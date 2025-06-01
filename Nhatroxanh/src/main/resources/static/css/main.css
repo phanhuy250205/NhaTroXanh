@@ -1,0 +1,38 @@
+/* Base styles and variables */
+:root {
+    --primary-color: #3498db;
+    --orange-color: #ff8000;
+    --primary-dark: #2980b9;
+    --primary-light: #e3f2fd;
+    --primary-hover: #2574a9;
+    --text-color: #2c3e50;
+    --text-light: #7f8c8d;
+    --white: #ffffff;
+    --gray-light: #f8f9fa;
+    --gray-medium: #e9ecef;
+    --gray-border: #dee2e6;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.258);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    --transition-fast: 0.2s ease;
+    --transition-normal: 0.3s ease;
+    --transition-slow: 0.5s ease;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+}
+
+
+/* FONTS */
+@font-face {
+    font-family: "SpotifyMixRegular";
+    src: url("../fonts/SpotifyMixUI Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "SpotifyMixBold";
+    src: url("../fonts/SpotifyMixUI Title Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
+}
