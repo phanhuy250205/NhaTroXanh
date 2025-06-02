@@ -14,4 +14,13 @@ public class HomeController {
     public String chitiet() {
         return "guest/chi-tiet";
     }
+
+    @GetMapping("/quanly")
+    public String quanly() {
+        return "staff/categoty";
+    }
+    @GetMapping("/phong-tro")
+    public String danhmuc() {
+        return "guest/phong-tro";
+    }
 }

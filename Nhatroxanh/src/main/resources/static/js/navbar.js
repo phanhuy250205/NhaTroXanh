@@ -250,7 +250,7 @@ document.addEventListener("DOMContentLoaded", () => {
             setTimeout(() => {
                 switch (itemText) {
                     case "Phòng trọ":
-                        window.location.href = "phong-tro.html"
+                        window.location.href = "phong-tro"
                         break
                     case "Nhà nguyên căn":
                         window.location.href = "nha-nguyen-can.html"

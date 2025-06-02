@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+    <style>
+        
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .badge-active {
+      background-color: #d4edda;
+      color: #28a745;
+      border: 1px solid #28a745;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-weight: 500;
+    }
+
+    .badge-inactive {
+      background-color: #f8d7da;
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-weight: 500;
+    }
+
+    .search-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .search-rounded {
+      height: 40px;
+      border-radius: 50px;
+      padding-left: 15px;
+      font-size: 14px;
+    }
+
+    .btn-search-rounded {
+      background-color: #0095d5;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 55px;
+      font-size: 13px;
+      border: none;
+      width: 123px;
+    }
+
+    .btn-search-rounded:hover {
+      background-color: #007bb5;
+      color: #fff;
+    }
+
+    table thead {
+      background-color: #e3f2fd;
+      font-weight: 600;
+    }
+
+    .table td,
+    .table th {
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .action-link {
+      color: orange;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+     <div class="main-content">
+      <ul class="nav nav-tabs border-bottom border-dark mb-3">
+        <li class="nav-item">
+          <a class="nav-link active fw-bold text-dark" href="#">THÔNG TIN TRỌ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-primary border-primary" href="#">LOẠI DANH MỤC</a>
+        </li>
+      </ul>
+
+      <div class="search-group">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <input type="text" class="form-control search-rounded" placeholder="Tìm kiếm..." />
+          <button class="btn btn-search-rounded">TÌM KIẾM</button>
+        </div>
+
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">
+          <i class="fas fa-plus-circle"></i> THÊM MỚI
+        </button>
+      </div>
+
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Tên Danh Mục</th>
+            <th>Số lượng bài đăng</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>Nhà trọ</td>
+            <td>147</td>
+            <td><a href="#" class="action-link" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">Sửa</a></td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td>Căn hộ</td>
+            <td>99</td>
+            <td><a href="#" class="action-link" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">Sửa</a></td>
+          </tr>
+          <tr>
+            <td>003</td>
+            <td>Chung cư</td>
+            <td>0</td>
+            <td><a href="#" class="action-link" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">Sửa</a></td>
+          </tr>
+        </tbody>
+      </table>
+       </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal fade" id="modalDanhMuc" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content rounded-4">
+        <div class="modal-header border-0">
+          <h5 class="modal-title fw-bold" id="modalLabel">Tên danh mục</h5>
+          <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body text-center">
+          <input type="text" class="form-control form-control-lg rounded-pill mb-4" placeholder="Nhập tên danh mục mới" />
+
+          <hr class="my-4">
+
+          <div class="d-flex justify-content-center flex-wrap gap-3">
+            <button class="btn btn-success rounded-pill action-btn">
+              <i class="fas fa-plus-circle me-1"></i> THÊM MỚI
+            </button>
+            <button class="btn btn-info text-white rounded-pill action-btn">
+              <i class="fas fa-sync-alt me-1"></i> CẬP NHẬT
+            </button>
+          </div>
+
+          <div class="d-flex justify-content-center flex-wrap gap-3 mt-3">
+            <button class="btn btn-danger rounded-pill action-btn">
+              <i class="fas fa-trash-alt me-1"></i> XÓA
+            </button>
+            <button class="btn btn-secondary rounded-pill action-btn">
+              <i class="fas fa-undo-alt me-1"></i> ĐẶT LẠI
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  
+</body>
+</html>
