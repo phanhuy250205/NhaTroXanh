@@ -530,4 +530,10 @@
     outline: 0;
     box-shadow: none;
 }
+
+
+.dropdown-item.active, .dropdown-item:active {
+    text-decoration: none;
+    background-color: rgb(158, 209, 253);
+}
 /* END NAVBAR */

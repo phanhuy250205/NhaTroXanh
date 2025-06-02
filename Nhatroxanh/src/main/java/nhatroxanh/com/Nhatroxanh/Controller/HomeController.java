@@ -9,6 +9,10 @@ public class HomeController {
     public String home() {
         return "index";
     }
+    @GetMapping("/demo")
+    public String demo() {
+        return "guest/demo";
+    }
 
     @GetMapping("/chi-tiet")
     public String chitiet() {
