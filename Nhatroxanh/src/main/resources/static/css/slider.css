@@ -66,7 +66,7 @@
 .slide-text {
     text-align: center;
     color: white;
-    max-width: 600px;
+    max-width: 700px;
     padding: 0 20px;
     animation: slideUp 1s ease-out;
 }
@@ -87,6 +87,7 @@
     opacity: 0.95;
     line-height: 1.6;
     animation: fadeInUp 1s ease-out 0.6s both;
+    width: 100%;
 }
 
 .slide-btn {
