@@ -2,21 +2,36 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- ICON -->
-    <link rel="icon" href="/images/logo/nhatroxanh(title).png" type="image/x-icon">
+    <title>Nhà Trọ Xanh</title>
 
+    <!-- ICON -->
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="/bootstrap-5.3.3/css/bootstrap.min.css">
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <!-- AOS CSS -->
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
 
 
+    <!-- Custom CSS (Thymeleaf style) -->
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <link rel="stylesheet" th:href="@{/css/slider.css}">
+    <link rel="stylesheet" th:href="@{/css/chi-tiet.css}">
+    <link rel="stylesheet" th:href="@{/css/property-cards.css}">
+
+    <!-- Custom JS (Thymeleaf style) -->
+    <script th:src="@{/js/navbar.js}"></script>
+    <script th:src="@{/js/slider.js}"></script>
+    <script th:src="@{/js/chi-tiet.js}"></script>
+    <script th:src="@{/js/property-cards.js}"></script>
 
 
-    <!-- Bootstrap JS -->
-    <link rel="stylesheet" href="/bootstrap-5.3.3/js/bootstrap.bundle.min.js">
+    <!-- Bootstrap JS (nên dùng <script> thay vì <link>) -->
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <!-- AOS JS -->
