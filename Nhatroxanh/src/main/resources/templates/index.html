@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Nhà Trọ Xanh</title>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <!-- Slder -->
+    <!-- Hero Slider Section -->
+    <section class="hero-slider">
+        <div class="swiper heroSwiper">
+            <div class="swiper-wrapper">
+                <!-- Slide 1 -->
+                <div class="swiper-slide">
+                    <div class="slide-content">
+                        <img src="/images/slider/slider1.jpg" alt="Nhà trọ hiện đại" class="slide-image">
+                        <div class="slide-overlay">
+                            <div class="container">
+                                <div class="slide-text">
+                                    <h2 class="slide-title">Tìm Nhà Trọ Ưng Ý</h2>
+                                    <p class="slide-description">Khám phá hàng ngàn phòng trọ chất lượng với giá cả phải chăng</p>
+                                    <button class="btn btn-primary btn-lg slide-btn">
+                                        <i class="fas fa-search"></i> Tìm kiếm ngay
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="swiper-slide">
+                    <div class="slide-content">
+                        <img src="/images/slider/slider2.jpg" alt="Căn hộ cao cấp" class="slide-image">
+                        <div class="slide-overlay">
+                            <div class="container">
+                                <div class="slide-text">
+                                    <h2 class="slide-title">Căn Hộ Cao Cấp</h2>
+                                    <p class="slide-description">Không gian sống hiện đại với đầy đủ tiện nghi</p>
+                                    <button class="btn btn-primary btn-lg slide-btn">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slide 3 -->
+                <div class="swiper-slide">
+                    <div class="slide-content">
+                        <img src="/images/slider/slider3.jpg" alt="Nhà nguyên căn" class="slide-image">
+                        <div class="slide-overlay">
+                            <div class="container">
+                                <div class="slide-text">
+                                    <h2 class="slide-title">Nhà Nguyên Căn</h2>
+                                    <p class="slide-description">Sự riêng tư tuyệt đối cho gia đình bạn</p>
+                                    <button class="btn btn-primary btn-lg slide-btn">
+                                        <i class="fas fa-home"></i> Khám phá
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation buttons -->
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+
+            <!-- Pagination -->
+            <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <!-- Property Cards Section -->
+    <section class="property-section py-5">
+        <div class="container">
+            <!-- Section Header -->
+            <div class="row mb-5">
+                <div class="col-12 text-center">
+                    <h2 class="section-title">Nhà Trọ Nổi Bật</h2>
+                    <p class="section-subtitle">Khám phá những căn phòng chất lượng với giá cả hợp lý</p>
+                </div>
+            </div>
+
+            <!-- Property Cards Grid -->
+            <div class="row g-4">
+                <!-- Card 1 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="100">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                                <div class="card-badges">
+                                    <span class="badge badge-featured">Nổi bật</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Nhà trọ Số 123, đường ABC</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">2.5 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Nhà trọ, phòng trọ</span>
+                                <span class="property-area">20m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Thanh Khê, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="200">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <div class="card-badges">
+                                    <span class="badge badge-new">Mới</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Căn hộ mini cao cấp</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">3.8 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Căn hộ</span>
+                                <span class="property-area">35m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Hải Châu, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="300">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <div class="card-badges">
+                                    <span class="badge badge-hot">Hot</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Nhà nguyên căn 2 tầng</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">8.5 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Nhà nguyên căn</span>
+                                <span class="property-area">80m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Sơn Trà, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="400">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Phòng trọ sinh viên</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">1.8 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Phòng trọ</span>
+                                <span class="property-area">15m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Ngũ Hành Sơn, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 5 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="500">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <div class="card-badges">
+                                    <span class="badge badge-featured">Nổi bật</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Studio apartment hiện đại</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">4.2 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Studio</span>
+                                <span class="property-area">25m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Cẩm Lệ, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 6 -->
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="property-card" data-aos="fade-up" data-aos-delay="600">
+                        <div class="card-image-container">
+                            <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ Số 123" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-favorite">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title">Chung cư mini đầy đủ nội thất</h3>
+                            <div class="property-price">
+                                <span class="price-label">Từ</span>
+                                <span class="price-amount">5.5 triệu/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <span class="property-type">Chung cư mini</span>
+                                <span class="property-area">45m²</span>
+                            </div>
+                            <div class="property-location">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>Liên Chiểu, TP. Đà Nẵng</span>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn btn-contact">
+                                    <i class="fas fa-phone"></i> Liên hệ
+                                </button>
+                                <a th:href="@{/chi-tiet}">
+                                    <button class="btn btn-view">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View More Button -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <button class="btn btn-view-more">
+                        <i class="fas fa-plus"></i> Xem thêm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+</body>
+</html>

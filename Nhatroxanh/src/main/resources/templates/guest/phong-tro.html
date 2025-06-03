@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+    <div th:replace="~{/layouts/loc-danhmuc}"></div>
+    <div class="container py-4">
+        <h5 class="fw-bold">CHO THUÊ NHÀ TRỌ, PHÒNG TRỌ GIÁ RẺ MỚI NHẤT</h5>
+        <div class="row">
+            <!-- Danh sách nhà trọ -->
+            <div class="col-md-8 danhmuc-nhatro">
+                <!-- Thanh top: Tổng kết quả + Sắp xếp -->
+                <div class="d-flex justify-content-between align-items-center mb-3 px-1">
+                    <p class="m-0 fw-semibold">Tổng <span class="text-dark">1234</span> kết quả</p>
+
+                    <div class="sort-box d-flex align-items-center">
+                        <span class="w-100 text-secondary">Sắp xếp theo</span>
+                        <select class="form-select form-select-sm sort-select">
+                            <option selected>Mới nhất</option>
+                            <option>Giá tăng dần</option>
+                            <option>Giá giảm dần</option>
+                        </select>
+                    </div>
+                </div>
+<div class="post-card mb-3 d-flex">
+  <!-- Ảnh -->
+  <div class="post-img position-relative">
+    <a href="/chi-tiet">
+      <img src="/images/cards/anh1.jpg" alt="Phòng trọ" class="img-fluid">
+    </a>
+    <button class="btn-favorite">
+      <i class="fas fa-heart"></i>
+    </button>
+  </div>
+
+  <!-- Nội dung -->
+  <div class="post-info ps-3 d-flex flex-column justify-content-between">
+    <div>
+      <h6 class="fw-bold mb-1">
+        <a href="/chi-tiet" class="text-dark text-decoration-none hover-text-primary">
+          Nhà trọ số 404, đường Pasteur
+        </a>
+      </h6>
+      <div class="text-muted small mb-1">
+        <span class="text-dark">Từ</span>
+        <span class="text-danger fw-bold">2.5 triệu</span><span class="text-muted">/tháng</span>
+      </div>
+      <div class="d-flex gap-2 mb-2">
+        <span class="badge bg-light border text-dark small px-2">Nhà trọ, phòng trọ</span>
+        <span class="badge bg-light border text-dark small px-2">20m²</span>
+      </div>
+      <div class="text-muted small">
+        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+        K814A/14 Trần Cao Vân, P.Thanh Khê Đông, Q.Thanh Khê, TP. Đà Nẵng
+      </div>
+    </div>
+  </div>
+</div>
+
+
+                <!-- Có thể lặp lại nhiều item tương tự -->
+            </div>
+
+            <!-- Bộ lọc -->
+            <div class="col-md-4 danhmuc-boloc">
+                <div class="filter-card">
+                    <h6 class="filter-title">
+                        <i class="fas fa-filter"></i> Lọc tìm kiếm phòng
+                    </h6>
+
+                    <div class="filter-section">
+                        <label class="filter-label">Diện tích</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area1" checked>
+                            <label class="form-check-label" for="area1">Dưới 10m²</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area2">
+                            <label class="form-check-label" for="area2">10 - 20m²</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area3">
+                            <label class="form-check-label" for="area3">20 - 25m²</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area4">
+                            <label class="form-check-label" for="area4">25 - 30m²</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area5">
+                            <label class="form-check-label" for="area5">Trên 30m²</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <label class="filter-label">Tiện nghi</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t1">
+                            <label class="form-check-label" for="t1">Gác lửng</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t2">
+                            <label class="form-check-label" for="t2">Wifi</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t3">
+                            <label class="form-check-label" for="t3">Vệ sinh trong</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t4">
+                            <label class="form-check-label" for="t4">Phòng tắm</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t5">
+                            <label class="form-check-label" for="t5">Bình nóng lạnh</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="t6">
+                            <label class="form-check-label" for="t6">Kệ bếp</label>
+                        </div>
+                    </div>
+
+                    <div class="filter-section">
+                        <label class="filter-label">Đối tượng</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="d1">
+                            <label class="form-check-label" for="d1">Đi học</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="d2">
+                            <label class="form-check-label" for="d2">Đi làm</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="d3">
+                            <label class="form-check-label" for="d3">Gia đình</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="d4">
+                            <label class="form-check-label" for="d4">Cặp đôi</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <button class="btn btn-blue">Tìm ngay</button>
+                        <button class="btn btn-outline-blue">Xóa bộ lọc</button>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+</html>
