@@ -1,34 +1,33 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
-import java.util.List;
+import java.util.Set;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@Data
 @Entity
-@Table(name = "Category")
-public class Category {
+@Table(name = "Utilities")
+public class Utility {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer category_id;
+    private int utilityId;
 
-    @Column(name = "name", columnDefinition = "NVARCHAR(100)")
+    @Column(nullable = false, length = 100)
     private String name;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    private List<Rooms> rooms;
+    @ManyToMany(mappedBy = "utilities")
+    private Set<Rooms> rooms;
 }

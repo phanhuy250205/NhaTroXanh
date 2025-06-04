@@ -1,4 +1,4 @@
-package nhatroxanh.com.Nhatroxanh.Controller;
+package nhatroxanh.com.Nhatroxanh.Controller.web;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +9,7 @@ public class HomeController {
     public String home() {
         return "index";
     }
+
     @GetMapping("/demo")
     public String demo() {
         return "guest/demo";
@@ -23,6 +24,7 @@ public class HomeController {
     public String quanly() {
         return "staff/categoty";
     }
+
     @GetMapping("/phong-tro")
     public String danhmuc() {
         return "guest/phong-tro";

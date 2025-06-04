@@ -1,4 +1,4 @@
-package nhatroxanh.com.Nhatroxanh.Controller;
+package nhatroxanh.com.Nhatroxanh.Controller.web;
 
 import java.util.List;
 
