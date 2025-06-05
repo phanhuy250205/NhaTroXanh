@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class Vouchers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -45,7 +45,7 @@ public class Vouchers {
     private Boolean discountType;
 
     @Column(name = "discount_value")
-    private float discountValue;
+    private Float discountValue;
 
     @Column(name = "start_date")
     private Date startDate;

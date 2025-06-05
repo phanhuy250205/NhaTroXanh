@@ -20,26 +20,26 @@ import lombok.NoArgsConstructor;
 public class ElectricWaterReading {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roomId;
+    private Integer roomId;
 
     @Column(name = "electric_old")
-    private float electricOld;
+    private Float electricOld;
 
     @Column(name = "electric_new")
-    private float electricNew;
+    private Float electricNew;
 
     @Column(name = "water_old")
-    private float waterOld;
+    private Float waterOld;
 
     @Column(name = "water_new")
-    private float waterNew;
+    private Float waterNew;
 
     @Column(name = "electric_price")
-    private float electricPrice;
+    private Float electricPrice;
 
     @Column(name = "water_price")
-    private float waterPrice;
+    private Float waterPrice;
 
     @Column(name = "wifi_price")
-    private float wifiPrice;
+    private Float wifiPrice;
 }

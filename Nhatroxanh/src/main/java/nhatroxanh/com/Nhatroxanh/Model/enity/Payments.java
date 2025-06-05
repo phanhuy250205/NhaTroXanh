@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 public class Payments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     @Column(name = "payment_id")
     private int paymentId;
@@ -36,7 +36,7 @@ public class Payments {
     private Contracts contract;
 
     @Column(name = "total_amount")
-    private float totalAmount;
+    private Float totalAmount;
 
     @Column(name = "due_date")
     private Date dueDate;

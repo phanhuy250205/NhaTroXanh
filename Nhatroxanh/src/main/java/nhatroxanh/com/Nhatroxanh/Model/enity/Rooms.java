@@ -6,6 +6,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,6 +42,8 @@ public class Rooms {
 
     @Column(name = "address", columnDefinition = "NVARCHAR(200)")
     private String address;
+    @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
+    private String namerooms;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "ENUM('Hoạt động', 'Ngừng hoạt đông','Đang sửa chửa')")
@@ -52,7 +55,11 @@ public class Rooms {
     @Column(name = "max_tenants")
     private Integer max_tenants;
 
-    @ManyToMany
+    @Column(name = "price")
+    private Float price;
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities;
+
 }

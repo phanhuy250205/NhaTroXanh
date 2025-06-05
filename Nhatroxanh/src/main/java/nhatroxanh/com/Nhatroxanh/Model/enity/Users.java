@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import java.sql.Date;
 import java.util.List;
 
 
@@ -27,7 +28,7 @@ import lombok.NoArgsConstructor;
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int userId;
+    private Integer userId;
 
     @Column(name = "username", nullable = false, length = 100)
     private String username;
@@ -45,7 +46,7 @@ public class Users {
     private String phone;
 
     @Column(name = "birthday")
-    private java.sql.Date birthday;
+    private Date birthday;
 
     @Column(name = "gender")
     private Boolean gender;
@@ -69,6 +70,6 @@ public class Users {
     }
 
     public enum Role {
-        ADMIN, HOST, GUEST, USER
+        admin, staff, owner, customer
     }
 }

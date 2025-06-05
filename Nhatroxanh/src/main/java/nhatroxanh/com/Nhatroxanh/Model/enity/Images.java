@@ -10,6 +10,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.criteria.CriteriaBuilder.In;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,14 +24,14 @@ import lombok.NoArgsConstructor;
 public class Images {
  @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int imageId;
+    private Integer imageId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private ImageType type;
 
     @Column(name = "entity_id", nullable = false)
-    private int entityId;
+    private Integer entityId;
 
     @Column(name = "image_url", nullable = false, length = 255)
     private String imageUrl;

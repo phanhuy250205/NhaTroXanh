@@ -30,7 +30,7 @@ import lombok.NoArgsConstructor;
 public class Hostel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int hostelId;
+    private Integer hostelId;
 
     private String name;
 

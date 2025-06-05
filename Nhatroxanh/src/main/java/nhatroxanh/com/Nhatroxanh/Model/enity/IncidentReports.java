@@ -1,7 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import java.sql.Date;
-import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -27,7 +26,7 @@ import lombok.NoArgsConstructor;
 public class IncidentReports {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int reportId;
+    private Integer reportId;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)

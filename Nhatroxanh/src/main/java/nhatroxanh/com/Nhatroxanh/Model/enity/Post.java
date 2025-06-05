@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int postId;
+    private Integer postId;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
@@ -39,13 +39,13 @@ public class Post {
     private String description;
 
     @Column(name = "price")
-    private float price;
+    private Float price;
 
     @Column(name = "address", columnDefinition = "NVARCHAR(255)")
     private String address;
 
     @Column(name = "view")
-    private int view;
+    private Integer view;
 
     @Column(name = "status")
     private Boolean status;

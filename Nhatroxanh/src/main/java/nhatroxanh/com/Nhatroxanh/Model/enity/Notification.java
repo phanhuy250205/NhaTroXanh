@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class Notification {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int notificationId;
+    private Integer notificationId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -42,7 +42,7 @@ public class Notification {
     private NotificationType type;
 
     @Column(nullable = false)
-    private boolean isRead;
+    private Boolean isRead;
 
     @Column(name = "create_at", nullable = false)
     private Date createAt;

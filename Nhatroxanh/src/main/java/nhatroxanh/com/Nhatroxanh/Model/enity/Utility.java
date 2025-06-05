@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class Utility {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int utilityId;
+    private Integer utilityId;
 
     @Column(nullable = false, length = 100)
     private String name;

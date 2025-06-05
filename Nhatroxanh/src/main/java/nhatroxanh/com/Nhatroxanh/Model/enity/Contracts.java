@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public class Contracts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int contractId;
+    private Integer contractId;
 
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
@@ -41,10 +41,10 @@ public class Contracts {
     private Date endDate;
 
     @Column(name = "price", nullable = false)
-    private float price;
+    private Float price;
 
     @Column(name = "deposit", nullable = false)
-    private float deposit;
+    private Float deposit;
 
     @Column(name = "terms", length = 255)
     private String terms;

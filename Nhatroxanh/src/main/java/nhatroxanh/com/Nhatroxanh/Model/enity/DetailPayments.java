@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 public class DetailPayments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int detailId;
+    private Integer detailId;
 
     @ManyToOne
     @JoinColumn(name = "payment_id", nullable = false)
@@ -32,11 +32,11 @@ public class DetailPayments {
     private String itemName;
 
     @Column(name = "quantity")
-    private int quantity;
+    private Integer quantity;
 
     @Column(name = "unit_price")
-    private float unitPrice;
+    private Float unitPrice;
 
     @Column(name = "amountunit_price")
-    private float amountUnitPrice;
+    private Float amountUnitPrice;
 }
