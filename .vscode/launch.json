@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-NhatroxanhApplication<Nhatroxanh>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "nhatroxanh.com.Nhatroxanh.NhatroxanhApplication",
+            "projectName": "Nhatroxanh",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
