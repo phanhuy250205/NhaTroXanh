@@ -1,13 +1,18 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import java.util.Set;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -22,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Rooms")
 
-public class Room {
+public class Rooms {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer room_id;
@@ -31,11 +36,14 @@ public class Room {
     @JoinColumn(name = "category_id")
     private Category category;
 
-    @Column(name = "room_number")
-    private Integer room_number;
+    @ManyToOne
+    @JoinColumn(name = "hostel_id")
+    private Hostel hostel;
 
     @Column(name = "address", columnDefinition = "NVARCHAR(200)")
     private String address;
+    @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
+    private String namerooms;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", columnDefinition = "ENUM('Hoạt động', 'Ngừng hoạt đông','Đang sửa chửa')")
@@ -47,6 +55,11 @@ public class Room {
     @Column(name = "max_tenants")
     private Integer max_tenants;
 
-    @Column(name = "utilities", columnDefinition = "NVARCHAR(255)")
-    private String utilities;
+    @Column(name = "price")
+    private Float price;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
+    private Set<Utility> utilities;
+
 }
