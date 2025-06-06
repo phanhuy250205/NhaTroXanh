@@ -1,4 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Validator;
 
-public class demo {
+public class UserValidator {
+
 }
