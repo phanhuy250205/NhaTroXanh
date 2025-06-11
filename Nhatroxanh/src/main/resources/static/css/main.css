@@ -242,7 +242,8 @@ html {
   border-radius: 55px;
   font-size: 13px;
   border: none;
-  width: 123px;
+  width: 150px;
+  height: 40px;
 }
 
 .btn-search-rounded:hover {
