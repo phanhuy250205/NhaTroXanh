@@ -1,0 +1,229 @@
+/* Verification Modal Styles */
+.verification-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.verification-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.verification-modal {
+    background: linear-gradient(135deg, #c3f6ff 0%, #69c2e8 100%);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 450px;
+    position: relative;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.verification-modal .logo-transparent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    z-index: -20;
+    opacity: 0.1;
+}
+
+.verification-modal-overlay.show .verification-modal {
+    transform: scale(1);
+}
+
+.verification-modal-content {
+    padding: 30px;
+}
+
+.verification-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.verification-form {
+    background-color: #ffffff67;
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.verification-alert {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    border-left: 4px solid #28a745;
+}
+
+.verification-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    background-color: #f8f9fa;
+}
+
+.verification-input:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.btn-verification-submit {
+    width: 100%;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.btn-verification-submit:hover {
+    background-color: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+.resend-code {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.resend-code-question {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.resend-code-btn {
+    background: none;
+    border: none;
+    color: #4a90e2;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.resend-code-btn:hover {
+    background-color: rgba(74, 144, 226, 0.1);
+    text-decoration: underline;
+}
+
+.resend-code-btn:disabled {
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* Success Message */
+.verification-success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    z-index: 10000;
+    max-width: 400px;
+    width: 90%;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.verification-success.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.verification-success-icon {
+    font-size: 60px;
+    color: #28a745;
+    margin-bottom: 20px;
+}
+
+.verification-success-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .verification-modal {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .verification-modal-content {
+        padding: 20px;
+    }
+
+    .verification-title {
+        font-size: 20px;
+    }
+}
+
+/* Loading state for submit button */
+.btn-verification-submit.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-verification-submit.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}

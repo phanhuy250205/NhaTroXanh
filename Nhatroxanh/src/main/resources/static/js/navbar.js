@@ -191,13 +191,65 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? "đăng nhập"
                 : this.classList.contains("btn-register")
                     ? "đăng ký"
-                    : "đăng tin cho chủ trọ"
+                    : this.classList.contains("btn-notification")
+                        ? "thông báo"
+                        : "đăng tin cho chủ trọ"
 
             // Delay alert to allow ripple effect to show
             setTimeout(() => {
-                alert(`Chức năng ${buttonType} đã được kích hoạt`)
+                if (this.classList.contains("btn-notification")) {
+                    alert(`Bạn có 3 thông báo mới!`)
+                } else if (this.classList.contains("btn-login")) {
+                    // Don't show alert for login button, let the modal handle it
+                    return
+                } else if (this.classList.contains("btn-register")) {
+                    return
+                } else {
+                    alert(`Chức năng ${buttonType} đã được kích hoạt`)
+                }
             }, 300)
         })
+    })
+
+    // User dropdown menu click handlers
+    document.addEventListener("click", (e) => {
+        if (e.target.closest(".user-dropdown-menu .dropdown-item")) {
+            const dropdownItem = e.target.closest(".dropdown-item")
+            const itemText = dropdownItem.textContent.trim()
+
+            // Prevent default for demo purposes
+            e.preventDefault()
+
+            // Show feedback based on menu item
+            setTimeout(() => {
+                if (itemText.includes("Đăng xuất")) {
+                    // alert("Đăng xuất thành công!")
+                    // Set active state back to home page after logout
+                    removeAllActiveClasses()
+                    const homeLink = document.querySelector('.nav-link[href="/trang-chu"]');
+                    if (homeLink) {
+                        homeLink.classList.add("active")
+                        // Update localStorage to reflect home page as active
+                        const itemInfo = {
+                            text: homeLink.textContent.trim(),
+                            href: homeLink.getAttribute("href"),
+                            isDropdownItem: false,
+                        }
+                        localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
+                        // Redirect to home page after a short delay
+                        setTimeout(() => {
+                            window.location.href = "/trang-chu"
+                        }, 100)
+                    }
+                } else if (itemText.includes("Hồ sơ")) {
+                    alert("Chuyển đến trang hồ sơ cá nhân")
+                } else if (itemText.includes("Trọ đã lưu")) {
+                    alert("Hiển thị danh sách trọ đã lưu")
+                } else if (itemText.includes("Cài đặt")) {
+                    alert("Mở trang cài đặt")
+                }
+            }, 100)
+        }
     })
 
     // Ripple effect function for buttons and links

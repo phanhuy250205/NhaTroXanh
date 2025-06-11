@@ -1,0 +1,362 @@
+/* Register Modal Styles */
+.register-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.register-modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.register-modal {
+    background: linear-gradient(135deg, #c3f6ff 0%, #69c2e8 100%);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 700px;
+    position: relative;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.register-modal .logo-transparent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    z-index: -20;
+    opacity: 0.1;
+}
+
+.register-modal-overlay.show .register-modal {
+    transform: scale(1);
+}
+
+.register-modal-header {
+    position: relative;
+    padding: 20px 20px 0;
+}
+
+.register-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.register-modal-close:hover {
+    background-color: rgba(255, 0, 0, 0.85);
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.register-modal-content {
+    padding: 20px 30px 30px;
+}
+
+.register-greeting h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 5px 0;
+}
+
+.register-greeting h2 {
+    color: #333;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 30px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.house-icons {
+    display: flex;
+    gap: 5px;
+}
+
+.house-icons i {
+    color: #4a90e2;
+    font-size: 20px;
+}
+
+.register-form {
+    border-radius: 10px;
+    width: 100%;
+    background-color: #ffffff67;
+    padding: 20px;
+}
+
+.register-modal .logo-register {
+    width: 120px;
+    z-index: -10;
+    position: absolute;
+    right: 50px;
+    top: 40px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 15px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.input-wrapper {
+    position: relative;
+    background-color: rgba(136, 215, 255, 0.151);
+    border-radius: 8px;
+    border: 1px solid #4e4e4e;
+    overflow: hidden;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.form-control-register {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: #333;
+    outline: none;
+}
+
+.form-control-register::placeholder {
+    color: #686868;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 5px;
+}
+
+.password-toggle:hover {
+    color: #333;
+}
+
+.btn-register-submit {
+    width: 100%;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 5px;
+}
+
+.btn-register-submit:hover {
+    background-color: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+.register-divider {
+    text-align: center;
+    margin: 5px 0;
+    position: relative;
+}
+
+.register-divider span {
+    padding: 0 15px;
+    color: #666;
+    font-size: 14px;
+}
+
+/* Social Register */
+.social-register {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    border: none;
+    border-radius: 50%;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.btn-google i {
+    color: #f44242;
+    font-size: 18px;
+}
+
+.btn-google:hover {
+    background-color: #ff0000;
+    transform: scale(1.05);
+}
+
+.btn-google:hover i {
+    color: white;
+}
+
+.btn-facebook i {
+    color: #1f7bf5;
+    font-size: 18px;
+}
+
+.btn-facebook:hover {
+    background-color: #1f7bf5;
+    transform: scale(1.05);
+}
+
+.btn-facebook:hover i {
+    color: white;
+}
+
+.login-link {
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+}
+
+.login-now {
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.login-now:hover {
+    color: #c0392b;
+    transition: ease 0.3s;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .register-modal {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .register-modal-content {
+        padding: 15px 20px 25px;
+    }
+
+    .register-greeting h2 {
+        font-size: 20px;
+    }
+
+    .form-control-register {
+        padding: 12px 12px 12px 40px;
+    }
+
+    .btn-register-submit {
+        padding: 12px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+    .account-type-options {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+/* Animation for form elements */
+.input-wrapper {
+    transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-control-register:focus {
+    outline: none;
+}
+
+/* Loading state for submit button */
+.btn-register-submit.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-register-submit.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
