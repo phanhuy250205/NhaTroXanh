@@ -46,6 +46,7 @@ public class CategoryController {
             category.setName(name.trim());
             categoryRepo.save(category);
         }
+
         return "redirect:/quanly/category";
     }
 
