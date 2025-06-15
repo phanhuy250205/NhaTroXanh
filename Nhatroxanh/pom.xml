@@ -61,6 +61,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
+
+		<!-- Thêm dependency này vào trong thẻ <dependencies> -->
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 <dependency>
 <groupId>org.thymeleaf.extras</groupId>
 <artifactId>thymeleaf-extras-java8time</artifactId>
