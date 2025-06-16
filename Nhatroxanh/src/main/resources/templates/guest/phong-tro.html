@@ -27,53 +27,89 @@
             <div class="col-md-8 danhmuc-nhatro">
                 <!-- Thanh top: Tổng kết quả + Sắp xếp -->
                 <div class="d-flex justify-content-between align-items-center mb-3 px-1">
-                    <p class="m-0 fw-semibold">Tổng <span class="text-dark">1234</span> kết quả</p>
+                    <p class="m-0 fw-semibold">
+                        Tổng <span class="text-dark" th:text="${#lists.size(posts)}">0</span> kết quả
+                    </p>
+                    <form action="" method="get">
+                        <div class="sort-box d-flex align-items-center">
+                            <span class="w-100 text-secondary">Sắp xếp theo</span>
+                            <select class="form-select form-select-sm sort-select" name="sort"
+                                onchange="this.form.submit()">
+                                <option value="all" th:selected="${param.sort == null or param.sort == 'all'}">Tất cả
+                                </option>
+                                <option value="latest" th:selected="${param.sort == 'latest'}">Mới nhất</option>
+                                <option value="price_asc" th:selected="${param.sort == 'price_asc'}">Giá tăng dần
+                                </option>
+                                <option value="price_desc" th:selected="${param.sort == 'price_desc'}">Giá giảm dần
+                                </option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="post-card mb-3 d-flex" th:each="post : ${posts}">
+                    <!-- Ảnh -->
+                    <div class="post-img position-relative">
+                        <a th:href="@{/chi-tiet/{id}(id=${post.postId})}">
+                            <!-- Improved image handling -->
+                            <img th:if="${post.images != null and !post.images.isEmpty()}"
+                                th:src="${post.images[0].url}" alt="Phòng trọ" class="img-fluid"
+                                onerror="this.src='/images/no-image.jpg'" />
+                            <img th:unless="${post.images != null and !post.images.isEmpty()}"
+                                src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
+                        </a>
+                        <button class="btn-favorite">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
 
-                    <div class="sort-box d-flex align-items-center">
-                        <span class="w-100 text-secondary">Sắp xếp theo</span>
-                        <select class="form-select form-select-sm sort-select">
-                            <option selected>Mới nhất</option>
-                            <option>Giá tăng dần</option>
-                            <option>Giá giảm dần</option>
-                        </select>
+                    <!-- Nội dung -->
+                    <div class="post-info ps-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                <a th:href="@{/chi-tiet/{id}(id=${post.postId})}"
+                                    class="text-dark text-decoration-none hover-text-primary"
+                                    th:text="${post.title}">Tiêu đề</a>
+                            </h6>
+
+                            <div class="text-muted small mb-1">
+                                <span class="text-dark">Từ</span>
+                                <span class="text-danger fw-bold"
+                                    th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                    2.5 triệu
+                                </span>
+                                <span class="text-muted">/tháng</span>
+                            </div>
+
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-light border text-dark small px-2"
+                                    th:text="${post.area + 'm²'}">Diện tích</span>
+                                <!-- Add category badge -->
+                                <span class="badge bg-primary text-white small px-2"
+                                    th:text="${post.category.name}">Danh mục</span>
+                            </div>
+
+                            <!-- Simplified address display -->
+                            <div class="text-muted small">
+                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                <span th:if="${post.address != null}"
+                                    th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
+                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                </span>
+                                <span th:unless="${post.address != null}">
+                                    Địa chỉ chưa cập nhật
+                                </span>
+                            </div>
+
+                            <!-- Add post date -->
+                            <div class="text-muted small mt-1">
+                                <i class="fas fa-clock me-1"></i>
+                                <span th:text="${#dates.format(post.createdAt, 'dd/MM/yyyy')}">Ngày đăng</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-<div class="post-card mb-3 d-flex">
-  <!-- Ảnh -->
-  <div class="post-img position-relative">
-    <a href="/chi-tiet">
-      <img src="/images/cards/anh1.jpg" alt="Phòng trọ" class="img-fluid">
-    </a>
-    <button class="btn-favorite">
-      <i class="fas fa-heart"></i>
-    </button>
-  </div>
-
-  <!-- Nội dung -->
-  <div class="post-info ps-3 d-flex flex-column justify-content-between">
-    <div>
-      <h6 class="fw-bold mb-1">
-        <a href="/chi-tiet" class="text-dark text-decoration-none hover-text-primary">
-          Nhà trọ số 404, đường Pasteur
-        </a>
-      </h6>
-      <div class="text-muted small mb-1">
-        <span class="text-dark">Từ</span>
-        <span class="text-danger fw-bold">2.5 triệu</span><span class="text-muted">/tháng</span>
-      </div>
-      <div class="d-flex gap-2 mb-2">
-        <span class="badge bg-light border text-dark small px-2">Nhà trọ, phòng trọ</span>
-        <span class="badge bg-light border text-dark small px-2">20m²</span>
-      </div>
-      <div class="text-muted small">
-        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-        K814A/14 Trần Cao Vân, P.Thanh Khê Đông, Q.Thanh Khê, TP. Đà Nẵng
-      </div>
-    </div>
-  </div>
-</div>
-
-
                 <!-- Có thể lặp lại nhiều item tương tự -->
             </div>
 

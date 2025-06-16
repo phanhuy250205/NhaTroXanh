@@ -7,13 +7,16 @@
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 </head>
 <style>
+    .hidden-review {
+        display: none;
+    }
+
     .map-container {
         width: 100%;
         margin-top: 20px;
         position: relative;
         border-radius: 12px;
         overflow: hidden;
-        /* Đảm bảo bo tròn không bị "tràn" */
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         border: 1px solid #ccc;
     }
@@ -22,7 +25,6 @@
         width: 100%;
         height: 400px;
         border: none;
-        /* Không cần border ở đây, container đã có */
     }
 
     .location-info p {
@@ -34,6 +36,151 @@
         font-size: 20px;
         font-weight: bold;
         margin-bottom: 15px;
+    }
+
+    .form.review-form {
+        max-width: 500px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        background-color: #f9f9f9;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        font-family: Arial, sans-serif;
+    }
+
+    .review-form div {
+        margin-bottom: 15px;
+    }
+
+    .review-form label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #333;
+    }
+
+    .review-form input[type="number"],
+    .review-form textarea {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 14px;
+        box-sizing: border-box;
+        resize: vertical;
+    }
+
+    .review-form input[type="number"]::-webkit-inner-spin-button {
+        height: 30px;
+    }
+
+    .review-form button {
+        padding: 10px 20px;
+        font-size: 14px;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .review-form button:hover {
+        background-color: #0056b3;
+    }
+
+    /* CSS tùy chỉnh cho phần nhận xét (textarea) giống hình */
+    .review-form textarea {
+        border-radius: 20px;
+        /* Bo tròn giống ô nhập liệu trong hình */
+        border: 1px solid #e0e0e0;
+        /* Viền mỏng và sáng */
+        background-color: #fff;
+        /* Nền trắng */
+        padding: 12px 40px 12px 12px;
+        /* Padding bên phải để chứa biểu tượng */
+        font-size: 14px;
+        height: 50px;
+        /* Chiều cao cố định giống hình */
+        resize: none;
+        /* Ngăn kéo giãn */
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        /* Hiệu ứng bóng nhẹ bên trong */
+        position: relative;
+    }
+
+    /* Thêm biểu tượng mũi tên bên phải */
+    .review-form textarea:after {
+        content: "▶";
+        /* Biểu tượng mũi tên */
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #888;
+        font-size: 16px;
+        pointer-events: none;
+        /* Ngăn chặn tương tác với biểu tượng */
+    }
+
+    /* Hiệu ứng focus */
+    .review-form textarea:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+    }
+
+    /* Đảm bảo textarea không bị che bởi biểu tượng */
+    .review-form textarea::-webkit-input-placeholder {
+        color: #888;
+    }
+
+    .review-form textarea:-moz-placeholder {
+        color: #888;
+    }
+
+    .review-form textarea::-moz-placeholder {
+        color: #888;
+    }
+
+    .review-form textarea:-ms-input-placeholder {
+        color: #888;
+    }
+
+    .star-rating label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+        color: #333;
+    }
+
+    #stars {
+        display: flex;
+        gap: 5px;
+        font-size: 28px;
+        cursor: pointer;
+        color: #ccc;
+        transition: color 0.2s;
+    }
+
+    .star-rating {
+        display: inline-flex;
+        font-size: 2rem;
+        cursor: pointer;
+        gap: 0.25rem;
+    }
+
+    .star-rating span {
+        color: #ccc;
+        transition: color 0.2s;
+    }
+
+    .star-rating span.hovered {
+        color: orange;
+    }
+
+    .star-rating span.selected {
+        color: gold;
     }
 </style>
 
@@ -56,8 +203,12 @@
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a th:href="@{/phong-tro}">Phòng trọ</a></li>
-                <li class="breadcrumb-item active" th:text="${room.address}"></li>
+                <li class="breadcrumb-item">
+                    <a th:href="@{/danh-muc/{id}(id=${post.category != null ? post.category.categoryId : 0})}"
+                        th:text="${post.category != null ? post.category.name : 'Phòng trọ'}">Phòng trọ</a>
+                </li>
+                <li class="breadcrumb-item active"
+                    th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}"></li>
             </ol>
         </nav>
     </div>
@@ -70,19 +221,24 @@
                 <div class="col-lg-8 col-md-7">
                     <div class="image-gallery">
                         <div class="main-image-container">
-                            <img th:src="@{${images[0]}}" alt="Hình ảnh chính" class="main-image" id="mainImage">
+                            <img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images[0]}"
+                                alt="Hình ảnh chính" class="main-image" id="mainImage"
+                                onerror="this.src='/images/cards/default.jpg';">
+                            <img th:unless="${images != null and !#lists.isEmpty(images)}"
+                                src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
                                 <button class="btn-favorite-large"><i class="fas fa-heart"></i></button>
                             </div>
                         </div>
                         <!-- Thumbnail Images -->
                         <div class="thumbnail-container">
-                            <div class="thumbnail-scroll">
+                            <div class="thumbnail-scroll d-flex" style="overflow-x: auto; white-space: nowrap;">
                                 <div th:each="image, iterStat : ${images}"
                                     th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'"
                                     th:data-image="${image}"
                                     onclick="changeMainImage(this.getAttribute('data-image'), this)">
-                                    <img th:src="@{${image}}" th:alt="'Hình ' + ${iterStat.count}">
+                                    <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}"
+                                        style="width: 80px; height: 60px; object-fit: cover;">
                                 </div>
                             </div>
                             <button class="thumbnail-nav prev" onclick="scrollThumbnails('prev')">
@@ -96,47 +252,47 @@
                             <i class="fas fa-images"></i> Tất cả (<span th:text="${#lists.size(images)}"></span>)
                         </button>
                     </div>
-
                     <!-- Contact Section -->
-                    <div class="contact-section">
+                    <div class="contact-section mt-4 p-3 border rounded">
                         <div class="contact-info">
-                            <div class="owner-info">
-                                <img src="/images/avatar-default.png" alt="Chủ trọ" class="owner-avatar">
+                            <div class="owner-info d-flex align-items-center">
+                                <img th:src="@{${owner.avatar != null and !owner.avatar.isEmpty() ? owner.avatar : '/images/avatar-default.png'}}"
+                                    alt="Chủ trọ" class="owner-avatar rounded-circle me-3"
+                                    style="width: 60px; height: 60px;" onerror="this.src='/images/avatar-default.png';">
                                 <div class="owner-details">
-                                    <h4 class="owner-name" th:text="${owner.fullname}"></h4>
-                                    <p class="owner-role" th:text="${owner.role}">Chủ trọ</p>
-                                    <div class="owner-rating">
-                                        <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 4)}"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                        <span th:text="'(' + ${ratingScore} + ')'"></span>
-                                    </div>
+                                    <h4 class="owner-name mb-1"
+                                        th:text="${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ trọ</h4>
+                                    <p class="owner-role mb-0 text-muted"
+                                        th:text="${owner != null && owner.role != null ? owner.role : 'Chủ trọ'}">Chủ
+                                        trọ</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="contact-buttons">
-                            <button class="btn btn-call" onclick="makeCall()">
+                        <div class="contact-buttons mt-3">
+                            <button class="btn btn-success me-2" onclick="makeCall()">
                                 <i class="fas fa-phone"></i>
-                                <span th:text="${owner.phone}"></span>
+                                <span th:text="${owner != null && owner.phone != null ? owner.phone : 'Chưa có SĐT'}">Số
+                                    điện thoại</span>
                             </button>
-                            <button class="btn btn-message" onclick="sendMessage()">
+                            <button class="btn btn-primary me-2" onclick="sendMessage()">
                                 <i class="fas fa-comment"></i>
                                 <span>Nhắn tin</span>
                             </button>
-                            <button class="btn btn-zalo" onclick="contactZalo()">
+                            <button class="btn btn-info" onclick="contactZalo()">
                                 <i class="fab fa-facebook-messenger"></i>
                                 <span>Zalo</span>
                             </button>
                         </div>
-                        <div class="additional-actions">
-                            <button class="btn btn-save" onclick="saveProperty()">
+                        <div class="additional-actions mt-3">
+                            <button class="btn btn-outline-secondary me-2" onclick="saveProperty()">
                                 <i class="fas fa-bookmark"></i>
                                 <span>Lưu tin</span>
                             </button>
-                            <button class="btn btn-share" onclick="shareProperty()">
+                            <button class="btn btn-outline-secondary me-2" onclick="shareProperty()">
                                 <i class="fas fa-share-alt"></i>
                                 <span>Chia sẻ</span>
                             </button>
-                            <button class="btn btn-report" onclick="reportProperty()">
+                            <button class="btn btn-outline-danger" onclick="reportProperty()">
                                 <i class="fas fa-flag"></i>
                                 <span>Báo cáo</span>
                             </button>
@@ -146,36 +302,52 @@
 
                 <!-- Property Information -->
                 <div class="col-lg-4 col-md-5">
-                    <div class="property-info">
+                    <div class="property-info p-3 border rounded">
                         <div class="property-header">
-                            <h1 class="property-title" th:text="'CHO THUÊ NHÀ TRỌ SỐ: ' + ${room.namerooms}"></h1>
+                            <h1 class="property-title h3"
+                                th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}">Tiêu
+                                đề bài đăng</h1>
                             <div class="property-price">
                                 <span class="price-amount"
-                                    th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}+' VNĐ/tháng'"></span>
-                                <span class="price-note">Chưa bao gồm phí dịch vụ</span>
+                                    th:text="${post != null && post.price != null ? #numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng' : '0 VNĐ/tháng'}">0
+                                    VNĐ/tháng</span>
+                                <div class="price-note text-muted small">Chưa bao gồm phí dịch vụ</div>
                             </div>
                         </div>
-                        <div class="quick-info">
-                            <div class="info-item">
-                                <i class="fas fa-expand-arrows-alt"></i>
-                                <span class="info-label">Diện tích:</span>
-                                <span class="info-value" th:text="${room.acreage} + 'm²'"></span>
+                        <div class="quick-info mt-3">
+                            <div class="info-item d-flex align-items-center mb-2">
+                                <i class="fas fa-expand-arrows-alt me-2"></i>
+                                <span class="info-label me-2">Diện tích:</span>
+                                <span class="info-value fw-bold"
+                                    th:text="${post != null && post.area != null ? post.area + 'm²' : '0m²'}">0m²</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-home"></i>
-                                <span class="info-label">Loại hình:</span>
-                                <span class="info-value" th:text="${room.category.name}"></span>
+                            <div class="info-item d-flex align-items-center mb-2">
+                                <i class="fas fa-home me-2"></i>
+                                <span class="info-label me-2">Loại hình:</span>
+                                <span class="info-value fw-bold"
+                                    th:text="${post != null && post.category != null && post.category.name != null ? post.category.name : 'Chưa phân loại'}">Chưa
+                                    phân loại</span>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span class="info-label">Địa chỉ:</span>
-                                <span class="info-value" th:text="${room.hostel.address}"></span>
+                            <div class="info-item d-flex align-items-start mb-2 mt-1">
+                                <i class="fas fa-map-marker-alt me-2 ms-1 mt-1"></i>
+                                <span class="info-label me-2 ms-1">Địa chỉ:</span>
+                                <div class="info-value fw-bold">
+                                    <span th:if="${post.address != null}"
+                                        th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
+                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                    </span>
+                                    <span th:unless="${post.address != null}">
+                                        Địa chỉ chưa cập nhật
+                                    </span>
+                                </div>
                             </div>
-                            <div class="info-item">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span class="info-label">Ngày đăng:</span>
-                                <span class="info-value"
-                                    th:text="${#dates.format(hostel.createdAt, 'dd/MM/yyyy')}"></span>
+                            <div class="info-item d-flex align-items-center mb-2">
+                                <i class="fas fa-calendar-alt me-2"></i>
+                                <span class="info-label me-2">Ngày đăng:</span>
+                                <span class="info-value fw-bold"
+                                    th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">01/01/2024</span>
                             </div>
                         </div>
                     </div>
@@ -205,68 +377,32 @@
                                     <i class="fas fa-map"></i> Vị trí
                                 </button>
                             </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-ct" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews"
-                                    type="button" role="tab">
-                                    <i class="fas fa-star"></i> Đánh giá
-                                </button>
-                            </li>
                         </ul>
-
                         <div class="tab-content" id="detailTabsContent">
                             <!-- Overview Tab -->
                             <div class="tab-pane fade show active" id="overview" role="tabpanel">
                                 <div class="overview-content">
                                     <h3>Mô tả chi tiết</h3>
-                                    <p th:text="${hostel.description}"></p>
-                                    <div class="property-specs">
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <h4>Thông tin cơ bản</h4>
-                                                <ul class="specs-list">
-                                                    <li><strong>Diện tích:</strong> <span
-                                                            th:text="${room.acreage} + 'm²'"></span></li>
-                                                    <li><strong>Số phòng ngủ:</strong> 1</li>
-                                                    <li><strong>Số phòng tắm:</strong> 1</li>
-                                                    <li><strong>Hướng cửa:</strong> Đông Nam</li>
-                                                    <li><strong>Tầng:</strong> 2/4</li>
-                                                </ul>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <h4>Chi phí</h4>
-                                                <ul class="specs-list">
-                                                    <li><strong>Giá thuê:</strong> <span
-                                                            th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}+' VNĐ/tháng'"></span>
-                                                    </li>
-                                                    <li><strong>Tiền điện:</strong> <span
-                                                            th:text="${#numbers.formatDecimal(electricWaterReading.electricPrice, 0, 'COMMA', 0, 'POINT')} + ' đ/kWh'"></span>
-                                                    </li>
-                                                    <li><strong>Tiền nước:</strong> <span
-                                                            th:text="${#numbers.formatDecimal(electricWaterReading.waterPrice, 0, 'COMMA', 0, 'POINT')} + ' đ/người'"></span>
-                                                    </li>
-                                                    <li><strong>Phí dịch vụ:</strong> <span
-                                                            th:text="${#numbers.formatDecimal(electricWaterReading.wifiPrice, 0, 'COMMA', 0, 'POINT')} + ' đ/tháng'"></span>
-                                                    </li>
-                                                    <li><strong>Tiền cọc:</strong> 1 tháng</li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
+                                    <p
+                                        th:text="${post != null && post.description != null ? post.description : 'Chưa có mô tả'}">
+                                        Mô tả bài đăng</p>
                                 </div>
                             </div>
 
                             <!-- Amenities Tab -->
                             <div class="tab-pane fade" id="amenities" role="tabpanel">
-                                <div class="amenities-content">
+                                <div class="amenities-content p-3">
                                     <h3 class="mb-3">Tiện nghi</h3>
                                     <div class="amenities-grid">
                                         <div class="amenity-category">
                                             <div class="amenity-list">
-                                                <p th:if="${utilities == null}" class="text-muted"
-                                                    th:text="'Không có thông tin tiện ích.'"></p>
-                                                <p th:if="${#sets.isEmpty(utilities)}" class="text-muted"
-                                                    th:text="'Phòng này hiện không có tiện ích nào.'"></p>
-                                                <div th:unless="${#sets.isEmpty(utilities)}">
+                                                <!-- Nếu không có tiện ích -->
+                                                <p th:if="${utilities == null or #sets.isEmpty(utilities)}"
+                                                    class="text-muted">
+                                                    Phòng này hiện không có tiện ích nào.
+                                                </p>
+                                                <!-- Danh sách tiện ích -->
+                                                <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
                                                     <ul class="list-unstyled">
                                                         <li class="amenity-item mb-2" th:each="utility : ${utilities}">
                                                             <i class="fas fa-check-circle text-success me-2"></i>
@@ -282,36 +418,25 @@
                             </div>
                             <!-- Location Tab -->
                             <div class="tab-pane fade" id="location" role="tabpanel">
-                                <div class="location-content">
+                                <div class="location-content p-3">
                                     <h3>Vị trí</h3>
                                     <div class="location-info">
-                                        <p><strong>Địa chỉ:</strong> <span th:text="${room.hostel.address}"></span></p>
+                                        <p>
+                                            <strong>Địa chỉ:</strong>
+                                            <span th:if="${post != null && post.address != null}"
+                                                th:text="|${post.address.street != null ? post.address.street + ', ' : ''}${post.address.ward != null ? post.address.ward.name + ', ' : ''}${post.address.ward != null && post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''}${post.address.ward != null && post.address.ward.district != null && post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}|">
+                                            </span>
+                                            <span th:unless="${post != null && post.address != null}">
+                                                Địa chỉ chưa cập nhật
+                                            </span>
+                                        </p>
                                         <div class="map-container">
-                                            <div id="map"></div>
-                                            <input type="hidden" id="address" th:value="${room.hostel.address}" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Reviews Tab -->
-                            <div class="tab-pane fade" id="reviews" role="tabpanel">
-                                <div class="reviews-content">
-                                    <h3>Đánh giá từ khách thuê</h3>
-                                    <div class="review-summary">
-                                        <div class="overall-rating">
-                                            <div class="rating-score" th:text="${ratingScore}"></div>
-                                            <div class="rating-stars">
-                                                <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, 4)}"></i>
-                                                <i class="fas fa-star-half-alt"></i>
-                                            </div>
-                                            <div class="rating-count" th:text="'(' + ${reviewCount} + ' đánh giá)'">
+                                            <div id="map"
+                                                style="height: 400px; background-color: #f8f9fa; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: center;">
+                                                <span class="text-muted">Bản đồ sẽ hiển thị tại đây</span>
                                             </div>
                                         </div>
-                                        <!-- Add dynamic rating breakdown if available -->
                                     </div>
-                                    <!-- Add dynamic reviews list if available -->
-                                    <button class="btn btn-outline-primary">Xem thêm đánh giá</button>
                                 </div>
                             </div>
                         </div>
@@ -322,36 +447,49 @@
             <!-- Similar Properties -->
             <div class="row mt-5">
                 <div class="col-12">
-                    <h3 class="section-title-ct">Nhà trọ tương tự</h3>
+                    <h3 class="section-title mb-4">Nhà trọ tương tự</h3>
                     <div class="similar-properties">
                         <div class="row">
-                            <p th:if="${similarRooms == null}" th:text="'Similar Rooms is null'"></p>
-                            <p th:if="${#lists.isEmpty(similarRooms)}" th:text="'No similar rooms available'"></p>
-                            <div class="col-lg-3 col-md-6 col-sm-12" th:each="similarRoom : ${similarRooms}">
-                                <div class="property-card">
-                                    <div class="card-image-container">
-                                        <img th:src="@{/images/cards/anh1.jpg}" alt="Nhà trọ tương tự"
-                                            class="card-image">
+                            <p th:if="${similarPosts == null or #lists.isEmpty(similarPosts)}" class="text-muted">Không
+                                có bài đăng tương tự</p>
+                            <div class="col-lg-3 col-md-6 col-sm-12 mb-4" th:each="similarPost : ${similarPosts}">
+                                <div class="card property-card h-100">
+                                    <div class="card-image-container position-relative">
+                                        <img th:if="${similarPost.images != null and !#lists.isEmpty(similarPost.images)}"
+                                            th:src="@{${similarPost.images[0].url}}" alt="Hình ảnh nhà trọ"
+                                            class="card-img-top" style="height: 200px; object-fit: cover;">
+                                        <img th:unless="${similarPost.images != null and !#lists.isEmpty(similarPost.images)}"
+                                            src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
+                                            style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite"><i class="far fa-heart"></i></button>
+                                            <button class="btn-favorite">
+                                                <i class="far fa-heart"></i>
+                                            </button>
                                         </div>
                                     </div>
-                                    <div class="card-content">
-                                        <h3 class="property-title" th:text="${similarRoom.namerooms}">
-                                        </h3>
-                                        <div class="property-price">
+                                    <div class="card-body">
+                                        <h5 class="property-title"
+                                            th:text="${similarPost != null && similarPost.title != null ? similarPost.title : 'Không có tiêu đề'}">
+                                            Tiêu đề</h5>
+                                        <div class="property-price mb-3">
                                             <span class="price-amount"
-                                                th:text="${#numbers.formatDecimal(similarRoom.price, 0, 'COMMA', 0, 'POINT')}+' VNĐ'"></span>
+                                                th:text="${similarPost != null && similarPost.price != null ? #numbers.formatDecimal(similarPost.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng' : '0 VNĐ'}"></span>
                                         </div>
-                                        <div class="property-location">
+
+                                        <div class="property-location mb-3">
                                             <i class="fas fa-map-marker-alt"></i>
-                                            <span
-                                                th:text="${similarRoom.hostel.address != null ? similarRoom.hostel.address : 'Không có địa chỉ'}"></span>
+                                            <span th:if="${similarPost.address != null}"
+                                                th:text="${similarPost.address.street != null ? similarPost.address.street + ', ' : ''} + 
+            ${similarPost.address.ward != null ? similarPost.address.ward.name + ', ' : ''} + 
+            ${similarPost.address.ward != null and similarPost.address.ward.district != null ? similarPost.address.ward.district.name + ', ' : ''} + 
+            ${similarPost.address.ward != null and similarPost.address.ward.district != null and similarPost.address.ward.district.province != null ? similarPost.address.ward.district.province.name : ''}">
+                                            </span>
+                                            <span th:unless="${similarPost.address != null}">
+                                                Địa chỉ chưa cập nhật
+                                            </span>
                                         </div>
-                                        <a th:href="@{'/chi-tiet/' + ${similarRoom.room_id}}">
-                                            <button class="btn btn-view">
-                                                <i class="fas fa-eye"></i> Xem chi tiết
-                                            </button>
+                                        <a th:href="@{'/chi-tiet/' + ${similarPost.postId}}" class="btn btn-view">
+                                            <i class="fas fa-eye"></i> Xem chi tiết
                                         </a>
                                     </div>
                                 </div>
@@ -360,7 +498,6 @@
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <!-- Photo Modal -->
@@ -379,8 +516,6 @@
             </div>
         </div>
     </div>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         function changeMainImage(src, element) {
             document.getElementById('mainImage').src = src;
@@ -390,11 +525,13 @@
 
         function scrollThumbnails(direction) {
             const container = document.querySelector('.thumbnail-scroll');
-            const scrollAmount = 100; // Adjust as needed
+            const scrollAmount = 80; // Match thumbnail width
+            const maxScroll = container.scrollWidth - container.clientWidth;
+
             if (direction === 'prev') {
-                container.scrollLeft -= scrollAmount;
+                container.scrollLeft = Math.max(0, container.scrollLeft - scrollAmount);
             } else {
-                container.scrollLeft += scrollAmount;
+                container.scrollLeft = Math.min(maxScroll, container.scrollLeft + scrollAmount);
             }
         }
 
@@ -427,56 +564,43 @@
             alert('Chức năng báo cáo đang được phát triển!');
         }
         let map;
-        let mapLoaded = false;
+        let geocoder;
 
-        function loadMap() {
-            const mapDiv = document.getElementById('map');
-            if (!mapDiv || mapDiv.offsetWidth === 0 || mapDiv.offsetHeight === 0) {
-                console.warn('Map container not visible or has zero dimensions');
-                return;
-            }
+        function initMap() {
+            const defaultLatLng = { lat: 16.068, lng: 108.212 }; // Trung tâm Đà Nẵng
+            const address = document.getElementById('address')?.value?.trim();
 
-            // Khởi tạo bản đồ tại vị trí mặc định
-            map = L.map(mapDiv).setView([16.068, 108.212], 13);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: defaultLatLng,
+                zoom: 13
+            });
 
-            const addressInput = document.getElementById('address');
-            const address = addressInput?.value?.trim();
+            geocoder = new google.maps.Geocoder();
 
             if (!address) {
-                L.marker([16.068, 108.212]).addTo(map)
-                    .bindPopup('Trung tâm TP. Đà Nẵng')
-                    .openPopup();
+                new google.maps.Marker({
+                    position: defaultLatLng,
+                    map: map,
+                    title: "Trung tâm TP. Đà Nẵng"
+                });
                 return;
             }
 
-            // Fetch to get coordinates
-            fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.length > 0) {
-                        const lat = parseFloat(data[0].lat);
-                        const lon = parseFloat(data[0].lon);
-                        map.setView([lat, lon], 15);
-                        L.marker([lat, lon]).addTo(map)
-                            .bindPopup(address)
-                            .openPopup();
-                    } else {
-                        alert('Không tìm thấy địa chỉ trên bản đồ.');
-                    }
-                })
-                .catch(err => {
-                    console.error('Lỗi tải tọa độ:', err);
-                    alert('Lỗi khi tải bản đồ: ' + err.message);
-                });
-
-            setTimeout(() => {
-                map.invalidateSize();
-            }, 500);
-
-            mapLoaded = true;
+            geocoder.geocode({ address: address }, function (results, status) {
+                if (status === 'OK') {
+                    const location = results[0].geometry.location;
+                    map.setCenter(location);
+                    map.setZoom(15);
+                    new google.maps.Marker({
+                        map: map,
+                        position: location,
+                        title: address
+                    });
+                } else {
+                    console.warn('Không tìm thấy địa chỉ: ' + status);
+                    alert('Không tìm thấy địa chỉ: ' + status);
+                }
+            });
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -496,7 +620,62 @@
                 });
             });
         });
+        const stars = document.querySelectorAll('#stars span');
+        const ratingInput = document.getElementById('rating');
+        let selectedRating = 0;
+
+        stars.forEach((star, idx) => {
+            const value = parseInt(star.dataset.value);
+
+            star.addEventListener('click', () => {
+                selectedRating = value;
+                ratingInput.value = selectedRating;
+                highlightStars(selectedRating);
+            });
+
+            star.addEventListener('mouseover', () => {
+                highlightStars(value);
+            });
+
+            star.addEventListener('mouseout', () => {
+                highlightStars(selectedRating);
+            });
+        });
+
+        function highlightStars(rating) {
+            stars.forEach((star, idx) => {
+                if (idx < rating) {
+                    star.classList.add('selected');
+                } else {
+                    star.classList.remove('selected');
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const hiddenReviews = document.querySelectorAll('.hidden-review');
+            let visibleCount = 5;
+            const step = 5;
+
+            loadMoreBtn.addEventListener('click', () => {
+                const nextHidden = Array.from(hiddenReviews).slice(visibleCount - 5, visibleCount + step);
+                nextHidden.forEach(item => item.classList.remove('hidden-review'));
+                visibleCount += step;
+
+                // Ẩn nút nếu không còn đánh giá nào bị ẩn
+                if (visibleCount >= hiddenReviews.length + 5) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            });
+
+            if (hiddenReviews.length === 0) {
+                loadMoreBtn.style.display = 'none';
+            }
+        });
     </script>
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAW7YMulhdUYW1RwiUNjijM3Mv222fLrWc&callback=initMap">
+        </script>
 </body>
 
 </html>

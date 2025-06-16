@@ -1,11 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import java.util.List;
 import java.util.Set;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +14,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,9 +46,8 @@ public class Rooms {
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", columnDefinition = "ENUM('Hoạt động', 'Ngừng hoạt đông','Đang sửa chửa')")
-    private RoomStatus status;
+    @Column(name = "status")
+    private Boolean status;
 
     @Column(name = "acreage")
     private Float acreage;
@@ -58,8 +58,10 @@ public class Rooms {
     @Column(name = "price")
     private Float price;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities;
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
 
 }
