@@ -28,9 +28,6 @@ public class Payments {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "payment_id")
-    private int paymentId;
-
     @ManyToOne
     @JoinColumn(name = "contract_id", nullable = false)
     private Contracts contract;

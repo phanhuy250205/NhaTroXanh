@@ -91,47 +91,61 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-lg-4 col-md-6 col-sm-12" th:each="room, iterStat : ${rooms}">
+                <div class="col-lg-4 col-md-6 col-sm-12" th:each="post, iterStat : ${posts}">
                     <div class="property-card" data-aos="fade-up"
                         th:attr="data-aos-delay=${100 * (iterStat.index + 1)}">
                         <div class="card-image-container">
-                            <img th:src="@{/images/cards/anh1.jpg}" th:alt="${room.address}" class="card-image" />
+                            <img th:src="${post.images != null and !post.images.isEmpty() ? post.images[0].url : '/images/cards/default.jpg'}"
+                                alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
+
                             <div class="card-overlay">
                                 <button class="btn-favorite">
                                     <i class="far fa-heart"></i>
                                 </button>
                                 <div class="card-badges">
-                                    <span class="badge badge-featured" th:if="${room.status == 'Hoạt động'}">Nổi
+                                    <span class="badge badge-featured" th:if="${post.approvalStatus == 'APPROVED'}">Nổi
                                         bật</span>
-                                    <span class="badge badge-new" th:if="${room.status == 'Đang sửa chửa'}">Đang
-                                        sửa</span>
-                                    <span class="badge badge-hot" th:if="${room.status == 'Ngừng hoạt đông'}">Ngừng hoạt
-                                        động</span>
+                                    <span class="badge badge-new" th:if="${post.approvalStatus == 'PENDING'}">Đang
+                                        chờ</span>
+                                    <span class="badge badge-hot" th:if="${post.status == false}">Ngừng hiển thị</span>
                                 </div>
                             </div>
                         </div>
                         <div class="card-content">
-                            <h3 class="property-title" th:text="${room.namerooms}"></h3>
+                            <h3 class="property-title" th:text="${post.title}"></h3>
                             <div class="property-price">
                                 <span class="price-label">Từ</span>
                                 <span class="price-amount"
-                                    th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')}+' VNĐ'"></span>
-                                <!-- Bạn có thể thêm trường giá nếu có -->
+                                    th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}+' VNĐ/tháng'"></span>
                             </div>
                             <div class="property-details">
                                 <span class="property-type"
-                                    th:text="${room.category != null ? room.category.name : 'Phòng trọ'}"></span>
-                                <span class="property-area" th:text="${room.acreage} + 'm²'"></span>
+                                    th:text="${post.category != null ? post.category.name : 'Phòng trọ'}"></span>
+                                <span class="property-area" th:text="${post.area} + 'm²'"></span>
                             </div>
                             <div class="property-location">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span th:text="${room.hostel != null ? room.hostel.address : ''}"></span>
+                                <span th:text="${post.address != null ? 
+                        post.address.street + ', ' + 
+                        post.address.ward.name + ', ' +
+                        post.address.ward.district.name + ', ' +
+                        post.address.ward.district.province.name : 'Chưa xác định'}">
+                                </span>
+                            </div>
+                            <div class="property-meta text-muted small mb-4 d-flex justify-content-between">
+                                <span class="property-views">
+                                    <i class="fas fa-eye"></i> Lượt xem: <span th:text="${post.view}"></span>
+                                </span>
+                                <span class="property-created">
+                                    <i class="fas fa-calendar-alt"></i> Ngày đăng:
+                                    <span th:text="${#dates.format(post.createdAt, 'dd/MM/yyyy')}"></span>
+                                </span>
                             </div>
                             <div class="card-actions">
                                 <button class="btn btn-contact">
                                     <i class="fas fa-phone"></i> Liên hệ
                                 </button>
-                                <a th:href="@{'/chi-tiet/' + ${room.room_id}}">
+                                <a th:href="@{'/chi-tiet/' + ${post.postId}}">
                                     <button class="btn btn-view">
                                         <i class="fas fa-eye"></i> Xem chi tiết
                                     </button>

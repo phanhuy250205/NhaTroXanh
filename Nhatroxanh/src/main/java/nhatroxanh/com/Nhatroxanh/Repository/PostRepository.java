@@ -1,0 +1,95 @@
+package nhatroxanh.com.Nhatroxanh.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+
+@Repository
+public interface PostRepository extends JpaRepository<Post, Integer> {
+        @Query("SELECT p FROM Post p WHERE p.category.categoryId = :categoryId")
+        List<Post> findByCategoryId(@Param("categoryId") Integer categoryId);
+
+        @Query("SELECT p FROM Post p JOIN FETCH p.category " +
+                        "WHERE p.category.categoryId = :categoryId " +
+                        "AND p.status = :status AND p.approvalStatus = :approvalStatus " +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> findByCategoryIdAndStatusAndApprovalStatus(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("status") Boolean status,
+                        @Param("approvalStatus") ApprovalStatus approvalStatus);
+
+        // Count posts by category
+        @Query("SELECT COUNT(p) FROM Post p WHERE p.category.categoryId = :categoryId " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED'")
+        Long countByCategoryId(@Param("categoryId") Integer categoryId);
+
+        @Query("SELECT p FROM Post p WHERE p.category.categoryId = :categoryId " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "ORDER BY p.price ASC")
+        List<Post> findByCategorySortedByPriceAsc(@Param("categoryId") Integer categoryId);
+
+        @Query("SELECT p FROM Post p WHERE p.category.categoryId = :categoryId " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "ORDER BY p.price DESC")
+        List<Post> findByCategorySortedByPriceDesc(@Param("categoryId") Integer categoryId);
+
+        @Query("SELECT p FROM Post p WHERE p.category.categoryId = :categoryId " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> findByCategorySortedByCreatedAtDesc(@Param("categoryId") Integer categoryId);
+
+        @Query("SELECT p FROM Post p WHERE p.category.categoryId = :categoryId ORDER BY p.createdAt DESC")
+        List<Post> findAllByCategoryId(@Param("categoryId") Integer categoryId);
+
+        Page<Post> findByStatusTrueAndApprovalStatusOrderByViewDesc(
+                        ApprovalStatus approvalStatus, PageRequest pageRequest);
+
+        @Query("SELECT p FROM Post p " +
+                        "LEFT JOIN FETCH p.images " +
+                        "LEFT JOIN FETCH p.utilities " +
+                        "LEFT JOIN FETCH p.address a " +
+                        "LEFT JOIN FETCH a.ward w " +
+                        "LEFT JOIN FETCH w.district d " +
+                        "LEFT JOIN FETCH d.province " +
+                        "LEFT JOIN FETCH p.category " +
+                        "LEFT JOIN FETCH p.user " +
+                        "WHERE p.postId = :postId")
+        Optional<Post> findByIdWithDetails(@Param("postId") Integer postId);
+
+        @Query("SELECT DISTINCT p FROM Post p " +
+                        "LEFT JOIN FETCH p.images " +
+                        "LEFT JOIN FETCH p.category " +
+                        "WHERE p.status = true " +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> findAllWithDetails();
+
+        @Query("SELECT p FROM Post p WHERE p.postId != :postId AND " +
+                        "(:categoryId IS NULL OR p.category.categoryId = :categoryId) " +
+                        "AND p.status = true " +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> findSimilarPostsByCategory(@Param("postId") Integer postId, @Param("categoryId") Integer categoryId);
+
+        @Modifying
+        @Query("UPDATE Post p SET p.view = COALESCE(p.view, 0) + 1 WHERE p.postId = :postId")
+        void incrementViewCount(@Param("postId") Integer postId);
+
+        List<Post> findByStatus(Boolean status);
+
+        @Query("SELECT p FROM Post p LEFT JOIN FETCH p.utilities WHERE p.postId = :postId")
+        Optional<Post> findByIdWithUtilities(@Param("postId") Integer postId);
+
+        @Query("SELECT u FROM Utility u JOIN u.posts p WHERE p.postId = :postId")
+        Set<Utility> findUtilitiesByPostId(@Param("postId") Integer postId);
+}
