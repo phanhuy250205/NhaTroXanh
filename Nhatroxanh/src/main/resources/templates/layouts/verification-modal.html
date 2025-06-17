@@ -1,0 +1,42 @@
+<!-- Verification Modal -->
+    <div class="verification-modal-overlay" id="verificationModalOverlay">
+        <div class="verification-modal">
+            <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
+            <div class="verification-modal-content">
+                <div class="verification-title">
+                    <span>Xác thực tài khoản</span>
+                </div>
+                
+                <form class="verification-form" id="verificationForm">
+                    <div class="verification-alert">
+                        Mã xác thực đã được gửi đến **********. Vui lòng nhập mã vào bên dưới để tiếp tục
+                    </div>
+                    
+                    <input type="text" id="verificationInput" class="verification-input" placeholder="Nhập mã xác thực">
+                    
+                    <button type="submit" class="btn-verification-submit">
+                        Hoàn tất
+                    </button>
+                    
+                    <div class="resend-code">
+                        <div class="resend-code-question">
+                            Bạn vẫn chưa nhận được mã xác thực?
+                        </div>
+                        <button type="button" id="resendCodeBtn" class="resend-code-btn">
+                            Gửi lại mã (50s)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+<!-- Success Message -->
+    <div class="verification-success" id="verificationSuccess">
+        <div class="verification-success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="verification-success-title">
+            Đăng ký thành công!
+        </div>
+    </div>
