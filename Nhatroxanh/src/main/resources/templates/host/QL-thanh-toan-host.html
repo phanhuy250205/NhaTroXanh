@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+  <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+  <!-- NAVBAR -->
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+  <div class="main-content">
+   
+      <h5 class="fw-bold mb-3">Quản lý thanh toán</h5>
+      <hr>
+
+      <!-- Search + Filters -->
+      <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <!-- Left: Search + Button -->
+        <div class="d-flex flex-grow-1 gap-3" style="max-width: 500px;">
+          <input type="text" class="form-control search-rounded" placeholder="Tìm kiếm..." />
+          <button class="btn btn-search-rounded">TÌM KIẾM</button>
+        </div>
+
+        <!-- Right: Filters -->
+        <div class="d-flex align-items-center gap-2">
+          <i class="fas fa-filter host-filter-icon"></i>
+          <select class="form-select form-select-sm">
+            <option selected>Trạng thái</option>
+            <option>Đã trả phòng</option>
+            <option>Đang thuê</option>
+          </select>
+          <select class="form-select form-select-sm">
+            <option selected>Loại</option>
+            <option>Phòng đơn</option>
+            <option>Phòng đôi</option>
+          </select>
+          <select class="form-select form-select-sm">
+            <option selected>Ngày</option>
+            <option>Gần nhất</option>
+            <option>Cũ nhất</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="table-responsive">
+        <table class="table table-bordered align-middle host-table">
+          <thead class="text-center fw-bold">
+            <tr>
+              <th>Khu trọ</th>
+              <th>Phòng</th>
+              <th>Người thuê</th>
+              <th>Tháng</th>
+              <th>Trạng thái</th>
+              <th>Hành động</th>
+            </tr>
+          </thead>
+          <tbody class="text-center">
+            <tr>
+              <td>Khu A</td>
+              <td>PB01</td>
+              <td>Nguyễn Văn A</td>
+              <td>06/2025</td>
+              <td><span class="host-badge-status host-badge-danger">Chưa thanh toán</span></td>
+              <td><a href="#" class="text-primary text-decoration-none" data-bs-toggle="modal"
+                  data-bs-target="#hostModalInvoice">
+                  Xem chi tiết
+                </a></td>
+            </tr>
+            <tr>
+              <td>Khu C</td>
+              <td>PB05</td>
+              <td>Hồ Bá B</td>
+              <td>06/2025</td>
+              <td><span class="host-badge-status host-badge-danger">Chưa thanh toán</span></td>
+              <td><a href="#" class="text-primary text-decoration-none">Xem chi tiết</a></td>
+            </tr>
+            <tr>
+              <td>Khu A</td>
+              <td>PB03</td>
+              <td>Trần Thị L</td>
+              <td>06/2025</td>
+              <td><span class="host-badge-status host-badge-success">Đã thanh toán</span></td>
+              <td><a href="#" class="text-primary text-decoration-none">Xem chi tiết</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+<!-- Modal -->
+<div class="modal fade" id="hostModalInvoice" tabindex="-1" aria-labelledby="hostModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content host-invoice-modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="hostModalLabel">Chi tiết hóa đơn</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+      </div>
+      <div class="modal-body px-4 py-3">
+
+        <div class="d-flex justify-content-between mb-3">
+          <span class="text-danger fw-semibold">Tháng: 06 / 2025</span>
+          <span class="fw-semibold">Phòng: PB01</span>
+        </div>
+
+        <ul class="list-unstyled small mb-4">
+          <li class="d-flex justify-content-between">
+            <span>Tiền phòng:</span>
+            <span>2,500,000 VNĐ</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span>Tiền điện <span class="text-danger">(50kWh):</span></span>
+            <span>750,000 VNĐ</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span>Tiền nước <span class="text-danger">(10 m³):</span></span>
+            <span>100,000 VNĐ</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span>Tiền rác:</span>
+            <span>30,000 VNĐ</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span>Tiền wifi:</span>
+            <span>0 VNĐ</span>
+          </li>
+        </ul>
+
+        <hr class="my-3">
+
+        <ul class="list-unstyled small">
+          <li class="d-flex justify-content-between fw-bold">
+            <span>TỔNG:</span>
+            <span>3,380,000 VNĐ</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span class="fw-bold">HẾT HẠN:</span>
+            <span>10/06/2025</span>
+          </li>
+          <li class="d-flex justify-content-between">
+            <span class="fw-bold">TRẠNG THÁI:</span>
+            <span class="text-danger fw-semibold">Chưa thanh toán</span>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+</div>
+
+</body>
+
+</html>

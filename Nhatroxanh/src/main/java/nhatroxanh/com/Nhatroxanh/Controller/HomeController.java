@@ -19,12 +19,53 @@ public class HomeController {
         return "guest/chi-tiet";
     }
 
-    @GetMapping("/quanly")
+    @GetMapping("/category")
     public String quanly() {
         return "staff/categoty";
     }
     @GetMapping("/phong-tro")
     public String danhmuc() {
         return "guest/phong-tro";
+    }
+    @GetMapping("/bai-dang")
+    public String baidang() {
+        return "host/bai-dang-host";
+    }
+
+    @GetMapping("/thong-tin-tro")
+    public String thongtintro() {
+        return "staff/thong-tin-tro-staff";
+    }
+    @GetMapping("detail-thong-tin-tro")
+    public String detailthongtintro() {
+        return "staff/detail-thong-tin-tro-staff";
+    }
+    @GetMapping("/chu-tro/hop-dong")
+    public String hopdong() {
+        return "host/hop-dong-host";
+    }
+     @GetMapping("/chu-tro/DS-hop-dong-host")
+    public String thuetra() {
+        return "host/DS-hop-dong-host";
+    }
+     @GetMapping("/chu-tro/lich-su-thue")
+    public String LsThuetra() {
+        return "host/LS-thue-tra-host";
+    }
+  @GetMapping("/chu-tro/thanh-toan")
+    public String Thanhtoan() {
+        return "host/QL-thanh-toan-host";
+    }
+    @GetMapping("/chu-tro/gia-hang-tra-phong")
+    public String giahangtraphong() {
+        return "host/gia-han-tra-phong-host";
+    }
+    @GetMapping("/chu-tro/danh-gia")
+    public String danhgia() {
+        return "host/QL-danh-gia-host";
+    }
+     @GetMapping("/chu-tro/profile-host")
+    public String profilehost() {
+        return "host/profile-host";
     }
 }
