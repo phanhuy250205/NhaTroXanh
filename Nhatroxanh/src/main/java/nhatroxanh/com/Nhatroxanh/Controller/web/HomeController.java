@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
-import nhatroxanh.com.Nhatroxanh.Service.Impl.PostService;
+import nhatroxanh.com.Nhatroxanh.Service.PostService;
 
 @Controller
 public class HomeController {

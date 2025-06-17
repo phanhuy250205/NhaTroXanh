@@ -25,7 +25,7 @@ import lombok.NoArgsConstructor;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id") // giữ nguyên tên cột trong database
+    @Column(name = "category_id")
     private Integer categoryId;
 
     @Column(name = "name", columnDefinition = "NVARCHAR(100)")

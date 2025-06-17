@@ -5,6 +5,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -24,6 +28,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,28 +37,29 @@ import lombok.NoArgsConstructor;
 @Data
 @Entity
 @Table(name = "Posts")
-
+@EqualsAndHashCode(exclude = { "images", "utilities", "user", "approvedBy" })
+@ToString(exclude = { "images", "utilities", "user", "approvedBy" })
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Post {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "post_id")
     private Integer postId;
 
-    // Thông tin cơ bản
-    @Column(name = "description", columnDefinition = "NVARCHAR(255)")
+    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Column(name = "price")
     private Float price;
 
     @Column(name = "area")
-    private Float area; // Diện tích
+    private Float area;
 
     @Column(name = "view")
     private Integer view;
 
     @Column(name = "status")
-    private Boolean status; // Đang hiển thị hay không
+    private Boolean status;
 
     @Column(name = "title", columnDefinition = "NVARCHAR(255)")
     private String title;
@@ -60,37 +67,36 @@ public class Post {
     @Column(name = "created_at")
     private Date createdAt;
 
-    // Trạng thái duyệt
     @Enumerated(EnumType.STRING)
     @Column(name = "approval_status")
     private ApprovalStatus approvalStatus;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by")
+    @JsonBackReference
     private Users approvedBy;
 
     @Column(name = "approved_at")
     private Date approvedAt;
 
-    // Quan hệ với user
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonBackReference
     private Users user;
 
-    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Image> images;
 
-    // Địa chỉ riêng cho bài viết (không dùng address của Rooms)
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", nullable = true)
     private Address address;
 
-    // Tiện ích riêng cho bài viết
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "post_utilities", joinColumns = @JoinColumn(name = "post_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities = new HashSet<>();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 }
