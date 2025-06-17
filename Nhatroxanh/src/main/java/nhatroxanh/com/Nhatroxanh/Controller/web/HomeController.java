@@ -1,137 +1,84 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.Min;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ElectricWaterReading;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
-import nhatroxanh.com.Nhatroxanh.Repository.ElectricWaterReadingRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
-import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
+import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Repository.*;
+import nhatroxanh.com.Nhatroxanh.Service.Impl.PostService;
 
 @Controller
 public class HomeController {
+    private static final Logger log = LoggerFactory.getLogger(HomeController.class);
     @Autowired
-    private RoomsService roomsService;
+    private PostRepository postRepository;
     @Autowired
-    private RoomsRepository roomRepository;
-
-    @Autowired
-    private HostelRepository hostelRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UtilityRepository utilityRepository;
-
-    @Autowired
-    private ElectricWaterReadingRepository electricWaterReadingRepository;
+    private PostService postService;
 
     @GetMapping("/")
     public String home(Model model) {
-        List<Rooms> rooms = roomsService.findAllRooms();
-        model.addAttribute("rooms", rooms);
+        List<Post> posts = postService.findTopApprovedActivePostsByViews(12);
+        model.addAttribute("posts", posts);
         return "index";
     }
 
-    @GetMapping("/demo")
-    public String demo() {
-        return "guest/demo";
-    }
-
     @Transactional
-    @GetMapping("/chi-tiet/{room_id}")
-    public String getRoomDetail(@PathVariable("room_id") @Min(1) Integer roomId, Model model) {
+    @GetMapping("/chi-tiet/{postId}")
+    public String getPostDetail(@PathVariable("postId") Integer postId, Model model,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Post> postOptional = postRepository.findById(postId); // Sử dụng findById cơ bản
+            if (postOptional.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bài đăng không tồn tại.");
+                return "redirect:/error/404";
+            }
 
-        Optional<Rooms> roomOptional = roomRepository.findByIdWithDetails(roomId);
-        if (roomOptional.isEmpty()) {
-            return "error/404";
-        }
-        Rooms room = roomOptional.get();
-        model.addAttribute("room", room);
+            Post post = postOptional.get();
+            if (!post.getStatus() || post.getApprovalStatus() != ApprovalStatus.APPROVED) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Bài đăng chưa được duyệt hoặc không hiển thị.");
+                return "redirect:/error/403";
+            }
 
-        Hostel hostel = room.getHostel();
-        model.addAttribute("hostel", hostel);
+            // Lấy tiện ích riêng
+            Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
+            log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
+                    utilities.stream().map(Utility::getName).collect(Collectors.toList()));
 
-        Users owner = hostel != null ? hostel.getOwner() : null;
-        model.addAttribute("owner", owner);
+            model.addAttribute("post", post);
+            model.addAttribute("owner", post.getUser() != null ? post.getUser() : new Users());
+            model.addAttribute("utilities", utilities != null ? utilities : new HashSet<>());
 
-        Set<Utility> utilities = room.getUtilities();
-        System.out.println("Utilities for Room ID " + roomId + ": " + utilities);
-        if (utilities != null && !utilities.isEmpty()) {
-            utilities.forEach(utility -> System.out.println("Utility Name: " + utility.getName()));
-        } else {
-            System.out.println("No utilities found for Room ID " + roomId);
-        }
-        model.addAttribute("utilities", utilities != null ? utilities : new HashSet<>());
+            // Hình ảnh
+            List<String> images = post.getImages() != null && !post.getImages().isEmpty()
+                    ? post.getImages().stream().map(Image::getUrl).distinct().collect(Collectors.toList())
+                    : List.of("/images/cards/default.jpg");
+            log.info("Post {} images: {}", postId, images);
+            model.addAttribute("images", images);
 
-        Optional<ElectricWaterReading> readingOptional = electricWaterReadingRepository.findById(roomId);
-        if (readingOptional.isPresent()) {
-            model.addAttribute("electricWaterReading", readingOptional.get());
-        }
-
-        model.addAttribute("ratingScore", 4.8);
-        model.addAttribute("reviewCount", 24);
-
-        // Mock image list (replace with actual image data)
-        List<String> images = List.of("/images/cards/anh1.jpg", "/images/cards/anh1.jpg", "/images/cards/anh1.jpg");
-        model.addAttribute("images", images);
-
-        Integer currentHostelId = room.getHostel() != null ? room.getHostel().getHostelId() : null;
-        List<Rooms> similarRooms = new ArrayList<>();
-        if (currentHostelId != null) {
-            similarRooms = roomRepository.findAllWithDetails().stream()
-                    .filter(r -> r.getHostel() != null && r.getHostel().getHostelId() != null)
-                    .filter(r -> !r.getRoom_id().equals(roomId))
-                    .filter(r -> r.getHostel().getHostelId().equals(currentHostelId))
+            // Bài viết tương tự
+            List<Post> similarPosts = postRepository.findSimilarPostsByCategory(postId,
+                    post.getCategory() != null ? post.getCategory().getCategoryId() : null).stream()
+                    .filter(p -> p.getStatus() && p.getApprovalStatus() == ApprovalStatus.APPROVED)
                     .limit(4)
                     .collect(Collectors.toList());
+            model.addAttribute("similarPosts", similarPosts);
+
+            postRepository.incrementViewCount(postId);
+            return "guest/chi-tiet";
+        } catch (Exception e) {
+            log.error("Lỗi khi lấy chi tiết bài đăng {}: {}", postId, e.getMessage(), e);
+            redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
+            return "redirect:/error/500";
         }
-
-        if (similarRooms.isEmpty() && room.getCategory() != null) {
-            System.out.println("Falling back to category filter...");
-            similarRooms = roomRepository.findAllWithDetails().stream()
-                    .filter(r -> !r.getRoom_id().equals(roomId) && r.getCategory() != null
-                            && r.getCategory().equals(room.getCategory()))
-                    .limit(4)
-                    .collect(Collectors.toList());
-        }
-
-        if (similarRooms.isEmpty()) {
-            System.out.println("Falling back to broader filter...");
-            similarRooms = roomRepository.findAllWithDetails().stream()
-                    .filter(r -> !r.getRoom_id().equals(roomId))
-                    .limit(4)
-                    .collect(Collectors.toList());
-        }
-
-        model.addAttribute("similarRooms", similarRooms);
-        System.out.println("Final Similar Rooms: " + similarRooms.size());
-
-        return "/guest/chi-tiet";
     }
 
-    @GetMapping("/phong-tro")
-    public String danhmuc() {
-        return "guest/phong-tro";
-    }
 }

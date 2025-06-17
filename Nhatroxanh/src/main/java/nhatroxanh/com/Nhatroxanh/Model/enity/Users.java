@@ -3,7 +3,6 @@ package nhatroxanh.com.Nhatroxanh.Model.enity;
 import java.sql.Date;
 import java.util.List;
 
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,7 +34,7 @@ public class Users {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
-    
+
     @Column(name = "password", nullable = false, length = 256)
     private String password;
 
@@ -60,6 +59,9 @@ public class Users {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
+    
+    @Column(name = "avatar", length = 50)
+    private String avatar;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
