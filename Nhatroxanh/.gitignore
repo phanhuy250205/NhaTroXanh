@@ -13,6 +13,14 @@ target/
 .springBeans
 .sts4-cache
 
+
+# QUAN TRỌNG: File chứa thông tin nhạy cảm
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
