@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-
-  // Xử lý active cho sidebar chính
+  // Active tab
   document.querySelectorAll('.nav-sidebar').forEach(item => {
     item.addEventListener('click', () => {
       document.querySelectorAll('.nav-sidebar').forEach(i => i.classList.remove('active'));
@@ -8,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Xử lý dropdown custom
+  // Dropdown toggle (giữ nguyên)
   function toggleDropdown(id) {
     const el = document.getElementById(id);
     const isOpen = !el.classList.contains('d-none');
@@ -16,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!isOpen) el.classList.remove('d-none');
   }
 
-  // Ẩn dropdown khi click ra ngoài
   document.addEventListener('click', function (e) {
     if (!e.target.closest('.filter-btn-wrapper')) {
       document.querySelectorAll('.dropdown-modal').forEach(el => el.classList.add('d-none'));
@@ -24,23 +22,23 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const overlay = document.getElementById('overlay');
-
-  // Sidebar Tài khoản
-  const accountBtn = document.querySelectorAll('.nav-sidebar i.fa-user-circle, .nav-item i.fa-user-circle');
   const accountSidebar = document.getElementById('sidebarAccount');
   const closeAccountBtn = document.getElementById('closeAccountSidebar');
 
+  const accountBtn = document.querySelectorAll('.nav-sidebar i.fa-user-circle');
+
   function showAccountSidebar(btn) {
-    hideRentalSidebar(); // 👈 Hide rental if open
+    if (typeof hideRentalSidebar === 'function') hideRentalSidebar(); // Không lỗi nếu chưa có
+    if (!accountSidebar) return;
     accountSidebar.classList.remove('d-none');
     setTimeout(() => accountSidebar.classList.add('show'), 10);
     overlay.classList.remove('d-none');
-
     document.querySelectorAll('.nav-sidebar').forEach(i => i.classList.remove('active'));
-    btn.parentElement.classList.add('active');
+    btn?.parentElement?.classList.add('active');
   }
 
   function hideAccountSidebar() {
+    if (!accountSidebar) return;
     accountSidebar.classList.remove('show');
     setTimeout(() => {
       accountSidebar.classList.add('d-none');
@@ -54,22 +52,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (closeAccountBtn) closeAccountBtn.addEventListener('click', hideAccountSidebar);
 
-  // Sidebar Thuê trả
-  const rentalBtn = document.querySelector('.nav-sidebar i.fa-file-signature')?.parentElement;
+  // 🔹 Rental sidebar (optional – không lỗi nếu không tồn tại)
+  const rentalBtns = document.querySelectorAll('.nav-sidebar i.fa-file-signature');
   const rentalSidebar = document.getElementById('sidebarRental');
   const closeRentalBtn = document.getElementById('closeRentalSidebar');
 
-  function showRentalSidebar() {
-    hideAccountSidebar(); // 👈 Hide account if open
+  function showRentalSidebar(btn) {
+    hideAccountSidebar();
+    if (!rentalSidebar) return;
     rentalSidebar.classList.remove('d-none');
     setTimeout(() => rentalSidebar.classList.add('show'), 10);
     overlay.classList.remove('d-none');
-
     document.querySelectorAll('.nav-sidebar').forEach(i => i.classList.remove('active'));
-    rentalBtn.classList.add('active');
+    btn?.parentElement?.classList.add('active');
   }
 
   function hideRentalSidebar() {
+    if (!rentalSidebar) return;
     rentalSidebar.classList.remove('show');
     setTimeout(() => {
       rentalSidebar.classList.add('d-none');
@@ -77,19 +76,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 300);
   }
 
-  if (rentalBtn) rentalBtn.addEventListener('click', showRentalSidebar);
-  if (closeRentalBtn) closeRentalBtn.addEventListener('click', hideRentalSidebar);
+  if (rentalBtns.length && rentalSidebar) {
+    rentalBtns.forEach(btn => {
+      btn.parentElement.addEventListener('click', () => showRentalSidebar(btn));
+    });
+  }
 
-  // Overlay click: đóng cả 2 nếu đang mở
+  if (closeRentalBtn && rentalSidebar) {
+    closeRentalBtn.addEventListener('click', hideRentalSidebar);
+  }
+
+  // Overlay click: đóng cả hai
   overlay.addEventListener('click', () => {
     hideAccountSidebar();
-    hideRentalSidebar();
+    hideRentalSidebar?.(); // optional chaining
   });
 
-  // Helper: Ẩn overlay nếu không có sidebar nào đang mở
   function hideOverlayIfNoneOpen() {
-    const isAccountOpen = !accountSidebar.classList.contains('d-none');
-    const isRentalOpen = !rentalSidebar.classList.contains('d-none');
+    const isAccountOpen = accountSidebar && !accountSidebar.classList.contains('d-none');
+    const isRentalOpen = rentalSidebar && !rentalSidebar.classList.contains('d-none');
     if (!isAccountOpen && !isRentalOpen) {
       overlay.classList.add('d-none');
     }
