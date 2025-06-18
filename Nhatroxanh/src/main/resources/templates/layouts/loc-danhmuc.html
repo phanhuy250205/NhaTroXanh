@@ -1,0 +1,155 @@
+ <div class="container-fluid px-0">
+        <div class="row search-bar mx-0">
+            <div class="col-12 col-sm-auto mb-2 mb-sm-0">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Bạn muốn tìm trọ ở đâu?">
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+                <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownDiaDiem')">
+                    <i class="fas fa-map-marker-alt text-primary"></i> Địa điểm <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-modal d-none" id="dropdownDiaDiem">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <strong class="text-primary"><i class="fas fa-map-marker-alt"></i> Địa điểm</strong>
+                        <button class="btn btn-sm"
+                            onclick="document.getElementById('dropdownDiaDiem').classList.add('d-none')">&times;</button>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="diaDiem1">
+                        <label class="form-check-label" for="diaDiem1">Hà Nội</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="diaDiem2">
+                        <label class="form-check-label" for="diaDiem2">TP. Hồ Chí Minh</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="diaDiem3">
+                        <label class="form-check-label" for="diaDiem3">Đà Nẵng</label>
+                    </div>
+                    <div class="d-flex justify-content-between pt-3">
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-sync-alt me-1"></i> Đặt
+                            lại</button>
+                        <button class="btn btn-primary btn-sm">Tìm ngay</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+                <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownMucGia')">
+                    <i class="fas fa-dollar-sign text-info"></i> Mức giá <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-modal d-none p-3" id="dropdownMucGia"
+                    style="background:#fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 300px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <strong class="text-info"><i class="fas fa-dollar-sign"></i> Mức giá</strong>
+                        <button class="btn btn-sm"
+                            onclick="document.getElementById('dropdownMucGia').classList.add('d-none')">&times;</button>
+                    </div>
+
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                        <input type="number" class="form-control form-control-sm me-2" placeholder="Từ">
+                        <span>&rarr;</span>
+                        <input type="number" class="form-control form-control-sm ms-2" placeholder="Đến">
+                    </div>
+
+                    <div class="my-2">
+                        <input type="range" class="form-range" min="0" max="2000000000" step="10000000">
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="price" id="gia-all" checked>
+                        <label class="form-check-label" for="gia-all">Tất cả mức giá</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="price" id="gia1">
+                        <label class="form-check-label" for="gia1">Dưới 500 triệu</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="price" id="gia2">
+                        <label class="form-check-label" for="gia2">500 - 800 triệu</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="price" id="gia3">
+                        <label class="form-check-label" for="gia3">800 triệu - 1 tỷ</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="price" id="gia4">
+                        <label class="form-check-label" for="gia4">1 - 2 tỷ</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3">
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-sync-alt me-1"></i> Đặt
+                            lại</button>
+                        <button class="btn btn-danger btn-sm">Áp dụng</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+                <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownDienTich')">
+                    <span class="text-primary">m<sup>2</sup></span> Diện tích <i class="fas fa-caret-down"></i>
+                </button>
+                <div class="dropdown-modal d-none p-3" id="dropdownDienTich"
+                    style="background:#fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 300px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <strong class="text-primary"><i class="fas fa-vector-square me-1"></i> m<sup>2</sup> Diện
+                            tích</strong>
+                        <button class="btn btn-sm"
+                            onclick="document.getElementById('dropdownDienTich').classList.add('d-none')">&times;</button>
+                    </div>
+
+                    <div class="mb-2 d-flex justify-content-between align-items-center">
+                        <input type="number" class="form-control form-control-sm me-2" placeholder="Từ">
+                        <span>&rarr;</span>
+                        <input type="number" class="form-control form-control-sm ms-2" placeholder="Đến">
+                    </div>
+
+                    <div class="my-2">
+                        <input type="range" class="form-range" min="0" max="200" step="1">
+                    </div>
+
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area-all" checked>
+                        <label class="form-check-label" for="area-all">Tất cả diện tích</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area1">
+                        <label class="form-check-label" for="area1">Dưới 20 m²</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area2">
+                        <label class="form-check-label" for="area2">20 - 40 m²</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area3">
+                        <label class="form-check-label" for="area3">40 - 60 m²</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area4">
+                        <label class="form-check-label" for="area4">60 - 80 m²</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="area" id="area5">
+                        <label class="form-check-label" for="area5">Trên 80 m²</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between pt-3">
+                        <button class="btn btn-outline-secondary btn-sm"><i class="fas fa-sync-alt me-1"></i> Đặt
+                            lại</button>
+                        <button class="btn btn-danger btn-sm">Áp dụng</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-sm-auto">
+                <button class="btn btn-search w-100 w-sm-auto">
+                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                </button>
+            </div>
+        </div>
+    </div>

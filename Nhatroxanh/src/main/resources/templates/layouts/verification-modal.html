@@ -1,0 +1,30 @@
+<div class="verification-modal-overlay" id="verificationModalOverlay">
+    <div class="verification-modal">
+        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
+        <div class="verification-modal-content">
+            <div class="verification-title">
+                <span>Xác thực tài khoản</span>
+            </div>
+            
+            <form class="verification-form" id="verificationForm">
+                <div id="verification-message" class="alert" style="display:none; font-size:14px; margin-bottom: 15px;"></div>
+
+                <div class="verification-alert">
+                    Mã xác thực đã được gửi đến <b></b>. Vui lòng nhập mã vào bên dưới để tiếp tục.
+                </div>
+                
+                <input type="text" id="verificationInput" class="verification-input" placeholder="Nhập mã xác thực" required>
+                
+                <button type="submit" class="btn-verification-submit">
+                    Hoàn tất
+                </button>
+                
+                <div class="resend-code">
+                    <button type="button" id="resendCodeBtn" class="resend-code-btn">
+                        Gửi lại mã
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
