@@ -1,0 +1,92 @@
+.filter-card {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+.filter-title {
+  font-weight: bold;
+  color: #007bff;
+  margin-bottom: 15px;
+}
+
+.filter-title i {
+  margin-right: 5px;
+}
+
+.filter-label {
+  font-weight: bold;
+  margin-top: 10px;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.form-check {
+  margin-bottom: 5px;
+}
+
+.form-check-input {
+  border-radius: 50%;
+  border: 1.5px solid #007bff;
+}
+
+.form-check-input:checked {
+  background-color: #007bff;
+  border-color: #007bff;
+}
+
+.btn-blue {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 6px;
+}
+
+.btn-outline-blue {
+  border: 1px solid #007bff;
+  color: #007bff;
+  background-color: white;
+  padding: 6px 16px;
+  border-radius: 6px;
+}
+
+.btn-outline-blue:hover {
+  background-color: #007bff;
+  color: white;
+}
+.post-card {
+  background: white;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.post-img {
+  position: relative;
+  width: 220px;
+  height: 160px;
+  flex-shrink: 0;
+}
+
+.post-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+
+
+.post-info h6 {
+  font-size: 16px;
+  margin: 0;
+}
+
+.post-info .badge {
+  font-size: 12px;
+  border-radius: 8px;
+}
