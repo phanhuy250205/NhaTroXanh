@@ -56,63 +56,63 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     // Form submission
-    // if (registerForm) {
-    //     registerForm.addEventListener("submit", function (e) {
-    //         e.preventDefault()
+    if (registerForm) {
+        registerForm.addEventListener("submit", function (e) {
+            e.preventDefault()
 
-    //         const submitBtn = this.querySelector(".btn-register-submit")
-    //         const fullName = this.querySelector('input[placeholder="Nhập Họ và tên"]').value
-    //         const email = this.querySelector('input[placeholder="Nhập Email hoặc Số điện thoại"]').value
-    //         const password = this.querySelector('input[placeholder="Nhập mật khẩu"]').value
-    //         const confirmPassword = this.querySelector('input[placeholder="Nhập mật khẩu"]').value
+            const submitBtn = this.querySelector(".btn-register-submit")
+            const fullName = this.querySelector('input[placeholder="Nhập Họ và tên"]').value
+            const email = this.querySelector('input[placeholder="Nhập Email hoặc Số điện thoại"]').value
+            const password = this.querySelector('input[placeholder="Nhập mật khẩu"]').value
+            const confirmPassword = this.querySelector('input[placeholder="Nhập mật khẩu"]').value
 
-    //         // Basic validation
-    //         if (!fullName || !email || !password || !confirmPassword) {
-    //             alert("Vui lòng điền đầy đủ thông tin!")
-    //             return
-    //         }
+            // Basic validation
+            if (!fullName || !email || !password || !confirmPassword) {
+                alert("Vui lòng điền đầy đủ thông tin!")
+                return
+            }
 
-    //         if (password !== confirmPassword) {
-    //             alert("Mật khẩu xác nhận không khớp!")
-    //             return
-    //         }
+            if (password !== confirmPassword) {
+                alert("Mật khẩu xác nhận không khớp!")
+                return
+            }
 
-    //         // Email validation
-    //         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    //         const phoneRegex = /^[0-9]{10,11}$/
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+            const phoneRegex = /^[0-9]{10,11}$/
 
-    //         if (!emailRegex.test(email) && !phoneRegex.test(email)) {
-    //             alert("Vui lòng nhập email hoặc số điện thoại hợp lệ!")
-    //             return
-    //         }
+            if (!emailRegex.test(email) && !phoneRegex.test(email)) {
+                alert("Vui lòng nhập email hoặc số điện thoại hợp lệ!")
+                return
+            }
 
-    //         // Add loading state
-    //         submitBtn.classList.add("loading")
-    //         submitBtn.disabled = true
+            // Add loading state
+            submitBtn.classList.add("loading")
+            submitBtn.disabled = true
 
-    //         // Simulate registration process
-    //         setTimeout(() => {
-    //             submitBtn.classList.remove("loading")
-    //             submitBtn.disabled = false
+            // Simulate registration process
+            setTimeout(() => {
+                submitBtn.classList.remove("loading")
+                submitBtn.disabled = false
 
-    //             // Show success message
-    //             // alert(`Đăng ký thành công!`)
-    //             closeModal()
+                // Show success message
+                // alert(`Đăng ký thành công!`)
+                closeModal()
 
-    //             // Reset form
-    //             registerForm.reset()
+                // Reset form
+                registerForm.reset()
 
-    //             // Reset password visibility
-    //             passwordToggles.forEach((toggle) => {
-    //                 const passwordInput = toggle.parentElement.querySelector("input")
-    //                 passwordInput.setAttribute("type", "password")
-    //                 const icon = toggle.querySelector("i")
-    //                 icon.classList.remove("fa-eye")
-    //                 icon.classList.add("fa-eye-slash")
-    //             })
-    //         }, 2000)
-    //     })
-    // }
+                // Reset password visibility
+                passwordToggles.forEach((toggle) => {
+                    const passwordInput = toggle.parentElement.querySelector("input")
+                    passwordInput.setAttribute("type", "password")
+                    const icon = toggle.querySelector("i")
+                    icon.classList.remove("fa-eye")
+                    icon.classList.add("fa-eye-slash")
+                })
+            }, 2000)
+        })
+    }
 
     // Social register buttons
     const googleBtn = document.querySelector(".register-modal .btn-google")

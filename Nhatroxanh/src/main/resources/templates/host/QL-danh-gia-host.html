@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+    <div class="main-content">
+         <h4 class="mb-4">Quản lý đánh giá theo khu trọ</h4>
+         <hr>
+        <div class="container py-4">
+ 
+
+  <!-- Bộ lọc -->
+  <div class="d-flex gap-3 mb-3">
+    <input type="text" class="form-control w-25" placeholder="Tìm khu trọ...">
+    <select class="form-select w-25">
+      <option>Tất cả số sao</option>
+      <option>5 sao</option>
+      <option>4 sao</option>
+      <option>3 sao</option>
+    </select>
+  </div>
+
+  <!-- Accordion khu trọ -->
+  <div class="accordion" id="hostReviewAccordion">
+
+    <!-- Khu trọ A2 -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingA2">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA2">
+          <i class="fa-solid fa-building me-2 text-primary"></i> Khu trọ A2 – 12 đánh giá
+        </button>
+      </h2>
+      <div id="collapseA2" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
+        <div class="accordion-body">
+
+          <!-- Danh sách đánh giá -->
+          <div class="host-review-item mb-3 p-3 border rounded shadow-sm">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong><i class="fa fa-user"></i> Nguyễn Văn A</strong> – <span class="text-warning">★★★★★</span>
+                <p class="mb-1">Phòng sạch sẽ, chủ thân thiện, khu vực yên tĩnh...</p>
+              </div>
+              <div class="text-end">
+                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reviewDetailModal"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lặp thêm các đánh giá -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Khu trọ B1 (tương tự) -->
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="headingB1">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB1">
+          <i class="fa-solid fa-building me-2 text-primary"></i> Khu trọ B1 – 8 đánh giá
+        </button>
+      </h2>
+      <div id="collapseB1" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
+        <div class="accordion-body">
+          <!-- Các đánh giá khu B1 -->
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- Modal xem chi tiết -->
+<div class="modal fade" id="reviewDetailModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content host-modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title"><i class="fa-solid fa-star me-2 text-warning"></i>Chi tiết đánh giá</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Người đánh giá:</strong> Nguyễn Văn A</p>
+        <p><strong>Đối tượng:</strong> Phòng A2-105</p>
+        <p><strong>Số sao:</strong> ★★★★☆</p>
+        <p><strong>Nội dung:</strong> Phòng sạch, giá tốt nhưng hơi ồn...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

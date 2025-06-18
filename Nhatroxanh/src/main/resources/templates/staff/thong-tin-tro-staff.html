@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+    <style>
+        
+    .main-content {
+      flex: 1;
+      padding: 20px;
+      background-color: #f8f9fa;
+    }
+
+    .badge-active {
+      background-color: #d4edda;
+      color: #28a745;
+      border: 1px solid #28a745;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-weight: 500;
+    }
+
+    .badge-inactive {
+      background-color: #f8d7da;
+      color: #dc3545;
+      border: 1px solid #dc3545;
+      border-radius: 20px;
+      padding: 5px 15px;
+      font-weight: 500;
+    }
+
+    .search-group {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .search-rounded {
+      height: 40px;
+      border-radius: 50px;
+      padding-left: 15px;
+      font-size: 14px;
+    }
+
+    .btn-search-rounded {
+      background-color: #0095d5;
+      color: #fff;
+      font-weight: 500;
+      border-radius: 55px;
+      font-size: 13px;
+      border: none;
+      width: 123px;
+    }
+
+    .btn-search-rounded:hover {
+      background-color: #007bb5;
+      color: #fff;
+    }
+
+    table thead {
+      background-color: #e3f2fd;
+      font-weight: 600;
+    }
+
+    .table td,
+    .table th {
+      vertical-align: middle;
+      text-align: center;
+    }
+
+    .action-link {
+      color: orange;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+     <div class="main-content">
+      <ul class="nav nav-tabs border-bottom border-dark mb-3">
+        <li class="nav-item">
+          <a class="nav-link text-primary border-primary" href="/thong-tin-tro" >THÔNG TIN TRỌ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active fw-bold text-dark" href="/category">LOẠI DANH MỤC</a>
+        </li>
+      </ul>
+
+      <div class="search-group">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <input type="text" class="form-control search-rounded" placeholder="Tìm kiếm..." />
+          <button class="btn btn-search-rounded">TÌM KIẾM</button>
+        </div>
+      </div>
+
+      <table class="table table-bordered text-center">
+  <thead class="table-primary">
+    <tr>
+      <th>ID</th>
+      <th>Tên khu trọ</th>
+      <th>Địa chỉ</th>
+      <th>Trạng thái</th>
+      <th>Hành động</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Nhà trọ A</td>
+      <td>147 Lê Lợi</td>
+      <td><span class="badge bg-success rounded-pill px-3 py-1">Hoạt động</span></td>
+      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>Nhà trọ B</td>
+      <td>99 Trần Hưng Đạo</td>
+      <td><span class="badge bg-success rounded-pill px-3 py-1">Hoạt động</span></td>
+      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td>Nhà trọ C</td>
+      <td>45 Nguyễn Huệ</td>
+      <td><span class="badge bg-danger rounded-pill px-3 py-1">Hết phòng</span></td>
+      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
+    </tr>
+  </tbody>
+</table>
+
+       </div>
+  </div>
+
+  
+</body>
+</html>

@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+    <!-- Main Content -->
+    <!-- Main Content -->
+    <div class="nha-tro-main-content">
+        <div class="nha-tro-header">
+            <h5>
+                <a href="javascript:history.back()" class="nha-tro-back-btn">
+                    <i class="fa fa-arrow-left"></i>
+                </a> 
+                Tạo hợp đồng thuê nhà
+            </h5>
+            <hr>
+        </div>
+
+        <div class="container-fluid mt-4">
+            <div class="row mt-3">
+                <!-- Form Column -->
+                <div class="col-lg-7">
+                    <!-- Basic Info Card -->
+                    <div class="card nha-tro-card mb-3">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" placeholder="Số điện thoại người thuê" id="tenant-phone">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Ngày lập hợp đồng</label>
+                                    <input type="date" class="form-control" id="contract-date">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" id="contract-status">
+                                        <option value="">Trạng thái</option>
+                                        <option value="active">Đang hiệu lực</option>
+                                        <option value="expired">Hết hiệu lực</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs nha-tro-tabs" id="contractTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-tab="tenantInfo" href="#tenantInfo">
+                                <i class="fa fa-user"></i> Người thuê
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="ownerInfo" href="#ownerInfo">
+                                <i class="fa fa-id-card"></i> Chủ trọ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="roomInfo" href="#roomInfo">
+                                <i class="fa fa-house"></i> Nhà trọ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="terms" href="#terms">
+                                <i class="fa fa-file-contract"></i> Điều khoản & Thanh toán
+                            </a>
+                        </li>
+                    </ul>
+
+                    <!-- Tab Content -->
+                    <div class="tab-content card p-4 nha-tro-tab-content">
+                        <!-- Tenant Info Tab -->
+                        <div class="tab-pane fade show active" id="tenantInfo">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control" id="tenant-name">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Ngày sinh</label>
+                                    <input type="date" class="form-control" id="tenant-dob">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Số CMND/CCCD</label>
+                                    <input type="text" class="form-control" id="tenant-id">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Ngày cấp</label>
+                                    <input type="date" class="form-control" id="tenant-id-date">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label">Nơi cấp</label>
+                                    <input type="text" class="form-control" id="tenant-id-place">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tỉnh/Thành phố</label>
+                                    <select class="form-select" id="tenant-province">
+                                        <option value="">Tỉnh/Thành phố</option>
+                                        <option value="hanoi">Hà Nội</option>
+                                        <option value="hcm">TP. Hồ Chí Minh</option>
+                                        <option value="danang">Đà Nẵng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Quận/Huyện</label>
+                                    <select class="form-select" id="tenant-district">
+                                        <option value="">Quận/Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Phường/Xã</label>
+                                    <select class="form-select" id="tenant-ward">
+                                        <option value="">Phường/Xã</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên đường/Số nhà</label>
+                                    <input type="text" class="form-control" id="tenant-street">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email (nếu có)</label>
+                                    <input type="email" class="form-control" id="tenant-email">
+                                </div>
+                                
+                                <!-- CCCD Images -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Ảnh CCCD mặt trước</label>
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-front').click()">
+                                        <input type="file" id="cccd-front" accept="image/*" style="display: none;">
+                                        <div id="cccd-front-preview" class="nha-tro-image-preview">
+                                            <i class="fa fa-camera fa-2x"></i>
+                                            <div class="mt-2">Tải ảnh mặt trước</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <label class="form-label">Ảnh CCCD mặt sau</label>
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-back').click()">
+                                        <input type="file" id="cccd-back" accept="image/*" style="display: none;">
+                                        <div id="cccd-back-preview" class="nha-tro-image-preview">
+                                            <i class="fa fa-camera fa-2x"></i>
+                                            <div class="mt-2">Tải ảnh mặt sau</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end mt-4">
+                                <button class="btn btn-primary nha-tro-btn-next" id="btn-next-owner">
+                                    <i class="fa fa-arrow-right"></i> Tiếp tục
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Owner Info Tab -->
+                        <div class="tab-pane fade" id="ownerInfo">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" class="form-control" id="owner-name">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Ngày sinh</label>
+                                    <input type="date" class="form-control" id="owner-dob">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Số CMND/CCCD</label>
+                                    <input type="text" class="form-control" id="owner-id">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Ngày cấp</label>
+                                    <input type="date" class="form-control" id="owner-id-date">
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="form-label">Nơi cấp</label>
+                                    <input type="text" class="form-control" id="owner-id-place">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Tỉnh/Thành phố</label>
+                                    <select class="form-select" id="owner-province">
+                                        <option value="">Tỉnh/Thành phố</option>
+                                        <option value="hanoi">Hà Nội</option>
+                                        <option value="hcm">TP. Hồ Chí Minh</option>
+                                        <option value="danang">Đà Nẵng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Quận/Huyện</label>
+                                    <select class="form-select" id="owner-district">
+                                        <option value="">Quận/Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Phường/Xã</label>
+                                    <select class="form-select" id="owner-ward">
+                                        <option value="">Phường/Xã</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên đường/Số nhà</label>
+                                    <input type="text" class="form-control" id="owner-street">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email (nếu có)</label>
+                                    <input type="email" class="form-control" id="owner-email">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" id="owner-phone">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tài khoản ngân hàng (nếu có)</label>
+                                    <input type="text" class="form-control" id="owner-bank">
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-secondary" id="btn-prev-tenant">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </button>
+                                <button class="btn btn-primary" id="btn-next-room">
+                                    <i class="fa fa-arrow-right"></i> Tiếp tục
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Room Info Tab -->
+                        <div class="tab-pane fade" id="roomInfo">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Tỉnh/Thành phố</label>
+                                    <select class="form-select" id="room-province">
+                                        <option value="">Tỉnh/Thành phố</option>
+                                        <option value="hanoi">Hà Nội</option>
+                                        <option value="hcm">TP. Hồ Chí Minh</option>
+                                        <option value="danang">Đà Nẵng</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Quận/Huyện</label>
+                                    <select class="form-select" id="room-district">
+                                        <option value="">Quận/Huyện</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Phường/Xã</label>
+                                    <select class="form-select" id="room-ward">
+                                        <option value="">Phường/Xã</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên đường/Số nhà</label>
+                                    <input type="text" class="form-control" id="room-street">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Số phòng</label>
+                                    <input type="text" class="form-control" id="room-number">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Diện tích (m²)</label>
+                                    <input type="number" class="form-control" id="room-area">
+                                </div>
+
+                                <!-- Add Amenity Button -->
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <label class="form-label">Tiện ích</label>
+                                        <button type="button" class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-amenity" id="btn-add-amenity-host">
+                                            <i class="fa fa-plus"></i> Thêm tiện ích
+                                        </button>
+                                    </div>
+                                    <div class="nha-tro-amenities" id="amenities-list-host">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="wifi">
+                                            <label class="form-check-label" for="wifi">Wifi</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="ac">
+                                            <label class="form-check-label" for="ac">Máy lạnh</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="fridge">
+                                            <label class="form-check-label" for="fridge">Tủ lạnh</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="kitchen">
+                                            <label class="form-check-label" for="kitchen">Bếp</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="parking">
+                                            <label class="form-check-label" for="parking">Chỗ để xe</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="security">
+                                            <label class="form-check-label" for="security">Camera an ninh</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label class="form-label">Ghi chú</label>
+                                    <textarea class="form-control" rows="3" id="room-notes"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-secondary" id="btn-prev-owner">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </button>
+                                <button class="btn btn-primary" id="btn-next-terms">
+                                    <i class="fa fa-arrow-right"></i> Tiếp tục
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Terms Tab -->
+                        <div class="tab-pane fade" id="terms">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Giá thuê hàng tháng (VND)</label>
+                                    <input type="number" class="form-control" id="rent-price">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phương thức thanh toán</label>
+                                    <select class="form-select" id="payment-method">
+                                        <option value="cash">Tiền mặt</option>
+                                        <option value="transfer">Chuyển khoản</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ngày thanh toán hàng tháng</label>
+                                    <input type="text" class="form-control" id="payment-date" placeholder="Ví dụ: Ngày 5 hằng tháng">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Thời hạn hợp đồng</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" value="12" id="contract-duration">
+                                        <span class="input-group-text">Tháng</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Ngày bắt đầu HĐ</label>
+                                    <input type="date" class="form-control" id="start-date">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Đặt cọc trước</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" value="2" id="deposit-months">
+                                        <span class="input-group-text">tháng tiền nhà</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Điều khoản chung</label>
+                                    <textarea class="form-control" rows="4" id="terms-conditions"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between mt-4">
+                                <button class="btn btn-secondary" id="btn-prev-room">
+                                    <i class="fa fa-arrow-left"></i> Quay lại
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                        <button class="btn btn-outline-info flex-fill" id="btn-update">
+                            <i class="fa fa-pen-to-square"></i> Cập nhật hợp đồng
+                        </button>
+                        <button class="btn btn-success flex-fill" id="btn-print">
+                            <i class="fa fa-print"></i> In hợp đồng
+                        </button>
+                        <button class="btn nha-tro-btn-purple flex-fill" id="btn-save">
+                            <i class="fa fa-floppy-disk"></i> Lưu hợp đồng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preview Column -->
+                <div class="col-lg-5">
+                    <div class="card nha-tro-contract-preview">
+                        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                            <strong>Xem trước hợp đồng</strong>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-secondary" id="btn-zoom-out" title="Thu nhỏ">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" id="btn-zoom-in" title="Phóng to">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-secondary" id="btn-reset-zoom" title="Kích thước gốc">
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body nha-tro-preview-content" id="contract-preview">
+                            <div id="preview-container" style="transform-origin: top left; transition: transform 0.3s ease;">
+                                <p class="text-center"><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</strong></p>
+                                <p class="text-center"><strong>HỢP ĐỒNG THUÊ NHÀ</strong></p>
+                                <p>Hôm nay, ngày <span id="preview-sign-date" class="nha-tro-highlight">........................</span>, chúng tôi gồm:</p>
+
+                                <p><strong>BÊN CHO THUÊ (Bên A):</strong> <span id="preview-owner-name" class="nha-tro-highlight">........................</span></p>
+                                <p>Sinh ngày: <span id="preview-owner-dob" class="nha-tro-highlight">........................</span></p>
+                                <p>Số CMND/CCCD: <span id="preview-owner-id" class="nha-tro-highlight">........................</span> cấp ngày <span id="preview-owner-id-date" class="nha-tro-highlight">........................</span> tại <span id="preview-owner-id-place" class="nha-tro-highlight">........................</span></p>
+                                <p>Địa chỉ: <span id="preview-owner-address" class="nha-tro-highlight">........................</span></p>
+                                <p>Số điện thoại: <span id="preview-owner-phone" class="nha-tro-highlight">........................</span></p>
+
+                                <p><strong>BÊN THUÊ (Bên B):</strong> <span id="preview-tenant-name" class="nha-tro-highlight">........................</span></p>
+                                <p>Sinh ngày: <span id="preview-tenant-dob" class="nha-tro-highlight">........................</span></p>
+                                <p>Số CMND/CCCD: <span id="preview-tenant-id" class="nha-tro-highlight">........................</span> cấp ngày <span id="preview-tenant-id-date" class="nha-tro-highlight">........................</span> tại <span id="preview-tenant-id-place" class="nha-tro-highlight">........................</span></p>
+                                <p>Địa chỉ: <span id="preview-tenant-address" class="nha-tro-highlight">........................</span></p>
+                                <p>Số điện thoại: <span id="preview-tenant-phone" class="nha-tro-highlight">........................</span></p>
+
+                                <p>Sau khi bàn bạc trên tinh thần dân chủ, hai bên thống nhất ký kết hợp đồng thuê nhà với các điều khoản sau:</p>
+
+                                <p><strong>Điều 1: Đối tượng hợp đồng</strong><br>
+                                Bên A đồng ý cho Bên B thuê căn nhà tại địa chỉ: <span id="preview-room-address" class="nha-tro-highlight">........................</span>, phòng số <span id="preview-room-number" class="nha-tro-highlight">........................</span>, diện tích <span id="preview-room-area" class="nha-tro-highlight">........................</span> m².</p>
+
+                                <p><strong>Điều 2: Thời hạn thuê</strong><br>
+                                Thời gian thuê: <span id="preview-duration" class="nha-tro-highlight">........................</span> tháng, kể từ ngày <span id="preview-start-date" class="nha-tro-highlight">........................</span> đến ngày <span id="preview-end-date" class="nha-tro-highlight">........................</span></p>
+
+                                <p><strong>Điều 3: Giá thuê và phương thức thanh toán</strong><br>
+                                Giá thuê: <span id="preview-rent" class="nha-tro-highlight">........................</span> VNĐ/tháng. Thanh toán <span id="preview-payment-date" class="nha-tro-highlight">........................</span> bằng <span id="preview-payment-method" class="nha-tro-highlight">........................</span>.<br>
+                                Tiền đặt cọc: <span id="preview-deposit" class="nha-tro-highlight">........................</span> VNĐ (tương đương <span id="preview-deposit-months" class="nha-tro-highlight">........................</span> tháng tiền nhà).</p>
+
+                                <p><strong>Điều 4: Tiện ích và trang thiết bị</strong><br>
+                                Phòng được trang bị: <span id="preview-amenities" class="nha-tro-highlight">........................</span></p>
+
+                                <p><strong>Điều 5: Trách nhiệm các bên</strong><br>
+                                Bên A cam kết giao nhà đúng thời gian và đúng hiện trạng. Bên B có trách nhiệm sử dụng đúng mục đích, bảo quản tài sản và trả nhà đúng hạn.</p>
+
+                                <p><strong>Điều 6: Điều khoản khác</strong><br>
+                                <span id="preview-terms" class="nha-tro-highlight">........................</span></p>
+
+                                <p><strong>Điều 7: Cam kết chung</strong><br>
+                                Hai bên cam kết thực hiện đúng các điều khoản. Nếu có tranh chấp, sẽ giải quyết theo pháp luật Việt Nam.</p>
+
+                                <p>Hợp đồng được lập thành 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
+
+                                <div class="row text-center mt-5">
+                                    <div class="col-6">
+                                        <p><strong>BÊN CHO THUÊ</strong></p>
+                                        <p class="mt-5">(Ký, ghi rõ họ tên)</p>
+                                        <p><span id="preview-owner-signature" class="nha-tro-highlight">........................</span></p>
+                                    </div>
+                                    <div class="col-6">
+                                        <p><strong>BÊN THUÊ</strong></p>
+                                        <p class="mt-5">(Ký, ghi rõ họ tên)</p>
+                                        <p><span id="preview-tenant-signature" class="nha-tro-highlight">........................</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Amenity Modal -->
+    <div class="modal fade" id="addAmenityModal-host" tabindex="-1" aria-labelledby="addAmenityModalLabel-host" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content nha-tro-host-modal">
+                <div class="modal-header nha-tro-host-modal-header">
+                    <h5 class="modal-title" id="addAmenityModalLabel-host">
+                        <i class="fa fa-plus-circle me-2"></i>Thêm tiện ích mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body nha-tro-host-modal-body">
+                    <form id="addAmenityForm-host">
+                        <div class="mb-3">
+                            <label for="amenityName-host" class="form-label">Tên tiện ích</label>
+                            <input type="text" class="form-control nha-tro-host-input" id="amenityName-host" placeholder="Nhập tên tiện ích..." required>
+                            <div class="invalid-feedback">
+                                Vui lòng nhập tên tiện ích
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="amenityDescription-host" class="form-label">Mô tả (tùy chọn)</label>
+                            <textarea class="form-control nha-tro-host-input" id="amenityDescription-host" rows="2" placeholder="Mô tả chi tiết về tiện ích..."></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer nha-tro-host-modal-footer">
+                    <button type="button" class="btn btn-secondary nha-tro-host-btn-cancel" data-bs-dismiss="modal">
+                        <i class="fa fa-times me-1"></i>Hủy
+                    </button>
+                    <button type="button" class="btn btn-primary nha-tro-host-btn-save" id="saveAmenity-host">
+                        <i class="fa fa-check me-1"></i>Lưu tiện ích
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Namespace để tránh xung đột với Spring Boot
+        window.NhaTroContract = {
+            // Tab management
+            currentTab: "tenantInfo",
+            zoomLevel: 1,
+
+            init() {
+                this.setupEventListeners()
+                this.setCurrentDate()
+                this.updateAllPreview()
+                this.setupLocationData()
+                this.setupAmenityModal() // Add this line
+            },
+
+            setupEventListeners() {
+                // Tab click events
+                document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
+                    link.addEventListener("click", (e) => {
+                        e.preventDefault()
+                        const tabId = link.getAttribute("data-tab")
+                        this.showTab(tabId)
+                    })
+                })
+
+                // Button events
+                document.getElementById("btn-next-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
+                document.getElementById("btn-prev-tenant")?.addEventListener("click", () => this.showTab("tenantInfo"))
+                document.getElementById("btn-next-room")?.addEventListener("click", () => this.showTab("roomInfo"))
+                document.getElementById("btn-prev-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
+                document.getElementById("btn-next-terms")?.addEventListener("click", () => this.showTab("terms"))
+                document.getElementById("btn-prev-room")?.addEventListener("click", () => this.showTab("roomInfo"))
+
+                // Action buttons
+                document.getElementById("btn-update")?.addEventListener("click", () => this.updateContract())
+                document.getElementById("btn-print")?.addEventListener("click", () => this.printContract())
+                document.getElementById("btn-save")?.addEventListener("click", () => this.saveContract())
+
+                // Zoom buttons
+                document.getElementById("btn-zoom-in")?.addEventListener("click", () => this.zoomIn())
+                document.getElementById("btn-zoom-out")?.addEventListener("click", () => this.zoomOut())
+                document.getElementById("btn-reset-zoom")?.addEventListener("click", () => this.resetZoom())
+
+                // Image upload events
+                document.getElementById("cccd-front")?.addEventListener("change", (e) => {
+                    this.previewImage(e, "cccd-front-preview")
+                })
+
+                document.getElementById("cccd-back")?.addEventListener("change", (e) => {
+                    this.previewImage(e, "cccd-back-preview")
+                })
+
+                // Form input events for live preview
+                this.setupPreviewListeners()
+                this.setupLocationListeners()
+            },
+
+            setupPreviewListeners() {
+                const inputs = [
+                    { id: "tenant-name", preview: "preview-tenant-name" },
+                    { id: "tenant-dob", preview: "preview-tenant-dob" },
+                    { id: "tenant-id", preview: "preview-tenant-id" },
+                    { id: "tenant-id-date", preview: "preview-tenant-id-date" },
+                    { id: "tenant-id-place", preview: "preview-tenant-id-place" },
+                    { id: "tenant-phone", preview: "preview-tenant-phone" },
+                    { id: "owner-name", preview: "preview-owner-name" },
+                    { id: "owner-dob", preview: "preview-owner-dob" },
+                    { id: "owner-id", preview: "preview-owner-id" },
+                    { id: "owner-id-date", preview: "preview-owner-id-date" },
+                    { id: "owner-id-place", preview: "preview-owner-id-place" },
+                    { id: "owner-phone", preview: "preview-owner-phone" },
+                    { id: "room-number", preview: "preview-room-number" },
+                    { id: "room-area", preview: "preview-room-area" },
+                    { id: "rent-price", preview: "preview-rent" },
+                    { id: "contract-duration", preview: "preview-duration" },
+                    { id: "start-date", preview: "preview-start-date" },
+                    { id: "contract-date", preview: "preview-sign-date" },
+                    { id: "payment-date", preview: "preview-payment-date" },
+                    { id: "deposit-months", preview: "preview-deposit-months" },
+                    { id: "terms-conditions", preview: "preview-terms" },
+                ]
+
+                inputs.forEach((input) => {
+                    const element = document.getElementById(input.id)
+                    if (element) {
+                        element.addEventListener("input", () => {
+                            this.updatePreviewField(input.id, input.preview)
+                        })
+                        element.addEventListener("change", () => {
+                            this.updatePreviewField(input.id, input.preview)
+                        })
+                    }
+                })
+
+                // Special handlers
+                document.getElementById("payment-method")?.addEventListener("change", () => {
+                    this.updatePaymentMethod()
+                })
+
+                // Amenities checkboxes
+                document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.addEventListener('change', () => {
+                        this.updateAmenities()
+                    })
+                })
+
+                // Address fields
+                const addressFields = ['tenant', 'owner', 'room']
+                addressFields.forEach(prefix => {
+                    ['province', 'district', 'ward', 'street'].forEach(field => {
+                        const element = document.getElementById(`${prefix}-${field}`)
+                        if (element) {
+                            element.addEventListener('change', () => {
+                                this.updateAddress(prefix)
+                            })
+                        }
+                    })
+                })
+            },
+
+            setupLocationData() {
+                this.locationData = {
+                    hanoi: {
+                        name: "Hà Nội",
+                        districts: {
+                            "ba-dinh": { name: "Ba Đình", wards: ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc", "Cống Vị"] },
+                            "hoan-kiem": { name: "Hoàn Kiếm", wards: ["Phúc Tấn", "Đồng Xuân", "Hàng Mã", "Hàng Bồ"] },
+                            "dong-da": { name: "Đống Đa", wards: ["Cát Linh", "Văn Miếu", "Quốc Tử Giám", "Láng Thượng"] },
+                        },
+                    },
+                    hcm: {
+                        name: "TP. Hồ Chí Minh",
+                        districts: {
+                            "quan-1": { name: "Quận 1", wards: ["Bến Nghé", "Bến Thành", "Cầu Kho", "Cầu Ông Lãnh"] },
+                            "quan-3": { name: "Quận 3", wards: ["Võ Thị Sáu", "Đa Kao", "Tân Định", "Phường 1"] },
+                            "quan-7": { name: "Quận 7", wards: ["Tân Thuận Đông", "Tân Thuận Tây", "Tân Kiểng", "Tân Hưng"] },
+                        },
+                    },
+                    danang: {
+                        name: "Đà Nẵng",
+                        districts: {
+                            "hai-chau": { name: "Hải Châu", wards: ["Thạch Thang", "Hải Châu I", "Hải Châu II", "Thanh Bình"] },
+                            "thanh-khe": { name: "Thanh Khê", wards: ["Thanh Khê Tây", "Thanh Khê Đông", "Xuân Hà", "Tân Chính"] },
+                        },
+                    },
+                }
+            },
+
+            setupLocationListeners() {
+                const prefixes = ["tenant", "owner", "room"]
+
+                prefixes.forEach((prefix) => {
+                    const provinceSelect = document.getElementById(`${prefix}-province`)
+                    const districtSelect = document.getElementById(`${prefix}-district`)
+                    const wardSelect = document.getElementById(`${prefix}-ward`)
+
+                    if (provinceSelect) {
+                        provinceSelect.addEventListener("change", () => {
+                            this.updateDistricts(provinceSelect.value, districtSelect, wardSelect)
+                            this.updateAddress(prefix)
+                        })
+                    }
+
+                    if (districtSelect) {
+                        districtSelect.addEventListener("change", () => {
+                            this.updateWards(provinceSelect.value, districtSelect.value, wardSelect)
+                            this.updateAddress(prefix)
+                        })
+                    }
+
+                    if (wardSelect) {
+                        wardSelect.addEventListener("change", () => {
+                            this.updateAddress(prefix)
+                        })
+                    }
+                })
+            },
+
+            updateDistricts(provinceValue, districtSelect, wardSelect) {
+                districtSelect.innerHTML = '<option value="">Quận/Huyện</option>'
+                wardSelect.innerHTML = '<option value="">Phường/Xã</option>'
+
+                if (provinceValue && this.locationData[provinceValue]) {
+                    const districts = this.locationData[provinceValue].districts
+                    Object.entries(districts).forEach(([key, district]) => {
+                        const option = document.createElement("option")
+                        option.value = key
+                        option.textContent = district.name
+                        districtSelect.appendChild(option)
+                    })
+                }
+            },
+
+            updateWards(provinceValue, districtValue, wardSelect) {
+                wardSelect.innerHTML = '<option value="">Phường/Xã</option>'
+
+                if (provinceValue && districtValue && this.locationData[provinceValue]?.districts[districtValue]) {
+                    const wards = this.locationData[provinceValue].districts[districtValue].wards
+                    wards.forEach((ward) => {
+                        const option = document.createElement("option")
+                        option.value = ward.toLowerCase().replace(/\s+/g, "-")
+                        option.textContent = ward
+                        wardSelect.appendChild(option)
+                    })
+                }
+            },
+
+            setCurrentDate() {
+                const today = new Date().toISOString().split("T")[0]
+                const contractDateInput = document.getElementById("contract-date")
+                const startDateInput = document.getElementById("start-date")
+
+                if (contractDateInput) contractDateInput.value = today
+                if (startDateInput) startDateInput.value = today
+
+                this.updatePreviewField("contract-date", "preview-sign-date")
+                this.updatePreviewField("start-date", "preview-start-date")
+                this.calculateEndDate()
+            },
+
+            showTab(tabId) {
+                // Hide all tabs
+                document.querySelectorAll(".tab-pane").forEach((pane) => {
+                    pane.classList.remove("show", "active")
+                })
+
+                // Remove active class from all nav links
+                document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
+                    link.classList.remove("active")
+                })
+
+                // Show selected tab
+                const targetTab = document.getElementById(tabId)
+                const targetLink = document.querySelector(`[data-tab="${tabId}"]`)
+
+                if (targetTab && targetLink) {
+                    targetTab.classList.add("show", "active")
+                    targetLink.classList.add("active")
+                    this.currentTab = tabId
+                }
+
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: "smooth" })
+            },
+
+            previewImage(event, previewId) {
+                const file = event.target.files[0]
+                const preview = document.getElementById(previewId)
+
+                if (file) {
+                    const reader = new FileReader()
+                    reader.onload = (e) => {
+                        preview.innerHTML = `<img src="${e.target.result}" alt="CCCD Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
+                    }
+                    reader.readAsDataURL(file)
+                }
+            },
+
+            updateAllPreview() {
+                this.updatePreviewField("contract-date", "preview-sign-date")
+                this.updatePreviewField("start-date", "preview-start-date")
+                this.calculateEndDate()
+                this.calculateDeposit()
+                this.updatePaymentMethod()
+                this.updateAmenities()
+            },
+
+            updatePreviewField(inputId, previewId) {
+                const input = document.getElementById(inputId)
+                const preview = document.getElementById(previewId)
+
+                if (input && preview) {
+                    let value = input.value
+
+                    // Format date if needed
+                    if (input.type === "date" && value) {
+                        const date = new Date(value)
+                        value = date.toLocaleDateString("vi-VN")
+                    }
+
+                    // Format number if it's rent price
+                    if (inputId === "rent-price" && value) {
+                        value = new Intl.NumberFormat("vi-VN").format(value)
+                    }
+
+                    // Special handling for textarea
+                    if (input.tagName === "TEXTAREA" && value) {
+                        preview.innerHTML = value.replace(/\n/g, '<br>')
+                    } else {
+                        preview.textContent = value || "........................"
+                    }
+
+                    // Add highlight effect
+                    if (value) {
+                        preview.classList.add('nha-tro-updated')
+                        setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000)
+                    }
+
+                    // Update related calculations
+                    if (inputId === "start-date" || inputId === "contract-duration") {
+                        this.calculateEndDate()
+                    }
+                    if (inputId === "rent-price" || inputId === "deposit-months") {
+                        this.calculateDeposit()
+                    }
+                }
+            },
+
+            updateAddress(prefix) {
+                const street = document.getElementById(`${prefix}-street`)?.value || ""
+                const ward = this.getSelectText(`${prefix}-ward`)
+                const district = this.getSelectText(`${prefix}-district`)
+                const province = this.getSelectText(`${prefix}-province`)
+
+                const parts = [street, ward, district, province].filter(
+                    (part) => part && !part.includes("Chọn") && part !== ""
+                )
+                const fullAddress = parts.join(", ")
+
+                const previewId = `preview-${prefix === 'room' ? 'room' : prefix}-address`
+                const preview = document.getElementById(previewId)
+                if (preview) {
+                    preview.textContent = fullAddress || "........................"
+                    if (fullAddress) {
+                        preview.classList.add('nha-tro-updated')
+                        setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000)
+                    }
+                }
+            },
+
+            updatePaymentMethod() {
+                const paymentMethod = document.getElementById("payment-method")
+                const preview = document.getElementById("preview-payment-method")
+                
+                if (paymentMethod && preview) {
+                    const selectedText = paymentMethod.options[paymentMethod.selectedIndex]?.text || "........................"
+                    preview.textContent = selectedText
+                }
+            },
+
+            updateAmenities() {
+                const checkboxes = document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]:checked')
+                const amenities = Array.from(checkboxes).map(cb => {
+                    const label = document.querySelector(`label[for="${cb.id}"]`)
+                    return label ? label.textContent : cb.id
+                })
+
+                const preview = document.getElementById("preview-amenities")
+                if (preview) {
+                    preview.textContent = amenities.length > 0 ? amenities.join(", ") : "........................"
+                }
+            },
+
+            calculateEndDate() {
+                const startDate = document.getElementById("start-date")?.value
+                const duration = document.getElementById("contract-duration")?.value
+
+                if (startDate && duration) {
+                    const start = new Date(startDate)
+                    const end = new Date(start)
+                    end.setMonth(end.getMonth() + parseInt(duration))
+
+                    const preview = document.getElementById("preview-end-date")
+                    if (preview) {
+                        preview.textContent = end.toLocaleDateString("vi-VN")
+                    }
+                }
+            },
+
+            calculateDeposit() {
+                const rentPrice = document.getElementById("rent-price")?.value
+                const depositMonths = document.getElementById("deposit-months")?.value
+
+                if (rentPrice && depositMonths) {
+                    const deposit = parseInt(rentPrice) * parseInt(depositMonths)
+                    const preview = document.getElementById("preview-deposit")
+                    if (preview) {
+                        preview.textContent = new Intl.NumberFormat("vi-VN").format(deposit)
+                    }
+                }
+            },
+
+            getSelectText(id) {
+                const element = document.getElementById(id)
+                if (element && element.selectedIndex >= 0) {
+                    return element.options[element.selectedIndex].text
+                }
+                return ""
+            },
+
+            // Zoom functions
+            zoomIn() {
+                this.zoomLevel = Math.min(this.zoomLevel + 0.1, 2)
+                this.applyZoom()
+            },
+
+            zoomOut() {
+                this.zoomLevel = Math.max(this.zoomLevel - 0.1, 0.5)
+                this.applyZoom()
+            },
+
+            resetZoom() {
+                this.zoomLevel = 1
+                this.applyZoom()
+            },
+
+            applyZoom() {
+                const container = document.getElementById("preview-container")
+                if (container) {
+                    container.style.transform = `scale(${this.zoomLevel})`
+                }
+            },
+
+            // Action functions
+            updateContract() {
+                this.showNotification("Hợp đồng đã được cập nhật!", "success")
+            },
+
+            printContract() {
+                const printContent = document.getElementById("contract-preview").innerHTML
+                const printWindow = window.open('', '_blank')
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Hợp đồng thuê nhà</title>
+                            <style>
+                                body { font-family: 'Times New Roman', serif; line-height: 1.8; }
+                                .nha-tro-highlight { color: #000; font-weight: normal; }
+                                @media print { body { margin: 0; } }
+                            </style>
+                        </head>
+                        <body>${printContent}</body>
+                    </html>
+                `)
+                printWindow.document.close()
+                printWindow.print()
+            },
+
+            saveContract() {
+                const contractData = this.collectFormData()
+                console.log("Saving contract:", contractData)
+                this.showNotification("Hợp đồng đã được lưu thành công!", "success")
+            },
+
+            collectFormData() {
+                return {
+                    tenant: {
+                        name: document.getElementById("tenant-name")?.value || "",
+                        dob: document.getElementById("tenant-dob")?.value || "",
+                        id: document.getElementById("tenant-id")?.value || "",
+                        phone: document.getElementById("tenant-phone")?.value || "",
+                        email: document.getElementById("tenant-email")?.value || "",
+                    },
+                    owner: {
+                        name: document.getElementById("owner-name")?.value || "",
+                        dob: document.getElementById("owner-dob")?.value || "",
+                        id: document.getElementById("owner-id")?.value || "",
+                        phone: document.getElementById("owner-phone")?.value || "",
+                    },
+                    room: {
+                        address: this.getFullAddress("room"),
+                        number: document.getElementById("room-number")?.value || "",
+                        area: document.getElementById("room-area")?.value || "",
+                    },
+                    terms: {
+                        rentPrice: document.getElementById("rent-price")?.value || "",
+                        duration: document.getElementById("contract-duration")?.value || "",
+                        startDate: document.getElementById("start-date")?.value || "",
+                        paymentMethod: document.getElementById("payment-method")?.value || "",
+                    },
+                }
+            },
+
+            getFullAddress(prefix) {
+                const street = document.getElementById(`${prefix}-street`)?.value || ""
+                const ward = this.getSelectText(`${prefix}-ward`)
+                const district = this.getSelectText(`${prefix}-district`)
+                const province = this.getSelectText(`${prefix}-province`)
+
+                return [street, ward, district, province].filter(part => part && !part.includes("Chọn")).join(", ")
+            },
+
+            showNotification(message, type = "info") {
+                const notification = document.createElement("div")
+                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`
+                notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 300px;"
+                notification.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `
+
+                document.body.appendChild(notification)
+
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove()
+                    }
+                }, 5000)
+            },
+
+            setupAmenityModal() {
+                const addAmenityBtn = document.getElementById("btn-add-amenity-host")
+                const saveAmenityBtn = document.getElementById("saveAmenity-host")
+                const amenityForm = document.getElementById("addAmenityForm-host")
+                const amenityNameInput = document.getElementById("amenityName-host")
+
+                if (addAmenityBtn) {
+                    addAmenityBtn.addEventListener("click", () => {
+                        const modal = new bootstrap.Modal(document.getElementById("addAmenityModal-host"))
+                        modal.show()
+                        // Clear form when opening
+                        amenityForm.reset()
+                        amenityNameInput.classList.remove("is-invalid")
+                    })
+                }
+
+                if (saveAmenityBtn) {
+                    saveAmenityBtn.addEventListener("click", () => {
+                        this.saveNewAmenity()
+                    })
+                }
+
+                // Enter key to save
+                if (amenityNameInput) {
+                    amenityNameInput.addEventListener("keypress", (e) => {
+                        if (e.key === "Enter") {
+                            e.preventDefault()
+                            this.saveNewAmenity()
+                        }
+                    })
+                }
+            },
+
+            saveNewAmenity() {
+                const amenityNameInput = document.getElementById("amenityName-host")
+                const amenityName = amenityNameInput.value.trim()
+
+                if (!amenityName) {
+                    amenityNameInput.classList.add("is-invalid")
+                    amenityNameInput.focus()
+                    return
+                }
+
+                // Check if amenity already exists
+                const existingAmenities = document.querySelectorAll('#amenities-list-host .form-check-label')
+                const exists = Array.from(existingAmenities).some(label => 
+                    label.textContent.toLowerCase() === amenityName.toLowerCase()
+                )
+
+                if (exists) {
+                    this.showNotification("Tiện ích này đã tồn tại!", "warning")
+                    return
+                }
+
+                // Create new amenity
+                this.addAmenityToList(amenityName)
+                
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById("addAmenityModal-host"))
+                modal.hide()
+                
+                // Show success message
+                this.showNotification(`Đã thêm tiện ích "${amenityName}" thành công!`, "success")
+                
+                // Update preview
+                this.updateAmenities()
+            },
+
+            addAmenityToList(amenityName) {
+                const amenitiesList = document.getElementById("amenities-list-host")
+                const amenityId = "amenity-" + Date.now() + "-host"
+                
+                const amenityDiv = document.createElement("div")
+                amenityDiv.className = "form-check nha-tro-host-custom-amenity"
+                amenityDiv.innerHTML = `
+                    <input class="form-check-input" type="checkbox" id="${amenityId}">
+                    <label class="form-check-label" for="${amenityId}">${amenityName}</label>
+                    <button type="button" class="btn btn-sm btn-outline-danger nha-tro-host-remove-amenity" onclick="NhaTroContract.removeAmenity('${amenityId}')" title="Xóa tiện ích">
+                        <i class="fa fa-times"></i>
+                    </button>
+                `
+                
+                amenitiesList.appendChild(amenityDiv)
+                
+                // Add event listener for the new checkbox
+                const newCheckbox = document.getElementById(amenityId)
+                newCheckbox.addEventListener('change', () => {
+                    this.updateAmenities()
+                })
+            },
+
+            removeAmenity(amenityId) {
+                const amenityElement = document.getElementById(amenityId).closest('.nha-tro-host-custom-amenity')
+                const amenityName = amenityElement.querySelector('label').textContent
+                
+                if (confirm(`Bạn có chắc chắn muốn xóa tiện ích "${amenityName}"?`)) {
+                    amenityElement.remove()
+                    this.updateAmenities()
+                    this.showNotification(`Đã xóa tiện ích "${amenityName}"`, "info")
+                }
+            },
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener("DOMContentLoaded", () => {
+            window.NhaTroContract.init()
+        })
+    </script>
+</body>
+
+</html>
