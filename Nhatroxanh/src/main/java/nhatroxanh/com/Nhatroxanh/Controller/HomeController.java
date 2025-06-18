@@ -28,7 +28,7 @@ public class HomeController {
         return "host/bai-dang-host";
     }
 
-    @GetMapping("/thong-tin-tro")
+    @GetMapping("/nhan-vien/thong-tin-tro")
     public String thongtintro() {
         return "staff/thong-tin-tro-staff";
     }
