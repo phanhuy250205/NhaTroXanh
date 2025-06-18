@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,4 +33,3 @@ public class Address {
     @JoinColumn(name = "ward_id")
     private Ward ward;
 }
-
