@@ -46,7 +46,7 @@ public class Post {
     @Column(name = "post_id")
     private Integer postId;
 
-    @Column(name = "description", columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
     @Column(name = "price")

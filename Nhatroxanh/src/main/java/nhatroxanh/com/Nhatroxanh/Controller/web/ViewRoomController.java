@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PostDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
@@ -46,7 +47,22 @@ public class ViewRoomController {
             List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
 
             if (category != null) {
-                posts = postRepository.findAllByCategoryId(id);
+                // Sử dụng phương thức từ PostRepository để lọc bài đăng có status = true và
+                // approvalStatus = 'APPROVED'
+                posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(id, true, ApprovalStatus.APPROVED);
+
+                // Sắp xếp theo yêu cầu
+                switch (sort) {
+                    case "price_asc":
+                        posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
+                        break;
+                    case "price_desc":
+                        posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
+                        break;
+                    case "latest":
+                        posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+                        break;
+                }
 
                 model.addAttribute("category", category);
                 model.addAttribute("posts", posts);
@@ -88,41 +104,18 @@ public class ViewRoomController {
             System.out.println("MinArea: " + minArea + ", MaxArea: " + maxArea);
             System.out.println("Sort: " + sort);
 
-            List<Post> filteredPosts = new ArrayList<>();
+            List<Post> filteredPosts;
 
-            List<Post> allCategoryPosts = postRepository.findAllByCategoryId(categoryId);
-            System.out.println("All category posts: " + allCategoryPosts.size());
-
-            for (Post post : allCategoryPosts) {
-                boolean matchesFilter = true;
-
-                if (minArea != null && post.getArea() < minArea) {
-                    matchesFilter = false;
-                }
-                if (maxArea != null && post.getArea() > maxArea) {
-                    matchesFilter = false;
-                }
-
-                if (utilityIds != null && !utilityIds.isEmpty()) {
-                    boolean hasUtility = false;
-                    if (post.getUtilities() != null) {
-                        for (Integer utilityId : utilityIds) {
-                            if (post.getUtilities().stream().anyMatch(u -> u.getUtilityId().equals(utilityId))) {
-                                hasUtility = true;
-                                break;
-                            }
-                        }
-                    }
-                    if (!hasUtility) {
-                        matchesFilter = false;
-                    }
-                }
-
-                if (matchesFilter) {
-                    filteredPosts.add(post);
-                }
+            // Sử dụng phương thức từ PostRepository để lọc bài đăng có status = true và
+            // approvalStatus = 'APPROVED'
+            if (utilityIds != null && !utilityIds.isEmpty()) {
+                filteredPosts = postRepository.findActiveCategoryPostsWithUtilityFilter(categoryId, utilityIds, minArea,
+                        maxArea);
+            } else {
+                filteredPosts = postRepository.findActiveCategoryPostsWithAreaFilter(categoryId, minArea, maxArea);
             }
 
+            // Sắp xếp theo yêu cầu
             switch (sort) {
                 case "price_asc":
                     filteredPosts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
@@ -148,13 +141,15 @@ public class ViewRoomController {
         }
     }
 
-    // Test endpoint to check if API is working
     @GetMapping("/api/test-category/{categoryId}")
     @ResponseBody
     public ResponseEntity<?> testCategory(@PathVariable("categoryId") Integer categoryId) {
         try {
-            List<Post> posts = postRepository.findAllByCategoryId(categoryId);
-            return ResponseEntity.ok("Category " + categoryId + " has " + posts.size() + " posts");
+            // Sử dụng phương thức từ PostRepository để lọc bài đăng có status = true và
+            // approvalStatus = 'APPROVED'
+            List<Post> posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(categoryId, true,
+                    ApprovalStatus.APPROVED);
+            return ResponseEntity.ok("Category " + categoryId + " has " + posts.size() + " approved posts");
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }

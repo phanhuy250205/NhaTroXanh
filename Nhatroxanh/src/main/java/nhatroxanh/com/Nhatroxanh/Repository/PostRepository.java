@@ -186,11 +186,12 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         Optional<Post> findPostWithUserById(@Param("postId") Integer postId);
 
         @Query("SELECT p FROM Post p " +
-               "LEFT JOIN FETCH p.images " +
-               "LEFT JOIN FETCH p.address a " +
-               "LEFT JOIN FETCH a.ward w " +
-               "LEFT JOIN FETCH w.district d " +
-               "LEFT JOIN FETCH d.province " +
-               "WHERE p.postId = :postId")
+                        "LEFT JOIN FETCH p.images " +
+                        "LEFT JOIN FETCH p.address a " +
+                        "LEFT JOIN FETCH a.ward w " +
+                        "LEFT JOIN FETCH w.district d " +
+                        "LEFT JOIN FETCH d.province " +
+                        "WHERE p.postId = :postId")
         Optional<Post> findByIdWithShareDetails(@Param("postId") Integer postId);
+
 }
