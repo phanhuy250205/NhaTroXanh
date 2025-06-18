@@ -1,0 +1,107 @@
+<!-- Mobile Header - Chỉ hiển thị trên mobile -->
+    <nav class="mobile-header-host d-lg-none">
+        <div class="container-fluid-host">
+            <button class="navbar-toggler-host" type="button" id="sidebarToggleHost">
+                <span class="hamburger-line-host"></span>
+                <span class="hamburger-line-host"></span>
+                <span class="hamburger-line-host"></span>
+            </button>
+            <a class="navbar-brand-host" href="#">
+                <div class="logo-container-host mobile-logo-host">
+                    <div class="logo-icon-host">
+                        <img th:src="@{/images/logo/nhatroxanh(title).png}" alt="Nhà Trọ Xanh" class="logo-image-host">
+                    </div>
+                </div>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Sidebar - Luôn hiển thị trên desktop -->
+    <div class="sidebar-host" id="sidebarHost">
+        <div class="sidebar-header-host">
+            <div class="logo-container-host">
+                <div class="logo-icon-host">
+                    <img th:src="@{/images/logo/nhatroxanh(title).png}" alt="Nhà Trọ Xanh" class="logo-image-host">
+                </div>
+            </div>
+        </div>
+        
+        <nav class="sidebar-nav-host">
+            <ul class="nav-host">
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#overview" data-target="overview">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <span class="nav-text-host">Tổng quan</span>
+                    </a>
+                </li>
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#posts" data-target="posts">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <span class="nav-text-host">Bài đăng</span>
+                    </a>
+                </li>
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#create-post" data-target="create-post">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <span class="nav-text-host">Đăng tin</span>
+                    </a>
+                </li>
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#tenants" data-target="tenants">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                        <span class="nav-text-host">Khách thuê</span>
+                    </a>
+                </li>
+                <li class="nav-item-host nav-item-dropdown-host">
+                    <a class="nav-link-host nav-link-dropdown-host" href="#management" data-target="management">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <span class="nav-text-host">Quản lí trọ</span>
+                        <i class="fas fa-chevron-down dropdown-arrow-host"></i>
+                    </a>
+                    <ul class="nav-submenu-host">
+                        <li class="nav-subitem-host">
+                            <a class="nav-sublink-host" th:href="@{/phong-tro-host}"  data-target="room-management">
+                                <i class="fas fa-door-open"></i>
+                                <span>Quản lý phòng trọ</span>
+                            </a>
+                        </li>
+                        <li class="nav-subitem-host">
+                            <a class="nav-sublink-host active" th:href="@{/thong-tin-tro-host}" data-target="info-management">
+                                <i class="fas fa-info-circle"></i>
+                                <span>Quản lý thông tin trọ</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#tax-management" data-target="tax-management">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <span class="nav-text-host">QL Thuê trả</span>
+                    </a>
+                </li>
+                <li class="nav-item-host">
+                    <a class="nav-link-host" href="#account" data-target="account">
+                        <div class="nav-icon-wrapper-host">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="nav-text-host">Tài khoản</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Overlay chỉ cho mobile -->
+    <div class="sidebar-overlay-host" id="sidebarOverlayHost"></div>
