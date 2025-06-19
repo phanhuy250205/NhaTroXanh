@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Nhà Trọ Xanh</title>
+</head>
+<body class="phongtro">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <div class="main-content-host" id="mainContentHost">
+        <div class="content-container-host">
+            <!-- Header Section -->
+            <div class="page-header-host">
+                <h1 class="page-title-host">QUẢN LÝ PHÒNG TRỌ</h1>
+            </div>
+
+            <!-- Tabs Navigation -->
+            <div class="tabs-container-host">
+                <ul class="nav nav-tabs tabs-nav-host" id="roomTabsHost" role="tablist">
+                    <li class="nav-item tab-item-host" role="presentation">
+                        <button class="nav-link tab-link-host active" id="room-list-tab-host" data-bs-toggle="tab"
+                            data-bs-target="#room-list-host" type="button" role="tab" aria-controls="room-list-host"
+                            aria-selected="true">
+                            <i class="fas fa-list me-2"></i>
+                            Danh sách phòng trọ
+                        </button>
+                    </li>
+                    <li class="nav-item tab-item-host" role="presentation">
+                        <button class="nav-link tab-link-host" id="add-room-tab-host" data-bs-toggle="tab"
+                            data-bs-target="#add-room-host" type="button" role="tab" aria-controls="add-room-host"
+                            aria-selected="false">
+                            <i class="fas fa-plus me-2"></i>
+                            Thêm phòng mới
+                        </button>
+                    </li>
+                    <li class="nav-item tab-item-host" role="presentation">
+                        <button class="nav-link tab-link-host" id="status-management-tab-host" data-bs-toggle="tab"
+                            data-bs-target="#status-management-host" type="button" role="tab"
+                            aria-controls="status-management-host" aria-selected="false">
+                            <i class="fas fa-cogs me-2"></i>
+                            Quản lý trạng thái
+                        </button>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content tabs-content-host" id="roomTabContentHost">
+                <!-- Tab 1: Danh sách phòng trọ -->
+                <div class="tab-pane fade show active" id="room-list-host" role="tabpanel"
+                    aria-labelledby="room-list-tab-host" tabindex="0">
+
+                    <!-- Search and Filter Section -->
+                    <div class="search-filter-section-host">
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <div class="search-container-host">
+                                    <input type="text" class="form-control search-input-host"
+                                        placeholder="Tìm kiếm phòng..." id="searchRoomInputHost">
+                                    <button class="btn search-btn-host" type="button">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select status-filter-host" id="statusFilterHost">
+                                    <option value="">Tất cả trạng thái</option>
+                                    <option value="available">Trống</option>
+                                    <option value="occupied">Đã thuê</option>
+                                    <option value="maintenance">Bảo trì</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room List Table -->
+                    <div class="table-container-host">
+                        <div class="table-responsive">
+                            <table class="table room-table-host" id="roomTableHost">
+                                <thead class="table-header-host">
+                                    <tr>
+                                        <th class="table-th-host-name">Tên phòng</th>
+                                        <th class="table-th-host-price">Giá thuê</th>
+                                        <th class="table-th-host">Trạng thái</th>
+                                        <th class="table-th-host">Diện tích</th>
+                                        <th class="table-th-host">Số người tối đa</th>
+                                        <th class="table-th-host">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="table-body-host" id="roomTableBodyHost">
+                                    <tr class="table-row-host">
+                                        <td class="table-td-host room-name-host">Phòng A101</td>
+                                        <td class="table-td-host-price price-host">3.500.000 ₫</td>
+                                        <td class="table-td-host">
+                                            <span class="status-badge-host status-available-host">Trống</span>
+                                        </td>
+                                        <td class="table-td-host">25 m²</td>
+                                        <td class="table-td-host">2 người</td>
+                                        <td class="table-td-host">
+                                            <div class="action-buttons-host">
+                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+                                                    data-bs-target="#add-room-host" role="tab"
+                                                    aria-controls="add-room-host">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-delete-host" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row-host">
+                                        <td class="table-td-host room-name-host">Phòng A102</td>
+                                        <td class="table-td-host-price price-host">4.000.000 ₫</td>
+                                        <td class="table-td-host">
+                                            <span class="status-badge-host status-occupied-host">Đã thuê</span>
+                                        </td>
+                                        <td class="table-td-host">30 m²</td>
+                                        <td class="table-td-host">3 người</td>
+                                        <td class="table-td-host">
+                                            <div class="action-buttons-host">
+                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+                                                    data-bs-target="#add-room-host" role="tab"
+                                                    aria-controls="add-room-host">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-delete-host" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row-host">
+                                        <td class="table-td-host room-name-host">Phòng B201</td>
+                                        <td class="table-td-host-price price-host">3.200.000 ₫</td>
+                                        <td class="table-td-host">
+                                            <span class="status-badge-host status-available-host">Trống</span>
+                                        </td>
+                                        <td class="table-td-host">20 m²</td>
+                                        <td class="table-td-host">2 người</td>
+                                        <td class="table-td-host">
+                                            <div class="action-buttons-host">
+                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+                                                    data-bs-target="#add-room-host" role="tab"
+                                                    aria-controls="add-room-host">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-delete-host" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="table-row-host">
+                                        <td class="table-td-host room-name-host">Phòng B202</td>
+                                        <td class="table-td-host-price price-host">3.500.000 ₫</td>
+                                        <td class="table-td-host">
+                                            <span class="status-badge-host status-maintenance-host">Bảo trì</span>
+                                        </td>
+                                        <td class="table-td-host">25 m²</td>
+                                        <td class="table-td-host">2 người</td>
+                                        <td class="table-td-host">
+                                            <div class="action-buttons-host">
+                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+                                                    data-bs-target="#add-room-host" role="tab"
+                                                    aria-controls="add-room-host">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn-delete-host" title="Xóa">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Thêm phòng mới - Updated Design -->
+                <div class="tab-pane fade" id="add-room-host" role="tabpanel" aria-labelledby="add-room-tab-host"
+                    tabindex="0">
+
+                    <div class="add-room-container-modern">
+                        <form id="addRoomFormHost" class="add-room-form-modern">
+                            <!-- Row 1: Tên phòng và Giá thuê -->
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label for="roomNameHost" class="form-label-modern">
+                                        Tên phòng <span class="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-modern" id="roomNameHost"
+                                        placeholder="Nhập tên phòng" required>
+                                </div>
+                                <div class="form-group-modern">
+                                    <label for="roomPriceHost" class="form-label-modern">
+                                        Giá thuê (VNĐ) <span class="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-modern" id="roomPriceHost"
+                                        placeholder="Nhập giá thuê phòng" required>
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Trạng thái, Diện tích, Số người tối đa -->
+                            <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label for="roomStatusHost" class="form-label-modern">
+                                        Trạng thái <span class="required-star">*</span>
+                                    </label>
+                                    <select class="form-select-modern" id="roomStatusHost" required>
+                                        <option value="">Chọn trạng thái</option>
+                                        <option value="available">Trống</option>
+                                        <option value="occupied">Đã thuê</option>
+                                        <option value="maintenance">Bảo trì</option>
+                                    </select>
+                                </div>
+                                <div class="form-group-modern">
+                                    <label for="roomAreaHost" class="form-label-modern">
+                                        Diện tích (m²) <span class="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-modern" id="roomAreaHost"
+                                        placeholder="Nhập diện tích phòng" required>
+                                </div>
+                                <div class="form-group-modern">
+                                    <label for="roomCapacityHost" class="form-label-modern">
+                                        Số người tối đa <span class="required-star">*</span>
+                                    </label>
+                                    <input type="text" class="form-input-modern" id="roomCapacityHost"
+                                        placeholder="Số người thuê phòng tối đa" required>
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Mô tả -->
+                            <div class="form-group-modern full-width">
+                                <label for="roomDescriptionHost" class="form-label-modern">Mô tả</label>
+                                <textarea class="form-textarea-modern" id="roomDescriptionHost"
+                                    placeholder="Mô tả chi tiết về phòng..." rows="4"></textarea>
+                            </div>
+
+                            <!-- Image Upload Section -->
+                            <div class="image-upload-section">
+                                <div class="upload-area" id="uploadArea">
+                                    <div class="upload-icon">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                                                stroke="#3E83CC" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                            <path d="M14 2V8H20" stroke="#3E83CC" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M16 13L12 9L8 13" stroke="#3E83CC" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                            <path d="M12 9V19" stroke="#3E83CC" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <p class="upload-text">Kéo thả ảnh vào đây hoặc click để chọn</p>
+                                    <input type="file" id="imageUpload" multiple accept="image/*"
+                                        style="display: none;">
+                                </div>
+
+                                <!-- Image Preview Section -->
+                                <div class="image-preview-container" id="imagePreviewContainer">
+                                    <!-- Preview images will be dynamically added here -->
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="form-actions-modern">
+                                <button type="button" class="btn-cancel-modern">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Hủy bỏ
+                                </button>
+                                <button type="submit" class="btn-submit-modern">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    Thêm phòng
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+
+                <!-- Tab 3: Quản lý trạng thái - Updated Design -->
+                <div class="tab-pane fade" id="status-management-host" role="tabpanel"
+                    aria-labelledby="status-management-tab-host" tabindex="0">
+
+                    <div class="status-management-modern">
+                        <!-- Statistics Cards -->
+                        <div class="stats-grid-modern">
+                            <div class="stat-card-modern stat-total-modern">
+                                <div class="stat-icon-modern">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M9 22V12H15V22" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content-modern">
+                                    <div class="stat-label-modern">Tổng phòng</div>
+                                    <div class="stat-number-modern" id="totalRoomsCount">4</div>
+                                    <div class="stat-sublabel-modern">phòng</div>
+                                    <div class="stat-action-modern">Xem danh sách</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card-modern stat-available-modern">
+                                <div class="stat-icon-modern">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 21H21M5 21V7L13 2L21 7V21M9 9H15M9 13H15M9 17H15"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content-modern">
+                                    <div class="stat-label-modern">Phòng trống</div>
+                                    <div class="stat-number-modern" id="availableRoomsCount">2</div>
+                                    <div class="stat-sublabel-modern">phòng</div>
+                                    <div class="stat-action-modern">Xem danh sách</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card-modern stat-occupied-modern">
+                                <div class="stat-icon-modern">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M2 4V20C2 20.5304 2.21071 21.0391 2.58579 21.4142C2.96086 21.7893 3.46957 22 4 22H20C20.5304 22 21.0391 21.7893 21.4142 21.4142C21.7893 21.0391 22 20.5304 22 20V4C22 3.46957 21.7893 2.96086 21.4142 2.58579C21.0391 2.21071 20.5304 2 20 2H4C3.46957 2 2.96086 2.21071 2.58579 2.58579C2.21071 2.96086 2 3.46957 2 4Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path
+                                            d="M7 22V18C7 17.4696 7.21071 16.9609 7.58579 16.5858C7.96086 16.2107 8.46957 16 9 16H15C15.5304 16 16.0391 16.2107 16.4142 16.5858C16.7893 16.9609 17 17.4696 17 18V22"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content-modern">
+                                    <div class="stat-label-modern">Phòng đã thuê</div>
+                                    <div class="stat-number-modern" id="occupiedRoomsCount">1</div>
+                                    <div class="stat-sublabel-modern">phòng</div>
+                                    <div class="stat-action-modern">Xem danh sách</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card-modern stat-maintenance-modern">
+                                <div class="stat-icon-modern">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M14.7 6.3C15.1 5.9 15.1 5.3 14.7 4.9L13.1 3.3C12.7 2.9 12.1 2.9 11.7 3.3L10.3 4.7L15.3 9.7L14.7 6.3Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                        <path d="M9 5L4 1.5L5.5 3L4 4.5L9 5Z" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path d="M9 5L15.3 9.7L10.3 4.7L9 5Z" stroke="currentColor" stroke-width="2"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                        <path
+                                            d="M15.3 9.7L20.5 14.9C20.9 15.3 20.9 15.9 20.5 16.3L18.9 17.9C18.5 18.3 17.9 18.3 17.5 17.9L12.3 12.7L15.3 9.7Z"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+                                <div class="stat-content-modern">
+                                    <div class="stat-label-modern">Phòng bảo trì</div>
+                                    <div class="stat-number-modern" id="maintenanceRoomsCount">1</div>
+                                    <div class="stat-sublabel-modern">phòng</div>
+                                    <div class="stat-action-modern">Xem danh sách</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Section -->
+                        <div class="chart-section-modern">
+                            <div class="chart-container-modern">
+                                <h3 class="chart-title-modern">Biểu đồ thống kê tỷ lệ tình trạng phòng</h3>
+                                <div class="chart-wrapper-modern">
+                                    <div class="chart-canvas-container">
+                                        <canvas id="roomStatusChart" width="400" height="400"></canvas>
+                                    </div>
+                                    <div class="chart-legend-modern">
+                                        <div class="legend-item-modern">
+                                            <div class="legend-color-modern legend-available"></div>
+                                            <span class="legend-text-modern">Phòng trống</span>
+                                        </div>
+                                        <div class="legend-item-modern">
+                                            <div class="legend-color-modern legend-occupied"></div>
+                                            <span class="legend-text-modern">Phòng đã thuê</span>
+                                        </div>
+                                        <div class="legend-item-modern">
+                                            <div class="legend-color-modern legend-maintenance"></div>
+                                            <span class="legend-text-modern">Phòng bảo trì</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="quick-actions-modern">
+                            <div class="action-card-modern">
+                                <h4 class="action-title-modern">Thay đổi trạng thái nhanh</h4>
+                                <div class="action-form-modern">
+                                    <div class="form-group-inline-modern">
+                                        <label for="quickRoomSelect" class="form-label-inline-modern">Chọn
+                                            phòng:</label>
+                                        <select class="form-select-inline-modern" id="quickRoomSelect">
+                                            <option value="">Chọn phòng...</option>
+                                            <option value="A101">Phòng A101</option>
+                                            <option value="A102">Phòng A102</option>
+                                            <option value="B201">Phòng B201</option>
+                                            <option value="B202">Phòng B202</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group-inline-modern">
+                                        <label for="quickStatusSelect" class="form-label-inline-modern">Trạng thái
+                                            mới:</label>
+                                        <select class="form-select-inline-modern" id="quickStatusSelect">
+                                            <option value="">Chọn trạng thái...</option>
+                                            <option value="available">Trống</option>
+                                            <option value="occupied">Đã thuê</option>
+                                            <option value="maintenance">Bảo trì</option>
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn-update-status-modern" id="updateStatusBtn">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                            xmlns="http://www.w3.org/2000/svg">
+                                            <path
+                                                d="M1 4V10H7M23 20V14H17M20.49 9C19.9828 7.56678 19.1209 6.28392 17.9845 5.27304C16.8482 4.26216 15.4745 3.55682 13.9917 3.21834C12.5089 2.87986 10.9652 2.91902 9.50481 3.33329C8.04437 3.74757 6.71475 4.52306 5.64 5.58L1 10M23 14L18.36 18.42C17.2853 19.477 15.9556 20.2524 14.4952 20.6667C13.0348 21.081 11.4911 21.1201 10.0083 20.7817C8.52547 20.4432 7.1518 19.7378 6.01547 18.727C4.87913 17.7161 4.01717 16.4332 3.51 15"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" />
+                                        </svg>
+                                        Cập nhật
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</body>
+</html>
