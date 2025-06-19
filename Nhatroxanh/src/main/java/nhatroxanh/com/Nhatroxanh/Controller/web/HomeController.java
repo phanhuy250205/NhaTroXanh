@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
-import nhatroxanh.com.Nhatroxanh.Service.Impl.PostService;
+import nhatroxanh.com.Nhatroxanh.Service.PostService;
 
 @Controller
 public class HomeController {
@@ -36,7 +36,7 @@ public class HomeController {
     public String getPostDetail(@PathVariable("postId") Integer postId, Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            Optional<Post> postOptional = postRepository.findById(postId); // Sử dụng findById cơ bản
+            Optional<Post> postOptional = postRepository.findById(postId);
             if (postOptional.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Bài đăng không tồn tại.");
                 return "redirect:/error/404";

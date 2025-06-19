@@ -29,7 +29,7 @@ public class Image {
     @Column(columnDefinition = "varchar(255)", nullable = false)
     private String url;
 
-    private String description;
+    // private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = true)

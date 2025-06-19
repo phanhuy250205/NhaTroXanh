@@ -1,4 +1,3 @@
-
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container-fluid">
@@ -54,16 +53,68 @@
 
             <!-- Auth buttons -->
             <div class="auth-buttons">
-                <button class="btn btn-login" type="button">
-                    <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>
-                </button>
-                <button class="btn btn-register" type="button">
-                    <i class="fas fa-user-plus"></i> <span>Đăng ký</span>
-                </button>
-                <button class="btn btn-post" type="button">
-                    <i class="fas fa-plus-circle"></i> <span>Đăng bài</span>
-                </button>
-              </div>
+                <div class="d-flex align-items-center" sec:authorize="isAuthenticated()">
+                    <div class="notification-wrapper">
+                        <button class="btn btn-notification" type="button">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                    </div>
+
+                    <div class="nav-item dropdown user-dropdown">
+                        <a class="nav-link dropdown-toggle user-avatar" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <img th:src="@{/images/logo/nhatroxanh.png}" alt="User Avatar" class="avatar-img">
+                            <span class="user-name d-lg-inline"
+                                th:text="${#authentication.principal.fullName != null ? #authentication.principal.fullName : 'Khách'}"></span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu" aria-labelledby="userDropdown">
+                            <li class="dropdown-header">
+                                <div class="user-info">
+                                    <img th:src="@{/images/logo/nhatroxanh.png}" alt="User Avatar"
+                                        class="user-avatar-large">
+                                    <div class="user-details">
+                                        <div class="user-greeting">Xin chào!</div>
+                                        <div class="user-name-full"
+                                            th:text="${#authentication.principal.fullName != null ? #authentication.principal.fullName : 'Khách'}">
+                                            Nguyễn Văn A</div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Thông tin tài
+                                    khoản</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Đổi mật khẩu</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-heart me-2"></i>Trọ đã lưu</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Quản lý đánh giá</a>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <form th:action="@{/perform_logout}" method="post" class="d-inline">
+                                    <button type="submit" class="dropdown-item text-danger logout-btn">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                    </button>
+                                </form>
+                            </li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-post" type="button">
+                        <i class="fas fa-plus-circle"></i> <span>Đăng bài</span>
+                    </button>
+                </div>
+
+                <div class="d-flex" sec:authorize="isAnonymous()">
+                    <button class="btn btn-login" type="button" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>
+                    </button>
+                    <button class="btn btn-register" type="button" id="registerBtn">
+                        <i class="fas fa-user-plus"></i> <span>Đăng ký</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

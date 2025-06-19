@@ -261,34 +261,38 @@
                                     style="width: 60px; height: 60px;" onerror="this.src='/images/avatar-default.png';">
                                 <div class="owner-details">
                                     <h4 class="owner-name mb-1"
-                                        th:text="${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ trọ</h4>
+                                        th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ trọ</h4>
                                     <p class="owner-role mb-0 text-muted"
                                         th:text="${owner != null && owner.role != null ? owner.role : 'Chủ trọ'}">Chủ
                                         trọ</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="contact-buttons mt-3">
-                            <button class="btn btn-success me-2" onclick="makeCall()">
+                        <div class="contact-buttons mt-3" th:attr="data-post-id=${post.postId}">
+                            <button class="btn btn-success btn-sm me-2" onclick="fetchContact(event, 'call')">
                                 <i class="fas fa-phone"></i>
-                                <span th:text="${owner != null && owner.phone != null ? owner.phone : 'Chưa có SĐT'}">Số
-                                    điện thoại</span>
+                                <span class="phone-text">Hiển thị SĐT</span>
                             </button>
-                            <button class="btn btn-primary me-2" onclick="sendMessage()">
-                                <i class="fas fa-comment"></i>
-                                <span>Nhắn tin</span>
+                            <button class="btn btn-primary btn-sm me-2" onclick="fetchContact(event, 'sms')">
+                                <i class="fas fa-comment"></i> Nhắn tin
                             </button>
-                            <button class="btn btn-info" onclick="contactZalo()">
-                                <i class="fab fa-facebook-messenger"></i>
-                                <span>Zalo</span>
+                            <button class="btn btn-info btn-sm" onclick="fetchContact(event, 'zalo')">
+                                <i class="fab fa-facebook-messenger"></i> Zalo
                             </button>
+                            <div class="contact-loading" style="display: none;">
+                                <div class="spinner-border spinner-border-sm text-primary" role="status">
+                                    <span class="visually-hidden">Đang tải...</span>
+                                </div>
+                                <small class="text-muted ms-2">Đang tải...</small>
+                            </div>
                         </div>
                         <div class="additional-actions mt-3">
                             <button class="btn btn-outline-secondary me-2" onclick="saveProperty()">
                                 <i class="fas fa-bookmark"></i>
                                 <span>Lưu tin</span>
                             </button>
-                            <button class="btn btn-outline-secondary me-2" onclick="shareProperty()">
+                            <button class="btn btn-outline-secondary btn-sm me-2" th:attr="data-post-id=${post.postId}"
+                                onclick="shareProperty(event)">
                                 <i class="fas fa-share-alt"></i>
                                 <span>Chia sẻ</span>
                             </button>
@@ -317,21 +321,21 @@
                         <div class="quick-info mt-3">
                             <div class="info-item d-flex align-items-center mb-2">
                                 <i class="fas fa-expand-arrows-alt me-2"></i>
-                                <span class="info-label me-2">Diện tích:</span>
-                                <span class="info-value fw-bold"
+                                <span class="info-label me-2 fw-bold">Diện tích:</span>
+                                <span class="info-value"
                                     th:text="${post != null && post.area != null ? post.area + 'm²' : '0m²'}">0m²</span>
                             </div>
                             <div class="info-item d-flex align-items-center mb-2">
                                 <i class="fas fa-home me-2"></i>
-                                <span class="info-label me-2">Loại hình:</span>
-                                <span class="info-value fw-bold"
+                                <span class="info-label me-2 fw-bold">Loại hình:</span>
+                                <span class="info-value"
                                     th:text="${post != null && post.category != null && post.category.name != null ? post.category.name : 'Chưa phân loại'}">Chưa
                                     phân loại</span>
                             </div>
                             <div class="info-item d-flex align-items-start mb-2 mt-1">
                                 <i class="fas fa-map-marker-alt me-2 ms-1 mt-1"></i>
-                                <span class="info-label me-2 ms-1">Địa chỉ:</span>
-                                <div class="info-value fw-bold">
+                                <span class="info-label me-2 ms-1 fw-bold">Địa chỉ:</span>
+                                <div class="info-value">
                                     <span th:if="${post.address != null}"
                                         th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
                                    ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
@@ -345,8 +349,8 @@
                             </div>
                             <div class="info-item d-flex align-items-center mb-2">
                                 <i class="fas fa-calendar-alt me-2"></i>
-                                <span class="info-label me-2">Ngày đăng:</span>
-                                <span class="info-value fw-bold"
+                                <span class="info-label me-2 fw-bold">Ngày đăng:</span>
+                                <span class="info-value "
                                     th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">01/01/2024</span>
                             </div>
                         </div>
@@ -382,10 +386,12 @@
                             <!-- Overview Tab -->
                             <div class="tab-pane fade show active" id="overview" role="tabpanel">
                                 <div class="overview-content">
-                                    <h3>Mô tả chi tiết</h3>
+                                    <h3>Giới thiệu</h3>
                                     <p
-                                        th:text="${post != null && post.description != null ? post.description : 'Chưa có mô tả'}">
-                                        Mô tả bài đăng</p>
+                                        th:utext="${post != null && post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
+                                        Mô tả bài đăng
+                                    </p>
+
                                 </div>
                             </div>
 
@@ -516,6 +522,75 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="shareModalLabel">
+                        <i class="fas fa-share-alt"></i> Chia sẻ bài đăng
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger" id="shareError" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span id="shareErrorMessage"></span>
+                    </div>
+                    <div class="alert alert-info" id="shareDebug" style="display: none;">
+                        <h6>Debug Information:</h6>
+                        <pre id="shareDebugContent"></pre>
+                    </div>
+                    <div class="share-preview mb-3" id="sharePreview" style="display: none;">
+                        <div class="row">
+                            <div class="col-4">
+                                <img id="shareImage" src="/placeholder.svg" alt="Preview" class="img-fluid rounded">
+                            </div>
+                            <div class="col-8">
+                                <h6 id="shareTitle" class="mb-1"></h6>
+                                <p id="shareDescription" class="text-muted small mb-1"></p>
+                                <span id="sharePrice" class="text-danger fw-bold"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="shareUrlSection" style="display: none;">
+                        <label for="shareUrl" class="form-label">Liên kết chia sẻ:</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="shareUrl" readonly>
+                            <button class="btn btn-outline-secondary" type="button" onclick="copyShareUrl()">
+                                <i class="fas fa-copy"></i> Sao chép
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="social-share" id="socialShare" style="display: none;">
+                        <h6>Chia sẻ qua:</h6>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button class="btn btn-primary btn-sm" onclick="shareToFacebook()">
+                                <i class="fab fa-facebook-f"></i> Facebook
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="shareToMessenger()">
+                                <i class="fab fa-facebook-messenger"></i> Messenger
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="shareToTelegram()">
+                                <i class="fab fa-telegram"></i> Telegram
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="shareViaEmail()">
+                                <i class="fas fa-envelope"></i> Email
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Loading State -->
+                    <div class="text-center" id="shareLoading" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Đang tải...</span>
+                        </div>
+                        <p class="mt-2">Đang tạo liên kết chia sẻ...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script>
         function changeMainImage(src, element) {
             document.getElementById('mainImage').src = src;
@@ -539,27 +614,331 @@
             $('#photoModal').modal('show');
         }
 
-        function makeCall() {
-            const phone = document.querySelector('.btn-call span').textContent;
-            window.location.href = `tel:${phone}`;
+        let contactCache = new Map();
+
+        function fetchContact(event, action) {
+            event.preventDefault();
+            console.log('fetchContact called with action:', action);
+
+            const button = event.target.closest('button');
+            const contactButtons = button.closest('.contact-buttons');
+            const postId = contactButtons.getAttribute('data-post-id');
+            const loadingDiv = contactButtons.querySelector('.contact-loading');
+            const allButtons = contactButtons.querySelectorAll('button');
+
+            console.log('PostId:', postId);
+
+            if (!postId) {
+                alert("Không tìm thấy ID bài đăng!");
+                return;
+            }
+
+            // Check cache first
+            if (contactCache.has(postId)) {
+                console.log('Using cached data for postId:', postId);
+                const cachedData = contactCache.get(postId);
+                if (cachedData.success) {
+                    executeContactAction(action, cachedData.phoneNumber);
+                    return;
+                } else {
+                    alert(cachedData.message);
+                    return;
+                }
+            }
+
+            // Show loading state
+            console.log('Showing loading state...');
+            allButtons.forEach(btn => {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+            });
+            if (loadingDiv) {
+                loadingDiv.style.display = 'block';
+            }
+
+            console.log('Making API call to:', `/api/contact/${postId}`);
+
+            fetch(`/api/contact/${postId}`)
+                .then(response => {
+                    console.log('API response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('API response data:', data);
+
+                    // Cache the result
+                    contactCache.set(postId, data);
+
+                    if (data.success && data.phoneNumber) {
+                        updateContactButtons(contactButtons, data);
+                        executeContactAction(action, data.phoneNumber);
+                        // No alert notification - clean UX
+                    } else {
+                        alert(data.message || "Không thể lấy thông tin liên hệ");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching contact info:', error);
+                    alert("❌ Không thể tải thông tin liên hệ. Vui lòng thử lại sau.");
+                })
+                .finally(() => {
+                    console.log('Hiding loading state...');
+                    // Hide loading state
+                    if (loadingDiv) {
+                        loadingDiv.style.display = 'none';
+                    }
+                    allButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                    });
+                });
         }
 
-        function sendMessage() {
-            alert('Chức năng nhắn tin đang được phát triển!');
+        function updateContactButtons(contactButtons, data) {
+            const phoneButton = contactButtons.querySelector('button[onclick*="call"]');
+            const phoneText = phoneButton.querySelector('.phone-text');
+
+            if (phoneText && data.phoneNumber) {
+                phoneText.textContent = data.phoneNumber;
+                phoneButton.classList.remove('btn-success');
+                phoneButton.classList.add('btn-outline-success');
+            }
+
+            // Add owner name if available
+            // if (data.ownerName) {
+            //     let ownerInfo = contactButtons.querySelector('.owner-info');
+            //     if (!ownerInfo) {
+            //         ownerInfo = document.createElement('div');
+            //         ownerInfo.className = 'owner-info text-muted small mt-1';
+            //         contactButtons.appendChild(ownerInfo);
+            //     }
+            //     // ownerInfo.innerHTML = `<i class="fas fa-user"></i> Liên hệ: ${data.ownerName}`;
+            // }
         }
 
-        function contactZalo() {
-            alert('Chức năng liên hệ Zalo đang được phát triển!');
+        function executeContactAction(action, phoneNumber) {
+            console.log('Executing action:', action, 'with phone:', phoneNumber);
+
+            try {
+                switch (action) {
+                    case 'call':
+                        window.location.href = `tel:${phoneNumber}`;
+                        break;
+
+                    case 'sms':
+                        window.location.href = `sms:${phoneNumber}`;
+                        break;
+
+                    case 'zalo':
+                        window.location.href = `zalo://chat?phone=${phoneNumber}`;
+                        setTimeout(() => {
+                            window.open(`https://zalo.me/${phoneNumber}`, '_blank');
+                        }, 1000);
+                        break;
+
+                    default:
+                        alert("Hành động không được hỗ trợ");
+                }
+            } catch (error) {
+                console.error('Error executing contact action:', error);
+                alert("Không thể thực hiện hành động này");
+            }
         }
 
         function saveProperty() {
             alert('Đã lưu tin!');
         }
 
-        function shareProperty() {
-            alert('Chức năng chia sẻ đang được phát triển!');
+        let currentShareData = null;
+
+        function shareProperty(event) {
+            event.preventDefault();
+            const button = event.target.closest('button');
+            const postId = button.getAttribute('data-post-id');
+
+            console.log("=== SHARE PROPERTY ===");
+            console.log("PostId:", postId);
+            console.log("PostId type:", typeof postId);
+
+            if (!postId || postId === 'null' || postId === 'undefined') {
+                showShareError("Không tìm thấy ID bài đăng!");
+                return;
+            }
+            const modal = new bootstrap.Modal(document.getElementById('shareModal'));
+            modal.show();
+            hideAllSections();
+            showLoading();
+
+            console.log("Making API call to:", `/api/share/${postId}`);
+
+            fetch(`/api/share/${postId}`)
+                .then(response => {
+                    console.log("API response status:", response.status);
+                    console.log("API response headers:", response.headers);
+
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            console.log("Error response data:", errorData);
+                            throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+                        }).catch(parseError => {
+                            console.log("Failed to parse error response, trying text...");
+                            return response.text().then(text => {
+                                console.log("Error response text:", text);
+                                throw new Error(`HTTP ${response.status}: ${text}`);
+                            });
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Received share data:", data);
+
+                    if (data.success) {
+                        currentShareData = data;
+                        displayShareData(data);
+                    } else {
+                        throw new Error(data.message || "Không thể tạo liên kết chia sẻ");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching share URL:', error);
+                    showShareError("Không thể tải liên kết chia sẻ: " + error.message);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
         }
 
+        function hideAllSections() {
+            document.getElementById('shareError').style.display = 'none';
+            document.getElementById('shareDebug').style.display = 'none';
+            document.getElementById('sharePreview').style.display = 'none';
+            document.getElementById('shareUrlSection').style.display = 'none';
+            document.getElementById('socialShare').style.display = 'none';
+        }
+
+        function showLoading() {
+            document.getElementById('shareLoading').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('shareLoading').style.display = 'none';
+        }
+
+        function showShareError(message) {
+            document.getElementById('shareErrorMessage').textContent = message;
+            document.getElementById('shareError').style.display = 'block';
+        }
+
+        function showDebugInfo(data) {
+            document.getElementById('shareDebugContent').textContent = JSON.stringify(data, null, 2);
+            document.getElementById('shareDebug').style.display = 'block';
+        }
+
+        function displayShareData(data) {
+            document.getElementById('shareUrl').value = data.shareUrl;
+            document.getElementById('shareUrlSection').style.display = 'block';
+            if (data.title || data.description || data.imageUrl) {
+                document.getElementById('shareTitle').textContent = data.title || 'Phòng trọ cho thuê';
+                document.getElementById('shareDescription').textContent = data.description || '';
+                document.getElementById('sharePrice').textContent = data.price ? data.price + ' VNĐ/tháng' : '';
+                document.getElementById('shareImage').src = data.imageUrl || '/images/no-image.jpg';
+                document.getElementById('sharePreview').style.display = 'block';
+            }
+            document.getElementById('socialShare').style.display = 'block';
+        }
+
+        function copyShareUrl() {
+            const shareUrl = document.getElementById('shareUrl').value;
+            if (!shareUrl) {
+                showNotification("Chưa có liên kết để sao chép!", 'error');
+                return;
+            }
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showNotification("Đã sao chép liên kết!", 'success');
+                }).catch(error => {
+                    console.error('Clipboard error:', error);
+                    fallbackCopyText(shareUrl);
+                });
+            } else {
+                fallbackCopyText(shareUrl);
+            }
+        }
+
+        function fallbackCopyText(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showNotification("Đã sao chép liên kết!", 'success');
+            } catch (error) {
+                console.error('Fallback copy failed:', error);
+                showNotification("Không thể sao chép. Vui lòng sao chép thủ công: " + text, 'error');
+            }
+
+            textArea.remove();
+        }
+
+        function shareToFacebook() {
+            if (!currentShareData) return;
+            const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareData.shareUrl)}`;
+            window.open(url, '_blank', 'width=600,height=400');
+        }
+        function shareToMessenger() {
+            if (!currentShareData) return;
+            const text = `${currentShareData.title}\n${currentShareData.description}\n${currentShareData.shareUrl}`;
+            const url = `https://messenger.com/?text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareToTelegram() {
+            if (!currentShareData) return;
+            const text = `${currentShareData.title}\n${currentShareData.description}`;
+            const url = `https://t.me/share/url?url=${encodeURIComponent(currentShareData.shareUrl)}&text=${encodeURIComponent(text)}`;
+            window.open(url, '_blank');
+        }
+
+        function shareViaEmail() {
+            if (!currentShareData) return;
+            const subject = encodeURIComponent(currentShareData.title);
+            const body = encodeURIComponent(`${currentShareData.description}\n\nXem chi tiết tại: ${currentShareData.shareUrl}`);
+            const url = `mailto:?subject=${subject}&body=${body}`;
+            window.location.href = url;
+        }
+
+        function showNotification(message, type = 'info') {
+            if (typeof toastr !== 'undefined') {
+                toastr[type](message);
+            } else {
+                const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️';
+                alert(icon + ' ' + message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Contact buttons JavaScript loaded!');
+            const buttons = document.querySelectorAll('.contact-buttons button');
+            console.log('Found', buttons.length, 'contact buttons');
+
+            const shareButtons = document.querySelectorAll('[data-post-id]');
+            console.log('Found', shareButtons.length, 'share buttons');
+            shareButtons.forEach((btn, index) => {
+                const postId = btn.getAttribute('data-post-id');
+                console.log(`Share button ${index}: postId = ${postId} (type: ${typeof postId})`);
+            });
+        });
         function reportProperty() {
             alert('Chức năng báo cáo đang được phát triển!');
         }
@@ -567,7 +946,7 @@
         let geocoder;
 
         function initMap() {
-            const defaultLatLng = { lat: 16.068, lng: 108.212 }; // Trung tâm Đà Nẵng
+            const defaultLatLng = { lat: 16.068, lng: 108.212 };
             const address = document.getElementById('address')?.value?.trim();
 
             map = new google.maps.Map(document.getElementById('map'), {
