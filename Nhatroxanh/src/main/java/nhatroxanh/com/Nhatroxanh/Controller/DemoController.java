@@ -4,14 +4,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
-public class HomeController {
+public class DemoController {
     @GetMapping("/trang-chu")
     public String home() {
         return "index";
-    }
-    @GetMapping("/demo")
-    public String demo() {
-        return "guest/demo";
     }
 
     @GetMapping("/chi-tiet")
@@ -23,10 +19,7 @@ public class HomeController {
     public String quanly() {
         return "staff/categoty";
     }
-    @GetMapping("/phong-tro")
-    public String danhmuc() {
-        return "guest/phong-tro";
-    }
+    
     @GetMapping("/bai-dang")
     public String baidang() {
         return "host/bai-dang-host";
