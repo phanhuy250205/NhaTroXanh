@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
     newUser.setPhone(userRequest.getPhoneNumber());
     newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
     newUser.setEnabled(false);
-    newUser.setRole(Role.owner);
+    newUser.setRole(Role.customer); // Mặc định là customer
 
     Users savedUser = userRepository.save(newUser);
 
