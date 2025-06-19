@@ -13,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
@@ -34,13 +35,13 @@ public class Hostel {
 
     private String name;
 
-    private String address;
-
     private String description;
-    
+
+    private Boolean status;
+
     @Column(name = "room_number")
     private Integer room_number;
-
+    
     @Temporal(TemporalType.DATE)
     private Date createdAt;
 
@@ -50,4 +51,8 @@ public class Hostel {
 
     @OneToMany(mappedBy = "hostel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rooms> rooms = new ArrayList<>();
+    
+    @OneToOne
+    @JoinColumn(name = "address_id")
+    private Address address;
 }

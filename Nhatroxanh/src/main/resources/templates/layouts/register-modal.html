@@ -1,83 +1,83 @@
-<!-- Register Modal -->
-    <div class="register-modal-overlay" id="registerModalOverlay">
-        <div class="register-modal">
-            <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
-            <div class="register-modal-header">
-                <button class="register-modal-close" id="registerModalClose">
-                    <i class="fas fa-times"></i>
-                </button>
+<div class="register-modal-overlay" id="registerModalOverlay">
+    <div class="register-modal">
+        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
+        <div class="register-modal-header">
+            <button class="register-modal-close" id="registerModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="register-modal-content">
+            <div class="register-greeting">
+                <h3>Chào mừng bạn đến với <span style="color: #39a3e9;">NHÀ TRỌ XANH</span></h3>
+                <h2>Đăng ký tài khoản mới 
+                    <span class="house-icons">
+                        <img class="logo-register d-none d-md-block" th:src="@{/images/logo/nhatroxanh.png}" alt="">
+                    </span>
+                </h2>
             </div>
-            
-            <div class="register-modal-content">
-                <div class="register-greeting">
-                    <h3>Chào mừng bạn đến với <span style="color: #39a3e9;">NHÀ TRỌ XANH</span></h3>
-                    <h2>Đăng ký tài khoản mới 
-                        <span class="house-icons">
-                            <img class="logo-register d-none d-md-block" th:src="@{/images/logo/nhatroxanh.png}" alt="">
-                        </span>
-                    </h2>
+
+            <form class="register-form" id="registerForm">
+                <div id="register-error-message" class="alert alert-danger" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-user input-icon"></i>
+                            <input type="text" id="fullName" class="form-control-register" placeholder="Nhập Họ và tên" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-at input-icon"></i>
+                            <input type="text" id="username" class="form-control-register" placeholder="Nhập tên đăng nhập" >
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" id="email" class="form-control-register" placeholder="Nhập Email" >
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                             <i class="fas fa-phone input-icon"></i>
+                            <input type="tel" id="phoneNumber" class="form-control-register" placeholder="Nhập số điện thoại" >
+                        </div>
+                    </div>
                 </div>
 
-                <form class="register-form" id="registerForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <i class="fas fa-user input-icon"></i>
-                                <input type="text" class="form-control-register" placeholder="Nhập Họ và tên">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <i class="fas fa-envelope input-icon"></i>
-                                <input type="text" class="form-control-register" placeholder="Nhập Email hoặc Số điện thoại">
-                            </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" class="form-control-register" placeholder="Nhập mật khẩu" >
+                             <button type="button" class="password-toggle"><i class="fas fa-eye-slash"></i></button>
                         </div>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock input-icon"></i>
-                                <input type="password" class="form-control-register" placeholder="Nhập mật khẩu">
-                                <button type="button" class="password-toggle">
-                                    <i class="fas fa-eye-slash"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="input-wrapper">
-                                <i class="fas fa-lock input-icon"></i>
-                                <input type="password" class="form-control-register" placeholder="Xác nhận mật khẩu">
-                                <button type="button" class="password-toggle">
-                                    <i class="fas fa-eye-slash"></i>
-                                </button>
-                            </div>
+                    <div class="form-group">
+                        <div class="input-wrapper">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="confirmPassword" class="form-control-register" placeholder="Xác nhận mật khẩu" >
+                            <button type="button" class="password-toggle"><i class="fas fa-eye-slash"></i></button>
                         </div>
                     </div>
+                </div>
 
-                    <button type="submit" class="btn-register-submit">
-                        ĐĂNG KÝ
-                    </button>
-
-                    <div class="register-divider">
-                        <span>Hoặc</span>
-                    </div>
-
-                    <div class="social-register">
-                        <button type="button" class="btn-icon btn-google">
-                            <i class="fab fa-google"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </button>
-                    </div>
-
-                    <div class="login-link">
-                        Đã có tài khoản? <a href="#" class="login-now">Đăng nhập ngay</a>
-                    </div>
-                </form>
-            </div>
+                <button type="submit" class="btn-register-submit">ĐĂNG KÝ</button>
+                
+                <div class="register-divider"><span>Hoặc</span></div>
+                <div class="social-register">
+                    <button type="button" class="btn-icon btn-google"><i class="fab fa-google"></i></button>
+                    <button type="button" class="btn-icon btn-facebook"><i class="fab fa-facebook-f"></i></button>
+                </div>
+                <div class="login-link">
+                    Đã có tài khoản? <a href="#" class="login-now">Đăng nhập ngay</a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
