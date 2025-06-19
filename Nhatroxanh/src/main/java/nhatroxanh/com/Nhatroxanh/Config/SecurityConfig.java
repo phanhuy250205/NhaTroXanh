@@ -52,11 +52,13 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // API đăng ký/xác thực phải được phép
                         .requestMatchers("/api/users/**").permitAll()
+                        // ✅ THÊM DÒNG NÀY - Cho phép tất cả API filter
+                        .requestMatchers("/api/**").permitAll()
                         // Các tài nguyên tĩnh và trang công khai được phép
                         .requestMatchers("/", "/trang-chu", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
                                 "/fonts/**")
                         .permitAll()
-                        .requestMatchers("/phong-tro/**", "/chi-tiet/**","/danh-muc/**","/uploads/**").permitAll()
+                        .requestMatchers("/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/uploads/**").permitAll()
                         // Mọi request khác cần xác thực
                         .anyRequest().authenticated())
                 .formLogin(form -> form

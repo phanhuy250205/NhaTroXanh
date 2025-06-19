@@ -16,10 +16,12 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.PostDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Model.mapper.PostMapper;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.ProvinceRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 
 @Controller
@@ -31,57 +33,157 @@ public class ViewRoomController {
     private PostRepository postRepository;
 
     @Autowired
-    private UtilityRepository utilityRepository;
+    private PostMapper postMapper;
+    @Autowired
+    private ProvinceRepository provinceRepository;
 
     @Autowired
-    private PostMapper postMapper;
+    private UtilityRepository utilityRepository;
 
     @GetMapping("/danh-muc/{id}")
     public String showPostsByCategory(@PathVariable("id") Integer id,
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
+            @RequestParam(value = "province", required = false) Integer provinceId,
+            @RequestParam(value = "priceRange", required = false) String priceRange,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
             Model model) {
         try {
+            System.out.println("Request: Category ID: " + id + ", Sort: " + sort + ", Province ID: " + provinceId +
+                    ", Price Range: " + priceRange + ", Search Term: " + searchTerm);
+            long startTime = System.currentTimeMillis();
+
+            // Load provinces và utilities cho filter
+            List<Province> provinces = provinceRepository.findAll();
+            if (provinces == null) {
+                provinces = new ArrayList<>();
+                System.out.println("Warning: No provinces found in database");
+            }
+
+            List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
+            if (utilities == null) {
+                utilities = new ArrayList<>();
+            }
+
+            model.addAttribute("provinces", provinces);
+            model.addAttribute("utilities", utilities);
+            model.addAttribute("categoryId", id);
+
             Category category = categoryRepository.findById(id).orElse(null);
             List<Post> posts = new ArrayList<>();
 
-            List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
+            Float minPrice = null;
+            Float maxPrice = null;
+
+            // Xử lý khoảng giá
+            if (priceRange != null && !priceRange.isEmpty()) {
+                if (priceRange.startsWith("custom_")) {
+                    String[] customRange = priceRange.replace("custom_", "").split("_");
+                    if (customRange.length > 0 && !customRange[0].isEmpty()) {
+                        minPrice = Float.parseFloat(customRange[0]);
+                    }
+                    if (customRange.length > 1 && !customRange[1].isEmpty()) {
+                        maxPrice = Float.parseFloat(customRange[1]);
+                    }
+                } else {
+                    switch (priceRange.toLowerCase()) {
+                        case "under_1m":
+                            maxPrice = 1_000_000f;
+                            break;
+                        case "1_2m":
+                            minPrice = 1_000_000f;
+                            maxPrice = 2_000_000f;
+                            break;
+                        case "2_3m":
+                            minPrice = 2_000_000f;
+                            maxPrice = 3_000_000f;
+                            break;
+                        case "3_5m":
+                            minPrice = 3_000_000f;
+                            maxPrice = 5_000_000f;
+                            break;
+                        case "over_5m":
+                            minPrice = 5_000_000f;
+                            break;
+                        default:
+                            System.out.println("Invalid priceRange: " + priceRange);
+                    }
+                }
+            }
 
             if (category != null) {
-                // Sử dụng phương thức từ PostRepository để lọc bài đăng có status = true và
-                // approvalStatus = 'APPROVED'
-                posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(id, true, ApprovalStatus.APPROVED);
+                // Kiểm tra xem có filter nào được áp dụng không
+                boolean hasFilters = (provinceId != null || priceRange != null ||
+                        (searchTerm != null && !searchTerm.trim().isEmpty()));
 
-                // Sắp xếp theo yêu cầu
-                switch (sort) {
-                    case "price_asc":
-                        posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
-                        break;
-                    case "price_desc":
-                        posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
-                        break;
-                    case "latest":
-                        posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
-                        break;
+                if (hasFilters) {
+                    // Sử dụng các method có filter
+                    switch (sort.toLowerCase()) {
+                        case "price_asc":
+                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceAsc(
+                                    id, provinceId, minPrice, maxPrice, searchTerm);
+                            break;
+                        case "price_desc":
+                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceDesc(
+                                    id, provinceId, minPrice, maxPrice, searchTerm);
+                            break;
+                        case "latest":
+                            posts = postRepository
+                                    .findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByCreatedAtDesc(
+                                            id, provinceId, minPrice, maxPrice, searchTerm);
+                            break;
+                        default:
+                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTerm(
+                                    id, provinceId, minPrice, maxPrice, searchTerm);
+                            break;
+                    }
+                } else {
+                    // Không có filter, sử dụng method đơn giản với ApprovalStatus
+                    posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(id, true,
+                            ApprovalStatus.APPROVED);
+
+                    // Sắp xếp theo yêu cầu
+                    switch (sort.toLowerCase()) {
+                        case "price_asc":
+                            posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
+                            break;
+                        case "price_desc":
+                            posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
+                            break;
+                        case "latest":
+                        default:
+                            posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+                            break;
+                    }
                 }
+
+                System.out.println("Posts fetched: " + posts.size() + ", Time taken: " +
+                        (System.currentTimeMillis() - startTime) + "ms");
 
                 model.addAttribute("category", category);
                 model.addAttribute("posts", posts);
-                model.addAttribute("utilities", utilities);
                 model.addAttribute("totalPosts", posts.size());
-                model.addAttribute("categoryId", id);
+                model.addAttribute("selectedProvince", provinceId);
+                model.addAttribute("selectedPriceRange", priceRange);
+                model.addAttribute("searchTerm", searchTerm);
+                model.addAttribute("selectedSort", sort);
 
                 System.out.println("Category: " + category.getName() + ", Posts: " + posts.size());
             } else {
                 model.addAttribute("category", null);
                 model.addAttribute("posts", new ArrayList<>());
-                model.addAttribute("utilities", utilities);
+                model.addAttribute("totalPosts", 0);
                 model.addAttribute("error", "Danh mục không tồn tại");
             }
-        } catch (Exception e) {
-            model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu");
+        } catch (NumberFormatException e) {
+            model.addAttribute("error", "Khoảng giá không hợp lệ: " + e.getMessage());
             model.addAttribute("posts", new ArrayList<>());
-            model.addAttribute("utilities", new ArrayList<>());
-            System.out.println("Error in showPostsByCategory: " + e.getMessage());
+            model.addAttribute("totalPosts", 0);
+            System.out.println("NumberFormatException in showPostsByCategory: " + e.getMessage());
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu: " + e.getMessage());
+            model.addAttribute("posts", new ArrayList<>());
+            model.addAttribute("totalPosts", 0);
+            System.out.println("Exception in showPostsByCategory: " + e.getMessage());
             e.printStackTrace();
         }
 

@@ -121,8 +121,11 @@
                     <h6 class="filter-title">
                         <i class="fas fa-filter"></i> Lọc tìm kiếm phòng
                     </h6>
+
+                    <!-- ẨN CÁC ELEMENT DEBUG -->
                     <input type="hidden" id="categoryId" th:value="${categoryId}">
-                    <button class="btn btn-info btn-sm mb-3" id="testBtn">Nhà trọ xanh</button>
+                    <!-- <button class="btn btn-info btn-sm mb-3" id="testBtn">Nhà trọ xanh</button> -->
+
                     <div class="filter-section">
                         <label class="filter-label">Diện tích</label>
                         <div class="form-check">
@@ -172,7 +175,8 @@
     </div>
 
     <script>
-        // Test API connection
+        // XÓA HOẶC COMMENT FUNCTION TEST API
+        /*
         document.getElementById('testBtn').addEventListener('click', function () {
             const categoryId = document.getElementById('categoryId').value;
             const debugInfo = document.getElementById('debugInfo');
@@ -191,6 +195,7 @@
                     debugInfo.className = 'alert alert-danger';
                 });
         });
+        */
 
         // Auto-apply filter when inputs change
         document.addEventListener('change', function (e) {

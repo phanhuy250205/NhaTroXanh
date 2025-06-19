@@ -194,4 +194,65 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                         "WHERE p.postId = :postId")
         Optional<Post> findByIdWithShareDetails(@Param("postId") Integer postId);
 
+        @Query("SELECT p FROM Post p " +
+                        "WHERE p.category.categoryId = :categoryId " +
+                        "AND (p.address.ward.district.province.id = :provinceId OR :provinceId IS NULL) " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+                        "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+                        "AND (:searchTerm IS NULL OR LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
+                        +
+                        "ORDER BY p.price ASC")
+        List<Post> findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceAsc(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceId") Integer provinceId,
+                        @Param("minPrice") Float minPrice,
+                        @Param("maxPrice") Float maxPrice,
+                        @Param("searchTerm") String searchTerm);
+
+        @Query("SELECT p FROM Post p " +
+                        "WHERE p.category.categoryId = :categoryId " +
+                        "AND (p.address.ward.district.province.id = :provinceId OR :provinceId IS NULL) " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+                        "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+                        "AND (:searchTerm IS NULL OR LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
+                        +
+                        "ORDER BY p.price DESC")
+        List<Post> findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceDesc(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceId") Integer provinceId,
+                        @Param("minPrice") Float minPrice,
+                        @Param("maxPrice") Float maxPrice,
+                        @Param("searchTerm") String searchTerm);
+
+        @Query("SELECT p FROM Post p " +
+                        "WHERE p.category.categoryId = :categoryId " +
+                        "AND (p.address.ward.district.province.id = :provinceId OR :provinceId IS NULL) " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+                        "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+                        "AND (:searchTerm IS NULL OR LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) "
+                        +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByCreatedAtDesc(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceId") Integer provinceId,
+                        @Param("minPrice") Float minPrice,
+                        @Param("maxPrice") Float maxPrice,
+                        @Param("searchTerm") String searchTerm);
+
+        @Query("SELECT p FROM Post p " +
+                        "WHERE p.category.categoryId = :categoryId " +
+                        "AND (p.address.ward.district.province.id = :provinceId OR :provinceId IS NULL) " +
+                        "AND p.status = true AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:minPrice IS NULL OR p.price >= :minPrice) " +
+                        "AND (:maxPrice IS NULL OR p.price <= :maxPrice) " +
+                        "AND (:searchTerm IS NULL OR LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%')))")
+        List<Post> findByCategoryAndProvinceAndPriceRangeAndSearchTerm(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceId") Integer provinceId,
+                        @Param("minPrice") Float minPrice,
+                        @Param("maxPrice") Float maxPrice,
+                        @Param("searchTerm") String searchTerm);
 }
