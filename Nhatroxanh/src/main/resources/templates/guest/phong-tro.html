@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{/layouts/head}">
     <title>Chi Tiết - Nhà Trọ Xanh</title>
@@ -25,92 +25,94 @@
         <div class="row">
             <!-- Danh sách nhà trọ -->
             <div class="col-md-8 danhmuc-nhatro">
-                <!-- Thanh top: Tổng kết quả + Sắp xếp -->
                 <div class="d-flex justify-content-between align-items-center mb-3 px-1">
                     <p class="m-0 fw-semibold">
-                        Tổng <span class="text-dark" th:text="${#lists.size(posts)}">0</span> kết quả
+                        Tổng <span class="text-dark" id="totalPostsCount" th:text="${#lists.size(posts)}">0</span> kết
+                        quả
                     </p>
-                    <form action="" method="get">
-                        <div class="sort-box d-flex align-items-center">
-                            <span class="w-100 text-secondary">Sắp xếp theo</span>
-                            <select class="form-select form-select-sm sort-select" name="sort"
-                                onchange="this.form.submit()">
-                                <option value="all" th:selected="${param.sort == null or param.sort == 'all'}">Tất cả
-                                </option>
-                                <option value="latest" th:selected="${param.sort == 'latest'}">Mới nhất</option>
-                                <option value="price_asc" th:selected="${param.sort == 'price_asc'}">Giá tăng dần
-                                </option>
-                                <option value="price_desc" th:selected="${param.sort == 'price_desc'}">Giá giảm dần
-                                </option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="post-card mb-3 d-flex" th:each="post : ${posts}">
-                    <!-- Ảnh -->
-                    <div class="post-img position-relative">
-                        <a th:href="@{/chi-tiet/{id}(id=${post.postId})}">
-                            <!-- Improved image handling -->
-                            <img th:if="${post.images != null and !post.images.isEmpty()}"
-                                th:src="${post.images[0].url}" alt="Phòng trọ" class="img-fluid"
-                                onerror="this.src='/images/no-image.jpg'" />
-                            <img th:unless="${post.images != null and !post.images.isEmpty()}"
-                                src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
-                        </a>
-                        <button class="btn-favorite">
-                            <i class="fas fa-heart"></i>
-                        </button>
+                    <div class="sort-box d-flex align-items-center">
+                        <span class="w-100 text-secondary">Sắp xếp theo</span>
+                        <select class="form-select form-select-sm sort-select" id="sortBy" name="sort">
+                            <option value="latest">Mới nhất</option>
+                            <option value="price_asc">Giá tăng dần</option>
+                            <option value="price_desc">Giá giảm dần</option>
+                        </select>
                     </div>
+                </div>
+                <div id="debugInfo" class="alert alert-info" style="display: none;"></div>
+                <div id="loading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                    <p class="mt-2">Đang tìm kiếm...</p>
+                </div>
 
-                    <!-- Nội dung -->
-                    <div class="post-info ps-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="fw-bold mb-1">
-                                <a th:href="@{/chi-tiet/{id}(id=${post.postId})}"
-                                    class="text-dark text-decoration-none hover-text-primary"
-                                    th:text="${post.title}">Tiêu đề</a>
-                            </h6>
+                <div id="postsContainer">
+                    <div class="post-card mb-3 d-flex" th:each="post : ${posts}">
+                        <div class="post-img position-relative">
+                            <a th:href="@{/chi-tiet/{id}(id=${post.postId})}">
+                                <img th:if="${post.images != null and !post.images.isEmpty()}"
+                                    th:src="${post.images[0].url}" alt="Phòng trọ" class="img-fluid"
+                                    onerror="this.src='/images/no-image.jpg'" />
+                                <img th:unless="${post.images != null and !post.images.isEmpty()}"
+                                    src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
+                            </a>
+                            <button class="btn-favorite">
+                                <i class="fas fa-heart"></i>
+                            </button>
+                        </div>
 
-                            <div class="text-muted small mb-1">
-                                <span class="text-dark">Từ</span>
-                                <span class="text-danger fw-bold"
-                                    th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
-                                    2.5 triệu
-                                </span>
-                                <span class="text-muted">/tháng</span>
-                            </div>
+                        <div class="post-info ps-3 d-flex flex-column justify-content-between">
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    <a th:href="@{/chi-tiet/{id}(id=${post.postId})}"
+                                        class="text-dark text-decoration-none hover-text-primary"
+                                        th:text="${post.title}">Tiêu đề</a>
+                                </h6>
 
-                            <div class="d-flex gap-2 mb-2">
-                                <span class="badge bg-light border text-dark small px-2"
-                                    th:text="${post.area + 'm²'}">Diện tích</span>
-                                <!-- Add category badge -->
-                                <span class="badge bg-primary text-white small px-2"
-                                    th:text="${post.category.name}">Danh mục</span>
-                            </div>
+                                <div class="text-muted small mb-1">
+                                    <span class="text-dark">Từ</span>
+                                    <span class="text-danger fw-bold"
+                                        th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ'}">
+                                        2.5 triệu
+                                    </span>
+                                    <span class="text-muted">/tháng</span>
+                                </div>
 
-                            <!-- Simplified address display -->
-                            <div class="text-muted small">
-                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-                                <span th:if="${post.address != null}"
-                                    th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
-                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
-                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
-                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
-                                </span>
-                                <span th:unless="${post.address != null}">
-                                    Địa chỉ chưa cập nhật
-                                </span>
-                            </div>
+                                <div class="d-flex gap-2 mb-2">
+                                    <span class="badge bg-light border text-dark small px-2"
+                                        th:text="${post.area + 'm²'}">Diện tích</span>
+                                    <span class="badge bg-primary text-white small px-2"
+                                        th:text="${post.category.name}">Danh mục</span>
+                                </div>
 
-                            <!-- Add post date -->
-                            <div class="text-muted small mt-1">
-                                <i class="fas fa-clock me-1"></i>
-                                <span th:text="${#dates.format(post.createdAt, 'dd/MM/yyyy')}">Ngày đăng</span>
+                                <div class="text-muted small">
+                                    <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                    <span th:if="${post.address != null}"
+                                        th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
+                                       ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
+                                       ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
+                                       ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                    </span>
+                                    <span th:unless="${post.address != null}">
+                                        Địa chỉ chưa cập nhật
+                                    </span>
+                                </div>
+
+                                <div class="text-muted small mt-1">
+                                    <i class="fas fa-clock me-1"></i>
+                                    <span th:text="${#dates.format(post.createdAt, 'dd/MM/yyyy')}">Ngày đăng</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Có thể lặp lại nhiều item tương tự -->
+
+                <div id="noResults" class="text-center py-4" style="display: none;">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4>Không tìm thấy kết quả</h4>
+                    <p class="text-muted">Vui lòng thử lại với các tiêu chí khác</p>
+                </div>
             </div>
 
             <!-- Bộ lọc -->
@@ -120,90 +122,284 @@
                         <i class="fas fa-filter"></i> Lọc tìm kiếm phòng
                     </h6>
 
+                    <!-- ẨN CÁC ELEMENT DEBUG -->
+                    <input type="hidden" id="categoryId" th:value="${categoryId}">
+                    <!-- <button class="btn btn-info btn-sm mb-3" id="testBtn">Nhà trọ xanh</button> -->
+
                     <div class="filter-section">
                         <label class="filter-label">Diện tích</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area1" checked>
+                            <input class="form-check-input" type="radio" name="area" id="area_all" value="all" checked>
+                            <label class="form-check-label" for="area_all">Tất cả</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="area" id="area1" value="0-10">
                             <label class="form-check-label" for="area1">Dưới 10m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area2">
+                            <input class="form-check-input" type="radio" name="area" id="area2" value="10-20">
                             <label class="form-check-label" for="area2">10 - 20m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area3">
+                            <input class="form-check-input" type="radio" name="area" id="area3" value="20-25">
                             <label class="form-check-label" for="area3">20 - 25m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area4">
+                            <input class="form-check-input" type="radio" name="area" id="area4" value="25-30">
                             <label class="form-check-label" for="area4">25 - 30m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area5">
+                            <input class="form-check-input" type="radio" name="area" id="area5" value="30-">
                             <label class="form-check-label" for="area5">Trên 30m²</label>
                         </div>
                     </div>
 
+                    <!-- Utilities Filter -->
                     <div class="filter-section">
-                        <label class="filter-label">Tiện nghi</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t1">
-                            <label class="form-check-label" for="t1">Gác lửng</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t2">
-                            <label class="form-check-label" for="t2">Wifi</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t3">
-                            <label class="form-check-label" for="t3">Vệ sinh trong</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t4">
-                            <label class="form-check-label" for="t4">Phòng tắm</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t5">
-                            <label class="form-check-label" for="t5">Bình nóng lạnh</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="t6">
-                            <label class="form-check-label" for="t6">Kệ bếp</label>
-                        </div>
-                    </div>
-
-                    <div class="filter-section">
-                        <label class="filter-label">Đối tượng</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="d1">
-                            <label class="form-check-label" for="d1">Đi học</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="d2">
-                            <label class="form-check-label" for="d2">Đi làm</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="d3">
-                            <label class="form-check-label" for="d3">Gia đình</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="d4">
-                            <label class="form-check-label" for="d4">Cặp đôi</label>
+                        <label class="filter-label">Tiện ích</label>
+                        <div th:each="utility : ${utilities}" class="form-check">
+                            <input class="form-check-input" type="checkbox" th:id="'utility_' + ${utility.utilityId}"
+                                th:value="${utility.utilityId}" name="utilities">
+                            <label class="form-check-label" th:for="'utility_' + ${utility.utilityId}"
+                                th:text="${utility.name}">Tiện ích</label>
                         </div>
                     </div>
 
                     <div class="d-flex justify-content-between mt-3">
-                        <button class="btn btn-blue">Tìm ngay</button>
-                        <button class="btn btn-outline-blue">Xóa bộ lọc</button>
+                        <button class="btn btn-primary" id="filter-btn">Tìm ngay</button>
+                        <button class="btn btn-secondary" id="reset-btn">Xóa bộ lọc</button>
                     </div>
                 </div>
-
-
             </div>
         </div>
     </div>
 
+    <script>
+        // XÓA HOẶC COMMENT FUNCTION TEST API
+        /*
+        document.getElementById('testBtn').addEventListener('click', function () {
+            const categoryId = document.getElementById('categoryId').value;
+            const debugInfo = document.getElementById('debugInfo');
 
+            debugInfo.style.display = 'block';
+            debugInfo.innerHTML = 'Testing API...';
+
+            fetch(`/api/test-category/${categoryId}`)
+                .then(response => response.text())
+                .then(data => {
+                    debugInfo.innerHTML = `Test result: ${data}`;
+                    debugInfo.className = 'alert alert-success';
+                })
+                .catch(error => {
+                    debugInfo.innerHTML = `Test error: ${error.message}`;
+                    debugInfo.className = 'alert alert-danger';
+                });
+        });
+        */
+
+        // Auto-apply filter when inputs change
+        document.addEventListener('change', function (e) {
+            if (e.target.matches('input[name="utilities"], input[name="area"], #sortBy')) {
+                applyFilter();
+            }
+        });
+
+        // Manual filter button
+        document.getElementById('filter-btn').addEventListener('click', function () {
+            applyFilter();
+        });
+
+        // Reset filter button
+        document.getElementById('reset-btn').addEventListener('click', function () {
+            resetFilter();
+        });
+
+        function applyFilter() {
+            const loading = document.getElementById('loading');
+            const postsContainer = document.getElementById('postsContainer');
+            const noResults = document.getElementById('noResults');
+            const debugInfo = document.getElementById('debugInfo');
+            const categoryId = document.getElementById('categoryId').value;
+
+            // Show loading
+            loading.style.display = 'block';
+            postsContainer.style.display = 'none';
+            noResults.style.display = 'none';
+            debugInfo.style.display = 'none';
+
+            const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
+                .map(checkbox => checkbox.value);
+
+            const selectedArea = document.querySelector('input[name="area"]:checked').value;
+            let minArea = null;
+            let maxArea = null;
+
+            if (selectedArea !== 'all') {
+                if (selectedArea.includes('-')) {
+                    const parts = selectedArea.split('-');
+                    minArea = parts[0] !== '' ? parseFloat(parts[0]) : null;
+                    maxArea = parts[1] !== '' ? parseFloat(parts[1]) : null;
+                } else if (selectedArea.endsWith('-')) {
+                    minArea = parseFloat(selectedArea.replace('-', ''));
+                } else if (selectedArea.startsWith('-')) {
+                    maxArea = parseFloat(selectedArea.replace('-', ''));
+                }
+            }
+
+            const sort = document.getElementById('sortBy').value;
+
+            const params = new URLSearchParams();
+
+            selectedUtilities.forEach(utilityId => {
+                params.append('utilities', utilityId);
+            });
+
+            if (minArea !== null) params.append('minArea', minArea);
+            if (maxArea !== null) params.append('maxArea', maxArea);
+            if (sort) params.append('sort', sort);
+
+            console.log('Filter request:', {
+                categoryId,
+                selectedUtilities,
+                minArea,
+                maxArea,
+                sort,
+                url: `/api/filter-posts-by-category/${categoryId}?${params.toString()}`
+            });
+
+            fetch(`/api/filter-posts-by-category/${categoryId}?${params.toString()}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(`HTTP ${response.status}: ${text}`);
+                        });
+                    }
+                    return response.json();
+                })
+                .then(posts => {
+                    console.log('Received posts:', posts.length);
+                    loading.style.display = 'none';
+                    displayPosts(posts);
+                    updatePostCount(posts.length);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    loading.style.display = 'none';
+                    debugInfo.style.display = 'block';
+                    debugInfo.className = 'alert alert-danger';
+                    debugInfo.innerHTML = `Lỗi: ${error.message}`;
+                    showError('Có lỗi xảy ra khi tải dữ liệu: ' + error.message);
+                });
+        }
+
+        function displayPosts(posts) {
+            const postsContainer = document.getElementById('postsContainer');
+            const noResults = document.getElementById('noResults');
+
+            if (posts.length === 0) {
+                postsContainer.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+
+            postsContainer.innerHTML = posts.map(post => createPostCard(post)).join('');
+            postsContainer.style.display = 'block';
+            noResults.style.display = 'none';
+        }
+
+        function createPostCard(post) {
+            const imageUrl = post.images && post.images.length > 0
+                ? post.images[0].url
+                : '/images/no-image.jpg';
+
+            const address = post.address
+                ? `${post.address.street || ''} ${post.address.ward?.name || ''} ${post.address.ward?.district?.name || ''} ${post.address.ward?.district?.province?.name || ''}`
+                : 'Địa chỉ chưa cập nhật';
+
+            const formattedDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : '';
+
+            return `
+                <div class="post-card mb-3 d-flex">
+                    <div class="post-img position-relative">
+                        <a href="/chi-tiet/${post.postId}">
+                            <img src="${imageUrl}" alt="Phòng trọ" class="img-fluid" onerror="this.src='/images/no-image.jpg'" />
+                        </a>
+                        <button class="btn-favorite">
+                            <i class="fas fa-heart"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="post-info ps-3 d-flex flex-column justify-content-between">
+                        <div>
+                            <h6 class="fw-bold mb-1">
+                                <a href="/chi-tiet/${post.postId}" class="text-dark text-decoration-none hover-text-primary">
+                                    ${post.title}
+                                </a>
+                            </h6>
+                            
+                            <div class="text-muted small mb-1">
+                                <span class="text-dark">Từ</span>
+                                <span class="text-danger fw-bold">
+                                    ${formatPrice(post.price)} VNĐ
+                                </span>
+                                <span class="text-muted">/tháng</span>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-light border text-dark small px-2">${post.area}m²</span>
+                                <span class="badge bg-primary text-white small px-2">${post.category?.name || ''}</span>
+                            </div>
+                            
+                            <div class="text-muted small">
+                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                                ${address}
+                            </div>
+                            
+                            <div class="text-muted small mt-1">
+                                <i class="fas fa-clock me-1"></i>
+                                ${formattedDate}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function formatPrice(price) {
+            if (!price) return '0';
+            return new Intl.NumberFormat('vi-VN').format(price);
+        }
+
+        function updatePostCount(count) {
+            const totalPostsCount = document.getElementById('totalPostsCount');
+            if (totalPostsCount) {
+                totalPostsCount.textContent = count;
+            }
+        }
+
+        function resetFilter() {
+            document.querySelectorAll('input[name="utilities"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+
+            document.getElementById('area_all').checked = true;
+
+            document.getElementById('sortBy').value = 'latest';
+
+            applyFilter();
+        }
+
+        function showError(message) {
+            const postsContainer = document.getElementById('postsContainer');
+            postsContainer.innerHTML = `
+                <div class="alert alert-danger text-center">
+                    <i class="fas fa-exclamation-triangle"></i> ${message}
+                </div>
+            `;
+            postsContainer.style.display = 'block';
+        }
+    </script>
 </body>
 
 </html>

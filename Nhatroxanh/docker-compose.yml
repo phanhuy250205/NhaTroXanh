@@ -1,0 +1,115 @@
+version: '3.8'
+
+services:
+  # Database MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: nhatroxanh_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: nhatroxanh_db
+      MYSQL_USER: nhatroxanh_user
+      MYSQL_PASSWORD: password123
+      MYSQL_CHARSET: utf8mb4
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - nhatroxanh_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Spring Boot Application
+  nhatroxanh-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nhatroxanh_app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      # Spring Boot profiles
+      SPRING_PROFILES_ACTIVE: docker
+
+      # Database configuration
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nhatroxanh_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: nhatroxanh_user
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
+
+      # JPA/Hibernate configuration
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: true
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.MySQL8Dialect
+
+      # Server configuration
+      SERVER_PORT: 8080
+
+      # Logging
+      LOGGING_LEVEL_COM_NHATROXANH: DEBUG
+      LOGGING_PATTERN_CONSOLE: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+
+    volumes:
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    networks:
+      - nhatroxanh_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # phpMyAdmin cho việc quản lý database
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: nhatroxanh_phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      PMA_ARBITRARY: 1
+      UPLOAD_LIMIT: 256M
+    depends_on:
+      - mysql
+    networks:
+      - nhatroxanh_network
+
+  # Redis cho caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: nhatroxanh_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nhatroxanh_network
+    command: redis-server --appendonly yes
+
+# Định nghĩa volumes
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+
+# Định nghĩa networks
+networks:
+  nhatroxanh_network:
+    driver: bridge

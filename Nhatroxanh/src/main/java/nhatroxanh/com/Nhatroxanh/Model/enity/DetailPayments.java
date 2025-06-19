@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -9,27 +10,33 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 @Entity
-@Table(name = "Address")
-@ToString(exclude = "ward")
-public class Address {
+@Table(name = "Detail_payments")
+public class DetailPayments {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    private String street;
+    private Integer detailId;
 
     @ManyToOne
-    @JoinColumn(name = "ward_id")
-    private Ward ward;
+    @JoinColumn(name = "payment_id", nullable = false)
+    private Payments payment;
+
+    @Column(name = "item_name", nullable = false, length = 100)
+    private String itemName;
+
+    @Column(name = "quantity")
+    private Integer quantity;
+
+    @Column(name = "unit_price")
+    private Float unitPrice;
+
+    @Column(name = "amountunit_price")
+    private Float amountUnitPrice;
 }
