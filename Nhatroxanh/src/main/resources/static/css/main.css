@@ -22,6 +22,164 @@
   --border-radius-lg: 12px;
 }
 
+/* CUSTOM SCROLLBAR STYLES - START */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-light);
+  border-radius: var(--border-radius-sm);
+  margin: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--gray-border);
+  transition: all var(--transition-normal);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, var(--primary-dark), var(--primary-hover));
+  transform: scale(1.1);
+  box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--primary-hover);
+  transform: scale(0.95);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--gray-light);
+}
+
+/* Thin scrollbar variant for specific elements */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 2px;
+  border: none;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-color) var(--gray-light);
+}
+
+/* Custom scrollbar for dropdown menus */
+.dropdown-menu::-webkit-scrollbar,
+.navbar-collapse::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dropdown-menu::-webkit-scrollbar-track,
+.navbar-collapse::-webkit-scrollbar-track {
+  background: var(--gray-medium);
+  border-radius: var(--border-radius-sm);
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb,
+.navbar-collapse::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: var(--border-radius-sm);
+  opacity: 0.7;
+  transition: all var(--transition-fast);
+}
+
+.dropdown-menu::-webkit-scrollbar-thumb:hover,
+.navbar-collapse::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+  opacity: 1;
+}
+
+/* Animated scrollbar for special elements */
+.animated-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, var(--primary-color), var(--orange-color));
+  animation: scrollbarGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes scrollbarGlow {
+  0% {
+    background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+    box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+  }
+  100% {
+    background: linear-gradient(45deg, var(--orange-color), var(--primary-color));
+    box-shadow: 0 0 10px rgba(255, 128, 0, 0.4);
+  }
+}
+
+/* Dark theme scrollbar */
+@media (prefers-color-scheme: dark) {
+  ::-webkit-scrollbar-track {
+    background: #2c3e50;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-light));
+    border-color: #34495e;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary-light), var(--primary-color));
+  }
+}
+
+/* Mobile scrollbar improvements */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+  }
+}
+
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom scrollbar for specific containers */
+.scrollable-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 400px;
+}
+
+.scrollable-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.scrollable-container::-webkit-scrollbar-track {
+  background: var(--white);
+  border: 1px solid var(--gray-border);
+  border-radius: var(--border-radius-md);
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: var(--border-radius-md);
+  border: 2px solid var(--white);
+}
+
+.scrollable-container::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-light);
+}
+/* CUSTOM SCROLLBAR STYLES - END */
+
 
 /* FONTS */
 @font-face {
@@ -84,7 +242,8 @@
   border-radius: 55px;
   font-size: 13px;
   border: none;
-  width: 123px;
+  width: 150px;
+  height: 40px;
 }
 
 .btn-search-rounded:hover {

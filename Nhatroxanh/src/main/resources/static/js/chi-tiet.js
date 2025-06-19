@@ -8,16 +8,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializePropertyDetail() {
     // Initialize thumbnail scrolling
     initializeThumbnailScroll();
-    
     // Initialize favorite button
     initializeFavoriteButton();
-    
     // Initialize contact buttons
     initializeContactButtons();
-    
     // Initialize photo modal
     initializePhotoModal();
-    
+
     // Initialize tabs
     initializeTabs();
 }
@@ -156,18 +153,18 @@ function openPhotoModal() {
 function loadPhotoGrid() {
     const photoGrid = document.querySelector('.photo-grid');
     const photos = [
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg',
-        'images/cards/anh1.jpg'
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg',
+        // 'images/cards/anh1.jpg'
     ];
     
     photoGrid.innerHTML = '';

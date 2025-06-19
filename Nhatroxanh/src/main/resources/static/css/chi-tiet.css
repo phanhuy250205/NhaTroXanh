@@ -25,9 +25,9 @@
     text-decoration: none;
 }
 
-.breadcrumb-item a:hover {
+/* .breadcrumb-item a:hover {
     text-decoration: underline;
-}
+} */
 
 .breadcrumb-item.active {
     color: var(--text-light);
@@ -392,6 +392,7 @@
     background-color: var(--primary-dark);
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+    color: var(--white);
 }
 
 .btn-message {
@@ -403,6 +404,7 @@
     background-color: #218838;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+    color: var(--white);
 }
 
 .btn-zalo {
@@ -414,6 +416,7 @@
     background-color: #0066cc;
     transform: translateY(-2px);
     box-shadow: var(--shadow-md);
+    color: var(--white);
 }
 
 /* Additional Actions */
@@ -573,11 +576,6 @@
     border-radius: var(--border-radius-sm);
     transition: all var(--transition-normal);
 }
-
-/* .amenity-item:hover {
-    background: var(--primary-light);
-    transform: translateY(-2px);
-} */
 
 .amenity-item i {
     color: var(--primary-color);

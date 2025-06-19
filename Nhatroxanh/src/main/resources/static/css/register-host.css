@@ -1,0 +1,565 @@
+/* CUSTOM SCROLLBAR STYLES - START */
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-light);
+    border-radius: var(--border-radius-sm);
+    margin: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    border-radius: var(--border-radius-sm);
+    border: 1px solid var(--gray-border);
+    transition: all var(--transition-normal);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--primary-dark), var(--primary-hover));
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+}
+
+::-webkit-scrollbar-thumb:active {
+    background: var(--primary-hover);
+    transform: scale(0.95);
+}
+
+::-webkit-scrollbar-corner {
+    background: var(--gray-light);
+}
+
+/* Scoped styles for register page only */
+.register-page-wrapper {
+    /* Root colors */
+    --primary-blue: #1196f5;
+    --primary-blue-light: #d2ecff;
+    --text-dark: #222;
+    --text-muted: #6c757d;
+    --bg-blue: #68c0ff;
+    --input-border: #ddd;
+    --input-focus: var(--primary-blue);
+    --error-red: #f44336;
+}
+
+.register-page-wrapper,
+.register-page-wrapper * {
+    box-sizing: border-box;
+}
+
+.register-page-wrapper {
+    height: 100vh;
+    margin: 0;
+    font-family: "Poppins", Arial, sans-serif;
+    background: linear-gradient(135deg, #d5f8ff 0%, #97e0ff 100%);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+/* Container - GIỐNG HỆT LOGIN */
+.register-page-wrapper .register-card {
+    width: 1250px; /* GIỐNG LOGIN */
+    height: min(90vh, 650px); /* GIỐNG LOGIN */
+    border-radius: 16px; /* GIỐNG LOGIN */
+    overflow: hidden;
+    box-shadow: 0 0 35px rgb(17 74 120 / 0.15); /* GIỐNG LOGIN */
+    background-color: #fff;
+    display: flex;
+}
+
+/* Left panel - GIỐNG HỆT LOGIN */
+.register-page-wrapper .register-left {
+    flex: 0 0 40%; /* GIỐNG LOGIN */
+    background: linear-gradient(180deg, #0085be 0%, #4fcaff9b 100%);
+    color: #fff;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: clamp(30px, 5vh, 50px) clamp(20px, 3vw, 35px); /* GIỐNG LOGIN */
+    overflow: hidden;
+}
+
+/* Background image with opacity overlay */
+.register-page-wrapper .register-left::before {
+    content: "";
+    pointer-events: none;
+    background-image: url('../images/slider/slider3.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.17;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    position: absolute;
+    z-index: 0;
+    border-radius: 0 0 0 16px; /* GIỐNG LOGIN */
+}
+
+/* Content inside left panel - GIỐNG LOGIN */
+.register-page-wrapper .register-left-content {
+    position: relative;
+    z-index: 1;
+    max-width: 320px; /* GIỐNG LOGIN */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.register-page-wrapper .left-content-top {
+    position: relative;
+    top: 10%; /* GIỐNG LOGIN */
+    left: 50%;
+    transform: translateX(-40%);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Title on the left - GIỐNG LOGIN */
+.register-page-wrapper .left-title {
+    font-size: clamp(1.5rem, 3vw, 2rem); /* GIỐNG LOGIN */
+    font-weight: 700;
+    margin-bottom: clamp(8px, 1vh, 12px); /* GIỐNG LOGIN */
+    line-height: 1.2;
+    user-select: none;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+}
+
+.register-page-wrapper .left-subtitle {
+    font-weight: 400;
+    font-size: clamp(0.85rem, 1.5vw, 1rem); /* GIỐNG LOGIN */
+    opacity: 0.8;
+    margin-bottom: clamp(25px, 4vh, 35px); /* GIỐNG LOGIN */
+    user-select: none;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
+}
+
+/* Feature list styles - GIỐNG LOGIN */
+.register-page-wrapper .feature-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: clamp(18px, 3vh, 24px); /* GIỐNG LOGIN */
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.register-page-wrapper .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(12px, 2vw, 16px); /* GIỐNG LOGIN */
+    font-size: clamp(0.8rem, 1.4vw, 0.95rem); /* GIỐNG LOGIN */
+    line-height: 1.4; /* GIỐNG LOGIN */
+    cursor: default;
+    user-select: none;
+}
+
+.register-page-wrapper .feature-list li .icon {
+    font-size: clamp(1.1rem, 2vw, 1.38rem); /* GIỐNG LOGIN */
+    color: #b9e0fe;
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+.register-page-wrapper .feature-list li .feature-text strong {
+    font-weight: 600;
+    color: #bae3ff;
+    font-size: clamp(0.85rem, 1.5vw, 1rem); /* GIỐNG LOGIN */
+}
+
+.register-page-wrapper .feature-list li .feature-text small {
+    color: #bbe6ffdd;
+    display: block;
+    margin-top: 2px;
+    font-weight: 400;
+    font-size: clamp(0.75rem, 1.2vw, 0.83rem); /* GIỐNG LOGIN */
+    letter-spacing: 0.15px;
+}
+
+/* Bottom left logo - GIỐNG LOGIN */
+.register-page-wrapper .left-logo {
+    user-select: none;
+    filter: drop-shadow(0px 2px 2px rgb(0 0 0 / 0.12));
+    align-self: flex-start;
+    margin-top: auto;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px; /* GIỐNG LOGIN */
+    height: 200px; /* GIỐNG LOGIN */
+}
+
+/* Right form panel - GIỐNG LOGIN */
+.register-page-wrapper .register-right {
+    flex: 1;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    padding: 30px; /* GIỐNG LOGIN */
+}
+
+/* Close icon top right - GIỐNG LOGIN */
+.register-page-wrapper .close-btn {
+    position: absolute;
+    top: clamp(20px, 3vh, 30px); /* GIỐNG LOGIN */
+    right: clamp(20px, 3vw, 30px); /* GIỐNG LOGIN */
+    font-size: clamp(1.2rem, 2vw, 1.4rem); /* GIỐNG LOGIN */
+    color: #555;
+    cursor: pointer;
+    border: none;
+    background: none;
+    z-index: 10;
+    transition: color 0.3s ease;
+}
+
+.register-page-wrapper .close-btn:hover,
+.register-page-wrapper .close-btn:focus {
+    color: var(--primary-blue);
+    outline: none;
+}
+
+/* Form container - centered vertically */
+.register-page-wrapper .form-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+    flex: 1;
+}
+
+/* Logo in right panel top - TĂNG SIZE */
+.register-page-wrapper .right-logo {
+    display: flex;
+    align-items: center;
+    gap: 7px; /* TĂNG từ 6px */
+    margin-bottom: 12px; /* TĂNG từ 10px */
+    user-select: none;
+}
+
+.register-page-wrapper .right-logo img {
+    width: 90px; /* TĂNG từ 70px */
+    height: auto;
+}
+
+.register-page-wrapper .right-logo span {
+    font-weight: 600;
+    font-size: clamp(1rem, 1.7vw, 1.1rem); /* TĂNG từ clamp(0.9rem, 1.6vw, 1rem) */
+    color: var(--text-dark);
+    user-select: none;
+}
+
+.register-page-wrapper .right-logo .highlight {
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+/* Headings - TĂNG SIZE */
+.register-page-wrapper .register-title {
+    font-weight: 700;
+    font-size: 30px; /* TĂNG từ 18px */
+    margin-bottom: clamp(3px, 0.6vh, 4px); /* TĂNG từ clamp(2px, 0.5vh, 3px) */
+    color: var(--text-dark);
+    user-select: none;
+}
+
+.register-page-wrapper .register-subtitle {
+    font-weight: 400;
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
+    margin-bottom: 20px; /* TĂNG từ 12px */
+    color: var(--text-muted);
+    user-select: none;
+}
+
+/* Form - TĂNG GAP */
+.register-page-wrapper form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px; /* TĂNG từ 4px */
+}
+
+.register-page-wrapper .form-row {
+    display: flex;
+    gap: 12px; /* TĂNG từ 10px */
+    margin-bottom: 6px; /* TĂNG từ 4px */
+}
+
+.register-page-wrapper .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.register-page-wrapper label {
+    font-weight: 600;
+    font-size: clamp(0.7rem, 1.1vw, 0.75rem); /* TĂNG từ clamp(0.65rem, 1vw, 0.7rem) */
+    margin-bottom: clamp(4px, 0.5vh, 5px); /* TĂNG từ clamp(3px, 0.4vh, 4px) */
+    color: #333;
+    user-select: none;
+    display: block;
+}
+
+/* TĂNG INPUT SIZE */
+.register-page-wrapper .form-control {
+    width: 100%;
+    padding: clamp(8px, 1.4vh, 10px) clamp(12px, 1.7vw, 14px); /* TĂNG từ clamp(6px, 1.2vh, 8px) clamp(10px, 1.5vw, 12px) */
+    border-radius: 5px; /* TĂNG từ 4px */
+    border: 1.2px solid var(--input-border); /* TĂNG từ 1px */
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
+    transition: all 0.3s ease;
+    font-family: inherit;
+    color: var(--text-dark);
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.03); /* TĂNG từ inset 0 1px 2px */
+}
+
+.register-page-wrapper .form-control::placeholder {
+    color: #999;
+    font-weight: 400;
+}
+
+.register-page-wrapper .form-control:focus {
+    border-color: var(--input-focus);
+    outline: none;
+    box-shadow: 0 0 4px var(--input-focus); /* TĂNG từ 0 0 3px */
+}
+
+/* Password field wrapper */
+.register-page-wrapper .password-wrapper {
+    position: relative;
+}
+
+/* Show/hide icon for password - TĂNG SIZE */
+.register-page-wrapper .password-toggle {
+    position: absolute;
+    right: clamp(10px, 1.4vw, 12px); /* TĂNG từ clamp(8px, 1.2vw, 10px) */
+    top: 50%;
+    transform: translateY(-10%);
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #888;
+    font-size: clamp(0.8rem, 1.2vw, 0.9rem); /* TĂNG từ clamp(0.75rem, 1.1vw, 0.85rem) */
+    transition: color 0.25s ease;
+}
+
+.register-page-wrapper .password-toggle:hover {
+    color: var(--primary-blue);
+}
+
+/* Terms checkbox - TĂNG SIZE */
+.register-page-wrapper .terms-row {
+    margin: 10px 0; /* TĂNG từ 8px */
+}
+
+.register-page-wrapper .terms-checkbox {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px; /* TĂNG từ 5px */
+    cursor: pointer;
+    font-size: 11px; /* TĂNG từ 10px */
+    color: var(--text-muted);
+    line-height: 1.3; /* TĂNG từ 1.2 */
+    margin-bottom: 0;
+}
+
+.register-page-wrapper .terms-checkbox input[type="checkbox"] {
+    display: none;
+}
+
+.register-page-wrapper .checkmark {
+    width: 12px; /* TĂNG từ 10px */
+    height: 12px;
+    border: 1.5px solid var(--input-border);
+    border-radius: 2px;
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.register-page-wrapper .terms-checkbox input[type="checkbox"]:checked+.checkmark {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.register-page-wrapper .terms-checkbox input[type="checkbox"]:checked+.checkmark::after {
+    content: "";
+    position: absolute;
+    left: 3px; /* TĂNG từ 2px */
+    top: 1px; /* TĂNG từ 0px */
+    width: 3px; /* TĂNG từ 2px */
+    height: 6px; /* TĂNG từ 5px */
+    border: solid white;
+    border-width: 0 1.5px 1.5px 0; /* TĂNG từ 0 1px 1px 0 */
+    transform: rotate(45deg);
+}
+
+.register-page-wrapper .terms-link {
+    font-size: 11px; /* TĂNG từ 10px */
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-page-wrapper .terms-link:hover {
+    text-decoration: underline;
+}
+
+/* Register button - TĂNG SIZE */
+.register-page-wrapper .btn-register-host {
+    display: block;
+    width: 40%; /* TĂNG từ 35% */
+    align-self: center;
+    background: var(--primary-blue);
+    border: none;
+    padding: clamp(8px, 1.6vh, 10px) 0; /* TĂNG từ clamp(6px, 1.4vh, 8px) */
+    font-weight: 700;
+    color: white;
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
+    border-radius: 5px; /* TĂNG từ 4px */
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    user-select: none;
+    margin: 8px 0; /* TĂNG từ 6px */
+}
+
+.register-page-wrapper .btn-register-host:hover,
+.register-page-wrapper .btn-register-host:focus {
+    background: #198bf0;
+    outline: none;
+    transform: translateY(-1px);
+}
+
+/* Under social buttons text - TĂNG SIZE */
+.register-page-wrapper .login-text {
+    text-align: center;
+    margin: 10px 0 12px 0; /* TĂNG từ 8px 0 10px 0 */
+    font-size: clamp(0.7rem, 1.1vw, 0.8rem); /* TĂNG từ clamp(0.65rem, 1vw, 0.75rem) */
+    color: var(--text-muted);
+    user-select: none;
+}
+
+.register-page-wrapper .login-text a {
+    color: var(--error-red);
+    font-weight: 700;
+    text-decoration: none;
+    user-select: none;
+}
+
+.register-page-wrapper .login-text a:hover,
+.register-page-wrapper .login-text a:focus {
+    text-decoration: underline;
+    outline: none;
+}
+
+/* Form validation styles */
+.register-page-wrapper .form-control.is-invalid {
+    border-color: var(--error-red);
+}
+
+.register-page-wrapper .invalid-feedback {
+    display: none;
+    color: var(--error-red);
+    font-size: clamp(0.6rem, 1vw, 0.7rem); /* TĂNG từ clamp(0.55rem, 0.9vw, 0.65rem) */
+    margin-top: 2px; /* TĂNG từ 1px */
+}
+
+.register-page-wrapper .was-validated .form-control:invalid~.invalid-feedback,
+.register-page-wrapper .form-control.is-invalid~.invalid-feedback {
+    display: block;
+}
+
+/* Mobile responsive - GIỐNG LOGIN */
+@media (max-width: 768px) {
+    .register-page-wrapper {
+        overflow: auto;
+        padding: 0;
+    }
+
+    .register-page-wrapper .register-card {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .register-page-wrapper .register-left {
+        display: none;
+    }
+
+    .register-page-wrapper .register-right {
+        flex: 1;
+        padding: 40px 25px; /* GIỐNG LOGIN */
+        justify-content: flex-start;
+        overflow-y: auto;
+    }
+
+    .register-page-wrapper .form-container {
+        max-width: 100%;
+        justify-content: flex-start;
+    }
+
+    .register-page-wrapper .form-row {
+        flex-direction: column;
+        gap: 6px; /* TĂNG từ 4px */
+    }
+
+    .register-page-wrapper .close-btn {
+        top: 20px; /* GIỐNG LOGIN */
+        right: 20px; /* GIỐNG LOGIN */
+        font-size: 1.4rem; /* GIỐNG LOGIN */
+    }
+
+    .register-page-wrapper .right-logo {
+        justify-content: left;
+        margin-bottom: 18px; /* TĂNG từ 15px */
+    }
+
+    .register-page-wrapper .register-title {
+        text-align: left;
+        font-size: 1.4rem; /* TĂNG từ 1.3rem */
+    }
+
+    .register-page-wrapper .register-subtitle {
+        text-align: left;
+        margin-bottom: 22px; /* TĂNG từ 20px */
+    }
+}
+
+/* Large screens - GIỐNG LOGIN */
+@media (min-width: 1400px) {
+    .register-page-wrapper .register-card {
+        width: min(85vw, 1200px); /* GIỐNG LOGIN */
+        height: min(85vh, 700px); /* GIỐNG LOGIN */
+    }
+}
+
+/* Very small screens - GIỐNG LOGIN */
+@media (max-height: 600px) {
+    .register-page-wrapper .form-container {
+        justify-content: flex-start;
+    }
+
+    .register-page-wrapper .register-right {
+        overflow-y: auto;
+    }
+
+    .register-page-wrapper {
+        overflow: auto;
+    }
+}

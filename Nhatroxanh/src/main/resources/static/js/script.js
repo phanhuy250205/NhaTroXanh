@@ -14,16 +14,14 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => submenu?.classList.add('d-none'), 300);
   }
 
- function hideOverlayIfNoneOpen() {
-  const isAccountOpen = accountSidebar?.classList.contains('show');
-  const isRentalOpen = rentalSidebar?.classList.contains('show');
-  const isSubmenuOpen = submenu?.classList.contains('show');
-  const isTroOpen = troSidebar?.classList.contains('show'); // 🔥 THÊM DÒNG NÀY
-  if (!isAccountOpen && !isRentalOpen && !isSubmenuOpen && !isTroOpen) {
-    overlay.classList.add('d-none');
+  function hideOverlayIfNoneOpen() {
+    const isAccountOpen = accountSidebar?.classList.contains('show');
+    const isRentalOpen = rentalSidebar?.classList.contains('show');
+    const isSubmenuOpen = submenu?.classList.contains('show');
+    if (!isAccountOpen && !isRentalOpen && !isSubmenuOpen) {
+      overlay.classList.add('d-none');
+    }
   }
-}
-
 
   function hideAll() {
     hideAccountSidebar();
@@ -215,6 +213,15 @@ document.addEventListener("DOMContentLoaded", () => {
       hideSubmenu();
       hideOverlayIfNoneOpen();
     }
+  });
+  // Điều hướng bằng data-link nếu có
+  document.querySelectorAll('.nav-sidebar').forEach(item => {
+    item.addEventListener('click', () => {
+      const url = item.getAttribute('data-link');
+      if (url && !item.classList.contains('has-submenu')) {
+        window.location.href = url;
+      }
+    });
   });
 
   overlay?.addEventListener('click', hideAll);

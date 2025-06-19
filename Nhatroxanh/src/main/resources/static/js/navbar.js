@@ -1,268 +1,344 @@
+// Remove any default active states on page load
+const navLinks = document.querySelectorAll(".nav-link")
+navLinks.forEach((link) => {
+  link.classList.remove("active")
+})
+
 document.addEventListener("DOMContentLoaded", () => {
-    // Variables for scroll handling
-    let lastScrollTop = 0
-    const navbar = document.querySelector(".navbar-custom")
-    const navbarHeight = navbar.offsetHeight
+  // Variables for scroll handling
+  let lastScrollTop = 0
+  const navbar = document.querySelector(".navbar-custom")
 
-    // Remove any default active states on page load
-    const navLinks = document.querySelectorAll(".nav-link")
-    navLinks.forEach((link) => {
-        link.classList.remove("active")
+  // Kiểm tra navbar có tồn tại không
+  if (!navbar) {
+    console.warn("Navbar not found")
+    return
+  }
+
+  const navbarHeight = navbar.offsetHeight
+
+  // Function to remove active class from all navigation items
+  function removeAllActiveClasses() {
+    // Remove active from all nav-links
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      link.classList.remove("active")
     })
 
-    // Enhanced navigation link interactions with animations and page navigation
-    navLinks.forEach((link) => {
-        // Skip dropdown toggles as they are handled by Bootstrap
-        if (!link.classList.contains("dropdown-toggle")) {
-            link.addEventListener("click", function (e) {
-                e.preventDefault()
+    // Remove active from all dropdown-items
+    document.querySelectorAll(".dropdown-item").forEach((item) => {
+      item.classList.remove("active")
+    })
+  }
 
-                // Add ripple effect
-                createRipple(e, this)
+  // Function to set active class for clicked item
+  function setActiveClass(clickedElement) {
+    // Remove all active classes first
+    removeAllActiveClasses()
 
-                // Get the page data attribute
-                const page = this.getAttribute("data-page")
+    // Add active class to clicked element
+    clickedElement.classList.add("active")
 
-                // Handle navigation based on page type
-                if (page) {
-                    // Remove active class from all links
-                    navLinks.forEach((l) => l.classList.remove("active"))
-
-                    // Add active class to clicked link
-                    this.classList.add("active")
-
-                    // Store active state in localStorage
-                    localStorage.setItem("activePage", page)
-
-                    // Navigate to appropriate page after a short delay for animation
-                    setTimeout(() => {
-                        switch (page) {
-                            case "trang-chu":
-                                window.location.href = "trang-chu"
-                                break
-                            case "video-review":
-                                // Create or navigate to video review page
-                                window.location.href = "video-review"
-                                break
-                            case "blog":
-                                // Create or navigate to blog page
-                                window.location.href = "blog.html"
-                                break
-                            default:
-                                // For any other pages, you can add more cases here
-                                console.log(`Navigation to ${page} not implemented yet`)
-                                break
-                        }
-                    }, 300) // Small delay to show the ripple effect
-                }
-            })
+    // If it's a dropdown item, also set its parent dropdown as active
+    if (clickedElement.classList.contains("dropdown-item")) {
+      const parentDropdown = clickedElement.closest(".dropdown")
+      if (parentDropdown) {
+        const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle")
+        if (dropdownToggle) {
+          dropdownToggle.classList.add("active")
         }
-    })
-
-    // Handle dropdown item clicks
-    const dropdownItems = document.querySelectorAll(".dropdown-item")
-    dropdownItems.forEach((item) => {
-        item.addEventListener("click", function (e) {
-            e.preventDefault()
-
-            // Add ripple effect
-            createRipple(e, this)
-
-            // You can add specific functionality for each dropdown item here
-            console.log("Clicked:", this.textContent.trim())
-        })
-    })
-
-    // Restore active state if explicitly set
-    const activePage = localStorage.getItem("activePage")
-    if (activePage) {
-        const activeLink = document.querySelector(`[data-page="${activePage}"]`)
-        if (activeLink) {
-            activeLink.classList.add("active")
-        }
+      }
     }
 
-    // Enhanced scroll effect for navbar with hide/show on scroll
-    window.addEventListener("scroll", () => {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    // Store the active item info for page reload
+    const itemInfo = {
+      text: clickedElement.textContent.trim(),
+      href: clickedElement.getAttribute("href"),
+      isDropdownItem: clickedElement.classList.contains("dropdown-item"),
+    }
+    localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
+  }
 
-        // Add scrolled class for subtle design changes
-        if (scrollTop > 10) {
-            navbar.classList.add("scrolled")
+  // Function to restore active state on page load
+  function restoreActiveState() {
+    const storedItem = localStorage.getItem("activeNavItem")
+    if (storedItem) {
+      try {
+        const itemInfo = JSON.parse(storedItem)
+
+        // Find the element by text content and href
+        let targetElement = null
+
+        if (itemInfo.isDropdownItem) {
+          // Look for dropdown item
+          document.querySelectorAll(".dropdown-item").forEach((item) => {
+            if (item.textContent.trim() === itemInfo.text) {
+              targetElement = item
+            }
+          })
         } else {
-            navbar.classList.remove("scrolled")
+          // Look for nav link
+          document.querySelectorAll(".nav-link").forEach((link) => {
+            if (link.textContent.trim() === itemInfo.text || link.getAttribute("href") === itemInfo.href) {
+              targetElement = link
+            }
+          })
         }
 
-        // Hide/show navbar on scroll
-        if (scrollTop > navbarHeight) {
-            if (scrollTop > lastScrollTop) {
-                // Scrolling down
-                navbar.classList.add("scrolled-down")
-                navbar.classList.remove("scrolled-up")
-            } else {
-                // Scrolling up
-                navbar.classList.remove("scrolled-down")
-                navbar.classList.add("scrolled-up")
+        if (targetElement) {
+          removeAllActiveClasses()
+          targetElement.classList.add("active")
+
+          // If it's a dropdown item, also set parent as active
+          if (targetElement.classList.contains("dropdown-item")) {
+            const parentDropdown = targetElement.closest(".dropdown")
+            if (parentDropdown) {
+              const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle")
+              if (dropdownToggle) {
+                dropdownToggle.classList.add("active")
+              }
             }
+          }
+        }
+      } catch (e) {
+        console.log("Error restoring active state:", e)
+      }
+    }
+  }
+
+  // Handle clicks on ALL navigation links (existing and future ones)
+  document.addEventListener("click", (e) => {
+    // Check if clicked element is a nav-link (but not dropdown-toggle)
+    if (e.target.closest(".nav-link") && !e.target.closest(".nav-link").classList.contains("dropdown-toggle")) {
+      const navLink = e.target.closest(".nav-link")
+
+      // Add ripple effect
+      createRipple(e, navLink)
+
+      // Set active class
+      setActiveClass(navLink)
+
+      // Let the default navigation happen (href will work automatically)
+      // No need to prevent default or handle navigation manually
+    }
+
+    // Check if clicked element is a dropdown-item
+    if (e.target.closest(".dropdown-item")) {
+      const dropdownItem = e.target.closest(".dropdown-item")
+
+      // Add ripple effect
+      createRipple(e, dropdownItem)
+
+      // Set active class
+      setActiveClass(dropdownItem)
+
+      // Let the default navigation happen (href will work automatically)
+      // No need to prevent default or handle navigation manually
+    }
+  })
+
+  // Restore active state on page load
+  restoreActiveState()
+
+  // Enhanced scroll effect for navbar with hide/show on scroll
+  window.addEventListener("scroll", () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+
+    // Add scrolled class for subtle design changes
+    if (scrollTop > 10) {
+      navbar.classList.add("scrolled")
+    } else {
+      navbar.classList.remove("scrolled")
+    }
+
+    // Hide/show navbar on scroll
+    if (scrollTop > navbarHeight) {
+      if (scrollTop > lastScrollTop) {
+        // Scrolling down
+        navbar.classList.add("scrolled-down")
+        navbar.classList.remove("scrolled-up")
+      } else {
+        // Scrolling up
+        navbar.classList.remove("scrolled-down")
+        navbar.classList.add("scrolled-up")
+      }
+    } else {
+      navbar.classList.remove("scrolled-up")
+    }
+
+    lastScrollTop = scrollTop
+  })
+
+  // Auto-close mobile menu when clicking on a link (except dropdown toggles)
+  const navbarCollapse = document.getElementById("navbarNav")
+  const navbarToggler = document.querySelector(".navbar-toggler")
+
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".nav-link") && !e.target.closest(".nav-link").classList.contains("dropdown-toggle")) {
+      // Only auto-close if we're on mobile
+      if (window.innerWidth < 992 && navbarCollapse && navbarCollapse.classList.contains("show")) {
+        const bsCollapse = new window.bootstrap.Collapse(navbarCollapse, {
+          toggle: false,
+        })
+        bsCollapse.hide()
+
+        // Reset toggler icon
+        if (navbarToggler) {
+          navbarToggler.setAttribute("aria-expanded", "false")
+        }
+      }
+    }
+  })
+
+  // Button click handlers with enhanced feedback
+  const buttons = document.querySelectorAll(".auth-buttons .btn")
+  buttons.forEach((button) => {
+    button.addEventListener("click", function (e) {
+      createRipple(e, this)
+
+      // Show feedback based on button type
+      const buttonType = this.classList.contains("btn-login")
+        ? "đăng nhập"
+        : this.classList.contains("btn-register")
+          ? "đăng ký"
+          : this.classList.contains("btn-notification")
+            ? "thông báo"
+            : "đăng tin cho chủ trọ"
+
+      // Delay alert to allow ripple effect to show
+      setTimeout(() => {
+        if (this.classList.contains("btn-notification")) {
+          alert(`Bạn có 3 thông báo mới!`)
+        } else if (this.classList.contains("btn-login")) {
+          // Don't show alert for login button, let the modal handle it
+          return
+        } else if (this.classList.contains("btn-register")) {
+          return
         } else {
-            navbar.classList.remove("scrolled-up")
+          alert(`Chức năng ${buttonType} đã được kích hoạt`)
         }
-
-        lastScrollTop = scrollTop
+      }, 300)
     })
+  })
 
-    // Auto-close mobile menu when clicking on a link (except dropdown toggles)
-    const navbarCollapse = document.getElementById("navbarNav")
-    const navbarToggler = document.querySelector(".navbar-toggler")
+  // User dropdown menu click handlers
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".user-dropdown-menu .dropdown-item")) {
+      const dropdownItem = e.target.closest(".dropdown-item")
+      const itemText = dropdownItem.textContent.trim()
 
-    navLinks.forEach((link) => {
-        link.addEventListener("click", () => {
-            // Only auto-close if it's not a dropdown toggle and we're on mobile
-            if (
-                window.innerWidth < 992 &&
-                navbarCollapse.classList.contains("show") &&
-                !link.classList.contains("dropdown-toggle")
-            ) {
-                const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
-                    toggle: false,
-                })
-                bsCollapse.hide()
+      // Prevent default for demo purposes
+      e.preventDefault()
 
-                // Reset toggler icon
-                navbarToggler.setAttribute("aria-expanded", "false")
+      // Show feedback based on menu item
+      setTimeout(() => {
+        if (itemText.includes("Đăng xuất")) {
+          // alert("Đăng xuất thành công!")
+          // Set active state back to home page after logout
+          removeAllActiveClasses()
+          const homeLink = document.querySelector('.nav-link[href="/trang-chu"]')
+          if (homeLink) {
+            homeLink.classList.add("active")
+            // Update localStorage to reflect home page as active
+            const itemInfo = {
+              text: homeLink.textContent.trim(),
+              href: homeLink.getAttribute("href"),
+              isDropdownItem: false,
             }
-        })
-    })
-
-    // Button click handlers with enhanced feedback
-    const buttons = document.querySelectorAll(".auth-buttons .btn")
-    buttons.forEach((button) => {
-        button.addEventListener("click", function (e) {
-            createRipple(e, this)
-
-            // Show feedback based on button type
-            const buttonType = this.classList.contains("btn-login")
-                ? "đăng nhập"
-                : this.classList.contains("btn-register")
-                    ? "đăng ký"
-                    : "đăng tin cho chủ trọ"
-
-            // Delay alert to allow ripple effect to show
+            localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
+            // Redirect to home page after a short delay
             setTimeout(() => {
-                alert(`Chức năng ${buttonType} đã được kích hoạt`)
-            }, 300)
-        })
-    })
-
-    // Ripple effect function for buttons and links
-    function createRipple(event, element) {
-        const circle = document.createElement("span")
-        const diameter = Math.max(element.clientWidth, element.clientHeight)
-        const radius = diameter / 2
-
-        // Position the ripple
-        const rect = element.getBoundingClientRect()
-
-        circle.style.width = circle.style.height = `${diameter}px`
-        circle.style.left = `${event.clientX - rect.left - radius}px`
-        circle.style.top = `${event.clientY - rect.top - radius}px`
-        circle.classList.add("ripple")
-
-        // Remove existing ripples
-        const ripple = element.querySelector(".ripple")
-        if (ripple) {
-            ripple.remove()
+              window.location.href = "/trang-chu"
+            }, 100)
+          }
+        } else if (itemText.includes("Hồ sơ")) {
+          alert("Chuyển đến trang hồ sơ cá nhân")
+        } else if (itemText.includes("Trọ đã lưu")) {
+          alert("Hiển thị danh sách trọ đã lưu")
+        } else if (itemText.includes("Cài đặt")) {
+          alert("Mở trang cài đặt")
         }
+      }, 100)
+    }
+  })
 
-        // Add new ripple
-        element.appendChild(circle)
+  // Ripple effect function for buttons and links
+  function createRipple(event, element) {
+    const circle = document.createElement("span")
+    const diameter = Math.max(element.clientWidth, element.clientHeight)
+    const radius = diameter / 2
 
-        // Remove ripple after animation
-        setTimeout(() => {
-            if (circle) {
-                circle.remove()
-            }
-        }, 600)
+    // Position the ripple
+    const rect = element.getBoundingClientRect()
+
+    circle.style.width = circle.style.height = `${diameter}px`
+    circle.style.left = `${event.clientX - rect.left - radius}px`
+    circle.style.top = `${event.clientY - rect.top - radius}px`
+    circle.classList.add("ripple")
+
+    // Remove existing ripples
+    const ripple = element.querySelector(".ripple")
+    if (ripple) {
+      ripple.remove()
     }
 
-    // Add ripple style
-    const style = document.createElement("style")
-    style.textContent = `
-        .ripple {
-            position: absolute;
-            background-color: rgba(255, 255, 255, 0.4);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-        }
-        
-        @keyframes ripple {
-            to {
-                transform: scale(4);
-                opacity: 0;
-            }
-        }
-        
-        .btn, .nav-link, .dropdown-item {
-            position: relative;
-            overflow: hidden;
-        }
-    `
-    document.head.appendChild(style)
+    // Add new ripple
+    element.appendChild(circle)
 
-    // Preload hover states for smoother interactions
-    function preloadHoverStates() {
-        const hoverStyle = document.createElement("div")
-        hoverStyle.style.position = "absolute"
-        hoverStyle.style.width = "0"
-        hoverStyle.style.height = "0"
-        hoverStyle.style.opacity = "0"
-        hoverStyle.style.pointerEvents = "none"
-        document.body.appendChild(hoverStyle)
+    // Remove ripple after animation
+    setTimeout(() => {
+      if (circle) {
+        circle.remove()
+      }
+    }, 600)
+  }
 
-        // Preload button hover states
-        hoverStyle.className = "btn-login hover"
-        hoverStyle.className = "btn-register hover"
-        hoverStyle.className = "btn-post hover"
-
-        // Remove after preloading
-        setTimeout(() => {
-            document.body.removeChild(hoverStyle)
-        }, 500)
+  // Add ripple style
+  const style = document.createElement("style")
+  style.textContent = `
+    .ripple {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      transform: scale(0);
+      animation: ripple 0.6s linear;
+      pointer-events: none;
     }
+    
+    @keyframes ripple {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+    
+    .btn, .nav-link, .dropdown-item {
+      position: relative;
+      overflow: hidden;
+    }
+  `
+  document.head.appendChild(style)
 
-    // Call preload function
-    preloadHoverStates()
+  // Preload hover states for smoother interactions
+  function preloadHoverStates() {
+    const hoverStyle = document.createElement("div")
+    hoverStyle.style.position = "absolute"
+    hoverStyle.style.width = "0"
+    hoverStyle.style.height = "0"
+    hoverStyle.style.opacity = "0"
+    hoverStyle.style.pointerEvents = "none"
+    document.body.appendChild(hoverStyle)
 
-    // Handle dropdown item navigation
-    dropdownItems.forEach((item) => {
-        item.addEventListener("click", function (e) {
-            e.preventDefault()
+    // Preload button hover states
+    hoverStyle.className = "btn-login hover"
+    hoverStyle.className = "btn-register hover"
+    hoverStyle.className = "btn-post hover"
 
-            // Add ripple effect
-            createRipple(e, this)
+    // Remove after preloading
+    setTimeout(() => {
+      document.body.removeChild(hoverStyle)
+    }, 500)
+  }
 
-            // Get the text content to determine navigation
-            const itemText = this.textContent.trim()
-
-            // Navigate based on dropdown item after animation
-            setTimeout(() => {
-                switch (itemText) {
-                    case "Phòng trọ":
-                        window.location.href = "phong-tro"
-                        break
-                    case "Nhà nguyên căn":
-                        window.location.href = "nha-nguyen-can.html"
-                        break
-                    case "Căn hộ":
-                        window.location.href = "can-ho.html"
-                        break
-                    default:
-                        console.log(`Navigation to ${itemText} not implemented yet`)
-                        break
-                }
-            }, 300)
-        })
-    })
+  // Call preload function
+  preloadHoverStates()
 })
