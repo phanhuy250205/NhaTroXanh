@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -29,5 +30,8 @@ public class Utility {
     private String name;
 
     @ManyToMany(mappedBy = "utilities")
-    private Set<Rooms> rooms;
+    private Set<Rooms> rooms = new HashSet<>();
+
+    @ManyToMany(mappedBy = "utilities")
+    private Set<Post> posts = new HashSet<>();
 }

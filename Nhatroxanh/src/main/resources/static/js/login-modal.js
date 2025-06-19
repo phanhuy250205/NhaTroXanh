@@ -4,117 +4,117 @@ document.addEventListener("DOMContentLoaded", () => {
     const loginModalOverlay = document.getElementById("loginModalOverlay")
     const loginModalClose = document.getElementById("loginModalClose")
     const loginForm = document.getElementById("loginForm")
-
-    // Lấy password toggle button trong login modal (dựa theo register modal)
-    const passwordToggle = document.querySelector("#loginModalOverlay .password-toggle")
+    const passwordToggle = document.querySelector(".password-toggle")
+    const passwordInput = document.querySelector('input[type="password"]')
 
     // Open modal when login button is clicked
-    if (loginBtn) {
-        loginBtn.addEventListener("click", (e) => {
-            e.preventDefault()
-            openModal()
-        })
-    }
+    loginBtn.addEventListener("click", (e) => {
+        e.preventDefault()
+        openModal()
+    })
 
     // Close modal when close button is clicked
-    if (loginModalClose) {
-        loginModalClose.addEventListener("click", () => {
-            closeModal()
-        })
-    }
+    loginModalClose.addEventListener("click", () => {
+        closeModal()
+    })
 
     // Close modal when clicking outside
-    if (loginModalOverlay) {
-        loginModalOverlay.addEventListener("click", (e) => {
-            if (e.target === loginModalOverlay) {
-                closeModal()
-            }
-        })
-    }
-
-    // Close modal with Escape key
-    document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && loginModalOverlay && loginModalOverlay.classList.contains("show")) {
+    loginModalOverlay.addEventListener("click", (e) => {
+        if (e.target === loginModalOverlay) {
             closeModal()
         }
     })
 
-    // Password toggle functionality - COPY TỪNG DÒNG TỪ REGISTER MODAL
-    // if (passwordToggle) {
-    //     passwordToggle.addEventListener("click", function () {
-    //         const passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"]')
-    //         const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
-    //         passwordInput.setAttribute("type", type)
+    // Close modal with Escape key
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && loginModalOverlay.classList.contains("show")) {
+            closeModal()
+        }
+    })
 
-    //         const icon = this.querySelector("i")
-    //         if (type === "password") {
-    //             icon.classList.remove("fa-eye")
-    //             icon.classList.add("fa-eye-slash")
-    //         } else {
-    //             icon.classList.remove("fa-eye-slash")
-    //             icon.classList.add("fa-eye")
-    //         }
-    //     })
-    // }
+    // Password toggle functionality
+    passwordToggle.addEventListener("click", function () {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password"
+        passwordInput.setAttribute("type", type)
+
+        const icon = this.querySelector("i")
+        if (type === "password") {
+            icon.classList.remove("fa-eye")
+            icon.classList.add("fa-eye-slash")
+        } else {
+            icon.classList.remove("fa-eye-slash")
+            icon.classList.add("fa-eye")
+        }
+    })
 
     // Form submission
-    if (loginForm) {
-        loginForm.addEventListener("submit", function (e) {
-            e.preventDefault()
+    loginForm.addEventListener("submit", function (e) {
+        e.preventDefault()
 
-            const submitBtn = this.querySelector(".btn-login-submit")
-            const username = this.querySelector('input[placeholder="Nhập SĐT hoặc email"]').value
-            const password = this.querySelector(".input-password").value
+        const submitBtn = this.querySelector(".btn-login-submit")
+        const text = this.querySelector('input[type="text"]').value
+        const password = this.querySelector('input[type="password"]').value
 
-            // Basic validation
-            if (!username || !password) {
-                alert("Vui lòng điền đầy đủ thông tin!")
-                return
-            }
+        // Basic validation
+        if (!text || !password) {
+            alert("Vui lòng điền đầy đủ thông tin!")
+            return
+        }
 
-            // Add loading state
-            submitBtn.classList.add("loading")
-            submitBtn.disabled = true
+        // Add loading state
+        submitBtn.classList.add("loading")
+        submitBtn.disabled = true
 
-            // Simulate login process
-            setTimeout(() => {
-                submitBtn.classList.remove("loading")
-                submitBtn.disabled = false
+        // Simulate login process
+        setTimeout(() => {
+            submitBtn.classList.remove("loading")
+            submitBtn.disabled = false
 
-                // Show success message
-                alert(`Đăng nhập thành công!`)
-                closeModal()
+            // Show success message
+            // alert("Đăng nhập thành công!")
+            closeModal()
 
-                // Reset form
-                loginForm.reset()
+            // Reset form
+            loginForm.reset()
 
-                // Reset password visibility - DÙNG LOGIC TỪ REGISTER MODAL
-                if (passwordToggle) {
-                    const passwordInput = passwordToggle.parentElement.querySelector("input")
-                    passwordInput.setAttribute("type", "password")
-                    const icon = passwordToggle.querySelector("i")
-                    icon.classList.remove("fa-eye")
-                    icon.classList.add("fa-eye-slash")
+            // Set active state for home page before redirect
+            const homeLink = document.querySelector('.nav-link[href="/trang-chu"]')
+            if (homeLink) {
+                // Remove all active classes first
+                document.querySelectorAll(".nav-link").forEach((link) => {
+                link.classList.remove("active")
+                })
+                document.querySelectorAll(".dropdown-item").forEach((item) => {
+                item.classList.remove("active")
+                })
+
+                // Set home page as active
+                homeLink.classList.add("active")
+
+                // Update localStorage to reflect home page as active
+                const itemInfo = {
+                text: homeLink.textContent.trim(),
+                href: homeLink.getAttribute("href"),
+                isDropdownItem: false,
                 }
-            }, 2000)
-        })
-    }
+                localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
+            }
+            
+            // Redirect to home page after successful login
+            setTimeout(() => {
+                window.location.href = "/trang-chu"
+            }, 500)
+        }, 2000)
+    })
 
     // Social login buttons
-    const googleBtn = document.querySelector(".login-modal .btn-google")
-    const facebookBtn = document.querySelector(".login-modal .btn-facebook")
+    document.querySelector(".btn-google").addEventListener("click", () => {
+        alert("Đăng nhập với Google - Chức năng đang phát triển")
+    })
 
-    if (googleBtn) {
-        googleBtn.addEventListener("click", () => {
-            alert("Đăng nhập với Google - Chức năng đang phát triển")
-        })
-    }
-
-    if (facebookBtn) {
-        facebookBtn.addEventListener("click", () => {
-            alert("Đăng nhập với Facebook - Chức năng đang phát triển")
-        })
-    }
+    document.querySelector(".btn-facebook").addEventListener("click", () => {
+        alert("Đăng nhập với Facebook - Chức năng đang phát triển")
+    })
 
     // Register link
     const registerLink = document.querySelector(".register-now")
@@ -130,43 +130,39 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 
+    // Forgot password link
+    document.querySelector(".forgot-password").addEventListener("click", (e) => {
+        e.preventDefault()
+        alert("Chuyển đến trang quên mật khẩu - Chức năng đang phát triển")
+    })
+
     // Functions to open and close modal
     function openModal() {
-        if (loginModalOverlay) {
-            loginModalOverlay.classList.add("show")
-            document.body.style.overflow = "hidden" // Prevent background scrolling
+        loginModalOverlay.classList.add("show")
+        document.body.style.overflow = "hidden" // Prevent background scrolling
 
-            // Focus on first input
-            setTimeout(() => {
-                const firstInput = loginForm.querySelector('input[placeholder="Nhập SĐT hoặc email"]')
-                if (firstInput) {
-                    firstInput.focus()
-                }
-            }, 300)
-        }
+        // Focus on first input
+        setTimeout(() => {
+            const firstInput = loginForm.querySelector('input[type="text"]')
+            if (firstInput) {
+                firstInput.focus()
+            }
+        }, 300)
     }
 
     function closeModal() {
-        if (loginModalOverlay) {
-            loginModalOverlay.classList.remove("show")
-            document.body.style.overflow = "" // Restore scrolling
+        loginModalOverlay.classList.remove("show")
+        document.body.style.overflow = "" // Restore scrolling
 
-            // Reset form and password visibility
-            if (loginForm) {
-                loginForm.reset()
-                // Reset password visibility - DÙNG LOGIC TỪ REGISTER MODAL
-                if (passwordToggle) {
-                    const passwordInput = passwordToggle.parentElement.querySelector("input")
-                    passwordInput.setAttribute("type", "password")
-                    const icon = passwordToggle.querySelector("i")
-                    icon.classList.remove("fa-eye")
-                    icon.classList.add("fa-eye-slash")
-                }
-            }
-        }
+        // Reset form and password visibility
+        loginForm.reset()
+        passwordInput.setAttribute("type", "password")
+        const icon = passwordToggle.querySelector("i")
+        icon.classList.remove("fa-eye")
+        icon.classList.add("fa-eye-slash")
     }
 
-    // Add smooth animations for form elements - COPY TỪ REGISTER MODAL
+    // Add smooth animations for form elements
     const formInputs = document.querySelectorAll(".form-control-login")
     formInputs.forEach((input) => {
         input.addEventListener("focus", function () {

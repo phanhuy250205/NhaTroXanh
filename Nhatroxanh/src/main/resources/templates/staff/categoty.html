@@ -169,6 +169,18 @@
       </thead>
       <tbody>
         <tr th:each="cat : ${categories}">
+<<<<<<< HEAD
+          <td th:text="${cat.categoryId}">001</td>
+          <td th:text="${cat.name}">Nhà trọ</td>
+          <td th:text="${#lists.size(cat.posts)}">147</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-2 d-inline-flex align-items-center"
+              th:attr="data-id=${cat.categoryId}, data-name=${cat.name}" data-bs-toggle="modal"
+              data-bs-target="#modalDanhMucEdit" onclick="editCategory(this)">
+              <i class="bi bi-pencil-square me-1"></i> Sửa
+            </button>
+            <a th:href="@{/quanly/category/delete/{id}(id=${cat.categoryId})}"
+=======
           <td th:text="${cat.category_id}">001</td>
           <td th:text="${cat.name}">Nhà trọ</td>
           <td th:text="${#lists.size(cat.rooms)}">147</td>
@@ -179,6 +191,7 @@
               <i class="bi bi-pencil-square me-1"></i> Sửa
             </button>
             <a th:href="@{/quanly/category/delete/{id}(id=${cat.category_id})}"
+>>>>>>> long_t
               onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')"
               class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
               <i class="bi bi-trash3 me-1"></i> Xóa

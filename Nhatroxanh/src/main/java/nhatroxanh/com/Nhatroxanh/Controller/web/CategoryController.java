@@ -8,14 +8,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
-import nhatroxanh.com.Nhatroxanh.Repository.CategoryReponsitory;
+import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 
 @Controller
 @RequestMapping("/quanly/category")
 public class CategoryController {
 
     @Autowired
-    private CategoryReponsitory categoryRepo;
+    private CategoryRepository categoryRepo;
 
     @GetMapping("")
     public String listAllCategory(Model model) {

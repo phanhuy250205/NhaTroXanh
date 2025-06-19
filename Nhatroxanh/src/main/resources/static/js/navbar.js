@@ -1,5 +1,5 @@
 // Remove any default active states on page load
-const navLinks = document.querySelectorAll(".nav-link")
+const navLinks = document.querySelectorAll(".nav-link");
 navLinks.forEach((link) => {
   link.classList.remove("active")
 })
