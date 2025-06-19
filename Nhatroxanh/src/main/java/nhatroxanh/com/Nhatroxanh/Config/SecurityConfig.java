@@ -56,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/trang-chu", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
                                 "/fonts/**")
                         .permitAll()
-                        .requestMatchers("/phong-tro/**", "/chi-tiet/**").permitAll()
+                        .requestMatchers("/phong-tro/**", "/chi-tiet/**","/danh-muc/**","/uploads/**").permitAll()
                         // Mọi request khác cần xác thực
                         .anyRequest().authenticated())
                 .formLogin(form -> form
