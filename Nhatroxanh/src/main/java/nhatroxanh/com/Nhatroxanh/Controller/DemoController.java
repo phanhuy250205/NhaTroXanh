@@ -5,10 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class DemoController {
-    @GetMapping("/trang-chu")
-    public String home() {
-        return "index";
-    }
 
     @GetMapping("/chi-tiet")
     public String chitiet() {
@@ -70,53 +66,39 @@ public class DemoController {
         return "host/QL-danh-gia-host";
     }
 
-    @GetMapping("/chu-tro/profile-host")
-    public String profilehost() {
-        return "host/profile-host";
-    }
-     @GetMapping("/chu-tro/quan-ly-tro")
+    @GetMapping("/chu-tro/quan-ly-tro")
     public String phongtro() {
         return "host/phongtro";
     }
-    @GetMapping("/chu-tro/dang-ky-chu-tro")
-    public String dangkychutro() {
-        return "auth/register-host";
-    }
-    @GetMapping("/chu-tro/dang-nhap-chu-tro")
-    public String dangnhapchutro() {
-        return "auth/login-host";
-    }
-    @GetMapping("/chu-tro/thong-tin-tro")
-    public String hostthongtintro() {
-        return "host/thongtintro";
-    }
-     @GetMapping("/chu-tro/them-khu-tro")
-    public String themkhutro() {
-        return "host/themkhutro";
-    }
-     @GetMapping("/chu-tro/tong-quan")
+
+    @GetMapping("/chu-tro/tong-quan")
     public String tongquan() {
         return "host/tong-quan";
     }
-     @GetMapping("/chu-tro/khach-thue")
+
+    @GetMapping("/chu-tro/khach-thue")
     public String khachthue() {
         return "host/quan-ly-khach-thue";
     }
-     @GetMapping("/chu-tro/dang-tin")
+
+    @GetMapping("/chu-tro/dang-tin")
     public String dangtin() {
         return "host/bai-dang-host";
     }
+
     @GetMapping("/chu-tro/bai-dang")
     public String quanlyhopdong() {
-        return "host/quan-ly-bai-dang";   
+        return "host/quan-ly-bai-dang";
     }
+
     @GetMapping("/chu-tro/chi-tiet-bai-dang")
     public String chitietbaidang() {
-        return "host/chi-tiet-bai-dang";   
+        return "host/chi-tiet-bai-dang";
     }
+
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
-        return "host/chi-tiet-khach-thue";   
+        return "host/chi-tiet-khach-thue";
     }
     @GetMapping("/chu-tro/sua-bai-dang")
     public String chitiethopdong() {

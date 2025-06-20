@@ -61,7 +61,7 @@ public class Users {
     @Column(name = "cccd", length = 20)
     private String cccd;
 
-    @Column(name = "avatar", length = 50)
+    @Column(name = "avatar", length = 1000)
     private String avatar;
 
     @Column(name = "otp_code")
@@ -73,12 +73,15 @@ public class Users {
     @Column(name = "enabled", nullable = false)
     private boolean enabled = false;
 
+    @Column(name = "address", length = 255)
+    private String address;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
 
     // @Column(name = "status")
-    // private Boolean status; 
+    // private Boolean status;
 
     public enum Role {
         admin, staff, owner, customer

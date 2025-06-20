@@ -10,39 +10,31 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class CustomUserDetails implements UserDetails {
-
-    private final String email;
-    private final String password;
-    private final String fullName;
-    private final boolean enabled;
-    private final Collection<? extends GrantedAuthority> authorities;
+    private final Users user;
 
     public CustomUserDetails(Users user) {
-        this.email = user.getEmail();
-        this.password = user.getPassword();
-        this.fullName = user.getFullname();
-        this.enabled = user.isEnabled();
-        this.authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().name().toUpperCase()));
+        this.user = user;
     }
 
+    public Users getUser() {
+        return user;
+    }
+
+    // ✅ THÊM MỚI
+    public String getFullName() {
+        return user.getFullname(); // hoặc getFullName nếu field là camelCase
+    }
+    public String getAvatar() {
+        return user.getAvatar();
+    }
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+    public String getUsername() {
+        return user.getUsername();
     }
 
     @Override
     public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return email;
-    }
-
-    public String getFullName() { // Thêm getter cho fullName
-        return fullName;
+        return user.getPassword();
     }
 
     @Override
@@ -62,12 +54,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return user.isEnabled();
     }
 
     @Override
-    public String toString() {
-        return "CustomUserDetails[email=" + email + ", fullName=" + fullName + ", enabled=" + enabled + ", authorities="
-                + authorities + "]";
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name().toUpperCase()));
     }
 }

@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
+
 <body class="thongtintro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -19,7 +21,7 @@
                         Thêm khu trọ mới
                     </button>
                 </a>
-                
+
             </div>
 
             <!-- Search Section -->
@@ -44,67 +46,37 @@
                         </tr>
                     </thead>
                     <tbody class="table-body-host" id="tableBodyHost">
-                        <tr class="table-row-host">
-                            <td class="table-td-host">1</td>
-                            <td class="table-td-host">Khu A</td>
+                        <tr class="table-row-host" th:each="hostel : ${hostels}">
+                            <td class="table-td-host" th:text="${hostel.hostelId}">1</td>
+                            <td class="table-td-host" th:text="${hostel.name}">Tên khu trọ</td>
                             <td class="table-td-host">
-                                <span class="status-badge-host status-active-host">Đang hoạt động</span>
+                                <span th:classappend="${hostel.status} ? 'status-active-host' : 'status-inactive-host'"
+                                    th:text="${hostel.status} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                    Trạng thái
+                                </span>
                             </td>
                             <td class="table-td-host">
                                 <div class="action-btns-host">
-                                    <a th:href="@{/chu-tro/them-khu-tro}">
+                                    <a th:href="@{'/chu-tro/them-khu-tro?id=' + ${hostel.hostelId}}">
                                         <button class="buttons-edit-host" title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     </a>
-                                    <button class="btn-delete-host" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="table-row-host">
-                            <td class="table-td-host">2</td>
-                            <td class="table-td-host">Khu B</td>
-                            <td class="table-td-host">
-                                <span class="status-badge-host status-inactive-host">Ngưng hoạt động</span>
-                            </td>
-                            <td class="table-td-host">
-                                <div class="action-btns-host">
-                                    <a th:href="@{/chu-tro/them-khu-tro}">
-                                        <button class="buttons-edit-host" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
+                                    <form th:action="@{/chu-tro/xoa-khu-tro}" method="post" style="display:inline;">
+                                        <input type="hidden" name="hostelId" th:value="${hostel.hostelId}" />
+                                        <button type="submit" class="btn-delete-host" title="Xóa">
+                                            <i class="fas fa-trash"></i>
                                         </button>
-                                    </a>
-                                    <button class="btn-delete-host" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        <tr class="table-row-host">
-                            <td class="table-td-host">3</td>
-                            <td class="table-td-host">Khu C</td>
-                            <td class="table-td-host">
-                                <span class="status-badge-host status-active-host">Đang hoạt động</span>
-                            </td>
-                            <td class="table-td-host">
-                                <div class="action-btns-host">
-                                    <a th:href="@{/chu-tro/them-khu-tro}">
-                                        <button class="buttons-edit-host" title="Chỉnh sửa">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                    </a>
-                                    <button class="btn-delete-host" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    </form>
                                 </div>
                             </td>
                         </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
 </body>
+
 </html>
