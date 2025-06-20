@@ -30,7 +30,6 @@ document.addEventListener("DOMContentLoaded", () => {
     hideSubmenu();
   }
 
-
   function showOverlay() {
     overlay.classList.remove('d-none');
   }
@@ -63,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
     showOverlay();
     setActiveSidebar(el);
   }
+
   function showTroSidebar(el) {
     hideAccountSidebar();
     hideRentalSidebar();
@@ -124,30 +124,25 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.nav-sidebar').forEach(item => item.classList.remove('active'));
     document.querySelectorAll('.nav-sublink-host').forEach(link => link.classList.remove('active'));
 
+    // Cập nhật navMap với các đường dẫn từ controller
     const navMap = {
-      '/chu-tro/overview': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
-      '/chu-tro/posts': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
+      '/chu-tro/tong-quan': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
       '/chu-tro/quan-ly-bai-dang': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
-      '/chu-tro/tenants': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
-      '/chu-tro/room-management': { sidebar: '#nav-tro', submenu: '#room-management' },
-      '/chu-tro/info-management': { sidebar: '#nav-tro', submenu: '#info-management' },
+      '/chu-tro/bai-dang-host': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
+      '/chu-tro/quan-ly-khach-thue': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
+      '/chu-tro/chi-tiet-khach-thue': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
+      '/phong-tro-host': { sidebar: '#nav-tro', submenu: '/phong-tro-host' },
+      '/thong-tin-tro-host': { sidebar: '#nav-tro', submenu: '/thong-tin-tro-host' },
       '/chu-tro/DS-hop-dong-host': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/lich-su-thue': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/thanh-toan': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/gia-hang-tra-phong': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/danh-gia': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/profile-host': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
-      '/admin/employee-management': { sidebar: '.nav-sidebar:has(.fa-users)' },
-      '/admin/statistics-reports': { sidebar: '.nav-sidebar:has(.fa-chart-bar)' },
-      '/admin/profile-host': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
-      '/nhan-vien/posts': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
-      '/nhan-vien/promotions': { sidebar: '.nav-sidebar:has(.fa-gift)' },
-      '/nhan-vien/complaints': { sidebar: '.nav-sidebar:has(.fa-comment-dots)' },
-      '/nhan-vien/hosts': { sidebar: '.nav-sidebar:has(.fa-user-tie)' },
-      '/nhan-vien/tenants': { sidebar: '.nav-sidebar:has(.fa-user)' },
-      '/nhan-vien/payments': { sidebar: '.nav-sidebar:has(.fa-credit-card)' },
-      '/nhan-vien/rental-info': { sidebar: '.nav-sidebar:has(.fa-house-user)' },
-      '/nhan-vien/profile': { sidebar: '.nav-sidebar:has(.fa-user-circle)' }
+      '/chu-tro/hop-dong': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
+      '/chu-tro/chi-tiet-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
+      '/chu-tro/sua-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
+      '/bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' }
     };
 
     const matchedNav = Object.entries(navMap).find(([path]) => currentPath.includes(path));
@@ -173,6 +168,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  // Xử lý click cho nav-sidebar
   document.querySelectorAll('.nav-sidebar').forEach(item => {
     item.addEventListener('click', e => {
       e.stopPropagation();
@@ -180,7 +176,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const isAccount = icon?.classList.contains('fa-user-circle');
       const isRental = icon?.classList.contains('fa-file-signature');
       const isTro = item.id === 'nav-tro';
+      const hasSubmenu = item.classList.contains('has-submenu');
 
+      // Nếu có data-link và không có submenu, điều hướng trực tiếp
+      const url = item.getAttribute('data-link');
+      if (url && !hasSubmenu) {
+        window.location.href = url;
+        return;
+      }
+
+      // Xử lý các sidebar đặc biệt
       if (isAccount) {
         showAccountSidebar(item);
       } else if (isRental) {
@@ -192,10 +197,10 @@ document.addEventListener("DOMContentLoaded", () => {
           showTroSubmenu(item); // desktop
         }
       }
-
     });
   });
 
+  // Xử lý click cho submenu links
   document.querySelectorAll('.nav-sublink-host').forEach(link => {
     link.addEventListener('click', e => {
       e.stopPropagation();
@@ -208,28 +213,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Đóng submenu khi click bên ngoài
   document.addEventListener('click', e => {
     if (!e.target.closest('#nav-tro') && !e.target.closest('.nav-submenu-host')) {
       hideSubmenu();
       hideOverlayIfNoneOpen();
     }
   });
-  // Điều hướng bằng data-link nếu có
-  document.querySelectorAll('.nav-sidebar').forEach(item => {
-    item.addEventListener('click', () => {
-      const url = item.getAttribute('data-link');
-      if (url && !item.classList.contains('has-submenu')) {
-        window.location.href = url;
-      }
-    });
-  });
 
+  // Event listeners cho các nút đóng
   overlay?.addEventListener('click', hideAll);
   closeAccountBtn?.addEventListener('click', hideAccountSidebar);
   closeRentalBtn?.addEventListener('click', hideRentalSidebar);
-  closeTroBtn?.addEventListener('click', hideTroSidebar); // thêm dòng này
+  closeTroBtn?.addEventListener('click', hideTroSidebar);
   document.querySelector('#closeSubmenu')?.addEventListener('click', hideSubmenu);
 
-
+  // Khởi tạo trạng thái active
   initializeActiveState();
 });

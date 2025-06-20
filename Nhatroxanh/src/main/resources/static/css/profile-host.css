@@ -107,8 +107,8 @@
 }
 
 .host-verified {
-    background: linear-gradient(135deg, #beffe9, #89dfc0);
-    color: rgb(0, 0, 0);
+    background: linear-gradient(135deg, #10b981, #34d399);
+    color: white;
     box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 

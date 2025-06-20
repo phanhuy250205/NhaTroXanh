@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thống Kê</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link
+      rel="icon"
+      th:href="@{/images/logo/nhatroxanh(title).png}"
+      type="image/x-icon"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <!-- Swiper CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+            min-height: 100vh;
+            display: flex;
+        }
+        .content-wrapper {
+            margin-left: 100px;
+            padding: 30px;
+            flex-grow: 1;
+            transition: all 0.3s ease;
+        }
+        .tongQuan {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2a44;
+            margin-bottom: 25px;
+            text-align: center;
+            border-bottom: 2px solid #1a2a44;
+            padding-bottom: 5px;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .tongQuan::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 4px;
+            background: #007bff;
+            border-radius: 2px;
+        }
+        .stats-tongQuan, .revenue-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+        }
+        .stat-card-tongQuan, .revenue-card {
+            width: 220px;
+            height: 120px;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            font-weight: 700;
+            line-height: 1.5;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .stat-card-tongQuan:hover, .revenue-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+        .stat-card-tongQuan .top, .revenue-card .top {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
+            height: 60%;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            border-radius: 10px 10px 0 0;
+            z-index: 0;
+        }
+        .stat-card-tongQuan .bottom, .revenue-card .bottom {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
+            height: 40%;
+            width: 100%;
+            position: absolute;
+            bottom: 0;
+            transform: rotate(180deg);
+            border-radius: 0 0 10px 10px;
+            z-index: 0;
+        }
+        .stat-card-tongQuan p, .revenue-card p {
+            font-size: 16px;
+            font-weight: 600;
+            z-index: 1;
+            margin: 0;
+            padding: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .stat-card-tongQuan span, .revenue-card span {
+            font-size: 32px;
+            font-weight: 700;
+            z-index: 1;
+            margin: 0;
+            padding: 0;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        .income h2 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a2a44;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+            text-transform: uppercase;
+        }
+        .income .line {
+            border-top: 2px solid #1a2a44;
+            width: 100%;
+            margin: -2px 0 25px 0;
+            position: relative;
+        }
+        .income .vector-left {
+            width: 100px;
+            height: 0;
+            border-top: 2px solid #1a2a44;
+            position: absolute;
+            left: 0;
+            top: -2px;
+        }
+        .income .vector-right {
+            width: calc(100% - 100px);
+            height: 0;
+            border-top: 2px solid #1a2a44;
+            position: absolute;
+            left: 100px;
+            top: -2px;
+        }
+        .revenue-card .line {
+            border-top: 1px solid #ffffff;
+            width: 180px;
+            margin-top: -1px;
+            z-index: 1;
+        }
+        .form-select {
+            padding: 8px 12px;
+            background: #f8f9fa;
+            border: 2px solid #1a2a44;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #1a2a44;
+            width: 250px;
+            height: 45px;
+            appearance: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .form-select:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+        .form-select option {
+            background: #f8f9fa;
+            color: #1a2a44;
+        }
+        .chart-container {
+            background-color: #fff;
+            padding: 25px 15px 15px 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            height: 450px;
+            overflow: hidden;
+        }
+        @media (max-width: 1200px) {
+            .stats-tongQuan, .revenue-grid {
+                justify-content: center;
+            }
+            .stat-card-tongQuan, .revenue-card {
+                margin: 10px 0;
+            }
+            .form-select {
+                width: 100%;
+                max-width: 250px;
+                margin-bottom: 20px;
+            }
+        }
+        @media (max-width: 768px) {
+            .content-wrapper {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+            .stats-tongQuan, .revenue-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+            .stat-card-tongQuan, .revenue-card {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+    
+    </div>
+    <div class="content-wrapper">
+        <div class="container-tongQuan">
+            <h2 class="tongQuan" data-aos="fade-up">THỐNG KÊ</h2>
+
+            <div class="income">
+                <div class="line"></div>
+            </div>
+            
+            <div class="stats-tongQuan row" data-aos="fade-up" data-aos-delay="100">
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #008dc9;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Tổng số nhà trọ</p><span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #00a040;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Tổng số phòng trọ</p><span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #e50707;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Số phòng đang trống</p><span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #ef6210;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Số phòng đang thuê</p><span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #a70edf;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Số phòng đang cọc giữ chỗ</p><span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #d60ac8;">
+                    <div class="top"></div>
+                    <div class="bottom"></div>
+                    <p>Số phòng đang nợ tiền</p><span>0</span>
+                </div>
+            </div>
+
+            <div class="income">
+                <h2 class="tongQuan" data-aos="fade-up" data-aos-delay="200">THU CHI</h2>
+                <div class="d-flex justify-content-end mb-3">
+                    <select class="form-select" data-aos="zoom-in" data-aos-delay="300">
+                        <option>7 ngày gần đây</option>
+                        <option>14 ngày gần đây</option>
+                        <option>30 ngày gần đây</option>
+                    </select>
+                </div>
+                <div class="line"></div>
+                <div class="revenue-grid row justify-content-center" data-aos="fade-up" data-aos-delay="400">
+                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(137, 121, 255, 0.4);">
+                    <p>Tổng khoản thu</p>
+                    <div class="line"></div>
+                    <span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(255, 146, 138, 0.4);">
+                    <p>Tổng khoản chi</p>
+                    <div class="line"></div>
+                    <span>0</span>
+                </div>
+                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(115, 223, 157, 0.4);">
+                    <p>Lợi nhuận</p>
+                    <div class="line"></div>
+                    <span>0</span>
+                </div>
+            </div>
+                <div class="chart-container" data-aos="fade-up" data-aos-delay="500">
+                    <canvas id="incomeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init();
+        const ctx = document.getElementById('incomeChart').getContext('2d');
+        const incomeChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                datasets: [
+                    {
+                        label: 'Tổng khoản thu',
+                        data: [60, 40, 90, 340, 50, 70, 80],
+                        borderColor: '#6c5ce7',
+                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Tổng khoản chi',
+                        data: [30, 60, 50, 170, 30, 20, 50],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    },
+                    {
+                        label: 'Lợi nhuận',
+                        data: [30, -20, 40, 170, 20, 50, 30],
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 80,
+                            color: '#1a2a44'
+                        },
+                        grid: {
+                            color: 'rgba(26, 42, 68, 0.1)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            padding: 10,
+                            color: '#1a2a44'
+                        },
+                        grid: {
+                            color: 'rgba(26, 42, 68, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#1a2a44',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true
+                }
+            }
+        });
+    </script>
+</body>
+</html>

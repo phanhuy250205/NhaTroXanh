@@ -20,6 +20,11 @@ public class DemoController {
         return "staff/categoty";
     }
 
+    @GetMapping("/phong-tro-fe")
+    public String danhmuc() {
+        return "guest/phong-tro";
+    }
+
     @GetMapping("/bai-dang")
     public String baidang() {
         return "host/bai-dang-host";
@@ -68,5 +73,33 @@ public class DemoController {
     @GetMapping("/chu-tro/profile-host")
     public String profilehost() {
         return "host/profile-host";
+    }
+    @GetMapping("/chu-tro/tong-quan")
+    public String tongQuan() {
+        return "host/tong-quan";
+    }
+    @GetMapping("/chu-tro/quan-ly-bai-dang")
+    public String quanLyBaiDang() {
+        return "host/quan-ly-bai-dang";
+    }
+    @GetMapping("/chu-tro/chi-tiet-bai-dang")
+    public String chiTietBaiDang() {
+        return "host/chi-tiet-bai-dang";
+    }
+    @GetMapping("/chu-tro/sua-bai-dang")
+    public String suaBaiDang() {
+        return "host/sua-bai-dang";
+    }
+    @GetMapping("/chu-tro/bai-dang-host")
+    public String baiDang() {
+        return "host/bai-dang-host";
+    }
+    @GetMapping("/chu-tro/quan-ly-khach-thue")
+    public String quanLyKhachThue() {
+        return "host/quan-ly-khach-thue";
+    }
+    @GetMapping("/chu-tro/chi-tiet-khach-thue")
+    public String chiTietKhachThue() {
+        return "host/chi-tiet-khach-thue";
     }
 }

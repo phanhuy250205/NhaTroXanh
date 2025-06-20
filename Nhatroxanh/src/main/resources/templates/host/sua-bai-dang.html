@@ -11,6 +11,7 @@
       th:href="@{/images/logo/nhatroxanh(title).png}"
       type="image/x-icon"
     />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <!-- Font Awesome -->
     <link
       rel="stylesheet"
@@ -31,6 +32,14 @@
         font-family: "Arial", sans-serif;
         color: #333;
       }
+
+      .breadcrumb-item a {
+        color: #000;             /* Màu mặc định */
+        text-decoration: none;   /* Bỏ gạch chân */
+        font-weight: bold;       /* Chữ đậm */
+        font-size: medium;
+        }
+
       .form-section {
         background: rgba(255, 255, 255, 0.9);
         padding: 20px;
@@ -86,7 +95,7 @@
         cursor: not-allowed;
       }
       .btn-custom-submit {
-        background: linear-gradient(45deg, #4caf50, #45a049);
+        background: linear-gradient(45deg, #4c8caf, #4845a0);
         color: white;
         border: none;
         padding: 12px 25px;
@@ -97,23 +106,11 @@
         margin-bottom: 20px;
       }
       .btn-custom-submit:hover {
-        background: linear-gradient(45deg, #45a049, #388e3c);
+        background: linear-gradient(45deg, #4550a0, #d2dcd3);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
       }
-      .btn-custom-reset {
-        background: linear-gradient(45deg, #f44336, #da190b);
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-      }
-      .btn-custom-reset:hover {
-        background: linear-gradient(45deg, #da190b, #b71c1c);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3);
-      }
+      
       .row {
         margin-bottom: 10px;
       }
@@ -221,12 +218,17 @@
   </head>
   <body>
     <!-- SIDEBAR -->
-  <div th:replace="~{/layouts/sidebar-host}"></div>
+    <div th:replace="~{/layouts/sidebar-host}"></div>
 
     <div class="container mt-4">
-      <h1 class="text-center mb-4" style="color: #2c3e50; font-weight: 700;">
-        Đăng tin trọ
-      </h1>
+      <!-- Breadcrumb -->
+        <div class="container mt-3">
+            <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><i class="bi bi-arrow-bar-left"></i> <a href="#">Sửa bài đăng</a></li>
+            </ol>
+            </nav>
+        </div>
 
       <!-- Loại danh mục -->
       <div class="form-section">
@@ -460,9 +462,9 @@
       <!-- Nút gửi -->
       <div class="text-center mt-4">
         <button type="submit" class="btn btn-custom-submit me-2">
-          Đăng bài
+          Sửa bài
         </button>
-        <button type="reset" class="btn btn-custom-reset">Làm mới</button>
+        
       </div>
 
       <!-- Modal để hiển thị tất cả ảnh -->
