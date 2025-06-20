@@ -1,0 +1,567 @@
+/* Enhanced Contract Management Styles - Matching phongtro-host.css theme */
+.main-content {
+    margin-left: 100px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    padding: 30px;
+    transition: margin-left 0.3s ease;
+    width: calc(100% - 100px);
+    position: relative;
+    font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Page Title */
+.main-content h5 {
+    font-size: 30px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 30px;
+}
+
+/* Statistics Cards Container */
+.host-stats {
+    margin-bottom: 30px;
+}
+
+/* Individual Stat Cards */
+.host-card-stat {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 8px 32px rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    height: 100px;
+}
+
+.host-card-stat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    z-index: 1;
+}
+
+.host-card-stat:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 168, 255, 0.15);
+}
+
+/* Stat Card Color Variants */
+.host-stat-blue::before {
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+}
+
+.host-stat-blue .host-stat-icon {
+    background: rgba(62, 131, 204, 0.1);
+    color: #3E83CC;
+}
+
+.host-stat-green::before {
+    background: linear-gradient(135deg, #10b981, #34d399);
+}
+
+.host-stat-green .host-stat-icon {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.host-stat-yellow::before {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+.host-stat-yellow .host-stat-icon {
+    background: rgba(245, 158, 11, 0.1);
+    color: #f59e0b;
+}
+
+.host-stat-purple::before {
+    background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+}
+
+.host-stat-purple .host-stat-icon {
+    background: rgba(139, 92, 246, 0.1);
+    color: #8b5cf6;
+}
+
+/* Stat Icon */
+.host-stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 24px;
+}
+
+/* Stat Text Content */
+.host-stat-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.host-stat-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.host-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+    margin: 0;
+}
+
+/* Contract Table Container */
+.host-contract-table {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.1);
+    position: relative;
+}
+
+.host-contract-table::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    z-index: 1;
+}
+
+/* Card Header */
+.host-contract-table .card-header {
+    background: white !important;
+    border-bottom: 2px solid rgba(0, 168, 255, 0.1);
+    padding: 24px 30px;
+}
+
+.host-contract-table .card-header h6 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.host-contract-table .card-header .btn {
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(62, 131, 204, 0.3);
+}
+
+.host-contract-table .card-header .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+}
+
+/* Table Styles */
+.host-contract-table .table {
+    margin: 0;
+    font-size: 15px;
+}
+
+.host-contract-table .table thead th {
+    background: #3E83CC;
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 18px 16px;
+    border: none;
+    font-size: 14px;
+    text-align: center;
+}
+
+.host-contract-table .table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid rgba(0, 168, 255, 0.1);
+}
+
+.host-contract-table .table tbody tr:hover {
+    background-color: rgba(0, 168, 255, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 10px rgba(0, 168, 255, 0.1);
+}
+
+.host-contract-table .table tbody td {
+    padding: 16px;
+    vertical-align: middle;
+    color: #2c3e50;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(0, 168, 255, 0.05);
+}
+
+/* Status Badges */
+.host-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    display: inline-block;
+    min-width: 90px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.host-badge.bg-success {
+    background: linear-gradient(135deg, #10b981, #34d399) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.host-badge.bg-danger {
+    background: linear-gradient(135deg, #ef4444, #f87171) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.host-badge.bg-warning {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.host-badge.bg-light {
+    background: #f8f9fa !important;
+    color: #f59e0b !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* Action Icons */
+.host-contract-table .fa-pen {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.host-contract-table .fa-pen:hover {
+    background: rgba(16, 185, 129, 0.1);
+    transform: scale(1.1);
+}
+
+.host-contract-table .fa-trash {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 8px;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.host-contract-table .fa-trash:hover {
+    background: rgba(239, 68, 68, 0.1);
+    transform: scale(1.1);
+}
+
+/* Card Footer */
+.host-contract-table .card-footer {
+    background: #f8f9fa;
+    border-top: 2px solid rgba(0, 168, 255, 0.1);
+    padding: 20px 30px;
+}
+
+.host-contract-table .card-footer small {
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* Pagination */
+.host-contract-table .pagination {
+    margin: 0;
+}
+
+.host-contract-table .pagination .page-link {
+    border: 1px solid rgba(0, 168, 255, 0.2);
+    color: #3E83CC;
+    padding: 8px 12px;
+    margin: 0 2px;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.host-contract-table .pagination .page-link:hover {
+    background: rgba(62, 131, 204, 0.1);
+    border-color: #3E83CC;
+    transform: translateY(-1px);
+}
+
+.host-contract-table .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    border-color: #3E83CC;
+    color: white;
+    box-shadow: 0 2px 8px rgba(62, 131, 204, 0.3);
+}
+
+.host-contract-table .pagination .page-item.disabled .page-link {
+    color: #9ca3af;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 1199.98px) {
+    .main-content {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+        padding: 25px 20px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .main-content {
+        margin-left: 0;
+        padding-top: 90px;
+        width: 100%;
+        padding: 90px 20px 20px 20px;
+    }
+
+    .main-content h5 {
+        font-size: 26px;
+        text-align: center;
+    }
+
+    .host-stats {
+        margin-bottom: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 80px 15px 15px 15px;
+    }
+
+    .main-content h5 {
+        font-size: 22px;
+    }
+
+    .host-card-stat {
+        padding: 20px;
+        gap: 16px;
+        height: auto;
+        min-height: 90px;
+    }
+
+    .host-stat-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+
+    .host-stat-number {
+        font-size: 24px;
+    }
+
+    .host-stat-label {
+        font-size: 13px;
+    }
+
+    .host-contract-table .card-header {
+        padding: 20px;
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch !important;
+    }
+
+    .host-contract-table .card-header .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .host-contract-table .table {
+        font-size: 14px;
+    }
+
+    .host-contract-table .table thead th {
+        padding: 14px 8px;
+        font-size: 12px;
+    }
+
+    .host-contract-table .table tbody td {
+        padding: 12px 8px;
+    }
+
+    .host-badge {
+        min-width: 70px;
+        font-size: 11px;
+        padding: 5px 10px;
+    }
+
+    .host-contract-table .card-footer {
+        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .host-contract-table .pagination {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content {
+        padding: 70px 10px 10px 10px;
+    }
+
+    .main-content h5 {
+        font-size: 20px;
+    }
+
+    .host-card-stat {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .host-stat-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .host-stat-number {
+        font-size: 20px;
+    }
+
+    .host-stat-label {
+        font-size: 12px;
+    }
+
+    .host-contract-table .card-header {
+        padding: 16px;
+    }
+
+    .host-contract-table .card-header h6 {
+        font-size: 16px;
+    }
+
+    .host-contract-table .table {
+        font-size: 13px;
+    }
+
+    .host-contract-table .table thead th {
+        padding: 12px 6px;
+        font-size: 11px;
+    }
+
+    .host-contract-table .table tbody td {
+        padding: 10px 6px;
+    }
+
+    .host-badge {
+        min-width: 60px;
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+
+    .host-contract-table .fa-pen,
+    .host-contract-table .fa-trash {
+        padding: 6px;
+        font-size: 12px;
+    }
+
+    .host-contract-table .card-footer {
+        padding: 12px 16px;
+    }
+
+    .host-contract-table .pagination .page-link {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
+}
+
+/* Animation Effects */
+.host-card-stat {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.host-card-stat:nth-child(1) { animation-delay: 0.1s; }
+.host-card-stat:nth-child(2) { animation-delay: 0.2s; }
+.host-card-stat:nth-child(3) { animation-delay: 0.3s; }
+.host-card-stat:nth-child(4) { animation-delay: 0.4s; }
+
+.host-contract-table {
+    animation: fadeInUp 0.6s ease forwards;
+    animation-delay: 0.5s;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced Scrollbar for table */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: rgba(0, 168, 255, 0.1);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: linear-gradient(90deg, #3E83CC, #549eed);
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(90deg, #549eed, #3E83CC);
+}
+
+/* Print Styles */
+@media print {
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+    }
+
+    .host-contract-table .card-header .btn,
+    .host-contract-table .fa-pen,
+    .host-contract-table .fa-trash {
+        display: none;
+    }
+
+    .host-contract-table {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+}

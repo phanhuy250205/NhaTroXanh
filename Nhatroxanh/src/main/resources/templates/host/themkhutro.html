@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Nhà Trọ Xanh</title>
+</head>
+<body class="themkhutro">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content-host" id="mainContentHost">
+        <div class="content-container-host">
+            <!-- Header Section -->
+            <div class="page-header-host">
+                <h1 class="page-title-host" id="pageTitle">THÊM KHU TRỌ MỚI</h1>
+                <div class="header-buttons-host">
+                    <a th:href="@{/chu-tro/thong-tin-tro}" style="text-decoration: none;">
+                        <button class="btn-save-host btn-secondary-host" id="backButtonHost">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Quay lại
+                        </button>
+                    </a>
+                    <button class="btn-save-host" id="saveButtonHost">
+                        <i class="fas fa-save me-2"></i>
+                        Lưu thông tin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Form Container -->
+            <div class="form-container-host">
+                <form id="addHostelFormHost" class="add-hostel-form-host">
+
+                    <!-- Thông tin cơ bản Section -->
+                    <div class="form-section-host">
+                        <h3 class="section-title-host">Thông tin cơ bản</h3>
+                        <div class="section-content-host">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="hostelIdHost" class="form-label-host">ID khu trọ</label>
+                                        <input type="text" class="form-control-host" id="hostelIdHost" placeholder="1"
+                                            value="1">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="hostelNameHost" class="form-label-host">Khu trọ</label>
+                                        <input type="text" class="form-control-host" id="hostelNameHost"
+                                            placeholder="Khu A">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="createDateHost" class="form-label-host">Ngày tạo</label>
+                                        <input type="date" class="form-control-host" id="createDateHost"
+                                            value="2025-06-15">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="roomCountHost" class="form-label-host">Số phòng</label>
+                                        <input type="number" class="form-control-host" id="roomCountHost"
+                                            placeholder="20" value="20">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="statusHost" class="form-label-host">Trạng thái</label>
+                                        <select class="form-select-host" id="statusHost">
+                                            <option value="active">Đang hoạt động</option>
+                                            <option value="inactive">Ngưng hoạt động</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Địa chỉ Section -->
+                    <div class="form-section-host">
+                        <h3 class="section-title-host">Địa chỉ</h3>
+                        <div class="section-content-host">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
+                                        <select class="form-select-host" id="provinceHost">
+                                            <option value="">Chọn tỉnh/thành phố</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="districtHost" class="form-label-host">Quận/Huyện</label>
+                                        <select class="form-select-host" id="districtHost" disabled>
+                                            <option value="">Chọn quận/huyện</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="wardHost" class="form-label-host">Phường/Xã</label>
+                                        <select class="form-select-host" id="wardHost" disabled>
+                                            <option value="">Chọn phường/xã</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="streetHost" class="form-label-host">Đường/Phố</label>
+                                        <input type="text" class="form-control-host" id="streetHost"
+                                            placeholder="Nhập tên đường/phố">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="houseNumberHost" class="form-label-host">Số nhà</label>
+                                        <input type="text" class="form-control-host" id="houseNumberHost"
+                                            placeholder="123">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group-host">
+                                        <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
+                                        <input type="text" class="form-control-host" id="fullAddressHost"
+                                            placeholder="Địa chỉ sẽ được tự động tạo" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mô tả Section -->
+                    <div class="form-section-host">
+                        <h3 class="section-title-host">Mô tả</h3>
+                        <div class="section-content-host">
+                            <div class="form-group-host">
+                                <textarea class="form-textarea-host" id="descriptionHost" rows="6"
+                                    placeholder="Nhập mô tả về khu trọ..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

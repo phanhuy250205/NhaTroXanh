@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content">
+        <div class="container ">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <a href="/thong-tin-tro"><button class="btn p-0 me-2" 
+                        style="border: none; background: none;">
+                        <i class="fas fa-arrow-left fs-5"></i>
+                    </button></a>
+                    <h4 class="m-0 fw-bold">Chi tiết khu trọ</h4>
+                </div>
+                <!-- Nút chỉnh sửa -->
+                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editModal">
+                    Chỉnh sửa
+                </button>
+
+            </div>
+            <hr>
+
+            <div class="row mb-4">
+                <!-- Thông tin Khu trọ -->
+                <div class="col-md-6 mb-3">
+                    <div class="bg-light p-4 rounded shadow-sm">
+                        <h5 class="mb-3 text-center">Thông tin Khu trọ</h5>
+                        <div class="mb-2">
+                            <label class="form-label">Tên khu trọ</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Địa chỉ</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span><strong>Số phòng:</strong> 99</span>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2"><strong>Trạng thái hoạt động:</strong></span>
+                                <span class="badge bg-success rounded-pill px-3 py-2">Hoạt động</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin Chủ trọ -->
+                <div class="col-md-6 mb-3">
+                    <div class="bg-light p-4 rounded shadow-sm">
+                        <h5 class="mb-3 text-center">Thông tin Chủ trọ</h5>
+                        <div class="mb-2">
+                            <label class="form-label">Họ và tên</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Số CCCD</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Email</label>
+                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Danh sách phòng -->
+            <h4 class="text-center fw-bold mb-3">Danh sách phòng</h4>
+            <table class="table table-bordered text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th>ID</th>
+                        <th>Diện tích</th>
+                        <th>Giá thuê</th>
+                        <th>Tình trạng</th>
+                        <th>Ghi chú</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                        <td><span class="badge bg-success rounded-pill px-3 py-2">Đang thuê</span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td></td>
+                        <td><span class="badge bg-warning text-dark rounded-pill px-3 py-2">Trống</span></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- Modal chỉnh sửa khu trọ -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-body p-5">
+                    <div class="d-flex justify-content-between align-items-start mb-4">
+                        <h5 class="modal-title fw-bold" id="editModalLabel">Chỉnh sửa khu trọ</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <form>
+                        <!-- Tên khu trọ -->
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Tên khu trọ</label>
+                            <input type="text" class="form-control" value="Nhà Trọ Xanh">
+                        </div>
+
+                        <!-- Địa chỉ chi tiết -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Tỉnh/Thành phố</label>
+                                <select id="province" class="form-select">
+                                    <option selected>Tỉnh/Thành phố</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Phường/Xã</label>
+                                <select id="ward" class="form-select mt-2">
+                                    <option selected>Phường/Xã</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Tên đường/Số nhà</label>
+                                <input type="text" class="form-control" value="Nhà Trọ Xanh">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Quận/Huyện</label>
+                                <select id="district" class="form-select mt-2">
+                                    <option selected>Quận/Huyện</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng & Trạng thái -->
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Số lượng phòng:</label>
+                                <select class="form-select w-auto d-inline-block">
+                                    <option>15</option>
+                                    <option>20</option>
+                                    <option>25</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-semibold">Trạng thái:</label>
+                                <select class="form-select w-auto d-inline-block">
+                                    <option>Hoạt động</option>
+                                    <option>Tạm dừng</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-success px-4 fw-bold">LƯU THAY ĐỔI</button>
+                            <button type="button" class="btn btn-danger px-4 fw-bold" data-bs-dismiss="modal">HỦY
+                                BỎ</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

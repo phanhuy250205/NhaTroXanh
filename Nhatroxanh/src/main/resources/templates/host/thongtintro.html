@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{/layouts/head}">
+    <title>Nhà Trọ Xanh</title>
+</head>
+<body class="thongtintro">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content-host" id="mainContentHost">
+        <div class="content-container-host">
+            <!-- Header Section -->
+            <div class="page-header-host">
+                <h1 class="page-title-host">QUẢN LÝ THÔNG TIN TRỌ</h1>
+                <a th:href="@{/chu-tro/them-khu-tro}" style="text-decoration: none;">
+                    <button class="btn-primary-host" id="addNewAreaHost">
+                        <i class="fas fa-plus"></i>
+                        Thêm khu trọ mới
+                    </button>
+                </a>
+                
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section-host">
+                <div class="search-container-host">
+                    <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
+                    <button class="btn-search-host" id="searchButtonHost">
+                        TÌM KIẾM
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-container-host">
+                <table class="data-table-host" id="dataTableHost">
+                    <thead class="table-header-host">
+                        <tr>
+                            <th class="table-th-host">ID</th>
+                            <th class="table-th-host">Khu trọ</th>
+                            <th class="table-th-host">Trạng thái</th>
+                            <th class="table-th-host">Hoạt động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-body-host" id="tableBodyHost">
+                        <tr class="table-row-host">
+                            <td class="table-td-host">1</td>
+                            <td class="table-td-host">Khu A</td>
+                            <td class="table-td-host">
+                                <span class="status-badge-host status-active-host">Đang hoạt động</span>
+                            </td>
+                            <td class="table-td-host">
+                                <div class="action-btns-host">
+                                    <a th:href="@{/chu-tro/them-khu-tro}">
+                                        <button class="buttons-edit-host" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </a>
+                                    <button class="btn-delete-host" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="table-row-host">
+                            <td class="table-td-host">2</td>
+                            <td class="table-td-host">Khu B</td>
+                            <td class="table-td-host">
+                                <span class="status-badge-host status-inactive-host">Ngưng hoạt động</span>
+                            </td>
+                            <td class="table-td-host">
+                                <div class="action-btns-host">
+                                    <a th:href="@{/chu-tro/them-khu-tro}">
+                                        <button class="buttons-edit-host" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </a>
+                                    <button class="btn-delete-host" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="table-row-host">
+                            <td class="table-td-host">3</td>
+                            <td class="table-td-host">Khu C</td>
+                            <td class="table-td-host">
+                                <span class="status-badge-host status-active-host">Đang hoạt động</span>
+                            </td>
+                            <td class="table-td-host">
+                                <div class="action-btns-host">
+                                    <a th:href="@{/chu-tro/them-khu-tro}">
+                                        <button class="buttons-edit-host" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </a>
+                                    <button class="btn-delete-host" title="Xóa">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi tiết khách thuê</title>
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+  <!-- ICON -->
+  <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <!-- AOS CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    a {
+      color: #000;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: medium;
+    }
+    .btn {
+      border-radius: 25px;
+      width: 200px;
+    }
+    .nam, .nu {
+      width: 100px;
+    }
+    .nam {
+      margin-left: 20px;
+    }
+    .form-section {
+      background-color: #e9ecef;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+    }
+    .btn-custom {
+      background-color: #28a745;
+      border-color: #28a745;
+    }
+    .btn-custom:hover {
+      background-color: #218838;
+      border-color: #218838;
+    }
+    .form-control:disabled {
+      background-color: #fff;
+      opacity: 1;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #fff;
+      background-color: #28a745;
+      border-radius: 25px;
+      text-align: center;
+      width: 80%;
+      margin-left: 50px;
+    }
+    .status-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 15px; /* Bo góc mượt hơn */
+      width: 90%;
+      max-width: 500px; /* Tăng chiều rộng */
+      max-height: 70vh; /* Giảm chiều cao tối đa */
+      overflow-y: auto; /* Thêm thanh cuộn nếu cần */
+      z-index: 1001;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Cải thiện bóng đổ */
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 1px solid #dee2e6; /* Thêm đường phân cách */
+      padding-bottom: 10px;
+    }
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #000;
+    }
+    .close-btn:hover {
+      color: #dc3545;
+    }
+    .status-select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid #ced4da;
+    }
+    .form-group {
+      margin-bottom: 1rem; /* Khoảng cách giữa các nhóm form */
+    }
+  </style>
+</head>
+<body>
+  <!-- SIDEBAR -->
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+
+  <div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <a href="#" class="text-decoration-none"><i class="bi bi-arrow-bar-left"></i> Chi tiết khách thuê</a>
+      <button class="btn btn-primary" onclick="showEditModal()">Chỉnh sửa</button>
+    </div>
+
+    <div class="form-section">
+      <h4>Thông tin cá nhân</h4>
+      <div class="row mb-3">
+        <div class="col-6">
+          <label for="hoVaTen" class="form-label">Họ và tên</label>
+          <input type="text" class="form-control" id="hoVaTen" value="Nguyễn Văn A" disabled>
+        </div>
+        <div class="col-3 row">
+          <label class="form-label">Giới tính</label>
+          <div class="col-6 form-check nam">
+            <input class="form-check-input" type="radio" name="gioiTinh" id="nam" checked disabled>
+            <label class="form-check-label" for="nam">Nam</label>
+          </div>
+          <div class="col-6 form-check nu">
+            <input class="form-check-input" type="radio" name="gioiTinh" id="nu" disabled>
+            <label class="form-check-label" for="nu">Nữ</label>
+          </div>
+        </div>
+        <div class="col-3">
+          <label for="nguyenVanA" class="form-label">Số điện thoại</label>
+          <input type="text" class="form-control" id="nguyenVanA" value="Nguyễn Văn A" disabled>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-6">
+          <label for="ngaySinh" class="form-label">Ngày sinh</label>
+          <input type="text" class="form-control" id="ngaySinh" value="Nguyễn Văn A" disabled>
+        </div>
+        <div class="col-6">
+          <label for="noiCap" class="form-label">Nơi cấp</label>
+          <input type="text" class="form-control" id="noiCap" value="Nguyễn Văn A" disabled>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <label for="cccdCmnd" class="form-label">CCCD/CMND</label>
+          <input type="text" class="form-control" id="cccdCmnd" value="Nguyễn Văn A" disabled>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h4>Thông tin thuê trọ</h4>
+      <div class="row mb-3">
+        <div class="col-6">
+          <label for="khuTro" class="form-label">Khu trọ</label>
+          <input type="text" class="form-control" id="khuTro" value="Nguyễn Văn A" disabled>
+        </div>
+        <div class="col-6">
+          <label for="idPhong" class="form-label">ID Phòng</label>
+          <input type="text" class="form-control" id="idPhong" value="Nguyễn Văn A" disabled>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-6">
+          <label for="ngayBatDau" class="form-label">Ngày bắt đầu</label>
+          <input type="text" class="form-control" id="ngayBatDau" value="Nguyễn Văn A" disabled>
+        </div>
+        <div class="col-6 status-container">
+          <label for="trangThai" class="form-label">Trạng thái</label>
+          <span id="trangThai" class="status-badge">Đang thuê</span>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-6">
+          <label for="ngayKetThuc" class="form-label">Ngày kết thúc</label>
+          <input type="text" class="form-control" id="ngayKetThuc" value="Nguyễn Văn A" disabled>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-6">
+          <label for="ghiChu" class="form-label">Ghi chú</label>
+          <textarea class="form-control" id="ghiChu" rows="3" disabled></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4>Chỉnh sửa thông tin khách thuê</h4>
+        <button class="close-btn" onclick="hideEditModal()"><i class="bi bi-x-lg"></i></button>
+      </div>
+      <div class="form-section">
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="editHoVaTen" class="form-label">Họ và tên</label>
+            <input type="text" class="form-control" id="editHoVaTen" value="Nguyễn Văn A" disabled>
+          </div>
+          <div class="col-3">
+            <label class="form-label">Giới tính</label>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="editGioiTinh" id="editNam" checked disabled>
+              <label class="form-check-label" for="editNam">Nam</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" name="editGioiTinh" id="editNu" disabled>
+              <label class="form-check-label" for="editNu">Nữ</label>
+            </div>
+          </div>
+          <div class="col-3">
+            <label for="editSoDienThoai" class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" id="editSoDienThoai" value="0987654321" disabled>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="editNgaySinh" class="form-label">Ngày sinh</label>
+            <input type="text" class="form-control" id="editNgaySinh" value="17/09/1990" disabled>
+          </div>
+          <div class="col-6">
+            <label for="editNoiCap" class="form-label">Nơi cấp</label>
+            <input type="text" class="form-control" id="editNoiCap" value="Công An Tỉnh Quảng Bình" disabled>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <label for="editCccdCmnd" class="form-label">CCCD/CMND</label>
+            <input type="text" class="form-control" id="editCccdCmnd" value="0000000000" disabled>
+          </div>
+          <div class="col-6">
+            <label for="editNgayCap" class="form-label">Ngày cấp</label>
+            <input type="text" class="form-control" id="editNgayCap" value="0987654321" disabled>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="editKhuTro" class="form-label">Khu trọ</label>
+            <input type="text" class="form-control" id="editKhuTro" value="Nguyễn Văn A" disabled>
+          </div>
+          <div class="col-6">
+            <label for="editIdPhong" class="form-label">ID Phòng</label>
+            <input type="text" class="form-control" id="editIdPhong" value="KT01" disabled>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="editNgayBatDau" class="form-label">Ngày bắt đầu</label>
+            <input type="text" class="form-control" id="editNgayBatDau" value="17/09/2024" disabled>
+          </div>
+          <div class="col-6">
+            <label for="editTrangThai" class="form-label">Trạng thái</label>
+            <select class="status-select" id="editTrangThai">
+              <option value="Đang thuê">Đang thuê</option>
+              <option value="Đã kết thúc">Đã kết thúc</option>
+            </select>
+          </div>
+        </div>
+        <div class="row mb-3">
+          <div class="col-6">
+            <label for="editNgayKetThuc" class="form-label">Ngày kết thúc</label>
+            <input type="text" class="form-control" id="editNgayKetThuc" value="17/09/2025" disabled>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-6">
+            <label for="editGhiChu" class="form-label">Ghi chú</label>
+            <textarea class="form-control" id="editGhiChu" rows="3" disabled></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="text-center mt-4">
+        <button class="btn btn-custom me-2" onclick="saveChanges()">Lưu</button>
+        <button class="btn btn-secondary" onclick="hideEditModal()">Hủy</button>
+      </div>
+    </div>
+  </div>
+  <!-- Bootstrap JS -->
+  <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <script th:src="@{/js/sidebar.js}"></script>
+
+  <script>
+    function showEditModal() {
+      document.getElementById('editModal').style.display = 'flex';
+      document.getElementById('main-content').style.filter = 'blur(5px)';
+    }
+
+    function hideEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+      document.getElementById('main-content').style.filter = 'none';
+    }
+
+    function saveChanges() {
+      document.getElementById('trangThai').textContent = document.getElementById('editTrangThai').value;
+      hideEditModal();
+    }
+  </script>
+</body>
+</html>

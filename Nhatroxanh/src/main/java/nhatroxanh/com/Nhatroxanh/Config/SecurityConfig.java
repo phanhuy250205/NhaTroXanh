@@ -49,6 +49,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         // API đăng ký/xác thực phải được phép
                         .requestMatchers("/api/users/**").permitAll()
@@ -56,9 +57,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").permitAll()
                         // Các tài nguyên tĩnh và trang công khai được phép
                         .requestMatchers("/", "/trang-chu", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
-                                "/fonts/**")
+                                "/fonts/**", "/uploads/**")
                         .permitAll()
-                        .requestMatchers("/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/uploads/**").permitAll()
+                        .requestMatchers("/phong-tro/**", "/chi-tiet/**", "/danh-muc/**","/chu-tro/**").permitAll()
                         // Mọi request khác cần xác thực
                         .anyRequest().authenticated())
                 .formLogin(form -> form
