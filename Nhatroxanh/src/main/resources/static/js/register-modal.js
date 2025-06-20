@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerModalClose = document.getElementById("registerModalClose");
     const registerForm = document.getElementById("registerForm");
     const passwordToggles = document.querySelectorAll(".register-modal .password-toggle");
-    
+
     // --- PHẦN 2: CÁC HÀM VÀ SỰ KIỆN ĐIỀU KHIỂN GIAO DIỆN (UI) ---
 
     // Hàm để mở modal
@@ -85,9 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             // Kiểm tra dữ liệu phía client
             if (!fullName || !username || !email || !phoneNumber || !password) {
-                 errorMessageDiv.textContent = "Vui lòng điền đầy đủ thông tin!";
-                 errorMessageDiv.style.display = "block";
-                 return;
+                errorMessageDiv.textContent = "Vui lòng điền đầy đủ thông tin!";
+                errorMessageDiv.style.display = "block";
+                return;
             }
             if (password !== confirmPassword) {
                 errorMessageDiv.textContent = "Mật khẩu xác nhận không khớp!";
@@ -106,30 +106,30 @@ document.addEventListener("DOMContentLoaded", () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
             })
-            .then(response => {
-                if (response.ok) {
-                    // THÀNH CÔNG: Đóng modal này, mở modal xác thực
-                    closeModal();
-                    const verificationModal = document.getElementById('verificationModalOverlay');
-                    if(verificationModal) {
-                        verificationModal.classList.add('show');
-                        document.body.style.overflow = "hidden";
-                        verificationModal.querySelector('.verification-alert b').textContent = email;
-                        verificationModal.dataset.email = email;
+                .then(response => {
+                    if (response.ok) {
+                        // THÀNH CÔNG: Đóng modal này, mở modal xác thực
+                        closeModal();
+                        const verificationModal = document.getElementById('verificationModalOverlay');
+                        if (verificationModal) {
+                            verificationModal.classList.add('show');
+                            document.body.style.overflow = "hidden";
+                            verificationModal.querySelector('.verification-alert b').textContent = email;
+                            verificationModal.dataset.email = email;
+                        }
+                    } else {
+                        // THẤT BẠI: Hiển thị lỗi từ server
+                        return response.text().then(text => { throw new Error(text) });
                     }
-                } else {
-                    // THẤT BẠI: Hiển thị lỗi từ server
-                    return response.text().then(text => { throw new Error(text) });
-                }
-            })
-            .catch(error => {
-                errorMessageDiv.textContent = error.message;
-                errorMessageDiv.style.display = "block";
-            })
-            .finally(() => {
-                submitBtn.textContent = 'ĐĂNG KÝ';
-                submitBtn.disabled = false;
-            });
+                })
+                .catch(error => {
+                    errorMessageDiv.textContent = error.message;
+                    errorMessageDiv.style.display = "block";
+                })
+                .finally(() => {
+                    submitBtn.textContent = 'ĐĂNG KÝ';
+                    submitBtn.disabled = false;
+                });
         });
     }
 
