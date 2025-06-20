@@ -72,12 +72,4 @@ public class DemoController {
     public String dangnhapchutro() {
         return "auth/login-host";
     }
-    @GetMapping("/chu-tro/thong-tin-tro")
-    public String hostthongtintro() {
-        return "host/thongtintro";
-    }
-     @GetMapping("/chu-tro/them-khu-tro")
-    public String themkhutro() {
-        return "host/themkhutro";
-    }
 }
