@@ -1,330 +1,929 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chi tiết khách thuê</title>
-  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
-  <!-- ICON -->
-  <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-  <!-- Bootstrap CSS -->
-  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
-  <!-- Swiper CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-  <!-- AOS CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-  <style>
-    a {
-      color: #000;
-      text-decoration: none;
-      font-weight: bold;
-      font-size: medium;
-    }
-    .btn {
-      border-radius: 25px;
-      width: 200px;
-    }
-    .nam, .nu {
-      width: 100px;
-    }
-    .nam {
-      margin-left: 20px;
-    }
-    .form-section {
-      background-color: #e9ecef;
-      padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-    }
-    .btn-custom {
-      background-color: #28a745;
-      border-color: #28a745;
-    }
-    .btn-custom:hover {
-      background-color: #218838;
-      border-color: #218838;
-    }
-    .form-control:disabled {
-      background-color: #fff;
-      opacity: 1;
-    }
-    .status-badge {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      font-weight: 500;
-      color: #fff;
-      background-color: #28a745;
-      border-radius: 25px;
-      text-align: center;
-      width: 80%;
-      margin-left: 50px;
-    }
-    .status-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      backdrop-filter: blur(5px);
-      z-index: 1000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    .modal-content {
-      background-color: #fff;
-      padding: 20px;
-      border-radius: 15px; /* Bo góc mượt hơn */
-      width: 90%;
-      max-width: 500px; /* Tăng chiều rộng */
-      max-height: 70vh; /* Giảm chiều cao tối đa */
-      overflow-y: auto; /* Thêm thanh cuộn nếu cần */
-      z-index: 1001;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2); /* Cải thiện bóng đổ */
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      border-bottom: 1px solid #dee2e6; /* Thêm đường phân cách */
-      padding-bottom: 10px;
-    }
-    .close-btn {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #000;
-    }
-    .close-btn:hover {
-      color: #dc3545;
-    }
-    .status-select {
-      width: 100%;
-      padding: 0.5rem;
-      border-radius: 0.25rem;
-      border: 1px solid #ced4da;
-    }
-    .form-group {
-      margin-bottom: 1rem; /* Khoảng cách giữa các nhóm form */
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Khách Thuê</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    
+    <style>
+        .tenant-detail-body-host {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .main-container-host {
+            margin-left: 100px;
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .page-header-host {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .back-link-host {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #3e83cc;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .back-link-host:hover {
+            color: #549eed;
+            transform: translateX(-2px);
+        }
+
+        .page-title-host {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .edit-btn-host {
+            background: #3e83cc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+        }
+
+        .edit-btn-host:hover {
+            background: #549eed;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .info-section-host {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .info-section-host:hover {
+            box-shadow: 0 3px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .section-header-host {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-content-host {
+            padding: 24px;
+        }
+
+        .form-row-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group-host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label-host {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        .form-control-host {
+            padding: 10px 14px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .form-control-host:disabled {
+            background: #f8fafc;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+        .form-textarea-host {
+            padding: 10px 14px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            resize: vertical;
+            min-height: 80px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .form-textarea-host:disabled {
+            background: #f8fafc;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+        .gender-group-host {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .radio-group-host {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-input-host {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #3e83cc;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .radio-input-host:checked {
+            background-color: #3e83cc;
+            border-color: #3e83cc;
+        }
+
+        .radio-input-host:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .radio-label-host {
+            font-size: 14px;
+            color: #1f2937;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .status-container-host {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .status-badge-host {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 8px;
+        }
+
+        .status-active-host {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .status-inactive-host {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        /* Modal Styles */
+        .modal-overlay-host {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay-host.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content-host {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(62, 131, 204, 0.2);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay-host.show .modal-content-host {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header-host {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title-host {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-btn-host {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn-host:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body-host {
+            padding: 24px;
+        }
+
+        .modal-section-host {
+            margin-bottom: 24px;
+            padding: 20px;
+            background: rgba(62, 131, 204, 0.02);
+            border-radius: 12px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .modal-section-title-host {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3e83cc;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-control-edit-host {
+            padding: 10px 14px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            background: white;
+            transition: all 0.2s ease;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .form-control-edit-host:focus {
+            outline: none;
+            border-color: #3e83cc;
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .form-control-edit-host:disabled {
+            background: #f8fafc;
+            opacity: 1;
+            cursor: not-allowed;
+        }
+
+        .form-select-edit-host {
+            padding: 10px 40px 10px 14px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        .form-select-edit-host:focus {
+            outline: none;
+            border-color: #3e83cc;
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .modal-actions-host {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .btn-save-host {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-save-host:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-cancel-host {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-cancel-host:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 12px rgba(107, 114, 128, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container-host {
+                margin-left: 80px;
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-container-host {
+                margin-left: 0;
+                padding: 12px;
+                padding-top: 70px;
+                width: 100%;
+            }
+
+            .page-header-host {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .back-link-host {
+                align-self: flex-start;
+            }
+
+            .edit-btn-host {
+                align-self: center;
+                width: fit-content;
+            }
+
+            .form-row-host {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container-host {
+                padding: 10px;
+            }
+
+            .section-content-host {
+                padding: 16px;
+            }
+
+            .modal-content-host {
+                width: 95%;
+                margin: 10px;
+            }
+
+            .modal-body-host {
+                padding: 16px;
+            }
+
+            .modal-section-host {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+
+            .gender-group-host {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-container-host {
+                padding: 8px;
+            }
+
+            .page-title-host {
+                font-size: 20px;
+            }
+
+            .section-header-host {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+
+            .section-content-host {
+                padding: 12px;
+            }
+
+            .form-row-host {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+
+            .modal-header-host {
+                padding: 16px;
+            }
+
+            .modal-title-host {
+                font-size: 16px;
+            }
+
+            .modal-actions-host {
+                flex-direction: column;
+                padding: 16px;
+            }
+
+            .btn-save-host,
+            .btn-cancel-host {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-container-host {
+                padding: 6px;
+            }
+
+            .page-title-host {
+                font-size: 18px;
+            }
+
+            .section-header-host {
+                padding: 10px 12px;
+                font-size: 13px;
+            }
+
+            .section-content-host {
+                padding: 10px;
+            }
+
+            .modal-content-host {
+                border-radius: 12px;
+            }
+
+            .modal-header-host {
+                border-radius: 12px 12px 0 0;
+                padding: 12px;
+            }
+
+            .modal-body-host {
+                padding: 12px;
+            }
+
+            .modal-section-host {
+                padding: 12px;
+                border-radius: 8px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-container-host {
+                padding: 4px;
+            }
+
+            .page-title-host {
+                font-size: 16px;
+            }
+
+            .section-header-host {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .section-content-host {
+                padding: 8px;
+            }
+
+            .form-control-host,
+            .form-control-edit-host,
+            .form-select-edit-host,
+            .form-textarea-host {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .form-select-edit-host {
+                padding-right: 35px;
+                background-position: right 10px center;
+                background-size: 14px;
+            }
+        }
+
+        /* Custom scrollbar */
+        .modal-content-host::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-content-host::-webkit-scrollbar-track {
+            background: rgba(62, 131, 204, 0.1);
+            border-radius: 3px;
+        }
+
+        .modal-content-host::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            border-radius: 3px;
+        }
+
+        .modal-content-host::-webkit-scrollbar-thumb:hover {
+            background: #549eed;
+        }
+    </style>
 </head>
-<body>
-  <!-- SIDEBAR -->
-  <div th:replace="~{/layouts/sidebar-host}"></div>
+<body class="tenant-detail-body-host">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
 
-  <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <a href="#" class="text-decoration-none"><i class="bi bi-arrow-bar-left"></i> Chi tiết khách thuê</a>
-      <button class="btn btn-primary" onclick="showEditModal()">Chỉnh sửa</button>
-    </div>
-
-    <div class="form-section">
-      <h4>Thông tin cá nhân</h4>
-      <div class="row mb-3">
-        <div class="col-6">
-          <label for="hoVaTen" class="form-label">Họ và tên</label>
-          <input type="text" class="form-control" id="hoVaTen" value="Nguyễn Văn A" disabled>
-        </div>
-        <div class="col-3 row">
-          <label class="form-label">Giới tính</label>
-          <div class="col-6 form-check nam">
-            <input class="form-check-input" type="radio" name="gioiTinh" id="nam" checked disabled>
-            <label class="form-check-label" for="nam">Nam</label>
-          </div>
-          <div class="col-6 form-check nu">
-            <input class="form-check-input" type="radio" name="gioiTinh" id="nu" disabled>
-            <label class="form-check-label" for="nu">Nữ</label>
-          </div>
-        </div>
-        <div class="col-3">
-          <label for="nguyenVanA" class="form-label">Số điện thoại</label>
-          <input type="text" class="form-control" id="nguyenVanA" value="Nguyễn Văn A" disabled>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-6">
-          <label for="ngaySinh" class="form-label">Ngày sinh</label>
-          <input type="text" class="form-control" id="ngaySinh" value="Nguyễn Văn A" disabled>
-        </div>
-        <div class="col-6">
-          <label for="noiCap" class="form-label">Nơi cấp</label>
-          <input type="text" class="form-control" id="noiCap" value="Nguyễn Văn A" disabled>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-6">
-          <label for="cccdCmnd" class="form-label">CCCD/CMND</label>
-          <input type="text" class="form-control" id="cccdCmnd" value="Nguyễn Văn A" disabled>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-section">
-      <h4>Thông tin thuê trọ</h4>
-      <div class="row mb-3">
-        <div class="col-6">
-          <label for="khuTro" class="form-label">Khu trọ</label>
-          <input type="text" class="form-control" id="khuTro" value="Nguyễn Văn A" disabled>
-        </div>
-        <div class="col-6">
-          <label for="idPhong" class="form-label">ID Phòng</label>
-          <input type="text" class="form-control" id="idPhong" value="Nguyễn Văn A" disabled>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-6">
-          <label for="ngayBatDau" class="form-label">Ngày bắt đầu</label>
-          <input type="text" class="form-control" id="ngayBatDau" value="Nguyễn Văn A" disabled>
-        </div>
-        <div class="col-6 status-container">
-          <label for="trangThai" class="form-label">Trạng thái</label>
-          <span id="trangThai" class="status-badge">Đang thuê</span>
-        </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-6">
-          <label for="ngayKetThuc" class="form-label">Ngày kết thúc</label>
-          <input type="text" class="form-control" id="ngayKetThuc" value="Nguyễn Văn A" disabled>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-6">
-          <label for="ghiChu" class="form-label">Ghi chú</label>
-          <textarea class="form-control" id="ghiChu" rows="3" disabled></textarea>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Edit Modal -->
-  <div id="editModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h4>Chỉnh sửa thông tin khách thuê</h4>
-        <button class="close-btn" onclick="hideEditModal()"><i class="bi bi-x-lg"></i></button>
-      </div>
-      <div class="form-section">
-        <div class="row mb-3">
-          <div class="col-6">
-            <label for="editHoVaTen" class="form-label">Họ và tên</label>
-            <input type="text" class="form-control" id="editHoVaTen" value="Nguyễn Văn A" disabled>
-          </div>
-          <div class="col-3">
-            <label class="form-label">Giới tính</label>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="editGioiTinh" id="editNam" checked disabled>
-              <label class="form-check-label" for="editNam">Nam</label>
+    <div class="main-container-host" id="main-content">
+        <div class="page-header-host">
+            <div>
+                <a href="/chu-tro/quan-ly-khach-thue" class="back-link-host">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Quay lại</span>
+                </a>
+                <h1 class="page-title-host">Chi tiết khách thuê</h1>
             </div>
-            <div class="form-check">
-              <input class="form-check-input" type="radio" name="editGioiTinh" id="editNu" disabled>
-              <label class="form-check-label" for="editNu">Nữ</label>
+            <button class="edit-btn-host" onclick="showEditModal()">
+                <i class="fas fa-edit"></i>
+                Chỉnh sửa
+            </button>
+        </div>
+
+        <!-- Personal Information Section -->
+        <div class="info-section-host">
+            <h3 class="section-header-host">
+                <i class="fas fa-user"></i>
+                Thông tin cá nhân
+            </h3>
+            <div class="section-content-host">
+                <div class="form-row-host">
+                    <div class="form-group-host">
+                        <label class="form-label-host">Họ và tên</label>
+                        <input type="text" class="form-control-host" value="Nguyễn Văn An" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Giới tính</label>
+                        <div class="gender-group-host">
+                            <div class="radio-group-host">
+                                <input type="radio" class="radio-input-host" name="gioiTinh" id="nam" checked disabled>
+                                <label class="radio-label-host" for="nam">Nam</label>
+                            </div>
+                            <div class="radio-group-host">
+                                <input type="radio" class="radio-input-host" name="gioiTinh" id="nu" disabled>
+                                <label class="radio-label-host" for="nu">Nữ</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Số điện thoại</label>
+                        <input type="text" class="form-control-host" value="0123456789" disabled>
+                    </div>
+                </div>
+                <div class="form-row-host">
+                    <div class="form-group-host">
+                        <label class="form-label-host">Ngày sinh</label>
+                        <input type="text" class="form-control-host" value="17/09/1990" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Nơi cấp</label>
+                        <input type="text" class="form-control-host" value="Công An Tỉnh Đà Nẵng" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">CCCD/CMND</label>
+                        <input type="text" class="form-control-host" value="123456789012" disabled>
+                    </div>
+                </div>
             </div>
-          </div>
-          <div class="col-3">
-            <label for="editSoDienThoai" class="form-label">Số điện thoại</label>
-            <input type="text" class="form-control" id="editSoDienThoai" value="0987654321" disabled>
-          </div>
         </div>
-        <div class="row mb-3">
-          <div class="col-6">
-            <label for="editNgaySinh" class="form-label">Ngày sinh</label>
-            <input type="text" class="form-control" id="editNgaySinh" value="17/09/1990" disabled>
-          </div>
-          <div class="col-6">
-            <label for="editNoiCap" class="form-label">Nơi cấp</label>
-            <input type="text" class="form-control" id="editNoiCap" value="Công An Tỉnh Quảng Bình" disabled>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <label for="editCccdCmnd" class="form-label">CCCD/CMND</label>
-            <input type="text" class="form-control" id="editCccdCmnd" value="0000000000" disabled>
-          </div>
-          <div class="col-6">
-            <label for="editNgayCap" class="form-label">Ngày cấp</label>
-            <input type="text" class="form-control" id="editNgayCap" value="0987654321" disabled>
-          </div>
-        </div>
-      </div>
 
-      <div class="form-section">
-        <div class="row mb-3">
-          <div class="col-6">
-            <label for="editKhuTro" class="form-label">Khu trọ</label>
-            <input type="text" class="form-control" id="editKhuTro" value="Nguyễn Văn A" disabled>
-          </div>
-          <div class="col-6">
-            <label for="editIdPhong" class="form-label">ID Phòng</label>
-            <input type="text" class="form-control" id="editIdPhong" value="KT01" disabled>
-          </div>
+        <!-- Rental Information Section -->
+        <div class="info-section-host">
+            <h3 class="section-header-host">
+                <i class="fas fa-home"></i>
+                Thông tin thuê trọ
+            </h3>
+            <div class="section-content-host">
+                <div class="form-row-host">
+                    <div class="form-group-host">
+                        <label class="form-label-host">Khu trọ</label>
+                        <input type="text" class="form-control-host" value="KTX A1" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">ID Phòng</label>
+                        <input type="text" class="form-control-host" value="A101" disabled>
+                    </div>
+                    <div class="form-group-host status-container-host">
+                        <label class="form-label-host">Trạng thái</label>
+                        <span id="trangThai" class="status-badge-host status-active-host">
+                            <i class="fas fa-check-circle"></i>
+                            Đang thuê
+                        </span>
+                    </div>
+                </div>
+                <div class="form-row-host">
+                    <div class="form-group-host">
+                        <label class="form-label-host">Ngày bắt đầu</label>
+                        <input type="text" class="form-control-host" value="17/09/2024" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Ngày kết thúc</label>
+                        <input type="text" class="form-control-host" value="17/09/2025" disabled>
+                    </div>
+                </div>
+                <div class="form-row-host">
+                    <div class="form-group-host">
+                        <label class="form-label-host">Ghi chú</label>
+                        <textarea class="form-textarea-host" disabled>Khách thuê đúng hạn, không có vấn đề gì.</textarea>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="row mb-3">
-          <div class="col-6">
-            <label for="editNgayBatDau" class="form-label">Ngày bắt đầu</label>
-            <input type="text" class="form-control" id="editNgayBatDau" value="17/09/2024" disabled>
-          </div>
-          <div class="col-6">
-            <label for="editTrangThai" class="form-label">Trạng thái</label>
-            <select class="status-select" id="editTrangThai">
-              <option value="Đang thuê">Đang thuê</option>
-              <option value="Đã kết thúc">Đã kết thúc</option>
-            </select>
-          </div>
-        </div>
-        <div class="row mb-3">
-          <div class="col-6">
-            <label for="editNgayKetThuc" class="form-label">Ngày kết thúc</label>
-            <input type="text" class="form-control" id="editNgayKetThuc" value="17/09/2025" disabled>
-          </div>
-        </div>
-        <div class="row">
-          <div class="col-6">
-            <label for="editGhiChu" class="form-label">Ghi chú</label>
-            <textarea class="form-control" id="editGhiChu" rows="3" disabled></textarea>
-          </div>
-        </div>
-      </div>
-      <div class="text-center mt-4">
-        <button class="btn btn-custom me-2" onclick="saveChanges()">Lưu</button>
-        <button class="btn btn-secondary" onclick="hideEditModal()">Hủy</button>
-      </div>
     </div>
-  </div>
-  <!-- Bootstrap JS -->
-  <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
-  <!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script th:src="@{/js/script.js}"></script>
 
-  <script>
-    function showEditModal() {
-      document.getElementById('editModal').style.display = 'flex';
-      document.getElementById('main-content').style.filter = 'blur(5px)';
-    }
+    <!-- Edit Modal -->
+    <div id="editModal" class="modal-overlay-host">
+        <div class="modal-content-host">
+            <div class="modal-header-host">
+                <h4 class="modal-title-host">
+                    <i class="fas fa-edit"></i>
+                    Chỉnh sửa thông tin khách thuê
+                </h4>
+                <button class="close-btn-host" onclick="hideEditModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body-host">
+                <!-- Personal Information Section -->
+                <div class="modal-section-host">
+                    <h5 class="modal-section-title-host">
+                        <i class="fas fa-user"></i>
+                        Thông tin cá nhân
+                    </h5>
+                    <div class="form-row-host">
+                        <div class="form-group-host">
+                            <label class="form-label-host">Họ và tên</label>
+                            <input type="text" class="form-control-edit-host" id="editHoVaTen" value="Nguyễn Văn An" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">Giới tính</label>
+                            <div class="gender-group-host">
+                                <div class="radio-group-host">
+                                    <input type="radio" class="radio-input-host" name="editGioiTinh" id="editNam" checked disabled>
+                                    <label class="radio-label-host" for="editNam">Nam</label>
+                                </div>
+                                <div class="radio-group-host">
+                                    <input type="radio" class="radio-input-host" name="editGioiTinh" id="editNu" disabled>
+                                    <label class="radio-label-host" for="editNu">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">Số điện thoại</label>
+                            <input type="text" class="form-control-edit-host" id="editSoDienThoai" value="0123456789" disabled>
+                        </div>
+                    </div>
+                    <div class="form-row-host">
+                        <div class="form-group-host">
+                            <label class="form-label-host">Ngày sinh</label>
+                            <input type="text" class="form-control-edit-host" id="editNgaySinh" value="17/09/1990" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">Nơi cấp</label>
+                            <input type="text" class="form-control-edit-host" id="editNoiCap" value="Công An Tỉnh Đà Nẵng" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">CCCD/CMND</label>
+                            <input type="text" class="form-control-edit-host" id="editCccdCmnd" value="123456789012" disabled>
+                        </div>
+                    </div>
+                </div>
 
-    function hideEditModal() {
-      document.getElementById('editModal').style.display = 'none';
-      document.getElementById('main-content').style.filter = 'none';
-    }
+                <!-- Rental Information Section -->
+                <div class="modal-section-host">
+                    <h5 class="modal-section-title-host">
+                        <i class="fas fa-home"></i>
+                        Thông tin thuê trọ
+                    </h5>
+                    <div class="form-row-host">
+                        <div class="form-group-host">
+                            <label class="form-label-host">Khu trọ</label>
+                            <input type="text" class="form-control-edit-host" id="editKhuTro" value="KTX A1" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">ID Phòng</label>
+                            <input type="text" class="form-control-edit-host" id="editIdPhong" value="A101" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">Trạng thái</label>
+                            <select class="form-select-edit-host" id="editTrangThai">
+                                <option value="Đang thuê" selected>Đang thuê</option>
+                                <option value="Đã trả phòng">Đã trả phòng</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-host">
+                        <div class="form-group-host">
+                            <label class="form-label-host">Ngày bắt đầu</label>
+                            <input type="text" class="form-control-edit-host" id="editNgayBatDau" value="17/09/2024" disabled>
+                        </div>
+                        <div class="form-group-host">
+                            <label class="form-label-host">Ngày kết thúc</label>
+                            <input type="text" class="form-control-edit-host" id="editNgayKetThuc" value="17/09/2025" disabled>
+                        </div>
+                    </div>
+                    <div class="form-row-host">
+                        <div class="form-group-host">
+                            <label class="form-label-host">Ghi chú</label>
+                            <textarea class="form-control-edit-host" id="editGhiChu" rows="3" disabled>Khách thuê đúng hạn, không có vấn đề gì.</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions-host">
+                <button class="btn-save-host" onclick="saveChanges()">
+                    <i class="fas fa-save"></i>
+                    Lưu thay đổi
+                </button>
+                <button class="btn-cancel-host" onclick="hideEditModal()">
+                    <i class="fas fa-times"></i>
+                    Hủy bỏ
+                </button>
+            </div>
+        </div>
+    </div>
 
-    function saveChanges() {
-      document.getElementById('trangThai').textContent = document.getElementById('editTrangThai').value;
-      hideEditModal();
-    }
-  </script>
+    <!-- Bootstrap JS -->
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/script.js}"></script>
+
+    <script>
+        function showEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideEditModal() {
+            const modal = document.getElementById('editModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function saveChanges() {
+            const newStatus = document.getElementById('editTrangThai').value;
+            const statusElement = document.getElementById('trangThai');
+            
+            // Update status display
+            statusElement.innerHTML = `
+                <i class="fas fa-${newStatus === 'Đang thuê' ? 'check-circle' : 'times-circle'}"></i>
+                ${newStatus}
+            `;
+            
+            // Update status class
+            statusElement.className = `status-badge-host ${newStatus === 'Đang thuê' ? 'status-active-host' : 'status-inactive-host'}`;
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #10b981;
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 9999;
+                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+                animation: slideInRight 0.3s ease;
+            `;
+            successMsg.innerHTML = '<i class="fas fa-check"></i> Cập nhật thành công!';
+            document.body.appendChild(successMsg);
+            
+            setTimeout(() => {
+                successMsg.remove();
+            }, 3000);
+            
+            hideEditModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideEditModal();
+            }
+        });
+
+        // Add slide animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

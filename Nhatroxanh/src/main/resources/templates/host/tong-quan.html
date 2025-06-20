@@ -1,311 +1,694 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thống Kê</title>
+    <title>Bảng Điều Khiển</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
-    <link
-      rel="icon"
-      th:href="@{/images/logo/nhatroxanh(title).png}"
-      type="image/x-icon"
-    />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <!-- Font Awesome -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-    <!-- Swiper CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-    />
-    <!-- AOS CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary-blue: #3E83CC;
+            --secondary-blue: #549eed;
+            --dark-blue: #1f2937;
+            --light-blue: #f0f8ff;
+            --accent-blue: #2563eb;
+            --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+            --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .dashboard-body-host {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #f0f4f8, #e0e7ff);
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
             min-height: 100vh;
             display: flex;
         }
-        .content-wrapper {
+
+        .main-content-wrapper-host {
             margin-left: 100px;
-            padding: 30px;
+            padding: 15px;
             flex-grow: 1;
-            transition: all 0.3s ease;
+            transition: margin-left 0.3s ease;
         }
-        .tongQuan {
-            font-size: 28px;
+
+        .page-title-host {
+            font-size: 24px;
             font-weight: 700;
-            color: #1a2a44;
-            margin-bottom: 25px;
-            text-align: center;
-            border-bottom: 2px solid #1a2a44;
-            padding-bottom: 5px;
-            position: relative;
-            text-transform: uppercase;
-        }
-        .tongQuan::after {
-            content: '';
-            position: absolute;
-            bottom: -2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 50px;
-            height: 4px;
-            background: #007bff;
-            border-radius: 2px;
-        }
-        .stats-tongQuan, .revenue-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 40px;
-        }
-        .stat-card-tongQuan, .revenue-card {
-            width: 220px;
-            height: 120px;
-            color: #ffffff;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border-radius: 10px;
-            font-weight: 700;
-            line-height: 1.5;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .stat-card-tongQuan:hover, .revenue-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-        .stat-card-tongQuan .top, .revenue-card .top {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.3));
-            height: 60%;
-            width: 100%;
-            position: absolute;
-            top: 0;
-            border-radius: 10px 10px 0 0;
-            z-index: 0;
-        }
-        .stat-card-tongQuan .bottom, .revenue-card .bottom {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6));
-            height: 40%;
-            width: 100%;
-            position: absolute;
-            bottom: 0;
-            transform: rotate(180deg);
-            border-radius: 0 0 10px 10px;
-            z-index: 0;
-        }
-        .stat-card-tongQuan p, .revenue-card p {
-            font-size: 16px;
-            font-weight: 600;
-            z-index: 1;
-            margin: 0;
-            padding: 0;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        .stat-card-tongQuan span, .revenue-card span {
-            font-size: 32px;
-            font-weight: 700;
-            z-index: 1;
-            margin: 0;
-            padding: 0;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-        .income h2 {
-            font-size: 32px;
-            font-weight: 700;
-            color: #1a2a44;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 20px;
             text-align: center;
             position: relative;
-            text-transform: uppercase;
         }
-        .income .line {
-            border-top: 2px solid #1a2a44;
-            width: 100%;
-            margin: -2px 0 25px 0;
-            position: relative;
-        }
-        .income .vector-left {
-            width: 100px;
-            height: 0;
-            border-top: 2px solid #1a2a44;
+
+        .page-title-host::after {
+            content: '';
             position: absolute;
-            left: 0;
-            top: -2px;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 2px;
+            background: var(--gradient-primary);
+            border-radius: 1px;
         }
-        .income .vector-right {
-            width: calc(100% - 100px);
-            height: 0;
-            border-top: 2px solid #1a2a44;
-            position: absolute;
-            left: 100px;
-            top: -2px;
+
+        .metrics-grid-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
         }
-        .revenue-card .line {
-            border-top: 1px solid #ffffff;
-            width: 180px;
-            margin-top: -1px;
-            z-index: 1;
-        }
-        .form-select {
-            padding: 8px 12px;
-            background: #f8f9fa;
-            border: 2px solid #1a2a44;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            color: #1a2a44;
-            width: 250px;
-            height: 45px;
-            appearance: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .form-select:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-        .form-select option {
-            background: #f8f9fa;
-            color: #1a2a44;
-        }
-        .chart-container {
-            background-color: #fff;
-            padding: 25px 15px 15px 15px;
+
+        .metric-card-host {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(62, 131, 204, 0.1);
             border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            height: 450px;
+            padding: 16px;
+            position: relative;
             overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-primary);
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
+
+        .metric-card-host:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .metric-icon-host {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-icon-host i {
+            font-size: 16px;
+            color: white;
+        }
+
+        .metric-label-host {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .metric-value-host {
+            font-size: 22px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .section-divider-host {
+            height: 1px;
+            background: var(--gradient-primary);
+            margin: 20px 0;
+            border-radius: 1px;
+        }
+
+        .finance-section-host {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: var(--shadow-primary);
+        }
+
+        .finance-header-host {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .finance-title-host {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .time-selector-host {
+            padding: 10px 40px 10px 16px;
+            background: rgba(62, 131, 204, 0.1);
+            border: 1px solid var(--primary-blue);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            min-width: 180px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+        }
+
+        .time-selector-host:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .finance-cards-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .finance-card-host {
+            background: linear-gradient(135deg, rgba(62, 131, 204, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+            border: 1px solid rgba(62, 131, 204, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+            transition: all 0.2s ease;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .finance-card-host:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 16px rgba(62, 131, 204, 0.2);
+        }
+
+        .finance-card-title-host {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 6px;
+        }
+
+        .finance-card-value-host {
+            font-size: 20px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .chart-wrapper-host {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.05);
+            height: 320px;
+        }
+
         @media (max-width: 1200px) {
-            .stats-tongQuan, .revenue-grid {
-                justify-content: center;
-            }
-            .stat-card-tongQuan, .revenue-card {
-                margin: 10px 0;
-            }
-            .form-select {
-                width: 100%;
-                max-width: 250px;
-                margin-bottom: 20px;
-            }
+    .main-content-wrapper-host {
+        padding: 12px;
+    }
+    
+    .metrics-grid-host {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+    
+    .page-title-host {
+        font-size: 22px;
+    }
+    
+    .finance-cards-host {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}
+
+@media (max-width: 992px) {
+    .main-content-wrapper-host {
+        margin-left: 80px;
+        width: calc(100% - 80px);
+    }
+    
+    .metrics-grid-host {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .finance-cards-host {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    
+    .time-selector-host {
+        min-width: 160px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content-wrapper-host {
+        margin-left: 0;
+        padding: 10px;
+        width: 100%;
+        padding-top: 70px;
+    }
+    
+    .page-title-host {
+        font-size: 20px;
+        margin-bottom: 16px;
+    }
+    
+    .finance-header-host {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    
+    .time-selector-host {
+        width: 100%;
+        min-width: auto;
+        padding: 12px 40px 12px 16px;
+    }
+    
+    .metrics-grid-host {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .finance-cards-host {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .chart-wrapper-host {
+        height: 280px;
+        padding: 12px;
+    }
+    
+    .metric-card-host {
+        height: 100px;
+        padding: 14px;
+    }
+    
+    .metric-label-host {
+        font-size: 11px;
+    }
+    
+    .metric-value-host {
+        font-size: 20px;
+    }
+    
+    .finance-card-host {
+        height: 75px;
+        padding: 14px;
+    }
+    
+    .finance-card-title-host {
+        font-size: 11px;
+    }
+    
+    .finance-card-value-host {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-content-wrapper-host {
+        padding: 8px;
+    }
+    
+    .page-title-host {
+        font-size: 18px;
+        margin-bottom: 12px;
+    }
+    
+    .metrics-grid-host {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .metric-card-host {
+        height: 85px;
+        padding: 12px;
+    }
+    
+    .metric-icon-host {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .metric-icon-host i {
+        font-size: 14px;
+    }
+    
+    .metric-label-host {
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+    
+    .metric-value-host {
+        font-size: 18px;
+    }
+    
+    .finance-section-host {
+        padding: 16px;
+    }
+    
+    .finance-title-host {
+        font-size: 18px;
+    }
+    
+    .finance-card-host {
+        height: 70px;
+        padding: 12px;
+    }
+    
+    .finance-card-title-host {
+        font-size: 10px;
+        margin-bottom: 4px;
+    }
+    
+    .finance-card-value-host {
+        font-size: 16px;
+    }
+    
+    .chart-wrapper-host {
+        height: 240px;
+        padding: 10px;
+    }
+    
+    .time-selector-host {
+        padding: 10px 35px 10px 12px;
+        font-size: 12px;
+        background-position: right 8px center;
+        background-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content-wrapper-host {
+        padding: 6px;
+    }
+    
+    .page-title-host {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+    
+    .metrics-grid-host {
+        gap: 6px;
+    }
+    
+    .metric-card-host {
+        height: 80px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    
+    .metric-icon-host {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        margin-bottom: 6px;
+    }
+    
+    .metric-icon-host i {
+        font-size: 12px;
+    }
+    
+    .metric-label-host {
+        font-size: 9px;
+        margin-bottom: 3px;
+    }
+    
+    .metric-value-host {
+        font-size: 16px;
+    }
+    
+    .section-divider-host {
+        margin: 15px 0;
+    }
+    
+    .finance-section-host {
+        padding: 12px;
+        border-radius: 12px;
+    }
+    
+    .finance-title-host {
+        font-size: 16px;
+    }
+    
+    .finance-header-host {
+        margin-bottom: 12px;
+        gap: 8px;
+    }
+    
+    .finance-cards-host {
+        gap: 6px;
+        margin-bottom: 15px;
+    }
+    
+    .finance-card-host {
+        height: 65px;
+        padding: 10px;
+        border-radius: 8px;
+    }
+    
+    .finance-card-title-host {
+        font-size: 9px;
+        margin-bottom: 3px;
+    }
+    
+    .finance-card-value-host {
+        font-size: 14px;
+    }
+    
+    .chart-wrapper-host {
+        height: 200px;
+        padding: 8px;
+        border-radius: 8px;
+    }
+    
+    .time-selector-host {
+        padding: 8px 30px 8px 10px;
+        font-size: 11px;
+        border-radius: 6px;
+        background-position: right 6px center;
+        background-size: 12px;
+    }
+}
+
+@media (max-width: 360px) {
+    .main-content-wrapper-host {
+        padding: 4px;
+    }
+    
+    .page-title-host {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .metric-card-host {
+        height: 75px;
+        padding: 8px;
+    }
+    
+    .metric-icon-host {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+    }
+    
+    .metric-icon-host i {
+        font-size: 10px;
+    }
+    
+    .metric-label-host {
+        font-size: 8px;
+        margin-bottom: 2px;
+    }
+    
+    .metric-value-host {
+        font-size: 14px;
+    }
+    
+    .finance-section-host {
+        padding: 10px;
+    }
+    
+    .finance-title-host {
+        font-size: 14px;
+    }
+    
+    .finance-card-host {
+        height: 60px;
+        padding: 8px;
+    }
+    
+    .finance-card-title-host {
+        font-size: 8px;
+    }
+    
+    .finance-card-value-host {
+        font-size: 12px;
+    }
+    
+    .chart-wrapper-host {
+        height: 180px;
+        padding: 6px;
+    }
+    
+    .time-selector-host {
+        padding: 6px 25px 6px 8px;
+        font-size: 10px;
+        background-position: right 4px center;
+        background-size: 10px;
+    }
+}
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        @media (max-width: 768px) {
-            .content-wrapper {
-                margin-left: 0;
-                width: 100%;
-                padding: 15px;
-            }
-            .stats-tongQuan, .revenue-grid {
-                flex-direction: column;
-                align-items: center;
-            }
-            .stat-card-tongQuan, .revenue-card {
-                width: 100%;
-                max-width: 300px;
-            }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(62, 131, 204, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 3px;
         }
     </style>
 </head>
-<body>
+<body class="dashboard-body-host">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
-    
-    </div>
-    <div class="content-wrapper">
-        <div class="container-tongQuan">
-            <h2 class="tongQuan" data-aos="fade-up">THỐNG KÊ</h2>
 
-            <div class="income">
-                <div class="line"></div>
-            </div>
-            
-            <div class="stats-tongQuan row" data-aos="fade-up" data-aos-delay="100">
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #008dc9;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Tổng số nhà trọ</p><span>0</span>
+    <div class="main-content-wrapper-host">
+        <div class="dashboard-container-host">
+            <h1 class="page-title-host">BẢNG TỔNG QUAN</h1>
+
+            <div class="metrics-grid-host">
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #3E83CC, #2563eb);">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="metric-label-host">Tổng số nhà trọ</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #3E83CC, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #00a040;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Tổng số phòng trọ</p><span>0</span>
+                
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <div class="metric-label-host">Tổng số phòng trọ</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #e50707;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Số phòng đang trống</p><span>0</span>
+                
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                        <i class="fas fa-door-closed"></i>
+                    </div>
+                    <div class="metric-label-host">Số phòng đang trống</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #ef6210;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Số phòng đang thuê</p><span>0</span>
+                
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="metric-label-host">Số phòng đang thuê</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #a70edf;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Số phòng đang cọc giữ chỗ</p><span>0</span>
+                
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="metric-label-host">Số phòng đang cọc</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 stat-card-tongQuan" style="background-color: #d60ac8;">
-                    <div class="top"></div>
-                    <div class="bottom"></div>
-                    <p>Số phòng đang nợ tiền</p><span>0</span>
+                
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="metric-label-host">Số phòng đang nợ</div>
+                    <div class="metric-value-host" style="background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
                 </div>
             </div>
 
-            <div class="income">
-                <h2 class="tongQuan" data-aos="fade-up" data-aos-delay="200">THU CHI</h2>
-                <div class="d-flex justify-content-end mb-3">
-                    <select class="form-select" data-aos="zoom-in" data-aos-delay="300">
+            <div class="section-divider-host"></div>
+
+            <div class="finance-section-host">
+                <div class="finance-header-host">
+                    <h2 class="finance-title-host">TỔNG QUAN THU CHI</h2>
+                    <select class="time-selector-host">
                         <option>7 ngày gần đây</option>
                         <option>14 ngày gần đây</option>
                         <option>30 ngày gần đây</option>
+                        <option>3 tháng gần đây</option>
+                        <option>6 tháng gần đây</option>
+                        <option>1 năm gần đây</option>
                     </select>
                 </div>
-                <div class="line"></div>
-                <div class="revenue-grid row justify-content-center" data-aos="fade-up" data-aos-delay="400">
-                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(137, 121, 255, 0.4);">
-                    <p>Tổng khoản thu</p>
-                    <div class="line"></div>
-                    <span>0</span>
+                
+                <div class="finance-cards-host">
+                    <div class="finance-card-host">
+                        <div class="finance-card-title-host">Tổng khoản thu</div>
+                        <div class="finance-card-value-host">0 VNĐ</div>
+                    </div>
+                    
+                    <div class="finance-card-host">
+                        <div class="finance-card-title-host">Tổng khoản chi</div>
+                        <div class="finance-card-value-host">0 VNĐ</div>
+                    </div>
+                    
+                    <div class="finance-card-host">
+                        <div class="finance-card-title-host">Lợi nhuận</div>
+                        <div class="finance-card-value-host">0 VNĐ</div>
+                    </div>
                 </div>
-                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(255, 146, 138, 0.4);">
-                    <p>Tổng khoản chi</p>
-                    <div class="line"></div>
-                    <span>0</span>
-                </div>
-                <div class="col-12 col-lg-4 col-sm-6 revenue-card" style="background-color: rgba(115, 223, 157, 0.4);">
-                    <p>Lợi nhuận</p>
-                    <div class="line"></div>
-                    <span>0</span>
-                </div>
-            </div>
-                <div class="chart-container" data-aos="fade-up" data-aos-delay="500">
-                    <canvas id="incomeChart"></canvas>
+                
+                <div class="chart-wrapper-host">
+                    <canvas id="financialChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/script.js}"></script>
     <script>
-        AOS.init();
-        const ctx = document.getElementById('incomeChart').getContext('2d');
-        const incomeChart = new Chart(ctx, {
+        // Initialize Chart
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        const financialChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
@@ -313,72 +696,127 @@
                     {
                         label: 'Tổng khoản thu',
                         data: [60, 40, 90, 340, 50, 70, 80],
-                        borderColor: '#6c5ce7',
-                        backgroundColor: 'rgba(108, 92, 231, 0.2)',
+                        borderColor: '#3E83CC',
+                        backgroundColor: 'rgba(62, 131, 204, 0.1)',
                         fill: true,
-                        tension: 0.4,
-                        borderWidth: 2
+                        tension: 0.3,
+                        borderWidth: 1,
+                        pointBackgroundColor: '#3E83CC',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'Tổng khoản chi',
                         data: [30, 60, 50, 170, 30, 20, 50],
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         fill: true,
-                        tension: 0.4,
-                        borderWidth: 2
+                        tension: 0.3,
+                        borderWidth: 1,
+                        pointBackgroundColor: '#ef4444',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
                         label: 'Lợi nhuận',
                         data: [30, -20, 40, 170, 20, 50, 30],
-                        borderColor: '#2ecc71',
-                        backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
                         fill: true,
-                        tension: 0.4,
-                        borderWidth: 2
+                        tension: 0.3,
+                        borderWidth: 1,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 1,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     }
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 80,
-                            color: '#1a2a44'
-                        },
-                        grid: {
-                            color: 'rgba(26, 42, 68, 0.1)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            padding: 10,
-                            color: '#1a2a44'
-                        },
-                        grid: {
-                            color: 'rgba(26, 42, 68, 0.1)'
-                        }
-                    }
+    responsive: true,
+    maintainAspectRatio: false,
+    devicePixelRatio: window.devicePixelRatio || 1,
+    interaction: {
+        intersect: false,
+        mode: 'index'
+    },
+    plugins: {
+        legend: {
+            position: window.innerWidth < 768 ? 'bottom' : 'bottom',
+            labels: {
+                color: '#1f2937',
+                font: {
+                    size: window.innerWidth < 576 ? 10 : window.innerWidth < 768 ? 11 : 12,
+                    weight: '600'
                 },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            color: '#1a2a44',
-                            font: {
-                                size: 14
-                            }
-                        }
-                    }
-                },
-                hover: {
-                    mode: 'nearest',
-                    intersect: true
-                }
+                padding: window.innerWidth < 576 ? 8 : 16,
+                usePointStyle: true,
+                pointStyle: 'circle',
+                boxWidth: window.innerWidth < 576 ? 8 : 12
             }
+        },
+        tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)',
+            titleColor: '#1f2937',
+            bodyColor: '#1f2937',
+            borderColor: '#3E83CC',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: true,
+            padding: window.innerWidth < 576 ? 6 : 10,
+            titleFont: {
+                size: window.innerWidth < 576 ? 10 : 12
+            },
+            bodyFont: {
+                size: window.innerWidth < 576 ? 9 : 11
+            }
+        }
+    },
+    scales: {
+        y: {
+            beginAtZero: true,
+            ticks: {
+                stepSize: 80,
+                color: '#1f2937',
+                font: {
+                    size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                    weight: '500'
+                },
+                maxTicksLimit: window.innerWidth < 576 ? 4 : 6
+            },
+            grid: {
+                color: 'rgba(62, 131, 204, 0.1)',
+                lineWidth: 1
+            },
+            border: {
+                color: 'rgba(62, 131, 204, 0.2)'
+            }
+        },
+        x: {
+            ticks: {
+                padding: window.innerWidth < 576 ? 4 : 8,
+                color: '#1f2937',
+                font: {
+                    size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                    weight: '500'
+                },
+                maxRotation: window.innerWidth < 576 ? 45 : 0
+            },
+            grid: {
+                color: 'rgba(62, 131, 204, 0.1)',
+                lineWidth: 1
+            },
+            border: {
+                color: 'rgba(62, 131, 204, 0.2)'
+            }
+        }
+    }
+}
         });
     </script>
 </body>

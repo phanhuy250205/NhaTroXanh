@@ -127,8 +127,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // Cập nhật navMap với các đường dẫn từ controller
     const navMap = {
       '/chu-tro/tong-quan': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
-      '/chu-tro/quan-ly-bai-dang': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
-      '/chu-tro/bai-dang-host': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
+      '/chu-tro/quan-ly-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
+      '/bai-dang': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
       '/chu-tro/quan-ly-khach-thue': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
       '/chu-tro/chi-tiet-khach-thue': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
       '/phong-tro-host': { sidebar: '#nav-tro', submenu: '/phong-tro-host' },
