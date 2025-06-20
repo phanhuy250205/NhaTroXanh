@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
@@ -7,10 +7,10 @@
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <!-- Nội dung chính -->
+    <!-- Main Content -->
     <div class="main-content-host" id="mainContentHost">
         <div class="content-container-host">
-            <!-- Tiêu đề -->
+            <!-- Header Section -->
             <div class="page-header-host">
                 <h1 class="page-title-host">QUẢN LÝ THÔNG TIN TRỌ</h1>
                 <a th:href="@{/chu-tro/them-khu-tro}" style="text-decoration: none;">
@@ -21,7 +21,7 @@
                 </a>
             </div>
 
-            <!-- Tìm kiếm -->
+            <!-- Search Section -->
             <div class="search-section-host">
                 <div class="search-container-host">
                     <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
@@ -31,7 +31,7 @@
                 </div>
             </div>
 
-            <!-- Bảng dữ liệu -->
+            <!-- Table Section -->
             <div class="table-container-host">
                 <table class="data-table-host" id="dataTableHost">
                     <thead class="table-header-host">
