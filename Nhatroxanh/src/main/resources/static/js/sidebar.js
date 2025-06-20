@@ -125,12 +125,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll('.nav-sublink-host').forEach(link => link.classList.remove('active'));
 
     const navMap = {
-      '/chu-tro/overview': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
-      '/chu-tro/posts': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
-      '/chu-tro/post-create': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
-      '/chu-tro/tenants': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
-      '/chu-tro/quan-ly-tro': { sidebar: '#nav-tro', submenu: '#room-management' },
-      '/chu-tro/thong-tin-tro': { sidebar: '#nav-tro', submenu: '#info-management' },
+      '/chu-tro/tong-quan': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
+      '/chu-tro/bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
+      '/chu-tro/dang-tin': { sidebar: '.nav-sidebar:has(.fa-plus-circle)' },
+      '/chu-tro/khach-thue': { sidebar: '.nav-sidebar:has(.fa-address-card)' },
+      '/chu-tro/quan-ly-tro': { sidebar: '#nav-tro' },
+      '/chu-tro/thong-tin-tro': { sidebar: '#nav-tro' },
       '/chu-tro/DS-hop-dong-host': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/lich-su-thue': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/thanh-toan': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
