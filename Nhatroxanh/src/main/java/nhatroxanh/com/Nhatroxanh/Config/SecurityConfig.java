@@ -55,12 +55,12 @@ public class SecurityConfig {
                                                 // ✅ THÊM DÒNG NÀY - Cho phép tất cả API filter
                                                 .requestMatchers("/api/**").permitAll()
                                                 // Các tài nguyên tĩnh và trang công khai được phép
-                                                .requestMatchers("/", "/trang-chu", "/css/**", "/js/**", "/images/**",
+                                                .requestMatchers("/", "/css/**", "/js/**", "/images/**",
                                                                 "/bootstrap/**",
                                                                 "/fonts/**", "/uploads/**")
                                                 .permitAll()
                                                 .requestMatchers("/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
-                                                                "/dang-ky-chu-tro/", "/dang-nhap-chu-tro/")
+                                                                "/dang-ky-chu-tro", "/dang-nhap-chu-tro")
                                                 .permitAll()
                                                 .requestMatchers("/chu-tro/**").hasRole("OWNER") // Chỉ cho phép chủ trọ
                                                                                                  // truy cập

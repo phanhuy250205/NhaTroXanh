@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhà Trọ</title>
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <!-- ICON -->
+    <link
+      rel="icon"
+      th:href="@{/images/logo/nhatroxanh(title).png}"
+      type="image/x-icon"
+    />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <!-- Swiper CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <!-- AOS CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <style>
+    .main-chiTietBaiDang {
+      margin-left: 50px;
+    }
+    .breadcrumb {
+      background-color: transparent;
+      padding: 0;
+      font-size: 14px;
+    }
+    .breadcrumb-item a {
+      color: #000;             /* Màu mặc định */
+      text-decoration: none;   /* Bỏ gạch chân */
+      font-weight: bold;       /* Chữ đậm */
+      font-size: medium;
+    }
+    .btn-custom {
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    .status-btn {
+      background-color: #6c757d;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .content-area {
+      margin-top: 20px;
+    }
+    .card-img-top {
+      object-fit: cover;
+      height: 300px;
+      border-radius: 10px;
+    }
+    .thumbnail {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border: 2px solid #ddd;
+      margin: 5px;
+      cursor: pointer;
+    }
+    .thumbnail.active {
+      border-color: #007bff;
+    }
+    .info-box {
+      background-color: #f8f9fa;
+      padding: 15px;
+      border-left: 4px solid #007bff;
+      border-radius: 5px;
+    }
+    .price {
+      color: #f0ad4e;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .details-section {
+      margin-top: 20px;
+    }
+    .details-table {
+      background-color: #e9ecef;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    .details-table td {
+      padding: 10px;
+      border: none;
+    }
+    .btn-custom {
+      background-color: #17a2b8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+    }
+    .status-btn {
+      background-color: #4d4d4d;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 25px;
+    }
+    .breadcrumb {
+      background-color: transparent;
+      padding: 0;
+    }
+    .bang {
+      margin-left: 200px;
+    }
+    @media (max-width: 992px) {
+      .main-chiTietBaiDang {
+        margin-left: 20px;
+      }
+      .bang {
+        margin-left: 50px;
+      }
+    }
+    @media (max-width: 768px) {
+      .main-chiTietBaiDang {
+        margin-left: 0px;
+      }
+      .bang {
+        margin-left: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+
+  <div class="main-chiTietBaiDang">
+    <!-- Breadcrumb -->
+  <div class="container mt-3">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><i class="bi bi-arrow-bar-left"></i> <a href="#">Chi tiết bài đăng</a></li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Header Section -->
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <a href="/chu-tro/sua-bai-dang"><button class="btn btn-custom">Sửa bài đăng</button></a>
+      <div>
+        <span class="me-2">Trạng thái:</span>
+        <button class="status-btn">Chờ duyệt</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Property Detail Section -->
+  <section class="property-detail-section py-4">
+    <div class="container">
+      <div class="row">
+        <!-- Image Gallery -->
+        <div class="col-lg-8 col-md-7">
+          <div class="image-gallery mb-3">
+            <!-- Main Image -->
+            <img src="../images/cards/anh1.jpg" alt="Hình ảnh chính" class="card-img-top mb-2" id="mainImage">
+            <!-- Thumbnail Images -->
+            <div class="d-flex justify-content-start">
+              <img src="../images/cards/anh1.jpg" alt="Hình 1" class="thumbnail active" onclick="changeMainImage('../images/cards/anh1.jpg', this)">
+              <img src="../images/cards/anh1.jpg" alt="Hình 2" class="thumbnail" onclick="changeMainImage('../images/cards/anh1.jpg', this)">
+              <img src="../images/cards/anh1.jpg" alt="Hình 3" class="thumbnail" onclick="changeMainImage('../images/cards/anh1.jpg', this)">
+              <img src="../images/cards/anh1.jpg" alt="Hình 4" class="thumbnail" onclick="changeMainImage('../images/cards/anh1.jpg', this)">
+            </div>
+          </div>
+        </div>
+
+        <!-- Property Information -->
+        <div class="col-lg-4 col-md-5">
+          <div class="info-box">
+            <h3 class="property-title">NHÀ TRỌ SỐ 123, ĐƯỜNG ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG</h3>
+            <div class="property-price">
+              <span class="price">2.5 triệu/tháng</span>
+              <br>
+              <span class="price-note"><i>(Chưa bao gồm phí dịch vụ)</i></span>
+            </div>
+            <div class="info-item mt-3">
+              <i class="bi bi-bounding-box-circles"></i> <span><b>Diện tích:</b> 20m²</span>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-house-heart"></i> <span><b>Loại hình:</b> Nhà trọ, phòng trọ</span>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-geo-alt-fill"></i> <span><b>Địa chỉ:</b> Thanh Khê, TP. Đà Nẵng</span>
+            </div>
+            <div class="info-item">
+              <i class="bi bi-clock-fill"></i> <span><b>Ngày đăng:</b> 28/05/2025</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detailed Information -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="details-section">
+            <h3>Mô tả chi tiết</h3>
+            <p>Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm uất. Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp.</p>
+            <div class="details-table mt-3">
+              <div class="row bang">
+                <div class="col-md-6">
+                  <h4>Thông tin cơ bản</h4>
+                  <table>
+                    <tr><td>Diện tích:</td><td>20m²</td></tr>
+                    <tr><td>Số phòng ngủ:</td><td>1</td></tr>
+                    <tr><td>Số phòng tắm:</td><td>1</td></tr>
+                    <tr><td>Hướng cửa:</td><td>Đông Nam</td></tr>
+                    <tr><td>Tầng:</td><td>2/4</td></tr>
+                  </table>
+                </div>
+                <div class="col-md-6">
+                  <h4>Chi phí</h4>
+                  <table>
+                    <tr><td>Giá thuê:</td><td>2.5 triệu/tháng</td></tr>
+                    <tr><td>Tiền điện:</td><td>3,500đ/kWh</td></tr>
+                    <tr><td>Tiền nước:</td><td>25,000đ/người</td></tr>
+                    <tr><td>Phí dịch vụ:</td><td>200,000đ/tháng</td></tr>
+                    <tr><td>Tiền cọc:</td><td>1 tháng</td></tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  </div>
+
+  
+
+  <!-- Bootstrap JS -->
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+   <script th:src="@{/js/sidebar.js}"></script>
+  <script>
+    function changeMainImage(src, element) {
+      document.getElementById('mainImage').src = src;
+      document.querySelectorAll('.thumbnail').forEach(img => img.classList.remove('active'));
+      element.classList.add('active');
+    }
+  </script>
+</body>
+</html>

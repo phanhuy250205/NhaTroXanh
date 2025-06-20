@@ -30,6 +30,87 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   }
 
+  // Function to set active class based on current URL
+  function setActiveBasedOnURL() {
+    const currentPath = window.location.pathname
+    const currentPage = window.location.pathname.split('/').pop() || 'index'
+    
+    removeAllActiveClasses()
+    
+    let activeSet = false
+
+    // Check nav-links first
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      const href = link.getAttribute("href")
+      const dataPage = link.getAttribute("data-page")
+      
+      if (!href || link.classList.contains("dropdown-toggle")) return
+      
+      // Exact match with href
+      if (href === currentPath) {
+        link.classList.add("active")
+        activeSet = true
+        return
+      }
+      
+      // Match with data-page attribute
+      if (dataPage && (currentPath.includes(dataPage) || currentPage === dataPage)) {
+        link.classList.add("active")
+        activeSet = true
+        return
+      }
+      
+      // Handle root path
+      if ((currentPath === "/" || currentPath === "/trang-chu" || currentPath === "") && 
+          (href === "/" || href.includes("trang-chu") || dataPage === "trang-chu")) {
+        link.classList.add("active")
+        activeSet = true
+        return
+      }
+    })
+
+    // Check dropdown items if no nav-link was activated
+    if (!activeSet) {
+      document.querySelectorAll(".dropdown-item").forEach((item) => {
+        const href = item.getAttribute("href")
+        
+        if (!href) return
+        
+        // Exact match with href
+        if (href === currentPath) {
+          item.classList.add("active")
+          
+          // Also activate parent dropdown
+          const parentDropdown = item.closest(".dropdown")
+          if (parentDropdown) {
+            const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle")
+            if (dropdownToggle) {
+              dropdownToggle.classList.add("active")
+            }
+          }
+          activeSet = true
+          return
+        }
+        
+        // Partial match for dynamic routes
+        if (currentPath.includes(href.replace(/^\//, ''))) {
+          item.classList.add("active")
+          
+          // Also activate parent dropdown
+          const parentDropdown = item.closest(".dropdown")
+          if (parentDropdown) {
+            const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle")
+            if (dropdownToggle) {
+              dropdownToggle.classList.add("active")
+            }
+          }
+          activeSet = true
+          return
+        }
+      })
+    }
+  }
+
   // Function to set active class for clicked item
   function setActiveClass(clickedElement) {
     // Remove all active classes first
@@ -49,7 +130,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    // Store the active item info for page reload
+    // Store the active item info for consistency
     const itemInfo = {
       text: clickedElement.textContent.trim(),
       href: clickedElement.getAttribute("href"),
@@ -58,52 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
   }
 
-  // Function to restore active state on page load
-  function restoreActiveState() {
-    const storedItem = localStorage.getItem("activeNavItem")
-    if (storedItem) {
-      try {
-        const itemInfo = JSON.parse(storedItem)
-
-        // Find the element by text content and href
-        let targetElement = null
-
-        if (itemInfo.isDropdownItem) {
-          // Look for dropdown item
-          document.querySelectorAll(".dropdown-item").forEach((item) => {
-            if (item.textContent.trim() === itemInfo.text) {
-              targetElement = item
-            }
-          })
-        } else {
-          // Look for nav link
-          document.querySelectorAll(".nav-link").forEach((link) => {
-            if (link.textContent.trim() === itemInfo.text || link.getAttribute("href") === itemInfo.href) {
-              targetElement = link
-            }
-          })
-        }
-
-        if (targetElement) {
-          removeAllActiveClasses()
-          targetElement.classList.add("active")
-
-          // If it's a dropdown item, also set parent as active
-          if (targetElement.classList.contains("dropdown-item")) {
-            const parentDropdown = targetElement.closest(".dropdown")
-            if (parentDropdown) {
-              const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle")
-              if (dropdownToggle) {
-                dropdownToggle.classList.add("active")
-              }
-            }
-          }
-        }
-      } catch (e) {
-        console.log("Error restoring active state:", e)
-      }
-    }
-  }
+  // Set active state based on current URL on page load
+  setActiveBasedOnURL()
 
   // Handle clicks on ALL navigation links (existing and future ones)
   document.addEventListener("click", (e) => {
@@ -118,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveClass(navLink)
 
       // Let the default navigation happen (href will work automatically)
-      // No need to prevent default or handle navigation manually
+      // The active state will be set correctly on the next page load
     }
 
     // Check if clicked element is a dropdown-item
@@ -132,12 +169,8 @@ document.addEventListener("DOMContentLoaded", () => {
       setActiveClass(dropdownItem)
 
       // Let the default navigation happen (href will work automatically)
-      // No need to prevent default or handle navigation manually
     }
   })
-
-  // Restore active state on page load
-  restoreActiveState()
 
   // Enhanced scroll effect for navbar with hide/show on scroll
   window.addEventListener("scroll", () => {
@@ -220,41 +253,43 @@ document.addEventListener("DOMContentLoaded", () => {
     })
   })
 
-  // User dropdown menu click handlers
+  // Xử lý click cho menu dropdown của người dùng
   document.addEventListener("click", (e) => {
-    if (e.target.closest(".user-dropdown-menu .dropdown-item")) {
-      const dropdownItem = e.target.closest(".dropdown-item")
-      const itemText = dropdownItem.textContent.trim()
+      if (e.target.closest(".user-dropdown-menu .dropdown-item")) {
+          const dropdownItem = e.target.closest(".dropdown-item");
+          const itemText = dropdownItem.textContent.trim();
 
-      // Prevent default for demo purposes
-      e.preventDefault()
+          // Ngăn hành vi mặc định cho mục demo
+          e.preventDefault();
 
-      // Show feedback based on menu item
-      setTimeout(() => {
-        if (itemText.includes("Đăng xuất")) {
-          // Để form POST xử lý đăng xuất
-          // Cập nhật trạng thái active về Trang chủ
-          removeAllActiveClasses();
-          const homeLink = document.querySelector('.nav-link[href="/trang-chu"]');
-          if (homeLink) {
-            homeLink.classList.add("active");
-            const itemInfo = {
-              text: homeLink.textContent.trim(),
-              href: homeLink.getAttribute("href"),
-              isDropdownItem: false,
-            };
-            localStorage.setItem("activeNavItem", JSON.stringify(itemInfo));
-          }
-        } else if (itemText.includes("Hồ sơ")) {
-          alert("Chuyển đến trang hồ sơ cá nhân");
-        } else if (itemText.includes("Trọ đã lưu")) {
-          alert("Hiển thị danh sách trọ đã lưu");
-        } else if (itemText.includes("Cài đặt")) {
-          alert("Mở trang cài đặt");
-        }
-      }, 100);
-    }
+          // Hiển thị phản hồi dựa trên mục menu
+          setTimeout(() => {
+              if (itemText.includes("Đăng xuất")) {
+                  // Xóa tất cả trạng thái active
+                  removeAllActiveClasses();
+                  // Xóa localStorage
+                  localStorage.removeItem("activeNavItem");
+                  // Chuyển hướng đến trang chủ
+                  setTimeout(() => {
+                      window.location.href = "/trang-chu";
+                  }, 100);
+              } else if (itemText.includes("Thông tin tài khoản")) {
+                  alert("Chuyển đến trang thông tin tài khoản");
+              } else if (itemText.includes("Đổi mật khẩu")) {
+                  alert("Chuyển đến trang đổi mật khẩu");
+              } else if (itemText.includes("Trọ đã lưu")) {
+                  alert("Hiển thị danh sách trọ đã lưu");
+              } else if (itemText.includes("Quản lý đánh giá")) {
+                  alert("Mở trang quản lý đánh giá");
+              }
+          }, 100);
+      }
   });
+
+  // Listen for browser back/forward navigation
+  window.addEventListener("popstate", () => {
+    setActiveBasedOnURL()
+  })
 
   // Ripple effect function for buttons and links
   function createRipple(event, element) {
@@ -309,6 +344,30 @@ document.addEventListener("DOMContentLoaded", () => {
     .btn, .nav-link, .dropdown-item {
       position: relative;
       overflow: hidden;
+    }
+
+    /* Active states styling */
+    .nav-link.active {
+      color: #3498DB !important;
+      font-weight: 600;
+    }
+    
+    .nav-link.active .nav-icon {
+      color: #3498DB;
+    }
+    
+    .dropdown-item.active {
+      background-color: #E3F2FD;
+      color: #3498DB !important;
+    }
+    
+    .dropdown-toggle.active {
+      color: #3498DB !important;
+      font-weight: 600;
+    }
+    
+    .dropdown-toggle.active .nav-icon {
+      color: #3498DB;
     }
   `
   document.head.appendChild(style)
