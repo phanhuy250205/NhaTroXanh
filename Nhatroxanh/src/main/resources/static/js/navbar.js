@@ -232,34 +232,29 @@ document.addEventListener("DOMContentLoaded", () => {
       // Show feedback based on menu item
       setTimeout(() => {
         if (itemText.includes("Đăng xuất")) {
-          // alert("Đăng xuất thành công!")
-          // Set active state back to home page after logout
-          removeAllActiveClasses()
-          const homeLink = document.querySelector('.nav-link[href="/trang-chu"]')
+          // Để form POST xử lý đăng xuất
+          // Cập nhật trạng thái active về Trang chủ
+          removeAllActiveClasses();
+          const homeLink = document.querySelector('.nav-link[href="/trang-chu"]');
           if (homeLink) {
-            homeLink.classList.add("active")
-            // Update localStorage to reflect home page as active
+            homeLink.classList.add("active");
             const itemInfo = {
               text: homeLink.textContent.trim(),
               href: homeLink.getAttribute("href"),
               isDropdownItem: false,
-            }
-            localStorage.setItem("activeNavItem", JSON.stringify(itemInfo))
-            // Redirect to home page after a short delay
-            setTimeout(() => {
-              window.location.href = "/trang-chu"
-            }, 100)
+            };
+            localStorage.setItem("activeNavItem", JSON.stringify(itemInfo));
           }
         } else if (itemText.includes("Hồ sơ")) {
-          alert("Chuyển đến trang hồ sơ cá nhân")
+          alert("Chuyển đến trang hồ sơ cá nhân");
         } else if (itemText.includes("Trọ đã lưu")) {
-          alert("Hiển thị danh sách trọ đã lưu")
+          alert("Hiển thị danh sách trọ đã lưu");
         } else if (itemText.includes("Cài đặt")) {
-          alert("Mở trang cài đặt")
+          alert("Mở trang cài đặt");
         }
-      }, 100)
+      }, 100);
     }
-  })
+  });
 
   // Ripple effect function for buttons and links
   function createRipple(event, element) {

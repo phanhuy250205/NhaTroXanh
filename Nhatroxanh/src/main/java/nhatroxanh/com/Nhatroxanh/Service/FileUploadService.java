@@ -69,7 +69,7 @@ public class FileUploadService {
         System.out.println("🟢 Ảnh đã lưu vào: " + filePath.toString());
 
         // 🔹 **CHỈ TRẢ VỀ `/uploads/avatars/[file_name]`**
-        return "/uploads/" + subFolder + "/" + fileName;
+        return "/uploads/" + fileName;
     }
 
     /**

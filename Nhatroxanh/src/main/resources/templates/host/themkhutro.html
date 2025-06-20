@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
+
 <body class="themkhutro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -40,28 +42,28 @@
                                     <div class="form-group-host">
                                         <label for="hostelIdHost" class="form-label-host">ID khu trọ</label>
                                         <input type="text" class="form-control-host" id="hostelIdHost" placeholder="1"
-                                            value="1">
+                                            value="1" th:value="${hostel != null ? hostel.hostelId : ''}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="hostelNameHost" class="form-label-host">Khu trọ</label>
                                         <input type="text" class="form-control-host" id="hostelNameHost"
-                                            placeholder="Khu A">
+                                            th:value="${hostel != null ? hostel.name : ''}" placeholder="Khu A">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="createDateHost" class="form-label-host">Ngày tạo</label>
                                         <input type="date" class="form-control-host" id="createDateHost"
-                                            value="2025-06-15">
+                                            th:value="${#dates.format(#dates.createNow(), 'dd-MM-yyyy')}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="roomCountHost" class="form-label-host">Số phòng</label>
                                         <input type="number" class="form-control-host" id="roomCountHost"
-                                            placeholder="20" value="20">
+                                            th:value="${hostel != null ? hostel.roomNumber : ''}" placeholder="20">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -147,4 +149,5 @@
         </div>
     </div>
 </body>
+
 </html>

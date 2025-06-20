@@ -56,10 +56,6 @@ public class DemoController {
     public String danhgia() {
         return "host/QL-danh-gia-host";
     }
-     @GetMapping("/chu-tro/profile-host")
-    public String profilehost() {
-        return "host/profile-host";
-    }
      @GetMapping("/chu-tro/quan-ly-tro")
     public String phongtro() {
         return "host/phongtro";
@@ -72,12 +68,5 @@ public class DemoController {
     public String dangnhapchutro() {
         return "auth/login-host";
     }
-    @GetMapping("/chu-tro/thong-tin-tro")
-    public String hostthongtintro() {
-        return "host/thongtintro";
-    }
-     @GetMapping("/chu-tro/them-khu-tro")
-    public String themkhutro() {
-        return "host/themkhutro";
-    }
+  
 }
