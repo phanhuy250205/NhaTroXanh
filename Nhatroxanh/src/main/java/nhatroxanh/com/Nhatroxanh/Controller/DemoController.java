@@ -100,4 +100,8 @@ public class DemoController {
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
+    @GetMapping("/chu-tro/sua-bai-dang")
+    public String chitiethopdong() {
+        return "host/sua-bai-dang";
+    }
 }
