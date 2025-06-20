@@ -1,4 +1,4 @@
-FROM ubuntu:latest
-LABEL authors="admin"
+# FROM ubuntu:latest
+# LABEL authors="admin"
 
-ENTRYPOINT ["top", "-b"]
+# ENTRYPOINT ["top", "-b"]
