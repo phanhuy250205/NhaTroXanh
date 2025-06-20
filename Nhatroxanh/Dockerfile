@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Multi-stage build cho Spring Boot
 FROM eclipse-temurin:21-jdk AS build
 
@@ -37,3 +38,9 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # Chạy ứng dụng
 ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "/app/app.jar"]
+=======
+# FROM ubuntu:latest
+# LABEL authors="admin"
+
+# ENTRYPOINT ["top", "-b"]
+>>>>>>> d0f8371a4ebc5516bc279082440241282949544a
