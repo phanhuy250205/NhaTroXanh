@@ -26,7 +26,7 @@ public class OtpServiceImpl implements OtpService {
         userRepository.save(user);
 
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("nhatroxanh1@gmail.com");
+        message.setFrom("nhatroxanh123@gmail.com");
         message.setTo(user.getEmail());
         message.setSubject("Mã xác thực OTP cho tài khoản Nhà Trọ Xanh");
         message.setText("Chào bạn,\n\nMã OTP của bạn là: " + otpCode + "\n\nMã này sẽ hết hạn sau 5 phút.\n\nTrân trọng,\nĐội ngũ Nhà Trọ Xanh.");
