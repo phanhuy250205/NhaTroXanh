@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <meta charset="UTF-8">
@@ -24,6 +24,7 @@
       --success-green: #10b981;
       --warning-orange: #f59e0b;
       --danger-red: #ef4444;
+      --text-muted: #6b7280;
     }
 
     .post-detail-body-host {
@@ -33,6 +34,7 @@
       background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
       min-height: 100vh;
       color: var(--dark-blue);
+      overflow-x: hidden;
     }
 
     .main-container-host {
@@ -48,6 +50,8 @@
       margin-bottom: 25px;
       flex-wrap: wrap;
       gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(62, 131, 204, 0.1);
     }
 
     .back-link-host {
@@ -74,7 +78,7 @@
     }
 
     .edit-btn-host {
-      background: var(--primary-blue);
+      background: var(--gradient-primary);
       color: white;
       border: none;
       padding: 12px 24px;
@@ -82,7 +86,7 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -91,10 +95,9 @@
     }
 
     .edit-btn-host:hover {
-      background: var(--secondary-blue);
-      transform: translateY(-1px);
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-2px);
       box-shadow: var(--shadow-hover);
-      color: white;
     }
 
     .status-container-host {
@@ -121,6 +124,21 @@
       box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
     }
 
+    .status-badge-host.APPROVED {
+      background: var(--success-green);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge-host.PENDING {
+      background: var(--warning-orange);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge-host.REJECTED {
+      background: var(--danger-red);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
     .content-section-host {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 16px;
@@ -133,52 +151,201 @@
 
     .content-section-host:hover {
       box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
     }
 
     .gallery-section-host {
       margin-bottom: 20px;
     }
 
-    .main-image-host {
+    .image-gallery {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .main-image-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .main-image-container:hover {
+      transform: scale(1.02);
+    }
+
+    .main-image {
       width: 100%;
       height: 400px;
       object-fit: cover;
-      border-radius: 12px;
-      margin-bottom: 16px;
-      border: 2px solid rgba(62, 131, 204, 0.1);
-      transition: all 0.2s ease;
+      border-radius: 16px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
     }
 
-    .main-image-host:hover {
-      border-color: var(--primary-blue);
-      box-shadow: 0 4px 16px rgba(62, 131, 204, 0.2);
-    }
-
-    .thumbnails-container-host {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      justify-content: flex-start;
-    }
-
-    .thumbnail-host {
-      width: 80px;
-      height: 80px;
-      object-fit: cover;
-      border-radius: 8px;
-      border: 2px solid rgba(62, 131, 204, 0.2);
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .thumbnail-host:hover {
-      border-color: var(--primary-blue);
+    .main-image:hover {
+      opacity: 0.95;
       transform: scale(1.05);
     }
 
-    .thumbnail-host.active {
+    .image-overlay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+
+    .btn-favorite-large {
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--danger-red);
+      box-shadow: var(--shadow-primary);
+      transition: all 0.3s ease;
+    }
+
+    .btn-favorite-large:hover {
+      background: var(--danger-red);
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .thumbnail-container {
+      position: relative;
+      margin-top: 15px;
+      padding: 0 40px;
+    }
+
+    .thumbnail-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 5px 0;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar-thumb {
+      background: var(--primary-blue);
+      border-radius: 3px;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar-track {
+      background: rgba(62, 131, 204, 0.1);
+    }
+
+    .thumbnail-item {
+      flex: 0 0 auto;
+      border: 2px solid rgba(62, 131, 204, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      scroll-snap-align: start;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .thumbnail-item img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      transition: opacity 0.3s ease;
+    }
+
+    .thumbnail-item.active {
       border-color: var(--primary-blue);
-      box-shadow: 0 2px 8px rgba(62, 131, 204, 0.3);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+      transform: scale(1.05);
+    }
+
+    .thumbnail-item:hover {
+      border-color: var(--secondary-blue);
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.2);
+    }
+
+    .thumbnail-item:hover img {
+      opacity: 0.9;
+    }
+
+    .thumbnail-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--dark-blue);
+      box-shadow: var(--shadow-primary);
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .thumbnail-nav.prev {
+      left: 0;
+    }
+
+    .thumbnail-nav.next {
+      right: 0;
+    }
+
+    .thumbnail-nav:hover {
+      background: var(--primary-blue);
+      color: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+    }
+
+    .thumbnail-nav i {
+      font-size: 14px;
+    }
+
+    .btn-view-all-photos {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      box-shadow: var(--shadow-primary);
+    }
+
+    .btn-view-all-photos:hover {
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .btn-view-all-photos i {
+      font-size: 16px;
     }
 
     .info-section-host {
@@ -186,6 +353,7 @@
       border-left: 4px solid var(--primary-blue);
       border-radius: 12px;
       padding: 24px;
+      box-shadow: var(--shadow-primary);
     }
 
     .property-title-host {
@@ -198,6 +366,10 @@
 
     .price-container-host {
       margin-bottom: 20px;
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
     }
 
     .price-host {
@@ -212,7 +384,7 @@
 
     .price-note-host {
       font-size: 14px;
-      color: #6b7280;
+      color: var(--text-muted);
       font-style: italic;
     }
 
@@ -222,6 +394,11 @@
       gap: 12px;
       margin-bottom: 12px;
       padding: 8px 0;
+      border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+    }
+
+    .info-item-host:last-child {
+      border-bottom: none;
     }
 
     .info-icon-host {
@@ -229,6 +406,11 @@
       height: 20px;
       color: var(--primary-blue);
       flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .info-item-host:hover .info-icon-host {
+      transform: scale(1.1);
     }
 
     .info-text-host {
@@ -240,6 +422,7 @@
     .info-text-host strong {
       font-weight: 600;
       margin-right: 8px;
+      color: var(--accent-blue);
     }
 
     .description-section-host {
@@ -288,6 +471,12 @@
       padding: 20px;
       border: 1px solid rgba(62, 131, 204, 0.1);
       box-shadow: 0 2px 8px rgba(62, 131, 204, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .details-card-host:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
     }
 
     .details-card-title-host {
@@ -325,7 +514,7 @@
     }
 
     .details-table-host td:last-child {
-      color: #6b7280;
+      color: var(--text-muted);
       font-weight: 500;
     }
 
@@ -334,6 +523,10 @@
       .main-container-host {
         margin-left: 80px;
         padding: 16px;
+      }
+
+      .main-image {
+        height: 350px;
       }
     }
 
@@ -345,6 +538,105 @@
         width: 100%;
       }
 
+      .main-image {
+        height: 300px;
+      }
+
+      .thumbnail-container {
+        padding: 0 30px;
+      }
+
+      .thumbnail-item img {
+        width: 70px;
+        height: 50px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-container-host {
+        padding: 10px;
+      }
+
+      .main-image {
+        height: 250px;
+      }
+
+      .thumbnail-item img {
+        width: 60px;
+        height: 45px;
+      }
+
+      .thumbnail-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+      }
+
+      .thumbnail-nav.prev {
+        left: -5px;
+      }
+
+      .thumbnail-nav.next {
+        right: -5px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-container-host {
+        padding: 8px;
+      }
+
+      .main-image {
+        height: 200px;
+      }
+
+      .thumbnail-item img {
+        width: 50px;
+        height: 40px;
+      }
+
+      .btn-view-all-photos {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-image {
+        height: 180px;
+        border-radius: 10px;
+      }
+
+      .thumbnail-item img {
+        width: 45px;
+        height: 35px;
+      }
+
+      .btn-favorite-large {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .main-image {
+        height: 160px;
+      }
+
+      .thumbnail-item img {
+        width: 40px;
+        height: 30px;
+      }
+
+      .thumbnail-nav {
+        width: 25px;
+        height: 25px;
+        font-size: 10px;
+      }
+    }
+
+    @media (max-width: 992px) {
       .page-header-host {
         flex-direction: column;
         align-items: stretch;
@@ -367,17 +659,9 @@
     }
 
     @media (max-width: 768px) {
-      .main-container-host {
-        padding: 10px;
-      }
-
       .content-section-host {
         padding: 16px;
         margin-bottom: 16px;
-      }
-
-      .main-image-host {
-        height: 300px;
       }
 
       .property-title-host {
@@ -386,15 +670,6 @@
 
       .price-host {
         font-size: 24px;
-      }
-
-      .thumbnails-container-host {
-        justify-content: center;
-      }
-
-      .thumbnail-host {
-        width: 70px;
-        height: 70px;
       }
 
       .header-actions-host {
@@ -427,15 +702,6 @@
 
       .price-host {
         font-size: 20px;
-      }
-
-      .main-image-host {
-        height: 250px;
-      }
-
-      .thumbnail-host {
-        width: 60px;
-        height: 60px;
       }
 
       .info-item-host {
@@ -472,17 +738,6 @@
         font-size: 18px;
       }
 
-      .main-image-host {
-        height: 200px;
-        border-radius: 8px;
-      }
-
-      .thumbnail-host {
-        width: 50px;
-        height: 50px;
-        border-radius: 6px;
-      }
-
       .section-title-host {
         font-size: 18px;
       }
@@ -507,15 +762,6 @@
 
       .price-host {
         font-size: 16px;
-      }
-
-      .main-image-host {
-        height: 180px;
-      }
-
-      .thumbnail-host {
-        width: 45px;
-        height: 45px;
       }
 
       .info-text-host {
@@ -559,82 +805,103 @@
   <div th:replace="~{/layouts/sidebar-host}"></div>
 
   <div class="main-container-host">
-
-    <div class="nha-tro-header d-flex align-items-center justify-content-between">
-      <h5>
-        <a href="/chu-tro/bai-dang" class="nha-tro-back-btn">
-          <i class="fa fa-arrow-left"></i>
+    <div class="page-header-host">
+      <a th:href="@{/chu-tro/bai-dang}" class="back-link-host">
+        <i class="fa fa-arrow-left"></i> Quay lại
+      </a>
+      <div class="header-actions-host">
+        <a th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}" class="edit-btn-host">
+          <i class="fas fa-edit"></i> Sửa bài đăng
         </a>
-        Chi tiết bài đăng
-      </h5>
-      <div class="header-actions-host d-flex align-items-center">
-        <a href="/chu-tro/sua-bai-dang" class="edit-btn-host">
-          <i class="fas fa-edit"></i>
-          Sửa bài đăng
-        </a>
-        <div class="status-container-host ms-3">
-          <span class="status-label-host me-2">Trạng thái:</span>
-          <span class="status-badge-host">Chờ duyệt</span>
+        <div class="status-container-host">
+          <span class="status-label-host">Trạng thái duyệt:</span>
+          <span class="status-badge-host"
+            th:classappend="|${post.approvalStatus != null ? post.approvalStatus.name() : ''}|"
+            th:text="|${post.approvalStatus != null ? post.approvalStatus.name() == 'APPROVED' ? 'Đã duyệt' : post.approvalStatus.name() == 'PENDING' ? 'Chờ duyệt' : 'Bị từ chối' : 'Chưa xác định'}|"></span>
+        </div>
+        <div class="status-container-host">
+          <span class="status-label-host">Trạng thái bài đăng:</span>
+          <span class="status-label-host status-badge-host"
+            th:classappend="${post.status != null and post.status ? 'APPROVED' : 'REJECTED'}"
+            th:text="${post.status != null and post.status ? 'Đang hiển thị' : 'Đã ẩn'}">
+          </span>
         </div>
       </div>
     </div>
     <hr>
 
-
     <!-- Image Gallery Section -->
     <div class="content-section-host gallery-section-host">
       <div class="row">
         <div class="col-lg-8 col-md-12">
-          <img src="../images/cards/anh1.jpg" alt="Hình ảnh chính" class="main-image-host" id="mainImage">
-          <div class="thumbnails-container-host">
-            <img src="../images/cards/anh1.jpg" alt="Hình 1" class="thumbnail-host active"
-              onclick="changeMainImage('../images/cards/anh1.jpg', this)">
-            <img src="../images/cards/anh1.jpg" alt="Hình 2" class="thumbnail-host"
-              onclick="changeMainImage('../images/cards/anh1.jpg', this)">
-            <img src="../images/cards/anh1.jpg" alt="Hình 3" class="thumbnail-host"
-              onclick="changeMainImage('../images/cards/anh1.jpg', this)">
-            <img src="../images/cards/anh1.jpg" alt="Hình 4" class="thumbnail-host"
-              onclick="changeMainImage('../images/cards/anh1.jpg', this)">
+          <div class="image-gallery">
+            <div class="main-image-container">
+              <img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images[0]}" alt="Hình ảnh chính"
+                class="main-image" id="mainImage" onerror="this.src='/images/cards/default.jpg';">
+              <img th:unless="${images != null and !#lists.isEmpty(images)}" src="/images/cards/default.jpg"
+                alt="Hình ảnh chính" class="main-image" id="mainImage">
+            </div>
+            <!-- Thumbnail Images -->
+            <div class="thumbnail-container">
+              <div class="thumbnail-scroll d-flex" style="overflow-x: auto; white-space: nowrap;">
+                <div th:each="image, iterStat : ${images}"
+                  th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'" th:data-image="${image}"
+                  onclick="changeMainImage(this.getAttribute('data-image'), this)">
+                  <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}"
+                    style="width: 80px; height: 60px; object-fit: cover;">
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="col-lg-4 col-md-12">
           <div class="info-section-host">
-            <h1 class="property-title-host">NHÀ TRỌ SỐ 123, ĐƯỜNG ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG</h1>
+            <h1 class="property-title-host"
+              th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}">NHÀ TRỌ SỐ 123, ĐƯỜNG
+              ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG</h1>
 
             <div class="price-container-host">
-              <div class="price-host">2.5 triệu/tháng</div>
+              <div class="price-host"
+                th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.5 triệu/tháng
+              </div>
               <div class="price-note-host">(Chưa bao gồm phí dịch vụ)</div>
             </div>
 
             <div class="info-item-host">
               <i class="bi bi-bounding-box-circles info-icon-host"></i>
-              <div class="info-text-host"><strong>Diện tích:</strong> 20m²</div>
+              <div class="info-text-host"><strong>Diện tích:</strong> <span
+                  th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'">20m²</span></div>
             </div>
 
             <div class="info-item-host">
               <i class="bi bi-house-heart info-icon-host"></i>
-              <div class="info-text-host"><strong>Loại hình:</strong> Nhà trọ, phòng trọ</div>
+              <div class="info-text-host"><strong>Loại hình:</strong> <span
+                  th:text="${post.category != null ? post.category.name : 'Chưa xác định'}">Nhà trọ, phòng trọ</span>
+              </div>
             </div>
 
-            <div class="info-item-host">
+            <!-- <div class="info-item-host">
               <i class="bi bi-geo-alt-fill info-icon-host"></i>
-              <div class="info-text-host"><strong>Địa chỉ:</strong> Thanh Khê, TP. Đà Nẵng</div>
-            </div>
+              <div class="info-text-host"><strong>Địa chỉ:</strong> <span
+                  th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">Thanh
+                  Khê, TP. Đà Nẵng</span></div>
+            </div> -->
 
             <div class="info-item-host">
               <i class="bi bi-clock-fill info-icon-host"></i>
-              <div class="info-text-host"><strong>Ngày đăng:</strong> 28/05/2025</div>
+              <div class="info-text-host"><strong>Ngày đăng:</strong> <span
+                  th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">28/05/2025</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-
     <!-- Description Section -->
     <div class="content-section-host">
       <div class="description-section-host">
         <h2 class="section-title-host">Mô tả chi tiết</h2>
-        <p class="description-text-host">
+        <p class="description-text-host" th:text="${post.description != null ? post.description : 'Chưa có mô tả'}">
           Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm uất.
           Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi cho người
           thuê.
@@ -644,59 +911,23 @@
           <div class="details-card-host">
             <h3 class="details-card-title-host">
               <i class="fas fa-info-circle"></i>
-              Thông tin cơ bản
+              Thông tin tiện ích cơ bản
             </h3>
-            <table class="details-table-host">
-              <tr>
-                <td>Diện tích:</td>
-                <td>20m²</td>
-              </tr>
-              <tr>
-                <td>Số phòng ngủ:</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Số phòng tắm:</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>Hướng cửa:</td>
-                <td>Đông Nam</td>
-              </tr>
-              <tr>
-                <td>Tầng:</td>
-                <td>2/4</td>
-              </tr>
-            </table>
-          </div>
-
-          <div class="details-card-host">
-            <h3 class="details-card-title-host">
-              <i class="fas fa-money-bill-wave"></i>
-              Chi phí
-            </h3>
-            <table class="details-table-host">
-              <tr>
-                <td>Giá thuê:</td>
-                <td>2.5 triệu/tháng</td>
-              </tr>
-              <tr>
-                <td>Tiền điện:</td>
-                <td>3,500đ/kWh</td>
-              </tr>
-              <tr>
-                <td>Tiền nước:</td>
-                <td>25,000đ/người</td>
-              </tr>
-              <tr>
-                <td>Phí dịch vụ:</td>
-                <td>200,000đ/tháng</td>
-              </tr>
-              <tr>
-                <td>Tiền cọc:</td>
-                <td>1 tháng</td>
-              </tr>
-            </table>
+            <div class="amenity-list">
+              <!-- Nếu không có tiện ích -->
+              <p th:if="${utilities == null or #sets.isEmpty(utilities)}" class="text-muted">
+                Phòng này hiện không có tiện ích nào.
+              </p>
+              <!-- Danh sách tiện ích -->
+              <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
+                <ul class="list-unstyled">
+                  <li class="amenity-item mb-2" th:each="utility : ${utilities}">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -743,6 +974,29 @@
         });
       });
     });
+    function changeMainImage(src, element) {
+      document.getElementById('mainImage').src = src;
+      document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function scrollThumbnails(direction) {
+      const container = document.querySelector('.thumbnail-scroll');
+      const scrollAmount = 120; // điều chỉnh theo thumbnail của bạn
+
+      if (!container) return; // nếu không tìm thấy container
+
+      if (direction === 'prev') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else if (direction === 'next') {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+
+
+    function openPhotoModal() {
+      $('#photoModal').modal('show');
+    }
   </script>
 </body>
 

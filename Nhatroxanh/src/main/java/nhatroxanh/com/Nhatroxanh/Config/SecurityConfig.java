@@ -51,7 +51,7 @@ public class SecurityConfig {
                                 .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
                                                 // API đăng ký/xác thực phải được phép
-                                                .requestMatchers("/api/users/**").permitAll()
+                                                .requestMatchers("/api/users/**","/api/1/login","/api/1/register").permitAll()
                                                 // ✅ THÊM DÒNG NÀY - Cho phép tất cả API filter
                                                 .requestMatchers("/api/**").permitAll()
                                                 // Các tài nguyên tĩnh và trang công khai được phép

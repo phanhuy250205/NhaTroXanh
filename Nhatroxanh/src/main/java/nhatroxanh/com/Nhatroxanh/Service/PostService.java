@@ -2,71 +2,36 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
-@Service
-public class PostService {
-    @Autowired
-    private PostRepository postRepository;
+public interface PostService {
+        List<Post> findTopApprovedActivePostsByViews(int limit);
 
-    public List<Post> findTopApprovedActivePostsByViews(int limit) {
-        return postRepository.findByStatusTrueAndApprovalStatusOrderByViewDesc(
-                ApprovalStatus.APPROVED, PageRequest.of(0, limit)).getContent();
-    }
+        List<Post> filterPosts(List<Integer> utilityIds, Float minArea, Float maxArea, String sort);
 
-    public List<Post> filterPosts(List<Integer> utilityIds, Float minArea, Float maxArea, String sort) {
-        List<Post> posts;
-        if (utilityIds != null && !utilityIds.isEmpty()) {
-            posts = postRepository.findActivePostsWithUtilityFilter(utilityIds, minArea, maxArea);
-        } else {
-            posts = postRepository.findAllActivePostsWithAreaFilter(minArea, maxArea);
-        }
+        List<Post> filterPostsByCategory(Integer categoryId, List<Integer> utilityIds, Float minArea, Float maxArea,
+                        String sort);
 
-        applySorting(posts, sort);
+        List<Post> getAllActivePosts();
 
-        return posts;
-    }
+        List<Post> getPostsByUserId(Integer userId);
 
-    public List<Post> filterPostsByCategory(Integer categoryId, List<Integer> utilityIds, Float minArea, Float maxArea,
-            String sort) {
-        List<Post> posts;
+        List<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status, Date fromDate, Date toDate,
+                        String sort);
 
-        if (utilityIds != null && !utilityIds.isEmpty()) {
-            posts = postRepository.findActiveCategoryPostsWithUtilityFilter(categoryId, utilityIds, minArea, maxArea);
-        } else {
-            posts = postRepository.findActiveCategoryPostsWithAreaFilter(categoryId, minArea, maxArea);
-        }
+        Post getPostById(Integer postId);
 
-        applySorting(posts, sort);
+        void deletePost(Integer postId);
 
-        return posts;
-    }
+        void savePost(Post post);
+          Post createPost(String title, String description, Float price, Float area,
+                    Integer categoryId, Integer wardId, String street, String houseNumber,
+                    List<Integer> utilityIds, MultipartFile[] images, Users user) throws Exception;
 
-    private void applySorting(List<Post> posts, String sort) {
-        if (sort != null) {
-            switch (sort) {
-                case "price_asc":
-                    posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
-                    break;
-                case "price_desc":
-                    posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
-                    break;
-                case "latest":
-                    posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
-
-    public List<Post> getAllActivePosts() {
-        return postRepository.findByStatusTrueAndApprovalStatusOrderByCreatedAtDesc("APPROVED");
-    }
 }

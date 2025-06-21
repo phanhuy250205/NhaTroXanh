@@ -21,11 +21,6 @@ public class DemoController {
         return "guest/phong-tro";
     }
 
-    @GetMapping("/bai-dang")
-    public String baidang() {
-        return "host/bai-dang-host";
-    }
-
     @GetMapping("/nhan-vien/thong-tin-tro")
     public String thongtintro() {
         return "staff/thong-tin-tro-staff";
@@ -81,27 +76,27 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
-    @GetMapping("/chu-tro/dang-tin")
-    public String dangtin() {
-        return "host/bai-dang-host";
-    }
+    // @GetMapping("/chu-tro/dang-tin")
+    // public String dangtin() {
+    //     return "host/bai-dang-host";
+    // }
 
-    @GetMapping("/chu-tro/bai-dang")
-    public String quanlyhopdong() {
-        return "host/quan-ly-bai-dang";
-    }
+    // @GetMapping("/chu-tro/bai-dang")
+    // public String quanlyhopdong() {
+    //     return "host/quan-ly-bai-dang";
+    // }
 
-    @GetMapping("/chu-tro/chi-tiet-bai-dang")
-    public String chitietbaidang() {
-        return "host/chi-tiet-bai-dang";
-    }
+    // @GetMapping("/chu-tro/chi-tiet-bai-dang")
+    // public String chitietbaidang() {
+    //     return "host/chi-tiet-bai-dang";
+    // }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
-    @GetMapping("/chu-tro/sua-bai-dang")
-    public String chitiethopdong() {
-        return "host/sua-bai-dang";
-    }
+    // @GetMapping("/chu-tro/sua-bai-dang")
+    // public String chitiethopdong() {
+    //     return "host/sua-bai-dang";
+    // }
 }

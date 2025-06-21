@@ -2,24 +2,26 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý bài đăng</title>
-    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
-    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
-    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý bài đăng</title>
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+  <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <style>
-        body {
-            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    }
 
-        }
-       .search-bar input {
+    .search-bar input {
       border-radius: 25px;
     }
+
     .listing-card {
       border-radius: 16px;
       background-color: #fff;
@@ -27,14 +29,17 @@
       overflow: hidden;
       transition: transform 0.2s ease;
     }
+
     .listing-card:hover {
       transform: translateY(-5px);
     }
+
     .listing-card img {
       width: 100%;
       height: 200px;
       object-fit: cover;
     }
+
     .status {
       position: absolute;
       top: 12px;
@@ -45,16 +50,28 @@
       font-weight: 600;
       color: #fff;
     }
-    .da-duyet { background-color: #28a745; }
-    .chua-duyet { background-color: #ffc107; }
-    .bi-an { background-color: #dc3545; }
+
+    .da-duyet {
+      background-color: #28a745;
+    }
+
+    .chua-duyet {
+      background-color: #ffc107;
+    }
+
+    .bi-an {
+      background-color: #dc3545;
+    }
+
     .listing-body {
       padding: 16px;
     }
+
     .listing-body p {
       margin-bottom: 6px;
       font-size: 0.9rem;
     }
+
     .listing-footer {
       padding: 12px 16px;
       border-top: 1px solid #eee;
@@ -63,7 +80,9 @@
       gap: 10px;
       align-items: center;
     }
-    .btn-edit-host, .btn-delete-host {
+
+    .btn-edit-host,
+    .btn-delete-host {
       border: none;
       border-radius: 8px;
       padding: 8px 16px;
@@ -75,138 +94,247 @@
       align-items: center;
       gap: 6px;
     }
+
     .btn-edit-host {
       background-color: #0d6efd;
     }
+
     .btn-edit-host:hover {
       background-color: #084298;
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(13, 110, 253, 0.3);
     }
+
     .btn-delete-host {
       background-color: #dc3545;
     }
+
     .btn-delete-host:hover {
       background-color: #a71d2a;
       transform: translateY(-2px);
       box-shadow: 0 6px 8px rgba(220, 53, 69, 0.3);
     }
-    </style>
+
+    /* Kiểu cho thông báo flash */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 12px 40px 12px 16px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      animation: slideIn 0.3s ease-out;
+      width: 320px;
+      z-index: 1000;
+    }
+
+    .alert-success {
+      background-color: #e6ffed;
+      color: #1a7e3b;
+      border: 1px solid #28a745;
+    }
+
+    .alert-error {
+      background-color: #ffe6e6;
+      color: #a71d2a;
+      border: 1px solid #dc3545;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.6;
+      transition: opacity 0.2s ease;
+      padding: 0;
+      margin-left: 10px;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .alert.fade-out {
+      animation: fadeOut 0.3s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-20px);
+        height: 0;
+        margin-bottom: 0;
+        padding: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <!-- SIDEBAR -->
-    <div th:replace="~{/layouts/sidebar-host}"></div>
+  <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <div class="main-content">
-        <div class="mb-4">
-            <h2 class="fw-bold">Quản lý bài đăng</h2>
-            <p class="text-muted">Xem và chỉnh sửa các bài đăng của bạn </p>
-        </div>
-    <div class="card p-3 mb-4">
-      <div class="row g-3 align-items-center">
-        <div class="col-md-6">
-          <input type="text" class="form-control" placeholder="Tìm kiếm bài đăng...">
+  <div class="main-content">
+    <div th:if="${message}" class="alert alert-success" role="alert">
+      <span th:text="${message}"></span>
+      <button type="button" class="close-btn">×</button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert">
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="close-btn">×</button>
+    </div>
+    <div class="mb-4">
+      <h2 class="fw-bold">Quản lý bài đăng</h2>
+      <p class="text-muted">Xem và chỉnh sửa các bài đăng của bạn</p>
+    </div>
+    <form method="get" th:action="@{/chu-tro/bai-dang/tim-kiem}">
+      <div class="row g-3 align-items-center mb-2">
+        <div class="col-md-4">
+          <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm bài đăng..."
+            th:value="${keyword}">
         </div>
         <div class="col-md-2">
-          <select class="form-select">
-            <option selected>Trạng thái</option>
-            <option>Đã duyệt</option>
-            <option>Chưa duyệt</option>
-            <option>Bị từ chối</option>
+          <select class="form-select" name="status">
+            <option value="">Trạng thái</option>
+            <option value="APPROVED" th:selected="${status?.name() == 'APPROVED'}">Đã duyệt</option>
+            <option value="PENDING" th:selected="${status?.name() == 'PENDING'}">Chưa duyệt</option>
+            <option value="REJECTED" th:selected="${status?.name() == 'REJECTED'}">Bị từ chối</option>
           </select>
         </div>
         <div class="col-md-2">
-          <select class="form-select">
-            <option selected>Loại</option>
-            <option>Nhà trọ</option>
-            <option>Chung cư</option>
+          <select class="form-select" name="categoryId">
+            <option value="">Danh mục</option>
+            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}"
+              th:selected="${categoryId == c.categoryId}">
+            </option>
           </select>
         </div>
         <div class="col-md-2">
-          <select class="form-select">
-            <option selected>Ngày</option>
-            <option>Hôm nay</option>
-            <option>Tuần này</option>
+          <select class="form-select" name="sort">
+            <option value="">Sắp xếp theo</option>
+            <option value="newest" th:selected="${sort == 'newest'}">Mới nhất</option>
+            <option value="oldest" th:selected="${sort == 'oldest'}">Cũ nhất</option>
           </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Lọc</button>
+        </div>
+      </div>
+    </form>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <div class="col" th:each="post : ${posts}">
+        <div class="listing-card position-relative">
+          <span class="status" th:classappend="
+                ${post.approvalStatus != null and post.approvalStatus.name() == 'APPROVED'} ? ' da-duyet' :
+                (${post.approvalStatus.name() == 'PENDING'} ? ' chua-duyet' :
+                (${post.approvalStatus.name() == 'REJECTED'} ? ' bi-an' : ''))" th:text="
+                ${post.approvalStatus != null and post.approvalStatus.name() == 'APPROVED'} ? 'Đã duyệt' :
+                (${post.approvalStatus.name() == 'PENDING'} ? 'Chưa duyệt' :
+                (${post.approvalStatus.name() == 'REJECTED'} ? 'Bị từ chối' : 'Không xác định'))">
+          </span>
+          <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}">
+            <img
+              th:src="${post.images != null and !post.images.isEmpty() ? post.images[0].url : '/images/cards/default.jpg'}"
+              alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
+          </a>
+          <div class="listing-body">
+            <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}" style="text-decoration: none; color: black;">
+              <h5 class="fw-semibold" th:text="${post.title}">Tiêu đề bài đăng</h5>
+            </a>
+            <p><strong>Từ:</strong>
+              <span th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}"></span>đ/tháng
+            </p>
+            <p>
+              <strong>Diện tích:</strong>
+              <span th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'"></span>
+            </p>
+            <!-- <p th:text="${post.address != null ? 
+                        post.address.street + ', ' + 
+                        post.address.ward.name + ', ' +
+                        post.address.ward.district.name + ', ' +
+                        post.address.ward.district.province.name : 'Chưa xác định'}">
+            </p> -->
+            <p><strong>Mô tả:</strong>
+              <span th:text="${#strings.length(post.description) > 100} ?
+                          ${#strings.substring(post.description, 0, 100)} + '...' :
+                          ${post.description}"></span>
+            </p>
+          </div>
+          <div class="listing-footer">
+            <a class="btn-edit-host text-decoration-none" th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}">
+              <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <form th:action="@{'/chu-tro/xoa-bai-dang/' + ${post.postId}}" method="post" class="delete-form">
+              <button type="submit" class="btn-delete-host delete-btn"><i class="fas fa-trash"></i> Xóa bài</button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                 <div class="col">
-        <div class="listing-card position-relative">
-          <span class="status da-duyet">Đã duyệt</span>
-          <a href="#"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
-          <div class="listing-body">
-            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
-            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
-            <p>Nhà trọ, phòng trọ, 20m²</p>
-            <p>Thanh Khê, TP. Đà Nẵng</p>
-            <p><strong>Khu trọ:</strong> KTX B1</p>
-            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
-          </div>
-          <div class="listing-footer">
-            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
-              <i class="fas fa-edit"></i> Chỉnh sửa
-            </button>
-            <button class="btn-delete-host" title="Xóa">
-              <i class="fas fa-trash"></i> Xóa bài
-            </button>
-          </div>
-        </div>
-      </div>
-               <div class="col">
-        <div class="listing-card position-relative">
-          <span class="status chua-duyet">Chưa duyệt</span>
-          <a href="/chu-tro/chi-tiet-bai-dang"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
-          <div class="listing-body">
-            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
-            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
-            <p>Nhà trọ, phòng trọ, 20m²</p>
-            <p>Thanh Khê, TP. Đà Nẵng</p>
-            <p><strong>Khu trọ:</strong> KTX B1</p>
-            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
-          </div>
-          <div class="listing-footer">
-            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
-              <i class="fas fa-edit"></i> Chỉnh sửa
-            </button>
-            <button class="btn-delete-host" title="Xóa">
-              <i class="fas fa-trash"></i> Xóa bài
-            </button>
-          </div>
-        </div>
-      </div>
-            <div class="col">
-        <div class="listing-card position-relative">
-          <span class="status bi-an">Bị ẩn</span>
-          <a href="#"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
-          <div class="listing-body">
-            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
-            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
-            <p>Nhà trọ, phòng trọ, 20m²</p>
-            <p>Thanh Khê, TP. Đà Nẵng</p>
-            <p><strong>Khu trọ:</strong> KTX B1</p>
-            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
-          </div>
-          <div class="listing-footer">
-            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
-              <i class="fas fa-edit"></i> Chỉnh sửa
-            </button>
-            <button class="btn-delete-host" title="Xóa">
-              <i class="fas fa-trash"></i> Xóa bài
-            </button>
-          </div>
-        </div>
-      </div>
-       
-        
-    </div>
-
     <script th:src="@{/js/sidebar.js}"></script>
+    <script>
+      document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          const form = this.closest('.delete-form');
+          Swal.fire({
+            title: "Bạn có chắc chắn muốn xóa?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              form.submit();
+            }
+          });
+        });
+      });
+      // Xử lý đóng thông báo
+      document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const alert = this.closest('.alert');
+          alert.classList.add('fade-out');
+          setTimeout(() => alert.remove(), 300);
+        });
+      });
+
+      // Tự động ẩn thông báo sau 5 giây
+      document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+          alert.classList.add('fade-out');
+          setTimeout(() => alert.remove(), 300);
+        }, 5000);
+      });
+    </script>
+  </div>
 </body>
 
 </html>
