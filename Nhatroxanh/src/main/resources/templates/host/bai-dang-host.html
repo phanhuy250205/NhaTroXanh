@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Tin Trọ</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    
+    <style>
+        :root {
+            --primary-blue: #3E83CC;
+            --secondary-blue: #549eed;
+            --dark-blue: #1f2937;
+            --light-blue: #f0f8ff;
+            --accent-blue: #2563eb;
+            --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+            --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+        }
+
+        .form-body-host {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            color: var(--dark-blue);
+        }
+
+        .form-container-host {
+            margin-left: 100px;
+            padding: 15px;
+            transition: margin-left 0.3s ease;
+            max-width: 100%;
+        }
+
+        .form-title-host {
+            font-size: 28px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-title-host::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 2px;
+        }
+
+        .form-section-host {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-primary);
+            transition: all 0.2s ease;
+        }
+
+        .form-section-host:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .form-label-host {
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 8px;
+            font-size: 14px;
+            display: block;
+        }
+
+        .form-control-host {
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 14px;
+            color: var(--dark-blue);
+            background: white;
+            transition: all 0.2s ease;
+            width: 100%;
+        }
+
+        .form-control-host:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .form-control-host::placeholder {
+            color: #8fa8b8;
+        }
+
+        .form-select-host {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 12px center;
+            background-repeat: no-repeat;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .input-group-host {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .input-group-host .form-control-host {
+            flex: 1;
+        }
+
+        .area-unit-host {
+            width: 80px;
+            background-color: #f8fafc;
+            color: #6b7280;
+            cursor: not-allowed;
+            text-align: center;
+        }
+
+        .row-host {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .col-host {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .amenities-grid-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .form-check-host {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(62, 131, 204, 0.05);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .form-check-host:hover {
+            background: rgba(62, 131, 204, 0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .form-check-input-host {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--primary-blue);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .form-check-input-host:checked {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .form-check-label-host {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--dark-blue);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .image-upload-container-host {
+            border: 2px dashed rgba(62, 131, 204, 0.3);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            background: rgba(62, 131, 204, 0.02);
+            transition: all 0.2s ease;
+            margin-top: 12px;
+        }
+
+        .image-upload-container-host:hover {
+            border-color: var(--primary-blue);
+            background: rgba(62, 131, 204, 0.05);
+        }
+
+        .image-upload-btn-host {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .image-upload-btn-host:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+        }
+
+        .image-upload-text-host {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        .image-preview-host {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(62, 131, 204, 0.02);
+            border-radius: 8px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .image-preview-host img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid rgba(62, 131, 204, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .image-preview-host img:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-blue);
+        }
+
+        .more-images-host {
+            width: 100px;
+            height: 100px;
+            background: var(--primary-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .more-images-host:hover {
+            background: var(--secondary-blue);
+            transform: scale(1.05);
+        }
+
+        .form-actions-host {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .btn-submit-host {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-submit-host:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+        }
+
+        .btn-reset-host {
+            background: var(--danger-red);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset-host:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .hidden-input-host {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(62, 131, 204, 0.2);
+        }
+
+        .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-body img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid rgba(62, 131, 204, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .form-container-host {
+                margin-left: 80px;
+                padding: 12px;
+            }
+            
+            .amenities-grid-host {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+
+        @media (max-width: 992px) {
+            .form-container-host {
+                margin-left: 0;
+                padding: 10px;
+                padding-top: 70px;
+                width: 100%;
+            }
+            
+            .row-host {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .amenities-grid-host {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-container-host {
+                padding: 8px;
+            }
+            
+            .form-title-host {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            
+            .form-section-host {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .amenities-grid-host {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+            
+            .form-actions-host {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-submit-host,
+            .btn-reset-host {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .form-container-host {
+                padding: 6px;
+            }
+            
+            .form-title-host {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+            
+            .form-section-host {
+                padding: 12px;
+                margin-bottom: 10px;
+            }
+            
+            .input-group-host {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .area-unit-host {
+                width: 100%;
+            }
+            
+            .image-upload-container-host {
+                padding: 16px;
+            }
+            
+            .image-preview-host {
+                padding: 12px;
+            }
+            
+            .image-preview-host img,
+            .more-images-host {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .form-container-host {
+                padding: 4px;
+            }
+            
+            .form-title-host {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+            
+            .form-section-host {
+                padding: 10px;
+                border-radius: 8px;
+            }
+            
+            .form-control-host {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            .form-label-host {
+                font-size: 13px;
+            }
+            
+            .form-check-host {
+                padding: 6px 10px;
+            }
+            
+            .form-check-label-host {
+                font-size: 12px;
+            }
+            
+            .btn-submit-host,
+            .btn-reset-host {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .form-container-host {
+                padding: 2px;
+            }
+            
+            .form-title-host {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+            
+            .form-section-host {
+                padding: 8px;
+            }
+            
+            .form-control-host {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .form-label-host {
+                font-size: 12px;
+                margin-bottom: 6px;
+            }
+            
+            .image-preview-host img,
+            .more-images-host {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .btn-submit-host,
+            .btn-reset-host {
+                padding: 8px 16px;
+                font-size: 12px;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(62, 131, 204, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gradient-primary);
+            border-radius: 3px;
+        }
+
+        .btn-add-amenity-host {
+            background: var(--success-green);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-add-amenity-host:hover {
+            background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .modal-content-host {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 8px 32px rgba(62, 131, 204, 0.2);
+        }
+
+        .modal-header-host {
+            background: var(--gradient-primary);
+            color: white;
+            border-radius: 12px 12px 0 0;
+            border-bottom: none;
+            padding: 16px 20px;
+        }
+
+        .modal-title-host {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .modal-body-host {
+            padding: 20px;
+        }
+
+        .modal-footer-host {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .btn-save-amenity-host {
+            background: var(--primary-blue);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-save-amenity-host:hover {
+            background: var(--secondary-blue);
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel-host {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-cancel-host:hover {
+            background: #4b5563;
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="form-body-host">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <div class="form-container-host">
+        <h1 class="form-title-host">ĐĂNG TIN TRỌ</h1>
+
+        <!-- Loại danh mục -->
+        <div class="form-section-host">
+            <label class="form-label-host">Loại danh mục</label>
+            <select class="form-control-host form-select-host">
+                <option>Mời bạn chọn loại danh mục phù hợp...</option>
+                <option value="nha-tro">Nhà trọ</option>
+                <option value="chung-cu">Chung cư mini</option>
+                <option value="phong-tro">Phòng trọ</option>
+            </select>
+        </div>
+
+        <!-- Khu vực -->
+        <div class="form-section-host">
+            <label class="form-label-host">Khu vực</label>
+            <div class="row-host">
+                <div class="col-host">
+                    <select class="form-control-host form-select-host" id="provinceSelect">
+                        <option value="">-- Chọn tỉnh/thành phố --</option>
+                    </select>
+                </div>
+                <div class="col-host">
+                    <select class="form-control-host form-select-host" id="districtSelect">
+                        <option value="">-- Chọn quận/huyện --</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row-host">
+                <div class="col-host">
+                    <select class="form-control-host form-select-host" id="wardSelect">
+                        <option value="">-- Chọn phường/xã --</option>
+                    </select>
+                </div>
+                <div class="col-host">
+                    <select class="form-control-host form-select-host" id="streetSelect">
+                        <option value="">-- Chọn đường/phố --</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Số nhà và Địa chỉ -->
+        <div class="form-section-host">
+            <div class="row-host">
+                <div class="col-host">
+                    <label class="form-label-host">Số nhà</label>
+                    <input type="text" class="form-control-host" placeholder="Nhập số nhà...">
+                </div>
+                <div class="col-host">
+                    <label class="form-label-host">Địa chỉ</label>
+                    <input type="text" class="form-control-host" placeholder="Nhập địa chỉ...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Thông tin mô tả -->
+        <div class="form-section-host">
+            <label class="form-label-host">Tiêu đề bài đăng</label>
+            <textarea class="form-control-host" placeholder="Nhập tiêu đề hấp dẫn cho bài đăng..." rows="2"></textarea>
+        </div>
+
+        <!-- Giá cho thuê và Diện tích -->
+        <div class="form-section-host">
+            <div class="row-host">
+                <div class="col-host">
+                    <label class="form-label-host">Giá cho thuê</label>
+                    <div class="input-group-host">
+                        <input type="number" class="form-control-host" placeholder="Nhập giá...">
+                        <select class="form-control-host form-select-host" style="width: 120px;">
+                            <option>VNĐ/Tháng</option>
+                            <option>VNĐ/Ngày</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-host">
+                    <label class="form-label-host">Diện tích</label>
+                    <div class="input-group-host">
+                        <input type="number" class="form-control-host" placeholder="Nhập diện tích...">
+                        <input type="text" class="form-control-host area-unit-host" value="m²" disabled>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nội dung mô tả -->
+        <div class="form-section-host">
+            <label class="form-label-host">Nội dung mô tả</label>
+            <textarea class="form-control-host" placeholder="Mô tả chi tiết về phòng trọ, vị trí, tiện ích..." rows="5"></textarea>
+        </div>
+
+        <!-- Tiện ích -->
+        <div class="form-section-host">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                <label class="form-label-host">Tiện ích</label>
+                <button type="button" class="btn-add-amenity-host" data-bs-toggle="modal" data-bs-target="#addAmenityModal">
+                    <i class="fas fa-plus"></i> Thêm tiện ích
+                </button>
+            </div>
+            <div class="amenities-grid-host" id="amenitiesGrid">
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="giuongngu">
+                    <label class="form-check-label-host" for="giuongngu">Giường ngủ</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="dieuhoa">
+                    <label class="form-check-label-host" for="dieuhoa">Điều hòa</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="wcrung">
+                    <label class="form-check-label-host" for="wcrung">WC riêng</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="chode">
+                    <label class="form-check-label-host" for="chode">Chỗ để xe</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="tuquanao">
+                    <label class="form-check-label-host" for="tuquanao">Tủ quần áo</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="bep">
+                    <label class="form-check-label-host" for="bep">Bếp</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="nuocnong">
+                    <label class="form-check-label-host" for="nuocnong">Nước nóng</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="chulua">
+                    <label class="form-check-label-host" for="chulua">Chữ lửa</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="wififree">
+                    <label class="form-check-label-host" for="wififree">Wifi miễn phí</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="cameraninh">
+                    <label class="form-check-label-host" for="cameraninh">Camera an ninh</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="thetu">
+                    <label class="form-check-label-host" for="thetu">Thẻ từ</label>
+                </div>
+                <div class="form-check-host">
+                    <input type="checkbox" class="form-check-input-host" id="tv">
+                    <label class="form-check-label-host" for="tv">TV LCD</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hình ảnh -->
+        <div class="form-section-host">
+            <label class="form-label-host">Hình ảnh</label>
+            <div class="image-upload-container-host">
+                <label for="upload-image" class="image-upload-btn-host">
+                    <i class="fas fa-camera"></i>
+                    Tải hình ảnh
+                </label>
+                <input type="file" id="upload-image" accept="image/*" multiple style="display: none;">
+                <p class="image-upload-text-host">Chọn nhiều hình ảnh để tăng độ tin cậy</p>
+            </div>
+            <div class="image-preview-host" id="imagePreview" style="display: none;"></div>
+            <input type="file" class="hidden-input-host" id="replace-image" accept="image/*">
+        </div>
+
+        <!-- Thông tin liên hệ -->
+        <div class="form-section-host">
+            <label class="form-label-host">Thông tin liên hệ</label>
+            <div class="row-host">
+                <div class="col-host">
+                    <input type="text" class="form-control-host" placeholder="Họ và tên">
+                </div>
+                <div class="col-host">
+                    <input type="tel" class="form-control-host" placeholder="Số điện thoại">
+                </div>
+            </div>
+        </div>
+
+        <!-- Nút gửi -->
+        <div class="form-actions-host">
+            <button type="submit" class="btn-submit-host">
+                <i class="fas fa-paper-plane"></i>
+                Đăng bài
+            </button>
+            <button type="reset" class="btn-reset-host">
+                <i class="fas fa-redo"></i>
+                Làm mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal để hiển thị tất cả ảnh -->
+    <div class="modal fade" id="imageModal" tabindex="-1" aria-labelledby="imageModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalLabel">
+                        <i class="fas fa-images"></i> Tất cả hình ảnh
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalImageContainer">
+                    <!-- Ảnh sẽ được thêm vào đây -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal thêm tiện ích -->
+    <div class="modal fade" id="addAmenityModal" tabindex="-1" aria-labelledby="addAmenityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content modal-content-host">
+                <div class="modal-header modal-header-host">
+                    <h5 class="modal-title modal-title-host" id="addAmenityModalLabel">
+                        <i class="fas fa-plus-circle"></i> Thêm tiện ích mới
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body modal-body-host">
+                    <label class="form-label-host" for="newAmenityName">Tên tiện ích</label>
+                    <input type="text" class="form-control-host" id="newAmenityName" placeholder="Nhập tên tiện ích..." maxlength="50">
+                    <small class="text-muted">Tối đa 50 ký tự</small>
+                </div>
+                <div class="modal-footer modal-footer-host">
+                    <button type="button" class="btn-cancel-host" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn-save-amenity-host" id="saveAmenityBtn">
+                        <i class="fas fa-save"></i> Lưu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function getMaxImages() {
+                const width = window.innerWidth;
+                if (width >= 1400) return 10;
+                if (width >= 992) return 8;
+                if (width >= 576) return 5;
+                return 5;
+            }
+
+            let imageElements = [];
+            let originalFiles = [];
+
+            const uploadInput = document.getElementById("upload-image");
+            if (uploadInput) {
+                uploadInput.addEventListener("change", function (e) {
+                    const files = e.target.files;
+                    const preview = document.getElementById("imagePreview");
+                    if (preview && files.length > 0) {
+                        preview.style.display = "flex";
+                        preview.innerHTML = "";
+                        originalFiles = Array.from(files);
+
+                        const maxImages = getMaxImages();
+                        imageElements = [];
+
+                        for (let i = 0; i < Math.min(files.length, maxImages); i++) {
+                            const file = files[i];
+                            const reader = new FileReader();
+
+                            reader.onload = function (event) {
+                                const img = document.createElement("img");
+                                img.src = event.target.result;
+                                img.dataset.index = i;
+                                preview.appendChild(img);
+                                imageElements.push(img);
+
+                                img.addEventListener("click", function () {
+                                    const replaceInput = document.getElementById("replace-image");
+                                    if (replaceInput) {
+                                        replaceInput.dataset.replaceIndex = this.dataset.index;
+                                        replaceInput.click();
+                                    }
+                                });
+                            };
+                            reader.readAsDataURL(file);
+                        }
+
+                        if (files.length > maxImages) {
+                            const moreImages = document.createElement("div");
+                            moreImages.className = "more-images-host";
+                            moreImages.textContent = `+${files.length - maxImages}`;
+                            moreImages.addEventListener("click", function () {
+                                const modalBody = document.getElementById("modalImageContainer");
+                                if (modalBody) {
+                                    modalBody.innerHTML = "";
+                                    for (let i = 0; i < originalFiles.length; i++) {
+                                        const file = originalFiles[i];
+                                        const reader = new FileReader();
+                                        reader.onload = function (event) {
+                                            const img = document.createElement("img");
+                                            img.src = event.target.result;
+                                            modalBody.appendChild(img);
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                    const modal = new bootstrap.Modal(document.getElementById("imageModal"));
+                                    modal.show();
+                                }
+                            });
+                            preview.appendChild(moreImages);
+                        }
+                    } else if (preview) {
+                        preview.style.display = "none";
+                    }
+                });
+            }
+
+            const replaceInput = document.getElementById("replace-image");
+            if (replaceInput) {
+                replaceInput.addEventListener("change", function (e) {
+                    const replaceFile = e.target.files[0];
+                    const replaceIndex = parseInt(this.dataset.replaceIndex);
+                    if (replaceFile && replaceIndex >= 0 && replaceIndex < imageElements.length) {
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            imageElements[replaceIndex].src = event.target.result;
+                            if (originalFiles && replaceIndex < originalFiles.length) {
+                                originalFiles[replaceIndex] = replaceFile;
+                            }
+                        };
+                        reader.readAsDataURL(replaceFile);
+                        this.value = "";
+                    }
+                });
+            }
+
+            window.addEventListener("resize", function () {
+                const uploadInput = document.getElementById("upload-image");
+                if (uploadInput && uploadInput.files.length > 0) {
+                    uploadInput.dispatchEvent(new Event("change"));
+                }
+            });
+
+            // API functions for location selection
+            async function fetchProvinces() {
+                try {
+                    const response = await fetch('https://provinces.open-api.vn/api/?depth=1');
+                    const provinces = await response.json();
+                    const provinceSelect = document.getElementById('provinceSelect');
+                    if (provinceSelect) {
+                        provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                        provinces.forEach(province => {
+                            const option = document.createElement('option');
+                            option.value = province.code;
+                            option.textContent = province.name;
+                            provinceSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi tải danh sách tỉnh:', error);
+                }
+            }
+
+            async function fetchDistricts(provinceCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    const data = await response.json();
+                    const districtSelect = document.getElementById('districtSelect');
+                    if (districtSelect) {
+                        districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                        data.districts.forEach(district => {
+                            const option = document.createElement('option');
+                            option.value = district.code;
+                            option.textContent = district.name;
+                            districtSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi tải danh sách quận/huyện:', error);
+                }
+            }
+
+            async function fetchWards(districtCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    const data = await response.json();
+                    const wardSelect = document.getElementById('wardSelect');
+                    if (wardSelect) {
+                        wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
+                        data.wards.forEach(ward => {
+                            const option = document.createElement('option');
+                            option.value = ward.code;
+                            option.textContent = ward.name;
+                            wardSelect.appendChild(option);
+                        });
+                    }
+                } catch (error) {
+                    console.error('Lỗi khi tải danh sách phường/xã:', error);
+                }
+            }
+
+            function fetchStreets(wardCode) {
+                const streetSelect = document.getElementById('streetSelect');
+                if (streetSelect) {
+                    streetSelect.innerHTML = '<option value="">-- Chọn đường/phố --</option>';
+                    const streets = [
+                        { code: 'street1', name: 'Đường Lê Lợi' },
+                        { code: 'street2', name: 'Đường Nguyễn Huệ' },
+                        { code: 'street3', name: 'Đường Trần Phú' },
+                        { code: 'street4', name: 'Đường Hai Bà Trưng' },
+                        { code: 'street5', name: 'Đường Lý Thường Kiệt' }
+                    ];
+                    streets.forEach(street => {
+                        const option = document.createElement('option');
+                        option.value = street.code;
+                        option.textContent = street.name;
+                        streetSelect.appendChild(option);
+                    });
+                }
+            }
+
+            fetchProvinces();
+
+            const provinceSelect = document.getElementById('provinceSelect');
+            if (provinceSelect) {
+                provinceSelect.addEventListener('change', function () {
+                    const provinceCode = this.value;
+                    if (provinceCode) {
+                        fetchDistricts(provinceCode);
+                        document.getElementById('districtSelect').value = '';
+                        document.getElementById('wardSelect').value = '';
+                        document.getElementById('streetSelect').value = '';
+                    }
+                });
+            }
+
+            const districtSelect = document.getElementById('districtSelect');
+            if (districtSelect) {
+                districtSelect.addEventListener('change', function () {
+                    const districtCode = this.value;
+                    if (districtCode) {
+                        fetchWards(districtCode);
+                        document.getElementById('wardSelect').value = '';
+                        document.getElementById('streetSelect').value = '';
+                    }
+                });
+            }
+
+            const wardSelect = document.getElementById('wardSelect');
+            if (wardSelect) {
+                wardSelect.addEventListener('change', function () {
+                    const wardCode = this.value;
+                    if (wardCode) {
+                        fetchStreets(wardCode);
+                        document.getElementById('streetSelect').value = '';
+                    }
+                });
+            }
+
+            // Add amenity functionality
+            let amenityCounter = 1000; // Start from 1000 to avoid conflicts with existing IDs
+
+            document.getElementById('saveAmenityBtn').addEventListener('click', function() {
+                const amenityName = document.getElementById('newAmenityName').value.trim();
+                
+                if (amenityName === '') {
+                    alert('Vui lòng nhập tên tiện ích!');
+                    return;
+                }
+                
+                // Check if amenity already exists
+                const existingLabels = document.querySelectorAll('.form-check-label-host');
+                const exists = Array.from(existingLabels).some(label => 
+                    label.textContent.toLowerCase() === amenityName.toLowerCase()
+                );
+                
+                if (exists) {
+                    alert('Tiện ích này đã tồn tại!');
+                    return;
+                }
+                
+                // Create new amenity checkbox
+                const amenitiesGrid = document.getElementById('amenitiesGrid');
+                const newAmenityDiv = document.createElement('div');
+                newAmenityDiv.className = 'form-check-host';
+                
+                const amenityId = 'amenity_' + amenityCounter++;
+                
+                newAmenityDiv.innerHTML = `
+                    <input type="checkbox" class="form-check-input-host" id="${amenityId}">
+                    <label class="form-check-label-host" for="${amenityId}">${amenityName}</label>
+                `;
+                
+                amenitiesGrid.appendChild(newAmenityDiv);
+                
+                // Clear input and close modal
+                document.getElementById('newAmenityName').value = '';
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addAmenityModal'));
+                modal.hide();
+                
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.className = 'alert alert-success';
+                successMsg.style.position = 'fixed';
+                successMsg.style.top = '20px';
+                successMsg.style.right = '20px';
+                successMsg.style.zIndex = '9999';
+                successMsg.style.minWidth = '300px';
+                successMsg.innerHTML = `
+                    <i class="fas fa-check-circle"></i> Đã thêm tiện ích "${amenityName}" thành công!
+                `;
+                
+                document.body.appendChild(successMsg);
+                
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 3000);
+            });
+
+            // Allow Enter key to save amenity
+            document.getElementById('newAmenityName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('saveAmenityBtn').click();
+                }
+            });
+
+            // Clear input when modal is opened
+            document.getElementById('addAmenityModal').addEventListener('show.bs.modal', function() {
+                document.getElementById('newAmenityName').value = '';
+                document.getElementById('newAmenityName').focus();
+            });
+        });
+    </script>
+</body>
+</html>

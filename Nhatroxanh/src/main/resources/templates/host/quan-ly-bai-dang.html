@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài đăng</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+
+        }
+       .search-bar input {
+      border-radius: 25px;
+    }
+    .listing-card {
+      border-radius: 16px;
+      background-color: #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+      transition: transform 0.2s ease;
+    }
+    .listing-card:hover {
+      transform: translateY(-5px);
+    }
+    .listing-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+    .status {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .da-duyet { background-color: #28a745; }
+    .chua-duyet { background-color: #ffc107; }
+    .bi-an { background-color: #dc3545; }
+    .listing-body {
+      padding: 16px;
+    }
+    .listing-body p {
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
+    .listing-footer {
+      padding: 12px 16px;
+      border-top: 1px solid #eee;
+      display: flex;
+      justify-content: end;
+      gap: 10px;
+      align-items: center;
+    }
+    .btn-edit-host, .btn-delete-host {
+      border: none;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 14px;
+      box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+      transition: all 0.2s ease;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-edit-host {
+      background-color: #0d6efd;
+    }
+    .btn-edit-host:hover {
+      background-color: #084298;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(13, 110, 253, 0.3);
+    }
+    .btn-delete-host {
+      background-color: #dc3545;
+    }
+    .btn-delete-host:hover {
+      background-color: #a71d2a;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 8px rgba(220, 53, 69, 0.3);
+    }
+    </style>
+</head>
+
+<body>
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <div class="main-content">
+        <div class="mb-4">
+            <h2 class="fw-bold">Quản lý bài đăng</h2>
+            <p class="text-muted">Xem và chỉnh sửa các bài đăng của bạn </p>
+        </div>
+    <div class="card p-3 mb-4">
+      <div class="row g-3 align-items-center">
+        <div class="col-md-6">
+          <input type="text" class="form-control" placeholder="Tìm kiếm bài đăng...">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option selected>Trạng thái</option>
+            <option>Đã duyệt</option>
+            <option>Chưa duyệt</option>
+            <option>Bị từ chối</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option selected>Loại</option>
+            <option>Nhà trọ</option>
+            <option>Chung cư</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select">
+            <option selected>Ngày</option>
+            <option>Hôm nay</option>
+            <option>Tuần này</option>
+          </select>
+        </div>
+      </div>
+    </div>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                 <div class="col">
+        <div class="listing-card position-relative">
+          <span class="status da-duyet">Đã duyệt</span>
+          <a href="#"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
+          <div class="listing-body">
+            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
+            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
+            <p>Nhà trọ, phòng trọ, 20m²</p>
+            <p>Thanh Khê, TP. Đà Nẵng</p>
+            <p><strong>Khu trọ:</strong> KTX B1</p>
+            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
+              <i class="fas fa-edit"></i> Chỉnh sửa
+            </button>
+            <button class="btn-delete-host" title="Xóa">
+              <i class="fas fa-trash"></i> Xóa bài
+            </button>
+          </div>
+        </div>
+      </div>
+               <div class="col">
+        <div class="listing-card position-relative">
+          <span class="status chua-duyet">Chưa duyệt</span>
+          <a href="/chu-tro/chi-tiet-bai-dang"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
+          <div class="listing-body">
+            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
+            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
+            <p>Nhà trọ, phòng trọ, 20m²</p>
+            <p>Thanh Khê, TP. Đà Nẵng</p>
+            <p><strong>Khu trọ:</strong> KTX B1</p>
+            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
+              <i class="fas fa-edit"></i> Chỉnh sửa
+            </button>
+            <button class="btn-delete-host" title="Xóa">
+              <i class="fas fa-trash"></i> Xóa bài
+            </button>
+          </div>
+        </div>
+      </div>
+            <div class="col">
+        <div class="listing-card position-relative">
+          <span class="status bi-an">Bị ẩn</span>
+          <a href="#"><img src="../images/cards/anh1.jpg" alt="Phòng trọ"></a>
+          <div class="listing-body">
+            <h5 class="fw-semibold">Nhà trọ Số 123, đường ABC</h5>
+            <p><strong>Từ:</strong> 2.500.000đ/tháng</p>
+            <p>Nhà trọ, phòng trọ, 20m²</p>
+            <p>Thanh Khê, TP. Đà Nẵng</p>
+            <p><strong>Khu trọ:</strong> KTX B1</p>
+            <p><strong>Mô tả:</strong> Căn phòng mới, có gác, giá 2tr2...</p>
+          </div>
+          <div class="listing-footer">
+            <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
+              data-bs-target="#add-room-host" role="tab" aria-controls="add-room-host">
+              <i class="fas fa-edit"></i> Chỉnh sửa
+            </button>
+            <button class="btn-delete-host" title="Xóa">
+              <i class="fas fa-trash"></i> Xóa bài
+            </button>
+          </div>
+        </div>
+      </div>
+       
+        
+    </div>
+
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+
+</html>
