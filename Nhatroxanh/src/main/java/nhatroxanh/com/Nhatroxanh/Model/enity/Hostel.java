@@ -52,7 +52,7 @@ public class Hostel {
     @OneToMany(mappedBy = "hostel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rooms> rooms = new ArrayList<>();
     
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "address_id")
     private Address address;
 }

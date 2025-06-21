@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,8 +29,12 @@ public class Address {
     private Integer id;
 
     private String street;
+    private String houseNumber;
 
     @ManyToOne
     @JoinColumn(name = "ward_id")
     private Ward ward;
+
+    @OneToOne(mappedBy = "address")
+    private Hostel hostel;
 }

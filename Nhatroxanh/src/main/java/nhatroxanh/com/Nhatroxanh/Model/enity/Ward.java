@@ -30,6 +30,7 @@ public class Ward {
     private Integer id;
 
     private String name;
+    private String code;
 
     @ManyToOne
     @JoinColumn(name = "district_id")

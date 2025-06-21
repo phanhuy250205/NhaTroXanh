@@ -30,6 +30,7 @@ public class District {
     private Integer id;
 
     private String name;
+    private String code;
 
     @ManyToOne
     @JoinColumn(name = "province_id")

@@ -9,6 +9,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -27,8 +28,10 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
+        // return NoOpPasswordEncoder.getInstance();
+        // Hoặc sử dụng BCryptPasswordEncoder nếu bạn muốn mã hóa mật khẩu
         return new BCryptPasswordEncoder();
-    }
+        }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -44,6 +47,7 @@ public class SecurityConfig {
         tokenRepository.setDataSource(dataSource);
         return tokenRepository;
     }
+
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

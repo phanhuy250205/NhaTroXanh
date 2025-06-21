@@ -227,47 +227,6 @@ class VietnamAddressAPI {
     }
 }
 
-$(document).ready(function() {
-    // Tải danh sách tỉnh/thành
-    $.getJSON("https://provinces.open-api.vn/api/p/", function(data) {
-        $("#provinceHost").append(data.map(p => `<option value="${p.code}">${p.name}</option>`));
-    });
-
-    // Tải quận/huyện khi chọn tỉnh/thành
-    $("#provinceHost").change(function() {
-        let provinceCode = $(this).val();
-        $("#districtHost").prop("disabled", false).empty().append('<option value="">Chọn quận/huyện</option>');
-        $("#wardHost").prop("disabled", true).empty().append('<option value="">Chọn phường/xã</option>');
-        if (provinceCode) {
-            $.getJSON(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function(data) {
-                $("#districtHost").append(data.districts.map(d => `<option value="${d.code}">${d.name}</option>`));
-            });
-        }
-    });
-
-    // Tải phường/xã khi chọn quận/huyện
-    $("#districtHost").change(function() {
-        let districtCode = $(this).val();
-        $("#wardHost").prop("disabled", false).empty().append('<option value="">Chọn phường/xã</option>');
-        if (districtCode) {
-            $.getJSON(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function(data) {
-                $("#wardHost").append(data.wards.map(w => `<option value="${w.code}">${w.name}</option>`));
-            });
-        }
-    });
-
-    // Tự động tạo địa chỉ đầy đủ
-    $("#provinceHost, #districtHost, #wardHost, #streetHost, #houseNumberHost").change(function() {
-        let province = $("#provinceHost option:selected").text();
-        let district = $("#districtHost option:selected").text();
-        let ward = $("#wardHost option:selected").text();
-        let street = $("#streetHost").val();
-        let houseNumber = $("#houseNumberHost").val();
-        let fullAddress = `${houseNumber ? houseNumber + ', ' : ''}${street ? street + ', ' : ''}${ward ? ward + ', ' : ''}${district ? district + ', ' : ''}${province}`;
-        $("#fullAddressHost").val(fullAddress.trim());
-    });
-});
-
 // Khởi tạo khi trang web được tải
 document.addEventListener("DOMContentLoaded", () => {
     window.vietnamAddressAPI = new VietnamAddressAPI()

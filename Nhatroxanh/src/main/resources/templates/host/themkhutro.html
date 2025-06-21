@@ -100,9 +100,9 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="wardHost" class="form-label-host">Phường/Xã</label>
-                                        <select class="form-select-host" id="wardHost" th:field="*{address.ward.id}" disabled>
+                                        <select class="form-select-host" id="wardHost" name="wardHost" disabled>
                                             <option value="">Chọn phường/xã</option>
-                                            <option th:each="ward : ${wards}" th:value="${ward.id}" th:text="${ward.name}"></option>
+                                            <option th:each="ward : ${wards}" th:value="${ward.code}" th:text="${ward.name}"></option>
                                         </select>
                                     </div>
                                 </div>
@@ -115,7 +115,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="houseNumberHost" class="form-label-host">Số nhà</label>
-                                        <input type="text" class="form-control-host" id="houseNumberHost" th:field="*{address.street}" placeholder="123">
+                                        <input type="text" class="form-control-host" id="houseNumberHost" th:field="*{address.houseNumber}" placeholder="123">
                                     </div>
                                 </div>
                                 <div class="col-md-6">

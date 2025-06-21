@@ -29,6 +29,7 @@ public class Province {
     private Integer id;
 
     private String name;
+    private String code;
 
     @OneToMany(mappedBy = "province")
     private List<District> districts;
