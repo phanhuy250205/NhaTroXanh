@@ -31,4 +31,8 @@ public class HostelService {
     public List<Hostel> findAllHostels() {
         return hostelRepository.findAllWithDetails();
     }
+    // Search hostels by name
+    public List<Hostel> findHostelsByName(String name) {
+        return hostelRepository.findByNameContainingIgnoreCase(name);
+    }
 }

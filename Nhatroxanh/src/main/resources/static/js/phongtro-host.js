@@ -615,3 +615,86 @@ const ImageUploader = (function() {
 
 // Expose necessary functions to global scope
 window.RoomManagementUI = RoomManagementUI;
+
+document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('searchInputHost');
+        const searchButton = document.getElementById('searchButtonHost');
+        const tableBody = document.getElementById('tableBodyHost');
+
+        // Xử lý sự kiện khi nhấn nút tìm kiếm
+        searchButton.addEventListener('click', function () {
+            const searchTerm = searchInput.value.trim();
+            searchHostels(searchTerm);
+        });
+
+        // Xử lý sự kiện khi nhấn Enter trong ô tìm kiếm
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const searchTerm = searchInput.value.trim();
+                searchHostels(searchTerm);
+            }
+        });
+
+        // Hàm gửi yêu cầu tìm kiếm
+        function searchHostels(name) {
+            fetch(`/chu-tro/search-hostels?name=${encodeURIComponent(name)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateTable(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                tableBody.innerHTML = '<tr><td colspan="4">Đã có lỗi xảy ra. Vui lòng thử lại.</td></tr>';
+            });
+        }
+
+        function updateTable(hostels) {
+            tableBody.innerHTML = ''; 
+            if (hostels.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="4">Không tìm thấy khu trọ nào.</td></tr>';
+                return;
+            }
+
+            hostels.forEach(hostel => {
+                const row = document.createElement('tr');
+                row.className = 'table-row-host';
+                row.innerHTML = `
+                    <td class="table-td-host">${hostel.hostelId}</td>
+                    <td class="table-td-host">${hostel.name}</td>
+                    <td class="table-td-host">
+                        <span class="${hostel.status ? 'status-badge-host status-active-host' : 'status-badge-host status-inactive-host'}">
+                            ${hostel.status ? 'Đang hoạt động' : 'Ngưng hoạt động'}
+                        </span>
+                    </td>
+                    <td class="table-td-host">
+                        <div class="action-btns-host">
+                            <a href="/chu-tro/them-khu-tro?id=${hostel.hostelId}">
+                                <button class="buttons-edit-host" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </a>
+                            <form action="/chu-tro/delete-khu-tro/${hostel.hostelId}" method="post" style="display:inline;">
+                                <button type="submit" class="btn-delete-host" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa khu trọ này?');">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+    });
+    searchInput.addEventListener('input', function () {
+    const searchTerm = searchInput.value.trim();
+    if (searchTerm.length >= 2) {
+        searchHostels(searchTerm);
+    } else {
+        searchHostels(''); 
+    }
+});
