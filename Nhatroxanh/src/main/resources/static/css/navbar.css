@@ -201,7 +201,6 @@
 }
 
 .btn-notification:hover {
-    /* background-color: var(--primary-light) !important; */
     color: var(--primary-color) !important;
     transform: scale(1.1);
 }
@@ -295,7 +294,7 @@
     border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
 }
 
-.user-dropdown-menu.show{
+.user-dropdown-menu.show {
     margin-top: 10px;
 }
 
@@ -367,6 +366,8 @@
     color: var(--primary-color) !important;
     background-color: transparent !important;
     border: 1px solid transparent !important;
+    position: relative;
+    overflow: hidden;
 }
 
 .btn-login::before {
@@ -381,6 +382,7 @@
     transform-origin: right;
     transition: transform var(--transition-normal);
     z-index: -1;
+    border-radius: inherit;
 }
 
 .btn-login:hover::before {
@@ -396,11 +398,15 @@
     transform: translateX(-3px);
 }
 
-/* Register button styling */
+/* Register button styling - FIXED */
 .btn-register {
     color: var(--orange-color) !important;
     background-color: transparent !important;
     border: 1px solid var(--orange-color) !important;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    /* Tạo stacking context mới */
 }
 
 .btn-register::before {
@@ -415,6 +421,8 @@
     transform-origin: right;
     transition: transform var(--transition-normal);
     z-index: -1;
+    border-radius: inherit;
+    /* Kế thừa border-radius từ button */
 }
 
 .btn-register:hover::before {
@@ -424,10 +432,10 @@
 
 .btn-register:hover {
     color: var(--white) !important;
+    border-color: var(--orange-color) !important;
 }
 
 .btn-register:hover i {
-    /* transform: rotate(360deg); */
     transition: transform 0.5s ease;
 }
 
@@ -821,7 +829,6 @@
     text-decoration: none;
     background-color: rgb(158, 209, 253);
 }
-
 
 .col-12 {
     padding: 0;

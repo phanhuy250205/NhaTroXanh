@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle close button click to set home page as active and navigate
     // Tìm thẻ <a> chứa button close
-    const closeBtnLink = document.querySelector('a[href*="trang-chu"]')
+    const closeBtnLink = document.querySelector('a[href*="/"]')
     const closeBtn = document.querySelector(".close-btn")
 
     if (closeBtnLink) {
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Set home page as active in localStorage before navigation
             const homeItemInfo = {
                 text: "Trang chủ", // Điều chỉnh text này cho khớp với text trong navbar
-                href: "/trang-chu",
+                href: "/",
                 isDropdownItem: false,
             }
             localStorage.setItem("activeNavItem", JSON.stringify(homeItemInfo))
