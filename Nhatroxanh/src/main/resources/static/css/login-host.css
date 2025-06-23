@@ -458,7 +458,7 @@ html {
 }
 
 /* Show/hide icon for password */
-.login-page-wrapper .password-toggle {
+.login-page-wrapper .password-toggle-host {
     position: absolute;
     right: clamp(12px, 2vw, 14px);
     top: 50%;
@@ -471,7 +471,7 @@ html {
     transition: color 0.25s ease;
 }
 
-.login-page-wrapper .password-toggle:hover {
+.login-page-wrapper .password-toggle-host:hover {
     color: var(--primary-blue);
 }
 
