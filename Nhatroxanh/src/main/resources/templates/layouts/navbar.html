@@ -1,96 +1,93 @@
 <!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
     <div class="container-fluid">
-        <!-- Logo positioned on the left -->
-        <a class="navbar-brand" href="/">
-            <img th:src="@{/images/logo/nhatroxanh(title).png}" alt="Nhà Trọ Xanh Logo">
+        <!-- Logo -->
+        <a class="navbar-brand" th:href="@{/}">
+            <img th:src="@{/images/logo/nhatroxanh.png}" alt="Nhà Trọ Xanh Logo">
         </a>
 
-        <!-- Mobile toggle button -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <!-- Toggle button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <!-- Navigation items and auth buttons positioned to the right -->
+        <!-- Main content -->
         <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Menu items -->
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/}" href="/" data-page="trang-chu">
-                        <span class="nav-icon"><i class="fas fa-home"></i></span>
-                        <span class="nav-text">Trang chủ</span>
-                    </a>
+                    <a class="nav-link" th:href="@{/}"><i class="fas fa-home nav-icon"></i> <span class="nav-text">Trang chủ</span></a>
                 </li>
-                
-                <!-- Danh Mục Dropdown -->
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="phongTroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="nav-icon"><i class="fa-solid fa-list"></i></span>
-                        <span class="nav-text">Danh mục</span>
+                        <i class="fa-solid fa-list nav-icon"></i> <span class="nav-text">Danh mục</span>
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="phongTroDropdown">
-                        <li><a class="dropdown-item" th:href="@{/phong-tro}" href="/phong-tro"><i class="fa-solid fa-hotel me-2"></i>Phòng trọ</a></li>
-                        <li><a class="dropdown-item" th:href="@{/nha-nguyen-can}" href="/nha-nguyen-can"><i class="fas fa-building me-2"></i>Nhà nguyên căn</a></li>
-                        <li><a class="dropdown-item" th:href="@{/can-ho}" href="/can-ho"><i class="fas fa-city me-2"></i>Căn hộ</a></li>
+                        <li th:each="category : ${categoryList}">
+                            <a class="dropdown-item" th:href="@{'/danh-muc/' + ${category.categoryId}}" th:text="${category.name}">Tên danh mục</a>
+                        </li>
                     </ul>
                 </li>
-
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/video-review}" href="/video-review" data-page="video-review">
-                        <span class="nav-icon"><i class="fas fa-video"></i></span>
-                        <span class="nav-text">Video Review</span>
-                    </a>
+                    <a class="nav-link" th:href="@{/video-review}" data-page="video-review"><i class="fas fa-video nav-icon"></i> <span class="nav-text">Video Review</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" th:href="@{/blog}" href="/blog" data-page="blog">
-                        <span class="nav-icon"><i class="fas fa-blog"></i></span>
-                        <span class="nav-text">Blog</span>
-                    </a>
+                    <a class="nav-link" th:href="@{/blog}" data-page="blog"><i class="fas fa-blog nav-icon"></i> <span class="nav-text">Blog</span></a>
                 </li>
             </ul>
 
-            <!-- Auth buttons -->
-            <div class="auth-buttons">
-                <!-- Notification Icon -->
-                <div class="notification-wrapper">
+            <!-- Authenticated user -->
+            <div class="d-flex align-items-center" sec:authorize="isAuthenticated()">
+                <div class="notification-wrapper me-3">
                     <button class="btn btn-notification" type="button">
                         <i class="fas fa-bell"></i>
                         <span class="notification-badge">3</span>
                     </button>
                 </div>
 
-                <!-- User Avatar Dropdown -->
-                <div class="nav-item dropdown user-dropdown">
+                <!-- User dropdown -->
+                <div class="nav-item dropdown user-dropdown me-3">
                     <a class="nav-link dropdown-toggle user-avatar" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img th:src="@{/images/logo/nhatroxanh.png}" alt="User Avatar" class="avatar-img">
-                        <span class="user-name d-lg-inline">Nguyễn Văn A</span>
+                        <img th:src="${#authentication.principal.avatar != null ? #authentication.principal.avatar : '/images/avatars/default.png'}" alt="Avatar" class="me-2 rounded-circle" style="width: 32px; height: 32px;">
+                        <span class="user-name d-lg-inline" th:text="${#authentication.principal.fullName != null ? #authentication.principal.fullName : 'Khách'}"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu" aria-labelledby="userDropdown">
                         <li class="dropdown-header">
                             <div class="user-info">
-                                <img th:src="@{/images/logo/nhatroxanh.png}" alt="User Avatar" class="user-avatar-large">
+                                <img th:src="${#authentication.principal.avatar != null ? #authentication.principal.avatar : '/images/avatars/default.png'}" alt="Avatar" class="me-2 rounded-circle" style="width: 28px; height: 28px;">
                                 <div class="user-details">
                                     <div class="user-greeting">Xin chào!</div>
-                                    <div class="user-name-full">Nguyễn Văn A</div>
+                                    <div class="user-name-full" th:text="${#authentication.principal.fullName}">Người dùng</div>
                                 </div>
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/thong-tin-tai-khoan"><i class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
-                        <li><a class="dropdown-item" href="/doi-mat-khau"><i class="fas fa-key me-2"></i>Đổi mật khẩu</a></li>
-                        <li><a class="dropdown-item" href="/tro-da-luu"><i class="fas fa-heart me-2"></i>Trọ đã lưu</a></li>
-                        <li><a class="dropdown-item" href="/quan-ly-danh-gia"><i class="fas fa-cog me-2"></i>Quản lý đánh giá</a></li>
+                        <li><a class="dropdown-item" th:href="@{/thong-tin-tai-khoan}"><i class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
+                        <li><a class="dropdown-item" th:href="@{/doi-mat-khau}"><i class="fas fa-key me-2"></i>Đổi mật khẩu</a></li>
+                        <li><a class="dropdown-item" th:href="@{/tro-da-luu}"><i class="fas fa-heart me-2"></i>Trọ đã lưu</a></li>
+                        <li><a class="dropdown-item" th:href="@{/quan-ly-danh-gia}"><i class="fas fa-cog me-2"></i>Quản lý đánh giá</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" th:href="@{/trang-chu}" href="/"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                        <li>
+                            <form id="logoutForm" th:action="@{/perform_logout}" method="post">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
+                                </button>
+                            </form>
+                        </li>
                     </ul>
                 </div>
+            </div>
 
-                <button class="btn btn-login" type="button" id="loginBtn">
+            <!-- Anonymous user -->
+            <div class="d-flex" sec:authorize="isAnonymous()">
+                <button class="btn btn-login me-2" type="button" id="loginBtnTrigger">
                     <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>
                 </button>
-                <button class="btn btn-register" type="button" id="registerBtn">
+                <button class="btn btn-register me-3" type="button" id="registerBtnTrigger">
                     <i class="fas fa-user-plus"></i> <span>Đăng ký</span>
                 </button>
-                <a th:href="@{/chu-tro/dang-nhap-chu-tro}" href="/chu-tro/dang-nhap-chu-tro">
+                <a th:href="@{/dang-nhap-chu-tro}">
                     <button class="btn btn-post" type="button">
                         <i class="fas fa-plus-circle"></i> <span>Đăng bài</span>
                     </button>

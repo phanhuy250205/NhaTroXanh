@@ -23,18 +23,13 @@ public class UserServiceImpl implements UserService {
 
   @Transactional
   public Users registerNewUser(UserRequest userRequest) {
-    if (userRepository.findByUsername(userRequest.getUsername()).isPresent()) {
-      throw new RuntimeException("Tên đăng nhập đã được sử dụng!");
-    }
+    
     // Kiểm tra email đã tồn tại chưa
     if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
       throw new RuntimeException("Email đã được sử dụng!");
     }
 
     Users newUser = new Users();
-
-    // Lấy username từ request thay vì từ email
-    newUser.setUsername(userRequest.getUsername());
 
     newUser.setFullname(userRequest.getFullName());
     newUser.setEmail(userRequest.getEmail());

@@ -1,14 +1,14 @@
 <!-- Register Modal -->
-    <div class="register-modal-overlay" id="registerModalOverlay">
-        <div class="register-modal">
-            <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
-            <div class="register-modal-header">
-                <button class="register-modal-close" id="registerModalClose">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-             <div class="register-modal-content">
+<div class="register-modal-overlay" id="registerModalOverlay">
+    <div class="register-modal">
+        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent" alt="">
+        <div class="register-modal-header">
+            <button class="register-modal-close" id="registerModalClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="register-modal-content">
             <div class="register-greeting">
                 <h3>Chào mừng bạn đến với <span style="color: #39a3e9;">NHÀ TRỌ XANH</span></h3>
                 <h2>Đăng ký tài khoản mới 
@@ -19,11 +19,13 @@
             </div>
 
             <form class="register-form" id="registerForm">
-                <!-- Hàng 1: Họ tên -->
+                <div id="register-error-message" class="alert alert-danger" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                <!-- Hàng 1: Chỉ còn Họ tên -->
                 <div class="form-group">
                     <div class="input-wrapper">
                         <i class="fas fa-user input-icon"></i>
-                        <input type="text" class="form-control-register" placeholder="Nhập Họ và tên" required>
+                        <input id="fullName" type="text" class="form-control-register" placeholder="Nhập Họ và tên" required>
                     </div>
                 </div>
 
@@ -32,14 +34,13 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-envelope input-icon"></i>
-                            <input type="email" class="form-control-register" placeholder="Nhập Email" required>
+                            <input id="email" type="email" class="form-control-register" placeholder="Nhập Email" required>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-phone input-icon"></i>
-                            <input type="tel" class="form-control-register" placeholder="Nhập Số điện thoại" pattern="[0-9]{10,11}" required>
+                            <input id="phoneNumber" type="tel" class="form-control-register" placeholder="Nhập SĐT" pattern="[0-9]{10,11}" required>
                         </div>
                     </div>
                 </div>
@@ -49,45 +50,32 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" class="form-control-register" placeholder="Nhập mật khẩu" required>
-                            <button type="button" class="password-toggle">
-                                <i class="fas fa-eye-slash"></i>
-                            </button>
+                            <input id="password" type="password" class="form-control-register" placeholder="Mật khẩu" required>
+                            <button type="button" class="password-toggle"><i class="fas fa-eye-slash"></i></button>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-lock input-icon"></i>
-                            <input type="password" class="form-control-register" placeholder="Xác nhận mật khẩu" required>
-                            <button type="button" class="password-toggle">
-                                <i class="fas fa-eye-slash"></i>
-                            </button>
+                            <input id="confirmPassword" type="password" class="form-control-register" placeholder="Xác nhận mật khẩu" required>
+                            <button type="button" class="password-toggle"><i class="fas fa-eye-slash"></i></button>
                         </div>
                     </div>
                 </div>
 
-                    <button type="submit" class="btn-register-submit">
-                        ĐĂNG KÝ
-                    </button>
+                <button type="submit" class="btn-register-submit">ĐĂNG KÝ</button>
 
-                    <div class="register-divider">
-                        <span>Hoặc</span>
-                    </div>
+                <div class="register-divider"><span>Hoặc</span></div>
 
-                    <div class="social-register">
-                        <button type="button" class="btn-icon btn-google">
-                            <i class="fab fa-google"></i>
-                        </button>
-                        <button type="button" class="btn-icon btn-facebook">
-                            <i class="fab fa-facebook-f"></i>
-                        </button>
-                    </div>
+                <div class="social-register">
+                    <button type="button" class="btn-icon btn-google"><i class="fab fa-google"></i></button>
+                    <button type="button" class="btn-icon btn-facebook"><i class="fab fa-facebook-f"></i></button>
+                </div>
 
-                    <div class="login-link">
-                        Đã có tài khoản? <a href="#" class="login-now">Đăng nhập ngay</a>
-                    </div>
-                </form>
-            </div>
+                <div class="login-link">
+                    Đã có tài khoản? <a href="#" class="login-now">Đăng nhập ngay</a>
+                </div>
+            </form>
         </div>
     </div>
+</div>
