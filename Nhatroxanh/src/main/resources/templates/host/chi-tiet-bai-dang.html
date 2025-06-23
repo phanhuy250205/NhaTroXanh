@@ -139,6 +139,162 @@
       box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
     }
 
+    .form-status-update {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      border-radius: 8px;
+      padding: 8px 16px;
+      box-shadow: var(--shadow-primary);
+      transition: all 0.2s ease;
+    }
+
+    .form-status-update:hover {
+      box-shadow: var(--shadow-hover);
+    }
+
+    .form-status-update .form-label-host {
+      margin-bottom: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark-blue);
+    }
+
+    .form-status-update .form-control-host {
+      border: 1px solid rgba(62, 131, 204, 0.2);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: var(--dark-blue);
+      background: white;
+      transition: all 0.2s ease;
+      width: 120px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 8px center;
+      background-repeat: no-repeat;
+      background-size: 12px;
+      padding-right: 28px;
+    }
+
+    .form-status-update .form-control-host:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+    }
+
+    .form-status-update .form-control-host.green {
+      border-color: var(--success-green);
+      background-color: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-status-update .form-control-host.red {
+      border-color: var(--danger-red);
+      background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-status-update .btn-status-submit {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .form-status-update .btn-status-submit:hover {
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .toast-container-host {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      width: 350px;
+      max-width: 90%;
+      pointer-events: none;
+    }
+
+    .alert-host {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-left: 4px solid transparent;
+      border-image: var(--gradient-primary) 1;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .alert-host.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .alert-host:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-host.success {
+      border-image: linear-gradient(135deg, var(--success-green) 0%, #34d399 100%) 1;
+      background-color: #ecfdf5;
+    }
+
+    .alert-host.danger {
+      border-image: linear-gradient(135deg, var(--danger-red) 0%, #f87171 100%) 1;
+      background-color: #fef2f2;
+    }
+
+    .alert-host .alert-icon {
+      font-size: 18px;
+      margin-right: 12px;
+      color: var(--dark-blue);
+    }
+
+    .alert-host.success .alert-icon {
+      color: var(--success-green);
+    }
+
+    .alert-host.danger .alert-icon {
+      color: var(--danger-red);
+    }
+
+    .alert-host .alert-message {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dark-blue);
+      line-height: 1.4;
+    }
+
+    .alert-host .btn-close {
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0 8px;
+      transition: color 0.2s ease;
+    }
+
+    .alert-host .btn-close:hover {
+      color: var(--dark-blue);
+    }
+
     .content-section-host {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 16px;
@@ -518,7 +674,87 @@
       font-weight: 500;
     }
 
-    /* Responsive Design */
+    .room-item-host {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      margin-bottom: 10px;
+    }
+
+    .room-item-host:hover {
+      background: rgba(62, 131, 204, 0.1);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .room-item-title-host {
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 8px;
+    }
+
+    .room-item-info-host {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      background: var(--gradient-primary);
+      color: white;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .room-modal-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .room-modal-details {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--dark-blue);
+    }
+
+    .room-modal-details strong {
+      color: var(--accent-blue);
+    }
+
+    .room-modal-utilities {
+      margin-top: 16px;
+    }
+
+    .room-modal-utilities ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .room-modal-utilities li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
     @media (max-width: 1200px) {
       .main-container-host {
         margin-left: 80px;
@@ -550,6 +786,27 @@
         width: 70px;
         height: 50px;
       }
+
+      .header-actions-host {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-status-update {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .form-status-update .form-control-host {
+        width: 100px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 40px);
+        right: 20px;
+        top: 80px;
+      }
     }
 
     @media (max-width: 768px) {
@@ -579,6 +836,40 @@
       .thumbnail-nav.next {
         right: -5px;
       }
+
+      .form-status-update {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .form-status-update .form-control-host {
+        width: 100%;
+      }
+
+      .form-status-update .btn-status-submit {
+        width: 100%;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 20px);
+        right: 10px;
+        top: 70px;
+      }
+
+      .alert-host {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .alert-host .alert-icon {
+        font-size: 16px;
+        margin-right: 8px;
+      }
+
+      .alert-host .alert-message {
+        font-size: 13px;
+      }
     }
 
     @media (max-width: 576px) {
@@ -598,6 +889,12 @@
       .btn-view-all-photos {
         padding: 6px 12px;
         font-size: 12px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 20px);
+        right: 10px;
+        top: 60px;
       }
     }
 
@@ -633,6 +930,25 @@
         width: 25px;
         height: 25px;
         font-size: 10px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 10px);
+        right: 5px;
+        top: 50px;
+      }
+
+      .alert-host {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .alert-host .alert-icon {
+        font-size: 14px;
+      }
+
+      .alert-host .alert-message {
+        font-size: 12px;
       }
     }
 
@@ -670,11 +986,6 @@
 
       .price-host {
         font-size: 24px;
-      }
-
-      .header-actions-host {
-        flex-direction: column;
-        align-items: stretch;
       }
 
       .edit-btn-host {
@@ -779,7 +1090,6 @@
       }
     }
 
-    /* Custom scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
     }
@@ -801,10 +1111,10 @@
 </head>
 
 <body class="post-detail-body-host">
-  <!-- SIDEBAR -->
   <div th:replace="~{/layouts/sidebar-host}"></div>
 
   <div class="main-container-host">
+
     <div class="page-header-host">
       <a th:href="@{/chu-tro/bai-dang}" class="back-link-host">
         <i class="fa fa-arrow-left"></i> Quay lại
@@ -819,18 +1129,32 @@
             th:classappend="|${post.approvalStatus != null ? post.approvalStatus.name() : ''}|"
             th:text="|${post.approvalStatus != null ? post.approvalStatus.name() == 'APPROVED' ? 'Đã duyệt' : post.approvalStatus.name() == 'PENDING' ? 'Chờ duyệt' : 'Bị từ chối' : 'Chưa xác định'}|"></span>
         </div>
-        <div class="status-container-host">
-          <span class="status-label-host">Trạng thái bài đăng:</span>
-          <span class="status-label-host status-badge-host"
-            th:classappend="${post.status != null and post.status ? 'APPROVED' : 'REJECTED'}"
-            th:text="${post.status != null and post.status ? 'Đang hiển thị' : 'Đã ẩn'}">
-          </span>
-        </div>
+        <form th:action="@{/chu-tro/cap-nhat-trang-thai}" method="post" class="form-status-update">
+          <input type="hidden" name="postId" th:value="${post.postId}" />
+          <label for="statusSelect" class="form-label-host">Cập nhật trạng thái hiển thị:</label>
+          <select id="statusSelect" name="status" class="form-control-host"
+            th:classappend="${post.status == true} ? 'green' : 'red'">
+            <option th:value="true" th:selected="${post.status == true}">Đang hiển thị</option>
+            <option th:value="false" th:selected="${post.status == false}">Đã ẩn</option>
+          </select>
+          <button type="submit" class="btn-status-submit">Lưu</button>
+        </form>
+      </div>
+    </div>
+    <div class="toast-container-host" id="toastContainer">
+      <div th:if="${successMessage}" class="alert-host success" role="alert">
+        <i class="alert-icon fas fa-check-circle"></i>
+        <span class="alert-message" th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+      </div>
+      <div th:if="${errorMessage}" class="alert-host danger" role="alert">
+        <i class="alert-icon fas fa-exclamation-circle"></i>
+        <span class="alert-message" th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
       </div>
     </div>
     <hr>
 
-    <!-- Image Gallery Section -->
     <div class="content-section-host gallery-section-host">
       <div class="row">
         <div class="col-lg-8 col-md-12">
@@ -841,9 +1165,11 @@
               <img th:unless="${images != null and !#lists.isEmpty(images)}" src="/images/cards/default.jpg"
                 alt="Hình ảnh chính" class="main-image" id="mainImage">
             </div>
-            <!-- Thumbnail Images -->
             <div class="thumbnail-container">
-              <div class="thumbnail-scroll d-flex" style="overflow-x: auto; white-space: nowrap;">
+              <button class="thumbnail-nav prev" onclick="scrollThumbnails('prev')">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <div class="thumbnail-scroll" id="thumbnailScroll">
                 <div th:each="image, iterStat : ${images}"
                   th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'" th:data-image="${image}"
                   onclick="changeMainImage(this.getAttribute('data-image'), this)">
@@ -851,7 +1177,13 @@
                     style="width: 80px; height: 60px; object-fit: cover;">
                 </div>
               </div>
+              <button class="thumbnail-nav next" onclick="scrollThumbnails('next')">
+                <i class="fas fa-chevron-right"></i>
+              </button>
             </div>
+            <button class="btn-view-all-photos" onclick="openPhotoModal()">
+              <i class="fas fa-images"></i> Xem tất cả ảnh
+            </button>
           </div>
         </div>
         <div class="col-lg-4 col-md-12">
@@ -859,45 +1191,49 @@
             <h1 class="property-title-host"
               th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}">NHÀ TRỌ SỐ 123, ĐƯỜNG
               ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG</h1>
-
             <div class="price-container-host">
               <div class="price-host"
                 th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.5 triệu/tháng
               </div>
               <div class="price-note-host">(Chưa bao gồm phí dịch vụ)</div>
             </div>
-
             <div class="info-item-host">
               <i class="bi bi-bounding-box-circles info-icon-host"></i>
               <div class="info-text-host"><strong>Diện tích:</strong> <span
                   th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'">20m²</span></div>
             </div>
-
             <div class="info-item-host">
               <i class="bi bi-house-heart info-icon-host"></i>
               <div class="info-text-host"><strong>Loại hình:</strong> <span
                   th:text="${post.category != null ? post.category.name : 'Chưa xác định'}">Nhà trọ, phòng trọ</span>
               </div>
             </div>
-
-            <!-- <div class="info-item-host">
+            <div class="info-item-host">
               <i class="bi bi-geo-alt-fill info-icon-host"></i>
               <div class="info-text-host"><strong>Địa chỉ:</strong> <span
                   th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">Thanh
                   Khê, TP. Đà Nẵng</span></div>
-            </div> -->
-
+            </div>
             <div class="info-item-host">
               <i class="bi bi-clock-fill info-icon-host"></i>
               <div class="info-text-host"><strong>Ngày đăng:</strong> <span
                   th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">28/05/2025</span>
               </div>
             </div>
+            <div class="info-item-host">
+              <i class="bi bi-houses-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Nhà trọ:</strong> <span
+                  th:text="${hostel != null ? hostel.name : 'Không liên kết nhà trọ'}">Nhà trọ ABC</span></div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-door-open-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Số lượng phòng:</strong> <span
+                  th:text="${roomCount != null ? roomCount : 0}">0</span></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <!-- Description Section -->
     <div class="content-section-host">
       <div class="description-section-host">
         <h2 class="section-title-host">Mô tả chi tiết</h2>
@@ -906,7 +1242,6 @@
           Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi cho người
           thuê.
         </p>
-
         <div class="details-grid-host">
           <div class="details-card-host">
             <h3 class="details-card-title-host">
@@ -914,11 +1249,9 @@
               Thông tin tiện ích cơ bản
             </h3>
             <div class="amenity-list">
-              <!-- Nếu không có tiện ích -->
               <p th:if="${utilities == null or #sets.isEmpty(utilities)}" class="text-muted">
                 Phòng này hiện không có tiện ích nào.
               </p>
-              <!-- Danh sách tiện ích -->
               <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
                 <ul class="list-unstyled">
                   <li class="amenity-item mb-2" th:each="utility : ${utilities}">
@@ -929,28 +1262,109 @@
               </div>
             </div>
           </div>
+          <div class="details-card-host">
+            <h3 class="details-card-title-host">
+              <i class="fas fa-door-open"></i>
+              Danh sách phòng
+            </h3>
+            <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="text-muted">
+              Nhà trọ này hiện không có phòng nào.
+            </div>
+            <div th:unless="${rooms == null or #lists.isEmpty(rooms)}">
+              <div th:each="room : ${rooms}" class="room-item-host" th:data-room-id="${room.room_id}"
+                onclick="openRoomModal(this.getAttribute('data-room-id'))">
+                <div class="room-item-title-host"
+                  th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"></div>
+                <div class="room-item-info-host">
+                  <span
+                    th:text="'Giá: ' + ${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'"></span>
+                  |
+                  <span
+                    th:text="'Diện tích: ' + ${#numbers.formatDecimal(room.acreage, 1, 'COMMA', 0, 'POINT')} + ' m²'"></span>
+                  |
+                  <span
+                    th:text="'Số người tối đa: ' + ${room.max_tenants != null ? room.max_tenants : 'Chưa xác định'}"></span>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Bootstrap JS -->
   <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
   <script th:src="@{/js/sidebar.js}"></script>
 
   <script>
     function changeMainImage(src, element) {
-      document.getElementById('mainImage').src = src;
-      document.querySelectorAll('.thumbnail-host').forEach(img => img.classList.remove('active'));
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = src;
+      document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
       element.classList.add('active');
     }
 
-    // Add smooth loading animation for images
+    function scrollThumbnails(direction) {
+      const container = document.querySelector('.thumbnail-scroll');
+      const scrollAmount = 120;
+      if (!container) return;
+      if (direction === 'prev') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else if (direction === 'next') {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+
+    function openPhotoModal() {
+      $('#photoModal').modal('show');
+    }
+
+    async function openRoomModal(roomId) {
+      try {
+        const response = await fetch(`/api/rooms/${roomId}`);
+        if (!response.ok) throw new Error('Không thể tải thông tin phòng');
+        const room = await response.json();
+
+        if (room.error) {
+          showAlert('danger', 'Lỗi: ' + room.error);
+          return;
+        }
+
+        document.getElementById('roomModalName').textContent = room.name || 'Chưa xác định';
+        document.getElementById('roomModalPrice').textContent = room.price ? new Intl.NumberFormat('vi-VN').format(room.price) + ' VNĐ/tháng' : 'Chưa xác định';
+        document.getElementById('roomModalAcreage').textContent = room.acreage ? room.acreage.toFixed(1) + ' m²' : 'Chưa xác định';
+        document.getElementById('roomModalMaxTenants').textContent = room.maxTenants || 'Chưa xác định';
+        document.getElementById('roomModalCategory').textContent = room.category || 'Chưa xác định';
+        document.getElementById('roomModalStatus').textContent = room.status || 'Chưa xác định';
+        document.getElementById('roomModalImage').src = room.images && room.images.length > 0 ? room.images[0] : '/images/cards/default.jpg';
+
+        const utilitiesList = document.getElementById('roomModalUtilities');
+        utilitiesList.innerHTML = '';
+        if (room.utilities && room.utilities.length > 0) {
+          room.utilities.forEach(utility => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${utility}`;
+            utilitiesList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.textContent = 'Không có tiện ích';
+          utilitiesList.appendChild(li);
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('roomModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Lỗi khi tải chi tiết phòng:', error);
+        showAlert('danger', 'Không thể tải thông tin phòng. Vui lòng thử lại.');
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       const mainImage = document.getElementById('mainImage');
-      const thumbnails = document.querySelectorAll('.thumbnail-host');
+      const thumbnails = document.querySelectorAll('.thumbnail-item');
+      const statusSelect = document.getElementById('statusSelect');
 
-      // Add loading effect
       mainImage.addEventListener('load', function () {
         this.style.opacity = '0';
         setTimeout(() => {
@@ -959,7 +1373,6 @@
         }, 50);
       });
 
-      // Add hover effects for thumbnails
       thumbnails.forEach(thumb => {
         thumb.addEventListener('mouseenter', function () {
           if (!this.classList.contains('active')) {
@@ -973,29 +1386,71 @@
           }
         });
       });
-    });
-    function changeMainImage(src, element) {
-      document.getElementById('mainImage').src = src;
-      document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
-      element.classList.add('active');
-    }
 
-    function scrollThumbnails(direction) {
-      const container = document.querySelector('.thumbnail-scroll');
-      const scrollAmount = 120; // điều chỉnh theo thumbnail của bạn
-
-      if (!container) return; // nếu không tìm thấy container
-
-      if (direction === 'prev') {
-        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
-      } else if (direction === 'next') {
-        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      if (statusSelect) {
+        function updateSelectColor() {
+          statusSelect.classList.remove('green', 'red');
+          statusSelect.classList.add(statusSelect.value === 'true' ? 'green' : 'red');
+        }
+        updateSelectColor();
+        statusSelect.addEventListener('change', updateSelectColor);
       }
-    }
 
+      // Initialize toasts
+      const toasts = document.querySelectorAll('.alert-host');
+      toasts.forEach(toast => {
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          setTimeout(() => toast.remove(), 400);
+        }, 5000);
 
-    function openPhotoModal() {
-      $('#photoModal').modal('show');
+        const closeBtn = toast.querySelector('.btn-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 400);
+          });
+        }
+      });
+    });
+
+    function showAlert(type, message) {
+      const toastContainer = document.getElementById('toastContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert-host ${type}`;
+      alert.setAttribute('role', 'alert');
+
+      const icon = document.createElement('i');
+      icon.className = `alert-icon fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+      alert.appendChild(icon);
+
+      const messageSpan = document.createElement('span');
+      messageSpan.className = 'alert-message';
+      messageSpan.textContent = message;
+      alert.appendChild(messageSpan);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-close';
+      closeBtn.type = 'button';
+      closeBtn.innerHTML = '×';
+      closeBtn.setAttribute('aria-label', 'Đóng thông báo');
+      closeBtn.onclick = () => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => alert.remove(), 400);
+      };
+      alert.appendChild(closeBtn);
+
+      toastContainer.appendChild(alert);
+      setTimeout(() => alert.classList.add('show'), 100);
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => alert.remove(), 400);
+      }, 5000);
     }
   </script>
 </body>

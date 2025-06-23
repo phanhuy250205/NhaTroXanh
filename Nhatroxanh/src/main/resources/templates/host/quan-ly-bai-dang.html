@@ -272,12 +272,11 @@
               <strong>Diện tích:</strong>
               <span th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'"></span>
             </p>
-            <!-- <p th:text="${post.address != null ? 
-                        post.address.street + ', ' + 
-                        post.address.ward.name + ', ' +
-                        post.address.ward.district.name + ', ' +
-                        post.address.ward.district.province.name : 'Chưa xác định'}">
-            </p> -->
+            <p> <strong>Diện tích:</strong>
+              <span
+                th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">
+              </span>
+            </p>
             <p><strong>Mô tả:</strong>
               <span th:text="${#strings.length(post.description) > 100} ?
                           ${#strings.substring(post.description, 0, 100)} + '...' :

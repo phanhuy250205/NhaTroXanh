@@ -13,9 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
@@ -23,10 +25,12 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.WardRepository;
+import nhatroxanh.com.Nhatroxanh.Service.AddressService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
 
@@ -47,6 +51,10 @@ public class PostServiceImpl implements PostService {
     private ImageRepository imageRepository;
     @Autowired
     private FileUploadService fileUploadService;
+    @Autowired
+    private HostelRepository hostelRepository;
+    @Autowired
+    private AddressService addressService;
 
     @Override
     public List<Post> findTopApprovedActivePostsByViews(int limit) {
@@ -134,22 +142,45 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
+    @Transactional
     public Post createPost(String title, String description, Float price, Float area,
-            Integer categoryId, Integer wardId, String street, String houseNumber,
-            List<Integer> utilityIds, MultipartFile[] images, Users user) throws Exception {
+            Integer categoryId, String wardCode, String street, String houseNumber,
+            List<Integer> utilityIds, MultipartFile[] images, Integer hostelId, Users user,
+            String provinceCode, String districtCode, String provinceName,
+            String districtName, String wardName) throws Exception {
 
+        // Kiểm tra dữ liệu đầu vào
         validatePostData(title, description, price, area);
-        Address address = createAddress(wardId, street, houseNumber);
 
+        // Xử lý địa chỉ từ API
+        String fullStreet = houseNumber != null && !houseNumber.trim().isEmpty()
+                ? houseNumber.trim() + ", " + street.trim()
+                : street.trim();
+        Address address = addressService.processAddressFromApi(
+                provinceCode, districtCode, wardCode,
+                provinceName, districtName, wardName, fullStreet);
+
+        // Lấy danh mục
         Category category = null;
         if (categoryId != null && categoryId > 0) {
             category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại với ID: " + categoryId));
         }
 
+        // Lấy và kiểm tra nhà trọ
+        Hostel hostel = null;
+        if (hostelId != null && hostelId > 0) {
+            hostel = hostelRepository.findById(hostelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Nhà trọ không tồn tại với ID: " + hostelId));
+            // Kiểm tra quyền sở hữu
+            if (!hostel.getOwner().getUserId().equals(user.getUserId())) {
+                throw new IllegalArgumentException("Bạn không có quyền đăng bài cho nhà trọ này");
+            }
+        }
+
+        // Lấy tiện ích
         Set<Utility> utilities = new HashSet<>();
         if (utilityIds != null && !utilityIds.isEmpty()) {
-            // Filter out invalid or negative IDs
             List<Integer> validUtilityIds = utilityIds.stream()
                     .filter(id -> id != null && id > 0)
                     .toList();
@@ -159,6 +190,7 @@ public class PostServiceImpl implements PostService {
             }
         }
 
+        // Tạo bài đăng
         Post post = Post.builder()
                 .title(title.trim())
                 .description(description != null ? description.trim() : "")
@@ -172,10 +204,13 @@ public class PostServiceImpl implements PostService {
                 .address(address)
                 .category(category)
                 .utilities(utilities)
+                .hostel(hostel)
                 .build();
 
+        // Lưu bài đăng
         post = postRepository.save(post);
 
+        // Xử lý hình ảnh
         if (images != null && images.length > 0) {
             List<Image> imageList = uploadPostImages(images, post);
             post.setImages(imageList);
@@ -208,30 +243,6 @@ public class PostServiceImpl implements PostService {
         }
     }
 
-    private Address createAddress(Integer wardId, String street, String houseNumber) {
-        Ward ward = null;
-        if (wardId != null && wardId > 0) {
-            ward = wardRepository.findById(wardId).orElse(null);
-        }
-
-        String fullStreet = "";
-        if (houseNumber != null && !houseNumber.trim().isEmpty()) {
-            fullStreet += houseNumber.trim();
-        }
-        if (street != null && !street.trim().isEmpty()) {
-            if (!fullStreet.isEmpty())
-                fullStreet += ", ";
-            fullStreet += street.trim();
-        }
-
-        Address address = Address.builder()
-                .street(fullStreet)
-                .ward(ward)
-                .build();
-
-        return addressRepository.save(address);
-    }
-
     private List<Image> uploadPostImages(MultipartFile[] images, Post post) throws Exception {
         List<Image> imageList = new ArrayList<>();
         List<String> errors = new ArrayList<>();
@@ -250,7 +261,10 @@ public class PostServiceImpl implements PostService {
                     }
 
                     String imageUrl = fileUploadService.uploadFile(imageFile, "");
-                    Image image = Image.builder().url(imageUrl).post(post).build();
+                    Image image = Image.builder()
+                            .url(imageUrl)
+                            .post(post)
+                            .build();
                     imageList.add(imageRepository.save(image));
                 } catch (Exception e) {
                     errors.add("Lỗi khi upload ảnh " + (i + 1) + ": " + e.getMessage());
@@ -268,4 +282,134 @@ public class PostServiceImpl implements PostService {
 
         return imageList;
     }
+
+    @Transactional
+    public Post updatePost(Integer postId, String title, String description, Float price, Float area,
+            Integer categoryId, String wardCode, String street, String houseNumber,
+            List<Integer> utilityIds, MultipartFile[] images, List<Integer> imagesToDelete,
+            Integer hostelId, Users user, String provinceCode, String districtCode,
+            String provinceName, String districtName, String wardName) throws Exception {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Bài đăng không tồn tại với ID: " + postId));
+
+        if (!post.getUser().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("Bạn không có quyền chỉnh sửa bài đăng này");
+        }
+
+        validatePostData(title, description, price, area);
+
+        String fullStreet = (houseNumber != null && !houseNumber.trim().isEmpty() ? houseNumber.trim() + ", " : "")
+                + (street != null ? street.trim() : "");
+        Address address = addressService.processAddressFromApi(provinceCode, districtCode, wardCode,
+                provinceName, districtName, wardName, fullStreet);
+
+        Category category = categoryId != null && categoryId > 0 ? categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("Danh mục không tồn tại với ID: " + categoryId)) : null;
+
+        Hostel hostel = hostelId != null && hostelId > 0 ? hostelRepository.findById(hostelId)
+                .orElseThrow(() -> new IllegalArgumentException("Nhà trọ không tồn tại với ID: " + hostelId)) : null;
+        if (hostel != null && !hostel.getOwner().getUserId().equals(user.getUserId())) {
+            throw new IllegalArgumentException("Bạn không có quyền đăng bài cho nhà trọ này");
+        }
+
+        Set<Utility> utilities = new HashSet<>();
+        if (utilityIds != null && !utilityIds.isEmpty()) {
+            List<Integer> validUtilityIds = utilityIds.stream().filter(id -> id != null && id > 0).toList();
+            utilities = new HashSet<>(utilityRepository.findAllById(validUtilityIds));
+        }
+
+        post.setTitle(title.trim());
+        post.setDescription(description != null ? description.trim() : "");
+        post.setPrice(price);
+        post.setArea(area);
+        post.setAddress(address);
+        post.setCategory(category);
+        post.setUtilities(utilities);
+        post.setHostel(hostel);
+        post.setApprovalStatus(ApprovalStatus.PENDING);
+        post.setCreatedAt(java.sql.Date.valueOf(LocalDate.now()));
+
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+            List<Image> imagesToRemove = imageRepository.findAllById(imagesToDelete);
+            for (Image image : imagesToRemove) {
+                if (image.getPost().getPostId().equals(postId)) {
+                    fileUploadService.deleteFile(image.getUrl());
+                    imageRepository.delete(image);
+                }
+            }
+        }
+
+        if (images != null && images.length > 0) {
+            List<Image> newImages = uploadPostImages(images, post);
+            List<Image> currentImages = post.getImages() != null ? new ArrayList<>(post.getImages())
+                    : new ArrayList<>();
+            currentImages.addAll(newImages);
+            post.setImages(currentImages);
+        }
+
+        return postRepository.save(post);
+    }
+
+    private void validatePostData1(String title, String description, Float price, Float area) {
+        if (title == null || title.trim().isEmpty()) {
+            throw new IllegalArgumentException("Tiêu đề không được để trống");
+        }
+        if (title.trim().length() > 255) {
+            throw new IllegalArgumentException("Tiêu đề không được vượt quá 255 ký tự");
+        }
+        if (price == null || price <= 0) {
+            throw new IllegalArgumentException("Giá thuê phải lớn hơn 0");
+        }
+        if (price > 1_000_000_000) {
+            throw new IllegalArgumentException("Giá thuê không được vượt quá 1 tỷ VNĐ");
+        }
+        if (area == null || area <= 0) {
+            throw new IllegalArgumentException("Diện tích phải lớn hơn 0");
+        }
+        if (area > 10_000) {
+            throw new IllegalArgumentException("Diện tích không được vượt quá 10,000 m²");
+        }
+        if (description != null && description.length() > 5000) {
+            throw new IllegalArgumentException("Mô tả không được vượt quá 5,000 ký tự");
+        }
+    }
+
+    private List<Image> uploadPostImages1(MultipartFile[] images, Post post) throws Exception {
+        List<Image> imageList = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+
+        if (images.length > 8) {
+            throw new IllegalArgumentException("Không được tải lên quá 8 ảnh");
+        }
+
+        for (int i = 0; i < images.length; i++) {
+            MultipartFile imageFile = images[i];
+            if (!imageFile.isEmpty()) {
+                if (imageFile.getSize() > 10 * 1024 * 1024) {
+                    errors.add("Ảnh " + (i + 1) + " quá lớn (tối đa 10MB)");
+                    continue;
+                }
+
+                String imageUrl = fileUploadService.uploadFile(imageFile, "uploads");
+                Image image = Image.builder().url(imageUrl).post(post).build();
+                imageList.add(imageRepository.save(image));
+            }
+        }
+
+        if (!errors.isEmpty() && imageList.isEmpty()) {
+            throw new Exception("Không thể upload ảnh nào: " + String.join(", ", errors));
+        }
+        if (!errors.isEmpty()) {
+            System.out.println("Một số ảnh không thể upload: " + String.join(", ", errors));
+        }
+
+        return imageList;
+    }
+
+    @Override
+    public void save(Post post) {
+        postRepository.save(post);
+    }
+
 }
