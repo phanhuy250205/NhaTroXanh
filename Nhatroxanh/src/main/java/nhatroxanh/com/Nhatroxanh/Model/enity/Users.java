@@ -46,7 +46,7 @@ public class Users {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @Column(name = "phone", length = 15)
+    @Column(name = "phone", length = 15 ,unique = true)
     private String phone;
 
     @Column(name = "birthday")
@@ -86,4 +86,6 @@ public class Users {
     public enum Role {
         admin, staff, owner, customer
     }
+
+    
 }

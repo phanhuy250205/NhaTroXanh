@@ -19,7 +19,9 @@ public class CustomUserDetails implements UserDetails {
     public Users getUser() {
         return user;
     }
-
+    public Integer getUserId() {
+        return user.getUserId(); // Hoặc user.getId() nếu cột là id
+    }
     // ✅ THÊM MỚI
     public String getFullName() {
         return user.getFullname(); // hoặc getFullName nếu field là camelCase

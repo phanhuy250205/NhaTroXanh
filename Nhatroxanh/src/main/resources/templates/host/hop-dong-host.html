@@ -31,11 +31,11 @@
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" placeholder="Số điện thoại người thuê" id="tenant-phone">
+                                    <input type="text" class="form-control" id="tenant-phone" required pattern="\d{10,11}" title="Số điện thoại phải có 10-11 chữ số">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Ngày lập hợp đồng</label>
-                                    <input type="date" class="form-control" id="contract-date">
+                                    <input type="date" class="form-control" id="contract-date" name="contractDate">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Trạng thái</label>
@@ -78,13 +78,13 @@
                         <!-- Tenant Info Tab -->
                         <div class="tab-pane fade show active" id="tenantInfo">
                             <div class="row g-3">
-                                <div class="col-md-6">
+                                 <div class="col-md-6">
                                     <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="tenant-name">
+                                    <input type="text" class="form-control" id="tenant-name" required >
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Ngày sinh</label>
-                                    <input type="date" class="form-control" id="tenant-dob">
+                                    <input type="date" class="form-control" id="tenant-dob" required>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Số CMND/CCCD</label>
@@ -92,11 +92,11 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Ngày cấp</label>
-                                    <input type="date" class="form-control" id="tenant-id-date">
+                                    <input type="date" class="form-control" id="tenant-id-date"  required>
                                 </div>
                                 <div class="col-md-9">
                                     <label class="form-label">Nơi cấp</label>
-                                    <input type="text" class="form-control" id="tenant-id-place">
+                                    <input type="text" class="form-control" id="tenant-id-place" required>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Tỉnh/Thành phố</label>
@@ -341,13 +341,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Thời hạn hợp đồng</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" value="12" id="contract-duration">
+                                        <input type="number" class="form-control" id="contract-duration" required min="1" title="Thời hạn hợp đồng phải lớn hơn 0">
                                         <span class="input-group-text">Tháng</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Ngày bắt đầu HĐ</label>
-                                    <input type="date" class="form-control" id="start-date">
+                                    <input type="date" class="form-control" id="start-date" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Đặt cọc trước</label>
@@ -503,613 +503,847 @@
     </div>
 
     <script>
-        // Namespace để tránh xung đột với Spring Boot
-        window.NhaTroContract = {
-            // Tab management
-            currentTab: "tenantInfo",
-            zoomLevel: 1,
+window.NhaTroContract = {
+    currentTab: "tenantInfo",
+    zoomLevel: 1,
 
-            init() {
-                this.setupEventListeners()
-                this.setCurrentDate()
-                this.updateAllPreview()
-                this.setupLocationData()
-                this.setupAmenityModal() // Add this line
-            },
+    init() {
+        this.setupEventListeners();
+        this.setCurrentDate();
+        this.updateAllPreview();
+        this.setupLocationData();
+        this.setupAmenityModal();
+    },
 
-            setupEventListeners() {
-                // Tab click events
-                document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
-                    link.addEventListener("click", (e) => {
-                        e.preventDefault()
-                        const tabId = link.getAttribute("data-tab")
-                        this.showTab(tabId)
-                    })
-                })
+    setupEventListeners() {
+        document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
+            link.addEventListener("click", (e) => {
+                e.preventDefault();
+                const tabId = link.getAttribute("data-tab");
+                this.showTab(tabId);
+            });
+        });
 
-                // Button events
-                document.getElementById("btn-next-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
-                document.getElementById("btn-prev-tenant")?.addEventListener("click", () => this.showTab("tenantInfo"))
-                document.getElementById("btn-next-room")?.addEventListener("click", () => this.showTab("roomInfo"))
-                document.getElementById("btn-prev-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
-                document.getElementById("btn-next-terms")?.addEventListener("click", () => this.showTab("terms"))
-                document.getElementById("btn-prev-room")?.addEventListener("click", () => this.showTab("roomInfo"))
+        document.getElementById("btn-next-owner")?.addEventListener("click", () => this.showTab("ownerInfo"));
+        document.getElementById("btn-prev-tenant")?.addEventListener("click", () => this.showTab("tenantInfo"));
+        document.getElementById("btn-next-room")?.addEventListener("click", () => this.showTab("roomInfo"));
+        document.getElementById("btn-prev-owner")?.addEventListener("click", () => this.showTab("ownerInfo"));
+        document.getElementById("btn-next-terms")?.addEventListener("click", () => this.showTab("terms"));
+        document.getElementById("btn-prev-room")?.addEventListener("click", () => this.showTab("roomInfo"));
 
-                // Action buttons
-                document.getElementById("btn-update")?.addEventListener("click", () => this.updateContract())
-                document.getElementById("btn-print")?.addEventListener("click", () => this.printContract())
-                document.getElementById("btn-save")?.addEventListener("click", () => this.saveContract())
+        document.getElementById("btn-update")?.addEventListener("click", () => this.updateContract());
+        document.getElementById("btn-print")?.addEventListener("click", () => this.printContract());
+        document.getElementById("btn-save")?.addEventListener("click", () => this.saveContract());
+        document.getElementById("btn-delete")?.addEventListener("click", () => this.deleteContract());
 
-                // Zoom buttons
-                document.getElementById("btn-zoom-in")?.addEventListener("click", () => this.zoomIn())
-                document.getElementById("btn-zoom-out")?.addEventListener("click", () => this.zoomOut())
-                document.getElementById("btn-reset-zoom")?.addEventListener("click", () => this.resetZoom())
+        document.getElementById("cccd-front")?.addEventListener("change", (e) => {
+            this.previewImage(e, "cccd-front-preview");
+        });
 
-                // Image upload events
-                document.getElementById("cccd-front")?.addEventListener("change", (e) => {
-                    this.previewImage(e, "cccd-front-preview")
-                })
+        document.getElementById("cccd-back")?.addEventListener("change", (e) => {
+            this.previewImage(e, "cccd-back-preview");
+        });
 
-                document.getElementById("cccd-back")?.addEventListener("change", (e) => {
-                    this.previewImage(e, "cccd-back-preview")
-                })
+        this.setupPreviewListeners();
+        this.setupLocationListeners();
+    },
 
-                // Form input events for live preview
-                this.setupPreviewListeners()
-                this.setupLocationListeners()
-            },
+    setupPreviewListeners() {
+        const inputs = [
+            { id: "tenant-name", preview: "preview-tenant-name" },
+            { id: "tenant-dob", preview: "preview-tenant-dob" },
+            { id: "tenant-id", preview: "preview-tenant-id" },
+            { id: "tenant-id-date", preview: "preview-tenant-id-date" },
+            { id: "tenant-id-place", preview: "preview-tenant-id-place" },
+            { id: "tenant-phone", preview: "preview-tenant-phone" },
+            { id: "owner-name", preview: "preview-owner-name" },
+            { id: "owner-dob", preview: "preview-owner-dob" },
+            { id: "owner-id", preview: "preview-owner-id" },
+            { id: "owner-id-date", preview: "preview-owner-id-date" },
+            { id: "owner-id-place", preview: "preview-owner-id-place" },
+            { id: "owner-phone", preview: "preview-owner-phone" },
+            { id: "room-number", preview: "preview-room-number" },
+            { id: "room-area", preview: "preview-room-area" },
+            { id: "rent-price", preview: "preview-rent" },
+            { id: "contract-duration", preview: "preview-duration" },
+            { id: "start-date", preview: "preview-start-date" },
+            { id: "contract-date", preview: "preview-sign-date" },
+            { id: "payment-date", preview: "preview-payment-date" },
+            { id: "deposit-months", preview: "preview-deposit-months" },
+            { id: "terms-conditions", preview: "preview-terms" },
+        ];
 
-            setupPreviewListeners() {
-                const inputs = [
-                    { id: "tenant-name", preview: "preview-tenant-name" },
-                    { id: "tenant-dob", preview: "preview-tenant-dob" },
-                    { id: "tenant-id", preview: "preview-tenant-id" },
-                    { id: "tenant-id-date", preview: "preview-tenant-id-date" },
-                    { id: "tenant-id-place", preview: "preview-tenant-id-place" },
-                    { id: "tenant-phone", preview: "preview-tenant-phone" },
-                    { id: "owner-name", preview: "preview-owner-name" },
-                    { id: "owner-dob", preview: "preview-owner-dob" },
-                    { id: "owner-id", preview: "preview-owner-id" },
-                    { id: "owner-id-date", preview: "preview-owner-id-date" },
-                    { id: "owner-id-place", preview: "preview-owner-id-place" },
-                    { id: "owner-phone", preview: "preview-owner-phone" },
-                    { id: "room-number", preview: "preview-room-number" },
-                    { id: "room-area", preview: "preview-room-area" },
-                    { id: "rent-price", preview: "preview-rent" },
-                    { id: "contract-duration", preview: "preview-duration" },
-                    { id: "start-date", preview: "preview-start-date" },
-                    { id: "contract-date", preview: "preview-sign-date" },
-                    { id: "payment-date", preview: "preview-payment-date" },
-                    { id: "deposit-months", preview: "preview-deposit-months" },
-                    { id: "terms-conditions", preview: "preview-terms" },
-                ]
+        inputs.forEach((input) => {
+            const element = document.getElementById(input.id);
+            if (element) {
+                element.addEventListener("input", () => {
+                    this.updatePreviewField(input.id, input.preview);
+                });
+                element.addEventListener("change", () => {
+                    this.updatePreviewField(input.id, input.preview);
+                });
+            }
+        });
 
-                inputs.forEach((input) => {
-                    const element = document.getElementById(input.id)
-                    if (element) {
-                        element.addEventListener("input", () => {
-                            this.updatePreviewField(input.id, input.preview)
-                        })
-                        element.addEventListener("change", () => {
-                            this.updatePreviewField(input.id, input.preview)
-                        })
-                    }
-                })
+        document.getElementById("payment-method")?.addEventListener("change", () => {
+            this.updatePaymentMethod();
+        });
 
-                // Special handlers
-                document.getElementById("payment-method")?.addEventListener("change", () => {
-                    this.updatePaymentMethod()
-                })
+        document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                this.updateAmenities();
+            });
+        });
 
-                // Amenities checkboxes
-                document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]').forEach(checkbox => {
-                    checkbox.addEventListener('change', () => {
-                        this.updateAmenities()
-                    })
-                })
-
-                // Address fields
-                const addressFields = ['tenant', 'owner', 'room']
-                addressFields.forEach(prefix => {
-                    ['province', 'district', 'ward', 'street'].forEach(field => {
-                        const element = document.getElementById(`${prefix}-${field}`)
-                        if (element) {
-                            element.addEventListener('change', () => {
-                                this.updateAddress(prefix)
-                            })
-                        }
-                    })
-                })
-            },
-
-            setupLocationData() {
-                this.locationData = {
-                    hanoi: {
-                        name: "Hà Nội",
-                        districts: {
-                            "ba-dinh": { name: "Ba Đình", wards: ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc", "Cống Vị"] },
-                            "hoan-kiem": { name: "Hoàn Kiếm", wards: ["Phúc Tấn", "Đồng Xuân", "Hàng Mã", "Hàng Bồ"] },
-                            "dong-da": { name: "Đống Đa", wards: ["Cát Linh", "Văn Miếu", "Quốc Tử Giám", "Láng Thượng"] },
-                        },
-                    },
-                    hcm: {
-                        name: "TP. Hồ Chí Minh",
-                        districts: {
-                            "quan-1": { name: "Quận 1", wards: ["Bến Nghé", "Bến Thành", "Cầu Kho", "Cầu Ông Lãnh"] },
-                            "quan-3": { name: "Quận 3", wards: ["Võ Thị Sáu", "Đa Kao", "Tân Định", "Phường 1"] },
-                            "quan-7": { name: "Quận 7", wards: ["Tân Thuận Đông", "Tân Thuận Tây", "Tân Kiểng", "Tân Hưng"] },
-                        },
-                    },
-                    danang: {
-                        name: "Đà Nẵng",
-                        districts: {
-                            "hai-chau": { name: "Hải Châu", wards: ["Thạch Thang", "Hải Châu I", "Hải Châu II", "Thanh Bình"] },
-                            "thanh-khe": { name: "Thanh Khê", wards: ["Thanh Khê Tây", "Thanh Khê Đông", "Xuân Hà", "Tân Chính"] },
-                        },
-                    },
+        const addressFields = ['tenant', 'owner', 'room'];
+        addressFields.forEach(prefix => {
+            ['province', 'district', 'ward', 'street'].forEach(field => {
+                const element = document.getElementById(`${prefix}-${field}`);
+                if (element) {
+                    element.addEventListener('change', () => {
+                        this.updateAddress(prefix);
+                    });
                 }
+            });
+        });
+    },
+
+    setupLocationData() {
+        this.locationData = {
+            hanoi: {
+                name: "Hà Nội",
+                districts: {
+                    "ba-dinh": { name: "Ba Đình", wards: ["Phúc Xá", "Trúc Bạch", "Vĩnh Phúc", "Cống Vị"] },
+                    "hoan-kiem": { name: "Hoàn Kiếm", wards: ["Phúc Tấn", "Đồng Xuân", "Hàng Mã", "Hàng Bồ"] },
+                    "dong-da": { name: "Đống Đa", wards: ["Cát Linh", "Văn Miếu", "Quốc Tử Giám", "Láng Thượng"] },
+                },
             },
-
-            setupLocationListeners() {
-                const prefixes = ["tenant", "owner", "room"]
-
-                prefixes.forEach((prefix) => {
-                    const provinceSelect = document.getElementById(`${prefix}-province`)
-                    const districtSelect = document.getElementById(`${prefix}-district`)
-                    const wardSelect = document.getElementById(`${prefix}-ward`)
-
-                    if (provinceSelect) {
-                        provinceSelect.addEventListener("change", () => {
-                            this.updateDistricts(provinceSelect.value, districtSelect, wardSelect)
-                            this.updateAddress(prefix)
-                        })
-                    }
-
-                    if (districtSelect) {
-                        districtSelect.addEventListener("change", () => {
-                            this.updateWards(provinceSelect.value, districtSelect.value, wardSelect)
-                            this.updateAddress(prefix)
-                        })
-                    }
-
-                    if (wardSelect) {
-                        wardSelect.addEventListener("change", () => {
-                            this.updateAddress(prefix)
-                        })
-                    }
-                })
+            hcm: {
+                name: "TP. Hồ Chí Minh",
+                districts: {
+                    "quan-1": { name: "Quận 1", wards: ["Bến Nghé", "Bến Thành", "Cầu Kho", "Cầu Ông Lãnh"] },
+                    "quan-3": { name: "Quận 3", wards: ["Võ Thị Sáu", "Đa Kao", "Tân Định", "Phường 1"] },
+                    "quan-7": { name: "Quận 7", wards: ["Tân Thuận Đông", "Tân Thuận Tây", "Tân Kiểng", "Tân Hưng"] },
+                },
             },
-
-            updateDistricts(provinceValue, districtSelect, wardSelect) {
-                districtSelect.innerHTML = '<option value="">Quận/Huyện</option>'
-                wardSelect.innerHTML = '<option value="">Phường/Xã</option>'
-
-                if (provinceValue && this.locationData[provinceValue]) {
-                    const districts = this.locationData[provinceValue].districts
-                    Object.entries(districts).forEach(([key, district]) => {
-                        const option = document.createElement("option")
-                        option.value = key
-                        option.textContent = district.name
-                        districtSelect.appendChild(option)
-                    })
-                }
+            danang: {
+                name: "Đà Nẵng",
+                districts: {
+                    "hai-chau": { name: "Hải Châu", wards: ["Thạch Thang", "Hải Châu I", "Hải Châu II", "Thanh Bình"] },
+                    "thanh-khe": { name: "Thanh Khê", wards: ["Thanh Khê Tây", "Thanh Khê Đông", "Xuân Hà", "Tân Chính"] },
+                },
             },
+        };
+    },
 
-            updateWards(provinceValue, districtValue, wardSelect) {
-                wardSelect.innerHTML = '<option value="">Phường/Xã</option>'
+    setupLocationListeners() {
+        const prefixes = ["tenant", "owner", "room"];
+        prefixes.forEach((prefix) => {
+            const provinceSelect = document.getElementById(`${prefix}-province`);
+            const districtSelect = document.getElementById(`${prefix}-district`);
+            const wardSelect = document.getElementById(`${prefix}-ward`);
 
-                if (provinceValue && districtValue && this.locationData[provinceValue]?.districts[districtValue]) {
-                    const wards = this.locationData[provinceValue].districts[districtValue].wards
-                    wards.forEach((ward) => {
-                        const option = document.createElement("option")
-                        option.value = ward.toLowerCase().replace(/\s+/g, "-")
-                        option.textContent = ward
-                        wardSelect.appendChild(option)
-                    })
-                }
-            },
+            if (provinceSelect) {
+                provinceSelect.addEventListener("change", () => {
+                    this.updateDistricts(provinceSelect.value, districtSelect, wardSelect);
+                    this.updateAddress(prefix);
+                });
+            }
 
-            setCurrentDate() {
-                const today = new Date().toISOString().split("T")[0]
-                const contractDateInput = document.getElementById("contract-date")
-                const startDateInput = document.getElementById("start-date")
+            if (districtSelect) {
+                districtSelect.addEventListener("change", () => {
+                    this.updateWards(provinceSelect.value, districtSelect.value, wardSelect);
+                    this.updateAddress(prefix);
+                });
+            }
 
-                if (contractDateInput) contractDateInput.value = today
-                if (startDateInput) startDateInput.value = today
+            if (wardSelect) {
+                wardSelect.addEventListener("change", () => {
+                    this.updateAddress(prefix);
+                });
+            }
+        });
+    },
 
-                this.updatePreviewField("contract-date", "preview-sign-date")
-                this.updatePreviewField("start-date", "preview-start-date")
-                this.calculateEndDate()
-            },
+    updateDistricts(provinceValue, districtSelect, wardSelect) {
+        districtSelect.innerHTML = '<option value="">Quận/Huyện</option>';
+        wardSelect.innerHTML = '<option value="">Phường/Xã</option>';
 
-            showTab(tabId) {
-                // Hide all tabs
-                document.querySelectorAll(".tab-pane").forEach((pane) => {
-                    pane.classList.remove("show", "active")
-                })
+        if (provinceValue && this.locationData[provinceValue]) {
+            const districts = this.locationData[provinceValue].districts;
+            Object.entries(districts).forEach(([key, district]) => {
+                const option = document.createElement("option");
+                option.value = key;
+                option.textContent = district.name;
+                districtSelect.appendChild(option);
+            });
+        }
+    },
 
-                // Remove active class from all nav links
-                document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
-                    link.classList.remove("active")
-                })
+    updateWards(provinceValue, districtValue, wardSelect) {
+        wardSelect.innerHTML = '<option value="">Phường/Xã</option>';
 
-                // Show selected tab
-                const targetTab = document.getElementById(tabId)
-                const targetLink = document.querySelector(`[data-tab="${tabId}"]`)
+        if (provinceValue && districtValue && this.locationData[provinceValue]?.districts[districtValue]) {
+            const wards = this.locationData[provinceValue].districts[districtValue].wards;
+            wards.forEach((ward) => {
+                const option = document.createElement("option");
+                option.value = ward.toLowerCase().replace(/\s+/g, "-");
+                option.textContent = ward;
+                wardSelect.appendChild(option);
+            });
+        }
+    },
 
-                if (targetTab && targetLink) {
-                    targetTab.classList.add("show", "active")
-                    targetLink.classList.add("active")
-                    this.currentTab = tabId
-                }
+    setCurrentDate() {
+        const today = new Date().toISOString().split("T")[0];
+        const contractDateInput = document.getElementById("contract-date");
+        const startDateInput = document.getElementById("start-date");
 
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: "smooth" })
-            },
+        if (contractDateInput) contractDateInput.value = today;
+        if (startDateInput) startDateInput.value = today;
 
-            previewImage(event, previewId) {
-                const file = event.target.files[0]
-                const preview = document.getElementById(previewId)
+        this.updatePreviewField("contract-date", "preview-sign-date");
+        this.updatePreviewField("start-date", "preview-start-date");
+        this.calculateEndDate();
+    },
 
-                if (file) {
-                    const reader = new FileReader()
-                    reader.onload = (e) => {
-                        preview.innerHTML = `<img src="${e.target.result}" alt="CCCD Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`
-                    }
-                    reader.readAsDataURL(file)
-                }
-            },
+    showTab(tabId) {
+        document.querySelectorAll(".tab-pane").forEach((pane) => {
+            pane.classList.remove("show", "active");
+        });
 
-            updateAllPreview() {
-                this.updatePreviewField("contract-date", "preview-sign-date")
-                this.updatePreviewField("start-date", "preview-start-date")
-                this.calculateEndDate()
-                this.calculateDeposit()
-                this.updatePaymentMethod()
-                this.updateAmenities()
-            },
+        document.querySelectorAll(".nha-tro-tabs .nav-link").forEach((link) => {
+            link.classList.remove("active");
+        });
 
-            updatePreviewField(inputId, previewId) {
-                const input = document.getElementById(inputId)
-                const preview = document.getElementById(previewId)
+        const targetTab = document.getElementById(tabId);
+        const targetLink = document.querySelector(`[data-tab="${tabId}"]`);
 
-                if (input && preview) {
-                    let value = input.value
-
-                    // Format date if needed
-                    if (input.type === "date" && value) {
-                        const date = new Date(value)
-                        value = date.toLocaleDateString("vi-VN")
-                    }
-
-                    // Format number if it's rent price
-                    if (inputId === "rent-price" && value) {
-                        value = new Intl.NumberFormat("vi-VN").format(value)
-                    }
-
-                    // Special handling for textarea
-                    if (input.tagName === "TEXTAREA" && value) {
-                        preview.innerHTML = value.replace(/\n/g, '<br>')
-                    } else {
-                        preview.textContent = value || "........................"
-                    }
-
-                    // Add highlight effect
-                    if (value) {
-                        preview.classList.add('nha-tro-updated')
-                        setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000)
-                    }
-
-                    // Update related calculations
-                    if (inputId === "start-date" || inputId === "contract-duration") {
-                        this.calculateEndDate()
-                    }
-                    if (inputId === "rent-price" || inputId === "deposit-months") {
-                        this.calculateDeposit()
-                    }
-                }
-            },
-
-            updateAddress(prefix) {
-                const street = document.getElementById(`${prefix}-street`)?.value || ""
-                const ward = this.getSelectText(`${prefix}-ward`)
-                const district = this.getSelectText(`${prefix}-district`)
-                const province = this.getSelectText(`${prefix}-province`)
-
-                const parts = [street, ward, district, province].filter(
-                    (part) => part && !part.includes("Chọn") && part !== ""
-                )
-                const fullAddress = parts.join(", ")
-
-                const previewId = `preview-${prefix === 'room' ? 'room' : prefix}-address`
-                const preview = document.getElementById(previewId)
-                if (preview) {
-                    preview.textContent = fullAddress || "........................"
-                    if (fullAddress) {
-                        preview.classList.add('nha-tro-updated')
-                        setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000)
-                    }
-                }
-            },
-
-            updatePaymentMethod() {
-                const paymentMethod = document.getElementById("payment-method")
-                const preview = document.getElementById("preview-payment-method")
-                
-                if (paymentMethod && preview) {
-                    const selectedText = paymentMethod.options[paymentMethod.selectedIndex]?.text || "........................"
-                    preview.textContent = selectedText
-                }
-            },
-
-            updateAmenities() {
-                const checkboxes = document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]:checked')
-                const amenities = Array.from(checkboxes).map(cb => {
-                    const label = document.querySelector(`label[for="${cb.id}"]`)
-                    return label ? label.textContent : cb.id
-                })
-
-                const preview = document.getElementById("preview-amenities")
-                if (preview) {
-                    preview.textContent = amenities.length > 0 ? amenities.join(", ") : "........................"
-                }
-            },
-
-            calculateEndDate() {
-                const startDate = document.getElementById("start-date")?.value
-                const duration = document.getElementById("contract-duration")?.value
-
-                if (startDate && duration) {
-                    const start = new Date(startDate)
-                    const end = new Date(start)
-                    end.setMonth(end.getMonth() + parseInt(duration))
-
-                    const preview = document.getElementById("preview-end-date")
-                    if (preview) {
-                        preview.textContent = end.toLocaleDateString("vi-VN")
-                    }
-                }
-            },
-
-            calculateDeposit() {
-                const rentPrice = document.getElementById("rent-price")?.value
-                const depositMonths = document.getElementById("deposit-months")?.value
-
-                if (rentPrice && depositMonths) {
-                    const deposit = parseInt(rentPrice) * parseInt(depositMonths)
-                    const preview = document.getElementById("preview-deposit")
-                    if (preview) {
-                        preview.textContent = new Intl.NumberFormat("vi-VN").format(deposit)
-                    }
-                }
-            },
-
-            getSelectText(id) {
-                const element = document.getElementById(id)
-                if (element && element.selectedIndex >= 0) {
-                    return element.options[element.selectedIndex].text
-                }
-                return ""
-            },
-
-            // Zoom functions
-            zoomIn() {
-                this.zoomLevel = Math.min(this.zoomLevel + 0.1, 2)
-                this.applyZoom()
-            },
-
-            zoomOut() {
-                this.zoomLevel = Math.max(this.zoomLevel - 0.1, 0.5)
-                this.applyZoom()
-            },
-
-            resetZoom() {
-                this.zoomLevel = 1
-                this.applyZoom()
-            },
-
-            applyZoom() {
-                const container = document.getElementById("preview-container")
-                if (container) {
-                    container.style.transform = `scale(${this.zoomLevel})`
-                }
-            },
-
-            // Action functions
-            updateContract() {
-                this.showNotification("Hợp đồng đã được cập nhật!", "success")
-            },
-
-            printContract() {
-                const printContent = document.getElementById("contract-preview").innerHTML
-                const printWindow = window.open('', '_blank')
-                printWindow.document.write(`
-                    <html>
-                        <head>
-                            <title>Hợp đồng thuê nhà</title>
-                            <style>
-                                body { font-family: 'Times New Roman', serif; line-height: 1.8; }
-                                .nha-tro-highlight { color: #000; font-weight: normal; }
-                                @media print { body { margin: 0; } }
-                            </style>
-                        </head>
-                        <body>${printContent}</body>
-                    </html>
-                `)
-                printWindow.document.close()
-                printWindow.print()
-            },
-
-            saveContract() {
-                const contractData = this.collectFormData()
-                console.log("Saving contract:", contractData)
-                this.showNotification("Hợp đồng đã được lưu thành công!", "success")
-            },
-
-            collectFormData() {
-                return {
-                    tenant: {
-                        name: document.getElementById("tenant-name")?.value || "",
-                        dob: document.getElementById("tenant-dob")?.value || "",
-                        id: document.getElementById("tenant-id")?.value || "",
-                        phone: document.getElementById("tenant-phone")?.value || "",
-                        email: document.getElementById("tenant-email")?.value || "",
-                    },
-                    owner: {
-                        name: document.getElementById("owner-name")?.value || "",
-                        dob: document.getElementById("owner-dob")?.value || "",
-                        id: document.getElementById("owner-id")?.value || "",
-                        phone: document.getElementById("owner-phone")?.value || "",
-                    },
-                    room: {
-                        address: this.getFullAddress("room"),
-                        number: document.getElementById("room-number")?.value || "",
-                        area: document.getElementById("room-area")?.value || "",
-                    },
-                    terms: {
-                        rentPrice: document.getElementById("rent-price")?.value || "",
-                        duration: document.getElementById("contract-duration")?.value || "",
-                        startDate: document.getElementById("start-date")?.value || "",
-                        paymentMethod: document.getElementById("payment-method")?.value || "",
-                    },
-                }
-            },
-
-            getFullAddress(prefix) {
-                const street = document.getElementById(`${prefix}-street`)?.value || ""
-                const ward = this.getSelectText(`${prefix}-ward`)
-                const district = this.getSelectText(`${prefix}-district`)
-                const province = this.getSelectText(`${prefix}-province`)
-
-                return [street, ward, district, province].filter(part => part && !part.includes("Chọn")).join(", ")
-            },
-
-            showNotification(message, type = "info") {
-                const notification = document.createElement("div")
-                notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`
-                notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 300px;"
-                notification.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `
-
-                document.body.appendChild(notification)
-
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove()
-                    }
-                }, 5000)
-            },
-
-            setupAmenityModal() {
-                const addAmenityBtn = document.getElementById("btn-add-amenity-host")
-                const saveAmenityBtn = document.getElementById("saveAmenity-host")
-                const amenityForm = document.getElementById("addAmenityForm-host")
-                const amenityNameInput = document.getElementById("amenityName-host")
-
-                if (addAmenityBtn) {
-                    addAmenityBtn.addEventListener("click", () => {
-                        const modal = new bootstrap.Modal(document.getElementById("addAmenityModal-host"))
-                        modal.show()
-                        // Clear form when opening
-                        amenityForm.reset()
-                        amenityNameInput.classList.remove("is-invalid")
-                    })
-                }
-
-                if (saveAmenityBtn) {
-                    saveAmenityBtn.addEventListener("click", () => {
-                        this.saveNewAmenity()
-                    })
-                }
-
-                // Enter key to save
-                if (amenityNameInput) {
-                    amenityNameInput.addEventListener("keypress", (e) => {
-                        if (e.key === "Enter") {
-                            e.preventDefault()
-                            this.saveNewAmenity()
-                        }
-                    })
-                }
-            },
-
-            saveNewAmenity() {
-                const amenityNameInput = document.getElementById("amenityName-host")
-                const amenityName = amenityNameInput.value.trim()
-
-                if (!amenityName) {
-                    amenityNameInput.classList.add("is-invalid")
-                    amenityNameInput.focus()
-                    return
-                }
-
-                // Check if amenity already exists
-                const existingAmenities = document.querySelectorAll('#amenities-list-host .form-check-label')
-                const exists = Array.from(existingAmenities).some(label => 
-                    label.textContent.toLowerCase() === amenityName.toLowerCase()
-                )
-
-                if (exists) {
-                    this.showNotification("Tiện ích này đã tồn tại!", "warning")
-                    return
-                }
-
-                // Create new amenity
-                this.addAmenityToList(amenityName)
-                
-                // Close modal
-                const modal = bootstrap.Modal.getInstance(document.getElementById("addAmenityModal-host"))
-                modal.hide()
-                
-                // Show success message
-                this.showNotification(`Đã thêm tiện ích "${amenityName}" thành công!`, "success")
-                
-                // Update preview
-                this.updateAmenities()
-            },
-
-            addAmenityToList(amenityName) {
-                const amenitiesList = document.getElementById("amenities-list-host")
-                const amenityId = "amenity-" + Date.now() + "-host"
-                
-                const amenityDiv = document.createElement("div")
-                amenityDiv.className = "form-check nha-tro-host-custom-amenity"
-                amenityDiv.innerHTML = `
-                    <input class="form-check-input" type="checkbox" id="${amenityId}">
-                    <label class="form-check-label" for="${amenityId}">${amenityName}</label>
-                    <button type="button" class="btn btn-sm btn-outline-danger nha-tro-host-remove-amenity" onclick="NhaTroContract.removeAmenity('${amenityId}')" title="Xóa tiện ích">
-                        <i class="fa fa-times"></i>
-                    </button>
-                `
-                
-                amenitiesList.appendChild(amenityDiv)
-                
-                // Add event listener for the new checkbox
-                const newCheckbox = document.getElementById(amenityId)
-                newCheckbox.addEventListener('change', () => {
-                    this.updateAmenities()
-                })
-            },
-
-            removeAmenity(amenityId) {
-                const amenityElement = document.getElementById(amenityId).closest('.nha-tro-host-custom-amenity')
-                const amenityName = amenityElement.querySelector('label').textContent
-                
-                if (confirm(`Bạn có chắc chắn muốn xóa tiện ích "${amenityName}"?`)) {
-                    amenityElement.remove()
-                    this.updateAmenities()
-                    this.showNotification(`Đã xóa tiện ích "${amenityName}"`, "info")
-                }
-            },
+        if (targetTab && targetLink) {
+            targetTab.classList.add("show", "active");
+            targetLink.classList.add("active");
+            this.currentTab = tabId;
         }
 
-        // Initialize when DOM is loaded
-        document.addEventListener("DOMContentLoaded", () => {
-            window.NhaTroContract.init()
-        })
-    </script>
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+
+    previewImage(event, previewId) {
+        const file = event.target.files[0];
+        const preview = document.getElementById(previewId);
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.innerHTML = `<img src="${e.target.result}" alt="CCCD Preview" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`;
+            };
+            reader.readAsDataURL(file);
+        }
+    },
+
+    updateAllPreview() {
+        this.updatePreviewField("contract-date", "preview-sign-date");
+        this.updatePreviewField("start-date", "preview-start-date");
+        this.calculateEndDate();
+        this.calculateDeposit();
+        this.updatePaymentMethod();
+        this.updateAmenities();
+    },
+
+    updatePreviewField(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+
+        if (input && preview) {
+            let value = input.value;
+
+            if (input.type === "date" && value) {
+                const date = new Date(value);
+                value = date.toLocaleDateString("vi-VN");
+            }
+
+            if (inputId === "rent-price" && value) {
+                value = new Intl.NumberFormat("vi-VN").format(value);
+            }
+
+            if (input.tagName === "TEXTAREA" && value) {
+                preview.innerHTML = value.replace(/\n/g, '<br>');
+            } else {
+                preview.textContent = value || "........................";
+            }
+
+            if (value) {
+                preview.classList.add('nha-tro-updated');
+                setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000);
+            }
+
+            if (inputId === "start-date" || inputId === "contract-duration") {
+                this.calculateEndDate();
+            }
+            if (inputId === "rent-price" || inputId === "deposit-months") {
+                this.calculateDeposit();
+            }
+        }
+    },
+
+    updateAddress(prefix) {
+        const street = document.getElementById(`${prefix}-street`)?.value || "";
+        const ward = this.getSelectText(`${prefix}-ward`);
+        const district = this.getSelectText(`${prefix}-district`);
+        const province = this.getSelectText(`${prefix}-province`);
+
+        const parts = [street, ward, district, province].filter(
+            (part) => part && !part.includes("Chọn") && part !== ""
+        );
+        const fullAddress = parts.join(", ");
+
+        const previewId = `preview-${prefix === 'room' ? 'room' : prefix}-address`;
+        const preview = document.getElementById(previewId);
+        if (preview) {
+            preview.textContent = fullAddress || "........................";
+            if (fullAddress) {
+                preview.classList.add('nha-tro-updated');
+                setTimeout(() => preview.classList.remove('nha-tro-updated'), 1000);
+            }
+        }
+    },
+
+    updatePaymentMethod() {
+        const paymentMethod = document.getElementById("payment-method");
+        const preview = document.getElementById("preview-payment-method");
+
+        if (paymentMethod && preview) {
+            const selectedText = paymentMethod.options[paymentMethod.selectedIndex]?.text || "........................";
+            preview.textContent = selectedText;
+        }
+    },
+
+    updateAmenities() {
+        const checkboxes = document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]:checked');
+        const amenities = Array.from(checkboxes).map(cb => {
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            return label ? label.textContent : cb.id;
+        });
+
+        const preview = document.getElementById("preview-amenities");
+        if (preview) {
+            preview.textContent = amenities.length > 0 ? amenities.join(", ") : "........................";
+        }
+    },
+
+   calculateEndDate(startDate, duration) {
+    if (!startDate || !duration) {
+        return null; // Trả về null nếu thiếu dữ liệu
+    }
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + parseInt(duration));
+    const endDate = end.toISOString().split("T")[0]; // Định dạng yyyy-MM-dd
+    const preview = document.getElementById("preview-end-date");
+    if (preview) {
+        preview.textContent = end.toLocaleDateString("vi-VN");
+    }
+    return endDate;
+    } ,
+
+    calculateEndDate(startDate, duration) {
+    if (!startDate || !duration) {
+        this.showNotification("Vui lòng nhập ngày bắt đầu và thời hạn hợp đồng!", "warning");
+        return null;
+    }
+    const start = new Date(startDate);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + parseInt(duration));
+    const endDate = end.toISOString().split("T")[0]; // Định dạng yyyy-MM-dd
+    const preview = document.getElementById("preview-end-date");
+    if (preview) {
+        preview.textContent = end.toLocaleDateString("vi-VN");
+    }
+    return endDate;
+},
+updateAllPreview() {
+    this.updatePreviewField("contract-date", "preview-sign-date");
+    this.updatePreviewField("start-date", "preview-start-date");
+    const startDate = document.getElementById("start-date")?.value;
+    const duration = document.getElementById("contract-duration")?.value;
+    if (startDate && duration) {
+        this.calculateEndDate(startDate, duration);
+    }
+    this.calculateDeposit();
+    this.updatePaymentMethod();
+    this.updateAmenities();
+},
+
+    getSelectText(id) {
+        const element = document.getElementById(id);
+        if (element && element.selectedIndex >= 0) {
+            return element.options[element.selectedIndex].text;
+        }
+        return "";
+    },
+
+    zoomIn() {
+        this.zoomLevel = Math.min(this.zoomLevel + 0.1, 2);
+        this.applyZoom();
+    },
+
+    zoomOut() {
+        this.zoomLevel = Math.max(this.zoomLevel - 0.1, 0.5);
+        this.applyZoom();
+    },
+
+    resetZoom() {
+        this.zoomLevel = 1;
+        this.applyZoom();
+    },
+
+    applyZoom() {
+        const container = document.getElementById("preview-container");
+        if (container) {
+            container.style.transform = `scale(${this.zoomLevel})`;
+        }
+    },
+
+  async saveContract() {
+
+    const ownerId = await this.getOwnerId();
+    if (!ownerId) {
+        return; // Dừng nếu không lấy được ownerId
+    }
+
+    console.log("saveContract called"); // Debug: Kiểm tra hàm được gọi
+    const form = document.querySelector("form");
+    if (!form) {
+        console.error("Form not found!");
+        this.showNotification("Không tìm thấy form!", "danger");
+        return;
+    }
+    if (!form.checkValidity()) {
+        console.log("Form validation failed");
+        form.reportValidity();
+        this.showNotification("Vui lòng điền đầy đủ các trường bắt buộc!", "warning");
+        return;
+    }
+
+    const formData = new FormData();
+    const contractData = this.collectFormData();
+    console.log("Collected data:", contractData); // Debug: Kiểm tra dữ liệu thu thập
+
+    // Kiểm tra các trường bắt buộc
+    const checks = [
+        { condition: !contractData.tenant.name, message: "Vui lòng nhập họ và tên người thuê!" },
+        { condition: !contractData.tenant.phone, message: "Vui lòng nhập số điện thoại người thuê!" },
+        { condition: !contractData.tenant.id, message: "Vui lòng nhập số CMND/CCCD người thuê!" },
+        { condition: !contractData.terms.startDate, message: "Vui lòng nhập ngày bắt đầu hợp đồng!" },
+        { condition: !contractData.terms.duration, message: "Vui lòng nhập thời hạn hợp đồng!" },
+        { condition: !contractData.terms.rentPrice, message: "Vui lòng nhập giá thuê!" },
+        { condition: !document.getElementById("tenant-id-date")?.value, message: "Vui lòng nhập ngày cấp CCCD!" },
+        { condition: !document.getElementById("tenant-id-place")?.value, message: "Vui lòng nhập nơi cấp CCCD!" },
+        { condition: !document.getElementById("cccd-front")?.files[0], message: "Vui lòng tải ảnh CCCD mặt trước!" },
+        { condition: !document.getElementById("cccd-back")?.files[0], message: "Vui lòng tải ảnh CCCD mặt sau!" },
+        { condition: !contractData.room.number || isNaN(parseInt(contractData.room.number)), message: "Vui lòng nhập số phòng hợp lệ!" },
+        { condition: !document.getElementById("contract-date")?.value, message: "Vui lòng nhập ngày lập hợp đồng!" }
+    ];
+
+    for (const check of checks) {
+        if (check.condition) {
+            console.log("Validation failed:", check.message);
+            this.showNotification(check.message, "warning");
+            return;
+        }
+    }
+
+    // Lấy và kiểm tra contractDate
+    const contractDate = document.getElementById("contract-date").value;
+    console.log("contractDate:", contractDate); // Debug: Kiểm tra giá trị contractDate
+
+    // Tính endDate
+    const endDate = this.calculateEndDate(contractData.terms.startDate, contractData.terms.duration);
+    if (!endDate) {
+        console.log("End date calculation failed");
+        this.showNotification("Không thể tính ngày kết thúc. Vui lòng kiểm tra ngày bắt đầu và thời hạn!", "warning");
+        return;
+    }
+
+    // Thêm dữ liệu vào FormData
+    formData.append("tenantPhone", contractData.tenant.phone);
+    formData.append("roomId", parseInt(contractData.room.number));
+    formData.append("contractDate", contractDate); // Thêm contractDate
+    formData.append("startDate", contractData.terms.startDate);
+    formData.append("endDate", endDate);
+    formData.append("ownerId", ownerId); // Sử dụng ownerId từ getOwnerId
+    formData.append("price", contractData.terms.rentPrice);
+    formData.append("deposit", parseFloat(contractData.terms.rentPrice) * parseInt(document.getElementById("deposit-months").value) || 0);
+    formData.append("terms", document.getElementById("terms-conditions").value || "");
+    formData.append("status", document.getElementById("contract-status").value.toUpperCase());
+    formData.append("ownerId", this.getOwnerId());
+    if (document.getElementById("cccd-front").files[0]) {
+        formData.append("cccdFront", document.getElementById("cccd-front").files[0]);
+    }
+    if (document.getElementById("cccd-back").files[0]) {
+        formData.append("cccdBack", document.getElementById("cccd-back").files[0]);
+    }
+
+    console.log("Sending FormData:", Object.fromEntries(formData)); // Debug: Kiểm tra FormData
+
+    try {
+        const response = await fetch("/api/contracts", {
+            method: "POST",
+            body: formData
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            const errorMessage = errorData.message || await response.text();
+            throw new Error(errorMessage);
+        }
+        const result = await response.json();
+        this.showNotification("Hợp đồng đã được lưu thành công!", "success");
+        return result;
+    } catch (error) {
+        console.error("Save contract error:", error);
+        this.showNotification(`Lỗi khi lưu hợp đồng: ${error.message}`, "danger");
+    }
+},
+
+    async updateContract() {
+        const contractId = this.getContractId();
+        if (!contractId) {
+            this.showNotification("Vui lòng chọn hợp đồng để cập nhật!", "warning");
+            return;
+        }
+
+        const contractData = this.collectFormData();
+        const updatedContract = {
+            startDate: contractData.terms.startDate,
+            endDate: this.calculateEndDate(contractData.terms.startDate, contractData.terms.duration),
+            price: parseFloat(contractData.terms.rentPrice) || 0,
+            deposit: parseFloat(contractData.terms.rentPrice) * parseInt(document.getElementById("deposit-months").value) || 0,
+            terms: document.getElementById("terms-conditions").value || "",
+            status: document.getElementById("contract-status").value === "active"
+        };
+
+        try {
+            const response = await fetch(`/api/contracts/${contractId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedContract)
+            });
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+            const result = await response.json();
+            this.showNotification("Hợp đồng đã được cập nhật!", "success");
+        } catch (error) {
+            this.showNotification(`Lỗi khi cập nhật hợp đồng: ${error.message}`, "danger");
+        }
+    },
+
+    async deleteContract() {
+        const contractId = this.getContractId();
+        if (!contractId) {
+            this.showNotification("Vui lòng chọn hợp đồng để xóa!", "warning");
+            return;
+        }
+
+        if (!confirm("Bạn có chắc chắn muốn xóa hợp đồng này?")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/contracts/${contractId}`, {
+                method: "DELETE"
+            });
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+            this.showNotification("Hợp đồng đã được xóa!", "success");
+            window.location.href = "/contracts"; // Chuyển về danh sách hợp đồng
+        } catch (error) {
+            this.showNotification(`Lỗi khi xóa hợp đồng: ${error.message}`, "danger");
+        }
+    },
+
+    getContractId() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get("contractId");
+    },
+
+    async getOwnerId() {
+    try {
+        const response = await fetch('/api/users/current', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch current user:', response.statusText);
+            return null;
+        }
+
+        const userData = await response.json();
+        const ownerId = userData.id;
+        if (!ownerId || userData.role !== 'owner') {
+            console.error('User is not an owner or no ownerId found!');
+            return null;
+        }
+        return parseInt(ownerId);
+    } catch (error) {
+        console.error('Error fetching ownerId:', error);
+        return null;
+    }
+},
+
+    printContract() {
+        const printContent = document.getElementById("contract-preview").innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Hợp đồng thuê nhà</title>
+                    <style>
+                        body { font-family: 'Times New Roman', serif; line-height: 1.8; }
+                        .nha-tro-highlight { color: #000; font-weight: normal; }
+                        @media print { body { margin: 0; } }
+                    </style>
+                </head>
+                <body>${printContent}</body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    },
+
+  collectFormData() {
+    // Thu thập danh sách tiện ích từ checkbox
+    const checkboxes = document.querySelectorAll('.nha-tro-amenities input[type="checkbox"]:checked');
+    const amenities = Array.from(checkboxes).map(cb => {
+        const label = document.querySelector(`label[for="${cb.id}"]`);
+        return label ? label.textContent : cb.id;
+    });
+
+    // Giả định roomId được lấy từ server hoặc một nguồn khác
+    const roomId = document.getElementById("room-number").dataset.roomId || document.getElementById("room-number").value;
+    return {
+        tenant: {
+            name: document.getElementById("tenant-name")?.value || "",
+            dob: document.getElementById("tenant-dob")?.value || "",
+            id: document.getElementById("tenant-id")?.value || "",
+            phone: document.getElementById("tenant-phone")?.value || "",
+            email: document.getElementById("tenant-email")?.value || "",
+        },
+        owner: {
+            name: document.getElementById("owner-name")?.value || "",
+            dob: document.getElementById("owner-dob")?.value || "",
+            id: document.getElementById("owner-id")?.value || "",
+            phone: document.getElementById("owner-phone")?.value || "",
+        },
+        room: {
+            address: this.getFullAddress("room"),
+            number: roomId,
+            area: document.getElementById("room-area")?.value || "",
+            amenities: amenities // Sử dụng biến amenities vừa thu thập
+        },
+        terms: {
+            rentPrice: document.getElementById("rent-price")?.value || "",
+            duration: document.getElementById("contract-duration")?.value || "",
+            startDate: document.getElementById("start-date")?.value || "",
+            paymentMethod: document.getElementById("payment-method")?.value || ""
+        },
+    };
+},
+
+    getFullAddress(prefix) {
+        const street = document.getElementById(`${prefix}-street`)?.value || "";
+        const ward = this.getSelectText(`${prefix}-ward`);
+        const district = this.getSelectText(`${prefix}-district`);
+        const province = this.getSelectText(`${prefix}-province`);
+
+        return [street, ward, district, province].filter(part => part && !part.includes("Chọn")).join(", ");
+    },
+
+    showNotification(message, type = "info") {
+        const notification = document.createElement("div");
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 300px;";
+        notification.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    },
+
+    setupAmenityModal() {
+        const addAmenityBtn = document.getElementById("btn-add-amenity-host");
+        const saveAmenityBtn = document.getElementById("saveAmenity-host");
+        const amenityForm = document.getElementById("addAmenityForm-host");
+        const amenityNameInput = document.getElementById("amenityName-host");
+
+        if (addAmenityBtn) {
+            addAmenityBtn.addEventListener("click", () => {
+                const modal = new bootstrap.Modal(document.getElementById("addAmenityModal-host"));
+                modal.show();
+                amenityForm.reset();
+                amenityNameInput.classList.remove("is-invalid");
+            });
+        }
+
+        if (saveAmenityBtn) {
+            saveAmenityBtn.addEventListener("click", () => {
+                this.saveNewAmenity();
+            });
+        }
+
+        if (amenityNameInput) {
+            amenityNameInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    this.saveNewAmenity();
+                }
+            });
+        }
+    },
+
+    saveNewAmenity() {
+        const amenityNameInput = document.getElementById("amenityName-host");
+        const amenityName = amenityNameInput.value.trim();
+
+        if (!amenityName) {
+            amenityNameInput.classList.add("is-invalid");
+            amenityNameInput.focus();
+            return;
+        }
+
+        const existingAmenities = document.querySelectorAll('#amenities-list-host .form-check-label');
+        const exists = Array.from(existingAmenities).some(label =>
+            label.textContent.toLowerCase() === amenityName.toLowerCase()
+        );
+
+        if (exists) {
+            this.showNotification("Tiện ích này đã tồn tại!", "warning");
+            return;
+        }
+
+        this.addAmenityToList(amenityName);
+        const modal = bootstrap.Modal.getInstance(document.getElementById("addAmenityModal-host"));
+        modal.hide();
+        this.showNotification(`Đã thêm tiện ích "${amenityName}" thành công!`, "success");
+        this.updateAmenities();
+    },
+
+    init() {
+    this.setupEventListeners();
+    this.setCurrentDate();
+    this.updateAllPreview();
+    this.setupLocationData();
+    this.setupAmenityModal();
+    this.loadOwnerInfo(); // Thêm gọi hàm để tải thông tin chủ trọ
+},
+
+async loadOwnerInfo() {
+    const ownerId = await this.getOwnerId();
+    if (!ownerId) {
+        this.showNotification('Không thể lấy thông tin chủ trọ!', 'danger');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/users/${ownerId}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Lỗi khi lấy thông tin chủ trọ');
+        }
+
+        const ownerData = await response.json();
+        // Điền thông tin vào các trường
+        document.getElementById('owner-name').value = ownerData.name || '';
+        document.getElementById('owner-dob').value = ownerData.dob || '';
+        document.getElementById('owner-id').value = ownerData.cccd || '';
+        document.getElementById('owner-id-date').value = ownerData.issueDate || '';
+        document.getElementById('owner-id-place').value = ownerData.issuePlace || '';
+        document.getElementById('owner-phone').value = ownerData.phone || '';
+        document.getElementById('owner-email').value = ownerData.email || '';
+        document.getElementById('owner-bank').value = ownerData.bankAccount || '';
+
+        // Cập nhật địa chỉ
+        const [province, district, ward, street] = (ownerData.address || '').split(', ').filter(Boolean);
+        if (province) document.getElementById('owner-province').value = province.toLowerCase();
+        this.updateDistricts(document.getElementById('owner-province').value, document.getElementById('owner-district'), document.getElementById('owner-ward'));
+        if (district) document.getElementById('owner-district').value = district.toLowerCase().replace(/\s+/g, '-');
+        this.updateWards(document.getElementById('owner-province').value, document.getElementById('owner-district').value, document.getElementById('owner-ward'));
+        if (ward) document.getElementById('owner-ward').value = ward.toLowerCase().replace(/\s+/g, '-');
+        if (street) document.getElementById('owner-street').value = street;
+
+        // Cập nhật preview
+        this.updatePreviewField('owner-name', 'preview-owner-name');
+        this.updatePreviewField('owner-dob', 'preview-owner-dob');
+        this.updatePreviewField('owner-id', 'preview-owner-id');
+        this.updatePreviewField('owner-id-date', 'preview-owner-id-date');
+        this.updatePreviewField('owner-id-place', 'preview-owner-id-place');
+        this.updatePreviewField('owner-phone', 'preview-owner-phone');
+        this.updateAddress('owner');
+    } catch (error) {
+        console.error('Error loading owner info:', error);
+        this.showNotification('Lỗi khi tải thông tin chủ trọ: ' + error.message, 'danger');
+    }
+},
+
+    addAmenityToList(amenityName) {
+        const amenitiesList = document.getElementById("amenities-list-host");
+        const amenityId = "amenity-" + Date.now() + "-host";
+
+        const amenityDiv = document.createElement("div");
+        amenityDiv.className = "form-check nha-tro-host-custom-amenity";
+        amenityDiv.innerHTML = `
+            <input class="form-check-input" type="checkbox" id="${amenityId}">
+            <label class="form-check-label" for="${amenityId}">${amenityName}</label>
+            <button type="button" class="btn btn-sm btn-outline-danger nha-tro-host-remove-amenity" onclick="NhaTroContract.removeAmenity('${amenityId}')" title="Xóa tiện ích">
+                <i class="fa fa-times"></i>
+            </button>
+        `;
+
+        amenitiesList.appendChild(amenityDiv);
+
+        const newCheckbox = document.getElementById(amenityId);
+        newCheckbox.addEventListener('change', () => {
+            this.updateAmenities();
+        });
+    },
+
+    removeAmenity(amenityId) {
+        const amenityElement = document.getElementById(amenityId).closest('.nha-tro-host-custom-amenity');
+        const amenityName = amenityElement.querySelector('label').textContent;
+
+        if (confirm(`Bạn có chắc chắn muốn xóa tiện ích "${amenityName}"?`)) {
+            amenityElement.remove();
+            this.updateAmenities();
+            this.showNotification(`Đã xóa tiện ích "${amenityName}"`, "info");
+        }
+    },
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    window.NhaTroContract.init();
+});
+
+
+</script>
 </body>
 
 </html>
+

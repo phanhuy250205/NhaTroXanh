@@ -31,7 +31,8 @@ import lombok.NoArgsConstructor;
 public class Rooms {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer room_id;
+    @Column(name = "room_id")
+    private Integer roomId;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
