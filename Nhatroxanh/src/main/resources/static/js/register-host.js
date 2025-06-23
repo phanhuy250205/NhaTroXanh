@@ -29,28 +29,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle close button click to set home page as active and navigate
     // Tìm thẻ <a> chứa button close
-    const closeBtnLink = document.querySelector('a[href*="/"]')
+    // const closeBtnLink = document.querySelector('a[href*="/"]')
     const closeBtn = document.querySelector(".close-btn")
 
-    if (closeBtnLink) {
-        closeBtnLink.addEventListener("click", (e) => {
-            // Prevent default để xử lý custom logic
+    if (closeBtn) {
+        closeBtn.addEventListener("click", (e) => {
             e.preventDefault()
 
-            // Set home page as active in localStorage before navigation
-            const homeItemInfo = {
-                text: "Trang chủ", // Điều chỉnh text này cho khớp với text trong navbar
-                href: "/",
-                isDropdownItem: false,
-            }
-            localStorage.setItem("activeNavItem", JSON.stringify(homeItemInfo))
-
-            // Navigate to home page
-            window.location.href = "/trang-chu"
-        })
-    } else if (closeBtn) {
-        // Fallback: nếu không tìm thấy thẻ <a>, xử lý trên button
-        closeBtn.addEventListener("click", (e) => {
             // Set home page as active in localStorage before navigation
             const homeItemInfo = {
                 text: "Trang chủ",

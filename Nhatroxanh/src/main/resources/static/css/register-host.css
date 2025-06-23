@@ -344,7 +344,7 @@
 }
 
 /* Show/hide icon for password - TĂNG SIZE */
-.register-page-wrapper .password-toggle {
+.register-page-wrapper .password-toggle-host {
     position: absolute;
     right: clamp(10px, 1.4vw, 12px); /* TĂNG từ clamp(8px, 1.2vw, 10px) */
     top: 50%;
@@ -357,7 +357,7 @@
     transition: color 0.25s ease;
 }
 
-.register-page-wrapper .password-toggle:hover {
+.register-page-wrapper .password-toggle-host:hover {
     color: var(--primary-blue);
 }
 
