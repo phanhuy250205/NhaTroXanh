@@ -54,20 +54,27 @@ public class SecurityConfig {
                 .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**").permitAll()
                 .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**").permitAll()
                 .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro").permitAll()
-                .requestMatchers("/chu-tro/**").hasRole("OWNER")
+                .requestMatchers("/host/**").hasAuthority("owner")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
-                .loginProcessingUrl("/perform_login")
+                .loginPage("/dang-nhap-chu-tro")
+                // <<< SỬA: Đổi URL để tường minh và khớp với file JS
+                .loginProcessingUrl("/login-processing") 
+                // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
+                .usernameParameter("username")
+                // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
+                .passwordParameter("password")   
                 .successHandler((request, response, authentication) -> {
+                    // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển hướng.
                     response.setStatus(HttpServletResponse.SC_OK);
-                    response.getWriter().flush();
                 })
                 .failureHandler((request, response, exception) -> {
+                    // Khi thất bại, trả về status 401 Unauthorized và thông báo lỗi
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("text/plain; charset=UTF-8");
-                    response.getWriter().write("Vui lòng kiểm tra lại email/mật khẩu, hoặc tài khoản của bạn chưa được kích hoạt.");
-                    response.getWriter().flush();
+                    // <<< SỬA: Rút gọn thông báo lỗi cho phù hợp với cả hai luồng đăng nhập
+                    response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
                 })
                 .permitAll()
             )

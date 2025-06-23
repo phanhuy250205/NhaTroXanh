@@ -1,8 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
 
-<head th:replace="~{/layouts/head}">
-    <title>Nhà Trọ Xanh</title>
+<head>
+    <!-- ICON -->
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/login-host.css}">
 </head>
 
 <body>
@@ -78,7 +84,7 @@
                             <label for="password">Mật khẩu</label>
                             <input type="password" class="form-control" id="password" name="password"
                                 placeholder="Nhập mật khẩu" required aria-describedby="passwordHelp" />
-                            <button type="button" class="password-toggle" aria-label="Hiện hoặc ẩn mật khẩu"
+                            <button type="button" class="password-toggle-host" aria-label="Hiện hoặc ẩn mật khẩu"
                                 tabindex="0">
                                 <i class="fa-solid fa-eye-slash"></i>
                             </button>
@@ -92,10 +98,9 @@
                             </label>
                             <a href="#" class="forgot-password">Quên mật khẩu?</a>
                         </div>
-
-                        <button type="submit" class="btn-login-host" onclick="window.location.href='/chu-tro/tong-quan'" aria-label="Đăng nhập">
-                            ĐĂNG NHẬP
-                        </button>
+                         <button type="submit" class="btn-login-host" aria-label="Đăng nhập">
+                           ĐĂNG NHẬP
+                          </button>
 
                         <p class="signup-text">
                             Chưa có tài khoản? <a th:href="@{/dang-ky-chu-tro}" aria-label="Đăng ký ngay">Đăng ký</a> ngay
@@ -105,6 +110,8 @@
             </section>
         </div>
     </div>
+
+    <script th:src="@{/js/login-host.js}"></script>
 
 </body>
 
