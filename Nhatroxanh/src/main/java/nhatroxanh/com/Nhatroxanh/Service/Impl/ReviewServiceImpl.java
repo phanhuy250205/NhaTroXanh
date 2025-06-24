@@ -78,4 +78,50 @@ public class ReviewServiceImpl implements ReviewService {
                 .average()
                 .orElse(0.0);
     }
+        @Override
+    public Review updateReview(Integer reviewId, Double rating, String comment, Integer userId) {
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (!reviewOpt.isPresent()) {
+            throw new IllegalArgumentException("Review not found");
+        }
+
+        Review review = reviewOpt.get();
+
+        if (!review.getUser().getUserId().equals(userId)) {
+            throw new SecurityException("You are not allowed to update this review");
+        }
+
+        if (rating != null) {
+            if (rating < 1.0 || rating > 5.0) {
+                throw new IllegalArgumentException("Rating must be between 1.0 and 5.0");
+            }
+            review.setRating(rating);
+        }
+
+        if (comment != null) {
+            if (comment.length() > 1000) {
+                throw new IllegalArgumentException("Comment cannot exceed 1000 characters");
+            }
+            review.setComment(comment);
+        }
+
+        return reviewRepository.save(review);
+    }
+
+    @Override
+    public void deleteReview(Integer reviewId, Integer userId) {
+        Optional<Review> reviewOpt = reviewRepository.findById(reviewId);
+        if (!reviewOpt.isPresent()) {
+            throw new IllegalArgumentException("Review not found");
+        }
+
+        Review review = reviewOpt.get();
+
+        if (!review.getUser().getUserId().equals(userId)) {
+            throw new SecurityException("You are not allowed to delete this review");
+        }
+
+        reviewRepository.deleteById(reviewId);
+    }
+
 }
