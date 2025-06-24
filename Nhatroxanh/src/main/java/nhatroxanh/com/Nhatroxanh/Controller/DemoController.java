@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -104,4 +105,15 @@ public class DemoController {
     public String chitiethopdong() {
         return "host/sua-bai-dang";
     }
+
+
+    @GetMapping("/nhan-vien/quan-ly-khach-thue")
+    public String quanLyKhachThue() {
+        return "staff/khach-thue";
+    }
+    @GetMapping("/nhan-vien/chi-tiet-khach-thue")
+    public String chiTietKhachThue() {
+        return "staff/chi-tiet-khach-thue";
+    }
+    
 }
