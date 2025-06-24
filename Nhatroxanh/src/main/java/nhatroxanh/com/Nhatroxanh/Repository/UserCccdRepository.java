@@ -9,4 +9,6 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 @Repository
 public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
     UserCccd findByUser(Users user);
+
+    UserCccd findByCccdNumber(String cccdNumber);
 }
