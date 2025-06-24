@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
 
-<!-- <head th:replace="~{/layouts/head}">
-    <title>Nhà Trọ Xanh</title>
-</head> -->
-
 <head>
     <!-- ICON -->
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
@@ -47,8 +43,7 @@
                             </li>
                         </ul>
                     </div>
-                    <img class="left-logo"
-                        th:src="@{/images/logo/nhatroxanh(title).png}"
+                    <img class="left-logo" th:src="@{/images/logo/nhatroxanh(title).png}"
                         alt="Logo Nhà Trọ Xanh màu xanh, biểu tượng mái nhà" loading="lazy" width="200" height="200" />
                 </div>
             </section>
@@ -71,14 +66,14 @@
                         Tạo tài khoản mới để quản lý phòng trọ của bạn
                     </p>
 
-                    <form id="registerForm" novalidate>
+                    <form id="registerForm" novalidate class="needs-validation-custom">
                         <!-- Hàng 1: Họ tên + Ngày sinh -->
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="fullName">Họ và tên</label>
                                 <input type="text" class="form-control" id="fullName" name="fullName"
                                     placeholder="Nhập họ và tên" required />
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     Vui lòng nhập họ và tên.
                                 </div>
                             </div>
@@ -87,7 +82,7 @@
                                 <label for="birthDate">Ngày sinh</label>
                                 <input type="date" class="form-control" id="birthDate" name="birthDate"
                                     placeholder="dd/mm/yyyy" required />
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     Vui lòng nhập ngày sinh.
                                 </div>
                             </div>
@@ -99,7 +94,7 @@
                                 <label for="email">Email</label>
                                 <input type="email" class="form-control" id="email" name="email"
                                     placeholder="Nhập địa chỉ email" required />
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     Vui lòng nhập email hợp lệ.
                                 </div>
                             </div>
@@ -108,7 +103,7 @@
                                 <label for="phoneNumber">Số điện thoại</label>
                                 <input type="tel" class="form-control" id="phoneNumber" name="phoneNumber"
                                     placeholder="Nhập số điện thoại" required />
-                                <div class="invalid-feedback">
+                                <div class="error-message">
                                     Vui lòng nhập số điện thoại hợp lệ.
                                 </div>
                             </div>
@@ -123,7 +118,7 @@
                                 <button type="button" class="password-toggle-host" aria-label="Hiện hoặc ẩn mật khẩu">
                                     <i class="fa-solid fa-eye-slash"></i>
                                 </button>
-                                <div class="invalid-feedback">Vui lòng nhập mật khẩu.</div>
+                                <div class="error-message">Vui lòng nhập mật khẩu.</div>
                             </div>
 
                             <div class="form-group password-wrapper">
@@ -133,7 +128,7 @@
                                 <button type="button" class="password-toggle-host" aria-label="Hiện hoặc ẩn mật khẩu">
                                     <i class="fa-solid fa-eye-slash"></i>
                                 </button>
-                                <div class="invalid-feedback">Vui lòng xác nhận mật khẩu.</div>
+                                <div class="error-message">Mật khẩu xác nhận không khớp.</div>
                             </div>
                         </div>
 
@@ -141,8 +136,12 @@
                             <label class="terms-checkbox">
                                 <input type="checkbox" id="agreeTerms" name="agreeTerms" required />
                                 <span class="checkmark"></span>
-                                Tôi đồng ý với <a href="#" class="terms-link">Điều khoản</a> và <a href="#" class="terms-link">Chính sách bảo mật</a>
+                                Tôi đồng ý với <a href="#" class="terms-link">Điều khoản</a> và <a href="#"
+                                    class="terms-link">Chính sách bảo mật</a>
                             </label>
+                            <div class="error-message terms-error">
+                                Vui lòng đồng ý với điều khoản và chính sách bảo mật.
+                            </div>
                         </div>
 
                         <button type="submit" class="btn-register-host" aria-label="Đăng ký">
@@ -150,7 +149,8 @@
                         </button>
 
                         <p class="login-text">
-                            Đã có tài khoản? <a th:href="@{/dang-nhap-chu-tro}" aria-label="Đăng nhập ngay">Đăng nhập</a> ngay
+                            Đã có tài khoản? <a th:href="@{/dang-nhap-chu-tro}" aria-label="Đăng nhập ngay">Đăng
+                                nhập</a> ngay
                         </p>
                     </form>
                 </div>

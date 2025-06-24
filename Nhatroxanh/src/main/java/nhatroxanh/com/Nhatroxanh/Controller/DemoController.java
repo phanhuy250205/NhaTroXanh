@@ -104,4 +104,8 @@ public class DemoController {
     public String chitiethopdong() {
         return "host/sua-bai-dang";
     }
+    @GetMapping("/infor-chu-tro")
+    public String inforchutro() {
+        return "host/infor-chutro";
+    }
 }
