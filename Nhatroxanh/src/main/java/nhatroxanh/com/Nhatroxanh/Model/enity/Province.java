@@ -2,6 +2,8 @@ package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,8 +30,12 @@ public class Province {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(unique = true, nullable = false)
+    private String code; // Mã tỉnh từ API
+
+    @Column(nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "province")
+    @OneToMany(mappedBy = "province", cascade = CascadeType.ALL)
     private List<District> districts;
 }

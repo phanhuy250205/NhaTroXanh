@@ -34,9 +34,6 @@ public class Users {
     @Column(name = "userId")
     private Integer userId;
 
-    @Column(name = "username", nullable = false, length = 100, unique = true)
-    private String username;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications;
 

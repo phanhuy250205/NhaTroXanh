@@ -1073,25 +1073,55 @@ updateAllPreview() {
         const response = await fetch('/api/users/current', {
             method: 'GET',
             headers: {
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken') || ''}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            console.error('Failed to fetch current user:', response.status, response.statusText);
+            this.showNotification('Lỗi khi lấy ID chủ trọ: ' + response.statusText, 'danger');
+            return null;
+        }
+
+        const userData = await response.json();
+        console.log('User data from API:', userData); // Debug
+        if (!userData.id || userData.role !== 'owner') {
+            console.error('User is not an owner or no id found:', userData);
+            this.showNotification('Bạn không phải là chủ trọ hoặc ID không hợp lệ!', 'danger');
+            return null;
+        }
+        return parseInt(userData.id);
+    } catch (error) {
+        console.error('Error fetching ownerId:', error);
+        this.showNotification('Lỗi khi lấy ID chủ trọ: ' + error.message, 'danger');
+        return null;
+    }
+},
+
+async checkLoggedInUser() {
+    try {
+        const response = await fetch('/api/users/check-auth', {
+            method: 'GET',
+            headers: {
                 'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
                 'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            console.error('Failed to fetch current user:', response.statusText);
+            console.error('Not authenticated:', response.statusText);
+            this.showNotification('Chưa đăng nhập hoặc không có quyền!', 'danger');
             return null;
         }
 
-        const userData = await response.json();
-        const ownerId = userData.id;
-        if (!ownerId || userData.role !== 'owner') {
-            console.error('User is not an owner or no ownerId found!');
-            return null;
-        }
-        return parseInt(ownerId);
+        const userInfo = await response.json();
+        console.log('Logged in user details:', userInfo); // Thêm log
+        this.showNotification(`Đang đăng nhập với tài khoản: ${userInfo.username} (ID: ${userInfo.userId})`, 'success');
+        return userInfo;
     } catch (error) {
-        console.error('Error fetching ownerId:', error);
+        console.error('Error checking logged in user:', error);
+        this.showNotification('Lỗi khi kiểm tra đăng nhập: ' + error.message, 'danger');
         return null;
     }
 },
@@ -1250,29 +1280,33 @@ updateAllPreview() {
 },
 
 async loadOwnerInfo() {
+    console.log('Loading owner info...'); // Debug
     const ownerId = await this.getOwnerId();
     if (!ownerId) {
+        console.error('No ownerId found, cannot load info');
         this.showNotification('Không thể lấy thông tin chủ trọ!', 'danger');
         return;
     }
 
     try {
-        const response = await fetch(`/api/users/${ownerId}`, {
+        const response = await fetch('/api/users/current', {
             method: 'GET',
             headers: {
-                'Authorization': `Bearer ${localStorage.getItem('jwtToken')}`,
+                'Authorization': `Bearer ${localStorage.getItem('jwtToken') || ''}`, // Thử với token rỗng nếu cần
                 'Content-Type': 'application/json'
             }
         });
 
         if (!response.ok) {
-            throw new Error('Lỗi khi lấy thông tin chủ trọ');
+            throw new Error(`Lỗi khi lấy thông tin chủ trọ: ${response.status} - ${response.statusText}`);
         }
 
         const ownerData = await response.json();
+        console.log('Owner data received:', ownerData); // Debug
+
         // Điền thông tin vào các trường
-        document.getElementById('owner-name').value = ownerData.name || '';
-        document.getElementById('owner-dob').value = ownerData.dob || '';
+        document.getElementById('owner-name').value = ownerData.name || ownerData.fullname || '';
+        document.getElementById('owner-dob').value = ownerData.dob || ownerData.birthday || '';
         document.getElementById('owner-id').value = ownerData.cccd || '';
         document.getElementById('owner-id-date').value = ownerData.issueDate || '';
         document.getElementById('owner-id-place').value = ownerData.issuePlace || '';
@@ -1281,7 +1315,8 @@ async loadOwnerInfo() {
         document.getElementById('owner-bank').value = ownerData.bankAccount || '';
 
         // Cập nhật địa chỉ
-        const [province, district, ward, street] = (ownerData.address || '').split(', ').filter(Boolean);
+        const addressParts = (ownerData.address || '').split(', ').filter(Boolean);
+        const [street, ward, district, province] = addressParts.length >= 4 ? addressParts : ['', '', '', ''];
         if (province) document.getElementById('owner-province').value = province.toLowerCase();
         this.updateDistricts(document.getElementById('owner-province').value, document.getElementById('owner-district'), document.getElementById('owner-ward'));
         if (district) document.getElementById('owner-district').value = district.toLowerCase().replace(/\s+/g, '-');
@@ -1297,6 +1332,8 @@ async loadOwnerInfo() {
         this.updatePreviewField('owner-id-place', 'preview-owner-id-place');
         this.updatePreviewField('owner-phone', 'preview-owner-phone');
         this.updateAddress('owner');
+
+        this.showNotification('Thông tin chủ trọ đã được tải thành công!', 'success');
     } catch (error) {
         console.error('Error loading owner info:', error);
         this.showNotification('Lỗi khi tải thông tin chủ trọ: ' + error.message, 'danger');
@@ -1336,14 +1373,10 @@ async loadOwnerInfo() {
         }
     },
 };
-
 document.addEventListener("DOMContentLoaded", () => {
     window.NhaTroContract.init();
 });
-
-
 </script>
 </body>
-
 </html>
 

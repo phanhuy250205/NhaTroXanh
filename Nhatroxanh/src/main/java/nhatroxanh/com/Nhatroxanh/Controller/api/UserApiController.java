@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller.api;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
@@ -64,6 +65,7 @@ public class UserApiController {
         return ResponseEntity.ok("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
     }
 
+
     @GetMapping("/current")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> getCurrentUser() {
@@ -99,11 +101,25 @@ public class UserApiController {
         userData.put("role", user.getRole());
 
         // Thêm thông tin để kiểm tra tài khoản đăng nhập
-        userData.put("username", user.getUsername());
-        userData.put("isAuthenticated", true);
+        
         System.out.println("Current user data: " + userData);
         // Trả về thông tin người dùng
         System.out.println("Returning user data: " + userData);
         return ResponseEntity.ok(userData);
+    }
+
+    @PostMapping("/register-owner")
+    public ResponseEntity<?> registerOwner(@RequestBody UserOwnerRequest userOwnerRequest) {
+        try {
+            userService.registerOwner(userOwnerRequest);
+            return ResponseEntity.ok("Đăng ký chủ trọ thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+        } catch (RuntimeException e) {
+            // Bắt lỗi nếu có (ví dụ: email đã tồn tại) và trả về thông báo lỗi
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            // Bắt các lỗi không mong muốn khác
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra trong quá trình đăng ký.");
+        }
+
     }
 }
