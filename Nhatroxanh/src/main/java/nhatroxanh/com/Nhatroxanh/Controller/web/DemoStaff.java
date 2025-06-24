@@ -33,4 +33,8 @@ public class DemoStaff {
     public String profile(Model model) {
         return "staff/profile"; 
     }
+     @GetMapping("/nhan-vien/chi-tiet-bai-dang")
+    public String chitietbaidang(Model model) {
+        return "staff/chi-tiet-bai-dang"; 
+    }
 }

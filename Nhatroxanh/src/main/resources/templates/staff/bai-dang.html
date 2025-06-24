@@ -1,23 +1,313 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
-<head th:replace="~{/layouts/head}">
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quản lý bài đăng</title>
     <style>
-    
+        body {
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        }
+
+        .tab-content {
+            padding: 0;
+        }
+
+        /* Tab Styles */
+        .custom-tabs-staff {
+            border-bottom: 2px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+
+        .custom-tab-staff {
+            display: inline-block;
+            padding: 12px 24px;
+            margin-right: 8px;
+            background: #f8fafc;
+            color: #6b7280;
+            text-decoration: none;
+            border-radius: 8px 8px 0 0;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border: 1px solid #e5e7eb;
+            border-bottom: none;
+            position: relative;
+            top: 2px;
+        }
+
+        .custom-tab-staff:hover {
+            background: #f1f5f9;
+            color: #3e83cc;
+            text-decoration: none;
+        }
+
+        .custom-tab-staff.active {
+            background: #3e83cc;
+            color: white;
+            border-color: #3e83cc;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.2);
+        }
+
+        .staff-card {
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .staff-card:hover {
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .staff-card-img {
+            border-radius: 20px 20px 0 0;
+            object-fit: cover;
+            height: 180px;
+            width: 100%;
+        }
+
+        .staff-btn {
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .staff-btn-approve {
+            background-color: #0d6efd;
+            color: #ffffff;
+        }
+
+        .staff-btn-approve:hover {
+            background-color: #084298;
+            color: #fff;
+        }
+
+        .staff-btn-hide {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .staff-btn-hide:hover {
+            background-color: #e0a800;
+        }
+
+        .staff-btn-delete {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .staff-btn-delete:hover {
+            background-color: #b10516;
+            color: #fff;
+        }
+
+        .staff-badge-status {
+            padding: 5px 12px;
+            font-size: 13px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .staff-badge-pending {
+            background-color: #e3f2fd;
+            color: #0d6efd;
+        }
+
+        .staff-badge-approved {
+            background-color: #e9f7ef;
+            color: #28a745;
+        }
+
+        .staff-tab-content {
+            margin-top: 20px;
+        }
+
+        .staff-card-title {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .staff-icon {
+            margin-right: 6px;
+        }
+
+        /* Ô lọc đẹp hơn */
+        .staff-filter-select {
+            padding-left: 36px;
+            border-radius: 50px;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            height: 38px;
+            font-size: 14px;
+            background-color: #fff;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 12px;
+        }
+
+        /* Icon trong select */
+        .filter-icon {
+            position: absolute;
+            top: 50%;
+            left: 12px;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 14px;
+            pointer-events: none;
+        }
+
+        /* Hiệu ứng hover select */
+        .staff-filter-select:hover {
+            border-color: #3e83cc;
+            box-shadow: 0 0 0 2px rgba(62, 131, 204, 0.1);
+        }
+
+        /* Dropdown option */
+        .staff-filter-select option {
+            padding: 10px;
+            font-size: 14px;
+        }
     </style>
+
 </head>
 
 <body>
-    <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
-    <div class="main-content">
-   
+    <div class="main-content ">
+        <h4 class="mb-3"><i class="fa-solid fa-clipboard-list staff-icon"></i> Quản lý bài đăng</h4>
 
+        <!-- Search & Filter -->
+        <div class="row mb-4 align-items-center">
+            <!-- Tìm kiếm -->
+            <div class="col-md-6 mb-2 mb-md-0">
+                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+
+                    <input type="text" class="form-control border-0 staff-search-input"
+                        placeholder="Tìm kiếm bài viết...">
+                    <button class="btn btn-primary px-4 rounded-0 rounded-end">
+                        <i class="fa fa-magnifying-glass"></i> Tìm kiếm
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bộ lọc -->
+            <div class="col-md-6 text-md-end text-start d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-filter text-muted"></i>
+                    <select class="form-select staff-select-status w-auto rounded-pill shadow-sm">
+                        <option selected>Trạng thái</option>
+                        <option>Chờ duyệt</option>
+                        <option>Đã duyệt</option>
+                    </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-layer-group text-muted"></i>
+                    <select class="form-select staff-select-type w-auto rounded-pill shadow-sm">
+                        <option selected>Loại</option>
+                        <option>Nhà trọ</option>
+                        <option>Phòng trọ</option>
+                    </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-calendar-alt text-muted"></i>
+                    <select class="form-select staff-select-date w-auto rounded-pill shadow-sm">
+                        <option selected>Ngày</option>
+                        <option>Mới nhất</option>
+                        <option>Cũ nhất</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="staff-tab" role="tablist">
+            <li class="nav-item">
+                <a href="#staff-tab1" class="custom-tab-staff active" data-bs-toggle="tab">Chờ duyệt</a>
+            </li>
+            <li class="nav-item">
+                <a href="#staff-tab2" class="custom-tab-staff" data-bs-toggle="tab">Đã duyệt</a>
+            </li>
+        </ul>
+
+        <div class="tab-content staff-tab-content" id="staff-tab-content">
+            <!-- Tab Chờ Duyệt -->
+            <div class="tab-pane fade show active" id="staff-tab1">
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="card staff-card">
+                            <a href="/nhan-vien/chi-tiet-bai-dang"> <img class="staff-card-img"
+                                    src="../images/cards/anh1.jpg" alt="Room preview"></a>
+                            <div class="card-body">
+                                <h6 class="staff-card-title">Nhà trọ số 123, đường ABC</h6>
+                                <p class="text-danger fw-bold mb-1"><i class="fa fa-tag staff-icon"></i> 2.5 triệu/tháng
+                                </p>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary">Nhà trọ</span>
+                                    <span class="badge bg-light text-dark">20m²</span>
+                                </div>
+                                <p class="mb-1 text-muted"><i class="fa fa-location-dot staff-icon"></i> Q. Thanh Khê,
+                                    TP. Đà Nẵng</p>
+                                <p class="mb-1 small text-muted"><i class="fa fa-building staff-icon"></i> Khu KTX B1 -
+                                    Số phòng: 202</p>
+                                <p class="mb-2 small"><i class="fa fa-info-circle staff-icon"></i> Còn phòng mới, giá
+                                    rẻ, gần trường</p>
+
+                                <div class="d-flex gap-2">
+                                    <button class="btn staff-btn staff-btn-approve w-50"><i class="fa fa-check"></i>
+                                        Duyệt</button>
+                                    <button class="btn staff-btn staff-btn-delete w-50"><i class="fa fa-trash"></i>
+                                        Xoá</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- thêm bài viết khác nếu cần -->
+                </div>
+            </div>
+
+            <!-- Tab Đã Duyệt -->
+            <div class="tab-pane fade" id="staff-tab2">
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="card staff-card">
+                            <img class="staff-card-img" src="../images/cards/anh1.jpg" alt="Room preview">
+                            <div class="card-body">
+                                <h6 class="staff-card-title">Nhà trọ số 123, đường ABC</h6>
+                                <p class="text-danger fw-bold mb-1"><i class="fa fa-tag staff-icon"></i> 2.5 triệu/tháng
+                                </p>
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary">Phòng trọ</span>
+                                    <span class="badge bg-light text-dark">20m²</span>
+                                </div>
+                                <p class="mb-1 text-muted"><i class="fa fa-location-dot staff-icon"></i> Q. Thanh Khê,
+                                    TP. Đà Nẵng</p>
+                                <p class="mb-1 small text-muted"><i class="fa fa-building staff-icon"></i> KTX B1 -
+                                    Phòng: 202</p>
+                                <p class="mb-2 small"><i class="fa fa-info-circle staff-icon"></i> Đã đăng, còn phòng
+                                </p>
+                                <div class="d-flex gap-2">
+                                    <button class="btn staff-btn staff-btn-hide w-50"><i class="fa fa-eye-slash"></i> Ẩn
+                                        bài</button>
+                                    <button class="btn staff-btn staff-btn-delete w-50"><i class="fa fa-trash"></i>
+                                        Xoá</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- thêm bài viết khác nếu cần -->
+                </div>
+            </div>
+        </div>
     </div>
 
-<script>
-
-</script>
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
