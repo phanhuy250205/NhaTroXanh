@@ -4,536 +4,731 @@
 <head th:replace="~{/layouts/head}" />
 
 <head>
-    <meta charset="UTF-8">
-
     <title>Quản lý Voucher</title>
-
     <style>
-        body {
-            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+        :root {
+            --primary-color: #3e83cc;
+            --secondary-color: #6c757d;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+        }
+
+
+
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: none;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #16a34a);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            color: white;
+        }
+
+        .notification-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-body {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Header Styles */
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+            color: white;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 8px ;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .search-input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-group .form-control {
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .search-input-group .btn {
+            border: none;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .filter-select {
+            border-radius: 50px;
+            border: 2px solid #e5e7eb;
+            padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+            font-size: 0.9rem;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .filter-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            z-index: 10;
+        }
+
+        /* Custom Tabs */
+        .custom-tabs {
+            border: none;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-tab {
+            border: none;
+            background: transparent;
+            color: var(--secondary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+
+        .custom-tab:hover {
+            background: rgba(62, 131, 204, 0.1);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .custom-tab.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        /* Voucher Cards */
+        .voucher-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            border: none;
+            position: relative;
+        }
+
+        .voucher-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #2563eb);
+        }
+
+        .voucher-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .voucher-card-body {
+            padding: 1.5rem;
+        }
+
+        .voucher-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .voucher-info {
+            margin-bottom: 0.75rem;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .voucher-info i {
+            width: 20px;
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+
+        .voucher-info-value {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-expired {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 2px solid;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-btn-edit {
+            border-color: var(--info-color);
+            color: var(--info-color);
+        }
+
+        .action-btn-edit:hover {
+            background: var(--info-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-delete {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .action-btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-approve {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .action-btn-approve:hover {
+            background: var(--success-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-reject {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .action-btn-reject:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border: none;
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            background: var(--light-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        /* Status Toggle Button */
+        .status-toggle-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .status-toggle-active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-toggle-inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-toggle-expired {
+            background: var(--secondary-color);
+            color: white;
         }
 
         .tab-content {
             padding: 0;
         }
 
-        /* Tab Styles */
-        .custom-tabs-staff {
-            border-bottom: 2px solid #e5e7eb;
-            margin-bottom: 20px;
-        }
-
-        .custom-tab-staff {
-            display: inline-block;
-            padding: 12px 24px;
-            margin-right: 8px;
-            background: #f8fafc;
-            color: #6b7280;
-            text-decoration: none;
-            border-radius: 8px 8px 0 0;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            border: 1px solid #e5e7eb;
-            border-bottom: none;
-            position: relative;
-            top: 2px;
-        }
-
-        .custom-tab-staff:hover {
-            background: #f1f5f9;
-            color: #3e83cc;
-            text-decoration: none;
-        }
-
-        .custom-tab-staff.active {
-            background: #3e83cc;
-            color: white;
-            border-color: #3e83cc;
-            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.2);
-        }
-
-        .staff-card {
-            border-radius: 20px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .staff-card:hover {
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
-            transform: translateY(-3px);
-        }
-
-        .staff-card::before {
-            content: "%";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 200px;
-            color: rgba(62, 131, 204, 0.1);
-            z-index: 0;
-            pointer-events: none;
-
-        }
-
-        .staff-card-img {
-            border-radius: 20px 20px 0 0;
-            object-fit: cover;
-            height: 180px;
-            width: 100%;
-        }
-
-        .staff-btn {
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .staff-btn-approve {
-            background-color: #0d6efd;
-            color: #ffffff;
-        }
-
-        .staff-btn-approve:hover {
-            background-color: #084298;
-            color: #fff;
-        }
-
-        .staff-btn-hide {
-            background-color: #ffc107;
-            color: #212529;
-        }
-
-        .staff-btn-hide:hover {
-            background-color: #e0a800;
-        }
-
-        .staff-btn-delete {
-            background-color: #dc3545;
-            color: #fff;
-        }
-
-        .staff-btn-delete:hover {
-            background-color: #b10516;
-            color: #fff;
-        }
-
-        .staff-badge-status {
-            padding: 5px 12px;
-            font-size: 13px;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-
-        .staff-badge-pending {
-            background-color: #e3f2fd;
-            color: #0d6efd;
-        }
-
-        .staff-badge-approved {
-            background-color: #e9f7ef;
-            color: #28a745;
-        }
-
-        .staff-badge-active {
-            background-color: #e9f7ef;
-            color: #28a745;
-        }
-
-        .staff-tab-content {
-            margin-top: 20px;
-        }
-
-        .staff-card-title {
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .staff-icon {
-            margin-right: 6px;
-        }
-
-        /* Filter Styles */
-        .staff-filter-select {
-            padding-left: 36px;
-            border-radius: 50px;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-            height: 38px;
-            font-size: 14px;
-            background-color: #fff;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23666' stroke-width='1.5'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            background-size: 12px;
-        }
-
-        .filter-icon {
-            position: absolute;
-            top: 50%;
-            left: 12px;
-            transform: translateY(-50%);
-            color: #999;
-            font-size: 14px;
-            pointer-events: none;
-        }
-
-        .staff-filter-select:hover {
-            border-color: #3e83cc;
-            box-shadow: 0 0 0 2px rgba(62, 131, 204, 0.1);
-        }
-
-        .staff-filter-select option {
-            padding: 10px;
-            font-size: 14px;
-        }
-
-        /* Modal Styles */
-        .modal-content {
-            border: 0;
-            border-radius: 20px;
-        }
-
-        .modal-header {
-            border: 0;
-        }
-
-        .custom-status-select {
-            border-radius: 8px;
-            padding: 8px;
-        }
-
-        /* Responsive adjustments */
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .row.mb-4.align-items-center {
-                flex-direction: column;
-                gap: 12px;
+            .main-content {
+                padding: 1rem;
             }
 
-            .col-md-6.text-md-end.text-start.d-flex {
-                justify-content: flex-start !important;
+            .notification-container {
+                width: calc(100% - 2rem);
+                left: 1rem;
+                right: 1rem;
             }
 
-            .staff-card {
-                margin-bottom: 20px;
-
+            .page-header {
+                text-align: center;
             }
 
-            .modal-dialog {
-                margin: 10px;
-            }
 
-            .modal-dialog.modal-lg {
-                max-width: 90%;
+            .custom-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
             }
         }
 
-        /* Icon bên trong select */
-        .filter-icon-inside {
-            position: absolute;
-            top: 50%;
-            left: 14px;
-            transform: translateY(-50%);
-            color: #6c757d;
-            font-size: 14px;
-            pointer-events: none;
-            z-index: 2;
+        /* Loading Animation */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .staff-filter-select {
-            padding: 6px 38px 6px 38px;
-            /* top right bottom left */
-            height: 38px;
-            line-height: 1.5;
-            font-size: 14px;
-            font-family: inherit;
-            background-color: #fff;
-            background-position: right 12px center;
-            background-repeat: no-repeat;
-            background-size: 12px;
-            appearance: none;
-            border: 1px solid #dee2e6;
-            border-radius: 50px;
-        }
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
 
-        .btn-sm {
-            height: 36px;
-        }
-
-        .status-badge-staff {
-            font-weight: 600;
-            border-radius: 20px;
-            padding: 13px 20px;
-            border: none;
-            transition: all 0.3s ease;
-            color: white;
-        }
-
-        .status-active {
-            background-color: #22c55e;
-            /* xanh lá */
-        }
-
-        .status-inactive {
-            background-color: #ef4444;
-            /* đỏ */
-        }
-
-        .status-expired {
-            background-color: #9ca3af;
-            /* xám */
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
     <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="notification-container"></div>
     <div class="main-content">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="mb-0">
-                <i class="fa-solid fa-gift staff-icon"></i> Quản lý Voucher
+        <div class="page-header d-flex justify-content-between align-items-center mb-3">
+            <h4 class="page-title">
+                <i class="fa-solid fa-gift me-2"></i> Quản lý Voucher
             </h4>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#internalVoucherModal">
-                <i class="fa fa-plus"></i> Tạo Voucher
+            <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#internalVoucherModal">
+                <i class="fa fa-plus me-2"></i> Tạo Voucher
             </button>
         </div>
 
         <!-- Search & Filter -->
-        <div class="row mb-4 align-items-center">
-            <!-- Search -->
-            <div class="col-md-6 mb-2 mb-md-0">
-                <div class="input-group shadow-sm rounded-pill overflow-hidden">
+        <div class="search-filter-section">
+            <div class="row mb-4 align-items-center">
+                <!-- Search -->
+                <div class="col-md-6 mb-2 mb-md-0">
+                    <div class="input-group search-input-group">
+                        <input type="text" class="form-control" placeholder="Tìm kiếm voucher...">
+                        <button class="btn">
+                            <i class="fa fa-magnifying-glass"></i> Tìm kiếm
+                        </button>
+                    </div>
+                </div>
 
-                    <input type="text" class="form-control border-0 staff-search-input"
-                        placeholder="Tìm kiếm bài viết...">
-                    <button class="btn btn-primary px-4 rounded-0 rounded-end">
-                        <i class="fa fa-magnifying-glass"></i> Tìm kiếm
-                    </button>
+                <!-- Filters -->
+                <div class="col-md-6 text-md-end text-start d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
+                    <!-- Filter -->
+                    <div class="position-relative">
+                        <i class="fa fa-filter filter-icon"></i>
+                        <select class="form-select filter-select">
+                            <option selected>Trạng thái</option>
+                            <option>Chờ duyệt</option>
+                            <option>Đang áp dụng</option>
+                            <option>Tạm ngưng</option>
+                            <option>Hết hạn</option>
+                        </select>
+                    </div>
+
+                    <!-- Discount -->
+                    <div class="position-relative">
+                        <i class="fa fa-percentage filter-icon"></i>
+                        <select class="form-select filter-select">
+                            <option selected>Loại giảm giá</option>
+                            <option>Phần trăm</option>
+                            <option>Số tiền cố định</option>
+                        </select>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="position-relative">
+                        <i class="fa fa-calendar-alt filter-icon"></i>
+                        <select class="form-select filter-select">
+                            <option selected>Ngày</option>
+                            <option>Mới nhất</option>
+                            <option>Cũ nhất</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-
-            <!-- Filters -->
-            <div class="col-md-6 text-md-end text-start d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
-
-                <!-- Filter -->
-                <div class="position-relative">
-                    <i class="fa fa-filter filter-icon-inside"></i>
-                    <select class="form-select staff-filter-select rounded-pill shadow-sm">
-                        <option selected>Trạng thái</option>
-                        <option>Chờ duyệt</option>
-                        <option>Đang áp dụng</option>
-                        <option>Tạm ngưng</option>
-                        <option>Hết hạng</option>
-                    </select>
-                </div>
-
-                <!-- Discount -->
-                <div class="position-relative">
-                    <i class="fa fa-percentage filter-icon-inside"></i>
-                    <select class="form-select staff-filter-select rounded-pill shadow-sm">
-                        <option selected>Loại giảm giá</option>
-                        <option>Phần trăm</option>
-                        <option>Số tiền cố định</option>
-                    </select>
-                </div>
-
-                <!-- Date -->
-                <div class="position-relative">
-                    <i class="fa fa-calendar-alt filter-icon-inside"></i>
-                    <select class="form-select staff-filter-select rounded-pill shadow-sm">
-                        <option selected>Ngày</option>
-                        <option>Mới nhất</option>
-                        <option>Cũ nhất</option>
-                    </select>
-                </div>
-
-            </div>
-
         </div>
 
-        <!-- Tabs -->
-        <ul class="nav nav-tabs custom-tabs-staff" id="staff-tab" role="tablist">
+        <ul class="nav custom-tabs" id="voucherTabs" role="tablist">
             <li class="nav-item">
-                <a href="#staff-tab1" class="custom-tab-staff active" data-bs-toggle="tab">Quản lý voucher</a>
+                <a class="nav-link custom-tab active" id="manage-tab" data-bs-toggle="tab" href="#manage" role="tab">
+                    <i class="fas fa-cogs me-2"></i>Quản lý voucher
+                </a>
             </li>
             <li class="nav-item">
-                <a href="#staff-tab2" class="custom-tab-staff" data-bs-toggle="tab">Duyệt vocher</a>
+                <a class="nav-link custom-tab" id="approve-tab" data-bs-toggle="tab" href="#approve" role="tab">
+                    <i class="fas fa-check-circle me-2"></i>Duyệt voucher
+                </a>
             </li>
         </ul>
 
-
-        <div class="tab-content staff-tab-content" id="staff-tab-content">
-            <!-- Tab Quản lý Voucher -->
-            <div class="tab-pane fade show active" id="staff-tab1">
-                <div class="row mt-3">
-                    <!-- Thẻ 1 -->
-                    <div class="col-md-4 d-flex">
-                        <div class="card shadow-sm p-3 mb-4 bg-light rounded staff-card w-100 h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="fw-bold text-success mb-3">
-                                    <i class="fa fa-gift me-2 text-warning"></i>Khuyến mãi tháng 6
+        <div class="tab-content" id="voucherTabContent">
+            <!-- Manage Vouchers Tab -->
+            <div class="tab-pane fade show active" id="manage" role="tabpanel">
+                <div class="row" id="voucherList">
+                    <!-- Voucher Card 1 -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card voucher-card h-100">
+                            <div class="card-body voucher-card-body d-flex flex-column">
+                                <h5 class="voucher-title">
+                                    <i class="fas fa-gift me-2 text-warning"></i>Khuyến mãi tháng 6
                                 </h5>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-user me-2"></i>Chủ trọ: <span class="text-dark">Trần Văn B</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-home me-2"></i>Khu trọ áp dụng: <span class="text-dark">KTX Đại học
-                                        X</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-tag me-2"></i>Mã voucher: <span
-                                        class="text-uppercase text-dark">VOUCHER2025</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-clock me-2"></i>Thời gian: <span class="text-dark">23/06/2025 -
-                                        25/06/2025</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-percent me-2"></i>Giảm: <span class="text-dark">10%</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-wallet me-2"></i>Đơn tối thiểu: <span
-                                        class="text-dark">300.000đ</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-circle-check me-2"></i>Trạng thái:
-                                    <span class="badge bg-success text-white">Đang áp dụng</span>
-                                </p>
-                                <p class="mb-3 text-muted fw-semibold">
-                                    <i class="fa fa-chart-bar me-2"></i>Đã dùng: <span
-                                        class="text-dark fw-bold">08/100</span>
-                                </p>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-user"></i>
+                                    <span>Chủ trọ: <span class="voucher-info-value">Trần Văn B</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-home"></i>
+                                    <span>Khu trọ: <span class="voucher-info-value">KTX Đại học X</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Mã: <span class="voucher-info-value">VOUCHER2025</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Thời gian: <span class="voucher-info-value">23/06/2025 -
+                                            25/06/2025</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-percent"></i>
+                                    <span>Giảm: <span class="voucher-info-value">10%</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-wallet"></i>
+                                    <span>Đơn tối thiểu: <span class="voucher-info-value">300.000đ</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Trạng thái: <span class="status-badge status-active"><i
+                                                class="fas fa-check"></i>Đang áp dụng</span></span>
+                                </div>
+
+                                <div class="voucher-info mb-3">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>Đã dùng: <span class="voucher-info-value">08/100</span></span>
+                                </div>
+
                                 <div class="mt-auto d-flex justify-content-end gap-2">
-                                    <button
-                                        class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center px-3"
-                                        data-bs-toggle="modal" data-bs-target="#editVoucherModal"
-                                        title="Chỉnh sửa voucher">
-                                        <i class="fa fa-pen-to-square"></i>
+                                    <button class="btn action-btn action-btn-edit" data-bs-toggle="modal"
+                                        data-bs-target="#editVoucherModal" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button
-                                        class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center px-3"
-                                        title="Xóa voucher">
-                                        <i class="fa fa-trash"></i>
+                                    <button class="btn action-btn action-btn-delete"
+                                        onclick="deleteVoucher('VOUCHER2025')" title="Xóa">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Thẻ 2 -->
-                    <div class="col-md-4 d-flex">
-                        <div class="card shadow-sm p-3 mb-4 bg-light rounded staff-card w-100 h-100">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="fw-bold text-primary mb-3">
-                                    <i class="fa fa-gift me-2 text-warning"></i>KM Đăng Bài Tháng 7
+                    <!-- Voucher Card 2 -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card voucher-card h-100">
+                            <div class="card-body voucher-card-body d-flex flex-column">
+                                <h5 class="voucher-title">
+                                    <i class="fas fa-gift me-2 text-warning"></i>KM Đăng Bài Tháng 7
                                 </h5>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-user me-2"></i>Nhân viên: <span class="text-dark">Nguyễn Văn
-                                        A</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-tag me-2"></i>Mã voucher: <span
-                                        class="text-uppercase text-dark">STAFFJULY</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-clock me-2"></i>Thời gian: <span class="text-dark">01/07/2025 -
-                                        10/07/2025</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-percent me-2"></i>Giảm: <span class="text-dark">50.000đ</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-wallet me-2"></i>Đơn tối thiểu: <span
-                                        class="text-dark">300.000đ</span>
-                                </p>
-                                <p class="mb-1 text-muted fw-semibold">
-                                    <i class="fa fa-circle-check me-2"></i>Trạng thái:
-                                    <span class="badge bg-success text-white">Đang áp dụng</span>
-                                </p>
-                                <p class="mb-3 text-muted fw-semibold">
-                                    <i class="fa fa-chart-bar me-2"></i>Đã dùng: <span
-                                        class="text-dark fw-bold">3/50</span>
-                                </p>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-user"></i>
+                                    <span>Nhân viên: <span class="voucher-info-value">Nguyễn Văn A</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Mã: <span class="voucher-info-value">STAFFJULY</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Thời gian: <span class="voucher-info-value">01/07/2025 -
+                                            10/07/2025</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-money-bill"></i>
+                                    <span>Giảm: <span class="voucher-info-value">50.000đ</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-wallet"></i>
+                                    <span>Đơn tối thiểu: <span class="voucher-info-value">300.000đ</span></span>
+                                </div>
+
+                                <div class="voucher-info">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Trạng thái: <span class="status-badge status-active"><i
+                                                class="fas fa-check"></i>Đang áp dụng</span></span>
+                                </div>
+
+                                <div class="voucher-info mb-3">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>Đã dùng: <span class="voucher-info-value">3/50</span></span>
+                                </div>
+
                                 <div class="mt-auto d-flex justify-content-end gap-2">
-                                    <button
-                                        class="btn btn-sm btn-outline-primary d-flex align-items-center justify-content-center px-3"
-                                        data-bs-toggle="modal" data-bs-target="#editVoucherModal"
-                                        title="Chỉnh sửa voucher">
-                                        <i class="fa fa-pen-to-square"></i>
+                                    <button class="btn action-btn action-btn-edit" data-bs-toggle="modal"
+                                        data-bs-target="#editVoucherModal" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
                                     </button>
-                                    <button
-                                        class="btn btn-sm btn-outline-danger d-flex align-items-center justify-content-center px-3"
-                                        title="Xóa voucher">
-                                        <i class="fa fa-trash"></i>
+                                    <button class="btn action-btn action-btn-delete"
+                                        onclick="deleteVoucher('STAFFJULY')" title="Xóa">
+                                        <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
 
-
-            <!-- Tab  Duyệt -->
-            <div class="tab-pane fade" id="staff-tab2">
-                <div class="row mt-3">
-                    <div class="col-md-4">
-                        <div class="card shadow-sm p-3 mb-4 bg-light rounded staff-card">
-                            <div class="card-body position-relative">
-                                <h5 class="fw-bold text-primary mb-2">
-                                    <i class="fa fa-gift me-2 text-warning"></i>Khuyến mãi tháng 6
+            <!-- Approve Vouchers Tab -->
+            <div class="tab-pane fade" id="approve" role="tabpanel">
+                <div class="row" id="approveList">
+                    <!-- Pending Voucher Card -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card voucher-card h-100">
+                            <div class="card-body voucher-card-body d-flex flex-column">
+                                <h5 class="voucher-title">
+                                    <i class="fas fa-gift me-2 text-warning"></i>Khuyến mãi tháng 6
                                 </h5>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-user-pen me-2"></i>Người tạo: <span class="text-dark">Trần Văn B
-                                        (Chủ trọ)</span>
-                                </p>
+                                <div class="voucher-info">
+                                    <i class="fas fa-user-edit"></i>
+                                    <span>Người tạo: <span class="voucher-info-value">Trần Văn B (Chủ trọ)</span></span>
+                                </div>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-tag me-2"></i>Mã voucher: <span
-                                        class="text-uppercase text-dark">VOUCHER2025</span>
-                                </p>
+                                <div class="voucher-info">
+                                    <i class="fas fa-tag"></i>
+                                    <span>Mã: <span class="voucher-info-value">VOUCHER2025</span></span>
+                                </div>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-house me-2"></i>Khu trọ áp dụng: <span class="text-dark">KTX B1 -
-                                        Quận 7</span>
-                                </p>
+                                <div class="voucher-info">
+                                    <i class="fas fa-home"></i>
+                                    <span>Khu trọ: <span class="voucher-info-value">KTX B1 - Quận 7</span></span>
+                                </div>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-clock me-2"></i>Thời gian: <span class="text-dark">23/06/2025 -
-                                        25/06/2025</span>
-                                </p>
+                                <div class="voucher-info">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Thời gian: <span class="voucher-info-value">23/06/2025 -
+                                            25/06/2025</span></span>
+                                </div>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-percent me-2"></i>Hình thức giảm: <span class="text-dark">Giảm
-                                        10%</span>
-                                </p>
+                                <div class="voucher-info">
+                                    <i class="fas fa-percent"></i>
+                                    <span>Giảm: <span class="voucher-info-value">10%</span></span>
+                                </div>
 
-                                <p class="text-muted fw-semibold mb-2">
-                                    <i class="fa fa-wallet me-2"></i>Đơn tối thiểu: <span
-                                        class="text-dark">300.000đ</span>
-                                </p>
+                                <div class="voucher-info mb-3">
+                                    <i class="fas fa-wallet"></i>
+                                    <span>Đơn tối thiểu: <span class="voucher-info-value">300.000đ</span></span>
+                                </div>
 
-                                <div class="d-flex justify-content-end gap-2">
-                                    <button
-                                        class="btn btn-sm btn-outline-success d-flex align-items-center justify-content-center px-3"
-                                        title="Duyệt voucher">
-                                        <i class="fa fa-check me-1"></i> Duyệt
+                                <div class="mt-auto d-flex justify-content-end gap-2">
+                                    <button class="btn action-btn action-btn-approve"
+                                        onclick="approveVoucher('VOUCHER2025')" title="Duyệt">
+                                        <i class="fas fa-check"></i>
                                     </button>
-                                    <button
-                                        class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center px-3"
-                                        title="Từ chối voucher">
-                                        <i class="fa fa-xmark me-1"></i> Từ chối
+                                    <button class="btn action-btn action-btn-reject"
+                                        onclick="rejectVoucher('VOUCHER2025')" title="Từ chối">
+                                        <i class="fas fa-times"></i>
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <!-- Add more voucher cards as needed -->
                 </div>
             </div>
         </div>
@@ -548,9 +743,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body px-4 pb-4">
-                    <div class="bg-body-secondary rounded-3 px-4 py-4">
+                    <div class="form-section">
                         <h6 class="text-center fw-bold mb-4">Thông tin Voucher</h6>
-                        <form>
+                        <form id="editVoucherForm">
                             <!-- Tên & Mã -->
                             <div class="mb-3">
                                 <label class="form-label">Tên chương trình</label>
@@ -638,20 +833,13 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Trạng thái voucher</label>
                                     <div class="d-flex align-items-center gap-3">
-                                        <button id="statusBtn" class="btn status-badge-staff status-active"
-                                            onclick="toggleStatus(event)">
+                                        <button type="button" id="statusBtn"
+                                            class="btn status-toggle-btn status-toggle-active">
                                             <i class="fas fa-check-circle me-2"></i> Đang áp dụng
                                         </button>
-
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Trạng thái -->
-                            <div class="mb-4">
-
-                            </div>
-
 
                             <!-- Action -->
                             <div class="d-flex justify-content-between">
@@ -736,21 +924,16 @@
                         <div class="mb-4">
                             <label class="form-label">Trạng thái voucher</label>
                             <div class="d-flex align-items-center gap-3">
-                                <button id="statusBtn" class="btn status-badge-staff status-active"
-                                    onclick="toggleStatus(event)">
+                                <button type="button" id="statusBtnInternal"
+                                    class="btn status-toggle-btn status-toggle-active">
                                     <i class="fas fa-check-circle me-2"></i> Đang áp dụng
                                 </button>
                                 <small class="text-muted fst-italic">Nhấn để chuyển trạng thái tiếp theo</small>
                             </div>
                         </div>
 
-
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-success fw-bold px-4"
-                                onclick="showSuccessMessage('Tạo voucher thành công!')">
-                                Tạo voucher
-                            </button>
-
+                            <button type="submit" class="btn btn-success fw-bold px-4">Tạo voucher</button>
                             <button type="reset" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
                         </div>
                     </form>
@@ -759,51 +942,151 @@
         </div>
     </div>
 
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/QL-vocher.js}"></script>
-    <script>
-        let currentStatus = 0;
-        const statuses = [
-            {
-                text: 'Đang áp dụng',
-                class: 'status-active',
-                icon: 'fas fa-check-circle'
-            },
-            {
-                text: 'Ngưng áp dụng',
-                class: 'status-inactive',
-                icon: 'fas fa-ban'
-            },
-            {
-                text: 'Hết hạn',
-                class: 'status-expired',
-                icon: 'fas fa-clock'
+   <script>
+    // Status Toggle Functionality
+    const statuses = [
+        {
+            text: 'Đang áp dụng',
+            class: 'status-toggle-active',
+            icon: 'fas fa-check-circle'
+        },
+        {
+            text: 'Ngưng áp dụng',
+            class: 'status-toggle-inactive',
+            icon: 'fas fa-ban'
+        },
+        {
+            text: 'Hết hạn',
+            class: 'status-toggle-expired',
+            icon: 'fas fa-clock'
+        }
+    ];
+
+    class StatusManager {
+        constructor(buttonId) {
+            this.currentStatus = 0;
+            this.statusBtn = document.getElementById(buttonId);
+            this.statusBtn.addEventListener('click', this.toggleStatus.bind(this));
+            this.updateStatusDisplay();
+        }
+
+        toggleStatus(e) {
+            e.preventDefault();
+            this.currentStatus = (this.currentStatus + 1) % statuses.length;
+            this.updateStatusDisplay();
+        }
+
+        updateStatusDisplay() {
+            const status = statuses[this.currentStatus];
+            this.statusBtn.className = `btn status-toggle-btn ${status.class}`;
+            this.statusBtn.innerHTML = `<i class="${status.icon} me-2"></i> ${status.text}`;
+        }
+    }
+
+    class NotificationManager {
+        constructor() {
+            this.container = document.querySelector('.notification-container');
+            if (!this.container) {
+                console.warn('Notification container not found, creating a new one.');
+                this.container = document.createElement('div');
+                this.container.className = 'notification-container';
+                document.body.appendChild(this.container);
             }
-        ];
-
-        function toggleStatus(e) {
-            if (e) e.preventDefault();
-            currentStatus = (currentStatus + 1) % statuses.length;
-            updateStatusDisplay();
         }
 
-        function updateStatusDisplay() {
-            const statusBtn = document.getElementById('statusBtn');
-            const status = statuses[currentStatus];
+        showNotification(type, title, message, duration = 5000) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-header">
+                    <span>${title}</span>
+                    <button class="notification-close">×</button>
+                </div>
+                <div class="notification-body">${message}</div>
+            `;
 
-            statusBtn.className = 'btn status-badge-staff ' + status.class;
-            statusBtn.innerHTML = `<i class="${status.icon} me-2"></i> ${status.text}`;
+            this.container.appendChild(notification);
+
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            });
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+            }, duration);
+
+            setTimeout(() => {
+                notification.style.opacity = '1';
+            }, 100);
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            updateStatusDisplay();
+        showSuccess(message) {
+            this.showNotification('success', 'Thành công', message);
+        }
+
+        showError(message) {
+            this.showNotification('error', 'Lỗi', message);
+        }
+
+        showWarning(message) {
+            this.showNotification('warning', 'Cảnh báo', message);
+        }
+
+        showInfo(message) {
+            this.showNotification('info', 'Thông tin', message);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const notificationManager = new NotificationManager();
+        new StatusManager('statusBtn');
+        new StatusManager('statusBtnInternal');
+
+        // Initialize modal instances
+        const internalVoucherModal = new bootstrap.Modal(document.getElementById('internalVoucherModal'));
+        const editVoucherModal = new bootstrap.Modal(document.getElementById('editVoucherModal'));
+
+        document.getElementById('createInternalVoucherForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            notificationManager.showSuccess('Tạo voucher thành công!');
+            internalVoucherModal.hide();
+            setTimeout(() => {
+                internalVoucherModal.dispose();
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }, 500);
         });
 
-    </script>
+        document.getElementById('editVoucherForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            notificationManager.showSuccess('Cập nhật voucher thành công!');
+            editVoucherModal.hide();
+            setTimeout(() => {
+                editVoucherModal.dispose();
+                document.body.classList.remove('modal-open');
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) backdrop.remove();
+            }, 500);
+        });
 
+        window.deleteVoucher = (voucherCode) => {
+            notificationManager.showSuccess(`Voucher ${voucherCode} đã được xóa!`);
+        };
 
+        window.approveVoucher = (voucherCode) => {
+            notificationManager.showSuccess(`Voucher ${voucherCode} đã được duyệt!`);
+        };
+
+        window.rejectVoucher = (voucherCode) => {
+            notificationManager.showWarning(`Voucher ${voucherCode} đã bị từ chối!`);
+        };
+    });
+</script>
 </body>
 
 </html>

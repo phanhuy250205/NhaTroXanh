@@ -1,174 +1,507 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
-<head th:replace="~{/layouts/head}">
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi Tiết - Nhà Trọ Xanh</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --secondary-color: #8bc9ff;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 12px 15px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-5px);
+            color: white;
+        }
+
+        .edit-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .edit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+            color: white;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            height: 100%;
+        }
+
+        .info-card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .info-card h5 {
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .info-card h5::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+            background: white;
+        }
+
+        .status-info {
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 5px solid var(--secondary-color);
+        }
+
+        .rooms-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: var(--card-shadow);
+            margin-top: 30px;
+        }
+
+        .rooms-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .rooms-title::before {
+            content: '🏠';
+            margin-right: 10px;
+        }
+
+        .table {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            border: none;
+        }
+
+        .table thead th {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            font-weight: 600;
+            border: none;
+            padding: 15px;
+        }
+
+        .table tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-color: #f3f4f6;
+        }
+
+        .table tbody tr:hover {
+            background: #f8fafc;
+            transform: scale(1.01);
+            transition: all 0.2s ease;
+        }
+
+        .badge {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 20px;
+        }
+
+        .badge.bg-success {
+            background: linear-gradient(45deg, var(--success-color), #059669) !important;
+        }
+
+        .badge.bg-warning {
+            background: linear-gradient(45deg, var(--warning-color), #d97706) !important;
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 30px;
+            border: none;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 15px;
+            background: #f9fafb;
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .action-buttons .btn {
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, var(--success-color), #059669);
+            border: none;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(45deg, var(--danger-color), #dc2626);
+            border: none;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .icon-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #fff7ed, #fed7aa);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .icon-card i {
+            font-size: 2rem;
+            color: var(--warning-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .header-section {
+                padding: 20px;
+            }
+
+            .info-card {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
     <div class="main-content">
-       
+        <!-- Header Section -->
+        <div class="header-section">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="d-flex align-items-center">
-                    <a href="/nhan-vien/thong-tin-tro"><button class="btn p-0 me-2" 
-                        style="border: none; background: none;">
-                        <i class="fas fa-arrow-left fs-5"></i>
-                    </button></a>
-                    <h4 class="m-0 fw-bold">Chi tiết khu trọ</h4>
+                    <a href="/nhan-vien/thong-tin-tro">
+                        <button class="btn back-btn me-3">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </a>
+                    <div>
+                        <h3 class="m-0 fw-bold">Chi tiết khu trọ</h3>
+                        <p class="m-0 opacity-75">Quản lý thông tin chi tiết khu trọ</p>
+                    </div>
                 </div>
-                <!-- Nút chỉnh sửa -->
-                <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editModal">
-                    Chỉnh sửa
+                <button class="btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">
+                    <i class="fas fa-edit me-2"></i>Chỉnh sửa
                 </button>
-
             </div>
-            <hr>
+        </div>
 
-            <div class="row mb-4">
-                <!-- Thông tin Khu trọ -->
-                <div class="col-md-6 mb-3">
-                    <div class="bg-light p-4 rounded shadow-sm">
-                        <h5 class="mb-3 text-center">Thông tin Khu trọ</h5>
-                        <div class="mb-2">
-                            <label class="form-label">Tên khu trọ</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Địa chỉ</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span><strong>Số phòng:</strong> 99</span>
-                            <div class="d-flex align-items-center">
-                                <span class="me-2"><strong>Trạng thái hoạt động:</strong></span>
-                                <span class="badge bg-success rounded-pill px-3 py-2">Hoạt động</span>
+        <div class="row">
+            <!-- Thông tin Khu trọ -->
+            <div class="col-lg-6 mb-4">
+                <div class="info-card">
+                    <div class="icon-card">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <h5><i class="fas fa-home me-2"></i>Thông tin Khu trọ</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Tên khu trọ</label>
+                        <input type="text" class="form-control" value="Nhà Trọ Xanh" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ</label>
+                        <input type="text" class="form-control"
+                            value="123 Đường Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng" readonly />
+                    </div>
+                    <div class="status-info">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-door-open text-primary me-2"></i>
+                                    <div>
+                                        <strong>Số phòng:</strong>
+                                        <div class="h4 text-primary mb-0">99</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <div>
+                                        <strong>Trạng thái:</strong>
+                                        <div><span class="badge bg-success">Hoạt động</span></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Thông tin Chủ trọ -->
-                <div class="col-md-6 mb-3">
-                    <div class="bg-light p-4 rounded shadow-sm">
-                        <h5 class="mb-3 text-center">Thông tin Chủ trọ</h5>
-                        <div class="mb-2">
-                            <label class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Số CCCD</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label">Email</label>
-                            <input type="text" class="form-control" value="Nguyễn Văn A" readonly />
-                        </div>
+            <!-- Thông tin Chủ trọ -->
+            <div class="col-lg-6 mb-4">
+                <div class="info-card">
+                    <div class="icon-card">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <h5><i class="fas fa-user-crown me-2"></i>Thông tin Chủ trọ</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Họ và tên</label>
+                        <input type="text" class="form-control" value="Nguyễn Văn Minh" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" value="0905123456" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số CCCD</label>
+                        <input type="text" class="form-control" value="123456789012" readonly />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="text" class="form-control" value="nguyenvanminh@email.com" readonly />
                     </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Danh sách phòng -->
-            <h4 class="text-center fw-bold mb-3">Danh sách phòng</h4>
-            <table class="table table-bordered text-center">
-                <thead class="table-primary">
-                    <tr>
-                        <th>ID</th>
-                        <th>Diện tích</th>
-                        <th>Giá thuê</th>
-                        <th>Tình trạng</th>
-                        <th>Ghi chú</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td></td>
-                        <td></td>
-                        <td><span class="badge bg-success rounded-pill px-3 py-2">Đang thuê</span></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td></td>
-                        <td></td>
-                        <td><span class="badge bg-warning text-dark rounded-pill px-3 py-2">Trống</span></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td>3</td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-      
-
+        <!-- Danh sách phòng -->
+        <div class="rooms-section">
+            <h4 class="rooms-title">Danh sách phòng</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-hashtag me-2"></i>ID</th>
+                            <th><i class="fas fa-ruler-combined me-2"></i>Diện tích (m²)</th>
+                            <th><i class="fas fa-money-bill-wave me-2"></i>Giá thuê (VNĐ)</th>
+                            <th><i class="fas fa-info-circle me-2"></i>Tình trạng</th>
+                            <th><i class="fas fa-sticky-note me-2"></i>Ghi chú</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>P001</strong></td>
+                            <td>25</td>
+                            <td>3.500.000</td>
+                            <td><span class="badge bg-success">Đang thuê</span></td>
+                            <td>Phòng VIP, có điều hòa</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P002</strong></td>
+                            <td>20</td>
+                            <td>3.000.000</td>
+                            <td><span class="badge bg-warning text-dark">Trống</span></td>
+                            <td>Phòng thường</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P003</strong></td>
+                            <td>22</td>
+                            <td>3.200.000</td>
+                            <td><span class="badge bg-success">Đang thuê</span></td>
+                            <td>Có ban công</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P004</strong></td>
+                            <td>18</td>
+                            <td>2.800.000</td>
+                            <td><span class="badge bg-warning text-dark">Trống</span></td>
+                            <td>Cần sửa chữa nhỏ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>P005</strong></td>
+                            <td>30</td>
+                            <td>4.000.000</td>
+                            <td><span class="badge bg-success">Đang thuê</span></td>
+                            <td>Phòng lớn, 2 người</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Modal chỉnh sửa khu trọ -->
     <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-body p-5">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <h5 class="modal-title fw-bold" id="editModalLabel">Chỉnh sửa khu trọ</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">
+                        <i class="fas fa-edit me-2"></i>Chỉnh sửa khu trọ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
                     <form>
                         <!-- Tên khu trọ -->
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Tên khu trọ</label>
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-building me-2 text-primary"></i>Tên khu trọ
+                            </label>
                             <input type="text" class="form-control" value="Nhà Trọ Xanh">
                         </div>
 
                         <!-- Địa chỉ chi tiết -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Tỉnh/Thành phố</label>
-                                <select id="province" class="form-select">
-                                    <option selected>Tỉnh/Thành phố</option>
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt me-2 text-primary"></i>Tỉnh/Thành phố
+                                </label>
+                                <select class="form-select" id="citySelect">
+                                    <option value="">Chọn tỉnh/thành phố</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Phường/Xã</label>
-                                <select id="ward" class="form-select mt-2">
-                                    <option selected>Phường/Xã</option>
+                                <label class="form-label">
+                                    <i class="fas fa-location-dot me-2 text-primary"></i>Quận/Huyện
+                                </label>
+                                <select class="form-select" id="districtSelect">
+                                    <option value="">Chọn quận/huyện</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Tên đường/Số nhà</label>
-                                <input type="text" class="form-control" value="Nhà Trọ Xanh">
+                                <label class="form-label">
+                                    <i class="fas fa-map me-2 text-primary"></i>Phường/Xã
+                                </label>
+                                <select class="form-select" id="wardSelect">
+                                    <option value="">Chọn phường/xã</option>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label fw-semibold">Quận/Huyện</label>
-                                <select id="district" class="form-select mt-2">
-                                    <option selected>Quận/Huyện</option>
-                                </select>
+                                <label class="form-label">
+                                    <i class="fas fa-road me-2 text-primary"></i>Tên đường/Số nhà
+                                </label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="houseNumberInput" placeholder="Số nhà">
+                                    <input type="text" class="form-control" id="streetInput"
+                                        value="Đường Nguyễn Văn Linh">
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-address-card me-2 text-primary"></i>Địa chỉ đầy đủ
+                                </label>
+                                <input type="text" class="form-control" id="fullAddressInput" readonly>
                             </div>
                         </div>
 
                         <!-- Số lượng & Trạng thái -->
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-semibold">Số lượng phòng:</label>
-                                <select class="form-select w-auto d-inline-block">
-                                    <option>15</option>
-                                    <option>20</option>
-                                    <option>25</option>
-                                </select>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-door-open me-2 text-primary"></i>Số lượng phòng
+                                </label>
+                                <input type="number" class="form-control" value="99" min="1">
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-semibold">Trạng thái:</label>
-                                <select class="form-select w-auto d-inline-block">
+                            <div class="col-md-6">
+                                <label class="form-label">
+                                    <i class="fas fa-toggle-on me-2 text-primary"></i>Trạng thái
+                                </label>
+                                <select class="form-select">
                                     <option>Hoạt động</option>
                                     <option>Tạm dừng</option>
                                 </select>
@@ -176,16 +509,22 @@
                         </div>
 
                         <!-- Nút hành động -->
-                        <div class="d-flex justify-content-center gap-3">
-                            <button type="submit" class="btn btn-success px-4 fw-bold">LƯU THAY ĐỔI</button>
-                            <button type="button" class="btn btn-danger px-4 fw-bold" data-bs-dismiss="modal">HỦY
-                                BỎ</button>
+                        <div class="action-buttons d-flex justify-content-center gap-3">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-2"></i>LƯU THAY ĐỔI
+                            </button>
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>HỦY BỎ
+                            </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/api-map.js}"></script>
 
 </body>
 

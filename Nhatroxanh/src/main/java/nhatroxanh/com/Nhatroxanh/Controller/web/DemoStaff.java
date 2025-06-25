@@ -46,4 +46,16 @@ public class DemoStaff {
     public String chitietbaidang(Model model) {
         return "staff/chi-tiet-bai-dang"; 
     }
+     @GetMapping("/nhan-vien/quan-ly-khach-thue")
+    public String quanLyKhachThue() {
+        return "staff/khach-thue";
+    }
+    @GetMapping("/nhan-vien/chi-tiet-khach-thue")
+    public String chiTietKhachThue() {
+        return "staff/chi-tiet-khach-thue";
+    }
+     @GetMapping("/nhan-vien/profile-nhan-vien")
+    public String profile() {
+        return "staff/profile";
+    }
 }
