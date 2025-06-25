@@ -67,25 +67,25 @@
 
 /* Container - GIỐNG HỆT LOGIN */
 .register-page-wrapper .register-card {
-    width: 1250px; /* GIỐNG LOGIN */
-    height: min(90vh, 650px); /* GIỐNG LOGIN */
-    border-radius: 16px; /* GIỐNG LOGIN */
+    width: 1250px;
+    height: min(90vh, 650px);
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 0 35px rgb(17 74 120 / 0.15); /* GIỐNG LOGIN */
+    box-shadow: 0 0 35px rgb(17 74 120 / 0.15);
     background-color: #fff;
     display: flex;
 }
 
 /* Left panel - GIỐNG HỆT LOGIN */
 .register-page-wrapper .register-left {
-    flex: 0 0 40%; /* GIỐNG LOGIN */
+    flex: 0 0 40%;
     background: linear-gradient(180deg, #0085be 0%, #4fcaff9b 100%);
     color: #fff;
     position: relative;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: clamp(30px, 5vh, 50px) clamp(20px, 3vw, 35px); /* GIỐNG LOGIN */
+    padding: clamp(30px, 5vh, 50px) clamp(20px, 3vw, 35px);
     overflow: hidden;
 }
 
@@ -93,7 +93,7 @@
 .register-page-wrapper .register-left::before {
     content: "";
     pointer-events: none;
-    background-image: url('../images/slider/slider3.jpg');
+    background-image: url("../images/slider/slider3.jpg");
     background-size: cover;
     background-position: center;
     opacity: 0.17;
@@ -103,14 +103,14 @@
     right: 0;
     position: absolute;
     z-index: 0;
-    border-radius: 0 0 0 16px; /* GIỐNG LOGIN */
+    border-radius: 0 0 0 16px;
 }
 
 /* Content inside left panel - GIỐNG LOGIN */
 .register-page-wrapper .register-left-content {
     position: relative;
     z-index: 1;
-    max-width: 320px; /* GIỐNG LOGIN */
+    max-width: 320px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -119,7 +119,7 @@
 
 .register-page-wrapper .left-content-top {
     position: relative;
-    top: 10%; /* GIỐNG LOGIN */
+    top: 10%;
     left: 50%;
     transform: translateX(-40%);
     flex: 1;
@@ -129,9 +129,9 @@
 
 /* Title on the left - GIỐNG LOGIN */
 .register-page-wrapper .left-title {
-    font-size: clamp(1.5rem, 3vw, 2rem); /* GIỐNG LOGIN */
+    font-size: clamp(1.5rem, 3vw, 2rem);
     font-weight: 700;
-    margin-bottom: clamp(8px, 1vh, 12px); /* GIỐNG LOGIN */
+    margin-bottom: clamp(8px, 1vh, 12px);
     line-height: 1.2;
     user-select: none;
     text-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
@@ -139,9 +139,9 @@
 
 .register-page-wrapper .left-subtitle {
     font-weight: 400;
-    font-size: clamp(0.85rem, 1.5vw, 1rem); /* GIỐNG LOGIN */
+    font-size: clamp(0.85rem, 1.5vw, 1rem);
     opacity: 0.8;
-    margin-bottom: clamp(25px, 4vh, 35px); /* GIỐNG LOGIN */
+    margin-bottom: clamp(25px, 4vh, 35px);
     user-select: none;
     color: #ffffff;
     text-shadow: 0 1px 2px rgb(0 0 0 / 0.15);
@@ -152,7 +152,7 @@
     list-style: none;
     padding: 0;
     margin: 0;
-    gap: clamp(18px, 3vh, 24px); /* GIỐNG LOGIN */
+    gap: clamp(18px, 3vh, 24px);
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -161,15 +161,15 @@
 .register-page-wrapper .feature-list li {
     display: flex;
     align-items: flex-start;
-    gap: clamp(12px, 2vw, 16px); /* GIỐNG LOGIN */
-    font-size: clamp(0.8rem, 1.4vw, 0.95rem); /* GIỐNG LOGIN */
-    line-height: 1.4; /* GIỐNG LOGIN */
+    gap: clamp(12px, 2vw, 16px);
+    font-size: clamp(0.8rem, 1.4vw, 0.95rem);
+    line-height: 1.4;
     cursor: default;
     user-select: none;
 }
 
 .register-page-wrapper .feature-list li .icon {
-    font-size: clamp(1.1rem, 2vw, 1.38rem); /* GIỐNG LOGIN */
+    font-size: clamp(1.1rem, 2vw, 1.38rem);
     color: #b9e0fe;
     margin-top: 3px;
     flex-shrink: 0;
@@ -178,7 +178,7 @@
 .register-page-wrapper .feature-list li .feature-text strong {
     font-weight: 600;
     color: #bae3ff;
-    font-size: clamp(0.85rem, 1.5vw, 1rem); /* GIỐNG LOGIN */
+    font-size: clamp(0.85rem, 1.5vw, 1rem);
 }
 
 .register-page-wrapper .feature-list li .feature-text small {
@@ -186,7 +186,7 @@
     display: block;
     margin-top: 2px;
     font-weight: 400;
-    font-size: clamp(0.75rem, 1.2vw, 0.83rem); /* GIỐNG LOGIN */
+    font-size: clamp(0.75rem, 1.2vw, 0.83rem);
     letter-spacing: 0.15px;
 }
 
@@ -199,8 +199,8 @@
     position: relative;
     left: 50%;
     transform: translateX(-50%);
-    width: 200px; /* GIỐNG LOGIN */
-    height: 200px; /* GIỐNG LOGIN */
+    width: 200px;
+    height: 200px;
 }
 
 /* Right form panel - GIỐNG LOGIN */
@@ -210,15 +210,15 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    padding: 30px; /* GIỐNG LOGIN */
+    padding: 30px;
 }
 
 /* Close icon top right - GIỐNG LOGIN */
 .register-page-wrapper .close-btn {
     position: absolute;
-    top: clamp(20px, 3vh, 30px); /* GIỐNG LOGIN */
-    right: clamp(20px, 3vw, 30px); /* GIỐNG LOGIN */
-    font-size: clamp(1.2rem, 2vw, 1.4rem); /* GIỐNG LOGIN */
+    top: clamp(20px, 3vh, 30px);
+    right: clamp(20px, 3vw, 30px);
+    font-size: clamp(1.2rem, 2vw, 1.4rem);
     color: #555;
     cursor: pointer;
     border: none;
@@ -247,19 +247,19 @@
 .register-page-wrapper .right-logo {
     display: flex;
     align-items: center;
-    gap: 7px; /* TĂNG từ 6px */
-    margin-bottom: 12px; /* TĂNG từ 10px */
+    gap: 7px;
+    margin-bottom: 12px;
     user-select: none;
 }
 
 .register-page-wrapper .right-logo img {
-    width: 90px; /* TĂNG từ 70px */
+    width: 90px;
     height: auto;
 }
 
 .register-page-wrapper .right-logo span {
     font-weight: 600;
-    font-size: clamp(1rem, 1.7vw, 1.1rem); /* TĂNG từ clamp(0.9rem, 1.6vw, 1rem) */
+    font-size: clamp(1rem, 1.7vw, 1.1rem);
     color: var(--text-dark);
     user-select: none;
 }
@@ -272,16 +272,16 @@
 /* Headings - TĂNG SIZE */
 .register-page-wrapper .register-title {
     font-weight: 700;
-    font-size: 30px; /* TĂNG từ 18px */
-    margin-bottom: clamp(3px, 0.6vh, 4px); /* TĂNG từ clamp(2px, 0.5vh, 3px) */
+    font-size: 30px;
+    margin-bottom: clamp(3px, 0.6vh, 4px);
     color: var(--text-dark);
     user-select: none;
 }
 
 .register-page-wrapper .register-subtitle {
     font-weight: 400;
-    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
-    margin-bottom: 20px; /* TĂNG từ 12px */
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem);
+    margin-bottom: 20px;
     color: var(--text-muted);
     user-select: none;
 }
@@ -291,13 +291,13 @@
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 6px; /* TĂNG từ 4px */
+    gap: 6px;
 }
 
 .register-page-wrapper .form-row {
     display: flex;
-    gap: 12px; /* TĂNG từ 10px */
-    margin-bottom: 6px; /* TĂNG từ 4px */
+    gap: 12px;
+    margin-bottom: 6px;
 }
 
 .register-page-wrapper .form-group {
@@ -307,8 +307,8 @@
 
 .register-page-wrapper label {
     font-weight: 600;
-    font-size: clamp(0.7rem, 1.1vw, 0.75rem); /* TĂNG từ clamp(0.65rem, 1vw, 0.7rem) */
-    margin-bottom: clamp(4px, 0.5vh, 5px); /* TĂNG từ clamp(3px, 0.4vh, 4px) */
+    font-size: clamp(0.7rem, 1.1vw, 0.75rem);
+    margin-bottom: clamp(4px, 0.5vh, 5px);
     color: #333;
     user-select: none;
     display: block;
@@ -317,14 +317,14 @@
 /* TĂNG INPUT SIZE */
 .register-page-wrapper .form-control {
     width: 100%;
-    padding: clamp(8px, 1.4vh, 10px) clamp(12px, 1.7vw, 14px); /* TĂNG từ clamp(6px, 1.2vh, 8px) clamp(10px, 1.5vw, 12px) */
-    border-radius: 5px; /* TĂNG từ 4px */
-    border: 1.2px solid var(--input-border); /* TĂNG từ 1px */
-    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
+    padding: clamp(8px, 1.4vh, 10px) clamp(12px, 1.7vw, 14px);
+    border-radius: 5px;
+    border: 1.2px solid var(--input-border);
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem);
     transition: all 0.3s ease;
     font-family: inherit;
     color: var(--text-dark);
-    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.03); /* TĂNG từ inset 0 1px 2px */
+    box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.03);
 }
 
 .register-page-wrapper .form-control::placeholder {
@@ -335,7 +335,7 @@
 .register-page-wrapper .form-control:focus {
     border-color: var(--input-focus);
     outline: none;
-    box-shadow: 0 0 4px var(--input-focus); /* TĂNG từ 0 0 3px */
+    box-shadow: 0 0 4px var(--input-focus);
 }
 
 /* Password field wrapper */
@@ -343,37 +343,47 @@
     position: relative;
 }
 
-/* Show/hide icon for password - TĂNG SIZE */
-.register-page-wrapper .password-toggle {
+/* Password input - luôn có padding cho icon */
+.register-page-wrapper .password-wrapper .form-control {
+    padding-right: 40px !important;
+}
+
+/* Show/hide icon for password - CỐ ĐỊNH TUYỆT ĐỐI */
+.register-page-wrapper .password-toggle-host {
     position: absolute;
-    right: clamp(10px, 1.4vw, 12px); /* TĂNG từ clamp(8px, 1.2vw, 10px) */
-    top: 50%;
-    transform: translateY(-10%);
+    right: 12px;
+    top: 32px;
     border: none;
     background: none;
     cursor: pointer;
     color: #888;
-    font-size: clamp(0.8rem, 1.2vw, 0.9rem); /* TĂNG từ clamp(0.75rem, 1.1vw, 0.85rem) */
+    font-size: 14px;
     transition: color 0.25s ease;
+    z-index: 20;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.register-page-wrapper .password-toggle:hover {
+.register-page-wrapper .password-toggle-host:hover {
     color: var(--primary-blue);
 }
 
 /* Terms checkbox - TĂNG SIZE */
 .register-page-wrapper .terms-row {
-    margin: 10px 0; /* TĂNG từ 8px */
+    margin: 10px 0;
 }
 
 .register-page-wrapper .terms-checkbox {
     display: flex;
     align-items: flex-start;
-    gap: 6px; /* TĂNG từ 5px */
+    gap: 6px;
     cursor: pointer;
-    font-size: 11px; /* TĂNG từ 10px */
+    font-size: 11px;
     color: var(--text-muted);
-    line-height: 1.3; /* TĂNG từ 1.2 */
+    line-height: 1.3;
     margin-bottom: 0;
 }
 
@@ -382,7 +392,7 @@
 }
 
 .register-page-wrapper .checkmark {
-    width: 12px; /* TĂNG từ 10px */
+    width: 12px;
     height: 12px;
     border: 1.5px solid var(--input-border);
     border-radius: 2px;
@@ -400,17 +410,17 @@
 .register-page-wrapper .terms-checkbox input[type="checkbox"]:checked+.checkmark::after {
     content: "";
     position: absolute;
-    left: 3px; /* TĂNG từ 2px */
-    top: 1px; /* TĂNG từ 0px */
-    width: 3px; /* TĂNG từ 2px */
-    height: 6px; /* TĂNG từ 5px */
+    left: 3px;
+    top: 1px;
+    width: 3px;
+    height: 6px;
     border: solid white;
-    border-width: 0 1.5px 1.5px 0; /* TĂNG từ 0 1px 1px 0 */
+    border-width: 0 1.5px 1.5px 0;
     transform: rotate(45deg);
 }
 
 .register-page-wrapper .terms-link {
-    font-size: 11px; /* TĂNG từ 10px */
+    font-size: 11px;
     color: var(--primary-blue);
     text-decoration: none;
     font-weight: 600;
@@ -423,20 +433,20 @@
 /* Register button - TĂNG SIZE */
 .register-page-wrapper .btn-register-host {
     display: block;
-    width: 40%; /* TĂNG từ 35% */
+    width: 40%;
     align-self: center;
     background: var(--primary-blue);
     border: none;
-    padding: clamp(8px, 1.6vh, 10px) 0; /* TĂNG từ clamp(6px, 1.4vh, 8px) */
+    padding: clamp(8px, 1.6vh, 10px) 0;
     font-weight: 700;
     color: white;
-    font-size: clamp(0.75rem, 1.2vw, 0.85rem); /* TĂNG từ clamp(0.7rem, 1.1vw, 0.8rem) */
-    border-radius: 5px; /* TĂNG từ 4px */
+    font-size: clamp(0.75rem, 1.2vw, 0.85rem);
+    border-radius: 5px;
     cursor: pointer;
     text-transform: uppercase;
     transition: all 0.3s ease;
     user-select: none;
-    margin: 8px 0; /* TĂNG từ 6px */
+    margin: 8px 0;
 }
 
 .register-page-wrapper .btn-register-host:hover,
@@ -449,8 +459,8 @@
 /* Under social buttons text - TĂNG SIZE */
 .register-page-wrapper .login-text {
     text-align: center;
-    margin: 10px 0 12px 0; /* TĂNG từ 8px 0 10px 0 */
-    font-size: clamp(0.7rem, 1.1vw, 0.8rem); /* TĂNG từ clamp(0.65rem, 1vw, 0.75rem) */
+    margin: 10px 0 12px 0;
+    font-size: clamp(0.7rem, 1.1vw, 0.8rem);
     color: var(--text-muted);
     user-select: none;
 }
@@ -468,21 +478,67 @@
     outline: none;
 }
 
-/* Form validation styles */
+/* Form validation styles - CHỈ VIỀN ĐỎ VÀ TEXT LỖI */
 .register-page-wrapper .form-control.is-invalid {
+    border-color: var(--error-red);
+    box-shadow: 0 0 0 0.2rem rgba(244, 67, 54, 0.1);
+    background-image: none !important;
+    padding-right: clamp(12px, 1.7vw, 14px) !important;
+}
+
+.register-page-wrapper .form-control.is-valid {
+    background-image: none !important;
+    border-color: var(--input-border);
+    box-shadow: none;
+}
+
+/* Loại bỏ các pseudo-elements có thể tạo icon */
+.register-page-wrapper .form-control.is-invalid::after,
+.register-page-wrapper .form-control.is-invalid::before,
+.register-page-wrapper .form-control.is-valid::after,
+.register-page-wrapper .form-control.is-valid::before {
+    display: none !important;
+}
+
+/* Đảm bảo password field không bị ảnh hưởng bởi validation */
+.register-page-wrapper .password-wrapper .form-control.is-invalid,
+.register-page-wrapper .password-wrapper .form-control.is-valid {
+    padding-right: 40px !important;
+    background-image: none !important;
+}
+
+/* Override Bootstrap validation feedback icons */
+.register-page-wrapper .was-validated .form-control:invalid,
+.register-page-wrapper .was-validated .form-control:valid {
+    background-image: none !important;
+    padding-right: clamp(12px, 1.7vw, 14px) !important;
+}
+
+.register-page-wrapper .was-validated .password-wrapper .form-control:invalid,
+.register-page-wrapper .was-validated .password-wrapper .form-control:valid {
+    padding-right: 40px !important;
+}
+
+.register-page-wrapper .checkmark.is-invalid {
     border-color: var(--error-red);
 }
 
-.register-page-wrapper .invalid-feedback {
+/* Error message styles - THAY THẾ invalid-feedback */
+.register-page-wrapper .error-message {
     display: none;
     color: var(--error-red);
-    font-size: clamp(0.6rem, 1vw, 0.7rem); /* TĂNG từ clamp(0.55rem, 0.9vw, 0.65rem) */
-    margin-top: 2px; /* TĂNG từ 1px */
+    font-size: clamp(0.6rem, 1vw, 0.7rem);
+    margin-top: 4px;
+    font-weight: 400;
 }
 
-.register-page-wrapper .was-validated .form-control:invalid~.invalid-feedback,
-.register-page-wrapper .form-control.is-invalid~.invalid-feedback {
+.register-page-wrapper .error-message.show {
     display: block;
+}
+
+.register-page-wrapper .terms-error {
+    margin-top: 2px;
+    margin-left: 18px;
 }
 
 /* Mobile responsive - GIỐNG LOGIN */
@@ -504,7 +560,7 @@
 
     .register-page-wrapper .register-right {
         flex: 1;
-        padding: 40px 25px; /* GIỐNG LOGIN */
+        padding: 40px 25px;
         justify-content: flex-start;
         overflow-y: auto;
     }
@@ -516,36 +572,36 @@
 
     .register-page-wrapper .form-row {
         flex-direction: column;
-        gap: 6px; /* TĂNG từ 4px */
+        gap: 6px;
     }
 
     .register-page-wrapper .close-btn {
-        top: 20px; /* GIỐNG LOGIN */
-        right: 20px; /* GIỐNG LOGIN */
-        font-size: 1.4rem; /* GIỐNG LOGIN */
+        top: 20px;
+        right: 20px;
+        font-size: 1.4rem;
     }
 
     .register-page-wrapper .right-logo {
         justify-content: left;
-        margin-bottom: 18px; /* TĂNG từ 15px */
+        margin-bottom: 18px;
     }
 
     .register-page-wrapper .register-title {
         text-align: left;
-        font-size: 1.4rem; /* TĂNG từ 1.3rem */
+        font-size: 1.4rem;
     }
 
     .register-page-wrapper .register-subtitle {
         text-align: left;
-        margin-bottom: 22px; /* TĂNG từ 20px */
+        margin-bottom: 22px;
     }
 }
 
 /* Large screens - GIỐNG LOGIN */
 @media (min-width: 1400px) {
     .register-page-wrapper .register-card {
-        width: min(85vw, 1200px); /* GIỐNG LOGIN */
-        height: min(85vh, 700px); /* GIỐNG LOGIN */
+        width: min(85vw, 1200px);
+        height: min(85vh, 700px);
     }
 }
 

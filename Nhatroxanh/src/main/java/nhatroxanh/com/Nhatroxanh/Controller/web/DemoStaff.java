@@ -12,20 +12,29 @@ public class DemoStaff {
     public String baidang(Model model) {
         return "staff/bai-dang"; 
     }
-      @GetMapping("/nhan-vien/khuyen-mai")
+    @GetMapping("/nhan-vien/khuyen-mai")
     public String khuyenmai(Model model) {
         return "staff/khuyen-mai"; 
     }
-      @GetMapping("/nhan-vien/khieu-nai")
+    @GetMapping("/nhan-vien/khieu-nai")
     public String khieunai(Model model) {
         return "staff/khieu-nai"; 
     }
+    @GetMapping("/nhan-vien/chi-tiet-khieu-nai")
+    public String chitietkhieunai(Model model) {
+        return "staff/chitiet-khieunai"; 
+    }
 
-       @GetMapping("/nhan-vien/chu-tro")
+    @GetMapping("/nhan-vien/chu-tro")
     public String chutro(Model model) {
         return "staff/chu-tro"; 
     }
-       @GetMapping("/nhan-vien/khach-thue")
+    @GetMapping("/nhan-vien/chi-tiet-chu-tro")
+    public String chitietchutro(Model model) {
+        return "staff/chitiet-chutro"; 
+    }
+
+    @GetMapping("/nhan-vien/khach-thue")
     public String khachthue(Model model) {
         return "staff/khach-thue"; 
     }

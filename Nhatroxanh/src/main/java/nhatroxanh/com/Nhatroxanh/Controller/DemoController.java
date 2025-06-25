@@ -11,7 +11,7 @@ public class DemoController {
         return "guest/chi-tiet";
     }
 
-    @GetMapping("/category")
+    @GetMapping("/nhan-vien/category")
     public String quanly() {
         return "staff/categoty";
     }
@@ -31,7 +31,7 @@ public class DemoController {
         return "staff/thong-tin-tro-staff";
     }
 
-    @GetMapping("detail-thong-tin-tro")
+    @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
     public String detailthongtintro() {
         return "staff/detail-thong-tin-tro-staff";
     }
@@ -103,5 +103,9 @@ public class DemoController {
     @GetMapping("/chu-tro/sua-bai-dang")
     public String chitiethopdong() {
         return "host/sua-bai-dang";
+    }
+    @GetMapping("/infor-chu-tro")
+    public String inforchutro() {
+        return "host/infor-chutro";
     }
 }
