@@ -52,9 +52,9 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**").permitAll()
-                .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**").permitAll()
-                .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro").permitAll()
-                .requestMatchers("/host/**").hasAuthority("owner")
+                .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**" ).permitAll()
+                .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro" ,"/nhan-vien/**", "/infor-chu-tro").permitAll()  
+                .requestMatchers("/chu-tro/**").hasRole("OWNER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

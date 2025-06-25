@@ -104,4 +104,165 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/trang-chu"
         })
     }
+
+    // Xử lý form validation
+    if (registerForm) {
+        // Thêm event listener cho từng input để xóa lỗi khi user nhập
+        const inputs = registerForm.querySelectorAll("input")
+        inputs.forEach((input) => {
+            input.addEventListener("input", () => {
+                clearFieldError(input)
+            })
+
+            input.addEventListener("change", () => {
+                clearFieldError(input)
+            })
+        })
+
+        registerForm.addEventListener("submit", (e) => {
+            e.preventDefault()
+
+            // Validate form
+            if (validateForm()) {
+                console.log("Form hợp lệ, đang xử lý đăng ký...")
+                // Thực hiện logic đăng ký ở đây
+            }
+        })
+    }
+
+    // Function để clear error cho một field
+    function clearFieldError(input) {
+        // Loại bỏ tất cả các class validation của Bootstrap
+        input.classList.remove("is-invalid", "is-valid")
+
+        const errorMessage = input.parentElement.querySelector(".error-message")
+        if (errorMessage) {
+            errorMessage.classList.remove("show")
+        }
+
+        // Xử lý riêng cho checkbox terms
+        if (input.id === "agreeTerms") {
+            const checkmark = input.parentElement.querySelector(".checkmark")
+            if (checkmark) {
+                checkmark.classList.remove("is-invalid")
+            }
+            const termsError = document.querySelector(".terms-error")
+            if (termsError) {
+                termsError.classList.remove("show")
+            }
+        }
+    }
+
+    // Function để hiển thị error cho một field
+    function showFieldError(input, message = null) {
+        // Chỉ thêm class tùy chỉnh, không dùng Bootstrap
+        input.classList.add("is-invalid")
+        input.classList.remove("is-valid") // Đảm bảo không có class valid
+
+        const errorMessage = input.parentElement.querySelector(".error-message")
+        if (errorMessage) {
+            if (message) {
+                errorMessage.textContent = message
+            }
+            errorMessage.classList.add("show")
+        }
+
+        // Xử lý riêng cho checkbox terms
+        if (input.id === "agreeTerms") {
+            const checkmark = input.parentElement.querySelector(".checkmark")
+            if (checkmark) {
+                checkmark.classList.add("is-invalid")
+            }
+            const termsError = document.querySelector(".terms-error")
+            if (termsError) {
+                termsError.classList.add("show")
+            }
+        }
+    }
+
+    // Function để validate form
+    function validateForm() {
+        let isValid = true
+        const form = document.getElementById("registerForm")
+
+        // Clear all previous errors
+        const allInputs = form.querySelectorAll("input")
+        allInputs.forEach((input) => clearFieldError(input))
+
+        // Validate họ tên
+        const fullName = document.getElementById("fullName")
+        if (!fullName.value.trim()) {
+            showFieldError(fullName, "Vui lòng nhập họ và tên.")
+            isValid = false
+        } else if (fullName.value.trim().length < 2) {
+            showFieldError(fullName, "Họ tên phải có ít nhất 2 ký tự.")
+            isValid = false
+        }
+
+        // Validate ngày sinh
+        const birthDate = document.getElementById("birthDate")
+        if (!birthDate.value) {
+            showFieldError(birthDate, "Vui lòng nhập ngày sinh.")
+            isValid = false
+        } else {
+            const today = new Date()
+            const birth = new Date(birthDate.value)
+            const age = today.getFullYear() - birth.getFullYear()
+            if (age < 18) {
+                showFieldError(birthDate, "Bạn phải đủ 18 tuổi để đăng ký.")
+                isValid = false
+            }
+        }
+
+        // Validate email
+        const email = document.getElementById("email")
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!email.value.trim()) {
+            showFieldError(email, "Vui lòng nhập email.")
+            isValid = false
+        } else if (!emailRegex.test(email.value)) {
+            showFieldError(email, "Vui lòng nhập email hợp lệ.")
+            isValid = false
+        }
+
+        // Validate số điện thoại
+        const phone = document.getElementById("phoneNumber")
+        const phoneRegex = /^[0-9]{10,11}$/
+        if (!phone.value.trim()) {
+            showFieldError(phone, "Vui lòng nhập số điện thoại.")
+            isValid = false
+        } else if (!phoneRegex.test(phone.value.replace(/\s/g, ""))) {
+            showFieldError(phone, "Số điện thoại phải có 10-11 chữ số.")
+            isValid = false
+        }
+
+        // Validate mật khẩu
+        const password = document.getElementById("password")
+        if (!password.value) {
+            showFieldError(password, "Vui lòng nhập mật khẩu.")
+            isValid = false
+        } else if (password.value.length < 6) {
+            showFieldError(password, "Mật khẩu phải có ít nhất 6 ký tự.")
+            isValid = false
+        }
+
+        // Validate xác nhận mật khẩu
+        const confirmPassword = document.getElementById("confirmPassword")
+        if (!confirmPassword.value) {
+            showFieldError(confirmPassword, "Vui lòng xác nhận mật khẩu.")
+            isValid = false
+        } else if (password.value !== confirmPassword.value) {
+            showFieldError(confirmPassword, "Mật khẩu xác nhận không khớp.")
+            isValid = false
+        }
+
+        // Validate điều khoản
+        const agreeTerms = document.getElementById("agreeTerms")
+        if (!agreeTerms.checked) {
+            showFieldError(agreeTerms)
+            isValid = false
+        }
+
+        return isValid
+    }
 })

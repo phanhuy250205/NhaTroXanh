@@ -1,3 +1,13 @@
+.btn-close {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    background-color: transparent !important;
+    transition: all 0.3s ease;
+    padding: 8px !important;
+    cursor: pointer;
+    margin-top: 9px;
+}
 .nha-tro-nav-item {
   display: flex;
   align-items: center;
@@ -288,8 +298,6 @@
   animation: fadeInUp 0.5s ease;
 }
 
-
-
 /* Additional styles for amenity modal - with -host suffix to avoid conflicts */
 .nha-tro-host-modal {
   border-radius: 15px;
@@ -425,16 +433,93 @@
   background-color: rgba(0, 0, 0, 0.6);
 }
 
+/* New Customer Modal Styles */
+.nha-tro-host-btn-add-customer {
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-color: #28a745;
+    color: #28a745;
+}
+
+.nha-tro-host-btn-add-customer:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    background-color: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+.modal-xl {
+    max-width: 1200px;
+}
+
+.nha-tro-image-upload.required-field {
+    border-color: #dc3545;
+}
+
+.nha-tro-image-upload.valid-field {
+    border-color: #28a745;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.is-invalid {
+    border-color: #dc3545;
+}
+
+.is-valid {
+    border-color: #28a745;
+}
+
+/* Image preview enhancements */
+.nha-tro-image-preview small {
+    font-size: 0.75rem;
+    margin-top: 5px;
+}
+
+.nha-tro-image-upload.has-image {
+    border-color: #28a745;
+    border-style: solid;
+}
+
+/* Form validation styles */
+.was-validated .form-control:invalid,
+.was-validated .form-select:invalid {
+    border-color: #dc3545;
+}
+
+.was-validated .form-control:valid,
+.was-validated .form-select:valid {
+    border-color: #28a745;
+}
+
+/* Highlight effect for updated fields */
+.nha-tro-highlight {
+    color: #007BFF;
+    font-weight: 500;
+}
+
+.nha-tro-updated {
+    background-color: rgba(40, 167, 69, 0.1);
+    transition: background-color 1s ease;
+}
+
 /* Responsive adjustments */
 @media (max-width: 576px) {
-  .nha-tro-host-modal-header,
-  .nha-tro-host-modal-body,
-  .nha-tro-host-modal-footer {
-    padding: 15px 20px;
-  }
+    .nha-tro-host-modal-header,
+    .nha-tro-host-modal-body,
+    .nha-tro-host-modal-footer {
+        padding: 15px 20px;
+    }
 
-  .nha-tro-host-btn-add-amenity {
-    font-size: 0.8rem;
-    padding: 4px 10px;
-  }
+    .nha-tro-host-btn-add-amenity,
+    .nha-tro-host-btn-add-customer {
+        font-size: 0.8rem;
+        padding: 4px 10px;
+    }
 }

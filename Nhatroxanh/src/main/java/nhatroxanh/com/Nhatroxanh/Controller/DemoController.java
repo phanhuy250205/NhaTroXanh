@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -11,10 +12,6 @@ public class DemoController {
         return "guest/chi-tiet";
     }
 
-    @GetMapping("/category")
-    public String quanly() {
-        return "staff/categoty";
-    }
 
     @GetMapping("/phong-tro-fe")
     public String danhmuc() {
@@ -26,7 +23,7 @@ public class DemoController {
         return "staff/thong-tin-tro-staff";
     }
 
-    @GetMapping("detail-thong-tin-tro")
+    @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
     public String detailthongtintro() {
         return "staff/detail-thong-tin-tro-staff";
     }

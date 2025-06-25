@@ -12,7 +12,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users.Role;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Service
@@ -21,8 +21,8 @@ public class UserServiceImpl implements UserService {
   private UserRepository userRepository;
   @Autowired
   private PasswordEncoder passwordEncoder;
-  @Autowired
-  private OtpService otpService;
+  // @Autowired
+  // private OtpService otpService;
 
   @Transactional
   public Users registerNewUser(UserRequest userRequest) {
@@ -43,7 +43,7 @@ public class UserServiceImpl implements UserService {
 
     Users savedUser = userRepository.save(newUser);
 
-    otpService.createAndSendOtp(savedUser);
+    // otpService.createAndSendOtp(savedUser);
 
     return savedUser;
   }

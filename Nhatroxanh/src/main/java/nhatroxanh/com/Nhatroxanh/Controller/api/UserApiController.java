@@ -4,7 +4,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserApiController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private OtpService otpService;
+    // @Autowired
+    // private OtpService otpService;
     @Autowired
     private UserRepository userRepository;
 
@@ -39,9 +39,10 @@ public class UserApiController {
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản đã được kích hoạt.");
-        if (otpService.verifyOtp(user, otp)) {
-            return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
-        } else {
+        // if (otpService.verifyOtp(user, otp)) {
+        //     return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
+        // }
+        else {
             return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
     }
@@ -53,7 +54,7 @@ public class UserApiController {
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản này đã được kích hoạt.");
-        otpService.createAndSendOtp(user);
+        // otpService.createAndSendOtp(user);
         return ResponseEntity.ok("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
     }
     @PostMapping("/register-owner")
