@@ -1,5 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
+import java.sql.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -7,6 +9,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users.Role;
+import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 // import nhatroxanh.com.Nhatroxanh.Service.OtpService;
@@ -44,4 +47,30 @@ public class UserServiceImpl implements UserService {
 
     return savedUser;
   }
+
+   @Override
+    @Transactional
+    public Users registerOwner(UserOwnerRequest userOwnerRequest) {
+        if(userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()){
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+        Users newUser = new Users();
+        newUser.setFullname(userOwnerRequest.getFullName());
+        newUser.setEmail(userOwnerRequest.getEmail());
+        newUser.setPhone(userOwnerRequest.getPhoneNumber());
+        newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
+        if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
+            try {
+                newUser.setBirthday(Date.valueOf(userOwnerRequest.getBirthDate()));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Định dạng ngày sinh không hợp lệ: " + userOwnerRequest.getBirthDate());
+            }
+        }
+        newUser.setRole(Users.Role.owner);
+        newUser.setEnabled(true);
+        Users savedUser = userRepository.save(newUser);       
+        return savedUser;
+    }
+
+
 }

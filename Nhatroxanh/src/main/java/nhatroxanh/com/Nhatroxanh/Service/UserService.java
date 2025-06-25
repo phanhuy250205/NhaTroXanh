@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 
 public interface UserService {
@@ -15,5 +16,6 @@ public interface UserService {
      * @return Đối tượng Users sau khi đã được lưu.
      */
     Users registerNewUser(UserRequest userRequest);
+    Users registerOwner(UserOwnerRequest userOwnerRequest);
 
 }
