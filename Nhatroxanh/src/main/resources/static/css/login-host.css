@@ -462,7 +462,7 @@ html {
     position: absolute;
     right: clamp(12px, 2vw, 14px);
     top: 50%;
-    transform: translateY(-10%);
+    transform: translateY(0%);
     border: none;
     background: none;
     cursor: pointer;

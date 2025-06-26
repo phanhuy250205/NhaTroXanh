@@ -1,5 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
+import java.util.List;
+
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
@@ -17,5 +20,9 @@ public interface UserService {
      */
     Users registerNewUser(UserRequest userRequest);
     Users registerOwner(UserOwnerRequest userOwnerRequest);
-
+    /**
+     * Cung cấp danh sách thông tin khách thuê cho trang quản lý của Chủ trọ.
+     * @return một danh sách các đối tượng DTO.
+     */
+   
 }

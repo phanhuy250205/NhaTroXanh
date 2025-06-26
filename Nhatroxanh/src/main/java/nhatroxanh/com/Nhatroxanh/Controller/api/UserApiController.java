@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/users")
@@ -41,7 +43,8 @@ public class UserApiController {
             return ResponseEntity.badRequest().body("Tài khoản đã được kích hoạt.");
         if (otpService.verifyOtp(user, otp)) {
             return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
-        } else {
+        }
+        else {
             return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
     }
@@ -53,11 +56,11 @@ public class UserApiController {
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản này đã được kích hoạt.");
-        otpService.createAndSendOtp(user);
+        // otpService.createAndSendOtp(user);
         return ResponseEntity.ok("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
     }
     @PostMapping("/register-owner")
-    public ResponseEntity<?> registerOwner(@RequestBody UserOwnerRequest userOwnerRequest) {
+    public ResponseEntity<?> registerOwner(@Valid @RequestBody UserOwnerRequest userOwnerRequest) {
         try {
             userService.registerOwner(userOwnerRequest);
             return ResponseEntity.ok("Đăng ký chủ trọ thành công! Vui lòng kiểm tra email để xác thực tài khoản.");

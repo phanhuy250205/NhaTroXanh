@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/dashboard")
-public class DashboardController {
+public class DashboardApiController {
 
     @Autowired
     private DashboardService dashboardService;

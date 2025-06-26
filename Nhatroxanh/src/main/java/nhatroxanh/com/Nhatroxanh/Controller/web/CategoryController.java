@@ -11,7 +11,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 
 @Controller
-@RequestMapping("/quanly/category")
+@RequestMapping("/nhan-vien/category")
 public class CategoryController {
 
     @Autowired
@@ -46,7 +46,7 @@ public class CategoryController {
             category.setName(name.trim());
             categoryRepo.save(category);
         }
-        return "redirect:/quanly/category";
+        return "redirect:/nhan-vien/category";
     }
 
     @PostMapping("/update")
@@ -57,7 +57,7 @@ public class CategoryController {
             category.setName(name.trim());
             categoryRepo.save(category);
         }
-        return "redirect:/quanly/category";
+        return "redirect:/nhan-vien/category";
     }
 
     @GetMapping("/delete/{id}")
@@ -65,6 +65,6 @@ public class CategoryController {
         if (categoryRepo.existsById(id)) {
             categoryRepo.deleteById(id);
         }
-        return "redirect:/quanly/category";
+        return "redirect:/nhan-vien/category";
     }
 }

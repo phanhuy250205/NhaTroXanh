@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý chủ trọ</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/QL-chu-tro.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<body class="management-body-staff">
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content-staff" id="main-content">
+        <div class="page-header-staff">
+            <h1 class="page-title-staff">Quản lý chủ trọ</h1>
+            
+            <!-- Tabs -->
+            <div class="custom-tabs-staff">
+                <a href="#" class="custom-tab-staff active" onclick="switchTab(0, this)">QUẢN LÝ CHỦ TRỌ</a>
+                <a href="#" class="custom-tab-staff" onclick="switchTab(1, this)">DUYỆT ĐĂNG KÝ</a>
+            </div>
+        </div>
+
+        <!-- Tab Content 1: Quản lý chủ trọ -->
+        <div id="tab-content-0" class="tab-content-panel-staff">
+            <!-- Search Section -->
+            <div class="search-section-staff">
+                <div class="search-container-staff">
+                    <div class="search-input-group-staff">
+                        <input type="text" class="search-input-staff" placeholder="Tìm kiếm theo tên, email, số điện thoại..." id="searchInput">
+                        <button class="search-btn-staff" onclick="performSearch()">
+                            <i class="fas fa-search"></i>
+                            TÌM KIẾM
+                        </button>
+                    </div>
+                    
+                    <!-- Filter Dropdown -->
+                    <div class="filter-dropdown-staff">
+                        <button class="filter-btn-staff" onclick="toggleFilterDropdown()">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-filter"></i>
+                                <span id="filterText">Tất cả</span>
+                            </div>
+                            <i class="fas fa-chevron-down" id="filterChevron"></i>
+                        </button>
+                        <div class="filter-dropdown-content-staff" id="filterDropdown">
+                            <div class="filter-option-staff selected" onclick="selectFilter('all', this)">
+                                <i class="fas fa-list"></i>
+                                <span>Tất cả</span>
+                            </div>
+                            <div class="filter-option-staff" onclick="selectFilter('active', this)">
+                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                <span>Hoạt động</span>
+                            </div>
+                            <div class="filter-option-staff" onclick="selectFilter('inactive', this)">
+                                <i class="fas fa-times-circle" style="color: #ef4444;"></i>
+                                <span>Vô hiệu hóa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-section-staff">
+                <div class="custom-table-responsive-staff">
+                    <table class="custom-table-staff">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Hoạt động</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr data-status="active">
+                                <td>1</td>
+                                <td>Nguyễn Văn An</td>
+                                <td>nguyenvanan@email.com</td>
+                                <td>0123456789</td>
+                                <td>
+                                    <span class="status-badge-staff status-active-staff">
+                                        <i class="fas fa-check-circle"></i>
+                                        Hoạt động
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/nhan-vien/chi-tiet-chu-tro" class="action-btn-staff" onclick="viewDetails(1)">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="inactive">
+                                <td>2</td>
+                                <td>Trần Thị Bình</td>
+                                <td>tranthibinh@email.com</td>
+                                <td>0987654321</td>
+                                <td>
+                                    <span class="status-badge-staff status-inactive-staff">
+                                        <i class="fas fa-times-circle"></i>
+                                        Vô hiệu hóa
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/nhan-vien/chi-tiet-chu-tro" class="action-btn-staff" onclick="viewDetails(2)">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="active">
+                                <td>3</td>
+                                <td>Lê Minh Cường</td>
+                                <td>leminhcuong@email.com</td>
+                                <td>0369852147</td>
+                                <td>
+                                    <span class="status-badge-staff status-active-staff">
+                                        <i class="fas fa-check-circle"></i>
+                                        Hoạt động
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/nhan-vien/chi-tiet-chu-tro" class="action-btn-staff" onclick="viewDetails(3)">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="active">
+                                <td>4</td>
+                                <td>Phạm Thị Dung</td>
+                                <td>phamthidung@email.com</td>
+                                <td>0147258369</td>
+                                <td>
+                                    <span class="status-badge-staff status-active-staff">
+                                        <i class="fas fa-check-circle"></i>
+                                        Hoạt động
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="#" class="action-btn-staff" onclick="viewDetails(4)">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr data-status="inactive">
+                                <td>5</td>
+                                <td>Hoàng Văn Em</td>
+                                <td>hoangvanem@email.com</td>
+                                <td>0258147369</td>
+                                <td>
+                                    <span class="status-badge-staff status-inactive-staff">
+                                        <i class="fas fa-times-circle"></i>
+                                        Vô hiệu hóa
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/nhan-vien/chi-tiet-chu-tro" class="action-btn-staff" onclick="viewDetails(5)">
+                                        <i class="fas fa-eye"></i>
+                                        Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 2: Duyệt đăng ký -->
+        <div id="tab-content-1" class="tab-content-panel-staff hidden">
+            <!-- Search Section -->
+            <div class="search-section-staff">
+                <div class="search-container-staff">
+                    <div class="search-input-group-staff">
+                        <input type="text" class="search-input-staff" placeholder="Tìm kiếm..." id="searchInputApproval">
+                        <button class="search-btn-staff" onclick="performApprovalSearch()">
+                            <i class="fas fa-search"></i>
+                            TÌM KIẾM
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Registration Cards Grid -->
+            <div class="registration-grid-staff" id="registrationGrid">
+                <!-- Card 1 -->
+                <div class="registration-card-staff" data-id="1">
+                    <div class="card-header-staff">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Thông tin người dùng</span>
+                        </div>
+                    </div>
+                    <div class="card-body-staff">
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Họ và tên</label>
+                            <input type="text" class="form-input-staff" value="Nguyễn Văn A" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Ngày sinh</label>
+                            <input type="text" class="form-input-staff" value="17/09/1990" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Số điện thoại</label>
+                            <input type="text" class="form-input-staff" value="0987654321" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Giới tính</label>
+                            <div class="gender-group-staff">
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="male1" name="gender1" class="gender-radio-staff" checked disabled>
+                                    <label for="male1" class="gender-label-staff">Nam</label>
+                                </div>
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="female1" name="gender1" class="gender-radio-staff" disabled>
+                                    <label for="female1" class="gender-label-staff">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions-staff">
+                            <button class="view-detail-btn-staff" onclick="showDetailModal(1)">
+                                <i class="fas fa-eye"></i>
+                                Xem chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="registration-card-staff" data-id="2">
+                    <div class="card-header-staff">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Thông tin người dùng</span>
+                        </div>
+                    </div>
+                    <div class="card-body-staff">
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Họ và tên</label>
+                            <input type="text" class="form-input-staff" value="Trần Thị B" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Ngày sinh</label>
+                            <input type="text" class="form-input-staff" value="25/03/1995" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Số điện thoại</label>
+                            <input type="text" class="form-input-staff" value="0123456789" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Giới tính</label>
+                            <div class="gender-group-staff">
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="male2" name="gender2" class="gender-radio-staff" disabled>
+                                    <label for="male2" class="gender-label-staff">Nam</label>
+                                </div>
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="female2" name="gender2" class="gender-radio-staff" checked disabled>
+                                    <label for="female2" class="gender-label-staff">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions-staff">
+                            <button class="view-detail-btn-staff" onclick="showDetailModal(2)">
+                                <i class="fas fa-eye"></i>
+                                Xem chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="registration-card-staff" data-id="3">
+                    <div class="card-header-staff">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Thông tin người dùng</span>
+                        </div>
+                    </div>
+                    <div class="card-body-staff">
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Họ và tên</label>
+                            <input type="text" class="form-input-staff" value="Lê Minh C" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Ngày sinh</label>
+                            <input type="text" class="form-input-staff" value="12/11/1988" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Số điện thoại</label>
+                            <input type="text" class="form-input-staff" value="0369852147" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Giới tính</label>
+                            <div class="gender-group-staff">
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="male3" name="gender3" class="gender-radio-staff" checked disabled>
+                                    <label for="male3" class="gender-label-staff">Nam</label>
+                                </div>
+                                <div class="gender-option-staff">
+                                    <input type="radio" id="female3" name="gender3" class="gender-radio-staff" disabled>
+                                    <label for="female3" class="gender-label-staff">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions-staff">
+                            <button class="view-detail-btn-staff" onclick="showDetailModal(3)">
+                                <i class="fas fa-eye"></i>
+                                Xem chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-circle"></i>
+                        Chi tiết thông tin đăng ký
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Personal Information -->
+                        <div class="col-md-6">
+                            <div class="detail-section-staff">
+                                <h6 class="detail-section-title-staff">
+                                    <i class="fas fa-user"></i>
+                                    Thông tin cá nhân
+                                </h6>
+                                <div class="detail-info-staff">
+                                    <div class="detail-row-staff">
+                                        <label>Họ và tên:</label>
+                                        <span id="detailName">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Ngày sinh:</label>
+                                        <span id="detailBirthDate">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Giới tính:</label>
+                                        <span id="detailGender">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Số CCCD:</label>
+                                        <span id="detailCccd">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Ngày cấp CCCD:</label>
+                                        <span id="detailCccdDate">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Nơi cấp:</label>
+                                        <span id="detailCccdPlace">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information -->
+                        <div class="col-md-6">
+                            <div class="detail-section-staff">
+                                <h6 class="detail-section-title-staff">
+                                    <i class="fas fa-phone"></i>
+                                    Thông tin liên hệ
+                                </h6>
+                                <div class="detail-info-staff">
+                                    <div class="detail-row-staff">
+                                        <label>Số điện thoại:</label>
+                                        <span id="detailPhone">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Email:</label>
+                                        <span id="detailEmail">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Địa chỉ thường trú:</label>
+                                        <span id="detailAddress">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Nghề nghiệp:</label>
+                                        <span id="detailJob">-</span>
+                                    </div>
+                                    <div class="detail-row-staff">
+                                        <label>Nơi làm việc:</label>
+                                        <span id="detailWorkplace">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Images -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="detail-section-staff">
+                                <h6 class="detail-section-title-staff">
+                                    <i class="fas fa-images"></i>
+                                    Hình ảnh giấy tờ
+                                </h6>
+                                <div class="document-images-staff" id="documentImages">
+                                    <!-- Images will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i>
+                        Đóng
+                    </button>
+                    <button type="button" class="btn btn-danger" id="rejectDetailBtn">
+                        <i class="fas fa-times-circle"></i>
+                        Từ chối
+                    </button>
+                    <button type="button" class="btn btn-success" id="approveDetailBtn">
+                        <i class="fas fa-check-circle"></i>
+                        Phê duyệt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div class="modal fade" id="confirmationModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Xác nhận</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="modalMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn" id="confirmBtn">Xác nhận</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Xem ảnh</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="/placeholder.svg?height=400&width=600" alt="Document Image" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script th:src="@{/js/QL-chu-tro.js}"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+</html>

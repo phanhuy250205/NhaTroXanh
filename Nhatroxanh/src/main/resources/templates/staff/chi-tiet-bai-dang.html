@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}"/>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bài đăng</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-blue: #3E83CC;
+            --secondary-blue: #549eed;
+            --dark-blue: #1f2937;
+            --warning-orange: #f59e0b;
+            --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+            --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .post-info {
+            font-size: 14px;
+        }
+
+        .post-status {
+            font-weight: 600;
+            font-size: 14px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            background-color: var(--warning-orange);
+            color: white;
+        }
+
+        .staff-back-link {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .staff-back-link:hover {
+            color: var(--secondary-blue);
+            transform: translateX(-2px);
+        }
+
+        .staff-status-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-right: 8px;
+        }
+
+        .post-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .post-price {
+            font-size: 24px;
+            color: var(--warning-orange);
+            font-weight: bold;
+        }
+
+        .post-meta {
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .post-section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin: 30px 0 10px;
+        }
+
+        .details-table td {
+            padding: 8px 0;
+        }
+
+        .details-table td:first-child {
+            font-weight: 600;
+            width: 150px;
+        }
+
+        .action-buttons {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .btn-approve {
+            background-color: #10b981;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-right: 16px;
+        }
+
+        .btn-delete {
+            background-color: #ef4444;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+
+        .staff-content-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: var(--shadow-primary);
+            transition: all 0.2s ease;
+        }
+
+        .staff-content-section:hover {
+            box-shadow: var(--shadow-hover);
+        }
+
+        .staff-gallery-section {
+            margin-bottom: 20px;
+        }
+
+        .staff-main-image {
+            width: 100%;
+            height: 500px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            border: 2px solid rgba(62, 131, 204, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .staff-main-image:hover {
+            border-color: var(--primary-blue);
+            box-shadow: 0 4px 16px rgba(62, 131, 204, 0.2);
+        }
+
+        .staff-thumbnails-container {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 10px;
+        }
+
+        .staff-thumbnails-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .staff-thumbnails-container::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 4px;
+        }
+
+        .staff-thumbnail {
+            width: 100px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border: 2px solid rgba(62, 131, 204, 0.2);
+        }
+
+        .staff-thumbnail:hover {
+            transform: scale(1.05);
+        }
+
+        .staff-thumbnail.active {
+            border: 2px solid var(--primary-blue);
+        }
+
+        .staff-info-section {
+            background: linear-gradient(135deg, rgba(62, 131, 204, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+            border-left: 4px solid var(--primary-blue);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .staff-property-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark-blue);
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .staff-price-container {
+            margin-bottom: 20px;
+        }
+
+        .staff-price {
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 4px;
+        }
+
+        .staff-price-note {
+            font-size: 14px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .staff-info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .staff-info-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--primary-blue);
+            flex-shrink: 0;
+        }
+
+        .staff-info-text {
+            font-size: 14px;
+            color: var(--dark-blue);
+            line-height: 1.4;
+        }
+
+        .staff-info-text strong {
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .staff-description-section {
+            margin-bottom: 24px;
+        }
+
+        .staff-section-title {
+            font-size: 20px;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .staff-section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--gradient-primary);
+            border-radius: 1px;
+        }
+
+        .staff-description-text {
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--dark-blue);
+            margin-bottom: 20px;
+        }
+
+        .staff-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .staff-details-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.05);
+        }
+
+        .staff-details-card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .staff-details-table {
+            width: 100%;
+        }
+
+        .staff-details-table tr {
+            border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .staff-details-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .staff-details-table td {
+            padding: 12px 0;
+            font-size: 14px;
+            vertical-align: top;
+        }
+
+        .staff-details-table td:first-child {
+            font-weight: 600;
+            color: var(--dark-blue);
+            width: 40%;
+        }
+
+        .staff-details-table td:last-child {
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* Responsive adjustments for header */
+        @media (max-width: 768px) {
+            .post-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .staff-back-link {
+                margin-bottom: 12px;
+            }
+
+            .post-info {
+                margin-bottom: 12px;
+            }
+
+            .post-status-container {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content">
+        <!-- Integrated provided row with title -->
+        <div class="row align-items-center mb-3">
+            <div class="col-12 d-flex align-items-center">
+                <a href="/nhan-vien/bai-dang" class="staff-back-link me-3">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h4 class="mb-0">Chi tiết bài đăng</h4>
+            </div>
+            <div class="col-12">
+                <hr>
+            </div>
+        </div>
+
+
+        <!-- Modified post-header with back button and status label -->
+        <div class="post-header">
+
+            <div class="post-info">
+                <div>Người đăng: <strong>Trần Văn B</strong> </div>
+                <div>Ngày đăng: 28/05/2025</div>
+            </div>
+            <div class="post-status-container">
+                <span class="staff-status-label">Trạng thái:</span>
+                <div class="post-status badge bg-warning text-dark">Chờ duyệt</div>
+            </div>
+        </div>
+
+        <!-- Gallery Section -->
+        <div class="staff-content-section staff-gallery-section">
+            <div class="row">
+                <div class="col-lg-8 col-md-12">
+                    <img src="../images/cards/anh1.jpg" alt="Hình ảnh chính" class="staff-main-image" id="mainImage">
+                    <div class="staff-thumbnails-container d-flex">
+                        <img src="../images/cards/anh1.jpg" alt="Hình 1" class="staff-thumbnail"
+                            onclick="changeMainImage(this)">
+                        <img src="../images/cards/anh1.jpg" alt="Hình 2" class="staff-thumbnail"
+                            onclick="changeMainImage(this)">
+                        <img src="../images/cards/anh1.jpg" alt="Hình 3" class="staff-thumbnail"
+                            onclick="changeMainImage(this)">
+                        <img src="../images/cards/anh1.jpg" alt="Hình 4" class="staff-thumbnail"
+                            onclick="changeMainImage(this)">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-12">
+                    <div class="staff-info-section">
+                        <h1 class="staff-property-title">NHÀ TRỌ SỐ 123, ĐƯỜNG ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ
+                            NẴNG</h1>
+                        <div class="staff-price-container">
+                            <div class="staff-price">2.5 triệu/tháng</div>
+                            <div class="staff-price-note">(Chưa bao gồm phí dịch vụ)</div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-bounding-box-circles staff-info-icon"></i>
+                            <div class="staff-info-text"><strong>Diện tích:</strong> 20m²</div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-house-heart staff-info-icon"></i>
+                            <div class="staff-info-text"><strong>Loại hình:</strong> Nhà trọ, phòng trọ</div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-geo-alt-fill staff-info-icon"></i>
+                            <div class="staff-info-text"><strong>Địa chỉ:</strong> Thanh Khê, TP. Đà Nẵng</div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-clock-fill staff-info-icon"></i>
+                            <div class="staff-info-text"><strong>Ngày đăng:</strong> 28/05/2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Description Section -->
+        <div class="staff-content-section">
+            <div class="staff-description-section">
+                <h2 class="staff-section-title">Mô tả chi tiết</h2>
+                <p class="staff-description-text">
+                    Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm
+                    uất.
+                    Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi
+                    cho người thuê.
+                </p>
+                <div class="staff-details-grid">
+                    <div class="staff-details-card">
+                        <h3 class="staff-details-card-title">
+                            <i class="fas fa-info-circle"></i>
+                            Thông tin cơ bản
+                        </h3>
+                        <table class="staff-details-table">
+                            <tr>
+                                <td>Diện tích:</td>
+                                <td>20m²</td>
+                            </tr>
+                            <tr>
+                                <td>Số phòng ngủ:</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>Số phòng tắm:</td>
+                                <td>1</td>
+                            </tr>
+                            <tr>
+                                <td>Hướng cửa:</td>
+                                <td>Đông Nam</td>
+                            </tr>
+                            <tr>
+                                <td>Tầng:</td>
+                                <td>2/4</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="staff-details-card">
+                        <h3 class="staff-details-card-title">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Chi phí
+                        </h3>
+                        <table class="staff-details-table">
+                            <tr>
+                                <td>Giá thuê:</td>
+                                <td>2.5 triệu/tháng</td>
+                            </tr>
+                            <tr>
+                                <td>Tiền điện:</td>
+                                <td>3,500đ/kWh</td>
+                            </tr>
+                            <tr>
+                                <td>Tiền nước:</td>
+                                <td>25,000đ/người</td>
+                            </tr>
+                            <tr>
+                                <td>Phí dịch vụ:</td>
+                                <td>200,000đ/tháng</td>
+                            </tr>
+                            <tr>
+                                <td>Tiền cọc:</td>
+                                <td>1 tháng</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button class="btn-approve">DUYỆT BÀI</button>
+            <button class="btn-delete">XÓA BÀI</button>
+        </div>
+    </div>
+
+    <script>
+        function changeMainImage(element) {
+            const mainImage = document.getElementById('mainImage');
+            mainImage.style.opacity = '0'; // Start fade-out
+            mainImage.src = element.src;
+            mainImage.onload = () => {
+                mainImage.style.transition = 'opacity 0.3s ease';
+                mainImage.style.opacity = '1'; // Fade-in
+            };
+            document.querySelectorAll('.staff-thumbnail').forEach(img => img.classList.remove('active'));
+            element.classList.add('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainImage = document.getElementById('mainImage');
+            const thumbnails = document.querySelectorAll('.staff-thumbnail');
+
+            // Set first thumbnail as active by default
+            if (thumbnails.length > 0) {
+                thumbnails[0].classList.add('active');
+            }
+
+            // Add hover effects for thumbnails
+            thumbnails.forEach(thumb => {
+                thumb.addEventListener('mouseenter', function () {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'scale(1.05)';
+                    }
+                });
+
+                thumb.addEventListener('mouseleave', function () {
+                    if (!this.classList.contains('active')) {
+                        this.style.transform = 'scale(1)';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

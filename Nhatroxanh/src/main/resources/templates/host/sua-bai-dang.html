@@ -613,7 +613,7 @@
                 <div class="image-preview-host" id="imagePreview"
                     th:style="${#lists.isEmpty(post.images)} ? 'display: none' : 'display: flex'">
                     <div th:each="image : ${post.images}" class="image-container">
-                        <img th:src="@{'/Uploads/' + ${image.url}}" th:data-id="${image.id}" alt="Ảnh bài đăng" />
+                        <img th:src="@{'/uploads/' + ${image.url}}" th:data-id="${image.id}" alt="Ảnh bài đăng" />
                         <input type="hidden" name="imagesToDelete" th:id="'delete_' + ${image.id}" value="${image.id}"
                             disabled />
                         <button type="button" class="delete-btn" th:data-id="${image.id}" aria-label="Xóa ảnh"
