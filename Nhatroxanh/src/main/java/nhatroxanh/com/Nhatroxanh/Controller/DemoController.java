@@ -77,8 +77,6 @@ public class DemoController {
 
     @GetMapping("/chu-tro/khach-thue")
     public String khachthue(Model model) {
-        List<TenantInfoDTO> tenantList = userService.getTenantInfoForHostPage();
-        model.addAttribute("danhSachKhachThue", tenantList);
         return "host/quan-ly-khach-thue";
     }
 
