@@ -22,5 +22,19 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
 
     @Query("SELECT u FROM Utility u JOIN u.rooms r WHERE r.room_id = :roomId")
     Set<Utility> findUtilitiesByRoomId(@Param("roomId") Integer roomId);
+    // Đếm tổng số phòng trọ của một chủ trọ
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId")
+    long countRoomsByOwnerId(Integer ownerId);
 
+    // Đếm số phòng trống
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'unactive'")
+    long countVacantRoomsByOwnerId(Integer ownerId);
+
+    // Đếm số phòng đang thuê
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'active'")
+    long countRentedRoomsByOwnerId(Integer ownerId);
+
+    // Đếm số phòng đang cọc
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'ĐANG_CỌC'")
+    long countDepositedRoomsByOwnerId(Integer ownerId);
 }

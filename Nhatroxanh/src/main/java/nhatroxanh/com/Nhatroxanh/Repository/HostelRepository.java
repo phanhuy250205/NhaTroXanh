@@ -23,9 +23,12 @@ public interface HostelRepository extends JpaRepository<Hostel, Integer> {
     List<Hostel> findByOwnerUserId(Integer userId);
 
     @Query("""
-    SELECT DISTINCT h FROM Hostel h 
-    LEFT JOIN FETCH h.rooms r 
-    WHERE h.hostelId = :hostelId AND (r IS NULL OR r.status = 'unactive')
-    """)
+            SELECT DISTINCT h FROM Hostel h
+            LEFT JOIN FETCH h.rooms r
+            WHERE h.hostelId = :hostelId AND (r IS NULL OR r.status = 'unactive')
+            """)
     Optional<Hostel> findByIdWithRooms(@Param("hostelId") Integer hostelId);
+
+    @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
+    long countHostelsByOwnerId(Integer ownerId);
 }

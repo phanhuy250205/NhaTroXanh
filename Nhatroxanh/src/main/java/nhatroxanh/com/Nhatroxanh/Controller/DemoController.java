@@ -66,10 +66,10 @@ public class DemoController {
         return "host/phongtro";
     }
 
-    @GetMapping("/chu-tro/tong-quan")
-    public String tongquan() {
-        return "host/tong-quan";
-    }
+    // @GetMapping("/chu-tro/tong-quan")
+    // public String tongquan() {
+    //     return "host/tong-quan";
+    // }
 
     @GetMapping("/chu-tro/khach-thue")
     public String khachthue() {

@@ -6,10 +6,8 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
 
@@ -50,10 +49,11 @@ public class HomeController {
     @Transactional
     @GetMapping("/chi-tiet/{postId}")
     public String getPostDetail(@PathVariable("postId") Integer postId,
-            @RequestParam(defaultValue = "0") int page,
             Model model,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
+            // 1. Kiểm tra bài viết có tồn tại không
             Optional<Post> postOptional = postRepository.findById(postId);
             if (postOptional.isEmpty()) {
                 redirectAttributes.addFlashAttribute("errorMessage", "Bài đăng không tồn tại.");
@@ -66,55 +66,48 @@ public class HomeController {
                 return "redirect:/error/403";
             }
 
-            // Lấy tiện ích riêng
+            // 2. Tiện ích
             Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
-            log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
-                    utilities.stream().map(Utility::getName).collect(Collectors.toList()));
+            model.addAttribute("post", post);
+            model.addAttribute("owner", post.getUser() != null ? post.getUser() : new Users());
+            model.addAttribute("utilities", utilities != null ? new HashSet<>(utilities) : new HashSet<>());
 
-            // Lấy danh sách hình ảnh
+            // 3. Hình ảnh
             List<String> images = post.getImages() != null && !post.getImages().isEmpty()
                     ? post.getImages().stream().map(Image::getUrl).distinct().collect(Collectors.toList())
                     : List.of("/images/cards/default.jpg");
-            log.info("Post {} images: {}", postId, images);
+            model.addAttribute("images", images);
 
-            // Fetch hostel and rooms for the post
+            // 4. Nhà trọ & phòng
             Hostel hostel = post.getHostel() != null
-                    ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId())
-                            .orElse(null)
+                    ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
                     : null;
             List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
+            model.addAttribute("hostel", hostel);
+            model.addAttribute("rooms", rooms);
+            model.addAttribute("roomCount", rooms.size());
 
-            // Fetch reviews with pagination
-            Pageable pageable = PageRequest.of(page, 5);
-            Page<Review> reviews = reviewService.getReviewsByPost(postId, pageable);
-            Double averageRating = reviewService.getAverageRating(postId);
-
-            // Fetch similar posts
+            // 5. Bài viết tương tự
             List<Post> similarPosts = postRepository.findSimilarPostsByCategory(postId,
                     post.getCategory() != null ? post.getCategory().getCategoryId() : null).stream()
                     .filter(p -> p.getStatus() && p.getApprovalStatus() == ApprovalStatus.APPROVED)
                     .limit(4)
                     .collect(Collectors.toList());
-
-            // Add attributes to model
-            model.addAttribute("post", post);
-            model.addAttribute("owner", post.getUser() != null ? post.getUser() : new Users());
-            model.addAttribute("utilities", utilities != null ? new HashSet<>(utilities) : new HashSet<>());
-            model.addAttribute("images", images);
-            model.addAttribute("hostel", hostel);
-            model.addAttribute("rooms", rooms);
-            model.addAttribute("roomCount", rooms.size());
             model.addAttribute("similarPosts", similarPosts);
-            model.addAttribute("reviews", reviews.getContent());
-            model.addAttribute("totalReviews", reviews.getTotalElements());
-            model.addAttribute("averageRating", averageRating);
-            model.addAttribute("hasMoreReviews", reviews.hasNext());
-            model.addAttribute("currentPage", page);
 
+            // 6. Đánh giá
+            List<Review> reviews = reviewService.getReviewsByPostId(postId);
+            Double averageRating = reviewService.getAverageRating(postId);
+            model.addAttribute("reviews", reviews);
+            model.addAttribute("averageRating", averageRating != null ? averageRating : 0.0);
+
+            // ✅ Thêm currentUser để view biết ai đang đăng nhập
+            model.addAttribute("currentUser", userDetails != null ? userDetails.getUser() : null);
+
+            // 7. Tăng lượt xem
             postRepository.incrementViewCount(postId);
 
             return "guest/chi-tiet";
-
         } catch (Exception e) {
             log.error("Lỗi khi lấy chi tiết bài đăng {}: {}", postId, e.getMessage(), e);
             redirectAttributes.addFlashAttribute("errorMessage", "Đã có lỗi xảy ra. Vui lòng thử lại sau.");
