@@ -101,13 +101,13 @@ public class UserApiController {
         userData.put("role", user.getRole());
 
         // Thêm thông tin để kiểm tra tài khoản đăng nhập
-        
+        userData.put("username", user.getFullname());
+        userData.put("isAuthenticated", true);
         System.out.println("Current user data: " + userData);
         // Trả về thông tin người dùng
         System.out.println("Returning user data: " + userData);
         return ResponseEntity.ok(userData);
     }
-
     @PostMapping("/register-owner")
     public ResponseEntity<?> registerOwner(@RequestBody UserOwnerRequest userOwnerRequest) {
         try {
@@ -120,6 +120,5 @@ public class UserApiController {
             // Bắt các lỗi không mong muốn khác
             return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra trong quá trình đăng ký.");
         }
-
     }
 }

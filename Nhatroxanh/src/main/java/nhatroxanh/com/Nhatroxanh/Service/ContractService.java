@@ -12,7 +12,7 @@ public interface ContractService {
     Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate, 
             Date endDate, Float price, Float deposit, String terms, 
-            Contracts.Status status, Integer ownerId
+            Contracts.Status status, String ownerId
     ) throws Exception;
 
     Contracts updateContract(
@@ -48,4 +48,5 @@ public interface ContractService {
     Long countContractsByOwnerIdAndStatus(Integer ownerId, Contracts.Status status);
 
     Float getTotalRevenueByOwnerId(Integer ownerId);
+    
 }

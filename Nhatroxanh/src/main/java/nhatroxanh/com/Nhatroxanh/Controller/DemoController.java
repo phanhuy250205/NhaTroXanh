@@ -3,9 +3,12 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import ch.qos.logback.core.model.Model;
+
 @Controller
 public class DemoController {
 
+    
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -32,7 +35,8 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/hop-dong")
-    public String hopdong() {
+    public String hopdong(Model model) {
+        
         return "host/hop-dong-host";
     }
 

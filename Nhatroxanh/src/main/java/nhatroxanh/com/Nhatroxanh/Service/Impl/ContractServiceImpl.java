@@ -39,11 +39,11 @@ public class ContractServiceImpl implements ContractService {
     public Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate, 
             Date endDate, Float price, Float deposit, String terms, 
-            Contracts.Status status, Integer ownerId
+            Contracts.Status status, String ownerId
     ) throws Exception {
         logger.info("Creating new contract for tenant with phone: {}", tenantPhone);
 
-        Users owner = userRepository.findById(ownerId)
+        Users owner = userRepository.findById((Integer.parseInt(ownerId)))
                 .orElseThrow(() -> new IllegalArgumentException("Chủ trọ không tồn tại!"));
         if (!"owner".equals(owner.getRole().toString())) {
             throw new IllegalArgumentException("Người dùng không phải là chủ trọ!");
@@ -99,19 +99,19 @@ public class ContractServiceImpl implements ContractService {
                     return new IllegalArgumentException("Khách thuê không tồn tại với số điện thoại: " + tenantPhone);
                 });
 
-        if (tenant.getRole() != Users.Role.customer) {
+        if (tenant.getRole() != Users.Role.CUSTOMER) {
             logger.error("User with phone {} is not a customer", tenantPhone);
             throw new IllegalArgumentException("Người dùng không phải là khách thuê!");
         }
 
         // Kiểm tra chủ trọ
-        Users owner1 = userRepository.findById(ownerId)
-                .orElseThrow(() -> {
-                    logger.error("Owner not found: {}", ownerId);
-                    return new IllegalArgumentException("Chủ trọ không tồn tại!");
-                });
+        Users owner1 = userRepository.findById(Integer.parseInt(ownerId))
+    .orElseThrow(() -> {
+        logger.error("Owner not found: {}", ownerId);
+        return new IllegalArgumentException("Chủ trọ không tồn tại!");
+    });
 
-        if (owner1.getRole() != Users.Role.owner) {
+        if (owner1.getRole() != Users.Role.OWNER) {
             logger.error("User {} is not an owner", ownerId);
             throw new IllegalArgumentException("Người dùng không phải là chủ trọ!");
         }

@@ -43,7 +43,7 @@ public class Users {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @Column(name = "phone", length = 15 ,unique = true)
+    @Column(name = "phone", length = 15, unique = true)
     private String phone;
 
     @Column(name = "birthday")
@@ -77,12 +77,11 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
-    // @Column(name = "status")
-    // private Boolean status;
-
     public enum Role {
-        admin, staff, owner, customer
+        ADMIN, STAFF, OWNER, CUSTOMER
     }
 
-    
+    public Users orElse(Object object) {
+        throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
 }

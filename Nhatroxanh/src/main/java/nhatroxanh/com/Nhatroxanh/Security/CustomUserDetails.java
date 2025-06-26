@@ -29,7 +29,13 @@ public class CustomUserDetails implements UserDetails {
     public String getFullName() {
         return user.getFullname();
     }
+public String getCccd() {
+        return user.getCccd();
+    }
 
+    public String getPhone() {
+        return user.getPhone();
+    }
     public String getAvatar() {
         return user.getAvatar();
     }
