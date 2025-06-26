@@ -1,17 +1,20 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.sql.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users.Role;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 // import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
@@ -21,8 +24,9 @@ public class UserServiceImpl implements UserService {
   private UserRepository userRepository;
   @Autowired
   private PasswordEncoder passwordEncoder;
-  // @Autowired
-  // private OtpService otpService;
+  @Autowired
+  private OtpService otpService;
+  
 
   @Transactional
   public Users registerNewUser(UserRequest userRequest) {
@@ -43,7 +47,7 @@ public class UserServiceImpl implements UserService {
 
     Users savedUser = userRepository.save(newUser);
 
-    // otpService.createAndSendOtp(savedUser);
+     otpService.createAndSendOtp(savedUser);
 
     return savedUser;
   }
@@ -71,6 +75,8 @@ public class UserServiceImpl implements UserService {
         Users savedUser = userRepository.save(newUser);       
         return savedUser;
     }
+
+  
 
 
 }

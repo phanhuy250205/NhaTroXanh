@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import nhatroxanh.com.Nhatroxanh.Security.CustomLoginSuccessHandler;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,6 +23,8 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
     @Autowired
     private DataSource dataSource;
 
@@ -64,7 +67,8 @@ public class SecurityConfig {
                 // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
                 .usernameParameter("username")
                 // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
-                .passwordParameter("password")   
+                .passwordParameter("password")  
+                .successHandler(customLoginSuccessHandler)
                 .successHandler((request, response, authentication) -> {
                     // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển hướng.
                     response.setStatus(HttpServletResponse.SC_OK);

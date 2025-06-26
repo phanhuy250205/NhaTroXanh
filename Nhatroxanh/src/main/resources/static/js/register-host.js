@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
    if (registerForm) {
         registerForm.addEventListener("submit", function (event) {
             event.preventDefault();
-
+            if (!validateForm()) return;
             // Lấy dữ liệu từ các input
             const fullName = document.getElementById("fullName").value;
             const email = document.getElementById("email").value;

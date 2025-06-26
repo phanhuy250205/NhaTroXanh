@@ -1,12 +1,19 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Service.UserService;
+
 @Controller
 public class DemoController {
-
+     @Autowired
+     private UserService userService;
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -69,7 +76,9 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/khach-thue")
-    public String khachthue() {
+    public String khachthue(Model model) {
+        List<TenantInfoDTO> tenantList = userService.getTenantInfoForHostPage();
+        model.addAttribute("danhSachKhachThue", tenantList);
         return "host/quan-ly-khach-thue";
     }
 
