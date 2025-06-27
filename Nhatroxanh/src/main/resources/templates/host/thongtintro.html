@@ -24,10 +24,8 @@
             <!-- Search Section -->
             <div class="search-section-host">
                 <div class="search-container-host">
-                    <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
-                    <button class="btn-search-host" id="searchButtonHost">
-                        TÌM KIẾM
-                    </button>
+                    <input type="text" class="search-input-host" id="searchInputHost" th:value="${searchName}" placeholder="Tìm kiếm..." />
+                    <button class="btn-search-host" id="searchButtonHost" onclick="searchHostels()">TÌM KIẾM</button>
                 </div>
             </div>
 
@@ -52,12 +50,12 @@
                             </td>
                             <td class="table-td-host">
                                 <div class="action-btns-host">
-                                    <a th:href="@{/chu-tro/them-khu-tro(id=${hostel.hostelId})}">
+                                    <a th:href="@{/chu-tro/edit-khu-tro(id=${hostel.hostelId})}">
                                         <button class="buttons-edit-host" title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     </a>
-                                    <form th:action="@{/chu-tro/delete-khu-tro/{id}(id=${hostel.hostelId})}" method="post" style="display:inline;">
+                                    <form th:action="@{/chu-tro/delete-khu-tro(id=${hostel.hostelId})}" method="get" style="display:inline;">
                                         <button type="submit" class="btn-delete-host" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa khu trọ này?');">
                                             <i class="fas fa-trash"></i>
                                         </button>
@@ -70,5 +68,17 @@
             </div>
         </div>
     </div>
+
+    <script th:inline="javascript">
+        function searchHostels() {
+            let searchName = $('#searchInputHost').val();
+            window.location.href = "/chu-tro/thong-tin-tro?name=" + encodeURIComponent(searchName);
+        }
+        $('#searchInputHost').on('keypress', function(e) {
+            if (e.which === 13) { // Enter key
+                searchHostels();
+            }
+        });
+    </script>
 </body>
 </html>

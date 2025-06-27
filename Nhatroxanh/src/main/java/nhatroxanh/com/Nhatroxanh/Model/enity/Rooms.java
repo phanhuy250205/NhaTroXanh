@@ -6,6 +6,8 @@ import java.util.Set;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,11 +47,12 @@ public class Rooms {
     private String address;
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
-
+    
     @Column(name = "status")
     private Boolean status;
 
     @Column(name = "acreage")
+
     private Float acreage;
 
     @Column(name = "max_tenants")

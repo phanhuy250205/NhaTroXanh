@@ -60,10 +60,7 @@ public class DemoController {
     public String profilehost() {
         return "host/profile-host";
     }
-     @GetMapping("/chu-tro/quan-ly-tro")
-    public String phongtro() {
-        return "host/phongtro";
-    }
+    
     @GetMapping("/chu-tro/Dk")
     public String dangkychutro() {
         return "auth/register-host";

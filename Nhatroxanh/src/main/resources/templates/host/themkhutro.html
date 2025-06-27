@@ -82,25 +82,25 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
-                                        <select class="form-select-host" id="provinceHost" th:field="*{address.ward.district.province.id}">
+                                       <select th:field="*{address.ward.district.province.id}" id="provinceHost" class="form-select">
                                             <option value="">Chọn tỉnh/thành phố</option>
-                                            <option th:each="province : ${provinces}" th:value="${province.id}" th:text="${province.name}"></option>
+                                            <option th:each="province : ${provinces}" th:value="${province.code}" th:text="${province.name}"></option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="districtHost" class="form-label-host">Quận/Huyện</label>
-                                        <select class="form-select-host" id="districtHost" th:field="*{address.ward.district.id}" disabled>
+                                        <select class="form-select-host" id="districtHost" name="districtCode" disabled>
                                             <option value="">Chọn quận/huyện</option>
-                                            <option th:each="district : ${districts}" th:value="${district.id}" th:text="${district.name}"></option>
+                                            <option th:each="district : ${districts}" th:value="${district.code}" th:text="${district.name}"></option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="wardHost" class="form-label-host">Phường/Xã</label>
-                                        <select class="form-select-host" id="wardHost" name="wardHost" disabled>
+                                        <select class="form-select-host" id="wardHost" name="wardCode" disabled>
                                             <option value="">Chọn phường/xã</option>
                                             <option th:each="ward : ${wards}" th:value="${ward.code}" th:text="${ward.name}"></option>
                                         </select>
@@ -109,19 +109,19 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="streetHost" class="form-label-host">Đường/Phố</label>
-                                        <input type="text" class="form-control-host" id="streetHost" th:field="*{address.street}" placeholder="Nhập tên đường/phố">
+                                        <input type="text" class="form-control-host" id="streetHost" name="street" placeholder="Nhập tên đường/phố">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="houseNumberHost" class="form-label-host">Số nhà</label>
-                                        <input type="text" class="form-control-host" id="houseNumberHost" th:field="*{address.houseNumber}" placeholder="123">
+                                        <input type="text" class="form-control-host" id="houseNumberHost" name="houseNumber" placeholder="123">
                                     </div>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <div class="form-group-host">
                                         <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
-                                        <input type="text" class="form-control-host" id="fullAddressHost" th:field="*{address.street}" placeholder="Địa chỉ sẽ được tự động tạo" readonly>
+                                        <input type="text" class="form-control-host" id="fullAddressHost" readonly>
                                     </div>
                                 </div>
                             </div>
@@ -137,6 +137,7 @@
                             </div>
                         </div>
                     </div>
+                    <div th:if="${error}" th:text="${error}" style="color: red;"></div>
                 </form>
             </div>
         </div>
@@ -145,59 +146,74 @@
     <!-- JavaScript -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script th:inline="javascript">
-        $(document).ready(function() {
-            $.ajaxSetup({ timeout: 5000 });
+    $(document).ready(function() {
+        $.ajaxSetup({ timeout: 5000 });
 
-            // Load provinces
-            $.getJSON("https://provinces.open-api.vn/api/p/", function(data) {
-                let $provinceSelect = $("#provinceHost");
-                $provinceSelect.append('<option value="">Chọn tỉnh/thành phố</option>');
-                $provinceSelect.append(data.map(p => `<option value="${p.code}">${p.name}</option>`));
-            }).fail(function() {
-                console.error("Lỗi tải danh sách tỉnh/thành");
-            });
-
-            // Load districts on province change
-            $("#provinceHost").change(function() {
-                let provinceCode = $(this).val();
-                let $districtSelect = $("#districtHost");
-                let $wardSelect = $("#wardHost");
-                $districtSelect.prop("disabled", false).empty().append('<option value="">Chọn quận/huyện</option>');
-                $wardSelect.prop("disabled", true).empty().append('<option value="">Chọn phường/xã</option>');
-                if (provinceCode) {
-                    $.getJSON(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function(data) {
-                        $districtSelect.append(data.districts.map(d => `<option value="${d.code}">${d.name}</option>`));
-                    }).fail(function() {
-                        console.error("Lỗi tải danh sách quận/huyện");
-                    });
-                }
-            });
-
-            // Load wards on district change
-            $("#districtHost").change(function() {
-                let districtCode = $(this).val();
-                let $wardSelect = $("#wardHost");
-                $wardSelect.prop("disabled", false).empty().append('<option value="">Chọn phường/xã</option>');
-                if (districtCode) {
-                    $.getJSON(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function(data) {
-                        $wardSelect.append(data.wards.map(w => `<option value="${w.code}">${w.name}</option>`));
-                    }).fail(function() {
-                        console.error("Lỗi tải danh sách phường/xã");
-                    });
-                }
-            });
-
-            // Update full address
-            $("#provinceHost, #districtHost, #wardHost, #streetHost, #houseNumberHost").change(function() {
-                let province = $("#provinceHost option:selected").text();
-                let district = $("#districtHost option:selected").text();
-                let ward = $("#wardHost option:selected").text();
-                let street = $("#streetHost").val();
-                let houseNumber = $("#houseNumberHost").val();
-                let fullAddress = `${houseNumber ? houseNumber + ', ' : ''}${street ? street + ', ' : ''}${ward ? ward + ', ' : ''}${district ? district + ', ' : ''}${province}`;
-                $("#fullAddressHost").val(fullAddress.trim());
-            });
+        // Load provinces
+        $.getJSON("https://provinces.open-api.vn/api/p/", function(data) {
+            let $provinceSelect = $("#provinceHost");
+            $provinceSelect.append('<option value="">Chọn tỉnh/thành phố</option>');
+            $provinceSelect.append(data.map(p => `<option value="${p.code}">${p.name}</option>`));
+            // Chọn province hiện tại
+            let provinceCode = /*[[${hostel.address.ward.district.province.code}]]*/ '';
+            if (provinceCode) $provinceSelect.val(provinceCode);
+        }).fail(function() {
+            console.error("Lỗi tải danh sách tỉnh/thành");
         });
-    </script>
+
+        // Load districts on province change
+        $("#provinceHost").change(function() {
+            let provinceCode = $(this).val();
+            let $districtSelect = $("#districtHost");
+            let $wardSelect = $("#wardHost");
+            $districtSelect.prop("disabled", false).empty().append('<option value="">Chọn quận/huyện</option>');
+            $wardSelect.prop("disabled", true).empty().append('<option value="">Chọn phường/xã</option>');
+            if (provinceCode) {
+                $.getJSON(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function(data) {
+                    $districtSelect.append(data.districts.map(d => `<option value="${d.code}">${d.name}</option>`));
+                    // Chọn district hiện tại
+                    let districtCode = /*[[${hostel.address.ward.district.code}]]*/ '';
+                    if (districtCode) $districtSelect.val(districtCode);
+                }).fail(function() {
+                    console.error("Lỗi tải danh sách quận/huyện");
+                });
+            }
+        });
+
+        // Load wards on district change
+        $("#districtHost").change(function() {
+            let districtCode = $(this).val();
+            let $wardSelect = $("#wardHost");
+            $wardSelect.prop("disabled", false).empty().append('<option value="">Chọn phường/xã</option>');
+            if (districtCode) {
+                $.getJSON(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function(data) {
+                    $wardSelect.append(data.wards.map(w => `<option value="${w.code}">${w.name}</option>`));
+                    // Chọn ward hiện tại
+                    let wardCode = /*[[${hostel.address.ward.code}]]*/ '';
+                    if (wardCode) $wardSelect.val(wardCode);
+                }).fail(function() {
+                    console.error("Lỗi tải danh sách phường/xã");
+                });
+            }
+        });
+
+        // Update full address
+        $("#provinceHost, #districtHost, #wardHost, #streetHost, #houseNumberHost").change(function() {
+            let province = $("#provinceHost option:selected").text();
+            let district = $("#districtHost option:selected").text();
+            let ward = $("#wardHost option:selected").text();
+            let street = $("#streetHost").val();
+            let houseNumber = $("#houseNumberHost").val();
+            let fullAddress = `${houseNumber ? houseNumber + ', ' : ''}${street ? street + ', ' : ''}${ward ? ward + ', ' : ''}${district ? district + ', ' : ''}${province}`;
+            $("#fullAddressHost").val(fullAddress.trim() || "Chưa có địa chỉ");
+        });
+
+        // Set initial values
+        let initialStreet = /*[[${hostel.address.street}]]*/ '';
+        let initialHouseNumber = /*[[${hostel.address.houseNumber}]]*/ '' || '';
+        $("#streetHost").val(initialStreet);
+        $("#houseNumberHost").val(initialHouseNumber);
+    });
+</script>
 </body>
 </html>
