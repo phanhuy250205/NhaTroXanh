@@ -23,8 +23,9 @@ import lombok.NoArgsConstructor;
 @Table(name = "reviews")
 public class Review {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Chỉ định IDENTITY nếu cột tự tăng
+    @Column(name = "id") // Mapping với tên cột trong DB
+    private Integer reviewId;
 
     @Column(nullable = false)
     private Double rating; // VD: 4.5, 5.0
@@ -33,7 +34,7 @@ public class Review {
     private String comment;
 
     @ManyToOne
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_id", nullable = true)
     private Rooms room;
 
     @ManyToOne

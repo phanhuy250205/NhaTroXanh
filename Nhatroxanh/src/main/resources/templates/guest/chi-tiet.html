@@ -5,6 +5,7 @@
     <title>Chi Tiết - Nhà Trọ Xanh</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
 
     <style>
         :root {
@@ -286,7 +287,6 @@
             -webkit-text-fill-color: transparent;
         }
 
-        /* Ảnh trong carousel lớn (trái) */
         #roomImageCarousel .carousel-item img {
             width: 100%;
             max-height: 350px;
@@ -295,7 +295,6 @@
             border-radius: 8px;
         }
 
-        /* Ảnh thumbnail nhỏ bên dưới */
         #roomThumbnails img {
             width: 80px;
             height: 60px;
@@ -306,7 +305,6 @@
             transition: border-color 0.3s;
         }
 
-        /* Khi ảnh thumbnail được chọn */
         #roomThumbnails img.active {
             border-color: #007bff;
         }
@@ -314,6 +312,69 @@
         #roomThumbnails img:hover {
             transform: scale(1.05);
             transition: transform 0.2s ease-in-out;
+        }
+
+        .toast-container-host {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 10px;
+            max-width: 320px;
+        }
+
+        /* Style toast */
+        .toast-host {
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: #fff;
+            opacity: 0;
+            transform: translateX(100%);
+            animation: slideIn 0.3s forwards;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            min-width: 280px;
+            font-size: 14px;
+        }
+
+        .toast-host.success {
+            background-color: #28a745;
+        }
+
+        .toast-host.error {
+            background-color: #dc3545;
+        }
+
+        .toast-icon {
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.8;
+            padding: 0;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
@@ -330,7 +391,6 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
-
     <!-- Breadcrumb -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -343,8 +403,19 @@
                     th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}"></li>
             </ol>
         </nav>
+        <!-- <div class="toast-container-host" id="toastContainer">
+            <div th:if="${message}" class="toast-host success" role="alert">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${message}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+            <div th:if="${errorData}" class="toast-host error" role="alert">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${error}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+        </div> -->
     </div>
-
     <!-- Property Detail Section -->
     <section class="property-detail-section py-4">
         <div class="container">
@@ -519,6 +590,12 @@
                                     <i class="fas fa-map"></i> Vị trí
                                 </button>
                             </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-ct" id="review-tab" data-bs-toggle="tab" data-bs-target="#review"
+                                    type="button" role="tab">
+                                    <i class="fa-solid fa-star"></i> Đánh giá
+                                </button>
+                            </li>
                         </ul>
                         <div class="tab-content" id="detailTabsContent">
                             <!-- Overview Tab -->
@@ -580,6 +657,134 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Review Tab -->
+                            <div class="tab-pane fade" id="review" role="tabpanel">
+                                <div class="p-3">
+                                    <h3 class="mb-3">Đánh giá từ người dùng</h3>
+
+                                    <div class="mb-3">
+                                        <strong>Đánh giá trung bình:</strong>
+                                        <span class="text-warning">
+                                            <i class="fas fa-star"
+                                                th:each="i : ${#numbers.sequence(1, averageRating != null ? T(java.lang.Math).round(averageRating) : 0)}"></i>
+                                        </span>
+                                        <span class="text-muted"
+                                            th:text="${averageRating != null ? '(' + #numbers.formatDecimal(averageRating, 1, 1) + ' / 5)' : '(0.00 / 5)'}"></span>
+                                    </div>
+
+                                    <div th:if="${!reviews.isEmpty()}">
+                                        <div th:each="review : ${reviews}" class="border rounded p-3 mb-3">
+                                            <div class="d-flex align-items-start">
+                                                <img th:src="@{${review.user.avatar != null ? review.user.avatar : '/images/avatar-default.png'}}"
+                                                    alt="avatar" class="rounded-circle me-3"
+                                                    style="width: 48px; height: 48px; object-fit: cover;">
+                                                <div>
+                                                    <strong th:text="${review.user.fullname}">Tên người dùng</strong>
+                                                    <small class="text-muted ms-2"
+                                                        th:text="${#dates.format(review.createdAt, 'dd/MM/yyyy')}">01/01/2024</small>
+                                                    <br>
+                                                    <span class="text-warning">
+                                                        <i class="fas fa-star"
+                                                            th:each="i : ${#numbers.sequence(1, review.rating.intValue())}"></i>
+                                                    </span>
+                                                    <p class="mb-0" th:text="${review.comment}">Nội dung đánh giá</p>
+
+                                                    <div th:if="${currentUser != null and currentUser.userId == review.user.userId}"
+                                                        class="mt-2 d-flex justify-content align-items-center gap-2">
+                                                        <button class="btn btn-primary btn-sm me-1 px-2 py-1"
+                                                            th:onclick="'showEditForm(' + ${review.reviewId} + ')'">Chỉnh
+                                                            sửa</button>
+                                                        <form th:action="@{/reviews/action}" method="post"
+                                                            class="m-0 delete-form">
+                                                            <input type="hidden" name="actionType" value="delete" />
+                                                            <input type="hidden" name="reviewId"
+                                                                th:value="${review.reviewId}" />
+                                                            <input type="hidden" name="postId"
+                                                                th:value="${post.postId}" />
+                                                            <button type="submit"
+                                                                class="btn btn-danger btn-sm delete-btn">Xóa</button>
+                                                        </form>
+                                                    </div>
+                                                    <!-- Form chỉnh sửa -->
+                                                    <div th:id="'edit-form-' + ${review.reviewId}"
+                                                        style="display: none;" class="mt-2">
+
+                                                        <form th:action="@{/reviews/action}" method="post"
+                                                            th:with="reviewId=${review.reviewId}, postId=${post.postId}, rating=${review.rating != null ? review.rating.intValue() : 0}">
+                                                            <input type="hidden" name="actionType" value="edit" />
+                                                            <input type="hidden" name="reviewId"
+                                                                th:value="${reviewId}" />
+                                                            <input type="hidden" name="postId" th:value="${postId}" />
+
+                                                            <div class="mb-2">
+                                                                <label class="form-label">Số sao:</label>
+                                                                <div class="star-rating-container"
+                                                                    style="color: #FFD700 ;"
+                                                                    th:attr="data-review-id=${reviewId}">
+                                                                    <input type="hidden" name="rating"
+                                                                        th:id="'rating-input-' + ${reviewId}"
+                                                                        th:value="${rating}" />
+
+                                                                    <i class="far fa-star" data-value="1"></i>
+                                                                    <i class="far fa-star" data-value="2"></i>
+                                                                    <i class="far fa-star" data-value="3"></i>
+                                                                    <i class="far fa-star" data-value="4"></i>
+                                                                    <i class="far fa-star" data-value="5"></i>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="mb-3">
+                                                                <label class="form-label">Nội dung:</label>
+                                                                <textarea th:id="'edit-comment-' + ${reviewId}"
+                                                                    name="comment" class="form-control" rows="3"
+                                                                    th:text="${review.comment != null ? review.comment : ''}"
+                                                                    placeholder="Nhập nội dung đánh giá..."></textarea>
+                                                            </div>
+
+                                                            <div class="d-flex gap-2 justify-content-end">
+                                                                <button type="submit" class="btn btn-success btn-sm">Lưu
+                                                                    chỉnh sửa</button>
+                                                                <button type="button" class="btn btn-danger btn-sm"
+                                                                    th:onclick="'hideEditForm(' + ${reviewId} + ')'">Hủy</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p th:if="${reviews.isEmpty()}" class="text-muted">Chưa có đánh giá nào.</p>
+
+                                    <!-- Form tạo đánh giá -->
+                                    <h5>Đánh giá của bạn</h5>
+                                    <div th:if="${#authentication.authenticated}">
+                                        <form th:action="@{/reviews}" method="post">
+                                            <input type="hidden" name="postId" th:value="${post.postId}" />
+                                            <div class="mb-2">
+                                                <label class="form-label">Số sao:</label>
+                                                <div class="star-rating-container"
+                                                    style="color: #FFD700 ; font-size: 27px;">
+                                                    <input type="hidden" name="rating" id="rating-input" value="0" />
+                                                    <i class="far fa-star" data-value="1"></i>
+                                                    <i class="far fa-star" data-value="2"></i>
+                                                    <i class="far fa-star" data-value="3"></i>
+                                                    <i class="far fa-star" data-value="4"></i>
+                                                    <i class="far fa-star" data-value="5"></i>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="comment" class="form-label">Nội dung:</label>
+                                                <textarea id="comment" name="comment" class="form-control" rows="3"
+                                                    placeholder="Nhập đánh giá của bạn..."></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-success btn-sm">Gửi đánh giá</button>
+                                        </form>
+                                    </div>
+                                    <div th:unless="${#authentication.authenticated}">
+                                        <p>Vui lòng <a href="/login">đăng nhập</a> để gửi đánh giá.</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -629,8 +834,6 @@
                     </div>
                 </div>
             </div>
-
-
             <!-- Similar Properties -->
             <div class="row mt-5">
                 <div class="col-12">
@@ -825,9 +1028,9 @@
         </div>
     </div>
 
-
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1236,39 +1439,122 @@
                 loadMoreBtn.style.display = 'none';
             }
         });
+        function showEditForm(reviewId) {
+            document.getElementById('edit-form-' + reviewId).style.display = 'block';
+        }
+        function hideEditForm(reviewId) {
+            document.getElementById('edit-form-' + reviewId).style.display = 'none';
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+            // Hàm khởi tạo sao cho container
+            function initializeStars(container) {
+                const stars = container.querySelectorAll('.fa-star');
+                const input = container.querySelector('input[name="rating"]');
+                let selected = parseInt(input ? input.value : 0) || 0;
 
-        const stars = document.querySelectorAll('#stars span');
-        const ratingInput = document.getElementById('rating');
-        let selectedRating = 0;
+                if (!stars.length) {
+                    console.error("Không tìm thấy các phần tử sao trong container:", container);
+                    return;
+                }
+                console.log("Container:", container, "Input value:", input ? input.value : 'Không có input', "Selected:", selected);
 
-        stars?.forEach((star, idx) => {
-            const value = parseInt(star.dataset.value);
+                function updateStars(value) {
+                    stars.forEach(star => {
+                        const val = parseInt(star.dataset.value);
+                        star.classList.remove('fas', 'far');
+                        star.classList.add(val <= value ? 'fas' : 'far');
+                        if (input) input.value = value; // Cập nhật input
+                    });
+                }
 
-            star.addEventListener('click', () => {
-                selectedRating = value;
-                ratingInput.value = selectedRating;
-                highlightStars(selectedRating);
-            });
+                stars.forEach(star => {
+                    const val = parseInt(star.dataset.value);
 
-            star.addEventListener('mouseover', () => {
-                highlightStars(value);
-            });
+                    star.addEventListener('click', () => {
+                        selected = val;
+                        updateStars(selected);
+                        console.log(`Click sao ${val}, giá trị input: ${input.value}`);
+                    });
 
-            star.addEventListener('mouseout', () => {
-                highlightStars(selectedRating);
+                    star.addEventListener('mouseover', () => {
+                        stars.forEach(s => {
+                            const sVal = parseInt(s.dataset.value);
+                            s.classList.remove('fas', 'far');
+                            s.classList.add(sVal <= val ? 'fas' : 'far');
+                        });
+                    });
+
+                    star.addEventListener('mouseout', () => {
+                        updateStars(selected);
+                    });
+                });
+
+                updateStars(selected);
+            }
+
+            document.querySelectorAll('.star-rating-container').forEach(initializeStars);
+            window.showEditForm = function (reviewId) {
+                const editForm = document.getElementById('edit-form-' + reviewId);
+                if (editForm) {
+                    editForm.style.display = 'block';
+                    setTimeout(() => {
+                        const container = editForm.querySelector('.star-rating-container');
+                        const input = container.querySelector('input[name="rating"]');
+                        if (container && input) {
+                            const selected = parseInt(input.value) || 0;
+                            console.log(`Khởi tạo form ${reviewId}, giá trị input: ${input.value}, selected: ${selected}`);
+                            initializeStars(container);
+                        } else {
+                            console.error("Không tìm thấy container hoặc input trong form chỉnh sửa:", editForm);
+                        }
+                    }, 0);
+                }
+            };
+
+            window.hideEditForm = function (reviewId) {
+                const editForm = document.getElementById('edit-form-' + reviewId);
+                if (editForm) editForm.style.display = 'none';
+            };
+        });
+        document.querySelectorAll('.delete-btn').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const form = this.closest('.delete-form');
+                Swal.fire({
+                    title: "Bạn có chắc chắn muốn xóa?",
+                    text: "Hành động này không thể hoàn tác!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#ef4444",
+                    cancelButtonColor: "#6b7280",
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Hủy"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
             });
         });
+        // document.addEventListener('DOMContentLoaded', function () {
+        //     const toasts = document.querySelectorAll('.toast-host');
+        //     toasts.forEach(toast => {
+        //         // Tự ẩn sau 5s
+        //         setTimeout(() => {
+        //             toast.style.opacity = '0';
+        //             setTimeout(() => toast.remove(), 30000); // xóa hẳn sau 0.3s
+        //         }, 5000);
 
-        function highlightStars(rating) {
-            stars.forEach((star, idx) => {
-                if (idx < rating) {
-                    star.classList.add('selected');
-                } else {
-                    star.classList.remove('selected');
-                }
-            });
-        }
+        //         // Nút close
+        //         toast.querySelector('.btn-close').addEventListener('click', () => {
+        //             toast.style.opacity = '0';
+        //             toast.style.transform = 'translateX(100%)';
+        //             setTimeout(() => toast.remove(), 300);
+        //         });
+        //     });
+        // });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

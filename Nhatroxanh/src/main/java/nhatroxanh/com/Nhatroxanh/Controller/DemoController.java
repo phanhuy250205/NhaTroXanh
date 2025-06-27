@@ -1,13 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-
-import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Controller
@@ -70,10 +65,10 @@ public class DemoController {
         return "host/phongtro";
     }
 
-    @GetMapping("/chu-tro/tong-quan")
-    public String tongquan() {
-        return "host/tong-quan";
-    }
+    // @GetMapping("/chu-tro/tong-quan")
+    // public String tongquan() {
+    //     return "host/tong-quan";
+    // }
 
     @GetMapping("/chu-tro/khach-thue")
     public String khachthue(Model model) {
