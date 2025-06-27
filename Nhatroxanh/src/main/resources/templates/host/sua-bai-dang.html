@@ -489,46 +489,53 @@
             <input type="hidden" name="wardName" id="wardName" th:value="${wardName}" />
 
             <div class="form-section-host">
-                <label class="form-label-host">Loại danh mục</label>
-                <select name="categoryId" class="form-control-host form-select-host"
-                    th:value="${post.category?.categoryId}">
+                <label class="form-label-host">Loại danh mục <span style="color: red;">*</span></label>
+                <div th:if="${categories == null or categories.isEmpty()}">
+                    <p style="color: red;">Không có danh mục nào được tải. Vui lòng liên hệ quản trị viên.</p>
+                </div>
+                <select th:unless="${categories == null or categories.isEmpty()}" name="categoryId"
+                    class="form-control-host form-select-host" id="categorySelect" required>
                     <option value="">Mời bạn chọn loại danh mục phù hợp...</option>
                     <option th:each="category : ${categories}" th:value="${category.categoryId}"
-                        th:text="${category.name}" th:selected="${post.category?.categoryId == category.categoryId}">
+                        th:text="${category.name}"
+                        th:selected="${post.category != null and post.category.categoryId == category.categoryId}">
                     </option>
                 </select>
             </div>
 
             <div class="form-section-host">
-                <label class="form-label-host">Nhà trọ</label>
-                <select name="hostelId" class="form-control-host form-select-host" id="hostelSelect"
-                    th:value="${post.hostel?.hostelId}">
+                <label class="form-label-host" for="hostelSelect">Nhà trọ</label>
+                <select name="hostelId" class="form-control-host form-select-host" id="hostelSelect">
                     <option value="">-- Chọn nhà trọ --</option>
+                    <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}" th:text="${hostel.name}"
+                        th:selected="${hostel.hostelId == post.hostel?.hostelId}">
+                    </option>
                 </select>
+                <input type="hidden" name="hostelName" id="hostelName" th:value="${post.hostel?.name}" />
             </div>
 
             <div class="form-section-host">
                 <label class="form-label-host">Khu vực</label>
                 <div class="row-host">
                     <div class="col-host">
-                        <select class="form-control-host form-select-host" id="provinceSelect" name="provinceId"
-                            th:value="${provinceId}">
+                        <select class="form-control-host form-select-host" id="provinceSelect" name="provinceId">
                             <option value="">-- Chọn tỉnh/thành phố --</option>
                         </select>
+                        <input type="hidden" name="provinceName" id="provinceName" th:value="${provinceName}" />
                     </div>
                     <div class="col-host">
-                        <select class="form-control-host form-select-host" id="districtSelect" name="districtId"
-                            th:value="${districtId}">
+                        <select class="form-control-host form-select-host" id="districtSelect" name="districtId">
                             <option value="">-- Chọn quận/huyện --</option>
                         </select>
+                        <input type="hidden" name="districtName" id="districtName" th:value="${districtName}" />
                     </div>
                 </div>
                 <div class="row-host">
                     <div class="col-host">
-                        <select name="wardId" class="form-control-host form-select-host" id="wardSelect"
-                            th:value="${wardId}">
+                        <select name="wardId" class="form-control-host form-select-host" id="wardSelect">
                             <option value="">-- Chọn phường/xã --</option>
                         </select>
+                        <input type="hidden" name="wardName" id="wardName" th:value="${wardName}" />
                     </div>
                     <div class="col-host">
                         <input name="street" type="text" class="form-control-host" placeholder="Nhập tên đường/phố..."
@@ -599,7 +606,10 @@
                     </div>
                 </div>
             </div>
-
+            <div id="hiddenInputsContainer">
+                <input type="hidden" name="imagesToDelete" th:each="id : ${imagesToDelete}" th:value="${id}" />
+                <input type="hidden" name="imagesToKeep" th:each="id : ${imagesToKeep}" th:value="${id}" />
+            </div>
             <div class="form-section-host">
                 <label class="form-label-host">Hình ảnh</label>
                 <div class="image-upload-container-host">
@@ -612,10 +622,11 @@
                 </div>
                 <div class="image-preview-host" id="imagePreview"
                     th:style="${#lists.isEmpty(post.images)} ? 'display: none' : 'display: flex'">
-                    <div th:each="image : ${post.images}" class="image-container">
-                        <img th:src="@{'/uploads/' + ${image.url}}" th:data-id="${image.id}" alt="Ảnh bài đăng" />
-                        <input type="hidden" name="imagesToDelete" th:id="'delete_' + ${image.id}" value="${image.id}"
-                            disabled />
+                    <div th:each="image : ${post.images}" th:if="${image != null and image.url != null}"
+                        class="image-container">
+                        <img th:src="@{'/uploads/' + ${#strings.replace(image.url, '/uploads/', '')}}"
+                            th:data-id="${image.id}" alt="Ảnh bài đăng" />
+                        <input type="hidden" name="imagesToKeep" th:value="${image.id}" />
                         <button type="button" class="delete-btn" th:data-id="${image.id}" aria-label="Xóa ảnh"
                             title="Xóa ảnh">×</button>
                     </div>
@@ -637,11 +648,15 @@
 
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
+    <script th:inline="javascript">
+        const selectedProvinceId = /*[[${provinceId}]]*/ null;
+        const selectedDistrictId = /*[[${districtId}]]*/ null;
+        const selectedWardId = /*[[${wardId}]]*/ null;
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             loadProvinces();
-            loadHostels();
             setupImagePreview();
             setupAddressCascade();
             setupFormSubmission();
@@ -664,15 +679,13 @@
                     provinceSelect.appendChild(option);
                 });
 
-                const selectedProvinceId = "${post.address?.ward?.district?.province?.code}" || "${provinceId}";
                 if (selectedProvinceId) {
                     provinceSelect.value = selectedProvinceId;
                     updateHiddenInput('provinceName', provinceSelect.options[provinceSelect.selectedIndex]?.dataset.name || '');
-                    loadDistricts(selectedProvinceId);
+                    await loadDistricts(selectedProvinceId);
                 }
             } catch (error) {
-                // console.error('Lỗi khi tải danh sách tỉnh:', error);
-                // showToast('error', 'Không thể tải danh sách tỉnh/thành phố.');
+                console.error('Lỗi khi tải danh sách tỉnh:', error);
             }
         }
 
@@ -693,15 +706,13 @@
                     districtSelect.appendChild(option);
                 });
 
-                const selectedDistrictId = "${post.address?.ward?.district?.code}" || "${districtId}";
                 if (selectedDistrictId) {
                     districtSelect.value = selectedDistrictId;
                     updateHiddenInput('districtName', districtSelect.options[districtSelect.selectedIndex]?.dataset.name || '');
-                    loadWards(selectedDistrictId);
+                    await loadWards(selectedDistrictId);
                 }
             } catch (error) {
-                // console.error('Lỗi khi tải danh sách quận/huyện:', error);
-                // showToast('error', 'Không thể tải danh sách quận/huyện.');
+                console.error('Lỗi khi tải danh sách quận/huyện:', error);
             }
         }
 
@@ -722,14 +733,12 @@
                     wardSelect.appendChild(option);
                 });
 
-                const selectedWardId = "${post.address?.ward?.code}" || "${wardId}";
                 if (selectedWardId) {
                     wardSelect.value = selectedWardId;
                     updateHiddenInput('wardName', wardSelect.options[wardSelect.selectedIndex]?.dataset.name || '');
                 }
             } catch (error) {
-                // console.error('Lỗi khi tải danh sách phường/xã:', error);
-                // showToast('error', 'Không thể tải danh sách phường/xã.');
+                console.error('Lỗi khi tải danh sách phường/xã:', error);
             }
         }
 
@@ -738,29 +747,29 @@
             const districtSelect = document.getElementById('districtSelect');
             const wardSelect = document.getElementById('wardSelect');
 
-            provinceSelect.addEventListener('change', function () {
+            provinceSelect.addEventListener('change', async function () {
                 const provinceCode = this.value;
                 if (provinceCode) {
-                    loadDistricts(provinceCode);
+                    await loadDistricts(provinceCode);
                     updateHiddenInput('provinceName', this.options[this.selectedIndex]?.dataset.name || '');
                 } else {
                     updateHiddenInput('provinceName', '');
+                    districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                    wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
                 }
-                districtSelect.value = '';
-                wardSelect.value = '';
                 updateHiddenInput('districtName', '');
                 updateHiddenInput('wardName', '');
             });
 
-            districtSelect.addEventListener('change', function () {
+            districtSelect.addEventListener('change', async function () {
                 const districtCode = this.value;
                 if (districtCode) {
-                    loadWards(districtCode);
+                    await loadWards(districtCode);
                     updateHiddenInput('districtName', this.options[this.selectedIndex]?.dataset.name || '');
                 } else {
                     updateHiddenInput('districtName', '');
+                    wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
                 }
-                wardSelect.value = '';
                 updateHiddenInput('wardName', '');
             });
 
@@ -769,90 +778,25 @@
             });
         }
 
-        async function loadHostels() {
-            try {
-                const response = await fetch('/chu-tro/api/hostels');
-                if (!response.ok) throw new Error('Lỗi khi tải danh sách nhà trọ');
-                const hostels = await response.json();
-
-                const hostelSelect = document.getElementById('hostelSelect');
-                hostelSelect.innerHTML = '<option value="">-- Chọn nhà trọ --</option>';
-
-                hostels.forEach(hostel => {
-                    const option = document.createElement('option');
-                    option.value = hostel.hostelId;
-                    option.textContent = hostel.name;
-                    option.dataset.address = JSON.stringify({
-                        street: hostel.street,
-                        wardId: hostel.wardId,
-                        districtId: hostel.districtId,
-                        provinceId: hostel.provinceId
-                    });
-                    hostelSelect.appendChild(option);
-                });
-
-                const selectedHostelId = "${post.hostel?.hostelId}" || '';
-                if (selectedHostelId) {
-                    hostelSelect.value = selectedHostelId;
-                    hostelSelect.dispatchEvent(new Event('change'));
-                }
-
-                hostelSelect.addEventListener('change', function () {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const addressData = selectedOption.dataset.address ? JSON.parse(selectedOption.dataset.address) : null;
-
-                    const provinceSelect = document.getElementById('provinceSelect');
-                    const districtSelect = document.getElementById('districtSelect');
-                    const wardSelect = document.getElementById('wardSelect');
-                    const streetInput = document.querySelector('input[name="street"]');
-                    const houseNumberInput = document.querySelector('input[name="houseNumber"]');
-
-                    if (addressData && addressData.provinceId) {
-                        provinceSelect.value = addressData.provinceId;
-                        loadDistricts(addressData.provinceId).then(() => {
-                            if (addressData.districtId) {
-                                districtSelect.value = addressData.districtId;
-                                loadWards(addressData.districtId).then(() => {
-                                    if (addressData.wardId) {
-                                        wardSelect.value = addressData.wardId;
-                                    }
-                                });
-                            }
-                        });
-                        streetInput.value = addressData.street || '';
-                        const streetParts = (addressData.street || '').split(',');
-                        houseNumberInput.value = streetParts[0]?.trim() || '';
-                        updateHiddenInput('provinceName', provinceSelect.options[provinceSelect.selectedIndex]?.dataset.name || '');
-                        updateHiddenInput('districtName', districtSelect.options[districtSelect.selectedIndex]?.dataset.name || '');
-                        updateHiddenInput('wardName', wardSelect.options[wardSelect.selectedIndex]?.dataset.name || '');
-                    } else {
-                        provinceSelect.value = '';
-                        districtSelect.value = '';
-                        wardSelect.value = '';
-                        streetInput.value = '';
-                        houseNumberInput.value = '';
-                        updateHiddenInput('provinceName', '');
-                        updateHiddenInput('districtName', '');
-                        updateHiddenInput('wardName', '');
-                    }
-                });
-            } catch (error) {
-                // console.error('Lỗi khi tải danh sách nhà trọ:', error);
-                // showToast('error', 'Không thể tải danh sách nhà trọ.');
-            }
-        }
-
         let selectedFiles = [];
         let imagesToDelete = [];
+        let imagesToKeep = [];
 
         function setupImagePreview() {
             const uploadInput = document.getElementById("upload-image");
             const preview = document.getElementById("imagePreview");
+            const hiddenInputsContainer = document.getElementById("hiddenInputsContainer");
+
+            // Initialize imagesToKeep with existing images
+            const existingImages = preview.querySelectorAll('.image-container img[data-id]');
+            existingImages.forEach(img => {
+                imagesToKeep.push(parseInt(img.dataset.id));
+            });
 
             if (uploadInput && preview) {
                 uploadInput.addEventListener("change", function (e) {
                     const files = Array.from(e.target.files);
-                    const totalFiles = selectedFiles.length + files.length + preview.querySelectorAll('.image-container img[data-id]').length;
+                    const totalFiles = selectedFiles.length + files.length + imagesToKeep.length;
 
                     if (totalFiles > 8) {
                         showToast('error', 'Chỉ được tải lên tối đa 8 ảnh!');
@@ -871,21 +815,17 @@
                     updatePreview();
                 });
 
-                preview.addEventListener('click', function (e) {
-                    if (e.target.classList.contains('delete-btn')) {
+                preview.addEventListener("click", function (e) {
+                    if (e.target.classList.contains("delete-btn")) {
                         const imageId = e.target.dataset.id;
-                        const container = e.target.closest('.image-container');
+                        const container = e.target.closest(".image-container");
+
                         if (imageId) {
                             imagesToDelete.push(parseInt(imageId));
-                            const deleteInput = document.getElementById('delete_' + imageId);
-                            if (deleteInput) {
-                                deleteInput.disabled = false;
-                            }
-                        } else {
-                            const index = parseInt(container.querySelector('img').dataset.index);
-                            selectedFiles.splice(index, 1);
-                            updateInputFiles();
+                            imagesToKeep = imagesToKeep.filter(id => id !== parseInt(imageId));
+                            updateHiddenInputs();
                         }
+
                         container.remove();
                         updatePreviewVisibility();
                     }
@@ -900,16 +840,19 @@
                 function updatePreview() {
                     updatePreviewVisibility();
                     const newImages = selectedFiles.filter(file => !preview.querySelector(`img[data-file-name="${file.name}"]`));
+
                     newImages.forEach((file, index) => {
                         const container = document.createElement("div");
                         container.className = "image-container";
 
                         const img = document.createElement("img");
                         const reader = new FileReader();
+
                         reader.onload = function (event) {
                             img.src = event.target.result;
                         };
                         reader.readAsDataURL(file);
+
                         img.dataset.index = selectedFiles.indexOf(file);
                         img.dataset.fileName = file.name;
                         img.alt = `Ảnh xem trước ${index + 1}`;
@@ -928,7 +871,25 @@
                 }
 
                 function updatePreviewVisibility() {
-                    preview.style.display = (preview.querySelectorAll('.image-container').length > 0 || selectedFiles.length > 0) ? "flex" : "none";
+                    preview.style.display = (preview.querySelectorAll(".image-container").length > 0 || selectedFiles.length > 0) ? "flex" : "none";
+                }
+
+                function updateHiddenInputs() {
+                    hiddenInputsContainer.innerHTML = "";
+                    imagesToDelete.forEach(id => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "imagesToDelete";
+                        input.value = id;
+                        hiddenInputsContainer.appendChild(input);
+                    });
+                    imagesToKeep.forEach(id => {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "imagesToKeep";
+                        input.value = id;
+                        hiddenInputsContainer.appendChild(input);
+                    });
                 }
 
                 updatePreview();
@@ -940,11 +901,14 @@
             const submitBtn = document.getElementById("submitBtn");
 
             if (form && submitBtn) {
-                submitBtn.addEventListener("click", function (e) {
-                    if (selectedFiles.length + document.querySelectorAll('#imagePreview .image-container img[data-id]').length > 8) {
+                form.addEventListener("submit", function (e) {
+                    const totalImages = selectedFiles.length + imagesToKeep.length;
+                    if (totalImages > 8) {
                         e.preventDefault();
                         showToast('error', 'Chỉ được tải lên tối đa 8 ảnh!');
+                        return;
                     }
+
                     const provinceId = document.getElementById('provinceSelect').value;
                     const districtId = document.getElementById('districtSelect').value;
                     const wardId = document.getElementById('wardSelect').value;
@@ -953,6 +917,7 @@
                     if (!provinceId || !districtId || !wardId || !street) {
                         e.preventDefault();
                         showToast('error', 'Vui lòng điền đầy đủ thông tin khu vực và đường phố!');
+                        return;
                     }
                 });
             }
@@ -1020,6 +985,16 @@
             const input = document.getElementById(inputId);
             if (input) input.value = value;
         }
+        document.addEventListener("DOMContentLoaded", function () {
+            const categorySelect = document.getElementById('categorySelect');
+            console.log("Category select options:", categorySelect.options);
+            console.log("Selected category ID:", categorySelect.value);
+
+            // Optional: Ensure the correct option is selected
+            if (categorySelect.value) {
+                categorySelect.querySelector(`option[value="${categorySelect.value}"]`).selected = true;
+            }
+        });
     </script>
 </body>
 

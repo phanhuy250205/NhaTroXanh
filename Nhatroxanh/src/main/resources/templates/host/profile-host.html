@@ -139,12 +139,12 @@
                             <p class="mb-1">Tổng số khu trọ: <strong th:text="${totalHostels}">5 khu trọ</strong></p>
                             <p class="mb-1">Xác minh tài khoản:
                                 <span
-                                    th:if="${hostInfo.cccd != null and hostInfo.cccd != '' and user.avatar != null and user.avatar != ''}"
+                                    th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
                                     class="host-badge host-verified ms-1">
                                     <i class="fa fa-check-circle"></i> Đã xác minh
                                 </span>
                                 <span
-                                    th:if="${hostInfo.cccd == null or hostInfo.cccd == '' or user.avatar == null or user.avatar == ''}"
+                                    th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
                                     class="host-badge host-inactive ms-1">
                                     <i class="fa fa-times-circle"></i> Chưa xác minh
                                 </span>
@@ -169,7 +169,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control" th:field="*{cccd}">
+                                <input type="text" class="form-control" th:field="*{cccdNumber}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày cấp</label>

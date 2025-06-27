@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,10 +54,18 @@ public class PostController {
 
     @Autowired
     private UtilityRepository utilityRepository;
+
     @Autowired
     private HostelRepository hostelRepository;
+
     @Autowired
     private RoomsRepository roomsRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
+    @Autowired
+    private FileUploadService fileUploadService;
 
     @GetMapping("/bai-dang")
     public String showPostList(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -307,7 +316,7 @@ public class PostController {
             model.addAttribute("post", post);
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("utilities", utilityRepository.findAll());
-
+            model.addAttribute("hostels", hostelRepository.findByOwnerUserId(userDetails.getUser().getUserId())); // ✅
             Address address = post.getAddress();
             if (address != null && address.getWard() != null) {
                 Ward ward = address.getWard();
@@ -355,6 +364,7 @@ public class PostController {
             @RequestParam(value = "utilities", required = false) List<Integer> utilityIds,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
             @RequestParam(value = "imagesToDelete", required = false) List<Integer> imagesToDelete,
+            @RequestParam(value = "imagesToKeep", required = false) List<Integer> imagesToKeep,
             @RequestParam(value = "hostelId", required = false) Integer hostelId,
             @RequestParam(value = "provinceId", required = false) String provinceCode,
             @RequestParam(value = "districtId", required = false) String districtCode,
@@ -369,7 +379,7 @@ public class PostController {
             Post updatedPost = postService.updatePost(
                     postId, title, description, price, area, categoryId,
                     wardCode, street, houseNumber, utilityIds, images, imagesToDelete,
-                    hostelId, userDetails.getUser(), provinceCode, districtCode,
+                    imagesToKeep, hostelId, userDetails.getUser(), provinceCode, districtCode,
                     provinceName, districtName, wardName);
 
             redirectAttributes.addFlashAttribute("successMessage",
@@ -400,5 +410,4 @@ public class PostController {
             return "redirect:/chu-tro/sua-bai-dang/" + postId;
         }
     }
-
 }
