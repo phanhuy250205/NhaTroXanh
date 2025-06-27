@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import java.io.IOException;
 import java.sql.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -54,7 +55,7 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
-        dto.setCccd(user.getCccd());
+        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
         if (cccd != null) {
             dto.setIssueDate(cccd.getIssueDate());
             dto.setIssuePlace(cccd.getIssuePlace());
@@ -68,75 +69,71 @@ public class HostProfileController {
 
     @PostMapping("/profile-host")
     public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
-            BindingResult bindingResult,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-
-        // Kiểm tra lỗi validation
-        if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
-            return "redirect:/chu-tro/profile-host";
-        }
+                                BindingResult bindingResult,
+                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                Model model,
+                                RedirectAttributes redirectAttributes) {
 
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("user", user);
+            model.addAttribute("totalHostels", hostelService.countByOwner(user));
+            return "host/profile-host";
+        }
+
         UserCccd cccd = userCccdRepository.findByUser(user);
 
         // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();
         if (avatarFile != null && !avatarFile.isEmpty()) {
             try {
-                // Delete old avatar if exists
                 if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
                     fileUploadService.deleteFile(user.getAvatar());
                 }
-                // Upload new avatar
                 String avatarPath = fileUploadService.uploadFile(avatarFile, "");
                 user.setAvatar(avatarPath);
             } catch (IOException e) {
-                e.printStackTrace();
-                redirectAttributes.addFlashAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
-                return "redirect:/chu-tro/profile-host";
+                model.addAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                return "host/profile-host";
             }
         }
 
-        // Update user information
+        // Update user info
         user.setFullname(dto.getFullname());
         user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
         user.setPhone(dto.getPhone());
         user.setGender(dto.getGender());
         user.setEmail(dto.getEmail());
-        user.setCccd(dto.getCccd() != null && !dto.getCccd().trim().isEmpty() ? dto.getCccd().trim() : null);
         user.setAddress(dto.getAddress());
 
-        // Handle CCCD information
-        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
-            // Check for duplicate CCCD number
-            UserCccd existingCccd = userCccdRepository.findByCccdNumber(dto.getCccd().trim());
+        // Handle CCCD
+        if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
+            UserCccd existingCccd = userCccdRepository.findByCccdNumber(dto.getCccdNumber().trim());
             if (existingCccd != null && (cccd == null || !existingCccd.getId().equals(cccd.getId()))) {
-                redirectAttributes.addFlashAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
-                return "redirect:/chu-tro/profile-host";
+                model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                return "host/profile-host";
             }
 
-            // Update or create CCCD record
             if (cccd == null) {
                 cccd = new UserCccd();
                 cccd.setUser(user);
             }
-            cccd.setCccdNumber(dto.getCccd().trim());
+            cccd.setCccdNumber(dto.getCccdNumber().trim());
             cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
-            cccd.setIssuePlace(
-                    dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty() ? dto.getIssuePlace().trim()
-                            : null);
+            cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
+                    ? dto.getIssuePlace().trim() : null);
             userCccdRepository.save(cccd);
         } else if (cccd != null) {
-            // Remove CCCD record if CCCD is cleared
             userCccdRepository.delete(cccd);
         }
 
-        // Save user after all updates
         usersRepository.save(user);
-
         redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
         return "redirect:/chu-tro/profile-host";
     }

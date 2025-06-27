@@ -1134,8 +1134,8 @@
           <label for="statusSelect" class="form-label-host">Cập nhật trạng thái hiển thị:</label>
           <select id="statusSelect" name="status" class="form-control-host"
             th:classappend="${post.status == true} ? 'green' : 'red'">
-            <option th:value="true" th:selected="${post.status == true}">Đang hiển thị</option>
-            <option th:value="false" th:selected="${post.status == false}">Đã ẩn</option>
+            <option th:value="true" th:selected="${post.status == true}">Hiển thị bài đăng</option>
+            <option th:value="false" th:selected="${post.status == false}">Ẩn bài đăng</option>
           </select>
           <button type="submit" class="btn-status-submit">Lưu</button>
         </form>
