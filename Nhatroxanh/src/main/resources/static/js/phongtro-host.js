@@ -511,80 +511,93 @@ const ImageUploader = (function() {
 // Expose necessary functions to global scope
 window.RoomManagementUI = RoomManagementUI;
 
-// Room management functions
-document.addEventListener('DOMContentLoaded', function () {
-    function searchRooms() {
-        const searchTerm = document.getElementById('searchRoomInputHost').value.trim();
-        fetch(`/chu-tro/search-rooms?name=${encodeURIComponent(searchTerm)}`)
-            .then(response => response.json())
-            .then(data => updateTable(data));
-    }
 
-    function filterRooms() {
-        const status = document.getElementById('statusFilterHost').value;
-        let rooms = []; // Dữ liệu từ server sẽ được truyền qua Thymeleaf
-        if (status) {
-            rooms = rooms.filter(room => room.status === (status === 'true'));
-        }
-        updateTable(rooms);
-    }
+    document.addEventListener('DOMContentLoaded', function () {
+        
 
-    function updateTable(rooms) {
-        const tableBody = document.getElementById('roomTableBodyHost');
-        tableBody.innerHTML = '';
-        if (!rooms || rooms.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6">Không tìm thấy phòng nào.</td></tr>';
-            return;
+        function searchRooms() {
+            const searchTerm = document.getElementById('searchRoomInputHost').value.trim();
+            fetch(`/chu-tro/search-rooms?name=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => updateTable(data))
+                .catch(error => console.error('Error fetching search results:', error));
         }
-        rooms.forEach(room => {
-            const row = document.createElement('tr');
-            row.className = 'table-row-host';
-            row.innerHTML = `
-                <td class="table-td-host room-name-host">${room.namerooms}</td>
-                <td class="table-td-host-price price-host">${new Intl.NumberFormat('vi-VN').format(room.price)} ₫</td>
-                <td class="table-td-host">
-                    <span class="status-badge-host ${room.status ? 'status-available-host' : 'status-occupied-host'}">
-                        ${room.status ? 'Trống' : 'Đã thuê/Bảo trì'}
-                    </span>
-                </td>
-                <td class="table-td-host">${room.acreage} m²</td>
-                <td class="table-td-host">${room.max_tenants} người</td>
-                <td class="table-td-host">
-                    <div class="action-buttons-host">
-                        <button class="btn-edit-host" title="Chỉnh sửa" onclick="editRoom(${room.room_id})">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-delete-host" title="Xóa" onclick="deleteRoom(${room.room_id})">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                </td>
-            `;
-            tableBody.appendChild(row);
+
+        function filterRooms() {
+            const status = document.getElementById('statusFilterHost').value;
+            let filteredRooms = [...initialRooms]; // Sử dụng bản sao của initialRooms
+            if (status) {
+                filteredRooms = filteredRooms.filter(room => room.status === (status === 'true'));
+            }
+            updateTable(filteredRooms);
+        }
+
+        function updateTable(rooms) {
+            const tableBody = document.getElementById('roomTableBodyHost');
+            tableBody.innerHTML = '';
+            if (!rooms || rooms.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6">Không tìm thấy phòng nào.</td></tr>';
+                return;
+            }
+            rooms.forEach(room => {
+                const row = document.createElement('tr');
+                row.className = 'table-row-host';
+                row.innerHTML = `
+                    <td class="table-td-host room-name-host">${room.namerooms || 'N/A'}</td>
+                    <td class="table-td-host-price price-host">${room.price ? new Intl.NumberFormat('vi-VN').format(room.price) + ' ₫' : 'N/A'}</td>
+                    <td class="table-td-host">
+                        <span class="status-badge-host ${room.status ? 'status-available-host' : 'status-occupied-host'}">
+                            ${room.status ? 'Trống' : 'Đã thuê/Bảo trì'}
+                        </span>
+                    </td>
+                    <td class="table-td-host">${room.acreage ? room.acreage + ' m²' : 'N/A'}</td>
+                    <td class="table-td-host">${room.max_tenants ? room.max_tenants + ' người' : 'N/A'}</td>
+                    <td class="table-td-host">
+                        <div class="action-buttons-host">
+                            <button class="btn-edit-host" title="Chỉnh sửa" onclick="editRoom(${room.room_id || 0})">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-delete-host" title="Xóa" onclick="deleteRoom(${room.room_id || 0})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function editRoom(room_id) {
+            window.location.href = `/chu-tro/them-phong?id=${room_id}`;
+        }
+
+        function deleteRoom(room_id) {
+            if (confirm('Bạn có chắc muốn xóa phòng này?')) {
+                fetch(`/chu-tro/delete-room?id=${room_id}`, { method: 'DELETE' })
+                    .then(() => location.reload())
+                    .catch(error => console.error('Error deleting room:', error));
+            }
+        }
+
+        // Khởi tạo bảng với dữ liệu từ Thymeleaf
+        updateTable(initialRooms);
+
+        // Event listeners
+        document.getElementById('searchRoomInputHost').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') searchRooms();
         });
-    }
-
-    function editRoom(roomId) {
-        window.location.href = `/chu-tro/them-phong?id=${roomId}`;
-    }
-
-    function deleteRoom(roomId) {
-        if (confirm('Bạn có chắc muốn xóa phòng này?')) {
-            fetch(`/chu-tro/delete-room?id=${roomId}`, { method: 'DELETE' })
-                .then(() => location.reload());
-        }
-    }
-
-    // Event listeners
-    document.getElementById('searchRoomInputHost').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') searchRooms();
+        document.querySelector('.search-btn-host').addEventListener('click', searchRooms);
+        document.getElementById('statusFilterHost').addEventListener('change', filterRooms);
     });
-    document.querySelector('.search-btn-host').addEventListener('click', searchRooms);
-    document.getElementById('statusFilterHost').addEventListener('change', filterRooms);
 
-    // Khởi tạo bảng với dữ liệu ban đầu từ server
-    updateTable([]);
-});
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.price-host').forEach(priceElement => {
+            let price = parseFloat(priceElement.textContent.replace(' ₫', '').replace(',', ''));
+            if (!isNaN(price)) {
+                priceElement.textContent = price.toLocaleString('vi-VN') + ' ₫';
+            }
+        });
+    });
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('.price-host').forEach(priceElement => {
         let price = parseInt(priceElement.textContent.replace(' ₫', ''));

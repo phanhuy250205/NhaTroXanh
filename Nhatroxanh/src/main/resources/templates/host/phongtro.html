@@ -93,10 +93,10 @@
                         <td class="table-td-host" th:text="${room.max_tenants} + ' người'">2 người</td>
                         <td class="table-td-host">
                             <div class="action-buttons-host">
-                                <button class="btn-edit-host" title="Chỉnh sửa" th:onclick="'editRoom(' + ${room['room_id']} + ')'">
+                                <button class="btn-edit-host" title="Chỉnh sửa" th:onclick="'editRoom(' + ${room.room_id} + ')'">
                                     <i class="fas fa-edit"></i>
                                 </button>
-                                <button class="btn-delete-host" title="Xóa" th:onclick="'deleteRoom(' + ${room['room_id']} + ')'">
+                                <button class="btn-delete-host" title="Xóa" th:onclick="'deleteRoom(' + ${room.room_id} + ')'">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -360,5 +360,11 @@
 
             </div>
         </div>
+
+    <script th:inline="javascript">
+    window.initialRooms = /*[[${rooms}]]*/ [];
+    </script>
+    <script th:src="@{/js/phongtro-host.js}"></script>
+    
 </body>
 </html>

@@ -179,15 +179,15 @@ public String editKhuTro(@RequestParam Integer id, Model model) {
 public String manageRooms(Model model, Authentication authentication) {
     if (authentication != null && authentication.isAuthenticated()) {
         String email = authentication.getName();
-        System.out.println("User email: " + email); // Debug email
+        System.out.println("User email: " + email);
         List<Hostel> hostels = hostelRepository.findAllByOwnerEmail(email);
         if (hostels != null && !hostels.isEmpty()) {
             List<Rooms> allRooms = new ArrayList<>();
             for (Hostel hostel : hostels) {
-                System.out.println("Checking hostel: " + hostel.getHostelId()); // Debug hostel
+                System.out.println("Checking hostel: " + hostel.getHostelId());
                 List<Rooms> rooms = roomsRepository.findByHostel_HostelId(hostel.getHostelId());
                 allRooms.addAll(rooms);
-                System.out.println("Rooms found for hostel " + hostel.getHostelId() + ": " + rooms.size()); // Debug rooms
+                System.out.println("Rooms found for hostel " + hostel.getHostelId() + ": " + rooms.size());
             }
             model.addAttribute("rooms", allRooms);
             System.out.println("Total rooms loaded: " + allRooms.size());

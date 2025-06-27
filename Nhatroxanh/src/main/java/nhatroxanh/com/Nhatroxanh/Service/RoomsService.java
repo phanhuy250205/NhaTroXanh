@@ -29,8 +29,8 @@ public class RoomsService {
         return roomsRepository.findByNameroomsContainingIgnoreCase(name);
     }
 
-    public Rooms findRoomById(Integer roomId) {
-        return roomsRepository.findById(roomId).orElse(null);
+    public Rooms findRoomById(Integer room_id) {
+        return roomsRepository.findById(room_id).orElse(null);
     }
 
     public void saveRoom(Rooms room) {
