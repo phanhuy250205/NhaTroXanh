@@ -12,9 +12,6 @@ const detailData = {
         address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
         job: "Kỹ sư phần mềm",
         workplace: "Công ty TNHH ABC Technology",
-        registerDate: "20/12/2024",
-        reason: "Cần thuê trọ gần nơi làm việc",
-        note: "Sinh viên mới tốt nghiệp, có thu nhập ổn định, không hút thuốc, không nuôi thú cưng. Mong muốn tìm được chỗ ở yên tĩnh để có thể tập trung làm việc và phát triển sự nghiệp.",
         documents: [
             { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
             { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
@@ -32,9 +29,6 @@ const detailData = {
         address: "456 Đường DEF, Phường UVW, Quận 2, TP.HCM",
         job: "Nhân viên văn phòng",
         workplace: "Công ty Cổ phần XYZ",
-        registerDate: "19/12/2024",
-        reason: "Chuyển công tác từ Hà Nội vào TP.HCM",
-        note: "Làm việc tại văn phòng, giờ giấc đều đặn, yêu thích sự yên tĩnh. Không hút thuốc, không uống rượu bia, có thói quen sinh hoạt lành mạnh.",
         documents: [
             { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
             { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
@@ -52,9 +46,6 @@ const detailData = {
         address: "789 Đường GHI, Phường RST, Quận 3, TP.HCM",
         job: "Giáo viên",
         workplace: "Trường THPT ABC",
-        registerDate: "18/12/2024",
-        reason: "Tìm chỗ ở gần trường học",
-        note: "Giáo viên có kinh nghiệm, sống có trách nhiệm, thích môi trường yên tĩnh để chuẩn bị bài giảng. Có thể về muộn vào các buổi tối do phải dạy thêm.",
         documents: [
             { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
             { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
@@ -286,9 +277,9 @@ function showDetailModal(id) {
     document.getElementById("detailAddress").textContent = registration.address
     document.getElementById("detailJob").textContent = registration.job
     document.getElementById("detailWorkplace").textContent = registration.workplace
-    document.getElementById("detailRegisterDate").textContent = registration.registerDate
-    document.getElementById("detailReason").textContent = registration.reason
-    document.getElementById("detailNote").textContent = registration.note
+    // document.getElementById("detailRegisterDate").textContent = registration.registerDate
+    // document.getElementById("detailReason").textContent = registration.reason
+    // document.getElementById("detailNote").textContent = registration.note
 
     // Populate document images
     const documentImages = document.getElementById("documentImages")
