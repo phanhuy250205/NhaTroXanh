@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         :root {
             --primary-blue: #3E83CC;
@@ -228,348 +231,347 @@
         }
 
         @media (max-width: 1200px) {
-    .main-content-wrapper-host {
-        padding: 12px;
-    }
-    
-    .metrics-grid-host {
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 10px;
-    }
-    
-    .page-title-host {
-        font-size: 22px;
-    }
-    
-    .finance-cards-host {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-}
+            .main-content-wrapper-host {
+                padding: 12px;
+            }
 
-@media (max-width: 992px) {
-    .main-content-wrapper-host {
-        margin-left: 80px;
-        width: calc(100% - 80px);
-    }
-    
-    .metrics-grid-host {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .finance-cards-host {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-    
-    .time-selector-host {
-        min-width: 160px;
-        font-size: 13px;
-    }
-}
+            .metrics-grid-host {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 10px;
+            }
 
-@media (max-width: 768px) {
-    .main-content-wrapper-host {
-        margin-left: 0;
-        padding: 10px;
-        width: 100%;
-        padding-top: 70px;
-    }
-    
-    .page-title-host {
-        font-size: 20px;
-        margin-bottom: 16px;
-    }
-    
-    .finance-header-host {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-    
-    .time-selector-host {
-        width: 100%;
-        min-width: auto;
-        padding: 12px 40px 12px 16px;
-    }
-    
-    .metrics-grid-host {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .finance-cards-host {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-    
-    .chart-wrapper-host {
-        height: 280px;
-        padding: 12px;
-    }
-    
-    .metric-card-host {
-        height: 100px;
-        padding: 14px;
-    }
-    
-    .metric-label-host {
-        font-size: 11px;
-    }
-    
-    .metric-value-host {
-        font-size: 20px;
-    }
-    
-    .finance-card-host {
-        height: 75px;
-        padding: 14px;
-    }
-    
-    .finance-card-title-host {
-        font-size: 11px;
-    }
-    
-    .finance-card-value-host {
-        font-size: 18px;
-    }
-}
+            .page-title-host {
+                font-size: 22px;
+            }
 
-@media (max-width: 576px) {
-    .main-content-wrapper-host {
-        padding: 8px;
-    }
-    
-    .page-title-host {
-        font-size: 18px;
-        margin-bottom: 12px;
-    }
-    
-    .metrics-grid-host {
-        grid-template-columns: 1fr;
-        gap: 8px;
-    }
-    
-    .metric-card-host {
-        height: 85px;
-        padding: 12px;
-    }
-    
-    .metric-icon-host {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .metric-icon-host i {
-        font-size: 14px;
-    }
-    
-    .metric-label-host {
-        font-size: 10px;
-        margin-bottom: 4px;
-    }
-    
-    .metric-value-host {
-        font-size: 18px;
-    }
-    
-    .finance-section-host {
-        padding: 16px;
-    }
-    
-    .finance-title-host {
-        font-size: 18px;
-    }
-    
-    .finance-card-host {
-        height: 70px;
-        padding: 12px;
-    }
-    
-    .finance-card-title-host {
-        font-size: 10px;
-        margin-bottom: 4px;
-    }
-    
-    .finance-card-value-host {
-        font-size: 16px;
-    }
-    
-    .chart-wrapper-host {
-        height: 240px;
-        padding: 10px;
-    }
-    
-    .time-selector-host {
-        padding: 10px 35px 10px 12px;
-        font-size: 12px;
-        background-position: right 8px center;
-        background-size: 14px;
-    }
-}
+            .finance-cards-host {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
 
-@media (max-width: 480px) {
-    .main-content-wrapper-host {
-        padding: 6px;
-    }
-    
-    .page-title-host {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
-    
-    .metrics-grid-host {
-        gap: 6px;
-    }
-    
-    .metric-card-host {
-        height: 80px;
-        padding: 10px;
-        border-radius: 8px;
-    }
-    
-    .metric-icon-host {
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
-        margin-bottom: 6px;
-    }
-    
-    .metric-icon-host i {
-        font-size: 12px;
-    }
-    
-    .metric-label-host {
-        font-size: 9px;
-        margin-bottom: 3px;
-    }
-    
-    .metric-value-host {
-        font-size: 16px;
-    }
-    
-    .section-divider-host {
-        margin: 15px 0;
-    }
-    
-    .finance-section-host {
-        padding: 12px;
-        border-radius: 12px;
-    }
-    
-    .finance-title-host {
-        font-size: 16px;
-    }
-    
-    .finance-header-host {
-        margin-bottom: 12px;
-        gap: 8px;
-    }
-    
-    .finance-cards-host {
-        gap: 6px;
-        margin-bottom: 15px;
-    }
-    
-    .finance-card-host {
-        height: 65px;
-        padding: 10px;
-        border-radius: 8px;
-    }
-    
-    .finance-card-title-host {
-        font-size: 9px;
-        margin-bottom: 3px;
-    }
-    
-    .finance-card-value-host {
-        font-size: 14px;
-    }
-    
-    .chart-wrapper-host {
-        height: 200px;
-        padding: 8px;
-        border-radius: 8px;
-    }
-    
-    .time-selector-host {
-        padding: 8px 30px 8px 10px;
-        font-size: 11px;
-        border-radius: 6px;
-        background-position: right 6px center;
-        background-size: 12px;
-    }
-}
+        @media (max-width: 992px) {
+            .main-content-wrapper-host {
+                margin-left: 80px;
+                width: calc(100% - 80px);
+            }
 
-@media (max-width: 360px) {
-    .main-content-wrapper-host {
-        padding: 4px;
-    }
-    
-    .page-title-host {
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-    
-    .metric-card-host {
-        height: 75px;
-        padding: 8px;
-    }
-    
-    .metric-icon-host {
-        width: 24px;
-        height: 24px;
-        margin-bottom: 4px;
-    }
-    
-    .metric-icon-host i {
-        font-size: 10px;
-    }
-    
-    .metric-label-host {
-        font-size: 8px;
-        margin-bottom: 2px;
-    }
-    
-    .metric-value-host {
-        font-size: 14px;
-    }
-    
-    .finance-section-host {
-        padding: 10px;
-    }
-    
-    .finance-title-host {
-        font-size: 14px;
-    }
-    
-    .finance-card-host {
-        height: 60px;
-        padding: 8px;
-    }
-    
-    .finance-card-title-host {
-        font-size: 8px;
-    }
-    
-    .finance-card-value-host {
-        font-size: 12px;
-    }
-    
-    .chart-wrapper-host {
-        height: 180px;
-        padding: 6px;
-    }
-    
-    .time-selector-host {
-        padding: 6px 25px 6px 8px;
-        font-size: 10px;
-        background-position: right 4px center;
-        background-size: 10px;
-    }
-}
+            .metrics-grid-host {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
 
-        /* Custom scrollbar */
+            .finance-cards-host {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .time-selector-host {
+                min-width: 160px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content-wrapper-host {
+                margin-left: 0;
+                padding: 10px;
+                width: 100%;
+                padding-top: 70px;
+            }
+
+            .page-title-host {
+                font-size: 20px;
+                margin-bottom: 16px;
+            }
+
+            .finance-header-host {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .time-selector-host {
+                width: 100%;
+                min-width: auto;
+                padding: 12px 40px 12px 16px;
+            }
+
+            .metrics-grid-host {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .finance-cards-host {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .chart-wrapper-host {
+                height: 280px;
+                padding: 12px;
+            }
+
+            .metric-card-host {
+                height: 100px;
+                padding: 14px;
+            }
+
+            .metric-label-host {
+                font-size: 11px;
+            }
+
+            .metric-value-host {
+                font-size: 20px;
+            }
+
+            .finance-card-host {
+                height: 75px;
+                padding: 14px;
+            }
+
+            .finance-card-title-host {
+                font-size: 11px;
+            }
+
+            .finance-card-value-host {
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content-wrapper-host {
+                padding: 8px;
+            }
+
+            .page-title-host {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+
+            .metrics-grid-host {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .metric-card-host {
+                height: 85px;
+                padding: 12px;
+            }
+
+            .metric-icon-host {
+                width: 30px;
+                height: 30px;
+            }
+
+            .metric-icon-host i {
+                font-size: 14px;
+            }
+
+            .metric-label-host {
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+
+            .metric-value-host {
+                font-size: 18px;
+            }
+
+            .finance-section-host {
+                padding: 16px;
+            }
+
+            .finance-title-host {
+                font-size: 18px;
+            }
+
+            .finance-card-host {
+                height: 70px;
+                padding: 12px;
+            }
+
+            .finance-card-title-host {
+                font-size: 10px;
+                margin-bottom: 4px;
+            }
+
+            .finance-card-value-host {
+                font-size: 16px;
+            }
+
+            .chart-wrapper-host {
+                height: 240px;
+                padding: 10px;
+            }
+
+            .time-selector-host {
+                padding: 10px 35px 10px 12px;
+                font-size: 12px;
+                background-position: right 8px center;
+                background-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .main-content-wrapper-host {
+                padding: 6px;
+            }
+
+            .page-title-host {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .metrics-grid-host {
+                gap: 6px;
+            }
+
+            .metric-card-host {
+                height: 80px;
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .metric-icon-host {
+                width: 28px;
+                height: 28px;
+                border-radius: 6px;
+                margin-bottom: 6px;
+            }
+
+            .metric-icon-host i {
+                font-size: 12px;
+            }
+
+            .metric-label-host {
+                font-size: 9px;
+                margin-bottom: 3px;
+            }
+
+            .metric-value-host {
+                font-size: 16px;
+            }
+
+            .section-divider-host {
+                margin: 15px 0;
+            }
+
+            .finance-section-host {
+                padding: 12px;
+                border-radius: 12px;
+            }
+
+            .finance-title-host {
+                font-size: 16px;
+            }
+
+            .finance-header-host {
+                margin-bottom: 12px;
+                gap: 8px;
+            }
+
+            .finance-cards-host {
+                gap: 6px;
+                margin-bottom: 15px;
+            }
+
+            .finance-card-host {
+                height: 65px;
+                padding: 10px;
+                border-radius: 8px;
+            }
+
+            .finance-card-title-host {
+                font-size: 9px;
+                margin-bottom: 3px;
+            }
+
+            .finance-card-value-host {
+                font-size: 14px;
+            }
+
+            .chart-wrapper-host {
+                height: 200px;
+                padding: 8px;
+                border-radius: 8px;
+            }
+
+            .time-selector-host {
+                padding: 8px 30px 8px 10px;
+                font-size: 11px;
+                border-radius: 6px;
+                background-position: right 6px center;
+                background-size: 12px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .main-content-wrapper-host {
+                padding: 4px;
+            }
+
+            .page-title-host {
+                font-size: 14px;
+                margin-bottom: 8px;
+            }
+
+            .metric-card-host {
+                height: 75px;
+                padding: 8px;
+            }
+
+            .metric-icon-host {
+                width: 24px;
+                height: 24px;
+                margin-bottom: 4px;
+            }
+
+            .metric-icon-host i {
+                font-size: 10px;
+            }
+
+            .metric-label-host {
+                font-size: 8px;
+                margin-bottom: 2px;
+            }
+
+            .metric-value-host {
+                font-size: 14px;
+            }
+
+            .finance-section-host {
+                padding: 10px;
+            }
+
+            .finance-title-host {
+                font-size: 14px;
+            }
+
+            .finance-card-host {
+                height: 60px;
+                padding: 8px;
+            }
+
+            .finance-card-title-host {
+                font-size: 8px;
+            }
+
+            .finance-card-value-host {
+                font-size: 12px;
+            }
+
+            .chart-wrapper-host {
+                height: 180px;
+                padding: 6px;
+            }
+
+            .time-selector-host {
+                padding: 6px 25px 6px 8px;
+                font-size: 10px;
+                background-position: right 4px center;
+                background-size: 10px;
+            }
+        }
+
         ::-webkit-scrollbar {
             width: 6px;
         }
@@ -585,6 +587,7 @@
         }
     </style>
 </head>
+
 <body class="dashboard-body-host">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -599,47 +602,89 @@
                         <i class="fas fa-building"></i>
                     </div>
                     <div class="metric-label-host">Tổng số nhà trọ</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #3E83CC, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="totalHostels"
+                        style="background: linear-gradient(135deg, #3E83CC, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
-                
+
                 <div class="metric-card-host">
                     <div class="metric-icon-host" style="background: linear-gradient(135deg, #10b981, #059669);">
                         <i class="fas fa-door-open"></i>
                     </div>
                     <div class="metric-label-host">Tổng số phòng trọ</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="totalRooms"
+                        style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
-                
+
                 <div class="metric-card-host">
                     <div class="metric-icon-host" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
                         <i class="fas fa-door-closed"></i>
                     </div>
                     <div class="metric-label-host">Số phòng đang trống</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="vacantRooms"
+                        style="background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
-                
+
                 <div class="metric-card-host">
                     <div class="metric-icon-host" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
                         <i class="fas fa-users"></i>
                     </div>
                     <div class="metric-label-host">Số phòng đang thuê</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="rentedRooms"
+                        style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
-                
+
                 <div class="metric-card-host">
                     <div class="metric-icon-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
                         <i class="fas fa-clock"></i>
                     </div>
                     <div class="metric-label-host">Số phòng đang cọc</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="depositedRooms"
+                        style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
-                
+
                 <div class="metric-card-host">
                     <div class="metric-icon-host" style="background: linear-gradient(135deg, #ec4899, #db2777);">
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="metric-label-host">Số phòng đang nợ</div>
-                    <div class="metric-value-host" style="background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">0</div>
+                    <div class="metric-value-host" id="overdueRooms"
+                        style="background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
+                </div>
+
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
+                        <i class="fas fa-user-friends"></i>
+                    </div>
+                    <div class="metric-label-host">Tổng số người thuê</div>
+                    <div class="metric-value-host" id="totalTenants"
+                        style="background: linear-gradient(135deg, #6b7280, #4b5563); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
+                </div>
+
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="metric-label-host">Người thuê mới</div>
+                    <div class="metric-value-host" id="newTenants"
+                        style="background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
+                </div>
+
+                <div class="metric-card-host">
+                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                        <i class="fas fa-hourglass-end"></i>
+                    </div>
+                    <div class="metric-label-host">Hợp đồng sắp hết hạn</div>
+                    <div class="metric-value-host" id="expiringContracts"
+                        style="background: linear-gradient(135deg, #f97316, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        0</div>
                 </div>
             </div>
 
@@ -648,33 +693,18 @@
             <div class="finance-section-host">
                 <div class="finance-header-host">
                     <h2 class="finance-title-host">TỔNG QUAN THU CHI</h2>
-                    <select class="time-selector-host">
-                        <option>7 ngày gần đây</option>
-                        <option>14 ngày gần đây</option>
-                        <option>30 ngày gần đây</option>
-                        <option>3 tháng gần đây</option>
-                        <option>6 tháng gần đây</option>
-                        <option>1 năm gần đây</option>
+                    <select class="time-selector-host" id="timeSelector">
+                        <!-- Tùy chọn sẽ được tạo động bằng JavaScript -->
                     </select>
                 </div>
-                
+
                 <div class="finance-cards-host">
                     <div class="finance-card-host">
                         <div class="finance-card-title-host">Tổng khoản thu</div>
-                        <div class="finance-card-value-host">0 VNĐ</div>
-                    </div>
-                    
-                    <div class="finance-card-host">
-                        <div class="finance-card-title-host">Tổng khoản chi</div>
-                        <div class="finance-card-value-host">0 VNĐ</div>
-                    </div>
-                    
-                    <div class="finance-card-host">
-                        <div class="finance-card-title-host">Lợi nhuận</div>
-                        <div class="finance-card-value-host">0 VNĐ</div>
+                        <div class="finance-card-value-host" id="totalRevenue">0 VNĐ</div>
                     </div>
                 </div>
-                
+
                 <div class="chart-wrapper-host">
                     <canvas id="financialChart"></canvas>
                 </div>
@@ -683,20 +713,99 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/sidebar.js}"></script>
     <script>
-        // Initialize Chart
+        // Hàm định dạng số tiền
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+        }
+
+        // Hàm tạo động danh sách tùy chọn lọc
+        function populateTimeSelector() {
+            const timeSelector = document.getElementById('timeSelector');
+            const currentYear = new Date().getFullYear();
+            const months = [
+                'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+                'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+            ];
+
+            timeSelector.innerHTML = `
+                <option value="7 ngày gần đây">7 ngày gần đây</option>
+                <option value="14 ngày gần đây">14 ngày gần đây</option>
+                <option value="30 ngày gần đây">30 ngày gần đây</option>
+                <option value="3 tháng gần đây">3 tháng gần đây</option>
+                <option value="6 tháng gần đây">6 tháng gần đây</option>
+                <option value="1 năm gần đây">1 năm gần đây</option>
+            `;
+
+            for (let year = currentYear; year >= currentYear - 5; year--) {
+                months.forEach((month, index) => {
+                    const monthValue = `month-${year}-${(index + 1).toString().padStart(2, '0')}`;
+                    const option = document.createElement('option');
+                    option.value = monthValue;
+                    option.textContent = `${month}/${year}`;
+                    timeSelector.appendChild(option);
+                });
+            }
+
+            for (let year = currentYear; year >= currentYear - 5; year--) {
+                for (let q = 1; q <= 4; q++) {
+                    const quarterValue = `quarter-${year}-${q}`;
+                    const option = document.createElement('option');
+                    option.value = quarterValue;
+                    option.textContent = `Quý ${q}/${year}`;
+                    timeSelector.appendChild(option);
+                }
+            }
+
+            for (let year = currentYear; year >= currentYear - 5; year--) {
+                const yearValue = `year-${year}`;
+                const option = document.createElement('option');
+                option.value = yearValue;
+                option.textContent = `Năm ${year}`;
+                timeSelector.appendChild(option);
+            }
+        }
+
+        // Hàm lấy dữ liệu từ API
+        function fetchDashboardStats(timeRange) {
+            axios.get('/api/dashboard/stats', {
+                params: { timeRange: timeRange }
+            }).then(response => {
+                const data = response.data;
+
+                // Cập nhật các số liệu
+                document.getElementById('totalHostels').textContent = data.totalHostels;
+                document.getElementById('totalRooms').textContent = data.totalRooms;
+                document.getElementById('vacantRooms').textContent = data.vacantRooms;
+                document.getElementById('rentedRooms').textContent = data.rentedRooms;
+                document.getElementById('depositedRooms').textContent = data.depositedRooms;
+                document.getElementById('overdueRooms').textContent = data.overdueRooms;
+                document.getElementById('totalTenants').textContent = data.totalTenants;
+                document.getElementById('newTenants').textContent = data.newTenants;
+                document.getElementById('expiringContracts').textContent = data.expiringContracts;
+                document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue);
+
+                // Cập nhật biểu đồ
+                financialChart.data.labels = data.chartLabels.length > 0 ? data.chartLabels : ['Không có dữ liệu'];
+                financialChart.data.datasets[0].data = data.chartRevenue.length > 0 ? data.chartRevenue : [0];
+                financialChart.update();
+            }).catch(error => {
+                console.error('Error fetching dashboard stats:', error);
+            });
+        }
+
+        // Khởi tạo biểu đồ
         const ctx = document.getElementById('financialChart').getContext('2d');
         const financialChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+                labels: ['Không có dữ liệu'],
                 datasets: [
                     {
                         label: 'Tổng khoản thu',
-                        data: [60, 40, 90, 340, 50, 70, 80],
+                        data: [0],
                         borderColor: '#3E83CC',
                         backgroundColor: 'rgba(62, 131, 204, 0.1)',
                         fill: true,
@@ -707,118 +816,110 @@
                         pointBorderWidth: 1,
                         pointRadius: 3,
                         pointHoverRadius: 5
-                    },
-                    {
-                        label: 'Tổng khoản chi',
-                        data: [30, 60, 50, 170, 30, 20, 50],
-                        borderColor: '#ef4444',
-                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 1,
-                        pointBackgroundColor: '#ef4444',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 1,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    },
-                    {
-                        label: 'Lợi nhuận',
-                        data: [30, -20, 40, 170, 20, 50, 30],
-                        borderColor: '#10b981',
-                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 1,
-                        pointBackgroundColor: '#10b981',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 1,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
                     }
                 ]
             },
             options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    devicePixelRatio: window.devicePixelRatio || 1,
-    interaction: {
-        intersect: false,
-        mode: 'index'
-    },
-    plugins: {
-        legend: {
-            position: window.innerWidth < 768 ? 'bottom' : 'bottom',
-            labels: {
-                color: '#1f2937',
-                font: {
-                    size: window.innerWidth < 576 ? 10 : window.innerWidth < 768 ? 11 : 12,
-                    weight: '600'
+                responsive: true,
+                maintainAspectRatio: false,
+                devicePixelRatio: window.devicePixelRatio || 1,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
                 },
-                padding: window.innerWidth < 576 ? 8 : 16,
-                usePointStyle: true,
-                pointStyle: 'circle',
-                boxWidth: window.innerWidth < 576 ? 8 : 12
-            }
-        },
-        tooltip: {
-            backgroundColor: 'rgba(255, 255, 255, 0.95)',
-            titleColor: '#1f2937',
-            bodyColor: '#1f2937',
-            borderColor: '#3E83CC',
-            borderWidth: 1,
-            cornerRadius: 8,
-            displayColors: true,
-            padding: window.innerWidth < 576 ? 6 : 10,
-            titleFont: {
-                size: window.innerWidth < 576 ? 10 : 12
-            },
-            bodyFont: {
-                size: window.innerWidth < 576 ? 9 : 11
-            }
-        }
-    },
-    scales: {
-        y: {
-            beginAtZero: true,
-            ticks: {
-                stepSize: 80,
-                color: '#1f2937',
-                font: {
-                    size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
-                    weight: '500'
+                plugins: {
+                    legend: {
+                        position: window.innerWidth < 768 ? 'bottom' : 'bottom',
+                        labels: {
+                            color: '#1f2937',
+                            font: {
+                                size: window.innerWidth < 576 ? 10 : window.innerWidth < 768 ? 11 : 12,
+                                weight: '600'
+                            },
+                            padding: window.innerWidth < 576 ? 8 : 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle',
+                            boxWidth: window.innerWidth < 576 ? 8 : 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                        titleColor: '#1f2937',
+                        bodyColor: '#1f2937',
+                        borderColor: '#3E83CC',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        padding: window.innerWidth < 576 ? 6 : 10,
+                        titleFont: {
+                            size: window.innerWidth < 576 ? 10 : 12
+                        },
+                        bodyFont: {
+                            size: window.innerWidth < 576 ? 9 : 11
+                        },
+                        callbacks: {
+                            label: function (context) {
+                                return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
+                            }
+                        }
+                    }
                 },
-                maxTicksLimit: window.innerWidth < 576 ? 4 : 6
-            },
-            grid: {
-                color: 'rgba(62, 131, 204, 0.1)',
-                lineWidth: 1
-            },
-            border: {
-                color: 'rgba(62, 131, 204, 0.2)'
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1000000,
+                            color: '#1f2937',
+                            font: {
+                                size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                                weight: '500'
+                            },
+                            maxTicksLimit: window.innerWidth < 576 ? 4 : 6,
+                            callback: function (value) {
+                                return formatCurrency(value);
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(62, 131, 204, 0.1)',
+                            lineWidth: 1
+                        },
+                        border: {
+                            color: 'rgba(62, 131, 204, 0.2)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            padding: window.innerWidth < 576 ? 4 : 8,
+                            color: '#1f2937',
+                            font: {
+                                size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                                weight: '500'
+                            },
+                            maxRotation: window.innerWidth < 576 ? 45 : 0
+                        },
+                        grid: {
+                            color: 'rgba(62, 131, 204, 0.1)',
+                            lineWidth: 1
+                        },
+                        border: {
+                            color: 'rgba(62, 131, 204, 0.2)'
+                        }
+                    }
+                }
             }
-        },
-        x: {
-            ticks: {
-                padding: window.innerWidth < 576 ? 4 : 8,
-                color: '#1f2937',
-                font: {
-                    size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
-                    weight: '500'
-                },
-                maxRotation: window.innerWidth < 576 ? 45 : 0
-            },
-            grid: {
-                color: 'rgba(62, 131, 204, 0.1)',
-                lineWidth: 1
-            },
-            border: {
-                color: 'rgba(62, 131, 204, 0.2)'
-            }
-        }
-    }
-}
         });
+
+        // Gọi hàm tạo danh sách tùy chọn khi trang tải
+        populateTimeSelector();
+
+        // Lắng nghe sự kiện thay đổi khoảng thời gian
+        document.getElementById('timeSelector').addEventListener('change', function () {
+            fetchDashboardStats(this.value);
+        });
+
+        // Gọi API khi trang được tải
+        fetchDashboardStats('7 ngày gần đây');
     </script>
 </body>
+
 </html>

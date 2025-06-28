@@ -1,138 +1,491 @@
 <!DOCTYPE html>
-<html lang="en">
-<head th:replace="~{/layouts/head}">
+<html lang="vi">
+  <head th:replace="~{/layouts/head}" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi Tiết - Nhà Trọ Xanh</title>
+    
     <style>
-        
-    .main-content {
-      flex: 1;
-      padding: 20px;
-      background-color: #f8f9fa;
-    }
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
 
-    .badge-active {
-      background-color: #d4edda;
-      color: #28a745;
-      border: 1px solid #28a745;
-      border-radius: 20px;
-      padding: 5px 15px;
-      font-weight: 500;
-    }
+        .page-header {
+            margin-bottom: 30px;
+        }
 
-    .badge-inactive {
-      background-color: #f8d7da;
-      color: #dc3545;
-      border: 1px solid #dc3545;
-      border-radius: 20px;
-      padding: 5px 15px;
-      font-weight: 500;
-    }
+        .page-title {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
 
-    .search-group {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
+        .page-subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
 
-    .search-rounded {
-      height: 40px;
-      border-radius: 50px;
-      padding-left: 15px;
-      font-size: 14px;
-    }
+        .nav-tabs-custom {
+            border: none;
+            margin-bottom: 30px;
+        }
 
-    .btn-search-rounded {
-      background-color: #0095d5;
-      color: #fff;
-      font-weight: 500;
-      border-radius: 55px;
-      font-size: 13px;
-      border: none;
-      width: 123px;
-    }
+        .nav-tabs-custom .nav-link {
+            border: none;
+            padding: 15px 25px;
+            font-weight: 600;
+            color: #7f8c8d;
+            background: transparent;
+            border-radius: 12px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
 
-    .btn-search-rounded:hover {
-      background-color: #007bb5;
-      color: #fff;
-    }
+        .nav-tabs-custom .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #3e83cc;
+        }
 
-    table thead {
-      background-color: #e3f2fd;
-      font-weight: 600;
-    }
+        .nav-tabs-custom .nav-link.active {
+            background: #3e83cc;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
 
-    .table td,
-    .table th {
-      vertical-align: middle;
-      text-align: center;
-    }
+        .search-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
 
-    .action-link {
-      color: orange;
-      text-decoration: none;
-      font-weight: 500;
-    }
+        .search-input {
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            border-color: #3e83cc;
+        }
+
+        .btn-search {
+            background: #3e83cc;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: #fff;
+        }
+
+        .table-container {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .table-modern {
+            margin: 0;
+            border: none;
+        }
+
+        .table-modern thead th {
+            background: #3e83cc;
+            color: #fff;
+            font-weight: 600;
+            padding: 20px 15px;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+
+        .table-modern tbody td {
+            padding: 20px 15px;
+            border: none;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            vertical-align: middle;
+            font-weight: 500;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+
+        .badge-status {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-active {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 184, 148, 0.3);
+        }
+
+        .badge-inactive {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(225, 112, 85, 0.3);
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 3px 10px rgba(253, 203, 110, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(253, 203, 110, 0.4);
+            color: #fff;
+        }
+
+        .stats-card {
+            background: #3e83cc;
+            color: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+      
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+            
+            .content-card {
+                padding: 20px;
+            }
+            
+            .search-section {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- NAVBAR -->
-    <div th:replace="~{/layouts/sidebar-staff}"></div>
-     <div class="main-content">
-      <ul class="nav nav-tabs border-bottom border-dark mb-3">
-        <li class="nav-item">
-          <a class="nav-link text-primary border-primary" href="/thong-tin-tro" >THÔNG TIN TRỌ</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link active fw-bold text-dark" href="/category">LOẠI DANH MỤC</a>
-        </li>
-      </ul>
+  <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card fade-in">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-building text-primary"></i>
+                    Quản lý thông tin trọ
+                </h1>
+                <p class="page-subtitle">Theo dõi và quản lý tất cả các khu trọ</p>
+            </div>
 
-      <div class="search-group">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <input type="text" class="form-control search-rounded" placeholder="Tìm kiếm..." />
-          <button class="btn btn-search-rounded">TÌM KIẾM</button>
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">3</h3>
+                                <p class="mb-0">Tổng khu trọ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">2</h3>
+                                <p class="mb-0">Đang hoạt động</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0">1</h3>
+                                <p class="mb-0">Hết phòng</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs nav-tabs-custom">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">
+                        <i class="fas fa-info-circle me-2"></i>
+                        THÔNG TIN TRỌ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/nhan-vien/category">
+                        <i class="fas fa-tags me-2"></i>
+                        LOẠI DANH MỤC
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control search-input border-0" placeholder="Tìm kiếm theo tên khu trọ hoặc địa chỉ...">
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-search">
+                            <i class="fas fa-search me-2"></i>
+                            TÌM KIẾM
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th>
+                                <i class="fas fa-hashtag me-2"></i>
+                                ID
+                            </th>
+                            <th>
+                                <i class="fas fa-building me-2"></i>
+                                Tên khu trọ
+                            </th>
+                            <th>
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Địa chỉ
+                            </th>
+                            <th>
+                                <i class="fas fa-info-circle me-2"></i>
+                                Trạng thái
+                            </th>
+                            <th>
+                                <i class="fas fa-cogs me-2"></i>
+                                Hành động
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <strong>Nhà trọ A</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                147 Lê Lợi
+                            </td>
+                            <td>
+                                <span class="badge badge-active">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Hoạt động
+                                </span>
+                            </td>
+                            <td>
+                                <a href="/nhan-vien/chi-tiet-thong-tin-tro" class="action-btn">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>2</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <strong>Nhà trọ B</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                99 Trần Hưng Đạo
+                            </td>
+                            <td>
+                                <span class="badge badge-active">
+                                    <i class="fas fa-check-circle me-1"></i>
+                                    Hoạt động
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="action-btn">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>3</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <strong>Nhà trọ C</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                45 Nguyễn Huệ
+                            </td>
+                            <td>
+                                <span class="badge badge-inactive">
+                                    <i class="fas fa-times-circle me-1"></i>
+                                    Hết phòng
+                                </span>
+                            </td>
+                            <td>
+                                <a href="#" class="action-btn">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
-      </div>
+    </div>
 
-      <table class="table table-bordered text-center">
-  <thead class="table-primary">
-    <tr>
-      <th>ID</th>
-      <th>Tên khu trọ</th>
-      <th>Địa chỉ</th>
-      <th>Trạng thái</th>
-      <th>Hành động</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td>1</td>
-      <td>Nhà trọ A</td>
-      <td>147 Lê Lợi</td>
-      <td><span class="badge bg-success rounded-pill px-3 py-1">Hoạt động</span></td>
-      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td>Nhà trọ B</td>
-      <td>99 Trần Hưng Đạo</td>
-      <td><span class="badge bg-success rounded-pill px-3 py-1">Hoạt động</span></td>
-      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
-    </tr>
-    <tr>
-      <td>3</td>
-      <td>Nhà trọ C</td>
-      <td>45 Nguyễn Huệ</td>
-      <td><span class="badge bg-danger rounded-pill px-3 py-1">Hết phòng</span></td>
-      <td><a href="/detail-thong-tin-tro" class="text-primary">Xem chi tiết</a></td>
-    </tr>
-  </tbody>
-</table>
+    <!-- Floating Add Button -->
+   
 
-       </div>
-  </div>
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Add smooth scrolling and interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('.table-modern tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px)';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
 
-  
+            // Add click effect to buttons
+            const buttons = document.querySelectorAll('.btn, .action-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255,255,255,0.4);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

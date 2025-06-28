@@ -50,9 +50,6 @@ public class Users {
     @Column(name = "email", length = 100, unique = true)
     private String email;
 
-    @Column(name = "cccd", length = 20)
-    private String cccd;
-
     @Column(name = "avatar", length = 1000)
     private String avatar;
 

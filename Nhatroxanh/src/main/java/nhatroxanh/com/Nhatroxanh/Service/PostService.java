@@ -40,7 +40,8 @@ public interface PostService {
         Post updatePost(Integer postId, String title, String description, Float price, Float area,
                         Integer categoryId, String wardCode, String street, String houseNumber,
                         List<Integer> utilityIds, MultipartFile[] images, List<Integer> imagesToDelete,
-                        Integer hostelId, Users user, String provinceCode, String districtCode,
+                        List<Integer> imagesToKeep, Integer hostelId, Users user, String provinceCode,
+                        String districtCode,
                         String provinceName, String districtName, String wardName) throws Exception;
 
         void save(Post post);

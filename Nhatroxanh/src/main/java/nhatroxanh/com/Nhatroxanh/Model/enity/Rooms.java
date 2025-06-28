@@ -47,6 +47,7 @@ public class Rooms {
 
     @Column(name = "description", columnDefinition = "NVARCHAR(200)")
     private String description;
+    
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 
@@ -68,6 +69,7 @@ public class Rooms {
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities = new HashSet<>();
+
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 }

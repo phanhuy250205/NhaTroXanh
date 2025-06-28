@@ -1,7 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.sql.Date;
+
 import java.util.Optional;
+
+import java.util.List;
+
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
@@ -13,23 +17,36 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 import static com.mysql.cj.conf.PropertyKey.logger;
 
 @Service
 public class UserServiceImpl implements UserService {
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private OtpService otpService;
+
+  @Autowired
+  private UserRepository userRepository;
+  @Autowired
+  private PasswordEncoder passwordEncoder;
+  @Autowired
+  private OtpService otpService;
+  
+
+  @Transactional
+  public Users registerNewUser(UserRequest userRequest) {
+    
+    // Kiểm tra email đã tồn tại chưa
+    if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+      throw new RuntimeException("Email đã được sử dụng!");
+    }
+
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -38,12 +55,16 @@ public class UserServiceImpl implements UserService {
     private AddressRepository addressRepository;
 
 
+
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
         // Kiểm tra email đã tồn tại chưa
         if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
+
+     otpService.createAndSendOtp(savedUser);
+
 
         Users newUser = new Users();
 
@@ -84,6 +105,7 @@ public class UserServiceImpl implements UserService {
         Users savedUser = userRepository.save(newUser);
         return savedUser;
     }
+
 
     @Override
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
@@ -168,6 +190,7 @@ public class UserServiceImpl implements UserService {
     public Address saveAddress(Address address) {
         return addressRepository.save(address); // Sử dụng AddressRepository
     }
+
 
 
 }

@@ -37,6 +37,7 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
     // Lấy utilities của một room cụ thể
     @Query("SELECT u FROM Utility u JOIN u.rooms r WHERE r.roomId = :roomId")
     Set<Utility> findUtilitiesByRoomId(@Param("roomId") Integer roomId);
+
     
     // Tìm rooms theo owner ID (qua hostel)
     @Query("SELECT r FROM Rooms r " +
@@ -65,3 +66,21 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
            "WHERE r.status = 'AVAILABLE'")
     List<Rooms> findAvailableRooms();
 }
+
+    // Đếm tổng số phòng trọ của một chủ trọ
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId")
+    long countRoomsByOwnerId(Integer ownerId);
+
+    // Đếm số phòng trống
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'unactive'")
+    long countVacantRoomsByOwnerId(Integer ownerId);
+
+    // Đếm số phòng đang thuê
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'active'")
+    long countRentedRoomsByOwnerId(Integer ownerId);
+
+    // Đếm số phòng đang cọc
+    @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'ĐANG_CỌC'")
+    long countDepositedRoomsByOwnerId(Integer ownerId);
+}
+

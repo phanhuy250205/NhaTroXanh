@@ -1,23 +1,25 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 import ch.qos.logback.core.model.Model;
 
 @Controller
 public class DemoController {
 
+
     
+
+     @Autowired
+     private UserService userService;
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
     }
 
-    @GetMapping("/category")
-    public String quanly() {
-        return "staff/categoty";
-    }
 
     @GetMapping("/phong-tro-fe")
     public String danhmuc() {
@@ -29,7 +31,7 @@ public class DemoController {
         return "staff/thong-tin-tro-staff";
     }
 
-    @GetMapping("detail-thong-tin-tro")
+    @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
     public String detailthongtintro() {
         return "staff/detail-thong-tin-tro-staff";
     }
@@ -70,13 +72,13 @@ public class DemoController {
         return "host/phongtro";
     }
 
-    @GetMapping("/chu-tro/tong-quan")
-    public String tongquan() {
-        return "host/tong-quan";
-    }
+    // @GetMapping("/chu-tro/tong-quan")
+    // public String tongquan() {
+    //     return "host/tong-quan";
+    // }
 
     @GetMapping("/chu-tro/khach-thue")
-    public String khachthue() {
+    public String khachthue(Model model) {
         return "host/quan-ly-khach-thue";
     }
 

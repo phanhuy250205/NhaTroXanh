@@ -15,6 +15,7 @@ public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
     
     // Tìm UserCccd theo Users entity
     UserCccd findByUser(Users user);
+
     
     // Tìm UserCccd theo số CCCD (khớp với tenant-id, owner-id trong form)
     Optional<UserCccd> findByCccdNumber(String cccdNumber);
@@ -25,4 +26,7 @@ public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
     // Tìm UserCccd theo user ID - CÁCH 2: Dùng @Query (backup hoặc thay thế)
     @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
     Optional<UserCccd> findByUserId(@Param("userId") Integer userId);
-}
+
+
+    UserCccd findByCccdNumber(String cccdNumber);
+

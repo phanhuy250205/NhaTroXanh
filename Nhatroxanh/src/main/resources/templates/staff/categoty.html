@@ -1,113 +1,388 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="~{/layouts/head}">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+<head th:replace="~{/layouts/head}"/>
+  <head>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  
   <title>Danh mục - Nhà Trọ Xanh</title>
+  
   <style>
-    .main-content {
-      flex: 1;
-      padding: 20px;
-      background-color: #f8f9fa;
+    :root {
+      --primary-color: #2563eb;
+      --primary-light: #3b82f6;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --info-color: #06b6d4;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
 
-    .badge-active {
-      background-color: #d4edda;
-      color: #28a745;
-      border: 1px solid #28a745;
+
+    /* Header Section */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      color: white;
+      padding: 2rem;
       border-radius: 20px;
-      padding: 5px 15px;
-      font-weight: 500;
+      margin-bottom: 2rem;
+      box-shadow: var(--card-shadow);
     }
 
-    .badge-inactive {
-      background-color: #f8d7da;
-      color: #dc3545;
-      border: 1px solid #dc3545;
-      border-radius: 20px;
-      padding: 5px 15px;
-      font-weight: 500;
-    }
-
-    .search-group {
+    .page-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 0;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      gap: 0.5rem;
     }
 
-    .search-rounded {
-      height: 40px;
-      border-radius: 50px;
-      padding-left: 15px;
-      font-size: 14px;
+    .page-subtitle {
+      opacity: 0.9;
+      margin: 0.5rem 0 0 0;
+      font-size: 1.1rem;
     }
 
-    .btn-search-rounded {
-      background-color: #0095d5;
-      color: #fff;
-      font-weight: 500;
-      border-radius: 55px;
-      font-size: 13px;
+    /* Navigation Tabs */
+    .custom-nav-tabs {
       border: none;
-      width: 123px;
+      background: white;
+      border-radius: 15px;
+      padding: 0.5rem;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
     }
 
-    .btn-search-rounded:hover {
-      background-color: #007bb5;
-      color: #fff;
-    }
-
-    table thead {
-      background-color: #e3f2fd;
+    .custom-nav-tabs .nav-link {
+      border: none;
+      color: #64748b;
       font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      margin: 0 0.25rem;
     }
 
-    .table td,
-    .table th {
-      vertical-align: middle;
-      text-align: center;
+    .custom-nav-tabs .nav-link.active {
+      background: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
     }
 
-    .action-link {
-      color: orange;
-      text-decoration: none;
-      font-weight: 500;
+    .custom-nav-tabs .nav-link:hover:not(.active) {
+      background: #f1f5f9;
+      color: var(--primary-color);
     }
 
-    /* Thêm viền mềm mại và bóng mờ cho bảng */
-    .table {
-      border-radius: 12px;
+    /* Search and Action Section */
+    .search-action-container {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+    }
+
+    .search-form {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 300px;
+      height: 50px;
+      border: 2px solid #e2e8f0;
+      border-radius: 25px;
+      padding: 0 1.5rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .search-input:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+      outline: none;
+    }
+
+    .btn-search {
+      background: linear-gradient(45deg, var(--primary-color), var(--primary-light));
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-search:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      color: white;
+    }
+
+    .btn-add-new {
+      background: linear-gradient(45deg, var(--success-color), #059669);
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-add-new:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      color: white;
+    }
+
+    /* Table Styles */
+    .table-container {
+      background: white;
+      border-radius: 15px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      box-shadow: var(--card-shadow);
+      transition: all 0.3s ease;
     }
 
-    .table th {
-      background-color: #0095d5;
-      color: #fff;
+    .table-container:hover {
+      box-shadow: var(--card-shadow-hover);
+    }
+
+    .table {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .table thead th {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: white;
+      border: none;
+      padding: 1.25rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-size: 0.85rem;
+    }
+
+    .table tbody td {
+      padding: 1.25rem 1rem;
+      vertical-align: middle;
+      border-color: #f1f5f9;
+    }
+
+    .table tbody tr {
+      transition: all 0.3s ease;
     }
 
     .table tbody tr:hover {
-      background-color: #f1f1f1;
+      background: linear-gradient(90deg, #f8fafc, #f1f5f9);
+      transform: scale(1.01);
     }
 
-    /* Nút hành động */
-    .action-link {
-      padding: 6px 12px;
+    /* Action Buttons */
+    .btn-action {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
       font-weight: 500;
-      border-radius: 6px;
-      transition: background-color 0.2s ease-in-out;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      border: none;
+      margin: 0 0.25rem;
     }
 
-    .action-link:hover {
-      text-decoration: none;
-      background-color: #f0f0f0;
+    .btn-edit {
+      background: linear-gradient(45deg, var(--info-color), #0891b2);
+      color: white;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
     }
 
-    .btn-success {
-      font-weight: bold;
-      border-radius: 30px;
-      padding: 8px 16px;
+    .btn-edit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+      color: white;
+    }
+
+    .btn-delete {
+      background: linear-gradient(45deg, var(--danger-color), #dc2626);
+      color: white;
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-delete:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      color: white;
+    }
+
+    /* Badge Styles */
+    .post-count-badge {
+      background: linear-gradient(45deg, var(--warning-color), #d97706);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Modal Styles */
+    .modal-content {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+      color: white;
+      border: none;
+      padding: 2rem;
+    }
+
+    .modal-title {
+      font-weight: 700;
+      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-close {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      opacity: 1;
+      padding: 0.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .form-control-custom {
+      border: 2px solid #e2e8f0;
+      border-radius: 15px;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      background: #f8fafc;
+    }
+
+    .form-control-custom:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      background: white;
+      outline: none;
+    }
+
+    .btn-modal-action {
+      padding: 0.75rem 2rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      border: none;
+      min-width: 150px;
+    }
+
+    .btn-submit {
+      background: linear-gradient(45deg, var(--success-color), #059669);
+      color: white;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+      color: white;
+    }
+
+    .btn-update {
+      background: linear-gradient(45deg, var(--info-color), #0891b2);
+      color: white;
+      box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+    }
+
+    .btn-update:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(6, 182, 212, 0.4);
+      color: white;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+        border-radius: 15px 0 0 0;
+      }
+      
+      .page-header {
+        padding: 1.5rem;
+        text-align: center;
+      }
+      
+      .page-title {
+        font-size: 1.5rem;
+      }
+      
+      .search-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .search-input {
+        min-width: auto;
+        margin-bottom: 1rem;
+      }
+      
+      .table-container {
+        overflow-x: auto;
+      }
+      
+      .btn-action {
+        padding: 0.4rem 0.8rem;
+        margin: 0.1rem;
+      }
+    }
+
+    /* Animation */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in-up {
+      animation: fadeInUp 0.6s ease-out;
     }
   </style>
 </head>
@@ -115,34 +390,54 @@
 <body>
   <!-- NAVBAR -->
   <div th:replace="~{/layouts/sidebar-staff}"></div>
-  <div class="main-content">
+  
+  <div class="main-content animate-fade-in-up">
+    
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-tags"></i>
+        Quản Lý Danh Mục
+      </h1>
+      <p class="page-subtitle">Quản lý các danh mục bài đăng cho hệ thống nhà trọ</p>
+    </div>
 
-    <ul class="nav nav-tabs border-bottom border-dark mb-3">
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs custom-nav-tabs">
       <li class="nav-item">
-        <a class="nav-link active fw-bold text-dark" href="#">THÔNG TIN TRỌ</a>
+        <a class="nav-link " href="/nhan-vien/thong-tin-tro">
+          <i class="fas fa-home me-2"></i>
+          THÔNG TIN TRỌ
+        </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link text-primary border-primary" href="#">LOẠI DANH MỤC</a>
+        <a class="nav-link active" href="#">
+          <i class="fas fa-list-alt me-2"></i>
+          LOẠI DANH MỤC
+        </a>
       </li>
     </ul>
 
-    <div class="search-group">
-      <div class="d-flex align-items-center gap-2 mb-3">
-        <form th:action="@{/quanly/category/search}" method="get" class="d-flex align-items-center gap-2 mb-3">
-          <input type="text" name="keyword" th:value="${keyword}" class="form-control search-rounded"
-            placeholder="Tìm theo tên danh mục..." />
-          <button type="submit" class="btn btn-search-rounded">
-            <i class="fas fa-search me-1"></i> TÌM KIẾM
+    <!-- Search and Action Section -->
+    <div class="search-action-container">
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <form th:action="@{/nhan-vien/category/search}" method="get" class="search-form flex-grow-1">
+          <input type="text" name="keyword" th:value="${keyword}" 
+                 class="search-input" 
+                 placeholder="🔍 Tìm kiếm theo tên danh mục..." />
+          <button type="submit" class="btn btn-search">
+            <i class="fas fa-search me-2"></i>
+            TÌM KIẾM
           </button>
         </form>
 
+        <button class="btn btn-add-new" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">
+          <i class="fas fa-plus-circle me-2"></i>
+          THÊM MỚI
+        </button>
       </div>
-
-      <!-- Button mở modal thêm mới -->
-      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalDanhMuc">
-        <i class="fas fa-plus-circle"></i> THÊM MỚI
-      </button>
     </div>
+
 
     <table class="table table-bordered">
       <thead>
@@ -173,22 +468,96 @@
         </tr>
       </tbody>
     </table>
+
+    <!-- Table Section -->
+    <div class="table-container">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>
+              <i class="fas fa-hashtag me-2"></i>
+              ID
+            </th>
+            <th>
+              <i class="fas fa-tag me-2"></i>
+              TÊN DANH MỤC
+            </th>
+            <th>
+              <i class="fas fa-newspaper me-2"></i>
+              SỐ LƯỢNG BÀI ĐĂNG
+            </th>
+            <th>
+              <i class="fas fa-cogs me-2"></i>
+              HÀNH ĐỘNG
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cat : ${categories}">
+            <td>
+              <span class="fw-bold text-primary" th:text="${cat.categoryId}">#001</span>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <i class="fas fa-folder text-warning me-2"></i>
+                <span class="fw-semibold" th:text="${cat.name}">Nhà trọ</span>
+              </div>
+            </td>
+            <td>
+              <span class="post-count-badge">
+                <i class="fas fa-file-alt"></i>
+                <span th:text="${#lists.size(cat.posts)}">147</span>
+              </span>
+            </td>
+            <td>
+              <div class="d-flex justify-content-center gap-2">
+                <button class="btn btn-action btn-edit"
+                        th:attr="data-id=${cat.categoryId}, data-name=${cat.name}" 
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalDanhMucEdit" 
+                        onclick="editCategory(this)">
+                  <i class="fas fa-edit me-1"></i>
+                  Sửa
+                </button>
+                <a th:href="@{/nhan-vien/category/delete/{id}(id=${cat.categoryId})}"
+                   onclick="return confirm('⚠️ Bạn có chắc muốn xóa danh mục này không?')"
+                   class="btn btn-action btn-delete">
+                  <i class="fas fa-trash-alt me-1"></i>
+                  Xóa
+                </a>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
   <!-- Modal Thêm mới danh mục -->
   <div class="modal fade" id="modalDanhMuc" tabindex="-1" aria-labelledby="modalLabelAdd" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <form method="post" th:action="@{/quanly/category/add}" class="modal-content rounded-4">
-        <div class="modal-header border-0">
-          <h5 class="modal-title fw-bold" id="modalLabelAdd">Thêm danh mục mới</h5>
-          <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+      <form method="post" th:action="@{/nhan-vien/category/add}" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabelAdd">
+            <i class="fas fa-plus-circle me-2"></i>
+            Thêm Danh Mục Mới
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body text-center">
-          <input name="name" type="text" class="form-control form-control-lg rounded-pill mb-4"
-            placeholder="Nhập tên danh mục mới" required />
-          <div class="d-flex justify-content-center flex-wrap gap-3">
-            <button type="submit" class="btn btn-success rounded-pill action-btn">
-              <i class="fas fa-plus-circle me-1"></i> THÊM MỚI
+        <div class="modal-body">
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">
+              <i class="fas fa-tag text-primary me-2"></i>
+              Tên danh mục
+            </label>
+            <input name="name" type="text" class="form-control form-control-custom"
+                   placeholder="Nhập tên danh mục mới..." required />
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-modal-action btn-submit">
+              <i class="fas fa-plus-circle me-2"></i>
+              THÊM MỚI
             </button>
           </div>
         </div>
@@ -199,18 +568,28 @@
   <!-- Modal Sửa danh mục -->
   <div class="modal fade" id="modalDanhMucEdit" tabindex="-1" aria-labelledby="modalLabelEdit" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-      <form method="post" th:action="@{/quanly/category/update}" class="modal-content rounded-4">
-        <div class="modal-header border-0">
-          <h5 class="modal-title fw-bold" id="modalLabelEdit">Cập nhật danh mục</h5>
-          <button type="button" class="btn-close fs-3" data-bs-dismiss="modal" aria-label="Close"></button>
+      <form method="post" th:action="@{/nhan-vien/category/update}" class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalLabelEdit">
+            <i class="fas fa-edit me-2"></i>
+            Cập Nhật Danh Mục
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body text-center">
+        <div class="modal-body">
           <input name="id" type="hidden" id="editCategoryId" />
-          <input name="name" type="text" class="form-control form-control-lg rounded-pill mb-4" id="editCategoryName"
-            required />
-          <div class="d-flex justify-content-center flex-wrap gap-3">
-            <button type="submit" class="btn btn-info text-white rounded-pill action-btn">
-              <i class="fas fa-sync-alt me-1"></i> CẬP NHẬT
+          <div class="mb-4">
+            <label class="form-label fw-semibold mb-3">
+              <i class="fas fa-tag text-primary me-2"></i>
+              Tên danh mục
+            </label>
+            <input name="name" type="text" class="form-control form-control-custom" 
+                   id="editCategoryName" required />
+          </div>
+          <div class="text-center">
+            <button type="submit" class="btn btn-modal-action btn-update">
+              <i class="fas fa-sync-alt me-2"></i>
+              CẬP NHẬT
             </button>
           </div>
         </div>
@@ -218,6 +597,9 @@
     </div>
   </div>
 
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
   <script>
     function editCategory(button) {
       const id = button.getAttribute('data-id');
@@ -226,8 +608,68 @@
       document.getElementById('editCategoryId').value = id;
       document.getElementById('editCategoryName').value = name;
     }
+
+    // Add smooth scrolling and enhanced interactions
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add ripple effect to buttons
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach(button => {
+        button.addEventListener('click', function(e) {
+          const ripple = document.createElement('span');
+          const rect = this.getBoundingClientRect();
+          const size = Math.max(rect.width, rect.height);
+          const x = e.clientX - rect.left - size / 2;
+          const y = e.clientY - rect.top - size / 2;
+          
+          ripple.style.width = ripple.style.height = size + 'px';
+          ripple.style.left = x + 'px';
+          ripple.style.top = y + 'px';
+          ripple.classList.add('ripple');
+          
+          this.appendChild(ripple);
+          
+          setTimeout(() => {
+            ripple.remove();
+          }, 600);
+        });
+      });
+
+      // Auto-focus on modal inputs
+      const modals = document.querySelectorAll('.modal');
+      modals.forEach(modal => {
+        modal.addEventListener('shown.bs.modal', function() {
+          const input = modal.querySelector('input[type="text"]');
+          if (input) {
+            input.focus();
+          }
+        });
+      });
+    });
   </script>
 
-</body>
+  <style>
+    /* Ripple effect */
+    .btn {
+      position: relative;
+      overflow: hidden;
+    }
 
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
+      transform: scale(0);
+      animation: ripple-animation 0.6s linear;
+      pointer-events: none;
+    }
+
+    @keyframes ripple-animation {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+  </style>
+
+</body>
 </html>

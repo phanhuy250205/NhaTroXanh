@@ -1,14 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{/layouts/head}">
     <title>Chi Tiết - Nhà Trọ Xanh</title>
 </head>
+<style>
+    .toast-container-host {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 300px;
+    }
+
+    .alert-host {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        margin-bottom: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-host.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-host.danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .alert-icon {
+        margin-right: 10px;
+        font-size: 1.2em;
+    }
+
+    .alert-message {
+        flex-grow: 1;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1em;
+        cursor: pointer;
+        color: inherit;
+        padding: 0 10px;
+    }
+
+    .host-profile-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+
+    .host-verified {
+        background-color: #28a745;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
+    .host-inactive {
+        background-color: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.9em;
+    }
+
+    .host-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .verification-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .verification-label {
+        flex: 0 0 auto;
+    }
+
+    .verification-badge {
+        flex: 0 0 auto;
+    }
+</style>
 
 <body>
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
     <div class="main-content">
+        <div class="toast-container-host" id="toastContainer">
+            <div th:if="${success}" class="alert-host success" role="alert">
+                <i class="alert-icon fas fa-check-circle"></i>
+                <span class="alert-message" th:text="${success}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+            <div th:if="${error}" class="alert-host danger" role="alert">
+                <i class="alert-icon fas fa-exclamation-circle"></i>
+                <span class="alert-message" th:text="${error}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+        </div>
         <h4 class="mb-4">Thông tin tài khoản</h4>
         <hr>
         <form th:action="@{/chu-tro/profile-host}" th:object="${hostInfo}" method="post" enctype="multipart/form-data">
@@ -22,12 +125,12 @@
               : '/uploads/' + user.avatar}" class="host-profile-img mb-3" alt="Avatar" id="avatarPreview"
                             style="cursor: pointer;" onclick="document.getElementById('avatarInput').click()" />
 
-
                         <h5 th:text="${user.fullname != null ? user.fullname : 'Chưa có tên'}">Nguyễn Văn A</h5>
                         <span th:if="${user.enabled}" class="host-badge host-verified ms-1">Đang hoạt động</span>
                         <span th:if="${!user.enabled}" class="host-badge host-inactive ms-1">Chưa kích hoạt</span>
                         <div class="mt-3">
-                            <button class="btn btn-outline-primary btn-sm"><i class="fa fa-pen"></i> Chỉnh sửa</button>
+                            <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-pen"></i> Cập
+                                nhật</button>
                         </div>
 
                         <div class="host-section mt-4 text-start">
@@ -35,8 +138,16 @@
                             <p class="mb-1">Ngày tham gia: <strong>01/06/2025</strong></p>
                             <p class="mb-1">Tổng số khu trọ: <strong th:text="${totalHostels}">5 khu trọ</strong></p>
                             <p class="mb-1">Xác minh tài khoản:
-                                <span class="host-badge host-verified ms-1"><i class="fa fa-check-circle"></i> Đã xác
-                                    minh</span>
+                                <span
+                                    th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
+                                    class="host-badge host-verified ms-1">
+                                    <i class="fa fa-check-circle"></i> Đã xác minh
+                                </span>
+                                <span
+                                    th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
+                                    class="host-badge host-inactive ms-1">
+                                    <i class="fa fa-times-circle"></i> Chưa xác minh
+                                </span>
                             </p>
                             <p class="mb-0">Đánh giá: <span class="host-rating">★ 4.8/5</span> (30 đánh giá)</p>
                         </div>
@@ -50,7 +161,7 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" th:field="*{fullname}">
+                                <input type="text" class="form-control" th:field="*{fullname}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày sinh</label>
@@ -58,7 +169,7 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control" th:field="*{cccd}">
+                                <input type="text" class="form-control" th:field="*{cccdNumber}">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày cấp</label>
@@ -82,7 +193,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                     <!-- Thông tin liên hệ -->
@@ -91,11 +201,11 @@
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
                                 <label class="form-label">Email</label>
-                                <input type="email" class="form-control" th:field="*{email}">
+                                <input type="email" class="form-control" th:field="*{email}" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số điện thoại</label>
-                                <input type="text" class="form-control" th:field="*{phone}">
+                                <input type="text" class="form-control" th:field="*{phone}" required>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Tỉnh/Thành phố</label>
@@ -113,7 +223,7 @@
                                 <label class="form-label">Tên đường/Số nhà</label>
                                 <input type="text" class="form-control" id="street" name="street">
                             </div>
-                            <!-- 🔹 Hidden chứa địa chỉ đầy đủ -->
+                            <!-- Hidden chứa địa chỉ đầy đủ -->
                             <input type="hidden" name="address" th:field="*{address}" id="fullAddress">
                             <input type="hidden" id="savedAddress" th:value="*{address}" />
                         </div>
@@ -123,9 +233,9 @@
         </form>
     </div>
 
-    </div>
-
+    <!-- JavaScript for Avatar Preview and Address API -->
     <script>
+        // Avatar Preview
         document.getElementById('avatarInput').addEventListener('change', function (event) {
             const file = event.target.files[0];
             if (file && file.type.startsWith('image/')) {
@@ -136,6 +246,8 @@
                 reader.readAsDataURL(file);
             }
         });
+
+        // Vietnam Address API
         class VietnamAddressAPI {
             constructor() {
                 this.provinceSelect = document.getElementById('province');
@@ -246,9 +358,7 @@
                 await api.setInitialAddress(savedAddress);
             }
         });
-
     </script>
-
 </body>
 
 </html>

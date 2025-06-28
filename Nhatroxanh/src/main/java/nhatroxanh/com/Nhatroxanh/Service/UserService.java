@@ -2,6 +2,11 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
+
+import java.util.List;
+
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
@@ -33,6 +38,7 @@ public interface UserService {
      */
     Users registerOwner(UserOwnerRequest userOwnerRequest);
 
+
     /**
      * Tìm người dùng dựa trên username.
      *
@@ -53,4 +59,11 @@ public interface UserService {
     Users saveUser(Users user);
     UserCccd saveUserCccd(UserCccd userCccd);
     Address saveAddress(Address address);
+
+    /**
+     * Cung cấp danh sách thông tin khách thuê cho trang quản lý của Chủ trọ.
+     * @return một danh sách các đối tượng DTO.
+     */
+   
+
 }
