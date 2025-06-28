@@ -184,7 +184,7 @@ public class PostController {
             Rooms room = roomsRepository.findByIdWithDetails(roomId)
                     .orElseThrow(() -> new IllegalArgumentException("Phòng không tồn tại với ID: " + roomId));
             Map<String, Object> roomData = new HashMap<>();
-            roomData.put("roomId", room.getRoom_id());
+            roomData.put("roomId", room.getRoomId());
             roomData.put("name", room.getNamerooms());
             roomData.put("price", room.getPrice());
             roomData.put("acreage", room.getAcreage());

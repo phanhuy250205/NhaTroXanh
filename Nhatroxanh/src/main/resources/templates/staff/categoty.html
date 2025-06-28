@@ -438,6 +438,37 @@
       </div>
     </div>
 
+
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Tên Danh Mục</th>
+          <th>Số lượng bài đăng</th>
+          <th>Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="cat : ${categories}">
+          <td th:text="${cat.category_id}">001</td>
+          <td th:text="${cat.name}">Nhà trọ</td>
+          <td th:text="${#lists.size(cat.rooms)}">147</td>
+          <td>
+            <button class="btn btn-sm btn-outline-primary me-2 d-inline-flex align-items-center"
+              th:attr="data-id=${cat.category_id}, data-name=${cat.name}" data-bs-toggle="modal"
+              data-bs-target="#modalDanhMucEdit" onclick="editCategory(this)">
+              <i class="bi bi-pencil-square me-1"></i> Sửa
+            </button>
+            <a th:href="@{/quanly/category/delete/{id}(id=${cat.category_id})}"
+              onclick="return confirm('Bạn có chắc muốn xóa danh mục này?')"
+              class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+              <i class="bi bi-trash3 me-1"></i> Xóa
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
     <!-- Table Section -->
     <div class="table-container">
       <table class="table table-hover mb-0">
@@ -500,6 +531,7 @@
         </tbody>
       </table>
     </div>
+
   </div>
 
   <!-- Modal Thêm mới danh mục -->

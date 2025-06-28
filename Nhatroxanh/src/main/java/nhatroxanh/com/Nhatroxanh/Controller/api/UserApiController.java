@@ -4,14 +4,24 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
+
+import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.HashMap;
+import java.util.Map;
+
 import jakarta.validation.Valid;
+
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -59,6 +69,50 @@ public class UserApiController {
         // otpService.createAndSendOtp(user);
         return ResponseEntity.ok("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
     }
+
+
+    @GetMapping("/current")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.SC_UNAUTHORIZED).body("Chưa đăng nhập!");
+        }
+
+        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+        Integer userId = userDetails.getUserId(); // Giả định CustomUserDetails có getUserId()
+
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Người dùng không tồn tại!"));
+
+        if (!"owner".equals(user.getRole())) {
+            return ResponseEntity.status(HttpStatus.SC_FORBIDDEN).body("Người dùng không phải là chủ trọ!");
+        }
+
+        // Chuẩn bị dữ liệu trả về
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("id", user.getUserId());
+        userData.put("name", user.getFullname() != null ? user.getFullname() : ""); // Sử dụng fullname thay vì name
+        userData.put("dob", user.getBirthday() != null ? user.getBirthday().toString() : ""); // Sử dụng birthday thay
+                                                                                              // vì dob
+        userData.put("cccd", user.getCccd() != null ? user.getCccd() : "");
+        userData.put("issueDate", ""); // Không có issueDate, có thể cần thêm trường nếu cần
+        userData.put("issuePlace", ""); // Không có issuePlace, có thể cần thêm trường nếu cần
+        userData.put("phone", user.getPhone() != null ? user.getPhone() : "");
+        userData.put("email", user.getEmail() != null ? user.getEmail() : "");
+        userData.put("bankAccount", ""); // Không có bankAccount, có thể cần thêm trường nếu cần
+        userData.put("address", user.getAddress() != null ? user.getAddress() : "");
+        userData.put("role", user.getRole().toString());
+        userData.put("role", user.getRole());
+
+        // Thêm thông tin để kiểm tra tài khoản đăng nhập
+        userData.put("username", user.getFullname());
+        userData.put("isAuthenticated", true);
+        System.out.println("Current user data: " + userData);
+        // Trả về thông tin người dùng
+        System.out.println("Returning user data: " + userData);
+        return ResponseEntity.ok(userData);
+    }
     @PostMapping("/register-owner")
     public ResponseEntity<?> registerOwner(@Valid @RequestBody UserOwnerRequest userOwnerRequest) {
         try {
@@ -69,7 +123,7 @@ public class UserApiController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             // Bắt các lỗi không mong muốn khác
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra trong quá trình đăng ký.");
+            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra trong quá trình đăng ký.");
         }
     }
 }

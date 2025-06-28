@@ -19,11 +19,23 @@ public class CustomUserDetails implements UserDetails {
     public Users getUser() {
         return user;
     }
-    
+
+    public Integer getUserId() {
+        return user.getUserId(); // Hoặc user.getId() nếu cột là id
+    }
+    // ✅ THÊM MỚI
+
+
     public String getFullName() {
         return user.getFullname();
     }
+public String getCccd() {
+        return user.getCccd();
+    }
 
+    public String getPhone() {
+        return user.getPhone();
+    }
     public String getAvatar() {
         return user.getAvatar();
     }

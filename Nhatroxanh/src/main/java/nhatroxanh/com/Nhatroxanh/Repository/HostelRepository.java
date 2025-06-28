@@ -12,13 +12,28 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
 public interface HostelRepository extends JpaRepository<Hostel, Integer> {
 
+
+
     @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE h.owner.userId = :ownerId")
     List<Hostel> findByOwner_UserId(@Param("ownerId") Integer ownerId);
 
     @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE h.hostelId = :id")
     Hostel findByIdWithAddress(@Param("id") Integer id);
-
+    
     int countByOwner(Users owner);
+
+    
+    // SỬA LẠI: Sử dụng 'street' thay vì 'address'
+    List<Hostel> findByAddress_StreetContainingIgnoreCase(String street);
+    
+    // HOẶC sử dụng @Query để search linh hoạt hơn
+    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p " +
+           "WHERE UPPER(a.street) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
+           "OR UPPER(w.name) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
+           "OR UPPER(d.name) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
+           "OR UPPER(p.name) LIKE UPPER(CONCAT('%', :keyword, '%'))")
+    List<Hostel> findByAddressKeyword(@Param("keyword") String keyword);
+
 
     List<Hostel> findByOwnerUserId(Integer userId);
 
@@ -29,6 +44,8 @@ public interface HostelRepository extends JpaRepository<Hostel, Integer> {
             """)
     Optional<Hostel> findByIdWithRooms(@Param("hostelId") Integer hostelId);
 
+
     @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
     long countHostelsByOwnerId(Integer ownerId);
+
 }
