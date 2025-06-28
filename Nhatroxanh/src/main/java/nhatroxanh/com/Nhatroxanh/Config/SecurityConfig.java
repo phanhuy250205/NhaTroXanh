@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Config;
 
 import jakarta.servlet.http.HttpServletResponse;
+import nhatroxanh.com.Nhatroxanh.Security.CustomLoginSuccessHandler;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -8,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
 import org.springframework.security.web.authentication.rememberme.PersistentTokenRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.sql.DataSource;
 
@@ -22,6 +23,8 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private CustomLoginSuccessHandler customLoginSuccessHandler;
     @Autowired
     private DataSource dataSource;
 
@@ -48,31 +51,33 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Bật CSRF cho các form, chỉ tắt cho API nếu cần
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**") // Tắt CSRF cho API
-            )
+            .csrf(csrf -> csrf.disable())
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                // Cho phép truy cập tài nguyên tĩnh và các trang công khai
-                .requestMatchers("/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**").permitAll()
-                .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**").permitAll()
-                .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/login-processing").permitAll()
-                // Chỉ cho phép OWNER truy cập các endpoint hợp đồng
-                .requestMatchers("/api/contracts/**").hasAuthority("owner")
-                // Chỉ cho phép OWNER truy cập các trang host
-                .requestMatchers("/host/**").hasAuthority("owner")
+                .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**").permitAll()
+                .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**" ).permitAll()
+                .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro" ,"/nhan-vien/**", "/infor-chu-tro").permitAll()  
+                .requestMatchers("/chu-tro/**").hasRole("OWNER")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/dang-nhap-chu-tro")
-                .loginProcessingUrl("/login-processing")
+                // <<< SỬA: Đổi URL để tường minh và khớp với file JS
+                .loginProcessingUrl("/login-processing") 
+                // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
                 .usernameParameter("username")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/api/contracts/form", true) // Redirect về form sau login
+                // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
+                .passwordParameter("password")  
+                .successHandler(customLoginSuccessHandler)
+                .successHandler((request, response, authentication) -> {
+                    // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển hướng.
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
                 .failureHandler((request, response, exception) -> {
+                    // Khi thất bại, trả về status 401 Unauthorized và thông báo lỗi
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.setContentType("text/plain; charset=UTF-8");
+                    // <<< SỬA: Rút gọn thông báo lỗi cho phù hợp với cả hai luồng đăng nhập
                     response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
                 })
                 .permitAll()
@@ -88,11 +93,6 @@ public class SecurityConfig {
                 .tokenRepository(persistentTokenRepository())
                 .key("NhaTroXanhSecretKeyRememberMe")
                 .tokenValiditySeconds(5 * 24 * 60 * 60)
-            )
-            .exceptionHandling(exception -> exception
-                .accessDeniedHandler((request, response, accessDeniedException) -> {
-                    response.sendRedirect("/dang-nhap-chu-tro?error=access-denied");
-                })
             );
 
         return http.build();

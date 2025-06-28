@@ -2,6 +2,9 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 
 import java.util.List;
 import java.util.Optional;
+
+import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +25,13 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
         }
         return findByPhone(phone);
     }
+
     @Query("SELECT u FROM Users u WHERE (u.cccd = :cccd OR u.phone = :phone) AND u.role = :role")
     Users findByCccdOrPhoneAndRole(@Param("cccd") String cccd, @Param("phone") String phone, @Param("role") String role);
+
+    @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
+    Optional<UserCccd> findUserCccdByUserId(Integer userId);
+
+    @Query("SELECT a FROM Address a LEFT JOIN a.ward w LEFT JOIN w.district d LEFT JOIN d.province p WHERE a.id = (SELECT u.addressEntity.id FROM Users u WHERE u.userId = :userId)")
+    Optional<Address> findAddressByUserId(@Param("userId") Integer userId);
 }

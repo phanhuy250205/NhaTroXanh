@@ -85,10 +85,7 @@
 
                         <form id="loginFormHost"
                             th:action="@{/login-processing}" method="post">
-                            <!-- Thêm trường CSRF token -->
-                            <input type="hidden"
-                                th:name="${_csrf.parameterName}"
-                                th:value="${_csrf.token}" />
+                            <!-- ĐÃ XÓA CSRF TOKEN VÌ ĐÃ TẮT CSRF TRONG CONFIG -->
 
                             <div class="form-group">
                                 <label for="emailPhone">Email hoặc Số điện

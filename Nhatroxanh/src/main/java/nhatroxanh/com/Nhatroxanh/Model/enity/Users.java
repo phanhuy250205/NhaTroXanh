@@ -4,16 +4,7 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -49,6 +40,10 @@ public class Users {
     @Column(name = "birthday")
     private Date birthday;
 
+
+    @Column(name = "bank_account", length = 50)
+    private String bankAccount;
+
     @Column(name = "gender")
     private Boolean gender;
 
@@ -72,6 +67,10 @@ public class Users {
 
     @Column(name = "address", length = 255)
     private String address;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address addressEntity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")

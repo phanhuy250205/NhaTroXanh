@@ -3,6 +3,10 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 import java.sql.Date;
 import java.util.Optional;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,6 +20,8 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
+import static com.mysql.cj.conf.PropertyKey.logger;
+
 @Service
 public class UserServiceImpl implements UserService {
     @Autowired
@@ -24,6 +30,13 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private OtpService otpService;
+
+    @Autowired
+    private UserCccdRepository userCccdRepository;
+
+    @Autowired
+    private AddressRepository addressRepository;
+
 
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
@@ -102,4 +115,59 @@ public class UserServiceImpl implements UserService {
 
         return user.get();
     }
+
+    @Override
+    public UserCccd findUserCccdByUserId(Integer userId) {
+        System.out.println("=== START: Finding UserCccd for userId: " + userId + " ===");
+        if (userId == null || userId <= 0) {
+            System.out.println("❌ Invalid user ID: " + userId);
+            throw new IllegalArgumentException("ID người dùng không hợp lệ!");
+        }
+
+        Optional<UserCccd> userCccdOptional = userRepository.findUserCccdByUserId(userId);
+        if (userCccdOptional.isPresent()) {
+            System.out.println("✅ Found UserCccd: " + userCccdOptional.get());
+        } else {
+            System.out.println("❌ No UserCccd found for userId: " + userId);
+        }
+        System.out.println("=== END: Finding UserCccd for userId: " + userId + " ===");
+        return userCccdOptional.orElse(null);
+    }
+
+    @Override
+    public Optional<Address> findAddressByUserId(Integer userId) {
+        System.out.println("=== START: Finding Address for userId: " + userId + " ===");
+        if (userId == null || userId <= 0) {
+            System.out.println("❌ Invalid user ID: " + userId);
+            throw new IllegalArgumentException("ID người dùng không hợp lệ!");
+        }
+
+        Optional<Address> addressOptional = userRepository.findAddressByUserId(userId);
+        if (addressOptional.isPresent()) {
+            System.out.println("✅ Found Address: " + addressOptional.get());
+        } else {
+            System.out.println("❌ No Address found for userId: " + userId);
+        }
+        System.out.println("=== END: Finding Address for userId: " + userId + " ===");
+        return addressOptional;
+    }
+    @Override
+    @Transactional
+    public Users saveUser(Users user) {
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public UserCccd saveUserCccd(UserCccd userCccd) {
+        return userCccdRepository.save(userCccd); // Sử dụng UserCccdRepository
+    }
+
+    @Override
+    @Transactional
+    public Address saveAddress(Address address) {
+        return addressRepository.save(address); // Sử dụng AddressRepository
+    }
+
+
 }

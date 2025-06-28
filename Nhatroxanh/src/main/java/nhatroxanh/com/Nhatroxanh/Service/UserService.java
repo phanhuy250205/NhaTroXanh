@@ -1,9 +1,13 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
+
+import java.util.Optional;
 
 public interface UserService {
 
@@ -35,5 +39,18 @@ public interface UserService {
      * @param username Tên đăng nhập của người dùng.
      * @return Đối tượng Users nếu tìm thấy, null nếu không tìm thấy.
      */
-     Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone);
+    Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone);
+
+    /**
+     * Tìm thông tin CCCD của người dùng dựa trên user_id.
+     *
+     * @param userId ID của người dùng trong bảng Users.
+     * @return Đối tượng UserCccd nếu tìm thấy, null nếu không tìm thấy.
+     */
+    UserCccd findUserCccdByUserId(Integer userId);
+    Optional<Address> findAddressByUserId(Integer userId);
+
+    Users saveUser(Users user);
+    UserCccd saveUserCccd(UserCccd userCccd);
+    Address saveAddress(Address address);
 }

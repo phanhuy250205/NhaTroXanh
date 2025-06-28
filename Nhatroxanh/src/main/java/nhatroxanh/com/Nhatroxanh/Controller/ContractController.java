@@ -1,11 +1,9 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
-import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import org.slf4j.Logger;
@@ -29,7 +27,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -44,38 +41,33 @@ public class ContractController {
     private ContractService contractService;
 
     @Autowired
-    private UserService userService;
+    private UserRepository userRepository;
 
     @Autowired
-    private RoomsService roomService;
+    private UserService userService;
 
     // Helper method để khởi tạo model attributes
     private void initializeModelAttributes(Model model, ContractDto contract) {
         if (contract == null) {
             contract = new ContractDto();
         }
-        
+
         model.addAttribute("contract", contract);
         model.addAttribute("contractDate", LocalDate.now());
         model.addAttribute("statusOptions", Arrays.stream(Contracts.Status.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
-        model.addAttribute("cities", Arrays.asList("Hà Nội", "TP. Hồ Chí Minh", "Đà Nẵng"));
-        model.addAttribute("amenities", Arrays.asList("Wi-Fi", "Điều hòa", "Máy giặt", "Tủ lạnh", "Máy nước nóng"));
-        
-        // Thêm các options cho payment method
-        model.addAttribute("paymentMethods", Arrays.asList("Tiền mặt", "Chuyển khoản", "Ví điện tử"));
-        model.addAttribute("paymentDays", Arrays.asList("01", "05", "10", "15", "20", "25", "30"));
     }
 
+    // Endpoint để hiển thị form tạo hợp đồng
     @GetMapping("/form")
     @PreAuthorize("hasRole('OWNER')")
     public String initContractForm(Authentication authentication, Model model) {
         System.out.println("=== START: Initializing contract form ===");
         logger.info("Initializing contract form for user");
-        
+
         ContractDto contract = new ContractDto();
-        
+
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             String cccd = userDetails.getCccd();
@@ -90,32 +82,118 @@ public class ContractController {
                 return "host/hop-dong-host";
             }
 
-            // Điền thông tin chủ trọ vào contract
+            // Gán thông tin chủ trọ
             contract.getOwner().setFullName(user.getFullname());
             contract.getOwner().setPhone(user.getPhone());
             contract.getOwner().setId(user.getCccd());
             contract.getOwner().setEmail(user.getEmail());
-            
-            // Set ngày hợp đồng mặc định là hôm nay
+            if (user.getBirthday() != null) {
+                contract.getOwner().setBirthday(new Date(user.getBirthday().getTime()));
+            }
+            contract.getOwner().setBankAccount(user.getBankAccount());
+
+            UserCccd userCccd = userService.findUserCccdByUserId(user.getUserId());
+            if (userCccd != null) {
+                contract.getOwner().setIssueDate(userCccd.getIssueDate());
+                contract.getOwner().setIssuePlace(userCccd.getIssuePlace());
+            }
+
+            Optional<Address> addressOptional = userService.findAddressByUserId(user.getUserId());
+            if (addressOptional.isPresent()) {
+                Address address = addressOptional.get();
+                contract.getOwner().setStreet(address.getStreet());
+                if (address.getWard() != null) {
+                    contract.getOwner().setWard(address.getWard().getName());
+                    if (address.getWard().getDistrict() != null) {
+                        contract.getOwner().setDistrict(address.getWard().getDistrict().getName());
+                        if (address.getWard().getDistrict().getProvince() != null) {
+                            contract.getOwner().setProvince(address.getWard().getDistrict().getProvince().getName());
+                        }
+                    }
+                }
+                logger.info("Address for userId {}: Street={}, Ward={}, District={}, Province={}", user.getUserId(), address.getStreet(), address.getWard() != null ? address.getWard().getName() : null, address.getWard() != null && address.getWard().getDistrict() != null ? address.getWard().getDistrict().getName() : null, address.getWard() != null && address.getWard().getDistrict() != null && address.getWard().getDistrict().getProvince() != null ? address.getWard().getDistrict().getProvince().getName() : null);
+            } else {
+                logger.warn("No Address found for userId: {}", user.getUserId());
+            }
+
             contract.setContractDate(LocalDate.now());
             contract.setStatus("DRAFT");
 
-            model.addAttribute("owner", user);
-            
-            logger.info("Contract form initialized successfully");
+            logger.info("Contract form initialized successfully for owner: {}", user.getFullname());
             System.out.println("=== END: Contract form initialized successfully ===");
-            
+
         } catch (Exception e) {
             System.out.println("❌ Error initializing contract form: " + e.getMessage());
             logger.error("Error initializing contract form: {}", e.getMessage(), e);
             model.addAttribute("error", "Lỗi khi tải dữ liệu form: " + e.getMessage());
         }
-        
-        // Luôn khởi tạo model attributes
+
         initializeModelAttributes(model, contract);
         return "host/hop-dong-host";
     }
 
+    // Endpoint để lấy thông tin người thuê dựa trên số điện thoại
+    @PostMapping("/get-tenant-by-phone")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Map<String, Object>> getTenantByPhone(@RequestParam String phone, Model model) {
+        System.out.println("=== START: Getting tenant by phone: " + phone + " ===");
+        logger.info("Request to get tenant by phone: {}", phone);
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Optional<Users> tenantUser = userRepository.findByPhone(phone);
+            if (tenantUser.isPresent()) {
+                Users user = tenantUser.get();
+                UserCccd tenantCccd = userService.findUserCccdByUserId(user.getUserId());
+                Optional<Address> tenantAddress = userService.findAddressByUserId(user.getUserId());
+
+                Map<String, Object> tenantData = new HashMap<>();
+                tenantData.put("fullName", user.getFullname());
+                tenantData.put("phone", user.getPhone());
+                if (user.getBirthday() != null) {
+                    tenantData.put("birthday", user.getBirthday().toString());
+                }
+                if (tenantCccd != null) {
+                    tenantData.put("id", tenantCccd.getCccdNumber());
+                    tenantData.put("issueDate", tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
+                    tenantData.put("issuePlace", tenantCccd.getIssuePlace());
+                }
+                if (tenantAddress.isPresent()) {
+                    Address address = tenantAddress.get();
+                    tenantData.put("street", address.getStreet());
+                    if (address.getWard() != null) {
+                        tenantData.put("ward", address.getWard().getName());
+                        if (address.getWard().getDistrict() != null) {
+                            tenantData.put("district", address.getWard().getDistrict().getName());
+                            if (address.getWard().getDistrict().getProvince() != null) {
+                                tenantData.put("province", address.getWard().getDistrict().getProvince().getName());
+                            }
+                        }
+                    }
+                }
+
+                response.put("success", true);
+                response.put("tenant", tenantData);
+                logger.info("Found tenant data: {}", tenantData);
+                System.out.println("✅ Found tenant data: " + tenantData);
+            } else {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy người thuê với số điện thoại: " + phone);
+                logger.warn("No tenant found for phone: {}", phone);
+                System.out.println("❌ No tenant found for phone: " + phone);
+            }
+            System.out.println("=== END: Getting tenant by phone ===");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            System.out.println("❌ Error getting tenant by phone: " + e.getMessage());
+            logger.error("Error getting tenant by phone: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi lấy thông tin người thuê: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // Endpoint để tạo hợp đồng
     @PostMapping
     @PreAuthorize("hasRole('OWNER')")
     public String createContract(
@@ -124,14 +202,12 @@ public class ContractController {
             @RequestParam(value = "cccdBack", required = false) MultipartFile cccdBack,
             BindingResult result,
             Model model,
-            Authentication authentication
-    ) {
+            Authentication authentication) {
         System.out.println("=== START: Creating new contract ===");
         System.out.println("Contract data received: " + contract);
         logger.info("Creating new contract with data: {}", contract);
-        
+
         try {
-            // Kiểm tra validation errors
             if (result.hasErrors()) {
                 System.out.println("❌ Validation errors: " + result.getAllErrors());
                 logger.error("Validation errors: {}", result.getAllErrors());
@@ -140,63 +216,96 @@ public class ContractController {
                 return "host/hop-dong-host";
             }
 
-            // Validate required fields
-            if (contract.getTenant().getPhone() == null || contract.getTenant().getPhone().trim().isEmpty()) {
+            // Kiểm tra và tự động điền thông tin người thuê nếu có số điện thoại
+            if (contract.getTenant().getPhone() != null && !contract.getTenant().getPhone().trim().isEmpty()) {
+                Optional<Users> tenantUser = userRepository.findByPhone(contract.getTenant().getPhone());
+                if (tenantUser.isPresent()) {
+                    Users user = tenantUser.get();
+                    UserCccd tenantCccd = userService.findUserCccdByUserId(user.getUserId());
+                    if (tenantCccd != null) {
+                        contract.getTenant().setId(tenantCccd.getCccdNumber());
+                        contract.getTenant().setIssueDate(tenantCccd.getIssueDate());
+                        contract.getTenant().setIssuePlace(tenantCccd.getIssuePlace());
+                    }
+                    contract.getTenant().setFullName(user.getFullname());
+                    contract.getTenant().setPhone(user.getPhone());
+                    if (user.getBirthday() != null) {
+                        contract.getTenant().setBirthday(new Date(user.getBirthday().getTime()));
+                    }
+                    Optional<Address> tenantAddress = userService.findAddressByUserId(user.getUserId());
+                    if (tenantAddress.isPresent()) {
+                        Address address = tenantAddress.get();
+                        contract.getTenant().setStreet(address.getStreet());
+                        if (address.getWard() != null) {
+                            contract.getTenant().setWard(address.getWard().getName());
+                            if (address.getWard().getDistrict() != null) {
+                                contract.getTenant().setDistrict(address.getWard().getDistrict().getName());
+                                if (address.getWard().getDistrict().getProvince() != null) {
+                                    contract.getTenant().setProvince(address.getWard().getDistrict().getProvince().getName());
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    model.addAttribute("error", "Không tìm thấy người thuê với số điện thoại: " + contract.getTenant().getPhone());
+                    initializeModelAttributes(model, contract);
+                    return "host/hop-dong-host";
+                }
+            } else {
                 model.addAttribute("error", "Số điện thoại người thuê không được để trống!");
                 initializeModelAttributes(model, contract);
                 return "host/hop-dong-host";
             }
 
-            if (contract.getRoom().getRoomNumber() == null || contract.getRoom().getRoomNumber().trim().isEmpty()) {
-                model.addAttribute("error", "Số phòng không được để trống!");
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
+            // Cập nhật thông tin chủ trọ
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
+            if (owner != null) {
+                owner.setFullname(contract.getOwner().getFullName());
+                owner.setPhone(contract.getOwner().getPhone());
+                if (contract.getOwner().getBirthday() != null) {
+                    owner.setBirthday(new java.sql.Date(contract.getOwner().getBirthday().getTime()));
+                }
+                UserCccd ownerCccdEntity = userService.findUserCccdByUserId(owner.getUserId());
+                if (ownerCccdEntity != null) {
+                    ownerCccdEntity.setCccdNumber(contract.getOwner().getId());
+                    ownerCccdEntity.setIssueDate(contract.getOwner().getIssueDate());
+                    ownerCccdEntity.setIssuePlace(contract.getOwner().getIssuePlace());
+                    userService.saveUserCccd(ownerCccdEntity);
+                }
+                Optional<Address> addressOptional = userService.findAddressByUserId(owner.getUserId());
+                if (addressOptional.isPresent()) {
+                    Address address = addressOptional.get();
+                    address.setStreet(contract.getOwner().getStreet());
+                    userService.saveAddress(address);
+                }
+                userService.saveUser(owner);
+
             }
 
-            if (contract.getTerms().getPrice() == null || contract.getTerms().getPrice() <= 0) {
-                model.addAttribute("error", "Giá thuê phải lớn hơn 0!");
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
-            }
-
-            if (contract.getTerms().getStartDate() == null || contract.getTerms().getEndDate() == null) {
-                model.addAttribute("error", "Ngày bắt đầu và kết thúc không được để trống!");
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
-            }
-
-            if (contract.getTerms().getStartDate().isAfter(contract.getTerms().getEndDate())) {
-                model.addAttribute("error", "Ngày bắt đầu không thể sau ngày kết thúc!");
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
-            }
-
-            // Xử lý file upload
             String frontImageUrl = saveFile(cccdFront);
             String backImageUrl = saveFile(cccdBack);
 
-            // Lấy thông tin owner từ authentication
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            String ownerCccd = userDetails.getCccd();
+            CustomUserDetails userDetails1 = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd1= userDetails.getCccd();
 
-            // Gọi service để lưu contract
+            // Tạm thời bỏ các trường Room và Terms, chỉ lưu thông tin cơ bản
             Contracts savedContract = contractService.createContract(
                     contract.getTenant().getPhone(),
-                    Integer.valueOf(contract.getRoom().getRoomNumber()),
+                    null, // Room number tạm thời để null
                     Date.valueOf(contract.getContractDate()),
-                    Date.valueOf(contract.getTerms().getStartDate()),
-                    Date.valueOf(contract.getTerms().getEndDate()),
-                    contract.getTerms().getPrice().floatValue(),
-                    contract.getTerms().getDeposit() != null ? contract.getTerms().getDeposit().floatValue() : 0f,
-                    contract.getTerms().getTerms(),
+                    null, // Start date tạm thời để null
+                    null, // End date tạm thời để null
+                    0.0f, // Price tạm thời để 0
+                    0.0f, // Deposit tạm thời để 0
+                    null, // Terms tạm thời để null
                     Contracts.Status.valueOf(contract.getStatus().toUpperCase()),
-                    ownerCccd
-            );
+                    ownerCccd);
 
             System.out.println("✅ Contract created successfully with ID: " + savedContract.getContractId());
             logger.info("Contract created successfully with ID: {}", savedContract.getContractId());
-            return "redirect:/chu-tro/DS-hop-dong-host";
-            
+            return "redirect:/api/contracts/list";
         } catch (Exception e) {
             System.out.println("❌ Error creating contract: " + e.getMessage());
             e.printStackTrace();
@@ -207,45 +316,38 @@ public class ContractController {
         }
     }
 
-    // Test endpoint to debug form data
+    // Endpoint debug form data
     @PostMapping("/debug-form")
     @PreAuthorize("hasRole('OWNER')")
     public String debugForm(
             @ModelAttribute("contract") ContractDto contract,
             BindingResult result,
-            Model model
-    ) {
+            Model model) {
         System.out.println("=== DEBUG FORM DATA ===");
         System.out.println("Contract: " + contract);
         System.out.println("Contract ID: " + contract.getId());
         System.out.println("Contract Date: " + contract.getContractDate());
         System.out.println("Status: " + contract.getStatus());
-        
+
         System.out.println("Owner: " + contract.getOwner().getFullName());
         System.out.println("Owner Phone: " + contract.getOwner().getPhone());
-        
+
         System.out.println("Tenant: " + contract.getTenant().getFullName());
         System.out.println("Tenant Phone: " + contract.getTenant().getPhone());
-        
-        System.out.println("Room Number: " + contract.getRoom().getRoomNumber());
-        System.out.println("Room Area: " + contract.getRoom().getArea());
-        
-        System.out.println("Price: " + contract.getTerms().getPrice());
-        System.out.println("Start Date: " + contract.getTerms().getStartDate());
-        System.out.println("End Date: " + contract.getTerms().getEndDate());
-        
+
         if (result.hasErrors()) {
             System.out.println("Binding errors:");
             result.getAllErrors().forEach(error -> {
                 System.out.println("- " + error.getDefaultMessage());
             });
         }
-        
+
         model.addAttribute("debugInfo", "Check console for form data");
         initializeModelAttributes(model, contract);
         return "host/hop-dong-host";
     }
 
+    // Endpoint test parameters
     @PostMapping("/test-params")
     public ResponseEntity<?> testParams(@RequestParam Map<String, String> params) {
         System.out.println("=== START: Testing parameters ===");
@@ -275,13 +377,12 @@ public class ContractController {
         return ResponseEntity.ok(result);
     }
 
-    // Các phương thức khác giữ nguyên...
+    // Endpoint cập nhật hợp đồng
     @PutMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateContract(
             @PathVariable Integer contractId,
-            @RequestBody Contracts updatedContract
-    ) {
+            @RequestBody Contracts updatedContract) {
         System.out.println("=== START: Updating contract with ID: " + contractId + " ===");
         logger.info("Received request to update contract with ID: {}", contractId);
         try {
@@ -289,7 +390,6 @@ public class ContractController {
             Contracts contract = contractService.updateContract(contractId, updatedContract);
             System.out.println("✅ Contract updated successfully with ID: " + contractId);
             logger.info("Contract updated successfully with ID: {}", contractId);
-            
             System.out.println("=== END: Contract updated successfully ===");
             return ResponseEntity.ok(contract);
         } catch (IllegalArgumentException e) {
@@ -310,6 +410,7 @@ public class ContractController {
         }
     }
 
+    // Endpoint xóa hợp đồng
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> deleteContract(@PathVariable Integer contractId) {
@@ -320,7 +421,6 @@ public class ContractController {
             contractService.deleteContract(contractId);
             System.out.println("✅ Contract deleted successfully with ID: " + contractId);
             logger.info("Contract deleted successfully with ID: {}", contractId);
-            
             System.out.println("=== END: Contract deleted successfully ===");
             return ResponseEntity.ok("Hợp đồng đã được xóa!");
         } catch (IllegalArgumentException e) {
@@ -330,7 +430,6 @@ public class ContractController {
             return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: " + e.getMessage());
         } catch (Exception e) {
             System.out.println("❌ Error deleting contract ID " + contractId + ": " + e.getMessage());
-            e.printStackTrace();
             logger.error("Error deleting contract ID {}: {}", contractId, e.getMessage(), e);
             if (e.getMessage().contains("Hợp đồng không tồn tại")) {
                 System.out.println("=== END: Contract not found ===");
@@ -341,6 +440,7 @@ public class ContractController {
         }
     }
 
+    // Endpoint tìm hợp đồng theo ID
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> findContractById(@PathVariable Integer id) {
@@ -361,8 +461,6 @@ public class ContractController {
         }
     }
 
-    // Các phương thức khác giữ nguyên từ code gốc...
-
     private String saveFile(MultipartFile file) {
         System.out.println("=== START: Saving file ===");
         if (file == null || file.isEmpty()) {
@@ -374,7 +472,7 @@ public class ContractController {
         try {
             String originalFilename = file.getOriginalFilename();
             System.out.println("Original filename: " + originalFilename);
-            
+
             System.out.println("Validating file type");
             if (originalFilename != null && !isValidFileType(originalFilename)) {
                 System.out.println("❌ Invalid file type: " + originalFilename);
@@ -415,7 +513,7 @@ public class ContractController {
 
     private boolean isValidFileType(String fileName) {
         System.out.println("=== START: Validating file type for: " + fileName + " ===");
-        String[] allowedExtensions = {".jpg", ".jpeg", ".png"};
+        String[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
         boolean isValid = Arrays.stream(allowedExtensions)
                 .anyMatch(ext -> fileName.toLowerCase().endsWith(ext));
         System.out.println("File type validation result: " + isValid);

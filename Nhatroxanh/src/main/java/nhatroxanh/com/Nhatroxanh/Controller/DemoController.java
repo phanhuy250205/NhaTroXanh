@@ -35,9 +35,9 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/hop-dong")
-    public String hopdong(Model model) {
+    public String hopdong() {
         
-        return "host/hop-dong-host";
+        return "redirect:/api/contracts/form";
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")

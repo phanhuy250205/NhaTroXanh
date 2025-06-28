@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
+import java.sql.Date;
 import java.time.LocalDate;
 
 public class ContractDto {
@@ -11,6 +12,13 @@ public class ContractDto {
     private Room room;
     private Terms terms;
 
+    public ContractDto() {
+        this.owner = new Owner();
+        this.tenant = new Tenant();
+        this.room = new Room();
+        this.terms = new Terms();
+    }
+
     // Getters and setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -18,13 +26,13 @@ public class ContractDto {
     public void setContractDate(LocalDate contractDate) { this.contractDate = contractDate; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public Owner getOwner() { return owner; }
+    public Owner getOwner() { return owner != null ? owner : (owner = new Owner()); }
     public void setOwner(Owner owner) { this.owner = owner; }
-    public Tenant getTenant() { return tenant; }
+    public Tenant getTenant() { return tenant != null ? tenant : (tenant = new Tenant()); }
     public void setTenant(Tenant tenant) { this.tenant = tenant; }
-    public Room getRoom() { return room; }
+    public Room getRoom() { return room != null ? room : (room = new Room()); }
     public void setRoom(Room room) { this.room = room; }
-    public Terms getTerms() { return terms; }
+    public Terms getTerms() { return terms != null ? terms : (terms = new Terms()); }
     public void setTerms(Terms terms) { this.terms = terms; }
 
     public static class Owner {
@@ -32,6 +40,14 @@ public class ContractDto {
         private String phone;
         private String id; // CCCD
         private String email;
+        private Date birthday;
+        private String bankAccount;
+        private Date issueDate;
+        private String issuePlace;
+        private String province;
+        private String district;
+        private String ward;
+        private String street;
 
         // Getters and setters
         public String getFullName() { return fullName; }
@@ -42,6 +58,22 @@ public class ContractDto {
         public void setId(String id) { this.id = id; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+        public Date getBirthday() { return birthday; }
+        public void setBirthday(Date birthday) { this.birthday = birthday; }
+        public String getBankAccount() { return bankAccount; }
+        public void setBankAccount(String bankAccount) { this.bankAccount = bankAccount; }
+        public Date getIssueDate() { return issueDate; }
+        public void setIssueDate(Date issueDate) { this.issueDate = issueDate; }
+        public String getIssuePlace() { return issuePlace; }
+        public void setIssuePlace(String issuePlace) { this.issuePlace = issuePlace; }
+        public String getProvince() { return province; }
+        public void setProvince(String province) { this.province = province; }
+        public String getDistrict() { return district; }
+        public void setDistrict(String district) { this.district = district; }
+        public String getWard() { return ward; }
+        public void setWard(String ward) { this.ward = ward; }
+        public String getStreet() { return street; }
+        public void setStreet(String street) { this.street = street; }
     }
 
     public static class Tenant {
@@ -49,6 +81,22 @@ public class ContractDto {
         private String phone;
         private String id; // CCCD
         private String email;
+        private Date issueDate;
+        private String issuePlace;
+        private String province;
+        private String district;
+        private String ward;
+        private String street;
+        private Date birthday; // Thêm trường birthday
+
+
+        public Date getBirthday() {
+            return birthday;
+        }
+
+        public void setBirthday(Date birthday) {
+            this.birthday = birthday;
+        }
 
         // Getters and setters
         public String getFullName() { return fullName; }
@@ -59,17 +107,41 @@ public class ContractDto {
         public void setId(String id) { this.id = id; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
+        public Date getIssueDate() { return issueDate; }
+        public void setIssueDate(Date issueDate) { this.issueDate = issueDate; }
+        public String getIssuePlace() { return issuePlace; }
+        public void setIssuePlace(String issuePlace) { this.issuePlace = issuePlace; }
+        public String getProvince() { return province; }
+        public void setProvince(String province) { this.province = province; }
+        public String getDistrict() { return district; }
+        public void setDistrict(String district) { this.district = district; }
+        public String getWard() { return ward; }
+        public void setWard(String ward) { this.ward = ward; }
+        public String getStreet() { return street; }
+        public void setStreet(String street) { this.street = street; }
     }
 
     public static class Room {
         private String roomNumber;
         private Double area;
+        private String province;
+        private String district;
+        private String ward;
+        private String street;
 
         // Getters and setters
         public String getRoomNumber() { return roomNumber; }
         public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
         public Double getArea() { return area; }
         public void setArea(Double area) { this.area = area; }
+        public String getProvince() { return province; }
+        public void setProvince(String province) { this.province = province; }
+        public String getDistrict() { return district; }
+        public void setDistrict(String district) { this.district = district; }
+        public String getWard() { return ward; }
+        public void setWard(String ward) { this.ward = ward; }
+        public String getStreet() { return street; }
+        public void setStreet(String street) { this.street = street; }
     }
 
     public static class Terms {

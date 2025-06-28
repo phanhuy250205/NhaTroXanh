@@ -1,5 +1,5 @@
-
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
+
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,18 +38,17 @@ public class ContractServiceImpl implements ContractService {
     @Override
     @Transactional
     public Contracts createContract(
-            String tenantPhone, Integer roomId, Date contractDate, Date startDate, 
-            Date endDate, Float price, Float deposit, String terms, 
-            Contracts.Status status, String ownerId
-    ) throws Exception {
+            String tenantPhone, Integer roomId, Date contractDate, Date startDate,
+            Date endDate, Float price, Float deposit, String terms,
+            Contracts.Status status, String ownerId) throws Exception {
         logger.info("Creating new contract for tenant with phone: {}", tenantPhone);
 
-        Users owner = userRepository.findById((Integer.parseInt(ownerId)))
+        Users owner = userRepository.findById(Integer.parseInt(ownerId))
                 .orElseThrow(() -> new IllegalArgumentException("Chủ trọ không tồn tại!"));
-        if (!"owner".equals(owner.getRole().toString())) {
+        if (owner.getRole() != Users.Role.OWNER) {
             throw new IllegalArgumentException("Người dùng không phải là chủ trọ!");
         }
-        // Kiểm tra dữ liệu đầu vào
+
         if (tenantPhone == null || tenantPhone.trim().isEmpty()) {
             logger.error("Tenant phone is null or empty");
             throw new IllegalArgumentException("Số điện thoại khách thuê không được để trống!");
@@ -78,21 +78,18 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
         }
 
-        // Kiểm tra sự tồn tại của phòng
         Rooms room = roomRepository.findById(roomId)
                 .orElseThrow(() -> {
                     logger.error("Room not found: {}", roomId);
                     return new IllegalArgumentException("Phòng không tồn tại!");
                 });
 
-        // Kiểm tra hợp đồng hoạt động cho phòng
         Optional<Contracts> activeContract = contractRepository.findActiveContractByRoomId(roomId, Contracts.Status.ACTIVE);
         if (activeContract.isPresent()) {
             logger.error("Room {} has an active contract", roomId);
             throw new Exception("Phòng hiện đang có hợp đồng active!");
         }
 
-        // Kiểm tra hoặc tìm khách thuê
         Users tenant = userRepository.findByPhone(tenantPhone)
                 .orElseThrow(() -> {
                     logger.error("Tenant not found with phone: {}", tenantPhone);
@@ -104,20 +101,7 @@ public class ContractServiceImpl implements ContractService {
             throw new IllegalArgumentException("Người dùng không phải là khách thuê!");
         }
 
-        // Kiểm tra chủ trọ
-        Users owner1 = userRepository.findById(Integer.parseInt(ownerId))
-    .orElseThrow(() -> {
-        logger.error("Owner not found: {}", ownerId);
-        return new IllegalArgumentException("Chủ trọ không tồn tại!");
-    });
-
-        if (owner1.getRole() != Users.Role.OWNER) {
-            logger.error("User {} is not an owner", ownerId);
-            throw new IllegalArgumentException("Người dùng không phải là chủ trọ!");
-        }
-
-        // Tạo hợp đồng mới
-       Contracts contract = Contracts.builder()
+        Contracts contract = Contracts.builder()
                 .tenantPhone(tenantPhone)
                 .contractDate(contractDate)
                 .startDate(startDate)
@@ -129,7 +113,7 @@ public class ContractServiceImpl implements ContractService {
                 .owner(owner)
                 .tenant(tenant)
                 .room(room)
-                .createdAt(new java.sql.Date(System.currentTimeMillis()))
+                .createdAt(new Date(System.currentTimeMillis()))
                 .build();
         Contracts savedContract = contractRepository.save(contract);
         logger.info("Contract created successfully: {}", savedContract.getContractId());
@@ -331,5 +315,37 @@ public class ContractServiceImpl implements ContractService {
     public Float getTotalRevenueByOwnerId(Integer ownerId) {
         Float revenue = contractRepository.getTotalRevenueByOwnerId(ownerId, Contracts.Status.ACTIVE);
         return revenue != null ? revenue : 0.0f;
+    }
+
+    @Override
+    public List<Contracts> findContractsByOwnerCccd(String cccd) {
+        logger.info("Finding contracts for owner with CCCD: {}", cccd);
+        
+        if (cccd == null || cccd.trim().isEmpty()) {
+            logger.warn("CCCD is null or empty");
+            return Collections.emptyList();
+        }
+        
+        Optional<Users> ownerOpt = userRepository.findByCccd(cccd);
+        if (ownerOpt.isEmpty()) {
+            logger.warn("No owner found with CCCD: {}", cccd);
+            return Collections.emptyList();
+        }
+        
+        Users owner = ownerOpt.get();
+        if (owner.getRole() != Users.Role.OWNER) {
+            logger.warn("User with CCCD {} is not an owner", cccd);
+            return Collections.emptyList();
+        }
+        
+        List<Contracts> contracts = contractRepository.findByOwnerId(owner.getUserId());
+        
+        contracts.forEach(contract -> {
+            if (contract.getOwner() == null) {
+                logger.error("Contract ID {} has null owner", contract.getContractId());
+            }
+        });
+        
+        return contracts;
     }
 }

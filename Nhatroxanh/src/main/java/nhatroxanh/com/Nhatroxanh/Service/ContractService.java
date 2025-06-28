@@ -1,23 +1,21 @@
-
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+
 
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+
 public interface ContractService {
 
     Contracts createContract(
-            String tenantPhone, Integer roomId, Date contractDate, Date startDate, 
-            Date endDate, Float price, Float deposit, String terms, 
-            Contracts.Status status, String ownerId
-    ) throws Exception;
+            String tenantPhone, Integer roomId, Date contractDate, Date startDate,
+            Date endDate, Float price, Float deposit, String terms,
+            Contracts.Status status, String ownerId) throws Exception;
 
-    Contracts updateContract(
-            Integer contractId, Contracts updatedContract
-    ) throws IllegalArgumentException, Exception;
+    Contracts updateContract(Integer contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
 
     void deleteContract(Integer contractId) throws Exception;
 
@@ -48,5 +46,6 @@ public interface ContractService {
     Long countContractsByOwnerIdAndStatus(Integer ownerId, Contracts.Status status);
 
     Float getTotalRevenueByOwnerId(Integer ownerId);
-    
+
+    List<Contracts> findContractsByOwnerCccd(String cccd);
 }
