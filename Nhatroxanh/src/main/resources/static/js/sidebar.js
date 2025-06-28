@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function showAccountSidebar(el) {
     hideSubmenu();
     hideRentalSidebar();
-    hideTroSidebar(); 
+    hideTroSidebar();
     if (!accountSidebar) return;
     accountSidebar.classList.remove('d-none');
     setTimeout(() => accountSidebar.classList.add('show'), 10);
@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function showRentalSidebar(el) {
     hideSubmenu();
-    hideTroSidebar(); 
+    hideTroSidebar();
     hideAccountSidebar();
     if (!rentalSidebar) return;
     rentalSidebar.classList.remove('d-none');
@@ -138,13 +138,14 @@ document.addEventListener("DOMContentLoaded", () => {
       '/chu-tro/gia-hang-tra-phong': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/danh-gia': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/profile-host': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
-      '/chu-tro/hop-dong': { sidebar: '.nav-sidebar:has(.fa-chart-pie)' },
+      '/chu-tro/hop-dong': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/chi-tiet-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
       '/chu-tro/sua-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
 
-       '/admin/employee-management': { sidebar: '.nav-sidebar:has(.fa-users)' },
-      '/admin/statistics-reports': { sidebar: '.nav-sidebar:has(.fa-chart-bar)' },
-      '/admin/profile-host': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
+      '/admin/quan-ly-nhan-vien': { sidebar: '.nav-sidebar:has(.fa-users)' },
+      '/admin/thong-ke': { sidebar: '.nav-sidebar:has(.fa-chart-bar)' },
+      '/admin/profile': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
+
       '/nhan-vien/bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
       '/nhan-vien/khuyen-mai': { sidebar: '.nav-sidebar:has(.fa-gift)' },
       '/nhan-vien/khieu-nai': { sidebar: '.nav-sidebar:has(.fa-comment-dots)' },
