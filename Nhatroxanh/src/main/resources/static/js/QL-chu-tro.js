@@ -12,7 +12,7 @@ const detailData = {
         address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
         job: "Kỹ sư phần mềm",
         workplace: "Công ty TNHH ABC Technology",
-         documents: [
+        documents: [
             { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
             { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
         ],
@@ -29,9 +29,9 @@ const detailData = {
         address: "456 Đường DEF, Phường UVW, Quận 2, TP.HCM",
         job: "Nhân viên văn phòng",
         workplace: "Công ty Cổ phần XYZ",
-          documents: [
-            { type: "CCCD mặt trước", url: "https://bcp.cdnchinhphu.vn/334894974524682240/2024/2/23/duoi-6y-1708685177988380748443.png" },
-            { type: "CCCD mặt sau", url: "https://image.plo.vn/w1000/Uploaded/2025/xqeioxdrky/2024_02_11/mau-can-cuoc-tre-tu-6-tuoi-mat-sau-9238.jpg.webp" },
+        documents: [
+            { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
+            { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
         ],
     },
     3: {
@@ -46,7 +46,7 @@ const detailData = {
         address: "789 Đường GHI, Phường RST, Quận 3, TP.HCM",
         job: "Giáo viên",
         workplace: "Trường THPT ABC",
-       documents: [
+        documents: [
             { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
             { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
         ],
