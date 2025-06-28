@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ sơ nhân viên</title>
+    <!-- ICON -->
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+
+    <style>
+        /* Previous styles remain unchanged */
+        body .main-content-staff {
+            margin-left: 100px;
+            padding: 1.5rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transition: margin-left 0.3s ease;
+            width: calc(100% - 100px);
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            body .main-content-staff {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+
+        @media (max-width: 992px) and (min-width: 769px) {
+            body .main-content-staff {
+                margin-left: 220px;
+                width: calc(100% - 220px);
+                padding: 1.5rem 2rem;
+            }
+        }
+
+        :root {
+            --primary-color-staff: #4a90e2;
+            --primary-light-staff: #e8f4fd;
+            --primary-dark-staff: #2c5aa0;
+            --danger-color-staff: #ef4444;
+            --success-color-staff: #22c55e;
+            --warning-color-staff: #ffc107;
+            --info-color-staff: #17a2b8;
+            --gray-100-staff: #f1f5f9;
+            --gray-200-staff: #e2e8f0;
+            --gray-300-staff: #cbd5e1;
+            --gray-600-staff: #475569;
+            --gray-700-staff: #334155;
+            --gray-800-staff: #1e293b;
+            --border-radius-staff: 1rem;
+            --transition-staff: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-staff: 0 0.25rem 2rem 0 rgba(58, 59, 69, 0.1);
+            --shadow-lg-staff: 0 1rem 3rem rgba(0, 0, 0, 0.12);
+        }
+
+        body {
+            background-color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .header-container-staff {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius-staff);
+            box-shadow: var(--shadow-staff);
+            border: 1px solid var(--gray-200-staff);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .header-content-staff {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header-left-staff {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .back-btn-staff {
+            background: linear-gradient(135deg, var(--gray-100-staff), rgba(255, 255, 255, 0.9));
+            border: 1px solid var(--gray-300-staff);
+            font-size: 1.2rem;
+            color: var(--gray-600-staff);
+            cursor: pointer;
+            padding: 0.75rem;
+            border-radius: 0.75rem;
+            transition: var(--transition-staff);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .back-btn-staff:hover {
+            background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        .page-title-staff {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800-staff);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .page-title-staff i {
+            color: var(--primary-color-staff);
+            font-size: 1.25rem;
+        }
+
+        .header-actions-staff {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-action-staff {
+            border: none;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition-staff);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+        }
+
+        .btn-action-staff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-action-staff:hover::before {
+            left: 100%;
+        }
+
+        .btn-edit-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
+        }
+
+        .btn-edit-staff:hover {
+            background: linear-gradient(135deg, var(--primary-dark-staff) 0%, #1a4480 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
+        }
+
+        .btn-permissions-staff {
+            background: linear-gradient(135deg, var(--info-color-staff) 0%, #138496 100%);
+        }
+
+        .btn-permissions-staff:hover {
+            background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-disable-staff {
+            background: linear-gradient(135deg, var(--danger-color-staff) 0%, #dc2626 100%);
+        }
+
+        .btn-disable-staff:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
+        }
+
+        .profile-overview-staff {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius-staff);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg-staff);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-overview-staff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(74, 144, 226, 0.02) 0%, rgba(44, 90, 160, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .profile-header-staff {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .avatar-container-staff {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .avatar-container-staff:hover::after {
+            content: 'Thay đổi ảnh';
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .avatar-staff {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid var(--primary-color-staff);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
+            object-fit: cover;
+            transition: var(--transition-staff);
+        }
+
+        .avatar-staff:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+
+        .status-indicator-staff {
+            position: absolute;
+            bottom: 8px;
+            right: 8px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .status-active-staff {
+            background-color: var(--success-color-staff);
+        }
+
+        .status-inactive-staff {
+            background-color: var(--danger-color-staff);
+        }
+
+        .profile-info-staff {
+            flex: 1;
+        }
+
+        .staff-name-staff {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--gray-800-staff);
+            margin-bottom: 0.5rem;
+        }
+
+        .staff-position-staff {
+            font-size: 1.125rem;
+            color: var(--primary-color-staff);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .staff-meta-staff {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item-staff {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--gray-600-staff);
+            font-size: 0.9rem;
+        }
+
+        .meta-item-staff i {
+            color: var(--primary-color-staff);
+            width: 16px;
+        }
+
+        .info-section-staff {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: var(--border-radius-staff);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-lg-staff);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .info-section-staff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(74, 144, 226, 0.02) 0%, rgba(44, 90, 160, 0.02) 100%);
+            pointer-events: none;
+        }
+
+        .section-title-staff {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gray-800-staff);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid var(--gray-200-staff);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-title-staff i {
+            color: var(--primary-color-staff);
+            font-size: 1.125rem;
+        }
+
+        .form-label-staff {
+            font-weight: 600;
+            color: var(--gray-700-staff);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control-staff {
+            border: 2px solid var(--gray-300-staff);
+            border-radius: 0.75rem;
+            padding: 0.875rem 1rem;
+            transition: var(--transition-staff);
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 2;
+        }
+
+        .form-control-staff:disabled,
+        .form-control-staff[readonly] {
+            background: linear-gradient(135deg, var(--gray-100-staff), rgba(248, 249, 250, 0.8));
+            border-color: var(--gray-300-staff);
+            color: var(--gray-600-staff);
+            cursor: not-allowed;
+        }
+
+        .badge-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-active-staff {
+            background: linear-gradient(135deg, var(--success-color-staff), #1e7e34);
+            color: white;
+        }
+
+        .badge-inactive-staff {
+            background: linear-gradient(135deg, var(--danger-color-staff), #dc2626);
+            color: white;
+        }
+
+        .badge-admin-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
+            color: white;
+        }
+
+        .badge-manager-staff {
+            background: linear-gradient(135deg, var(--info-color-staff), #138496);
+            color: white;
+        }
+
+        .badge-staff-role {
+            background: linear-gradient(135deg, var(--warning-color-staff), #e0a800);
+            color: white;
+        }
+
+        .stats-grid-staff {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card-staff {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            text-align: center;
+            border: 1px solid var(--gray-200-staff);
+            transition: var(--transition-staff);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-staff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color-staff), var(--primary-dark-staff));
+        }
+
+        .stat-card-staff:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-number-staff {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color-staff);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label-staff {
+            color: var(--gray-600-staff);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .permissions-grid-staff {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .permission-item-staff {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 0.75rem;
+            border: 1px solid var(--gray-200-staff);
+            transition: var(--transition-staff);
+        }
+
+        .permission-item-staff:hover {
+            background: rgba(74, 144, 226, 0.05);
+            border-color: var(--primary-color-staff);
+        }
+
+        .permission-label-staff {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+            color: var(--gray-700-staff);
+        }
+
+        .permission-label-staff i {
+            color: var(--primary-color-staff);
+            width: 20px;
+        }
+
+        .permission-toggle-staff {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background: var(--gray-300-staff);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition-staff);
+        }
+
+        .permission-toggle-staff.active-staff {
+            background: var(--success-color-staff);
+        }
+
+        .permission-toggle-staff::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: var(--transition-staff);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .permission-toggle-staff.active-staff::after {
+            transform: translateX(26px);
+        }
+
+        .activity-timeline-staff {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .activity-timeline-staff::before {
+            content: '';
+            position: absolute;
+            left: 0.75rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gray-300-staff);
+        }
+
+        .activity-item-staff {
+            position: relative;
+            margin-bottom: 2rem;
+            padding-left: 2rem;
+        }
+
+        .activity-item-staff::before {
+            content: '';
+            position: absolute;
+            left: -0.5rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            background: var(--primary-color-staff);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--primary-color-staff);
+        }
+
+        .activity-time-staff {
+            font-size: 0.875rem;
+            color: var(--gray-600-staff);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-content-staff {
+            color: var(--gray-700-staff);
+            line-height: 1.5;
+        }
+
+        .btn-loading-staff {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+
+        .btn-loading-staff::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid transparent;
+            border-top-color: currentColor;
+            border-radius: 50%;
+            animation: spin-staff 1s linear infinite;
+        }
+
+        @keyframes spin-staff {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert-staff {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            z-index: 9999;
+            min-width: 350px;
+            padding: 1.25rem 1.5rem;
+            border-radius: var(--border-radius-staff);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg-staff);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .alert-success-staff {
+            background: linear-gradient(135deg, var(--success-color-staff), #1e7e34);
+            color: white;
+        }
+
+        .alert-warning-staff {
+            background: linear-gradient(135deg, var(--warning-color-staff), #e0a800);
+            color: white;
+        }
+
+        .alert-info-staff {
+            background: linear-gradient(135deg, var(--info-color-staff), #138496);
+            color: white;
+        }
+
+        .btn-close-staff {
+            background: none;
+            border: none;
+            color: currentColor;
+            font-size: 1.25rem;
+            cursor: pointer;
+            margin-left: auto;
+            padding: 0.25rem;
+            opacity: 0.8;
+            transition: var(--transition-staff);
+            border-radius: 0.25rem;
+        }
+
+        .btn-close-staff:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .fade-show-staff {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .fade-staff {
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @media (max-width: 768px) {
+            .header-content-staff {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+            
+            .header-actions-staff {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .btn-action-staff {
+                flex: 1;
+                justify-content: center;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .profile-header-staff {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .staff-meta-staff {
+                justify-content: center;
+            }
+            
+            .info-section-staff {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .page-title-staff {
+                font-size: 1.25rem;
+            }
+
+            .stats-grid-staff {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 1rem;
+            }
+
+            .permissions-grid-staff {
+                grid-template-columns: 1fr;
+            }
+
+            .alert-staff {
+                right: 1rem;
+                left: 1rem;
+                min-width: auto;
+            }
+        }
+
+        .animate-slide-up-staff {
+            animation: slideInUp-staff 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .animate-fade-in-scale-staff {
+            animation: fadeInScale-staff 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp-staff {
+            from {
+                transform: translateY(40px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInScale-staff {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .is-invalid-staff {
+            border-color: var(--danger-color-staff) !important;
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+            animation: shake-staff 0.5s ease-in-out;
+        }
+
+        @keyframes shake-staff {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content-staff">
+        <!-- Header -->
+        <div class="header-container-staff animate-fade-in-scale-staff">
+            <div class="header-content-staff">
+                <div class="header-left-staff">
+                    <button class="back-btn-staff" onclick="goBack()">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 class="page-title-staff">
+                        <i class="fas fa-user-tie"></i>
+                        Hồ sơ nhân viên
+                    </h1>
+                </div>
+                <div class="header-actions-staff">
+                    <button class="btn-action-staff btn-edit-staff" onclick="editStaff()">
+                        <i class="fas fa-edit"></i>
+                        Chỉnh sửa
+                    </button>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Overview -->
+        <div class="profile-overview-staff animate-slide-up-staff">
+            <div class="profile-header-staff">
+                <div class="avatar-container-staff">
+                    <img src="https://i.pinimg.com/736x/b7/91/44/b79144e03dc4996ce319ff59118caf65.jpg" alt="Avatar" class="avatar-staff" id="staffAvatar">
+                    <input type="file" id="avatarInput" accept="image/*">
+                    <div class="status-indicator-staff status-active-staff" id="statusIndicator"></div>
+                </div>
+                <div class="profile-info-staff">
+                    <h2 class="staff-name-staff" id="staffName">Nguyễn Văn Quản Lý</h2>
+                    <div class="staff-position-staff" id="staffPosition">Quản lý khu trọ</div>
+                    <div class="staff-meta-staff">
+                        <div class="meta-item-staff">
+                            <i class="fas fa-id-badge"></i>
+                            <span>ID: NV001</span>
+                        </div>
+                        <div class="meta-item-staff">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Gia nhập: 15/01/2023</span>
+                        </div>
+                        <div class="meta-item-staff">
+                            <i class="fas fa-building"></i>
+                            <span>Khu A - Tòa nhà chính</span>
+                        </div>
+                        <div class="meta-item-staff">
+                            <i class="fas fa-circle"></i>
+                            <span class="badge-staff badge-active-staff">
+                                <i class="fas fa-check-circle"></i>
+                                Đang hoạt động
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Stats -->
+            <div class="stats-grid-staff">
+                <div class="stat-card-staff">
+                    <div class="stat-number-staff">45</div>
+                    <div class="stat-label-staff">Phòng quản lý</div>
+                </div>
+                <div class="stat-card-staff">
+                    <div class="stat-number-staff">38</div>
+                    <div class="stat-label-staff">Khách hàng</div>
+                </div>
+                <div class="stat-card-staff">
+                    <div class="stat-number-staff">12</div>
+                    <div class="stat-label-staff">Tháng làm việc</div>
+                </div>
+                <div class="stat-card-staff">
+                    <div class="stat-number-staff">4.8</div>
+                    <div class="stat-label-staff">Đánh giá (5★)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personal Information -->
+        <div class="info-section-staff animate-slide-up-staff">
+            <h3 class="section-title-staff">
+                <i class="fas fa-user"></i>
+                Thông tin cá nhân
+            </h3>
+            <form id="personalForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="fullName" class="form-label-staff">Họ và tên</label>
+                        <input type="text" class="form-control-staff" id="fullName" value="Nguyễn Văn Quản Lý" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label-staff">Email</label>
+                        <input type="email" class="form-control-staff" id="email" value="quanly@nhatroxanh.com" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="phone" class="form-label-staff">Số điện thoại</label>
+                        <input type="tel" class="form-control-staff" id="phone" value="0987654321" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="birthDate" class="form-label-staff">Ngày sinh</label>
+                        <input type="date" class="form-control-staff" id="birthDate" value="1985-03-15" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="idNumber" class="form-label-staff">CCCD/CMND</label>
+                        <input type="text" class="form-control-staff" id="idNumber" value="123456789012" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="address" class="form-label-staff">Địa chỉ</label>
+                        <input type="text" class="form-control-staff" id="address" value="123 Đường ABC, Quận 1, TP.HCM" readonly>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Work Information -->
+        <div class="info-section-staff animate-slide-up-staff">
+            <h3 class="section-title-staff">
+                <i class="fas fa-briefcase"></i>
+                Thông tin công việc
+            </h3>
+            <form id="workForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="employeeId" class="form-label-staff">Mã nhân viên</label>
+                        <input type="text" class="form-control-staff" id="employeeId" value="NV001" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="department" class="form-label-staff">Phòng ban</label>
+                        <input type="text" class="form-control-staff" id="department" value="Quản lý nhà trọ" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="position" class="form-label-staff">Chức vụ</label>
+                        <input type="text" class="form-control-staff" id="position" value="Quản lý khu trọ" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="salary" class="form-label-staff">Mức lương</label>
+                        <input type="text" class="form-control-staff" id="salary" value="15,000,000 VNĐ" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="startDate" class="form-label-staff">Ngày bắt đầu</label>
+                        <input type="date" class="form-control-staff" id="startDate" value="2023-01-15" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="workArea" class="form-label-staff">Khu vực phụ trách</label>
+                        <input type="text" class="form-control-staff" id="workArea" value="Khu A - Tòa nhà chính" readonly>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Permissions Management -->
+        <div class="info-section-staff animate-slide-up-staff">
+            <h3 class="section-title-staff">
+                <i class="fas fa-key"></i>
+                Phân quyền hệ thống
+            </h3>
+            <div class="permissions-grid-staff">
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-users"></i>
+                        Quản lý khách hàng
+                    </div>
+                    <div class="permission-toggle-staff active-staff" data-permission="customers"></div>
+                </div>
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-home"></i>
+                        Quản lý phòng trọ
+                    </div>
+                    <div class="permission-toggle-staff active-staff" data-permission="rooms"></div>
+                </div>
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-money-bill"></i>
+                        Quản lý thanh toán
+                    </div>
+                    <div class="permission-toggle-staff active-staff" data-permission="payments"></div>
+                </div>
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-chart-bar"></i>
+                        Xem báo cáo
+                    </div>
+                    <div class="permission-toggle-staff active-staff" data-permission="reports"></div>
+                </div>
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-cog"></i>
+                        Cài đặt hệ thống
+                    </div>
+                    <div class="permission-toggle-staff" data-permission="settings"></div>
+                </div>
+                <div class="permission-item-staff">
+                    <div class="permission-label-staff">
+                        <i class="fas fa-user-shield"></i>
+                        Quản lý nhân viên
+                    </div>
+                    <div class="permission-toggle-staff" data-permission="staff"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Timeline -->
+        <div class="info-section-staff animate-slide-up-staff">
+            <h3 class="section-title-staff">
+                <i class="fas fa-history"></i>
+                Lịch sử hoạt động
+            </h3>
+            <div class="activity-timeline-staff">
+                <div class="activity-item-staff">
+                    <div class="activity-time-staff">2 giờ trước</div>
+                    <div class="activity-content-staff">
+                        Cập nhật thông tin khách hàng <strong>Nguyễn Văn A</strong> - Phòng A101
+                    </div>
+                </div>
+                <div class="activity-item-staff">
+                    <div class="activity-time-staff">5 giờ trước</div>
+                    <div class="activity-content-staff">
+                        Xử lý thanh toán tiền phòng tháng 12/2024 cho <strong>15 khách hàng</strong>
+                    </div>
+                </div>
+                <div class="activity-item-staff">
+                    <div class="activity-time-staff">1 ngày trước</div>
+                    <div class="activity-content-staff">
+                        Kiểm tra và bảo trì <strong>8 phòng trọ</strong> trong khu A
+                    </div>
+                </div>
+                <div class="activity-item-staff">
+                    <div class="activity-time-staff">2 ngày trước</div>
+                    <div class="activity-content-staff">
+                        Tạo báo cáo doanh thu tháng 11/2024 - <strong>Tổng: 45,000,000 VNĐ</strong>
+                    </div>
+                </div>
+                <div class="activity-item-staff">
+                    <div class="activity-time-staff">3 ngày trước</div>
+                    <div class="activity-content-staff">
+                        Đăng ký khách hàng mới <strong>Trần Thị B</strong> - Phòng A205
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/sidebar.js}"></script>
+    
+    <script>
+    // Global state
+    let isEditMode = false;
+
+    // Form elements arrays - chỉ chứa các trường thông tin cá nhân
+    const personalFormElements = [
+        'fullName', 'email', 'phone', 'birthDate', 'idNumber', 'address'
+    ];
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Staff profile page loaded');
+        setReadOnlyMode(); // Set initial read-only state
+        initializeAnimations();
+        initializePermissionToggles();
+        initializeAvatarUpload();
+    });
+
+    // Initialize animations
+    function initializeAnimations() {
+        const sections = document.querySelectorAll('.info-section-staff, .profile-overview-staff');
+        sections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(40px)';
+            
+            setTimeout(() => {
+                section.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, (index + 1) * 200);
+        });
+    }
+
+    // Initialize permission toggles - chỉ cho phép thay đổi khi có quyền
+    function initializePermissionToggles() {
+        const toggles = document.querySelectorAll('.permission-toggle-staff');
+        toggles.forEach(toggle => {
+            toggle.style.pointerEvents = 'none';
+            toggle.style.opacity = '0.7';
+        });
+    }
+
+    // Initialize avatar upload
+    function initializeAvatarUpload() {
+        const avatar = document.getElementById('staffAvatar');
+        const avatarInput = document.getElementById('avatarInput');
+
+        avatar.addEventListener('click', () => {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', handleAvatarChange);
+    }
+
+    // Handle avatar change
+    function handleAvatarChange(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Validate file type
+        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!validImageTypes.includes(file.type)) {
+            showNotification('Vui lòng chọn file ảnh (JPEG, PNG, hoặc GIF)', 'warning');
+            event.target.value = '';
+            return;
+        }
+
+        // Validate file size (max 5MB)
+        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+        if (file.size > maxSize) {
+            showNotification('Ảnh phải nhỏ hơn 5MB', 'warning');
+            event.target.value = '';
+            return;
+        }
+
+        // Create preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const avatar = document.getElementById('staffAvatar');
+            
+            // Show loading state
+            avatar.style.opacity = '0.5';
+            avatar.style.cursor = 'wait';
+
+            // Simulate upload
+            setTimeout(() => {
+                avatar.src = e.target.result;
+                avatar.style.opacity = '1';
+                avatar.style.cursor = 'pointer';
+                
+                // Update activity timeline
+                updateActivityTimeline('Cập nhật ảnh đại diện mới');
+                
+                showNotification('Ảnh đại diện đã được cập nhật thành công!', 'success');
+                
+                // Reset input
+                event.target.value = '';
+            }, 1500);
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Update activity timeline
+    function updateActivityTimeline(activity) {
+        const timeline = document.querySelector('.activity-timeline-staff');
+        const newItem = document.createElement('div');
+        newItem.className = 'activity-item-staff';
+        newItem.innerHTML = `
+            <div class="activity-time-staff">Vừa xong</div>
+            <div class="activity-content-staff">${activity}</div>
+        `;
+        
+        // Add animation
+        newItem.style.opacity = '0';
+        newItem.style.transform = 'translateX(20px)';
+        
+        timeline.insertBefore(newItem, timeline.firstChild);
+        
+        setTimeout(() => {
+            newItem.style.transition = 'all 0.5s ease';
+            newItem.style.opacity = '1';
+            newItem.style.transform = 'translateX(0)';
+        }, 100);
+
+        // Limit to 5 activities
+        const items = timeline.querySelectorAll('.activity-item-staff');
+        if (items.length > 5) {
+            items[items.length - 1].remove();
+        }
+    }
+
+    // Go back function
+    function goBack() {
+        window.history.back();
+    }
+
+    // Edit staff function - chỉ áp dụng cho thông tin cá nhân
+    function editStaff() {
+        const editBtn = document.querySelector('.btn-edit-staff');
+        
+        if (!isEditMode) {
+            // Switch to edit mode chỉ cho thông tin cá nhân
+            setEditMode();
+            editBtn.style.background = 'linear-gradient(135deg, var(--success-color-staff) 0%, #1e7e34 100%)';
+            editBtn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
+            isEditMode = true;
+            
+            showNotification('Chế độ chỉnh sửa thông tin cá nhân đã được bật', 'info');
+        } else {
+            // Validate and save changes chỉ cho thông tin cá nhân
+            if (validatePersonalForm()) {
+                savePersonalChanges();
+            } else {
+                showNotification('Vui lòng kiểm tra lại thông tin cá nhân đã nhập', 'warning');
+            }
+        }
+    }
+
+    // Set edit mode chỉ cho thông tin cá nhân
+    function setEditMode() {
+        personalFormElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.readOnly = false;
+                element.classList.remove('is-invalid-staff');
+            }
+        });
+    }
+
+    // Set read-only mode cho tất cả các trường
+    function setReadOnlyMode() {
+        personalFormElements.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.readOnly = true;
+                element.classList.remove('is-invalid-staff');
+            }
+        });
+    }
+
+    // Validate chỉ form thông tin cá nhân
+    function validatePersonalForm() {
+        const requiredFields = [
+            { id: 'fullName', name: 'Họ và tên' },
+            { id: 'email', name: 'Email' },
+            { id: 'phone', name: 'Số điện thoại' }
+        ];
+        
+        let isValid = true;
+        let errorMessages = [];
+        
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            if (element && !element.value.trim()) {
+                element.classList.add('is-invalid-staff');
+                errorMessages.push(field.name);
+                isValid = false;
+            } else if (element) {
+                element.classList.remove('is-invalid-staff');
+            }
+        });
+
+        // Validate email format
+        const emailElement = document.getElementById('email');
+        if (emailElement && emailElement.value.trim()) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(emailElement.value.trim())) {
+                emailElement.classList.add('is-invalid-staff');
+                if (!errorMessages.includes('Email')) {
+                    errorMessages.push('Email (định dạng không hợp lệ)');
+                }
+                isValid = false;
+            }
+        }
+
+        // Validate phone number format
+        const phoneElement = document.getElementById('phone');
+        if (phoneElement && phoneElement.value.trim()) {
+            const phoneRegex = /^[0-9]{10}$/;
+            if (!phoneRegex.test(phoneElement.value.trim())) {
+                phoneElement.classList.add('is-invalid-staff');
+                if (!errorMessages.includes('Số điện thoại')) {
+                    errorMessages.push('Số điện thoại (định dạng không hợp lệ)');
+                }
+                isValid = false;
+            }
+        }
+        
+        if (!isValid) {
+            showNotification(`Vui lòng kiểm tra: ${errorMessages.join(', ')}`, 'warning');
+        }
+        
+        return isValid;
+    }
+
+    // Save changes chỉ cho thông tin cá nhân
+    function savePersonalChanges() {
+        const editBtn = document.querySelector('.btn-edit-staff');
+        
+        // Show loading state
+        editBtn.classList.add('btn-loading-staff');
+        editBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+        
+        // Simulate API call
+        setTimeout(() => {
+            // Collect personal form data
+            const formData = {};
+            
+            personalFormElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    formData[id] = element.value;
+                }
+            });
+            
+            console.log('Saving personal data:', formData);
+            
+            // Update profile header if name changed
+            const nameElement = document.getElementById('fullName');
+            const profileName = document.getElementById('staffName');
+            if (nameElement && profileName) {
+                profileName.textContent = nameElement.value;
+            }
+            
+            // Update activity timeline
+            updateActivityTimeline('Cập nhật thông tin cá nhân');
+            
+            // Switch back to read-only mode
+            setReadOnlyMode();
+            editBtn.classList.remove('btn-loading-staff');
+            editBtn.style.background = 'linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%)';
+            editBtn.innerHTML = '<i class="fas fa-edit"></i> Chỉnh sửa';
+            isEditMode = false;
+            
+            showNotification('Thông tin cá nhân đã được cập nhật thành công!', 'success');
+        }, 1500);
+    }
+
+    // Manage permissions - chỉ hiển thị thông báo
+    function managePermissions() {
+        showNotification('Chỉ quản trị viên mới có thể thay đổi phân quyền', 'warning');
+    }
+
+    // Disable staff - chỉ hiển thị thông báo
+    function disableStaff() {
+        showNotification('Chỉ quản trị viên mới có thể vô hiệu hóa nhân viên', 'warning');
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        // Remove existing notifications
+        document.querySelectorAll('.alert-staff').forEach(alert => alert.remove());
+        
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `alert-staff alert-${type}-staff fade-staff`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'info' ? 'info-circle' : type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
+            ${message}
+            <button type="button" class="btn-close-staff" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Trigger animation
+        setTimeout(() => {
+            notification.classList.remove('fade-staff');
+            notification.classList.add('fade-show-staff');
+        }, 10);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.classList.remove('fade-show-staff');
+                notification.classList.add('fade-staff');
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 400);
+            }
+        }, 5000);
+    }
+
+    // Prevent form submission
+    document.getElementById('personalForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+    });
+
+    document.getElementById('workForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + E to edit staff
+        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+            e.preventDefault();
+            editStaff();
+        }
+    });
+
+    // Stats animation on scroll
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const statNumbers = entry.target.querySelectorAll('.stat-number-staff');
+                statNumbers.forEach(stat => {
+                    const finalValue = parseFloat(stat.textContent);
+                    animateNumber(stat, 0, finalValue, 1500);
+                });
+            }
+        });
+    }, observerOptions);
+
+    const statsGrid = document.querySelector('.stats-grid-staff');
+    if (statsGrid) {
+        observer.observe(statsGrid);
+    }
+
+    // Animate number function
+    function animateNumber(element, start, end, duration) {
+        const startTime = performance.now();
+        const isFloat = end.toString().includes('.');
+        
+        function updateNumber(currentTime) {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            
+            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
+            const current = start + (end - start) * easeOutQuart;
+            
+            if (isFloat) {
+                element.textContent = current.toFixed(1);
+            } else {
+                element.textContent = Math.floor(current);
+            }
+            
+            if (progress < 1) {
+                requestAnimationFrame(updateNumber);
+            }
+        }
+        
+        requestAnimationFrame(updateNumber);
+    }
+
+    // Real-time validation chỉ cho các trường thông tin cá nhân
+    personalFormElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid-staff')) {
+                    this.classList.remove('is-invalid-staff');
+                }
+            });
+        }
+    });
+
+    // Phone number formatting
+    document.getElementById('phone').addEventListener('input', function(e) {
+        if (!this.readOnly) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 10) {
+                value = value.substring(0, 10);
+            }
+            e.target.value = value;
+        }
+    });
+
+    // ID number formatting
+    document.getElementById('idNumber').addEventListener('input', function(e) {
+        if (!this.readOnly) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 12) {
+                value = value.substring(0, 12);
+            }
+            e.target.value = value;
+        }
+    });
+</script>
+</body>
+</html>

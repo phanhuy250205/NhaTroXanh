@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import java.util.Date;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 
 @Repository
@@ -255,4 +257,47 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                         @Param("minPrice") Float minPrice,
                         @Param("maxPrice") Float maxPrice,
                         @Param("searchTerm") String searchTerm);
+
+        @Query("SELECT p FROM Post p WHERE p.user.userId = :userId")
+        List<Post> findByUserId(@Param("userId") Integer userId);
+
+        List<Post> findByUserOrderByCreatedAtDesc(Users user);
+
+        @Query("SELECT p FROM Post p " +
+                        "WHERE (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                        "AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) " +
+                        "AND (:status IS NULL OR p.approvalStatus = :status) " +
+                        "AND (:fromDate IS NULL OR p.createdAt >= :fromDate) " +
+                        "AND (:toDate IS NULL OR p.createdAt <= :toDate) " +
+                        "ORDER BY p.createdAt DESC")
+        List<Post> searchNewestPosts(@Param("keyword") String keyword,
+                        @Param("categoryId") Integer categoryId,
+                        @Param("status") ApprovalStatus status,
+                        @Param("fromDate") Date fromDate,
+                        @Param("toDate") Date toDate);
+
+        @Query("SELECT p FROM Post p " +
+                        "WHERE (:keyword IS NULL OR LOWER(p.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                        "AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) " +
+                        "AND (:status IS NULL OR p.approvalStatus = :status) " +
+                        "AND (:fromDate IS NULL OR p.createdAt >= :fromDate) " +
+                        "AND (:toDate IS NULL OR p.createdAt <= :toDate) " +
+                        "ORDER BY p.createdAt ASC")
+        List<Post> searchOldestPosts(@Param("keyword") String keyword,
+                        @Param("categoryId") Integer categoryId,
+                        @Param("status") ApprovalStatus status,
+                        @Param("fromDate") Date fromDate,
+                        @Param("toDate") Date toDate);
+
+        @Query("SELECT p FROM Post p WHERE p.user = :user AND p.postId = :postId")
+        Optional<Post> findByIdAndUser(@Param("postId") Integer postId, @Param("user") Users user);
+
+        List<Post> findByUserUserIdOrderByCreatedAtDesc(Integer userId);
+
+        List<Post> findByApprovalStatusOrderByCreatedAtDesc(ApprovalStatus status);
+
+        List<Post> findByApprovalStatusAndStatusOrderByCreatedAtDesc(ApprovalStatus approvalStatus, Boolean status);
+
+        List<Post> findByStatusTrueAndApprovalStatusOrderByCreatedAtDesc(ApprovalStatus approvalStatus);
+
 }

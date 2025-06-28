@@ -5,189 +5,322 @@
     <title>Chi Tiết - Nhà Trọ Xanh</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <style>
+        :root {
+            --primary-blue: #3E83CC;
+            --secondary-blue: #549eed;
+            --dark-blue: #1f2937;
+            --light-blue: #f0f8ff;
+            --accent-blue: #2563eb;
+            --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+            --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --text-muted: #6b7280;
+        }
+
+        .property-detail-section {
+            background-color: #f8f9fa;
+        }
+
+        .image-gallery .main-image-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .image-overlay .btn-favorite-large {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+        }
+
+        .thumbnail-item.active img {
+            border: 2px solid var(--primary-blue);
+            border-radius: 6px;
+        }
+
+        .thumbnail-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            z-index: 10;
+        }
+
+        .thumbnail-nav.prev {
+            left: 0;
+        }
+
+        .thumbnail-nav.next {
+            right: 0;
+        }
+
+        .contact-section {
+            background: #fff;
+            box-shadow: var(--shadow-primary);
+            border-radius: 12px;
+        }
+
+        .property-info {
+            background: #fff;
+            box-shadow: var(--shadow-primary);
+            border-radius: 12px;
+        }
+
+        .property-title {
+            color: var(--dark-blue);
+            font-weight: 600;
+        }
+
+        .price-amount {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        .info-item i {
+            color: var(--primary-blue);
+        }
+
+        .room-list-section .section-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .room-card {
+            background: #fff;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .room-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .room-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-blue);
+        }
+
+        .room-details {
+            font-size: 14px;
+            color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .room-details span {
+            margin-right: 10px;
+        }
+
+        .view-detail-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .view-detail-btn:hover {
+            background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .detail-tabs .nav-link {
+            color: var(--dark-blue);
+        }
+
+        .detail-tabs .nav-link.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: var(--primary-blue);
+        }
+
+        .location-content .map-container {
+            width: 100%;
+            margin-top: 20px;
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow-primary);
+            border: 1px solid #ccc;
+        }
+
+        #map {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+
+        .similar-properties .property-card {
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .property-card .card-image-container {
+            position: relative;
+        }
+
+        .property-card .card-overlay .btn-favorite {
+            background: rgba(255, 255, 255, 0.8);
+            border: none;
+        }
+
+        #photoModal .photo-grid img {
+            border-radius: 12px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        #shareModal .modal-content {
+            border-radius: 12px;
+        }
+
+        #roomDetailModal .modal-content {
+            border-radius: 12px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        #roomDetailModal .modal-header {
+            background: var(--gradient-primary);
+            color: white;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        #roomDetailModal .modal-image {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        #roomDetailModal .modal-info strong {
+            color: var(--accent-blue);
+            width: 120px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        #roomDetailModal .modal-info ul li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        #roomDetailModal .modal-footer {
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .room-card {
+                padding: 10px;
+            }
+
+            .room-title {
+                font-size: 16px;
+            }
+
+            .view-detail-btn {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            #roomDetailModal .modal-body {
+                flex-direction: column;
+            }
+
+            #roomDetailModal .modal-image {
+                max-width: 100%;
+                height: 250px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .room-details {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            #roomDetailModal .modal-info p {
+                font-size: 14px;
+            }
+        }
+
+        .room-box {
+            transition: transform 0.2s ease;
+        }
+
+        .room-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .room-img img {
+            object-fit: cover;
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Ảnh trong carousel lớn (trái) */
+        #roomImageCarousel .carousel-item img {
+            width: 100%;
+            max-height: 350px;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Ảnh thumbnail nhỏ bên dưới */
+        #roomThumbnails img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        /* Khi ảnh thumbnail được chọn */
+        #roomThumbnails img.active {
+            border-color: #007bff;
+        }
+
+        #roomThumbnails img:hover {
+            transform: scale(1.05);
+            transition: transform 0.2s ease-in-out;
+        }
+    </style>
 </head>
-<style>
-    .hidden-review {
-        display: none;
-    }
-
-    .map-container {
-        width: 100%;
-        margin-top: 20px;
-        position: relative;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        border: 1px solid #ccc;
-    }
-
-    #map {
-        width: 100%;
-        height: 400px;
-        border: none;
-    }
-
-    .location-info p {
-        margin-bottom: 10px;
-        font-size: 16px;
-    }
-
-    .location-content h3 {
-        font-size: 20px;
-        font-weight: bold;
-        margin-bottom: 15px;
-    }
-
-    .form.review-form {
-        max-width: 500px;
-        padding: 20px;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        background-color: #f9f9f9;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        font-family: Arial, sans-serif;
-    }
-
-    .review-form div {
-        margin-bottom: 15px;
-    }
-
-    .review-form label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 5px;
-        color: #333;
-    }
-
-    .review-form input[type="number"],
-    .review-form textarea {
-        width: 100%;
-        padding: 8px 12px;
-        border: 1px solid #ccc;
-        border-radius: 6px;
-        font-size: 14px;
-        box-sizing: border-box;
-        resize: vertical;
-    }
-
-    .review-form input[type="number"]::-webkit-inner-spin-button {
-        height: 30px;
-    }
-
-    .review-form button {
-        padding: 10px 20px;
-        font-size: 14px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-    }
-
-    .review-form button:hover {
-        background-color: #0056b3;
-    }
-
-    /* CSS tùy chỉnh cho phần nhận xét (textarea) giống hình */
-    .review-form textarea {
-        border-radius: 20px;
-        /* Bo tròn giống ô nhập liệu trong hình */
-        border: 1px solid #e0e0e0;
-        /* Viền mỏng và sáng */
-        background-color: #fff;
-        /* Nền trắng */
-        padding: 12px 40px 12px 12px;
-        /* Padding bên phải để chứa biểu tượng */
-        font-size: 14px;
-        height: 50px;
-        /* Chiều cao cố định giống hình */
-        resize: none;
-        /* Ngăn kéo giãn */
-        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
-        /* Hiệu ứng bóng nhẹ bên trong */
-        position: relative;
-    }
-
-    /* Thêm biểu tượng mũi tên bên phải */
-    .review-form textarea:after {
-        content: "▶";
-        /* Biểu tượng mũi tên */
-        position: absolute;
-        right: 15px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #888;
-        font-size: 16px;
-        pointer-events: none;
-        /* Ngăn chặn tương tác với biểu tượng */
-    }
-
-    /* Hiệu ứng focus */
-    .review-form textarea:focus {
-        outline: none;
-        border-color: #007bff;
-        box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
-    }
-
-    /* Đảm bảo textarea không bị che bởi biểu tượng */
-    .review-form textarea::-webkit-input-placeholder {
-        color: #888;
-    }
-
-    .review-form textarea:-moz-placeholder {
-        color: #888;
-    }
-
-    .review-form textarea::-moz-placeholder {
-        color: #888;
-    }
-
-    .review-form textarea:-ms-input-placeholder {
-        color: #888;
-    }
-
-    .star-rating label {
-        font-weight: bold;
-        margin-bottom: 5px;
-        display: block;
-        color: #333;
-    }
-
-    #stars {
-        display: flex;
-        gap: 5px;
-        font-size: 28px;
-        cursor: pointer;
-        color: #ccc;
-        transition: color 0.2s;
-    }
-
-    .star-rating {
-        display: inline-flex;
-        font-size: 2rem;
-        cursor: pointer;
-        gap: 0.25rem;
-    }
-
-    .star-rating span {
-        color: #ccc;
-        transition: color 0.2s;
-    }
-
-    .star-rating span.hovered {
-        color: orange;
-    }
-
-    .star-rating span.selected {
-        color: gold;
-    }
-</style>
 
 <body>
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/navbar}"></div>
-
 
     <!-- LOGIN MODAL -->
     <div th:replace="~{/layouts/login-modal}"></div>
@@ -197,7 +330,6 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
-    
 
     <!-- Breadcrumb -->
     <div class="container mt-3">
@@ -261,10 +393,16 @@
                                     style="width: 60px; height: 60px;" onerror="this.src='/images/avatar-default.png';">
                                 <div class="owner-details">
                                     <h4 class="owner-name mb-1"
-                                        th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ trọ</h4>
-                                    <p class="owner-role mb-0 text-muted"
-                                        th:text="${owner != null && owner.role != null ? owner.role : 'Chủ trọ'}">Chủ
-                                        trọ</p>
+                                        th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ
+                                        trọ</h4>
+                                    <p class="owner-role mb-0 text-muted" th:switch="${owner.role.name()}">
+                                        <span th:case="'owner'">Chủ trọ</span>
+                                        <span th:case="'admin'">Quản trị viên</span>
+                                        <span th:case="'staff'">Nhân viên</span>
+                                        <span th:case="'customer'">Khách thuê</span>
+                                        <span th:case="*">Không xác định</span>
+                                    </p>
+
                                 </div>
                             </div>
                         </div>
@@ -338,9 +476,9 @@
                                 <div class="info-value">
                                     <span th:if="${post.address != null}"
                                         th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
-                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
-                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
-                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                       ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
+                                       ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
+                                       ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
                                     </span>
                                     <span th:unless="${post.address != null}">
                                         Địa chỉ chưa cập nhật
@@ -350,7 +488,7 @@
                             <div class="info-item d-flex align-items-center mb-2">
                                 <i class="fas fa-calendar-alt me-2"></i>
                                 <span class="info-label me-2 fw-bold">Ngày đăng:</span>
-                                <span class="info-value "
+                                <span class="info-value"
                                     th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">01/01/2024</span>
                             </div>
                         </div>
@@ -361,7 +499,7 @@
             <!-- Detailed Information -->
             <div class="row mt-5">
                 <div class="col-12">
-                    <div class="detail-tabs">
+                    <div class="detail-tabs mb-5">
                         <ul class="nav nav-tabs" id="detailTabs" role="tablist">
                             <li class="nav-item" role="presentation">
                                 <button class="nav-ct active" id="overview-tab" data-bs-toggle="tab"
@@ -391,7 +529,6 @@
                                         th:utext="${post != null && post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
                                         Mô tả bài đăng
                                     </p>
-
                                 </div>
                             </div>
 
@@ -402,12 +539,10 @@
                                     <div class="amenities-grid">
                                         <div class="amenity-category">
                                             <div class="amenity-list">
-                                                <!-- Nếu không có tiện ích -->
                                                 <p th:if="${utilities == null or #sets.isEmpty(utilities)}"
                                                     class="text-muted">
                                                     Phòng này hiện không có tiện ích nào.
                                                 </p>
-                                                <!-- Danh sách tiện ích -->
                                                 <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
                                                     <ul class="list-unstyled">
                                                         <li class="amenity-item mb-2" th:each="utility : ${utilities}">
@@ -449,6 +584,52 @@
                     </div>
                 </div>
             </div>
+            <!-- Room List Section -->
+            <div class="detail-tabs">
+                <div class="room-list-section container my-5">
+                    <h4 class="section-title mb-4 text-gradient">Chi tiết các phòng trong khu trọ</h4>
+
+                    <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="text-muted">
+                        Nhà trọ này hiện không có phòng nào.
+                    </div>
+
+                    <div th:unless="${rooms == null or #lists.isEmpty(rooms)}" class="row">
+                        <div class="col-lg-3 col-md-6 col-sm-12 mb-4" th:each="room : ${rooms}">
+                            <div class="card property-card h-100">
+                                <div class="card-image-container position-relative">
+                                    <img th:src="@{${room.images[0].url}}" class="card-img-top"
+                                        style="height: 200px; object-fit: cover;" alt="Ảnh phòng" />
+                                </div>
+                                <div class="card-body">
+                                    <h5 th:text="${room.namerooms}" class="property-title">Phòng</h5>
+                                    <p><strong>Diện tích:</strong> <span th:text="${room.acreage} + ' m²'">20m²</span>
+                                    </p>
+                                    <p class="property-price mb-3">
+                                        <strong>Giá:</strong>
+                                        <span class="price-amount"
+                                            th:text="${#numbers.formatDecimal(room.price, 1, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                            2 triệu/tháng
+                                        </span>
+                                    </p>
+                                    <p><strong>Trạng thái:</strong>
+                                        <span th:if="${room.status.name() == 'unactive'}"
+                                            class="text-danger">Trống</span>
+                                        <span th:if="${room.status.name() == 'active'}" class="text-success">Đã
+                                            thuê</span>
+                                        <span th:if="${room.status.name() == 'repair'}" class="text-warning">Bảo
+                                            trì</span>
+                                    </p>
+                                    <button class="btn btn-outline-primary w-100" th:attr="data-room-id=${room.room_id}"
+                                        onclick="openRoomDetailModal(this.getAttribute('data-room-id'))">
+                                        <i class="fas fa-eye me-1"></i> Xem chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <!-- Similar Properties -->
             <div class="row mt-5">
@@ -481,7 +662,6 @@
                                             <span class="price-amount"
                                                 th:text="${similarPost != null && similarPost.price != null ? #numbers.formatDecimal(similarPost.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng' : '0 VNĐ'}"></span>
                                         </div>
-
                                         <div class="property-location mb-3">
                                             <i class="fas fa-map-marker-alt"></i>
                                             <span th:if="${similarPost.address != null}"
@@ -504,6 +684,7 @@
                     </div>
                 </div>
             </div>
+        </div>
     </section>
 
     <!-- Photo Modal -->
@@ -515,13 +696,17 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="photo-grid">
-                        <img th:each="image : ${images}" th:src="@{${image}}" alt="Hình ảnh phòng trọ">
+                    <div class="photo-grid row">
+                        <div th:each="image : ${images}" class="col-md-4 mb-3">
+                            <img th:src="@{${image}}" alt="Hình ảnh phòng trọ" class="img-fluid rounded">
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Share Modal -->
     <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -561,7 +746,6 @@
                             </button>
                         </div>
                     </div>
-
                     <div class="social-share" id="socialShare" style="display: none;">
                         <h6>Chia sẻ qua:</h6>
                         <div class="d-flex gap-2 flex-wrap">
@@ -579,8 +763,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Loading State -->
                     <div class="text-center" id="shareLoading" style="display: none;">
                         <div class="spinner-border text-primary" role="status">
                             <span class="visually-hidden">Đang tải...</span>
@@ -591,22 +773,76 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="roomDetailModal" tabindex="-1" aria-labelledby="roomDetailModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết phòng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Bên trái: ảnh -->
+                        <div class="col-md-6">
+                            <!-- Carousel ảnh -->
+                            <div id="roomImageCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                                <div class="carousel-inner" id="roomDetailCarouselInner"></div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#roomImageCarousel"
+                                    data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#roomImageCarousel"
+                                    data-bs-slide="next">
+                                    <span class="carousel-control-next-icon"></span>
+                                </button>
+                            </div>
+
+                            <!-- Thumbnails -->
+                            <div class="d-flex justify-content-center gap-2 flex-wrap" id="roomThumbnails"></div>
+                        </div>
+
+                        <!-- Bên phải: thông tin -->
+                        <div class="col-md-6">
+                            <p><strong>Tên phòng:</strong> <span id="roomDetailName"></span></p>
+                            <p><strong>Giá:</strong> <span id="roomDetailPrice"></span></p>
+                            <p><strong>Diện tích:</strong> <span id="roomDetailAcreage"></span></p>
+                            <p><strong>Số người tối đa:</strong> <span id="roomDetailMaxTenants"></span></p>
+                            <p><strong>Trạng thái:</strong> <span id="roomDetailStatus"></span></p>
+                            <p><strong>Mô tả:</strong> <span id="roomDetailDescription"></span></p>
+                            <div>
+                                <strong>Tiện nghi:</strong>
+                                <ul id="roomDetailUtilities" class="list-unstyled mt-2"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function changeMainImage(src, element) {
-            document.getElementById('mainImage').src = src;
+            const mainImage = document.getElementById('mainImage');
+            mainImage.src = src;
             document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
             element.classList.add('active');
         }
 
         function scrollThumbnails(direction) {
             const container = document.querySelector('.thumbnail-scroll');
-            const scrollAmount = 80; // Match thumbnail width
-            const maxScroll = container.scrollWidth - container.clientWidth;
-
+            const scrollAmount = 80;
             if (direction === 'prev') {
-                container.scrollLeft = Math.max(0, container.scrollLeft - scrollAmount);
+                container.scrollLeft -= scrollAmount;
             } else {
-                container.scrollLeft = Math.min(maxScroll, container.scrollLeft + scrollAmount);
+                container.scrollLeft += scrollAmount;
             }
         }
 
@@ -614,28 +850,100 @@
             $('#photoModal').modal('show');
         }
 
-        let contactCache = new Map();
+        async function openRoomDetailModal(roomId) {
+            try {
+                const response = await fetch(`/api/rooms/${roomId}`);
+                if (!response.ok) throw new Error('Không thể tải thông tin phòng');
+                const room = await response.json();
 
+                if (room.error) {
+                    alert('Lỗi: ' + room.error);
+                    return;
+                }
+
+                // Set thông tin cơ bản
+                document.getElementById('roomDetailName').textContent = room.name || 'Chưa xác định';
+                document.getElementById('roomDetailPrice').textContent = room.price ? new Intl.NumberFormat('vi-VN').format(room.price) + ' VNĐ/tháng' : 'Chưa xác định';
+                document.getElementById('roomDetailAcreage').textContent = room.acreage ? room.acreage.toFixed(0) + ' m²' : 'Chưa xác định';
+                document.getElementById('roomDetailMaxTenants').textContent = room.maxTenants || 'Chưa xác định';
+                document.getElementById('roomDetailStatus').textContent = room.status || 'Chưa xác định';
+                document.getElementById('roomDetailDescription').textContent = room.description || 'Chưa có mô tả';
+
+                // ====== ẢNH ======
+                const images = Array.from(new Set(
+                    room.images && room.images.length > 0 ? room.images : ['/images/cards/default.jpg']
+                ));
+
+                const carouselInner = document.getElementById('roomDetailCarouselInner');
+                const thumbnails = document.getElementById('roomThumbnails');
+                carouselInner.innerHTML = '';
+                thumbnails.innerHTML = '';
+
+                images.forEach((imgUrl, index) => {
+                    // Slide lớn
+                    const slide = document.createElement('div');
+                    slide.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+                    slide.innerHTML = `<img src="${imgUrl}" 
+     class="d-block w-100 rounded" 
+     style="width: 100%; height: 350px; object-fit: cover; border-radius: 8px;" 
+     alt="Ảnh phòng">
+`;
+                    carouselInner.appendChild(slide);
+
+                    // Thumbnail nhỏ
+                    const thumb = document.createElement('img');
+                    thumb.src = imgUrl;
+                    thumb.className = 'img-thumbnail me-2 mb-2';
+                    thumb.style = 'width:120px; height: 70px; width: auto; cursor: pointer;';
+                    if (index === 0) thumb.classList.add('border-primary');
+                    thumb.addEventListener('click', () => {
+                        const slides = carouselInner.querySelectorAll('.carousel-item');
+                        slides.forEach(s => s.classList.remove('active'));
+                        slides[index].classList.add('active');
+                    });
+                    thumbnails.appendChild(thumb);
+                });
+
+                // ====== TIỆN ÍCH ======
+                const utilitiesList = document.getElementById('roomDetailUtilities');
+                utilitiesList.innerHTML = '';
+                if (room.utilities && room.utilities.length > 0) {
+                    room.utilities.forEach(utility => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${utility}`;
+                        utilitiesList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement('li');
+                    li.textContent = 'Không có tiện ích';
+                    utilitiesList.appendChild(li);
+                }
+
+                const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
+                modal.show();
+            } catch (error) {
+                console.error('Lỗi khi tải chi tiết phòng:', error);
+                alert('Không thể tải thông tin phòng. Vui lòng thử lại.');
+            }
+        }
+
+
+
+        let contactCache = new Map();
         function fetchContact(event, action) {
             event.preventDefault();
-            console.log('fetchContact called with action:', action);
-
             const button = event.target.closest('button');
             const contactButtons = button.closest('.contact-buttons');
             const postId = contactButtons.getAttribute('data-post-id');
             const loadingDiv = contactButtons.querySelector('.contact-loading');
             const allButtons = contactButtons.querySelectorAll('button');
 
-            console.log('PostId:', postId);
-
             if (!postId) {
                 alert("Không tìm thấy ID bài đăng!");
                 return;
             }
 
-            // Check cache first
             if (contactCache.has(postId)) {
-                console.log('Using cached data for postId:', postId);
                 const cachedData = contactCache.get(postId);
                 if (cachedData.success) {
                     executeContactAction(action, cachedData.phoneNumber);
@@ -646,36 +954,22 @@
                 }
             }
 
-            // Show loading state
-            console.log('Showing loading state...');
             allButtons.forEach(btn => {
                 btn.disabled = true;
                 btn.style.opacity = '0.6';
             });
-            if (loadingDiv) {
-                loadingDiv.style.display = 'block';
-            }
-
-            console.log('Making API call to:', `/api/contact/${postId}`);
+            if (loadingDiv) loadingDiv.style.display = 'block';
 
             fetch(`/api/contact/${postId}`)
                 .then(response => {
-                    console.log('API response status:', response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    }
+                    if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                     return response.json();
                 })
                 .then(data => {
-                    console.log('API response data:', data);
-
-                    // Cache the result
                     contactCache.set(postId, data);
-
                     if (data.success && data.phoneNumber) {
                         updateContactButtons(contactButtons, data);
                         executeContactAction(action, data.phoneNumber);
-                        // No alert notification - clean UX
                     } else {
                         alert(data.message || "Không thể lấy thông tin liên hệ");
                     }
@@ -685,11 +979,7 @@
                     alert("❌ Không thể tải thông tin liên hệ. Vui lòng thử lại sau.");
                 })
                 .finally(() => {
-                    console.log('Hiding loading state...');
-                    // Hide loading state
-                    if (loadingDiv) {
-                        loadingDiv.style.display = 'none';
-                    }
+                    if (loadingDiv) loadingDiv.style.display = 'none';
                     allButtons.forEach(btn => {
                         btn.disabled = false;
                         btn.style.opacity = '1';
@@ -700,47 +990,20 @@
         function updateContactButtons(contactButtons, data) {
             const phoneButton = contactButtons.querySelector('button[onclick*="call"]');
             const phoneText = phoneButton.querySelector('.phone-text');
-
             if (phoneText && data.phoneNumber) {
                 phoneText.textContent = data.phoneNumber;
                 phoneButton.classList.remove('btn-success');
                 phoneButton.classList.add('btn-outline-success');
             }
-
-            // Add owner name if available
-            // if (data.ownerName) {
-            //     let ownerInfo = contactButtons.querySelector('.owner-info');
-            //     if (!ownerInfo) {
-            //         ownerInfo = document.createElement('div');
-            //         ownerInfo.className = 'owner-info text-muted small mt-1';
-            //         contactButtons.appendChild(ownerInfo);
-            //     }
-            //     // ownerInfo.innerHTML = `<i class="fas fa-user"></i> Liên hệ: ${data.ownerName}`;
-            // }
         }
 
         function executeContactAction(action, phoneNumber) {
-            console.log('Executing action:', action, 'with phone:', phoneNumber);
-
             try {
                 switch (action) {
-                    case 'call':
-                        window.location.href = `tel:${phoneNumber}`;
-                        break;
-
-                    case 'sms':
-                        window.location.href = `sms:${phoneNumber}`;
-                        break;
-
-                    case 'zalo':
-                        window.location.href = `zalo://chat?phone=${phoneNumber}`;
-                        setTimeout(() => {
-                            window.open(`https://zalo.me/${phoneNumber}`, '_blank');
-                        }, 1000);
-                        break;
-
-                    default:
-                        alert("Hành động không được hỗ trợ");
+                    case 'call': window.location.href = `tel:${phoneNumber}`; break;
+                    case 'sms': window.location.href = `sms:${phoneNumber}`; break;
+                    case 'zalo': window.location.href = `zalo://chat?phone=${phoneNumber}`; setTimeout(() => window.open(`https://zalo.me/${phoneNumber}`, '_blank'), 1000); break;
+                    default: alert("Hành động không được hỗ trợ");
                 }
             } catch (error) {
                 console.error('Error executing contact action:', error);
@@ -748,20 +1011,13 @@
             }
         }
 
-        function saveProperty() {
-            alert('Đã lưu tin!');
-        }
+        function saveProperty() { alert('Đã lưu tin!'); }
 
         let currentShareData = null;
-
         function shareProperty(event) {
             event.preventDefault();
             const button = event.target.closest('button');
             const postId = button.getAttribute('data-post-id');
-
-            console.log("=== SHARE PROPERTY ===");
-            console.log("PostId:", postId);
-            console.log("PostId type:", typeof postId);
 
             if (!postId || postId === 'null' || postId === 'undefined') {
                 showShareError("Không tìm thấy ID bài đăng!");
@@ -772,21 +1028,13 @@
             hideAllSections();
             showLoading();
 
-            console.log("Making API call to:", `/api/share/${postId}`);
-
             fetch(`/api/share/${postId}`)
                 .then(response => {
-                    console.log("API response status:", response.status);
-                    console.log("API response headers:", response.headers);
-
                     if (!response.ok) {
                         return response.json().then(errorData => {
-                            console.log("Error response data:", errorData);
                             throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
                         }).catch(parseError => {
-                            console.log("Failed to parse error response, trying text...");
                             return response.text().then(text => {
-                                console.log("Error response text:", text);
                                 throw new Error(`HTTP ${response.status}: ${text}`);
                             });
                         });
@@ -794,8 +1042,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Received share data:", data);
-
                     if (data.success) {
                         currentShareData = data;
                         displayShareData(data);
@@ -896,6 +1142,7 @@
             const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareData.shareUrl)}`;
             window.open(url, '_blank', 'width=600,height=400');
         }
+
         function shareToMessenger() {
             if (!currentShareData) return;
             const text = `${currentShareData.title}\n${currentShareData.description}\n${currentShareData.shareUrl}`;
@@ -927,83 +1174,74 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Contact buttons JavaScript loaded!');
-            const buttons = document.querySelectorAll('.contact-buttons button');
-            console.log('Found', buttons.length, 'contact buttons');
-
-            const shareButtons = document.querySelectorAll('[data-post-id]');
-            console.log('Found', shareButtons.length, 'share buttons');
-            shareButtons.forEach((btn, index) => {
-                const postId = btn.getAttribute('data-post-id');
-                console.log(`Share button ${index}: postId = ${postId} (type: ${typeof postId})`);
-            });
-        });
         function reportProperty() {
             alert('Chức năng báo cáo đang được phát triển!');
         }
-        let map;
-        let geocoder;
 
+        let map;
         function initMap() {
             const defaultLatLng = { lat: 16.068, lng: 108.212 };
-            const address = document.getElementById('address')?.value?.trim();
-
-            map = new google.maps.Map(document.getElementById('map'), {
-                center: defaultLatLng,
-                zoom: 13
-            });
-
-            geocoder = new google.maps.Geocoder();
+            const address = document.querySelector('.location-info p span[th:text]')?.textContent?.trim();
+            map = new google.maps.Map(document.getElementById('map'), { center: defaultLatLng, zoom: 13 });
+            const geocoder = new google.maps.Geocoder();
 
             if (!address) {
-                new google.maps.Marker({
-                    position: defaultLatLng,
-                    map: map,
-                    title: "Trung tâm TP. Đà Nẵng"
-                });
+                new google.maps.Marker({ position: defaultLatLng, map, title: "Trung tâm TP. Đà Nẵng" });
                 return;
             }
 
-            geocoder.geocode({ address: address }, function (results, status) {
+            geocoder.geocode({ address: address }, (results, status) => {
                 if (status === 'OK') {
                     const location = results[0].geometry.location;
                     map.setCenter(location);
                     map.setZoom(15);
-                    new google.maps.Marker({
-                        map: map,
-                        position: location,
-                        title: address
-                    });
+                    new google.maps.Marker({ map, position: location, title: address });
                 } else {
                     console.warn('Không tìm thấy địa chỉ: ' + status);
-                    alert('Không tìm thấy địa chỉ: ' + status);
                 }
             });
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            // Gắn sự kiện vào tất cả các tab Bootstrap có thuộc tính data-bs-toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const mapScript = document.createElement('script');
+            mapScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAW7YMulhdUYW1RwiUNjijM3Mv222fLrWc&callback=initMap';
+            mapScript.async = true;
+            mapScript.defer = true;
+            document.body.appendChild(mapScript);
+
             document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tabEl => {
                 tabEl.addEventListener('shown.bs.tab', function (event) {
-                    const targetId = event.target.getAttribute('data-bs-target');
-                    if (targetId === '#location') {
-                        setTimeout(() => {
-                            if (!mapLoaded) {
-                                loadMap();
-                            } else {
-                                map.invalidateSize();
-                            }
-                        }, 300); // Delay nhỏ giúp DOM được cập nhật đầy đủ
+                    if (event.target.getAttribute('data-bs-target') === '#location') {
+                        setTimeout(() => initMap(), 300);
                     }
                 });
             });
+
+            const loadMoreBtn = document.getElementById('loadMoreBtn');
+            const hiddenReviews = document.querySelectorAll('.hidden-review');
+            let visibleCount = 5;
+            const step = 5;
+
+            loadMoreBtn?.addEventListener('click', () => {
+                const nextHidden = Array.from(hiddenReviews).slice(visibleCount - 5, visibleCount + step);
+                nextHidden.forEach(item => item.classList.remove('hidden-review'));
+                visibleCount += step;
+
+                if (visibleCount >= hiddenReviews.length + 5) {
+                    loadMoreBtn.style.display = 'none';
+                }
+            });
+
+            if (hiddenReviews.length === 0) {
+                loadMoreBtn.style.display = 'none';
+            }
         });
+
         const stars = document.querySelectorAll('#stars span');
         const ratingInput = document.getElementById('rating');
         let selectedRating = 0;
 
-        stars.forEach((star, idx) => {
+        stars?.forEach((star, idx) => {
             const value = parseInt(star.dataset.value);
 
             star.addEventListener('click', () => {
@@ -1030,31 +1268,7 @@
                 }
             });
         }
-        document.addEventListener('DOMContentLoaded', () => {
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            const hiddenReviews = document.querySelectorAll('.hidden-review');
-            let visibleCount = 5;
-            const step = 5;
-
-            loadMoreBtn.addEventListener('click', () => {
-                const nextHidden = Array.from(hiddenReviews).slice(visibleCount - 5, visibleCount + step);
-                nextHidden.forEach(item => item.classList.remove('hidden-review'));
-                visibleCount += step;
-
-                // Ẩn nút nếu không còn đánh giá nào bị ẩn
-                if (visibleCount >= hiddenReviews.length + 5) {
-                    loadMoreBtn.style.display = 'none';
-                }
-            });
-
-            if (hiddenReviews.length === 0) {
-                loadMoreBtn.style.display = 'none';
-            }
-        });
     </script>
-    <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAW7YMulhdUYW1RwiUNjijM3Mv222fLrWc&callback=initMap">
-        </script>
 </body>
 
 </html>

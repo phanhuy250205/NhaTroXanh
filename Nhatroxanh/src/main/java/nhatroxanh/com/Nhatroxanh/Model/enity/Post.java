@@ -37,8 +37,8 @@ import lombok.ToString;
 @Data
 @Entity
 @Table(name = "Posts")
-@EqualsAndHashCode(exclude = { "images", "utilities", "user", "approvedBy" })
-@ToString(exclude = { "images", "utilities", "user", "approvedBy" })
+@EqualsAndHashCode(exclude = { "images", "utilities", "user", "approvedBy", "hostel", "reviews" })
+@ToString(exclude = { "images", "utilities", "user", "approvedBy", "hostel", "reviews" })
 @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Post {
     @Id
@@ -99,4 +99,13 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = true)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hostel_id", nullable = true)
+    @JsonBackReference
+    private Hostel hostel;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Review> reviews;
 }

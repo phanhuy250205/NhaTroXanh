@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head th:replace="~{/layouts/head}" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài đăng</title>
+    
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --primary-hover: #6c757d;
+            --secondary-color: #6b7280;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --border-radius: 12px;
+        }
+        .tab-content {
+            padding: 0;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #ffff, #3e83cc);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .page-header h4 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-input {
+            border: 2px solid #e5e7eb;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .filter-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-icon {
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        /* Custom Tabs */
+        .custom-tabs {
+            border: none;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .custom-tab {
+            border: none !important;
+            background: transparent !important;
+            color: var(--secondary-color) !important;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .custom-tab:hover {
+            background: #f1f5f9 !important;
+            color: var(--primary-color) !important;
+        }
+
+        .custom-tab.active {
+            background: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Post Cards */
+        .post-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+            cursor: pointer; /* Indicate clickable area */
+        }
+
+        .post-card:hover {
+            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .post-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .post-card-body {
+            padding: 20px;
+        }
+
+        .post-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+
+        .post-price {
+            color: var(--danger-color);
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .post-badges {
+            margin-bottom: 15px;
+        }
+
+        .post-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .badge-type {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-area {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .post-info {
+            font-size: 13px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .post-info i {
+            width: 14px;
+            text-align: center;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-approve {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #059669;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-hide {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-hide:hover {
+            background: #d97706;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Notification Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .notification-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-body {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .search-filter-section {
+                padding: 20px;
+            }
+            
+            .filter-select {
+                min-width: 100px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .post-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .post-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="notification-container"></div>
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <h4>
+                <i class="fas fa-clipboard-list"></i>
+                Quản lý bài đăng
+            </h4>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="search-filter-section">
+            <div class="row align-items-center">
+                <!-- Search -->
+                <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-input" placeholder="Tìm kiếm bài đăng...">
+                        <button class="btn btn-primary search-btn">
+                            <i class="fas fa-search"></i>
+                            <span class="d-none d-sm-inline ms-1">Tìm kiếm</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-filter filter-icon"></i>
+                            <select class="form-select filter-select">
+                                <option selected>Trạng thái</option>
+                                <option value="pending">Chờ duyệt</option>
+                                <option value="approved">Đã duyệt</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-home filter-icon"></i>
+                            <select class="form-select filter-select">
+                                <option selected>Loại</option>
+                                <option value="house">Nhà trọ</option>
+                                <option value="room">Phòng trọ</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-calendar-alt filter-icon"></i>
+                            <select class="form-select filter-select">
+                                <option selected>Ngày</option>
+                                <option value="newest">Mới nhất</option>
+                                <option value="oldest">Cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Tabs -->
+        <ul class="nav nav-tabs custom-tabs" id="managementTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link custom-tab active" id="pending-tab" data-bs-toggle="tab" 
+                        data-bs-target="#pending" type="button" role="tab">
+                    <i class="fas fa-clock me-2"></i>
+                    Chờ duyệt
+                    <span class="badge bg-warning ms-2">5</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link custom-tab" id="approved-tab" data-bs-toggle="tab" 
+                        data-bs-target="#approved" type="button" role="tab">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Đã duyệt
+                    <span class="badge bg-success ms-2">12</span>
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="managementTabsContent">
+            <!-- Pending Posts Tab -->
+            <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="post-card position-relative" data-post-id="1">
+                            <div class="status-badge status-pending">Chờ duyệt</div>
+                            <img src="https://file4.batdongsan.com.vn/crop/600x315/2025/02/12/20250212211500-7883_wm.jpg" 
+                                 alt="Post image" class="post-card-img">
+                            <div class="post-card-body">
+                                <h6 class="post-title">Nhà trọ cao cấp đường Lê Văn Hiến</h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    2.5 triệu/tháng
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type">Nhà trọ</span>
+                                    <span class="post-badge badge-area">25m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Q. Thanh Khê, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span>KTX B1 - Phòng 202</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Phòng mới, đầy đủ tiện nghi</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-approve" data-post-id="1">
+                                        <i class="fas fa-check"></i>
+                                        Duyệt
+                                    </button>
+                                    <button class="action-btn btn-delete" data-post-id="1">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="post-card position-relative" data-post-id="2">
+                            <div class="status-badge status-pending">Chờ duyệt</div>
+                            <img src="https://static.chotot.com/storage/chotot-kinhnghiem/nha/2022/10/23690945-tim-phong-tro-gia-re-1.webp" 
+                                 alt="Post image" class="post-card-img">
+                            <div class="post-card-body">
+                                <h6 class="post-title">Phòng trọ sinh viên giá rẻ</h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    1.8 triệu/tháng
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type">Phòng trọ</span>
+                                    <span class="post-badge badge-area">15m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Q. Hải Châu, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span>Số 45 đường Phan Châu Trinh</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Gần trường ĐH Đà Nẵng</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-approve" data-post-id="2">
+                                        <i class="fas fa-check"></i>
+                                        Duyệt
+                                    </button>
+                                    <button class="action-btn btn-delete" data-post-id="2">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="post-card position-relative" data-post-id="3">
+                            <div class="status-badge status-pending">Chờ duyệt</div>
+                            <img src="https://2trip.vn/wp-content/uploads/2023/06/homestay-da-nang-gan-bien-my-khe-3.jpg" 
+                                 alt="Post image" class="post-card-img">
+                            <div class="post-card-body">
+                                <h6 class="post-title">Homestay mini view biển</h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    3.2 triệu/tháng
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type">Homestay</span>
+                                    <span class="post-badge badge-area">30m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Q. Sơn Trà, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span>Đường Võ Nguyên Giáp</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>View biển tuyệt đẹp</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-approve" data-post-id="3">
+                                        <i class="fas fa-check"></i>
+                                        Duyệt
+                                    </button>
+                                    <button class="action-btn btn-delete" data-post-id="3">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Approved Posts Tab -->
+            <div class="tab-pane fade" id="approved" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="post-card position-relative" data-post-id="4">
+                            <div class="status-badge status-approved">Đã duyệt</div>
+                            <img src="https://www.lanha.vn/wp-content/uploads/2023/07/thiet-ke-noi-that-chung-cu-mini-15.jpg.webp" 
+                                 alt="Post image" class="post-card-img">
+                            <div class="post-card-body">
+                                <h6 class="post-title">Căn hộ mini đầy đủ tiện nghi</h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    2.8 triệu/tháng
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type">Căn hộ</span>
+                                    <span class="post-badge badge-area">35m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Q. Cẩm Lệ, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span>Chung cư Melody</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Đầy đủ nội thất</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-hide" data-post-id="4">
+                                        <i class="fas fa-eye-slash"></i>
+                                        Ẩn
+                                    </button>
+                                    <button class="action-btn btn-delete" data-post-id="4">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="post-card position-relative" data-post-id="5">
+                            <div class="status-badge status-approved">Đã duyệt</div>
+                            <img src="https://file4.batdongsan.com.vn/resize/745x510/2023/11/24/20231124154946-69d0_wm.jpg" 
+                                 alt="Post image" class="post-card-img">
+                            <div class="post-card-body">
+                                <h6 class="post-title">Phòng trọ cao cấp gần bến xe</h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    2.2 triệu/tháng
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type">Phòng trọ</span>
+                                    <span class="post-badge badge-area">20m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Q. Thanh Khê, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span>Đường Điện Biên Phủ</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span>Giao thông thuận tiện</span>
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="action-btn btn-hide" data-post-id="5">
+                                        <i class="fas fa-eye-slash"></i>
+                                        Ẩn
+                                    </button>
+                                    <button class="action-btn btn-delete" data-post-id="5">
+                                        <i class="fas fa-trash"></i>
+                                        Xóa
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Notification Manager
+        class NotificationManager {
+            constructor() {
+                this.container = document.querySelector('.notification-container');
+                if (!this.container) {
+                    this.container = document.createElement('div');
+                    this.container.className = 'notification-container';
+                    document.body.appendChild(this.container);
+                }
+            }
+
+            showNotification(type, title, message, duration = 5000) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-header">
+                        <span>${title}</span>
+                        <button class="notification-close">×</button>
+                    </div>
+                    <div class="notification-body">${message}</div>
+                `;
+
+                this.container.appendChild(notification);
+
+                notification.querySelector('.notification-close').addEventListener('click', () => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                });
+
+                setTimeout(() => {
+                    notification.style.opacity = '0';
+                    setTimeout(() => notification.remove(), 300);
+                }, duration);
+
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                }, 100);
+            }
+
+            showSuccess(message) {
+                this.showNotification('success', 'Thành công', message);
+            }
+
+            showError(message) {
+                this.showNotification('error', 'Lỗi', message);
+            }
+
+            showWarning(message) {
+                this.showNotification('warning', 'Cảnh báo', message);
+            }
+        }
+
+        // Add interactive functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationManager = new NotificationManager();
+
+            // Handle redirect to detail page on title or image click
+            document.querySelectorAll('.post-card').forEach(card => {
+                const postId = card.getAttribute('data-post-id');
+                const title = card.querySelector('.post-title');
+                const image = card.querySelector('.post-card-img');
+
+                if (title) {
+                    title.addEventListener('click', () => {
+                        window.location.href = `/nhan-vien/chi-tiet-bai-dang?id=${postId}`; // Replace with your detail page URL
+                    });
+                }
+
+                if (image) {
+                    image.addEventListener('click', () => {
+                        window.location.href = `/nhan-vien/chi-tiet-bai-dang?id=${postId}`; // Replace with your detail page URL
+                    });
+                }
+            });
+
+            // Handle action buttons
+            document.querySelectorAll('.action-btn').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent card click event from triggering
+
+                    const postId = this.getAttribute('data-post-id');
+                    const action = this.classList.contains('btn-approve') ? 'approve' :
+                                  this.classList.contains('btn-hide') ? 'hide' :
+                                  this.classList.contains('btn-delete') ? 'delete' : '';
+
+                    if (action === 'delete') {
+                        if (confirm('Bạn có chắc chắn muốn xóa bài đăng này?')) {
+                            notificationManager.showSuccess(`Bài đăng ${postId} đã được xóa!`);
+                            console.log('Delete post', postId);
+                            // Add delete logic here (e.g., API call)
+                        }
+                    } else if (action === 'approve') {
+                        notificationManager.showSuccess(`Bài đăng ${postId} đã được duyệt!`);
+                        console.log('Approve post', postId);
+                        // Add approve logic here (e.g., API call)
+                    } else if (action === 'hide') {
+                        notificationManager.showSuccess(`Bài đăng ${postId} đã được ẩn!`);
+                        console.log('Hide post', postId);
+                        // Add hide logic here (e.g., API call)
+                    }
+                });
+            });
+
+            // Handle search
+            document.querySelector('.search-btn').addEventListener('click', function() {
+                const searchTerm = document.querySelector('.search-input').value;
+                notificationManager.showInfo(`Đang tìm kiếm: ${searchTerm}`);
+                console.log('Search for:', searchTerm);
+                // Add search logic here
+            });
+
+            // Handle filter changes
+            document.querySelectorAll('.filter-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    notificationManager.showInfo(`Lọc theo: ${this.value}`);
+                    console.log('Filter changed:', this.value);
+                    // Add filter logic here
+                });
+            });
+        });
+    </script>
+</body>
+</html>

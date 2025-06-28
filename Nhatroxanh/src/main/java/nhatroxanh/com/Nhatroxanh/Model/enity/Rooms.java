@@ -1,11 +1,13 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.EnumType;
 
 @Data
 @Builder
@@ -41,13 +44,14 @@ public class Rooms {
     @JoinColumn(name = "hostel_id")
     private Hostel hostel;
 
-    @Column(name = "address", columnDefinition = "NVARCHAR(200)")
-    private String address;
+    @Column(name = "description", columnDefinition = "NVARCHAR(200)")
+    private String description;
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private RoomStatus status;
 
     @Column(name = "acreage")
     private Float acreage;
@@ -60,8 +64,7 @@ public class Rooms {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
-    private Set<Utility> utilities;
+    private Set<Utility> utilities = new HashSet<>();
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
-
 }
