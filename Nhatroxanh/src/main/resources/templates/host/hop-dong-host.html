@@ -11,6 +11,7 @@
     <link rel="stylesheet" th:href="@{/css/host.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
 </head>
+
 <body>
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -491,7 +492,8 @@
                                     Tiền đặt cọc: <span id="preview-deposit"
                                         class="nha-tro-highlight">........................</span> VNĐ (tương đương <span
                                         id="preview-deposit-months"
-                                        class="nha-tro-highlight">........................</span> tháng tiền nhà).</p>
+                                        class="nha-tro-highlight">........................</span> tháng tiền nhà).
+                                </p>
 
                                 <p><strong>Điều 4: Tiện ích và trang thiết bị</strong><br>
                                     Phòng được trang bị: <span id="preview-amenities"
@@ -695,6 +697,7 @@
     </div>
 
     <script th:src="@{/js/sidebar.js}"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
     <script>
         // Namespace để tránh xung đột với Spring Boot
