@@ -29,7 +29,7 @@ public class CustomUserDetails implements UserDetails {
     public String getFullName() {
         return user.getFullname();
     }
-public String getCccd() {
+    public String getCccd() {
         return user.getCccd();
     }
 

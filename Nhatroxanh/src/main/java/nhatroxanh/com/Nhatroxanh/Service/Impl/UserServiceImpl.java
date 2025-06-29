@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import java.util.List;
 
-
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
@@ -31,30 +30,26 @@ import static com.mysql.cj.conf.PropertyKey.logger;
 @Service
 public class UserServiceImpl implements UserService {
 
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private PasswordEncoder passwordEncoder;
-  @Autowired
-  private OtpService otpService;
-  
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private OtpService otpService;
 
-  @Transactional
-  public Users registerNewUser(UserRequest userRequest) {
+@Transactional
+public Users registerNewUser(UserRequest userRequest) {
     
     // Kiểm tra email đã tồn tại chưa
     if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
-      throw new RuntimeException("Email đã được sử dụng!");
+        throw new RuntimeException("Email đã được sử dụng!");
     }
-
 
     @Autowired
     private UserCccdRepository userCccdRepository;
 
     @Autowired
     private AddressRepository addressRepository;
-
-
 
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
@@ -63,8 +58,7 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Email đã được sử dụng!");
         }
 
-     otpService.createAndSendOtp(savedUser);
-
+        otpService.createAndSendOtp(savedUser);
 
         Users newUser = new Users();
 
@@ -105,7 +99,6 @@ public class UserServiceImpl implements UserService {
         Users savedUser = userRepository.save(newUser);
         return savedUser;
     }
-
 
     @Override
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
@@ -173,6 +166,7 @@ public class UserServiceImpl implements UserService {
         System.out.println("=== END: Finding Address for userId: " + userId + " ===");
         return addressOptional;
     }
+
     @Override
     @Transactional
     public Users saveUser(Users user) {
@@ -190,7 +184,5 @@ public class UserServiceImpl implements UserService {
     public Address saveAddress(Address address) {
         return addressRepository.save(address); // Sử dụng AddressRepository
     }
-
-
 
 }
