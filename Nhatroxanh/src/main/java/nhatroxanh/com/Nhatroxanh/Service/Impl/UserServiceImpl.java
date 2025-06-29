@@ -4,6 +4,10 @@ import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,42 +24,41 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
-  @Autowired
-  private UserRepository userRepository;
-  @Autowired
-  private PasswordEncoder passwordEncoder;
-  @Autowired
-  private OtpService otpService;
-  
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private OtpService otpService;
 
-  @Transactional
-  public Users registerNewUser(UserRequest userRequest) {
-    
-    // Kiểm tra email đã tồn tại chưa
-    if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
-      throw new RuntimeException("Email đã được sử dụng!");
+    @Transactional
+    public Users registerNewUser(UserRequest userRequest) {
+
+        // Kiểm tra email đã tồn tại chưa
+        if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+            throw new RuntimeException("Email đã được sử dụng!");
+        }
+
+        Users newUser = new Users();
+
+        newUser.setFullname(userRequest.getFullName());
+        newUser.setEmail(userRequest.getEmail());
+        newUser.setPhone(userRequest.getPhoneNumber());
+        newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
+        newUser.setEnabled(false);
+        newUser.setRole(Role.customer); // Mặc định là customer
+
+        Users savedUser = userRepository.save(newUser);
+
+        otpService.createAndSendOtp(savedUser);
+
+        return savedUser;
     }
 
-    Users newUser = new Users();
-
-    newUser.setFullname(userRequest.getFullName());
-    newUser.setEmail(userRequest.getEmail());
-    newUser.setPhone(userRequest.getPhoneNumber());
-    newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-    newUser.setEnabled(false);
-    newUser.setRole(Role.customer); // Mặc định là customer
-
-    Users savedUser = userRepository.save(newUser);
-
-     otpService.createAndSendOtp(savedUser);
-
-    return savedUser;
-  }
-
-   @Override
+    @Override
     @Transactional
     public Users registerOwner(UserOwnerRequest userOwnerRequest) {
-        if(userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()){
+        if (userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()) {
             throw new RuntimeException("Email đã được sử dụng!");
         }
         Users newUser = new Users();
@@ -72,11 +75,17 @@ public class UserServiceImpl implements UserService {
         }
         newUser.setRole(Users.Role.owner);
         newUser.setEnabled(true);
-        Users savedUser = userRepository.save(newUser);       
+        Users savedUser = userRepository.save(newUser);
         return savedUser;
     }
 
-  
+    @Override
+    public Page<Users> getAllCustomers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
+        Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.customer, pageable);
+        List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
+        return new PageImpl<>(users, pageable, customerIds.getTotalElements());
+    }
 
 }

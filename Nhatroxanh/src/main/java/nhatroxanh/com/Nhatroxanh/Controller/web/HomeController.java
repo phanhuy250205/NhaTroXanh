@@ -67,7 +67,8 @@ public class HomeController {
             }
 
             // 2. Tiện ích
-            Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
+            Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
+
             model.addAttribute("post", post);
             model.addAttribute("owner", post.getUser() != null ? post.getUser() : new Users());
             model.addAttribute("utilities", utilities != null ? new HashSet<>(utilities) : new HashSet<>());

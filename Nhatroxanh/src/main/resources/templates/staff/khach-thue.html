@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <!-- ICON -->
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
@@ -9,481 +10,490 @@
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
 
-    <!-- Custom CSS for this page -->
+    <!-- Custom CSS -->
     <style>
-    /* Main content layout */
-    body .main-content {
-        margin-left: 100px;
-        padding: 1.5rem;
-        min-height: 100vh;
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        transition: margin-left 0.3s ease;
-        width: calc(100% - 100px);
-        box-sizing: border-box;
-    }
-
-    /* Responsive sidebar adjustment */
-    @media (max-width: 768px) {
+        /* Main content layout */
         body .main-content {
-            margin-left: 0;
+            margin-left: 100px;
+            padding: 1.5rem;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            transition: margin-left 0.3s ease;
+            width: calc(100% - 100px);
+            box-sizing: border-box;
+        }
+
+        /* Responsive sidebar adjustment */
+        @media (max-width: 768px) {
+            body .main-content {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+        }
+
+        /* Tablet adjustment */
+        @media (max-width: 992px) and (min-width: 769px) {
+            body .main-content {
+                margin-left: 20px;
+                width: calc(100% - 200px);
+                padding: 1.25rem;
+            }
+        }
+
+        /* Reset any conflicting styles */
+        .main-content * {
+            box-sizing: border-box;
+        }
+
+        /* CSS Variables */
+        :root {
+            --primary-color-staff: #3e83cc;
+            --primary-light-staff: #e8f4fd;
+            --primary-dark-staff: #2c5aa0;
+            --success-color-staff: #28a745;
+            --info-color-staff: #17a2b8;
+            --danger-color-staff: #dc3545;
+            --warning-color-staff: #ffc107;
+            --light-color-staff: #f8f9fa;
+            --dark-color-staff: #343a40;
+            --border-color-staff: #e3e6f0;
+            --shadow-staff: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            --shadow-lg-staff: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+            --border-radius-staff: 0.75rem;
+            --transition-staff: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Card Styles */
+        .main-content .card-staff {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius-staff);
+            box-shadow: var(--shadow-lg-staff);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             width: 100%;
-            padding: 1rem;
+            max-width: none;
+            margin: 0;
         }
-    }
 
-    /* Tablet adjustment */
-    @media (max-width: 992px) and (min-width: 769px) {
-        body .main-content {
-            margin-left: 20px;
-            width: calc(100% - 200px);
-            padding: 1.25rem;
+        .main-content .card-header-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
+            color: white;
+            padding: 1.75rem 2rem;
+            border-bottom: none;
+            position: relative;
+            overflow: hidden;
         }
-    }
 
-    /* Reset any conflicting styles */
-    .main-content * {
-        box-sizing: border-box;
-    }
-
-    /* CSS Variables */
-    :root {
-        --primary-color-staff: #3e83cc;
-        --primary-light-staff: #e8f4fd;
-        --primary-dark-staff: #2c5aa0;
-        --success-color-staff: #28a745;
-        --info-color-staff: #17a2b8;
-        --danger-color-staff: #dc3545;
-        --warning-color-staff: #ffc107;
-        --light-color-staff: #f8f9fa;
-        --dark-color-staff: #343a40;
-        --border-color-staff: #e3e6f0;
-        --shadow-staff: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
-        --shadow-lg-staff: 0 1rem 3rem rgba(0, 0, 0, 0.175);
-        --border-radius-staff: 0.75rem;
-        --transition-staff: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Card Styles */
-    .main-content .card-staff {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: var(--border-radius-staff);
-        box-shadow: var(--shadow-lg-staff);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        overflow: hidden;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        width: 100%;
-        max-width: none;
-        margin: 0;
-    }
-
-    .main-content .card-header-staff {
-        background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
-        color: white;
-        padding: 1.75rem 2rem;
-        border-bottom: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .main-content .card-header-staff::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
-        opacity: 0.4;
-        animation: float-staff 6s ease-in-out infinite;
-    }
-
-    @keyframes float-staff {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-10px); }
-    }
-
-    .main-content .card-body-staff {
-        padding: 2rem;
-        position: relative;
-        background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
-    }
-
-    .main-content .text-staff-primary {
-        color: white;
-        font-weight: 700;
-        font-size: 1.6rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin: 0;
-    }
-
-    /* Search Section */
-    .main-content .search-section-staff {
-        background: linear-gradient(135deg, var(--primary-light-staff) 0%, rgba(255, 255, 255, 0.8) 100%);
-        padding: 1.75rem;
-        border-radius: var(--border-radius-staff);
-        border: 2px solid rgba(62, 131, 204, 0.1);
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 1.75rem;
-        box-shadow: var(--shadow-staff);
-    }
-
-    .main-content .input-group-staff {
-        display: flex;
-        border-radius: var(--border-radius-staff);
-        overflow: hidden;
-        box-shadow: var(--shadow-staff);
-        position: relative;
-        z-index: 2;
-        background: white;
-    }
-
-    .main-content .form-control-staff {
-        flex: 1;
-        padding: 0.9rem 1.25rem;
-        border: 2px solid transparent;
-        border-right: none;
-        font-size: 0.95rem;
-        transition: var(--transition-staff);
-        background: white;
-        font-weight: 500;
-        outline: none;
-    }
-
-    .main-content .form-control-staff:focus {
-        border-color: var(--primary-color-staff);
-        box-shadow: 0 0 0 0.25rem rgba(62, 131, 204, 0.15);
-        transform: translateY(-1px);
-    }
-
-    .main-content .btn-search-staff {
-        background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
-        color: white;
-        border: 2px solid var(--primary-color-staff);
-        padding: 0.9rem 2rem;
-        font-weight: 600;
-        transition: var(--transition-staff);
-        cursor: pointer;
-        font-size: 0.9rem;
-        letter-spacing: 0.5px;
-        outline: none;
-    }
-
-    .main-content .btn-search-staff:hover {
-        background: linear-gradient(135deg, var(--primary-dark-staff) 0%, #1a4480 100%);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(62, 131, 204, 0.4);
-    }
-
-    /* Table Styles */
-    .main-content .table-container-staff {
-        background: rgba(255, 255, 255, 0.95);
-        border-radius: var(--border-radius-staff);
-        overflow: hidden;
-        box-shadow: var(--shadow-staff);
-        border: 1px solid var(--border-color-staff);
-        position: relative;
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    .main-content .table-staff {
-        width: 100%;
-        margin-bottom: 0;
-        border-collapse: collapse;
-        font-size: 0.85rem;
-        background: transparent;
-    }
-
-    .main-content .table-header-staff {
-        background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
-        position: relative;
-    }
-
-    .main-content .table-header-staff th {
-        color: white;
-        font-weight: 700;
-        padding: 1.25rem 1rem;
-        text-align: left;
-        border: none;
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.2);
-        white-space: nowrap;
-        background: transparent;
-    }
-
-    .main-content .table-body-staff {
-        background: rgba(255, 255, 255, 0.95);
-    }
-
-    .main-content .table-row-staff {
-        transition: var(--transition-staff);
-        border-bottom: 1px solid var(--border-color-staff);
-        position: relative;
-        cursor: pointer;
-        background: transparent;
-    }
-
-    .main-content .table-row-staff::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 0;
-        background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
-        transition: width 0.4s ease;
-        border-radius: 0 4px 4px 0;
-    }
-
-    .main-content .table-row-staff:hover::before {
-        width: 5px;
-    }
-
-    .main-content .table-row-staff:hover {
-        background: linear-gradient(135deg, rgba(62, 131, 204, 0.05) 0%, rgba(62, 131, 204, 0.02) 100%);
-        transform: translateX(5px);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    }
-
-    .main-content .table-row-staff td {
-        padding: 1.25rem 1rem;
-        vertical-align: middle;
-        border: none;
-        font-size: 0.85rem;
-        transition: var(--transition-staff);
-        font-weight: 500;
-        background: transparent;
-    }
-
-    /* Customer Info Styles */
-    .main-content .customer-info-staff {
-        display: flex;
-        align-items: center;
-        font-weight: 600;
-        gap: 0.6rem;
-    }
-
-    .main-content .customer-info-staff i {
-        font-size: 1.75rem;
-        color: var(--primary-color-staff);
-        background: linear-gradient(135deg, var(--primary-light-staff), rgba(255, 255, 255, 0.8));
-        padding: 0.4rem;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(62, 131, 204, 0.2);
-    }
-
-    .main-content .phone-link-staff {
-        color: var(--primary-color-staff);
-        text-decoration: none;
-        transition: var(--transition-staff);
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.2rem 0.4rem;
-        border-radius: 6px;
-        font-size: 1.0rem;
-    }
-
-
-    .main-content .cccd-code-staff {
-        color: var(--dark-color-staff);
-        padding: 0.2rem 0.4rem;
-        border-radius: 8px;
-        font-weight: 600;
-        font-size: 1.0rem;
-        letter-spacing: 0.5px;
-    }
-
-    .main-content .area-badge-staff {
-        background: linear-gradient(135deg, rgba(62, 131, 204, 0.1), rgba(62, 131, 204, 0.05));
-        color: var(--primary-color-staff);
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        border: 1px solid rgba(62, 131, 204, 0.2);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
-    }
-
-    /* Badge Styles */
-    .main-content .badge-staff {
-        padding: 0.6rem 1rem;
-        border-radius: 25px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    .main-content .badge-success-staff {
-        background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1));
-        color: #1e7e34;
-        border: 2px solid rgba(40, 167, 69, 0.3);
-        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
-    }
-
-    .main-content .badge-info-staff {
-        background: linear-gradient(135deg, rgba(23, 162, 184, 0.2), rgba(23, 162, 184, 0.1));
-        color: #0c5460;
-        border: 2px solid rgba(23, 162, 184, 0.3);
-        box-shadow: 0 4px 12px rgba(23, 162, 184, 0.25);
-    }
-
-    .main-content .badge-danger-staff {
-        background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
-        color: #721c24;
-        border: 2px solid rgba(220, 53, 69, 0.3);
-        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
-    }
-
-    .main-content .badge-warning-staff {
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
-        color: #856404;
-        border: 2px solid rgba(255, 193, 7, 0.3);
-        box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
-    }
-
-    /* Button Styles */
-    .main-content .btn-action-staff {
-        border: none;
-        padding: 0.7rem 1.25rem;
-        border-radius: 8px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        transition: var(--transition-staff);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        position: relative;
-        overflow: hidden;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        outline: none;
-    }
-
-    .main-content .btn-edit-staff {
-        background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.08));
-        color: #856404;
-        border: 2px solid rgba(255, 193, 7, 0.3);
-        box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
-    }
-
-    .main-content .btn-edit-staff:hover {
-        background: linear-gradient(135deg, #ffc107, #e0a800);
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
-    }
-
-    /* Pagination */
-    .main-content .pagination-container-staff {
-        display: flex;
-        justify-content: center;
-        margin-top: 2rem;
-    }
-
-    .main-content .pagination-staff {
-        display: flex;
-        list-style: none;
-        margin: 0;
-        padding: 0.8rem;
-        gap: 0.4rem;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: var(--border-radius-staff);
-        box-shadow: var(--shadow-staff);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-    }
-
-    .main-content .page-item-staff {
-        margin: 0;
-    }
-
-    .main-content .page-link-staff {
-        display: block;
-        padding: 0.7rem 1rem;
-        color: var(--primary-color-staff);
-        text-decoration: none;
-        border: 2px solid transparent;
-        border-radius: 8px;
-        transition: var(--transition-staff);
-        font-weight: 600;
-        min-width: 40px;
-        text-align: center;
-        font-size: 0.85rem;
-    }
-
-    .main-content .page-link-staff:hover {
-        background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
-        color: white;
-        border-color: var(--primary-color-staff);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
-        text-decoration: none;
-    }
-
-    .main-content .page-item-staff.active-staff .page-link-staff {
-        background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
-        color: white;
-        border-color: var(--primary-color-staff);
-        box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
-    }
-
-    /* Animations */
-    @keyframes slideInUp {
-        from {
-            transform: translateY(30px);
-            opacity: 0;
+        .main-content .card-header-staff::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1.5" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.4;
+            animation: float-staff 6s ease-in-out infinite;
         }
-        to {
-            transform: translateY(0);
-            opacity: 1;
+
+        @keyframes float-staff {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
-    }
 
-    .main-content .animate-slide-up {
-        animation: slideInUp 0.6s ease-out;
-    }
+        .main-content .card-body-staff {
+            padding: 2rem;
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 249, 250, 0.9) 100%);
+        }
 
-    /* Loading Animation */
-    .main-content .loading-staff {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin-staff 1s ease-in-out infinite;
-    }
+        .main-content .text-staff-primary {
+            color: white;
+            font-weight: 700;
+            font-size: 1.6rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0;
+        }
 
-    @keyframes spin-staff {
-        to { transform: rotate(360deg); }
-    }
+        /* Search Section */
+        .main-content .search-section-staff {
+            background: linear-gradient(135deg, var(--primary-light-staff) 0%, rgba(255, 255, 255, 0.8) 100%);
+            padding: 1.75rem;
+            border-radius: var(--border-radius-staff);
+            border: 2px solid rgba(62, 131, 204, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 1.75rem;
+            box-shadow: var(--shadow-staff);
+        }
+
+        .main-content .input-group-staff {
+            display: flex;
+            border-radius: var(--border-radius-staff);
+            overflow: hidden;
+            box-shadow: var(--shadow-staff);
+            position: relative;
+            z-index: 2;
+            background: white;
+        }
+
+        .main-content .form-control-staff {
+            flex: 1;
+            padding: 0.9rem 1.25rem;
+            border: 2px solid transparent;
+            border-right: none;
+            font-size: 0.95rem;
+            transition: var(--transition-staff);
+            background: white;
+            font-weight: 500;
+            outline: none;
+        }
+
+        .main-content .form-control-staff:focus {
+            border-color: var(--primary-color-staff);
+            box-shadow: 0 0 0 0.25rem rgba(62, 131, 204, 0.15);
+            transform: translateY(-1px);
+        }
+
+        .main-content .btn-search-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
+            color: white;
+            border: 2px solid var(--primary-color-staff);
+            padding: 0.9rem 2rem;
+            font-weight: 600;
+            transition: var(--transition-staff);
+            cursor: pointer;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            outline: none;
+        }
+
+        .main-content .btn-search-staff:hover {
+            background: linear-gradient(135deg, var(--primary-dark-staff) 0%, #1a4480 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(62, 131, 204, 0.4);
+        }
+
+        /* Table Styles */
+        .main-content .table-container-staff {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: var(--border-radius-staff);
+            overflow: hidden;
+            box-shadow: var(--shadow-staff);
+            border: 1px solid var(--border-color-staff);
+            position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .main-content .table-staff {
+            width: 100%;
+            margin-bottom: 0;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: transparent;
+        }
+
+        .main-content .table-header-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%);
+            position: relative;
+        }
+
+        .main-content .table-header-staff th {
+            color: white;
+            font-weight: 700;
+            padding: 1.25rem 1rem;
+            text-align: left;
+            border: none;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            white-space: nowrap;
+            background: transparent;
+        }
+
+        .main-content .table-body-staff {
+            background: rgba(255, 255, 255, 0.95);
+        }
+
+        .main-content .table-row-staff {
+            transition: var(--transition-staff);
+            border-bottom: 1px solid var(--border-color-staff);
+            position: relative;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .main-content .table-row-staff::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
+            transition: width 0.4s ease;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .main-content .table-row-staff:hover::before {
+            width: 5px;
+        }
+
+        .main-content .table-row-staff:hover {
+            background: linear-gradient(135deg, rgba(62, 131, 204, 0.05) 0%, rgba(62, 131, 204, 0.02) 100%);
+            transform: translateX(5px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content .table-row-staff td {
+            padding: 1.25rem 1rem;
+            vertical-align: middle;
+            border: none;
+            font-size: 0.85rem;
+            transition: var(--transition-staff);
+            font-weight: 500;
+            background: transparent;
+        }
+
+        /* Customer Info Styles */
+        .main-content .customer-info-staff {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            gap: 0.6rem;
+        }
+
+        .main-content .customer-info-staff i {
+            font-size: 1.75rem;
+            color: var(--primary-color-staff);
+            background: linear-gradient(135deg, var(--primary-light-staff), rgba(255, 255, 255, 0.8));
+            padding: 0.4rem;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.2);
+        }
+
+        .main-content .phone-link-staff {
+            color: var(--primary-color-staff);
+            text-decoration: none;
+            transition: var(--transition-staff);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 6px;
+            font-size: 1.0rem;
+        }
+
+        .main-content .cccd-code-staff {
+            color: var(--dark-color-staff);
+            padding: 0.2rem 0.4rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.0rem;
+            letter-spacing: 0.5px;
+        }
+
+        .main-content .area-badge-staff {
+            background: linear-gradient(135deg, rgba(62, 131, 204, 0.1), rgba(62, 131, 204, 0.05));
+            color: var(--primary-color-staff);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+        }
+
+        /* Badge Styles */
+        .main-content .badge-staff {
+            padding: 0.6rem 1rem;
+            border-radius: 25px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .main-content .badge-success-staff {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.2), rgba(40, 167, 69, 0.1));
+            color: #1e7e34;
+            border: 2px solid rgba(40, 167, 69, 0.3);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.25);
+        }
+
+        .main-content .badge-info-staff {
+            background: linear-gradient(135deg, rgba(23, 162, 184, 0.2), rgba(23, 162, 184, 0.1));
+            color: #0c5460;
+            border: 2px solid rgba(23, 162, 184, 0.3);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.25);
+        }
+
+        .main-content .badge-danger-staff {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
+            color: #721c24;
+            border: 2px solid rgba(220, 53, 69, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.25);
+        }
+
+        .main-content .badge-warning-staff {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+            color: #856404;
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.25);
+        }
+
+        /* Button Styles */
+        .main-content .btn-action-staff {
+            border: none;
+            padding: 0.7rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition-staff);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            outline: none;
+        }
+
+        .main-content .btn-edit-staff {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.15), rgba(255, 193, 7, 0.08));
+            color: #856404;
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
+        }
+
+        .main-content .btn-edit-staff:hover {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        }
+
+        /* Pagination */
+        .main-content .pagination-container-staff {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .main-content .pagination-staff {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0.8rem;
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius-staff);
+            box-shadow: var(--shadow-staff);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .main-content .page-item-staff {
+            margin: 0;
+        }
+
+        .main-content .page-link-staff {
+            display: block;
+            padding: 0.7rem 1rem;
+            color: var(--primary-color-staff);
+            text-decoration: none;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            transition: var(--transition-staff);
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+
+        .main-content .page-link-staff:hover {
+            background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
+            color: white;
+            border-color: var(--primary-color-staff);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+            text-decoration: none;
+        }
+
+        .main-content .page-item-staff.active-staff .page-link-staff {
+            background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
+            color: white;
+            border-color: var(--primary-color-staff);
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        /* Animations */
+        @keyframes slideInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .main-content .animate-slide-up {
+            animation: slideInUp 0.6s ease-out;
+        }
+
+        /* Loading Animation */
+        .main-content .loading-staff {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin-staff 1s ease-in-out infinite;
+        }
+
+        @keyframes spin-staff {
+            to {
+                transform: rotate(360deg);
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
-    
+
     <div class="main-content">
         <div class="card-staff animate-slide-up">
             <div class="card-header-staff">
@@ -492,21 +502,21 @@
                     Quản lý khách thuê
                 </h4>
             </div>
-            
+
             <div class="card-body-staff">
                 <!-- Search Section -->
                 <div class="search-section-staff">
                     <div class="row align-items-center">
                         <div class="col-md-12">
                             <div class="input-group-staff">
-                                <input type="text" class="form-control-staff" placeholder="Tìm kiếm theo tên, số điện thoại, CCCD..." id="searchInput">
+                                <input type="text" class="form-control-staff"
+                                    placeholder="Tìm kiếm theo tên, số điện thoại, CCCD..." id="searchInput">
                                 <button class="btn-search-staff" type="button" id="searchBtn">
                                     <i class="fas fa-search"></i>
                                     TÌM KIẾM
                                 </button>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
 
@@ -525,194 +535,49 @@
                             </tr>
                         </thead>
                         <tbody class="table-body-staff" id="customerTableBody">
-                            <tr class="table-row-staff" data-customer-id="1">
-                                <td><strong>001</strong></td>
+                            <tr class="table-row-staff" th:each="customer, iterStat : ${customers}"
+                                th:data-customer-id="${customer.userId}">
+                                <td><strong th:text="${customer.userId}"></strong></td>
                                 <td>
                                     <div class="customer-info-staff">
                                         <i class="fas fa-user-circle"></i>
                                         <div>
-                                            <div class="fw-bold">Nguyễn Văn A</div>
-                                            <small class="text-muted">nguyenvana@email.com</small>
+                                            <div class="fw-bold" th:text="${customer.fullname}"></div>
+                                            <small class="text-muted" th:text="${customer.email}"></small>
                                         </div>
                                     </div>
                                 </td>
                                 <td>
-                                    <p class="phone-link-staff">
-                                        0123456789
-                                    </p>
+                                    <p class="phone-link-staff" th:text="${customer.phone}"></p>
                                 </td>
                                 <td>
-                                    <p class="cccd-code-staff">123456789012</p>
+                                    <p class="cccd-code-staff"
+                                        th:text="${customer.userCccd != null ? customer.userCccd.cccdNumber : 'Chưa có'}">
+                                    </p>
                                 </td>
                                 <td>
                                     <span class="area-badge-staff">
                                         <i class="fas fa-map-marker-alt"></i>
-                                        Khu A - Phòng 101
+                                        <span
+                                            th:text="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].room.hostel.name + ' - Phòng ' + customer.contracts[0].room.namerooms : 'Chưa phân phòng'}"></span>
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge-staff badge-success-staff">
-                                        <i class="fas fa-check-circle"></i>
-                                        Đang thuê
+                                    <span class="badge-staff"
+                                        th:classappend="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'badge-success-staff' : 'badge-danger-staff' : 'badge-warning-staff'}">
+                                        <i class="fas"
+                                            th:classappend="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'fa-check-circle' : 'fa-exclamation-triangle' : 'fa-clock'}"></i>
+                                        <span
+                                            th:text="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'Đang thuê' : 'Ngừng thuê' : 'Chưa thuê'}"></span>
                                     </span>
                                 </td>
                                 <td>
-                                    <button class="btn-action-staff btn-edit-staff" data-customer-id="1">
-                                        <i class="fas fa-edit"></i>
-                                        Chỉnh sửa
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-row-staff" data-customer-id="2">
-                                <td><strong>002</strong></td>
-                                <td>
-                                    <div class="customer-info-staff">
-                                        <i class="fas fa-user-circle"></i>
-                                        <div>
-                                            <div class="fw-bold">Trần Thị B</div>
-                                            <small class="text-muted">tranthib@email.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="phone-link-staff">
-                                        0987654321
-                                    </p>
-                                </td>
-                                <td>
-                                    <p class="cccd-code-staff">987654321098</p>
-                                </td>
-                                <td>
-                                    <span class="area-badge-staff">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        Khu B - Phòng 205
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge-staff badge-info-staff">
-                                        <i class="fas fa-arrow-right"></i>
-                                        Đã chuyển đi
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-action-staff btn-edit-staff" data-customer-id="2">
-                                        <i class="fas fa-edit"></i>
-                                        Chỉnh sửa
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-row-staff" data-customer-id="3">
-                                <td><strong>003</strong></td>
-                                <td>
-                                    <div class="customer-info-staff">
-                                        <i class="fas fa-user-circle"></i>
-                                        <div>
-                                            <div class="fw-bold">Lê Văn C</div>
-                                            <small class="text-muted">levanc@email.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="phone-link-staff">
-                                        0369852147
-                                    </p>
-                                </td>
-                                <td>
-                                    <p class="cccd-code-staff">147258369012</p>
-                                </td>
-                                <td>
-                                    <span class="area-badge-staff">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        Khu C - Phòng 301
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge-staff badge-danger-staff">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        Vi phạm
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-action-staff btn-edit-staff" data-customer-id="3">
-                                        <i class="fas fa-edit"></i>
-                                        Chỉnh sửa
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-row-staff" data-customer-id="4">
-                                <td><strong>004</strong></td>
-                                <td>
-                                    <div class="customer-info-staff">
-                                        <i class="fas fa-user-circle"></i>
-                                        <div>
-                                            <div class="fw-bold">Phạm Minh D</div>
-                                            <small class="text-muted">phamminhd@email.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="phone-link-staff">
-                                        0912345678
-                                    </p>
-                                </td>
-                                <td>
-                                    <p class="cccd-code-staff">456789123456</p>
-                                </td>
-                                <td>
-                                    <span class="area-badge-staff">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        Khu A - Phòng 102
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge-staff badge-success-staff">
-                                        <i class="fas fa-check-circle"></i>
-                                        Đang thuê
-                                    </span>
-                                </td>
-                                <td>
-                                    <button class="btn-action-staff btn-edit-staff" data-customer-id="4">
-                                        <i class="fas fa-edit"></i>
-                                        Chỉnh sửa
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="table-row-staff" data-customer-id="5">
-                                <td><strong>005</strong></td>
-                                <td>
-                                    <div class="customer-info-staff">
-                                        <i class="fas fa-user-circle"></i>
-                                        <div>
-                                            <div class="fw-bold">Hoàng Thị E</div>
-                                            <small class="text-muted">hoangthie@email.com</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <p class="phone-link-staff">
-                                        0876543210
-                                    </p>
-                                </td>
-                                <td>
-                                    <p class="cccd-code-staff">789123456789</p>
-                                </td>
-                                <td>
-                                    <span class="area-badge-staff">
-                                        <i class="fas fa-map-marker-alt"></i>
-                                        Khu B - Phòng 206
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge-staff badge-warning-staff">
-                                        <i class="fas fa-clock"></i>
-                                        Chờ duyệt
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="/nhan-vien/chi-tiet-khach-thue"><button class="btn-action-staff btn-edit-staff" data-customer-id="5">
-                                        <i class="fas fa-edit"></i>
-                                        Chỉnh sửa
-                                    </button>
+                                    <a th:href="@{/nhan-vien/chi-tiet-khach-thue/{id}(id=${customer.userId})}">
+                                        <button class="btn-action-staff btn-edit-staff"
+                                            th:data-customer-id="${customer.userId}">
+                                            <i class="fas fa-edit"></i>
+                                            Chỉnh sửa
+                                        </button>
                                     </a>
                                 </td>
                             </tr>
@@ -724,23 +589,24 @@
                 <div class="pagination-container-staff">
                     <nav aria-label="Page navigation">
                         <ul class="pagination-staff">
-                            <li class="page-item-staff">
-                                <a class="page-link-staff" href="#" aria-label="Previous" data-page="prev">
+                            <li class="page-item-staff" th:class="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link-staff"
+                                    th:href="@{/nhan-vien/khach-thue(page=${currentPage - 1}, size=${pageSize})}"
+                                    aria-label="Previous">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
                             </li>
-                            <li class="page-item-staff active-staff">
-                                <a class="page-link-staff" href="#" data-page="1">1</a>
+                            <li class="page-item-staff" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:class="${i == currentPage} ? 'active-staff'">
+                                <a class="page-link-staff"
+                                    th:href="@{/nhan-vien/khach-thue(page=${i}, size=${pageSize})}"
+                                    th:text="${i + 1}"></a>
                             </li>
-                            <li class="page-item-staff">
-                                <a class="page-link-staff" href="#" data-page="2">2</a>
-                            </li>
-                            <li class="page-item-staff">
-                                <a class="page-link-staff" href="#" data-page="3">3</a>
-                            </li>
-                            <li class="page-item-staff">
-                                <a class="page-link-staff" href="#" aria-label="Next" data-page="next">
-                                <i class="fas fa-chevron-right"></i>
+                            <li class="page-item-staff" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link-staff"
+                                    th:href="@{/nhan-vien/khach-thue(page=${currentPage + 1}, size=${pageSize})}"
+                                    aria-label="Next">
+                                    <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
                         </ul>
@@ -753,151 +619,133 @@
     <script th:src="@{/js/sidebar.js}"></script>
     <!-- Custom JavaScript for this page -->
     <script>
-    // Enhanced Customer Management System
-    class CustomerManagementSystem {
-        constructor() {
-            this.searchTimeout = null;
-            this.init();
-        }
-
-        init() {
-            this.initializeEffects();
-            this.initializeSearch();
-            this.initializePagination();
-            this.initializeButtons();
-        }
-
-        initializeEffects() {
-            // Animate elements on load
-            const elements = document.querySelectorAll('.card-staff, .search-section-staff, .table-container-staff');
-            elements.forEach((el, index) => {
-                el.style.opacity = '0';
-                el.style.transform = 'translateY(30px)';
-                
-                setTimeout(() => {
-                    el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, index * 150);
-            });
-
-            // Enhanced table row effects
-            const rows = document.querySelectorAll('.table-row-staff');
-            rows.forEach((row, index) => {
-                setTimeout(() => {
-                    row.classList.add('animate-slide-up');
-                }, index * 100);
-
-                row.addEventListener('mouseenter', () => {
-                    row.style.transform = 'translateX(8px) scale(1.01)';
-                    row.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.15)';
-                    row.style.zIndex = '10';
-                });
-                
-                row.addEventListener('mouseleave', () => {
-                    row.style.transform = 'translateX(0) scale(1)';
-                    row.style.boxShadow = 'none';
-                    row.style.zIndex = '1';
-                });
-            });
-        }
-
-        initializeSearch() {
-            const searchInput = document.getElementById('searchInput');
-            const searchBtn = document.getElementById('searchBtn');
-
-            if (searchInput) {
-                searchInput.addEventListener('input', () => {
-                    clearTimeout(this.searchTimeout);
-                    this.searchTimeout = setTimeout(() => {
-                        this.performSearch(searchInput.value);
-                    }, 300);
-                });
-
-                searchInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.performSearch(searchInput.value);
-                    }
-                });
+        // Enhanced Customer Management System
+        class CustomerManagementSystem {
+            constructor() {
+                this.searchTimeout = null;
+                this.init();
             }
 
-            if (searchBtn) {
-                searchBtn.addEventListener('click', () => {
-                    const originalText = searchBtn.innerHTML;
-                    searchBtn.innerHTML = '<span class="loading-staff"></span> Đang tìm...';
-                    searchBtn.disabled = true;
-                    
+            init() {
+                this.initializeEffects();
+                this.initializeSearch();
+                this.initializePagination();
+                this.initializeButtons();
+            }
+
+            initializeEffects() {
+                // Animate elements on load
+                const elements = document.querySelectorAll('.card-staff, .search-section-staff, .table-container-staff');
+                elements.forEach((el, index) => {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(30px)';
+
                     setTimeout(() => {
-                        this.performSearch(searchInput.value);
-                        searchBtn.innerHTML = originalText;
-                        searchBtn.disabled = false;
-                    }, 1000);
+                        el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                        el.style.opacity = '1';
+                        el.style.transform = 'translateY(0)';
+                    }, index * 150);
                 });
-            }
-        }
 
-        performSearch(query) {
-            const rows = document.querySelectorAll('.table-row-staff');
-            const searchTerm = query.toLowerCase().trim();
-            
-            rows.forEach(row => {
-                const text = row.textContent.toLowerCase();
-                const shouldShow = !searchTerm || text.includes(searchTerm);
-                
-                if (shouldShow) {
-                    row.style.display = '';
-                    row.style.animation = 'slideInUp 0.4s ease-out';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        }
+                // Enhanced table row effects
+                const rows = document.querySelectorAll('.table-row-staff');
+                rows.forEach((row, index) => {
+                    setTimeout(() => {
+                        row.classList.add('animate-slide-up');
+                    }, index * 100);
 
-        initializePagination() {
-            const pageLinks = document.querySelectorAll('.page-link-staff');
-            pageLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    
-                    // Remove active class from all
-                    document.querySelectorAll('.page-item-staff').forEach(item => {
-                        item.classList.remove('active-staff');
+                    row.addEventListener('mouseenter', () => {
+                        row.style.transform = 'translateX(8px) scale(1.01)';
+                        row.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.15)';
+                        row.style.zIndex = '10';
                     });
-                    
-                    // Add active class to clicked item
-                    if (link.dataset.page !== 'prev' && link.dataset.page !== 'next') {
-                        link.parentElement.classList.add('active-staff');
-                    }
-                });
-            });
-        }
 
-        initializeButtons() {
-
-            // Add customer functionality
-            const addBtn = document.getElementById('addBtn');
-            if (addBtn) {
-                addBtn.addEventListener('click', () => {
-                    console.log('Add customer functionality');
-                    
-                    const originalText = addBtn.innerHTML;
-                    addBtn.innerHTML = '<span class="loading-staff"></span> Đang thêm...';
-                    addBtn.disabled = true;
-                    
-                    setTimeout(() => {
-                        addBtn.innerHTML = originalText;
-                        addBtn.disabled = false;
-                    }, 2000);
+                    row.addEventListener('mouseleave', () => {
+                        row.style.transform = 'translateX(0) scale(1)';
+                        row.style.boxShadow = 'none';
+                        row.style.zIndex = '1';
+                    });
                 });
             }
-        }
-    }
 
-    // Initialize the system when DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
-        new CustomerManagementSystem();
-        console.log('🎉 Giao diện quản lý khách thuê đã được khởi tạo!');
-    });
+            initializeSearch() {
+                const searchInput = document.getElementById('searchInput');
+                const searchBtn = document.getElementById('searchBtn');
+
+                if (searchInput) {
+                    searchInput.addEventListener('input', () => {
+                        clearTimeout(this.searchTimeout);
+                        this.searchTimeout = setTimeout(() => {
+                            this.performSearch(searchInput.value);
+                        }, 300);
+                    });
+
+                    searchInput.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            this.performSearch(searchInput.value);
+                        }
+                    });
+                }
+
+                if (searchBtn) {
+                    searchBtn.addEventListener('click', () => {
+                        const originalText = searchBtn.innerHTML;
+                        searchBtn.innerHTML = '<span class="loading-staff"></span> Đang tìm...';
+                        searchBtn.disabled = true;
+
+                        setTimeout(() => {
+                            this.performSearch(searchInput.value);
+                            searchBtn.innerHTML = originalText;
+                            searchBtn.disabled = false;
+                        }, 1000);
+                    });
+                }
+            }
+
+            performSearch(query) {
+                const rows = document.querySelectorAll('.table-row-staff');
+                const searchTerm = query.toLowerCase().trim();
+
+                rows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    const shouldShow = !searchTerm || text.includes(searchTerm);
+
+                    if (shouldShow) {
+                        row.style.display = '';
+                        row.style.animation = 'slideInUp 0.4s ease-out';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            initializePagination() {
+                const pageLinks = document.querySelectorAll('.page-link-staff');
+                pageLinks.forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        // Let the server-side pagination handle navigation via href
+                        // Client-side only updates active class for visual feedback
+                        document.querySelectorAll('.page-item-staff').forEach(item => {
+                            item.classList.remove('active-staff');
+                        });
+                        if (link.dataset.page !== 'prev' && link.dataset.page !== 'next') {
+                            link.parentElement.classList.add('active-staff');
+                        }
+                    });
+                });
+            }
+
+            initializeButtons() {
+                // Placeholder for additional button functionality if needed
+            }
+        }
+
+        // Initialize the system when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            new CustomerManagementSystem();
+            console.log('🎉 Giao diện quản lý khách thuê đã được khởi tạo!');
+        });
     </script>
 </body>
+
 </html>

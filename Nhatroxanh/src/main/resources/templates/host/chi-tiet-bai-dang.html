@@ -1174,7 +1174,7 @@
                   th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'" th:data-image="${image}"
                   onclick="changeMainImage(this.getAttribute('data-image'), this)">
                   <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}"
-                    style="width: 80px; height: 60px; object-fit: cover;">
+                    style="width: 80px; height: 60px; ">
                 </div>
               </div>
               <button class="thumbnail-nav next" onclick="scrollThumbnails('next')">

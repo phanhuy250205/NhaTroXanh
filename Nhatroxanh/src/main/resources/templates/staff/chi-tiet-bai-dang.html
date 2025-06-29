@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 
-<head th:replace="~{/layouts/head}"/>
+<head th:replace="~{/layouts/head}" />
 
 <head>
     <meta charset="UTF-8">
@@ -378,59 +378,99 @@
             </div>
         </div>
 
-
-        <!-- Modified post-header with back button and status label -->
         <div class="post-header">
 
             <div class="post-info">
-                <div>Người đăng: <strong>Trần Văn B</strong> </div>
-                <div>Ngày đăng: 28/05/2025</div>
+                <div>Người đăng: <strong th:text="${author.fullname}">Trần Văn B</strong> </div>
+                <div>Ngày đăng: <span
+                        th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">28/05/2025</span>
+                </div>
             </div>
             <div class="post-status-container">
                 <span class="staff-status-label">Trạng thái:</span>
-                <div class="post-status badge bg-warning text-dark">Chờ duyệt</div>
+                <span class="post-status badge" th:classappend="| ${
+            post.approvalStatus != null ?
+            post.approvalStatus.name() == 'APPROVED' ? 'bg-success text-white' :
+            post.approvalStatus.name() == 'PENDING' ? 'bg-warning text-dark' :
+            'bg-danger text-white' : 'bg-secondary text-white'
+        } |" th:text="|${
+            post.approvalStatus != null ?
+            post.approvalStatus.name() == 'APPROVED' ? 'Đã duyệt' :
+            post.approvalStatus.name() == 'PENDING' ? 'Chờ duyệt' :
+            'Bị từ chối' : 'Chưa xác định'
+        }|">
+                </span>
             </div>
+
         </div>
 
         <!-- Gallery Section -->
         <div class="staff-content-section staff-gallery-section">
             <div class="row">
                 <div class="col-lg-8 col-md-12">
-                    <img src="../images/cards/anh1.jpg" alt="Hình ảnh chính" class="staff-main-image" id="mainImage">
+                    <img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images[0]}"
+                        alt="Hình ảnh chính" class="staff-main-image" id="mainImage"
+                        onerror="this.src='/images/cards/default.jpg';">
+                    <img th:unless="${images != null and !#lists.isEmpty(images)}" src="/images/cards/default.jpg"
+                        alt="Hình ảnh chính" class="staff-main-image" id="mainImage">
+
                     <div class="staff-thumbnails-container d-flex">
-                        <img src="../images/cards/anh1.jpg" alt="Hình 1" class="staff-thumbnail"
-                            onclick="changeMainImage(this)">
-                        <img src="../images/cards/anh1.jpg" alt="Hình 2" class="staff-thumbnail"
-                            onclick="changeMainImage(this)">
-                        <img src="../images/cards/anh1.jpg" alt="Hình 3" class="staff-thumbnail"
-                            onclick="changeMainImage(this)">
-                        <img src="../images/cards/anh1.jpg" alt="Hình 4" class="staff-thumbnail"
-                            onclick="changeMainImage(this)">
+                        <div th:each="image : ${images}">
+                            <img th:src="${image}" class="staff-thumbnail" th:alt="'Hình ảnh phụ'"
+                                th:onclick="'changeMainImage(this)'">
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-4 col-md-12">
                     <div class="staff-info-section">
-                        <h1 class="staff-property-title">NHÀ TRỌ SỐ 123, ĐƯỜNG ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ
-                            NẴNG</h1>
+                        <h1 class="staff-property-title"
+                            th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}">
+                            NHÀ TRỌ SỐ 123, ĐƯỜNG ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG
+                        </h1>
                         <div class="staff-price-container">
-                            <div class="staff-price">2.5 triệu/tháng</div>
+                            <div class="staff-price"
+                                th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">
+                                2.5 triệu/tháng
+                            </div>
+
                             <div class="staff-price-note">(Chưa bao gồm phí dịch vụ)</div>
                         </div>
                         <div class="staff-info-item">
                             <i class="bi bi-bounding-box-circles staff-info-icon"></i>
-                            <div class="staff-info-text"><strong>Diện tích:</strong> 20m²</div>
+                            <div class="staff-info-text"><strong>Diện tích:</strong> <span
+                                    th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'">20m²</span>
+                            </div>
                         </div>
                         <div class="staff-info-item">
                             <i class="bi bi-house-heart staff-info-icon"></i>
-                            <div class="staff-info-text"><strong>Loại hình:</strong> Nhà trọ, phòng trọ</div>
+                            <div class="staff-info-text"><strong>Loại hình:</strong><span
+                                    th:text="${post.category != null ? post.category.name : 'Chưa xác định'}">Nhà trọ,
+                                    phòng trọ</span></div>
                         </div>
                         <div class="staff-info-item">
                             <i class="bi bi-geo-alt-fill staff-info-icon"></i>
-                            <div class="staff-info-text"><strong>Địa chỉ:</strong> Thanh Khê, TP. Đà Nẵng</div>
+                            <div class="staff-info-text"><strong>Địa chỉ:</strong> <span
+                                    th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">Thanh
+                                    Khê, TP. Đà Nẵng</span></div>
                         </div>
                         <div class="staff-info-item">
                             <i class="bi bi-clock-fill staff-info-icon"></i>
-                            <div class="staff-info-text"><strong>Ngày đăng:</strong> 28/05/2025</div>
+                            <div class="staff-info-text"><strong>Ngày đăng:</strong><span
+                                    th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">28/05/2025</span>
+                            </div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-houses-fill info-icon-host" style="color: #007bff;"></i>
+                            <div class="staff-info-text"><strong>Nhà trọ:</strong> <span
+                                    th:text="${hostel != null ? hostel.name : 'Không liên kết nhà trọ'}">Nhà trọ
+                                    ABC</span>
+                            </div>
+                        </div>
+                        <div class="staff-info-item">
+                            <i class="bi bi-door-open-fill info-icon-host" style="color: #007bff;"></i>
+                            <div class="staff-info-text"><strong>Số lượng phòng:</strong> <span
+                                    th:text="${roomCount != null ? roomCount : 0}">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -441,7 +481,8 @@
         <div class="staff-content-section">
             <div class="staff-description-section">
                 <h2 class="staff-section-title">Mô tả chi tiết</h2>
-                <p class="staff-description-text">
+                <p class="staff-description-text"
+                    th:text="${post.description != null ? post.description : 'Chưa có mô tả'}">
                     Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm
                     uất.
                     Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi
@@ -453,65 +494,79 @@
                             <i class="fas fa-info-circle"></i>
                             Thông tin cơ bản
                         </h3>
-                        <table class="staff-details-table">
-                            <tr>
-                                <td>Diện tích:</td>
-                                <td>20m²</td>
-                            </tr>
-                            <tr>
-                                <td>Số phòng ngủ:</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>Số phòng tắm:</td>
-                                <td>1</td>
-                            </tr>
-                            <tr>
-                                <td>Hướng cửa:</td>
-                                <td>Đông Nam</td>
-                            </tr>
-                            <tr>
-                                <td>Tầng:</td>
-                                <td>2/4</td>
-                            </tr>
-                        </table>
+                        <div class="amenity-list">
+                            <p th:if="${utilities == null or #sets.isEmpty(utilities)}" class="text-muted">
+                                Phòng này hiện không có tiện ích nào.
+                            </p>
+                            <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
+                                <ul class="list-unstyled">
+                                    <li class="amenity-item mb-2" th:each="utility : ${utilities}">
+                                        <i class="fas fa-check-circle text-success me-2"></i>
+                                        <span
+                                            th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                     <div class="staff-details-card">
                         <h3 class="staff-details-card-title">
-                            <i class="fas fa-money-bill-wave"></i>
-                            Chi phí
+                            <i class="fas fa-door-open"></i>
+                            Danh sách phòng
                         </h3>
-                        <table class="staff-details-table">
-                            <tr>
-                                <td>Giá thuê:</td>
-                                <td>2.5 triệu/tháng</td>
-                            </tr>
-                            <tr>
-                                <td>Tiền điện:</td>
-                                <td>3,500đ/kWh</td>
-                            </tr>
-                            <tr>
-                                <td>Tiền nước:</td>
-                                <td>25,000đ/người</td>
-                            </tr>
-                            <tr>
-                                <td>Phí dịch vụ:</td>
-                                <td>200,000đ/tháng</td>
-                            </tr>
-                            <tr>
-                                <td>Tiền cọc:</td>
-                                <td>1 tháng</td>
-                            </tr>
-                        </table>
+                        <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="text-muted">
+                            Nhà trọ này hiện không có phòng nào.
+                        </div>
+                        <div th:unless="${rooms == null or #lists.isEmpty(rooms)}">
+                            <div th:each="room : ${rooms}" class="room-item-host" th:data-room-id="${room.room_id}"
+                                onclick="openRoomModal(this.getAttribute('data-room-id'))">
+                                <div class="room-item-title-host"
+                                    th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"></div>
+                                <div class="room-item-info-host">
+                                    <span
+                                        th:text="'Giá: ' + ${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'"></span>
+                                    |
+                                    <span
+                                        th:text="'Diện tích: ' + ${#numbers.formatDecimal(room.acreage, 1, 'COMMA', 0, 'POINT')} + ' m²'"></span>
+                                    |
+                                    <span
+                                        th:text="'Số người tối đa: ' + ${room.max_tenants != null ? room.max_tenants : 'Chưa xác định'}"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="action-buttons">
-            <button class="btn-approve">DUYỆT BÀI</button>
-            <button class="btn-delete">XÓA BÀI</button>
+        <div class="action-buttons text-center mt-4">
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <form th:if="${post.approvalStatus.name() == 'PENDING'}"
+                    th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}" method="post">
+                    <button type="submit" class="btn btn-success d-flex align-items-center">
+                        <i class="fas fa-check-circle me-2"></i> DUYỆT BÀI
+                    </button>
+                </form>
+                <form th:if="${post.approvalStatus.name() == 'APPROVED'}"
+                    th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post">
+                    <input type="hidden" name="postId" th:value="${post.postId}" />
+                    <button type="submit" class="btn d-flex align-items-center"
+                        th:classappend="${post.status} ? 'btn-warning' : 'btn-info'">
+                        <i class="fas" th:classappend="${post.status} ? 'fa-eye-slash me-2' : 'fa-eye me-2'"></i>
+                        <span th:text="${post.status} ? 'ẨN BÀI' : 'HIỂN BÀI'"></span>
+                    </button>
+                </form>
+                <form th:action="@{/nhan-vien/bai-dang/xoa}" method="post"
+                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài đăng này không?')">
+                    <input type="hidden" name="postId" th:value="${post.postId}" />
+                    <button type="submit" class="btn btn-danger d-flex align-items-center">
+                        <i class="fas fa-trash-alt me-2"></i> XÓA BÀI
+                    </button>
+                </form>
+            </div>
         </div>
+
+
     </div>
 
     <script>

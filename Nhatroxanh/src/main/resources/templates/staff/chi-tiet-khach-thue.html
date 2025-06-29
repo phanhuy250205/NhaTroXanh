@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -151,7 +152,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
 
@@ -262,7 +263,7 @@
             background: rgba(255, 255, 255, 0.9);
             transition: var(--transition-staff);
             cursor: pointer;
-            
+
         }
 
         .radio-item-staff:hover {
@@ -287,10 +288,11 @@
             cursor: pointer;
         }
 
-        .radio-item-staff input[type="radio"]:disabled + label {
+        .radio-item-staff input[type="radio"]:disabled+label {
             cursor: not-allowed;
             color: var(--gray-600-staff);
         }
+
         .status-badge-staff {
             display: inline-flex;
             align-items: center;
@@ -336,8 +338,13 @@
         }
 
         @keyframes spin-staff {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Enhanced Alert styles */
@@ -400,9 +407,19 @@
         }
 
         @keyframes shake-staff {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
         .fade-show-staff {
@@ -423,24 +440,24 @@
                 gap: 1rem;
                 text-align: center;
             }
-            
+
             .header-actions-staff {
                 width: 100%;
                 justify-content: center;
             }
-            
+
             .btn-disable-staff {
                 flex: 1;
                 justify-content: center;
                 padding: 0.75rem 1rem;
                 font-size: 0.9rem;
             }
-            
+
             .info-section-staff {
                 padding: 1.5rem;
                 margin-bottom: 1.5rem;
             }
-            
+
             .page-title-staff {
                 font-size: 1.25rem;
             }
@@ -471,6 +488,7 @@
                 transform: translateY(40px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -482,13 +500,86 @@
                 transform: scale(0.95);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1);
                 opacity: 1;
             }
         }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
+
 <body>
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
@@ -507,15 +598,31 @@
                         Chi tiết khách thuê
                     </h1>
                 </div>
+                <!-- Giao diện -->
                 <div class="header-actions-staff">
-                    <button class="btn-disable-staff" onclick="disableCustomer()">
-                        <i class="fas fa-ban"></i>
-                        Vô hiệu hóa
-                    </button>
+                    <form th:action="@{/nhan-vien/toggle-enable}" method="post">
+                        <input type="hidden" name="userId" th:value="${customer.userId}" />
+                        <button type="submit" class="btn-disable-staff"
+                            th:classappend="${customer.enabled} ? 'btn-danger' : 'btn-success'">
+                            <i class="fas" th:classappend="${customer.enabled} ? 'fa-ban' : 'fa-undo'"></i>
+                            <span th:text="${customer.enabled} ? 'Vô hiệu hóa' : 'Mở khóa'"></span>
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
-
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
         <!-- Personal Information Section -->
         <div class="info-section-staff animate-slide-up-staff">
             <h2 class="section-title-staff">
@@ -526,49 +633,54 @@
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="fullName" class="form-label-staff">Họ và tên</label>
-                        <input type="text" class="form-control-staff" id="fullName" value="Nguyễn Văn A" readonly>
+                        <input type="text" class="form-control-staff" id="fullName" th:value="${customer.fullname}"
+                            readonly>
                     </div>
                     <div class="col-md-6 mb-4">
                         <label class="form-label-staff">Giới tính</label>
                         <div class="radio-group-staff">
                             <div class="radio-item-staff">
-                                <input type="radio" id="male" name="gender" value="male" checked disabled>
+                                <input type="radio" id="male" name="gender" value="true"
+                                    th:checked="${customer.gender == true}" disabled>
                                 <label for="male">Nam</label>
                             </div>
                             <div class="radio-item-staff">
-                                <input type="radio" id="female" name="gender" value="female" disabled>
+                                <input type="radio" id="female" name="gender" value="false"
+                                    th:checked="${customer.gender == false}" disabled>
                                 <label for="female">Nữ</label>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="birthDate" class="form-label-staff">Ngày sinh</label>
-                        <input type="date" class="form-control-staff" id="birthDate" value="1990-01-15" readonly>
+                        <input type="date" class="form-control-staff" id="birthDate"
+                            th:value="${customer.birthday != null ? #dates.format(customer.birthday, 'yyyy-MM-dd') : ''}"
+                            readonly>
                     </div>
                     <div class="col-md-6 mb-4">
                         <label for="phoneNumber" class="form-label-staff">Số điện thoại</label>
-                        <input type="tel" class="form-control-staff" id="phoneNumber" value="0123456789" readonly>
+                        <input type="tel" class="form-control-staff" id="phoneNumber" th:value="${customer.phone}"
+                            readonly>
+
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="idNumber" class="form-label-staff">CCCD/CMND</label>
-                        <input type="text" class="form-control-staff" id="idNumber" value="123456789012" readonly>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="occupation" class="form-label-staff">Nghề nghiệp</label>
-                        <input type="text" class="form-control-staff" id="occupation" value="Kỹ sư phần mềm" readonly>
+                        <input type="text" class="form-control-staff" id="idNumber"
+                            th:value="${customer.userCccd != null ? customer.userCccd.cccdNumber : ''}" readonly>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-12 mb-4">
                         <label for="issuePlace" class="form-label-staff">Nơi cấp</label>
-                        <input type="text" class="form-control-staff" id="issuePlace" value="Công an TP. Hồ Chí Minh" readonly>
+                        <input type="text" class="form-control-staff" id="issuePlace"
+                            th:value="${customer.userCccd != null ? customer.userCccd.issuePlace : ''}" readonly>
                     </div>
                 </div>
             </form>
@@ -584,22 +696,29 @@
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="area" class="form-label-staff">Khu trọ</label>
-                        <input type="text" class="form-control-staff" id="area" value="Khu A - Tòa nhà chính" readonly>
+                        <input type="text" class="form-control-staff" id="area"
+                            th:value="${contract != null ? contract.room.hostel.name : ''}" readonly>
                     </div>
                     <div class="col-md-6 mb-4">
                         <label for="roomNumber" class="form-label-staff">Số Phòng</label>
-                        <input type="text" class="form-control-staff" id="roomNumber" value="A101" readonly>
+                        <input type="text" class="form-control-staff" id="roomNumber"
+                            th:value="${contract != null ? contract.room.namerooms : ''}" readonly>
                     </div>
                 </div>
 
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="startDate" class="form-label-staff">Ngày bắt đầu</label>
-                        <input type="date" class="form-control-staff" id="startDate" value="2024-01-01" readonly>
+                        <input type="date" class="form-control-staff" id="startDate"
+                            th:value="${contract != null ? #dates.format(contract.startDate, 'yyyy-MM-dd') : ''}"
+                            readonly>
+
                     </div>
                     <div class="col-md-6 mb-4">
                         <label for="endDate" class="form-label-staff">Ngày kết thúc</label>
-                        <input type="date" class="form-control-staff" id="endDate" value="2024-12-31" readonly>
+                        <input type="date" class="form-control-staff" id="endDate"
+                            th:value="${contract != null ? #dates.format(contract.endDate, 'yyyy-MM-dd') : ''}"
+                            readonly>
                     </div>
                 </div>
 
@@ -608,8 +727,10 @@
                         <label class="form-label-staff">Trạng thái thuê</label>
                         <div>
                             <span class="status-badge-staff">
-                                <i class="fas fa-check-circle"></i>
-                                Đang thuê
+                                <i class="fas"
+                                    th:classappend="${contract != null and contract.status ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                                <span
+                                    th:text="${contract != null ? (contract.status ? 'Đang thuê' : 'Ngừng thuê') : 'Chưa thuê'}"></span>
                             </span>
                         </div>
                     </div>
@@ -618,7 +739,9 @@
                 <div class="row">
                     <div class="col-md-12 mb-4">
                         <label for="notes" class="form-label-staff">Ghi chú</label>
-                        <textarea class="form-control-staff notes-textarea-staff" id="notes" readonly placeholder="Không có ghi chú đặc biệt...">Khách hàng thanh toán đúng hạn, tuân thủ nội quy khu trọ.</textarea>
+                        <textarea class="form-control-staff notes-textarea-staff" id="notes" readonly
+                            placeholder="Không có ghi chú đặc biệt..."
+                            th:text="${contract != null ? contract.terms : ''}"> </textarea>
                     </div>
                 </div>
             </form>
@@ -626,10 +749,10 @@
     </div>
 
     <script th:src="@{/js/sidebar.js}"></script>
-    
+
     <script>
         // Initialize page
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             console.log('Customer detail page loaded');
             setReadOnlyMode();
             initializeAnimations();
@@ -642,7 +765,7 @@
             sections.forEach((section, index) => {
                 section.style.opacity = '0';
                 section.style.transform = 'translateY(40px)';
-                
+
                 setTimeout(() => {
                     section.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
                     section.style.opacity = '1';
@@ -665,7 +788,7 @@
                     element.classList.remove('is-invalid-staff');
                 }
             });
-            
+
             radioElements.forEach(id => {
                 const element = document.getElementById(id);
                 if (element) {
@@ -685,27 +808,27 @@
             if (confirm('Bạn có chắc chắn muốn vô hiệu hóa khách hàng này? Hành động này không thể hoàn tác.')) {
                 const disableBtn = document.querySelector('.btn-disable-staff');
                 const originalText = disableBtn.innerHTML;
-                
+
                 // Show loading state
                 disableBtn.classList.add('btn-loading-staff');
                 disableBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-                
+
                 // Simulate API call
                 setTimeout(() => {
                     console.log('Customer disabled');
-                    
+
                     // Update status badge
                     const statusBadge = document.querySelector('.status-badge-staff');
                     statusBadge.style.background = 'linear-gradient(135deg, var(--danger-color-staff) 0%, #dc2626 100%)';
                     statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Đã vô hiệu hóa';
-                    
+
                     // Restore button
                     disableBtn.classList.remove('btn-loading-staff');
                     disableBtn.innerHTML = originalText;
                     disableBtn.disabled = true;
                     disableBtn.style.opacity = '0.5';
                     disableBtn.style.cursor = 'not-allowed';
-                    
+
                     showNotification('Khách hàng đã được vô hiệu hóa', 'warning');
                 }, 2000);
             }
@@ -715,7 +838,7 @@
         function showNotification(message, type = 'info') {
             // Remove existing notifications
             document.querySelectorAll('.alert-staff').forEach(alert => alert.remove());
-            
+
             // Create notification element
             const notification = document.createElement('div');
             notification.className = `alert-staff alert-${type}-staff fade-staff`;
@@ -726,15 +849,15 @@
                     <i class="fas fa-times"></i>
                 </button>
             `;
-            
+
             document.body.appendChild(notification);
-            
+
             // Trigger animation
             setTimeout(() => {
                 notification.classList.remove('fade-staff');
                 notification.classList.add('fade-show-staff');
             }, 10);
-            
+
             // Auto remove after 5 seconds
             setTimeout(() => {
                 if (notification.parentNode) {
@@ -753,15 +876,29 @@
         // Enhanced form validation
 
         // Prevent form submission
-        document.getElementById('customerForm').addEventListener('submit', function(e) {
+        document.getElementById('customerForm').addEventListener('submit', function (e) {
             e.preventDefault();
         });
 
-        document.getElementById('rentalForm').addEventListener('submit', function(e) {
+        document.getElementById('rentalForm').addEventListener('submit', function (e) {
             e.preventDefault();
         });
-
-        // Keyboard shortcuts
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
     </script>
 </body>
+
 </html>

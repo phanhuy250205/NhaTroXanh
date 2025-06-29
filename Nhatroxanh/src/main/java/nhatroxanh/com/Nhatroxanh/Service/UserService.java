@@ -2,6 +2,8 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
@@ -19,10 +21,15 @@ public interface UserService {
      * @return Đối tượng Users sau khi đã được lưu.
      */
     Users registerNewUser(UserRequest userRequest);
+
     Users registerOwner(UserOwnerRequest userOwnerRequest);
+
     /**
      * Cung cấp danh sách thông tin khách thuê cho trang quản lý của Chủ trọ.
+     * 
      * @return một danh sách các đối tượng DTO.
      */
-   
+    // List<Users> getAllCustomers();
+
+    Page<Users> getAllCustomers(int page, int size);
 }

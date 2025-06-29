@@ -138,7 +138,8 @@ public class PostController {
         if (post == null) {
             return "redirect:/chu-tro/bai-dang?error=Post not found";
         }
-        Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
+        Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
+
         log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
                 utilities.stream().map(Utility::getName).collect(Collectors.toList()));
         List<String> images = post.getImages() != null && !post.getImages().isEmpty()

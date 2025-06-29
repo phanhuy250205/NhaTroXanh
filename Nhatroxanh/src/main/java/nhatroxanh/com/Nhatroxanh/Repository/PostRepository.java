@@ -93,7 +93,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         Optional<Post> findByIdWithUtilities(@Param("postId") Integer postId);
 
         @Query("SELECT u FROM Utility u JOIN u.posts p WHERE p.postId = :postId")
-        Set<Utility> findUtilitiesByPostId(@Param("postId") Integer postId);
+        List<Utility> findUtilitiesByPostId(@Param("postId") Integer postId);
 
         @Query("SELECT DISTINCT p FROM Post p " +
                         "LEFT JOIN FETCH p.utilities u " +
