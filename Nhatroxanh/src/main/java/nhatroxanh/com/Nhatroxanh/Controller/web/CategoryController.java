@@ -50,7 +50,7 @@ public class CategoryController {
 
         return "redirect:/quanly/category";
 
-        return "redirect:/nhan-vien/category";
+        // return "redirect:/nhan-vien/category";
 
     }
 

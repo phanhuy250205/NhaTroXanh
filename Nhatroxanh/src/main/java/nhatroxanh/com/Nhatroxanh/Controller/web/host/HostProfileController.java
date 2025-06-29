@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 import java.io.IOException;
 import java.sql.Date;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -45,7 +46,7 @@ public class HostProfileController {
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user);
+        UserCccd cccd = userCccdRepository.findByUser(user).orElse(null);
         int totalHostels = hostelService.countByOwner(user);
 
         HostInfoDTO dto = new HostInfoDTO();
@@ -83,7 +84,7 @@ public class HostProfileController {
             return "host/profile-host";
         }
 
-        UserCccd cccd = userCccdRepository.findByUser(user);
+        UserCccd cccd = userCccdRepository.findByUser(user).orElse(null);
 
         // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();
@@ -112,19 +113,23 @@ public class HostProfileController {
 
         // Handle CCCD
         if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
-            UserCccd existingCccd = userCccdRepository.findByCccdNumber(dto.getCccdNumber().trim());
-            if (existingCccd != null && (cccd == null || !existingCccd.getId().equals(cccd.getId()))) {
-                model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
-                model.addAttribute("user", user);
-                model.addAttribute("totalHostels", hostelService.countByOwner(user));
-                return "host/profile-host";
+            String trimmedCccd = dto.getCccdNumber().trim();
+            Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+            if (existingCccdOptional.isPresent()) {
+                UserCccd existingCccd = existingCccdOptional.get();
+                if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
+                    model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                    model.addAttribute("user", user);
+                    model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                    return "host/profile-host";
+                }
             }
 
             if (cccd == null) {
                 cccd = new UserCccd();
                 cccd.setUser(user);
             }
-            cccd.setCccdNumber(dto.getCccdNumber().trim());
+            cccd.setCccdNumber(trimmedCccd);
             cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
             cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                     ? dto.getIssuePlace().trim() : null);
