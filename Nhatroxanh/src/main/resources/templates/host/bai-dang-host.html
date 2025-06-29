@@ -543,7 +543,9 @@
                             th:value="${houseNumber}">
                     </div>
                     <div class="col-host">
-                        <!-- Placeholder để cân bằng layout -->
+                        <label class="form-label-host">Địa chỉ chi tiết:</label>
+                        <input name="fullAddress" type="text" class="form-control-host" id="displayFullAddress"
+                            readonly />
                     </div>
                 </div>
             </div>
@@ -635,6 +637,7 @@
             setupAddressCascade();
             setupFormSubmission();
             initializeToasts();
+            setupLiveAddressPreview();
         });
 
         async function loadProvinces() {
@@ -992,6 +995,44 @@
                 }
             });
         }
+        function setupLiveAddressPreview() {
+            const houseNumber = document.querySelector('input[name="houseNumber"]');
+            const street = document.querySelector('input[name="street"]');
+            const ward = document.getElementById('wardSelect');
+            const district = document.getElementById('districtSelect');
+            const province = document.getElementById('provinceSelect');
+            const fullAddressInput = document.getElementById('displayFullAddress');
+
+            function updateAddressDisplay() {
+                const house = houseNumber.value.trim();
+                const streetName = street.value.trim();
+                const wardName = ward.options[ward.selectedIndex]?.text || "";
+                const districtName = district.options[district.selectedIndex]?.text || "";
+                const provinceName = province.options[province.selectedIndex]?.text || "";
+
+                let address = "";
+
+                if (house) address += house + ", ";
+                if (streetName) address += streetName + ", ";
+                if (ward.value) address += wardName + ", ";
+                if (district.value) address += districtName + ", ";
+                if (province.value) address += provinceName;
+
+                fullAddressInput.value = address;
+            }
+
+            // Lắng nghe thay đổi
+            [houseNumber, street, ward, district, province].forEach(el => {
+                el.addEventListener("input", updateAddressDisplay);
+                el.addEventListener("change", updateAddressDisplay);
+            });
+
+            updateAddressDisplay(); // Lần đầu tiên
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            setupLiveAddressPreview();
+        });
     </script>
 </body>
 

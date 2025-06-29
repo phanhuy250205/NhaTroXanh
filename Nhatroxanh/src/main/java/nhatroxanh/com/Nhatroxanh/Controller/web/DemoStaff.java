@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class DemoStaff {
 
-    @GetMapping("/nhan-vien/bai-dang")
-    public String baidang(Model model) {
-        return "staff/bai-dang"; 
-    }
+    // @GetMapping("/nhan-vien/bai-dang")
+    // public String baidang(Model model) {
+    //     return "staff/bai-dang"; 
+    // }
     @GetMapping("/nhan-vien/khuyen-mai")
     public String khuyenmai(Model model) {
         return "staff/khuyen-mai"; 
@@ -34,10 +34,10 @@ public class DemoStaff {
         return "staff/chitiet-chutro"; 
     }
 
-    @GetMapping("/nhan-vien/khach-thue")
-    public String khachthue(Model model) {
-        return "staff/khach-thue"; 
-    }
+    // @GetMapping("/nhan-vien/khach-thue")
+    // public String khachthue(Model model) {
+    //     return "staff/khach-thue"; 
+    // }
        @GetMapping("/nhan-vien/profile")
     public String profile(Model model) {
         return "staff/profile"; 

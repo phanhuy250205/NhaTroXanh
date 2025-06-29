@@ -50,7 +50,7 @@ public class Contracts {
     @Column(name = "contract_date", nullable = false)
     private Date contractDate;
 
-     @Column(name = "created_at", nullable = false)
+    @Column(name = "created_at", nullable = false)
     private Date createdAt;
 
     @Column(name = "start_date", nullable = false)

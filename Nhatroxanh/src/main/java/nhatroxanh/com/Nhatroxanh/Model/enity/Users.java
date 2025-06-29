@@ -6,12 +6,23 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 @Entity
-@ToString(exclude = "notifications")
+@ToString(exclude = { "notifications", "userCccd", "contracts" })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "Users")
 public class Users {
 
@@ -59,9 +70,6 @@ public class Users {
     @Column(name = "address", length = 255)
     private String address;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserCccd userCccd;
-
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address addressEntity;
@@ -69,6 +77,20 @@ public class Users {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserCccd userCccd;
+
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<Contracts> contracts;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> ownedContracts;
+
+    @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> rentedContracts;
+
+    // @Column(name = "status")
+    // private Boolean status;
 
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER

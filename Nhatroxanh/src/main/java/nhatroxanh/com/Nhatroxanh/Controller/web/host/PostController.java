@@ -138,24 +138,31 @@ public class PostController {
         if (post == null) {
             return "redirect:/chu-tro/bai-dang?error=Post not found";
         }
-        Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
-        log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
-                utilities.stream().map(Utility::getName).collect(Collectors.toList()));
+
+        Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
         List<String> images = post.getImages() != null && !post.getImages().isEmpty()
                 ? post.getImages().stream().map(Image::getUrl).distinct().collect(Collectors.toList())
                 : List.of("/images/cards/default.jpg");
-        log.info("Post {} images: {}", postId, images);
 
-        Hostel hostel = post.getHostel() != null ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId())
-                .orElse(null) : null;
+        // Lấy nhà trọ kèm phòng và thông tin chi tiết của phòng
+        Hostel hostel = post.getHostel() != null
+                ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
+                : null;
+
+        // Danh sách phòng
         List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
 
-        model.addAttribute("images", images);
-        model.addAttribute("post", post);
-        model.addAttribute("utilities", utilities != null ? utilities : new HashSet<>());
+        // Debug
+        log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+        log.info("Rooms count: {}", rooms.size());
+        rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
         model.addAttribute("hostel", hostel);
         model.addAttribute("rooms", rooms);
         model.addAttribute("roomCount", rooms.size());
+        model.addAttribute("images", images);
+        model.addAttribute("post", post);
+        model.addAttribute("utilities", utilities);
 
         return "host/chi-tiet-bai-dang";
     }

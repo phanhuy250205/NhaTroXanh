@@ -46,7 +46,8 @@ public class HostProfileController {
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user).orElse(null);
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+
         int totalHostels = hostelService.countByOwner(user);
 
         HostInfoDTO dto = new HostInfoDTO();
@@ -70,10 +71,10 @@ public class HostProfileController {
 
     @PostMapping("/profile-host")
     public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
-                                BindingResult bindingResult,
-                                @AuthenticationPrincipal CustomUserDetails userDetails,
-                                Model model,
-                                RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -84,7 +85,8 @@ public class HostProfileController {
             return "host/profile-host";
         }
 
-        UserCccd cccd = userCccdRepository.findByUser(user).orElse(null);
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+
 
         // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();
@@ -132,7 +134,8 @@ public class HostProfileController {
             cccd.setCccdNumber(trimmedCccd);
             cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
             cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
-                    ? dto.getIssuePlace().trim() : null);
+                    ? dto.getIssuePlace().trim()
+                    : null);
             userCccdRepository.save(cccd);
         } else if (cccd != null) {
             userCccdRepository.delete(cccd);

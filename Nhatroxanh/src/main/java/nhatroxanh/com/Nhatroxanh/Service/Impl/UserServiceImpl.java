@@ -13,10 +13,14 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
-
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -143,11 +147,11 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
             }
         }
-
         return savedUser;
     }
 
     @Override
+
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
         logger.info("Finding owner with CCCD: {} or phone: {}", cccd, phone);
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -167,7 +171,8 @@ public class UserServiceImpl implements UserService {
         }
 
         return userRepository.findByCccdOrPhoneAndRole(cccd, phone, Users.Role.OWNER)
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chủ trọ với CCCD hoặc số điện thoại cung cấp!"));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Không tìm thấy chủ trọ với CCCD hoặc số điện thoại cung cấp!"));
     }
 
     @Override
@@ -222,5 +227,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Address saveAddress(Address address) {
         return addressRepository.save(address);
+    }
+
+    public Page<Users> getAllCustomers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.CUSTOMER, pageable);
+        List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
+        return new PageImpl<>(users, pageable, customerIds.getTotalElements());
     }
 }

@@ -65,7 +65,6 @@ public class Rooms {
     private Float price;
 
 
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities = new HashSet<>();

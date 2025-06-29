@@ -45,4 +45,11 @@ public interface PostService {
                         String provinceName, String districtName, String wardName) throws Exception;
 
         void save(Post post);
+
+        void approvePost(Integer postId, Users approvedBy);
+
+        void hidePost(Integer postId);
+
+        List<Post> getFilteredPosts(String status, String type, String sortBy, String search);
+
 }
