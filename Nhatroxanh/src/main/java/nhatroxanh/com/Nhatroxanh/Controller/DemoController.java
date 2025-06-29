@@ -3,17 +3,31 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Controller
 public class DemoController {
      @Autowired
      private UserService userService;
+     @Autowired
+     private TenantService tenantService;
+     @Autowired
+    private HostelRepository hostelRepository;
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -75,9 +89,26 @@ public class DemoController {
         return "host/tong-quan";
     }
 
-    @GetMapping("/chu-tro/khach-thue")
-    public String khachthue(Model model) {
-        return "host/quan-ly-khach-thue";
+  @GetMapping("/chu-tro/khach-thue") 
+    public String khachthue(Model model,
+                                @RequestParam(defaultValue = "") String keyword,
+                                @RequestParam(required = false) Integer hostelId,
+                                @RequestParam(required = false) Boolean status,
+                                @RequestParam(defaultValue = "0") int page,
+                                @RequestParam(defaultValue = "10") int size) {
+        
+        Page<TenantInfoDTO> tenantPage = tenantService.findAllForTesting(PageRequest.of(page, size));
+        List<Hostel> hostels = hostelRepository.findAll();
+
+        model.addAttribute("tenants", tenantPage.getContent());
+        model.addAttribute("hostels", hostels);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", tenantPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedHostelId", hostelId);
+        model.addAttribute("selectedStatus", status);
+
+        return "host/quan-ly-khach-thue"; // Tên file HTML danh sách
     }
 
     // @GetMapping("/chu-tro/dang-tin")
@@ -95,9 +126,17 @@ public class DemoController {
     //     return "host/chi-tiet-bai-dang";
     // }
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue")
-    public String chitietkhachthue() {
-        return "host/chi-tiet-khach-thue";
+     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
+    public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+        try {
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
+            model.addAttribute("tenant", tenantDetail);
+            return "host/chi-tiet-khach-thue"; // Tên file HTML chi tiết
+        } catch (Exception e) {
+            // Nếu không tìm thấy hợp đồng, chuyển hướng về trang danh sách và báo lỗi
+            // (Bạn có thể tạo một trang lỗi riêng nếu muốn)
+            return "redirect:/chu-tro/khach-thue";
+        }
     }
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {

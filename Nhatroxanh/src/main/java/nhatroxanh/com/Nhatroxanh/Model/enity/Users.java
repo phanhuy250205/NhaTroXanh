@@ -9,10 +9,12 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +27,7 @@ import lombok.ToString;
 @Builder
 @Data
 @Entity
-@ToString(exclude = "notifications")
+@ToString(exclude = {"notifications", "userCccd"}) 
 @Table(name = "Users")
 public class Users {
 
@@ -55,9 +57,6 @@ public class Users {
     @Column(name = "email", length = 100, unique = true)
     private String email;
 
-    @Column(name = "cccd", length = 20)
-    private String cccd;
-
     @Column(name = "avatar", length = 1000)
     private String avatar;
 
@@ -77,9 +76,10 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
-    // @Column(name = "status")
-    // private Boolean status;
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private UserCccd userCccd;
 
+    
     public enum Role {
         admin, staff, owner, customer
     }

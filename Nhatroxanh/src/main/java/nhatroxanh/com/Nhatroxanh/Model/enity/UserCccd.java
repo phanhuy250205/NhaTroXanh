@@ -45,4 +45,6 @@ public class UserCccd {
     @OneToOne
     @JoinColumn(name = "user_id")
     private Users user;
+
+    
 }

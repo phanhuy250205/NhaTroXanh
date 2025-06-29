@@ -54,7 +54,6 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
-        dto.setCccd(user.getCccd());
         if (cccd != null) {
             dto.setIssueDate(cccd.getIssueDate());
             dto.setIssuePlace(cccd.getIssuePlace());
@@ -67,77 +66,61 @@ public class HostProfileController {
     }
 
     @PostMapping("/profile-host")
-    public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
-            BindingResult bindingResult,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
+public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
+                            BindingResult bindingResult,
+                            @AuthenticationPrincipal CustomUserDetails userDetails,
+                            RedirectAttributes redirectAttributes) {
 
-        // Kiểm tra lỗi validation
-        if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
-            return "redirect:/chu-tro/profile-host";
-        }
+    // 1. Kiểm tra lỗi validation cơ bản
+    if (bindingResult.hasErrors()) {
+        redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
+        return "redirect:/chu-tro/profile-host";
+    }
 
+    try {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user);
-
-        // Handle avatar upload
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userDetails.getUser().getUserId()));
         MultipartFile avatarFile = dto.getAvatarFile();
         if (avatarFile != null && !avatarFile.isEmpty()) {
-            try {
-                // Delete old avatar if exists
-                if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-                    fileUploadService.deleteFile(user.getAvatar());
-                }
-                // Upload new avatar
-                String avatarPath = fileUploadService.uploadFile(avatarFile, "");
-                user.setAvatar(avatarPath);
-            } catch (IOException e) {
-                e.printStackTrace();
-                redirectAttributes.addFlashAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
-                return "redirect:/chu-tro/profile-host";
+            if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                fileUploadService.deleteFile(user.getAvatar());
             }
+            String avatarPath = fileUploadService.uploadFile(avatarFile, "");
+            user.setAvatar(avatarPath);
         }
-
-        // Update user information
         user.setFullname(dto.getFullname());
         user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
         user.setPhone(dto.getPhone());
         user.setGender(dto.getGender());
         user.setEmail(dto.getEmail());
-        user.setCccd(dto.getCccd() != null && !dto.getCccd().trim().isEmpty() ? dto.getCccd().trim() : null);
         user.setAddress(dto.getAddress());
-
-        // Handle CCCD information
-        if (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) {
-            // Check for duplicate CCCD number
-            UserCccd existingCccd = userCccdRepository.findByCccdNumber(dto.getCccd().trim());
-            if (existingCccd != null && (cccd == null || !existingCccd.getId().equals(cccd.getId()))) {
-                redirectAttributes.addFlashAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+        UserCccd cccd = userCccdRepository.findByUser(user);
+        String newCccdNumber = (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) ? dto.getCccd().trim() : null;
+        if (newCccdNumber != null) {
+            UserCccd existingCccd = userCccdRepository.findByCccdNumber(newCccdNumber);
+            if (existingCccd != null && !existingCccd.getUser().getUserId().equals(user.getUserId())) {
+                redirectAttributes.addFlashAttribute("error", "Số CCCD đã được sử dụng bởi một tài khoản khác.");
                 return "redirect:/chu-tro/profile-host";
             }
-
-            // Update or create CCCD record
             if (cccd == null) {
                 cccd = new UserCccd();
                 cccd.setUser(user);
             }
-            cccd.setCccdNumber(dto.getCccd().trim());
+            cccd.setCccdNumber(newCccdNumber);
             cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
-            cccd.setIssuePlace(
-                    dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty() ? dto.getIssuePlace().trim()
-                            : null);
+            cccd.setIssuePlace(dto.getIssuePlace());     
             userCccdRepository.save(cccd);
         } else if (cccd != null) {
-            // Remove CCCD record if CCCD is cleared
             userCccdRepository.delete(cccd);
         }
-
-        // Save user after all updates
         usersRepository.save(user);
 
         redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
-        return "redirect:/chu-tro/profile-host";
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
     }
+    return "redirect:/chu-tro/profile-host";
+}
 }
