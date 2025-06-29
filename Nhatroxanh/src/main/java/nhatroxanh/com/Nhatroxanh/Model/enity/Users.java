@@ -1,21 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +21,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@ToString(exclude = {"notifications", "userCccd", "contracts"})
+@ToString(exclude = { "notifications", "userCccd", "contracts" })
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Table(name = "Users")
 public class Users {
@@ -50,11 +40,14 @@ public class Users {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @Column(name = "phone", length = 15)
+    @Column(name = "phone", length = 15, unique = true)
     private String phone;
 
     @Column(name = "birthday")
     private Date birthday;
+
+    @Column(name = "bank_account", length = 50)
+    private String bankAccount;
 
     @Column(name = "gender")
     private Boolean gender;
@@ -77,20 +70,33 @@ public class Users {
     @Column(name = "address", length = 255)
     private String address;
 
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address addressEntity;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
-    
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Contracts> contracts;
+
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    // private List<Contracts> contracts;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> ownedContracts;
+
+    @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> rentedContracts;
 
     // @Column(name = "status")
     // private Boolean status;
 
     public enum Role {
-        admin, staff, owner, customer
+        ADMIN, STAFF, OWNER, CUSTOMER
+    }
+
+    public Users orElse(Object object) {
+        throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 }

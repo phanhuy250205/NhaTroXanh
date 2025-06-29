@@ -1,16 +1,9 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ReviewRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

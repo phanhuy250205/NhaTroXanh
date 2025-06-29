@@ -5,8 +5,14 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
+
+
 @Controller
 public class DemoController {
+
+
+    
+
      @Autowired
      private UserService userService;
     @GetMapping("/chi-tiet")
@@ -32,7 +38,8 @@ public class DemoController {
 
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {
-        return "host/hop-dong-host";
+        
+        return "redirect:/api/contracts/form";
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")

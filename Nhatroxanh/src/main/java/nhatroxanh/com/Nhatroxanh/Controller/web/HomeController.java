@@ -83,7 +83,15 @@ public class HomeController {
             Hostel hostel = post.getHostel() != null
                     ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
                     : null;
+
+            // Danh sách phòng
             List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
+
+            // Debug
+            log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+            log.info("Rooms count: {}", rooms.size());
+            rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                    room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
             model.addAttribute("hostel", hostel);
             model.addAttribute("rooms", rooms);
             model.addAttribute("roomCount", rooms.size());
@@ -124,7 +132,7 @@ public class HomeController {
                     .orElseThrow(() -> new IllegalArgumentException("Phòng không tồn tại với ID: " + roomId));
             Set<Utility> utilities = roomsRepository.findUtilitiesByRoomId(roomId);
             Map<String, Object> roomData = new HashMap<>();
-            roomData.put("roomId", room.getRoom_id());
+            roomData.put("roomId", room.getRoomId());
             roomData.put("name", room.getNamerooms());
             roomData.put("price", room.getPrice());
             roomData.put("acreage", room.getAcreage());

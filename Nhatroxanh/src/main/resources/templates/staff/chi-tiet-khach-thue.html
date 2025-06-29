@@ -603,7 +603,7 @@
                     <form th:action="@{/nhan-vien/toggle-enable}" method="post">
                         <input type="hidden" name="userId" th:value="${customer.userId}" />
                         <button type="submit" class="btn-disable-staff"
-                            th:classappend="${customer.enabled} ? 'btn-danger' : 'btn-success'">
+                            th:classappend="${customer.enabled} ? 'btn-danger' : 'btn-primary'">
                             <i class="fas" th:classappend="${customer.enabled} ? 'fa-ban' : 'fa-undo'"></i>
                             <span th:text="${customer.enabled} ? 'Vô hiệu hóa' : 'Mở khóa'"></span>
                         </button>
@@ -671,8 +671,11 @@
                 <div class="row">
                     <div class="col-md-6 mb-4">
                         <label for="idNumber" class="form-label-staff">CCCD/CMND</label>
-                        <input type="text" class="form-control-staff" id="idNumber"
-                            th:value="${customer.userCccd != null ? customer.userCccd.cccdNumber : ''}" readonly>
+                        <input type="text" class="form-control-staff" id="idNumber" th:value="${customer.userCccd != null and customer.userCccd.cccdNumber != null 
+        ? customer.userCccd.cccdNumber.length() >= 4 
+            ? customer.userCccd.cccdNumber.substring(0, 2) + '**********' + customer.userCccd.cccdNumber.substring(customer.userCccd.cccdNumber.length() - 2) 
+            : customer.userCccd.cccdNumber
+        : ''}" readonly>
                     </div>
                 </div>
 
@@ -728,10 +731,11 @@
                         <div>
                             <span class="status-badge-staff">
                                 <i class="fas"
-                                    th:classappend="${contract != null and contract.status ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                                    th:classappend="${contract != null and contract.status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
                                 <span
-                                    th:text="${contract != null ? (contract.status ? 'Đang thuê' : 'Ngừng thuê') : 'Chưa thuê'}"></span>
+                                    th:text="${contract != null ? (contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Ngừng thuê') : 'Chưa thuê'}"></span>
                             </span>
+
                         </div>
                     </div>
                 </div>

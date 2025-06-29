@@ -46,7 +46,12 @@ public class CategoryController {
             category.setName(name.trim());
             categoryRepo.save(category);
         }
-        return "redirect:/nhan-vien/category";
+
+
+        return "redirect:/quanly/category";
+
+        // return "redirect:/nhan-vien/category";
+
     }
 
     @PostMapping("/update")

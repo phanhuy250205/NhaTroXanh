@@ -56,8 +56,9 @@ public class CustomerController {
         UserCccd cccd = customer.getUserCccd();
         customer.setUserCccd(cccd);
         Contracts latestContract = contractRepository
-                .findTopByUserOrderByStartDateDesc(customer)
+                .findTopByTenantOrderByStartDateDesc(customer)
                 .orElse(null);
+
         model.addAttribute("customer", customer);
         model.addAttribute("contract", latestContract);
 
@@ -69,7 +70,7 @@ public class CustomerController {
         Optional<Users> userOpt = userRepository.findById(userId);
         if (userOpt.isPresent()) {
             Users user = userOpt.get();
-            user.setEnabled(!user.isEnabled()); 
+            user.setEnabled(!user.isEnabled());
             userRepository.save(user);
             String status = user.isEnabled() ? "mở khóa" : "vô hiệu hóa";
             redirectAttributes.addFlashAttribute("successMessage", "Khách thuê đã được " + status + " thành công.");

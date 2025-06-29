@@ -79,59 +79,65 @@
                         </div>
                     </div>
 
-                    <!-- Địa chỉ Section -->
+                    <!-- Section: Địa chỉ -->
                     <div class="form-section-host">
                         <h3 class="section-title-host">Địa chỉ</h3>
                         <div class="section-content-host">
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
-                                        <select class="form-select-host" id="provinceHost">
+                                        <label for="citySelect" class="form-label-host">Tỉnh/Thành phố</label>
+                                        <select id="citySelect" class="form-select-host">
                                             <option value="">Chọn tỉnh/thành phố</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="districtHost" class="form-label-host">Quận/Huyện</label>
-                                        <select class="form-select-host" id="districtHost" disabled>
+                                        <label for="districtSelect" class="form-label-host">Quận/Huyện</label>
+                                        <select id="districtSelect" class="form-select-host" disabled>
                                             <option value="">Chọn quận/huyện</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="wardHost" class="form-label-host">Phường/Xã</label>
-                                        <select class="form-select-host" id="wardHost" disabled>
+                                        <label for="wardSelect" class="form-label-host">Phường/Xã</label>
+                                        <select id="wardSelect" class="form-select-host" disabled>
                                             <option value="">Chọn phường/xã</option>
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="streetHost" class="form-label-host">Đường/Phố</label>
-                                        <input type="text" class="form-control-host" id="streetHost"
+                                        <label for="streetInput" class="form-label-host">Đường/Phố</label>
+                                        <input type="text" id="streetInput" class="form-control-host"
                                             placeholder="Nhập tên đường/phố">
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="houseNumberHost" class="form-label-host">Số nhà</label>
-                                        <input type="text" class="form-control-host" id="houseNumberHost"
+                                        <label for="houseNumberInput" class="form-label-host">Số nhà</label>
+                                        <input type="text" id="houseNumberInput" class="form-control-host"
                                             placeholder="123">
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
-                                        <input type="text" class="form-control-host" id="fullAddressHost"
-                                            placeholder="Địa chỉ sẽ được tự động tạo" readonly>
+                                        <label for="fullAddressInput" class="form-label-host">Địa chỉ đầy đủ</label>
+                                        <input type="text" id="fullAddressInput" class="form-control-host"
+                                            placeholder="Địa chỉ sẽ tự động tạo" readonly>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Mô tả Section -->
                     <div class="form-section-host">
@@ -148,6 +154,7 @@
             </div>
         </div>
     </div>
+    <script th:src="@{/js/api-map.js}"></script>
 </body>
 
 </html>

@@ -551,24 +551,31 @@
                                     <p class="phone-link-staff" th:text="${customer.phone}"></p>
                                 </td>
                                 <td>
-                                    <p class="cccd-code-staff"
-                                        th:text="${customer.userCccd != null ? customer.userCccd.cccdNumber : 'Chưa có'}">
+                                    <p class="cccd-code-staff" th:text="${customer.userCccd != null and customer.userCccd.cccdNumber != null and customer.userCccd.cccdNumber.length() >= 4 
+       ? customer.userCccd.cccdNumber.substring(0, 2) + 
+         '********' + 
+         customer.userCccd.cccdNumber.substring(customer.userCccd.cccdNumber.length() - 2) 
+       : (customer.userCccd != null ? customer.userCccd.cccdNumber : 'Chưa có')}">
                                     </p>
                                 </td>
                                 <td>
                                     <span class="area-badge-staff">
                                         <i class="fas fa-map-marker-alt"></i>
-                                        <span
-                                            th:text="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].room.hostel.name + ' - Phòng ' + customer.contracts[0].room.namerooms : 'Chưa phân phòng'}"></span>
+                                        <span th:text="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
+            ? customer.rentedContracts[0].room.hostel.name + ' - Phòng ' + customer.rentedContracts[0].room.namerooms 
+            : 'Chưa phân phòng'}"></span>
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge-staff"
-                                        th:classappend="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'badge-success-staff' : 'badge-danger-staff' : 'badge-warning-staff'}">
-                                        <i class="fas"
-                                            th:classappend="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'fa-check-circle' : 'fa-exclamation-triangle' : 'fa-clock'}"></i>
-                                        <span
-                                            th:text="${customer.contracts != null and !customer.contracts.isEmpty() ? customer.contracts[0].status ? 'Đang thuê' : 'Ngừng thuê' : 'Chưa thuê'}"></span>
+                                    <span class="badge-staff" th:classappend="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
+            ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'badge-success-staff' : 'badge-danger-staff') 
+            : 'badge-warning-staff'}">
+                                        <i class="fas" th:classappend="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
+                ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-exclamation-triangle') 
+                : 'fa-clock'}"></i>
+                                        <span th:text="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
+            ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'Đang thuê' : 'Ngừng thuê') 
+            : 'Chưa thuê'}"></span>
                                     </span>
                                 </td>
                                 <td>

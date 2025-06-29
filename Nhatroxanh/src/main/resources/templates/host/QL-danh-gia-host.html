@@ -1,98 +1,702 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
-<head th:replace="~{/layouts/head}">
-    <title>Chi Tiết - Nhà Trọ Xanh</title>
+<head th:replace="~{/layouts/head}" />
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý đánh giá - Nhà Trọ Xanh</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color: #3498db;
+      --secondary-color: #3498db;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --card-hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header {
+      background: white;
+      padding: 2rem;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .page-title {
+      color: var(--primary-color);
+      font-weight: 700;
+      font-size: 2rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn {
+      border-radius: 16px;
+      padding: 0.75rem 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .page-title i {
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+      color: white;
+      padding: 0.5rem;
+      border-radius: 12px;
+      font-size: 1.5rem;
+    }
+
+    .filter-section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 2rem;
+      border: 1px solid #e2e8f0;
+    }
+
+    .filter-title {
+      color: var(--secondary-color);
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-control,
+    .form-select {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .accordion {
+      background: transparent;
+    }
+
+    .accordion-item {
+      background: white;
+      border: none;
+      border-radius: 16px;
+      margin-bottom: 1rem;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-item:hover {
+      box-shadow: var(--card-hover-shadow);
+      transform: translateY(-2px);
+    }
+
+    .accordion-header {
+      border-radius: 16px;
+    }
+
+    .accordion-button {
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      border: none;
+      padding: 1.5rem 2rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary-color);
+      border-radius: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .accordion-button:not(.collapsed) {
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+      color: white;
+      box-shadow: none;
+    }
+
+    .accordion-button:focus {
+      box-shadow: none;
+      border: none;
+    }
+
+    .accordion-button::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%232563eb'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+      transition: transform 0.3s ease;
+    }
+
+    .accordion-button:not(.collapsed)::after {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+    .accordion-body {
+      padding: 2rem;
+      background: #f8fafc;
+    }
+
+    .review-item {
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .review-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+    }
+
+    .review-item:hover {
+      border-color: var(--primary-color);
+      box-shadow: var(--card-hover-shadow);
+      transform: translateY(-2px);
+    }
+
+    .reviewer-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .reviewer-avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .reviewer-name {
+      font-weight: 600;
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .review-rating {
+      color: var(--warning-color);
+      font-size: 1.2rem;
+      margin-left: auto;
+    }
+
+    .review-content {
+      color: var(--secondary-color);
+      line-height: 1.6;
+      margin-bottom: 1rem;
+    }
+
+    .review-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+      border: none;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #1d4ed8, var(--primary-color));
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-outline-primary {
+      color: var(--primary-color);
+      border-color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline-danger {
+      color: var(--danger-color);
+      border-color: var(--danger-color);
+    }
+
+    .btn-outline-danger:hover {
+      background: var(--danger-color);
+      border-color: var(--danger-color);
+      transform: translateY(-1px);
+    }
+
+    .modal-content {
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+      color: white;
+      border-radius: 20px 20px 0 0;
+      padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.3rem;
+    }
+
+    .btn-close {
+      filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+      padding: 2rem;
+    }
+
+    .modal-info-item {
+      background: #f8fafc;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .modal-info-label {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .modal-info-value {
+      color: var(--secondary-color);
+      margin: 0;
+    }
+
+    .stats-card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stats-card:hover {
+      box-shadow: var(--card-hover-shadow);
+      transform: translateY(-2px);
+    }
+
+    .stats-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .stats-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .stats-label {
+      color: var(--secondary-color);
+      font-weight: 500;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--secondary-color);
+    }
+
+    .empty-state i {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1rem;
+      }
+
+      .filter-section .d-flex {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .filter-section .w-25 {
+        width: 100% !important;
+      }
+
+      .reviewer-info {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .review-rating {
+        margin-left: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <!-- NAVBAR -->
-    <div th:replace="~{/layouts/sidebar-host}"></div>
-    <div class="main-content">
-         <h4 class="mb-4">Quản lý đánh giá theo khu trọ</h4>
-         <hr>
-        <div class="container py-4">
- 
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+  <div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">
+        <i class="fas fa-star"></i>
+        Quản lý đánh giá theo khu trọ
+      </h1>
+    </div>
 
-  <!-- Bộ lọc -->
-  <div class="d-flex gap-3 mb-3">
-    <input type="text" class="form-control w-25" placeholder="Tìm khu trọ...">
-    <select class="form-select w-25">
-      <option>Tất cả số sao</option>
-      <option>5 sao</option>
-      <option>4 sao</option>
-      <option>3 sao</option>
-    </select>
-  </div>
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="stats-icon" style="background: linear-gradient(135deg, var(--primary-color), #3b82f6);">
+            <i class="fas fa-building"></i>
+          </div>
+          <div class="stats-number">8</div>
+          <div class="stats-label">Khu trọ</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="stats-icon" style="background: linear-gradient(135deg, var(--success-color), #22c55e);">
+            <i class="fas fa-comments"></i>
+          </div>
+          <div class="stats-number">47</div>
+          <div class="stats-label">Tổng đánh giá</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="stats-icon" style="background: linear-gradient(135deg, var(--warning-color), #fbbf24);">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stats-number">4.6</div>
+          <div class="stats-label">Điểm trung bình</div>
+        </div>
+      </div>
+      <div class="col-md-3 mb-3">
+        <div class="stats-card">
+          <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+            <i class="fas fa-trophy"></i>
+          </div>
+          <div class="stats-number">23</div>
+          <div class="stats-label">5 sao</div>
+        </div>
+      </div>
+    </div>
 
-  <!-- Accordion khu trọ -->
-  <div class="accordion" id="hostReviewAccordion">
+    <!-- Filter Section -->
+    <div class="filter-section">
+      <div class="filter-title">
+        <i class="fas fa-filter"></i>
+        Bộ lọc tìm kiếm
+      </div>
+      <div class="d-flex gap-3">
+        <div class="w-25">
+          <input type="text" class="form-control" placeholder="🔍 Tìm khu trọ...">
+        </div>
+        <div class="w-25">
+          <select class="form-select">
+            <option>⭐ Tất cả số sao</option>
+            <option>⭐⭐⭐⭐⭐ 5 sao</option>
+            <option>⭐⭐⭐⭐ 4 sao</option>
+            <option>⭐⭐⭐ 3 sao</option>
+            <option>⭐⭐ 2 sao</option>
+            <option>⭐ 1 sao</option>
+          </select>
+        </div>
+        <div class="w-25">
+          <select class="form-select">
+            <option>📅 Tất cả thời gian</option>
+            <option>Tuần này</option>
+            <option>Tháng này</option>
+            <option>3 tháng gần đây</option>
+          </select>
+        </div>
+        <div class="w-25">
+          <button class="btn btn-primary w-100">
+            <i class="fas fa-search me-2"></i>Tìm kiếm
+          </button>
+        </div>
+      </div>
+    </div>
 
-    <!-- Khu trọ A2 -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingA2">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseA2">
-          <i class="fa-solid fa-building me-2 text-primary"></i> Khu trọ A2 – 12 đánh giá
-        </button>
-      </h2>
-      <div id="collapseA2" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
-        <div class="accordion-body">
-
-          <!-- Danh sách đánh giá -->
-          <div class="host-review-item mb-3 p-3 border rounded shadow-sm">
-            <div class="d-flex justify-content-between">
-              <div>
-                <strong><i class="fa fa-user"></i> Nguyễn Văn A</strong> – <span class="text-warning">★★★★★</span>
-                <p class="mb-1">Phòng sạch sẽ, chủ thân thiện, khu vực yên tĩnh...</p>
+    <!-- Accordion khu trọ -->
+    <div class="accordion" id="hostReviewAccordion">
+      <!-- Khu trọ A2 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingA2">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseA2">
+            <i class="fas fa-building me-3"></i>
+            <div>
+              <strong>Khu trọ A2</strong>
+              <div class="text-muted" style="font-size: 0.9rem;">12 đánh giá • ⭐ 4.8/5</div>
+            </div>
+          </button>
+        </h2>
+        <div id="collapseA2" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
+          <div class="accordion-body">
+            <!-- Review Item 1 -->
+            <div class="review-item">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">A</div>
+                <div>
+                  <h6 class="reviewer-name">Nguyễn Văn A</h6>
+                  <small class="text-muted">Phòng A2-105 • 2 ngày trước</small>
+                </div>
+                <div class="review-rating">⭐⭐⭐⭐⭐</div>
               </div>
-              <div class="text-end">
-                <button class="btn btn-sm btn-outline-primary"  data-bs-toggle="modal" data-bs-target="#reviewDetailModal"><i class="fa fa-eye"></i></button>
-                <button class="btn btn-sm btn-outline-danger"><i class="fa fa-trash"></i></button>
+              <div class="review-content">
+                "Phòng sạch sẽ, chủ thân thiện, khu vực yên tĩnh. Tiện ích đầy đủ, giá cả hợp lý. Rất hài lòng với chất
+                lượng dịch vụ."
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#reviewDetailModal">
+                  <i class="fas fa-eye me-1"></i>Xem
+                </button>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+
+            <!-- Review Item 2 -->
+            <div class="review-item">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">B</div>
+                <div>
+                  <h6 class="reviewer-name">Trần Thị B</h6>
+                  <small class="text-muted">Phòng A2-203 • 5 ngày trước</small>
+                </div>
+                <div class="review-rating">⭐⭐⭐⭐</div>
+              </div>
+              <div class="review-content">
+                "Vị trí thuận tiện, gần trường học. Phòng thoáng mát nhưng wifi hơi yếu. Nhìn chung ok."
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#reviewDetailModal">
+                  <i class="fas fa-eye me-1"></i>Xem
+                </button>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+
+            <!-- Review Item 3 -->
+            <div class="review-item">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">C</div>
+                <div>
+                  <h6 class="reviewer-name">Lê Văn C</h6>
+                  <small class="text-muted">Phòng A2-101 • 1 tuần trước</small>
+                </div>
+                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+              </div>
+              <div class="review-content">
+                "Tuyệt vời! Chủ rất chu đáo, phòng mới, sạch sẽ. An ninh tốt, có bảo vệ 24/7. Sẽ ở lâu dài."
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#reviewDetailModal">
+                  <i class="fas fa-eye me-1"></i>Xem
+                </button>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Xóa
+                </button>
               </div>
             </div>
           </div>
+        </div>
+      </div>
 
-          <!-- Lặp thêm các đánh giá -->
+      <!-- Khu trọ B1 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingB1">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseB1">
+            <i class="fas fa-building me-3"></i>
+            <div>
+              <strong>Khu trọ B1</strong>
+              <div class="text-muted" style="font-size: 0.9rem;">8 đánh giá • ⭐ 4.3/5</div>
+            </div>
+          </button>
+        </h2>
+        <div id="collapseB1" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
+          <div class="accordion-body">
+            <!-- Review Item 1 -->
+            <div class="review-item">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">D</div>
+                <div>
+                  <h6 class="reviewer-name">Phạm Văn D</h6>
+                  <small class="text-muted">Phòng B1-301 • 3 ngày trước</small>
+                </div>
+                <div class="review-rating">⭐⭐⭐⭐</div>
+              </div>
+              <div class="review-content">
+                "Phòng ổn, giá hợp lý. Khu vực có nhiều tiện ích xung quanh. Chỉ có điều hơi ồn vào buổi tối."
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#reviewDetailModal">
+                  <i class="fas fa-eye me-1"></i>Xem
+                </button>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+
+            <!-- Review Item 2 -->
+            <div class="review-item">
+              <div class="reviewer-info">
+                <div class="reviewer-avatar">E</div>
+                <div>
+                  <h6 class="reviewer-name">Nguyễn Thị E</h6>
+                  <small class="text-muted">Phòng B1-205 • 1 tuần trước</small>
+                </div>
+                <div class="review-rating">⭐⭐⭐⭐⭐</div>
+              </div>
+              <div class="review-content">
+                "Rất hài lòng! Chủ nhiệt tình, phòng đẹp, đầy đủ tiện nghi. Giá cả phải chăng."
+              </div>
+              <div class="review-actions">
+                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+                  data-bs-target="#reviewDetailModal">
+                  <i class="fas fa-eye me-1"></i>Xem
+                </button>
+                <button class="btn btn-outline-danger btn-sm">
+                  <i class="fas fa-trash me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Khu trọ C3 -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingC3">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseC3">
+            <i class="fas fa-building me-3"></i>
+            <div>
+              <strong>Khu trọ C3</strong>
+              <div class="text-muted" style="font-size: 0.9rem;">15 đánh giá • ⭐ 4.7/5</div>
+            </div>
+          </button>
+        </h2>
+        <div id="collapseC3" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
+          <div class="accordion-body">
+            <div class="empty-state">
+              <i class="fas fa-comments"></i>
+              <h5>Chưa có đánh giá nào</h5>
+              <p>Khu trọ này chưa có đánh giá từ khách thuê.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Khu trọ B1 (tương tự) -->
-    <div class="accordion-item">
-      <h2 class="accordion-header" id="headingB1">
-        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseB1">
-          <i class="fa-solid fa-building me-2 text-primary"></i> Khu trọ B1 – 8 đánh giá
-        </button>
-      </h2>
-      <div id="collapseB1" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
-        <div class="accordion-body">
-          <!-- Các đánh giá khu B1 -->
+  <!-- Modal xem chi tiết -->
+  <div class="modal fade" id="reviewDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="fas fa-star me-2"></i>Chi tiết đánh giá
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-info-item">
+            <div class="modal-info-label">👤 Người đánh giá</div>
+            <div class="modal-info-value">Nguyễn Văn A</div>
+          </div>
+
+          <div class="modal-info-item">
+            <div class="modal-info-label">🏠 Đối tượng</div>
+            <div class="modal-info-value">Phòng A2-105, Khu trọ A2</div>
+          </div>
+
+          <div class="modal-info-item">
+            <div class="modal-info-label">⭐ Số sao</div>
+            <div class="modal-info-value">⭐⭐⭐⭐⭐ (5/5)</div>
+          </div>
+
+          <div class="modal-info-item">
+            <div class="modal-info-label">📅 Thời gian</div>
+            <div class="modal-info-value">25/06/2025 lúc 14:30</div>
+          </div>
+
+          <div class="modal-info-item">
+            <div class="modal-info-label">💬 Nội dung đánh giá</div>
+            <div class="modal-info-value">
+              Phòng sạch sẽ, chủ thân thiện, khu vực yên tĩnh. Tiện ích đầy đủ, giá cả hợp lý. Rất hài lòng với chất
+              lượng dịch vụ. Sẽ giới thiệu cho bạn bè.
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
-
   </div>
-</div>
 
-
-<!-- Modal xem chi tiết -->
-<div class="modal fade" id="reviewDetailModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content host-modal-content">
-      <div class="modal-header border-0">
-        <h5 class="modal-title"><i class="fa-solid fa-star me-2 text-warning"></i>Chi tiết đánh giá</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p><strong>Người đánh giá:</strong> Nguyễn Văn A</p>
-        <p><strong>Đối tượng:</strong> Phòng A2-105</p>
-        <p><strong>Số sao:</strong> ★★★★☆</p>
-        <p><strong>Nội dung:</strong> Phòng sạch, giá tốt nhưng hơi ồn...</p>
-      </div>
-    </div>
-  </div>
-</div>
-
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

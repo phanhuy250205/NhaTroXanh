@@ -467,10 +467,10 @@
                                         th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ
                                         trọ</h4>
                                     <p class="owner-role mb-0 text-muted" th:switch="${owner.role.name()}">
-                                        <span th:case="'owner'">Chủ trọ</span>
-                                        <span th:case="'admin'">Quản trị viên</span>
-                                        <span th:case="'staff'">Nhân viên</span>
-                                        <span th:case="'customer'">Khách thuê</span>
+                                        <span th:case="'OWNER'">Chủ trọ</span>
+                                        <span th:case="'ADMIN'">Quản trị viên</span>
+                                        <span th:case="'STAFF'">Nhân viên</span>
+                                        <span th:case="'CUSTOMER'">Khách thuê</span>
                                         <span th:case="*">Không xác định</span>
                                     </p>
 
@@ -802,11 +802,15 @@
                         <div class="col-lg-3 col-md-6 col-sm-12 mb-4" th:each="room : ${rooms}">
                             <div class="card property-card h-100">
                                 <div class="card-image-container position-relative">
-                                    <img th:src="@{${room.images[0].url}}" class="card-img-top"
-                                        style="height: 200px; object-fit: cover;" alt="Ảnh phòng" />
+                                    <img th:src="@{${(room.images != null and !room.images.isEmpty()) ? room.images[0].url : '/images/cards/default.jpg'}}"
+                                        class="card-img-top" style="height: 200px; object-fit: cover;"
+                                        alt="Ảnh phòng" />
                                 </div>
                                 <div class="card-body">
-                                    <h5 th:text="${room.namerooms}" class="property-title">Phòng</h5>
+                                    <h5 th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"
+                                        class="property-title">
+                                        Phòng
+                                    </h5>
                                     <p><strong>Diện tích:</strong> <span th:text="${room.acreage} + ' m²'">20m²</span>
                                     </p>
                                     <p class="property-price mb-3">
@@ -817,14 +821,17 @@
                                         </span>
                                     </p>
                                     <p><strong>Trạng thái:</strong>
-                                        <span th:if="${room.status.name() == 'unactive'}"
-                                            class="text-danger">Trống</span>
-                                        <span th:if="${room.status.name() == 'active'}" class="text-success">Đã
-                                            thuê</span>
-                                        <span th:if="${room.status.name() == 'repair'}" class="text-warning">Bảo
-                                            trì</span>
+                                        <span th:if="${room.status != null}">
+                                            <span th:switch="${room.status.name()}">
+                                                <span th:case="'unactive'" class="text-danger">Trống</span>
+                                                <span th:case="'active'" class="text-success">Đã thuê</span>
+                                                <span th:case="'repair'" class="text-warning">Bảo trì</span>
+                                                <span th:case="*">Không xác định</span>
+                                            </span>
+                                        </span>
+                                        <span th:if="${room.status == null}">Không xác định</span>
                                     </p>
-                                    <button class="btn btn-outline-primary w-100" th:attr="data-room-id=${room.room_id}"
+                                    <button class="btn btn-outline-primary w-100" th:attr="data-room-id=${room.roomId}"
                                         onclick="openRoomDetailModal(this.getAttribute('data-room-id'))">
                                         <i class="fas fa-eye me-1"></i> Xem chi tiết
                                     </button>
@@ -834,6 +841,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Similar Properties -->
             <div class="row mt-5">
                 <div class="col-12">

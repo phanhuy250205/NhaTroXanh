@@ -151,7 +151,14 @@ public class StaffPostController {
                 ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
                 : null;
 
+        // Danh sách phòng
         List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
+
+        // Debug
+        log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+        log.info("Rooms count: {}", rooms.size());
+        rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
         Users author = post.getUser();
         model.addAttribute("author", author);
         model.addAttribute("images", images);
