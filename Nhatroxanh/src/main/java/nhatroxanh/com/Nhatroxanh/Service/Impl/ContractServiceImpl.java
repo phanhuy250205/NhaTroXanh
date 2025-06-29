@@ -1,12 +1,13 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 
 import org.slf4j.Logger;
@@ -34,6 +35,9 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private RoomsRepository roomRepository;
+
+    @Autowired
+    private UserCccdRepository userCccdRepository; // Thêm để tìm UserCccd
 
     @Override
     @Transactional
@@ -320,32 +324,32 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public List<Contracts> findContractsByOwnerCccd(String cccd) {
         logger.info("Finding contracts for owner with CCCD: {}", cccd);
-        
+
         if (cccd == null || cccd.trim().isEmpty()) {
             logger.warn("CCCD is null or empty");
             return Collections.emptyList();
         }
-        
-        Optional<Users> ownerOpt = userRepository.findByCccd(cccd);
-        if (ownerOpt.isEmpty()) {
-            logger.warn("No owner found with CCCD: {}", cccd);
+
+        Optional<UserCccd> userCccd = userCccdRepository.findByCccdNumber(cccd);
+        if (userCccd.isEmpty()) {
+            logger.warn("No UserCccd found with CCCD: {}", cccd);
             return Collections.emptyList();
         }
-        
-        Users owner = ownerOpt.get();
-        if (owner.getRole() != Users.Role.OWNER) {
-            logger.warn("User with CCCD {} is not an owner", cccd);
+
+        Users owner = userCccd.get().getUser();
+        if (owner == null || owner.getRole() != Users.Role.OWNER) {
+            logger.warn("User with CCCD {} is not an owner or user is null", cccd);
             return Collections.emptyList();
         }
-        
+
         List<Contracts> contracts = contractRepository.findByOwnerId(owner.getUserId());
-        
+
         contracts.forEach(contract -> {
             if (contract.getOwner() == null) {
                 logger.error("Contract ID {} has null owner", contract.getContractId());
             }
         });
-        
+
         return contracts;
     }
 }

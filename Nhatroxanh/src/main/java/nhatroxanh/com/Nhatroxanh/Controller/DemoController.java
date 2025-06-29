@@ -5,7 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
-import ch.qos.logback.core.model.Model;
+
 
 @Controller
 public class DemoController {
