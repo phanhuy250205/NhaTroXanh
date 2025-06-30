@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
+
 <body class="themkhutro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -20,17 +22,12 @@
                             Quay lại
                         </button>
                     </a>
-                    <button type="submit" form="addHostelFormHost" class="btn-save-host" id="saveButtonHost">
-                        <i class="fas fa-save me-2"></i>
-                        Lưu thông tin
-                    </button>
                 </div>
             </div>
 
             <!-- Form Container -->
             <div class="form-container-host">
-                <form id="addHostelFormHost" class="add-hostel-form-host" th:action="@{/chu-tro/save-khu-tro}" th:object="${hostel}" method="post">
-                    <input type="hidden" th:field="*{hostelId}" />
+                <form id="addHostelFormHost" class="add-hostel-form-host" th:action="@{/chu-tro/them-khu-tro}" method="post">
 
                     <!-- Thông tin cơ bản Section -->
                     <div class="form-section-host">
@@ -40,33 +37,37 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="hostelIdHost" class="form-label-host">ID khu trọ</label>
-                                        <input type="text" class="form-control-host" id="hostelIdHost" th:field="*{hostelId}" placeholder="1" th:value="${hostel.hostelId != null} ? ${hostel.hostelId} : ''" readonly>
+                                        <input type="text" class="form-control-host" id="hostelIdHost" placeholder="1"
+                                            value="1" th:value="${hostel != null ? hostel.hostelId : ''}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="hostelNameHost" class="form-label-host">Khu trọ</label>
-                                        <input type="text" class="form-control-host" id="hostelNameHost" th:field="*{name}" placeholder="Khu A">
+                                        <input type="text" class="form-control-host" id="hostelNameHost"
+                                            th:value="${hostel != null ? hostel.name : ''}" placeholder="Khu A">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="createDateHost" class="form-label-host">Ngày tạo</label>
-                                        <input type="date" class="form-control-host" id="createDateHost" th:field="*{createdAt}" value="2025-06-15">
+                                        <input type="date" class="form-control-host" id="createDateHost"
+                                            th:value="${#dates.format(#dates.createNow(), 'dd-MM-yyyy')}" readonly>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="roomCountHost" class="form-label-host">Số phòng</label>
-                                        <input type="number" class="form-control-host" id="roomCountHost" th:field="*{room_number}" placeholder="20" value="20">
+                                        <input type="number" class="form-control-host" id="roomCountHost"
+                                            th:value="${hostel != null ? hostel.roomNumber : ''}" placeholder="20">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="statusHost" class="form-label-host">Trạng thái</label>
-                                        <select class="form-select-host" id="statusHost" th:field="*{status}">
-                                            <option value="true" th:selected="${hostel.status == true}">Đang hoạt động</option>
-                                            <option value="false" th:selected="${hostel.status == false}">Ngưng hoạt động</option>
+                                        <select class="form-select-host" id="statusHost">
+                                            <option value="active">Đang hoạt động</option>
+                                            <option value="inactive">Ngưng hoạt động</option>
                                         </select>
                                     </div>
                                 </div>
@@ -74,146 +75,123 @@
                         </div>
                     </div>
 
-                    <!-- Địa chỉ Section -->
+                    <!-- Section: Địa chỉ -->
                     <div class="form-section-host">
                         <h3 class="section-title-host">Địa chỉ</h3>
                         <div class="section-content-host">
                             <div class="row g-3">
+                                <!-- Tỉnh/Thành phố -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
-                                       <select th:field="*{address.ward.district.province.id}" id="provinceHost" class="form-select">
+                                        <label for="citySelect" class="form-label-host">Tỉnh/Thành phố</label>
+                                        <select id="citySelect" class="form-select-host">
                                             <option value="">Chọn tỉnh/thành phố</option>
-                                            <option th:each="province : ${provinces}" th:value="${province.code}" th:text="${province.name}"></option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Quận/Huyện -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="districtHost" class="form-label-host">Quận/Huyện</label>
-                                        <select class="form-select-host" id="districtHost" name="districtCode" disabled>
+                                        <label for="districtSelect" class="form-label-host">Quận/Huyện</label>
+                                        <select id="districtSelect" class="form-select-host" disabled>
                                             <option value="">Chọn quận/huyện</option>
-                                            <option th:each="district : ${districts}" th:value="${district.code}" th:text="${district.name}"></option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Phường/Xã -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="wardHost" class="form-label-host">Phường/Xã</label>
-                                        <select class="form-select-host" id="wardHost" name="wardCode" disabled>
+                                        <label for="wardSelect" class="form-label-host">Phường/Xã</label>
+                                        <select id="wardSelect" class="form-select-host" disabled>
                                             <option value="">Chọn phường/xã</option>
-                                            <option th:each="ward : ${wards}" th:value="${ward.code}" th:text="${ward.name}"></option>
                                         </select>
                                     </div>
                                 </div>
+
+                                <!-- Đường/Phố -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="streetHost" class="form-label-host">Đường/Phố</label>
-                                        <input type="text" class="form-control-host" id="streetHost" name="street" placeholder="Nhập tên đường/phố">
+                                        <label for="streetInput" class="form-label-host">Đường/Phố</label>
+                                        <input type="text" id="streetInput" class="form-control-host" placeholder="Nhập tên đường/phố">
                                     </div>
                                 </div>
+
+                                <!-- Số nhà -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="houseNumberHost" class="form-label-host">Số nhà</label>
-                                        <input type="text" class="form-control-host" id="houseNumberHost" name="houseNumber" placeholder="123">
+                                        <label for="houseNumberInput" class="form-label-host">Số nhà</label>
+                                        <input type="text" id="houseNumberInput" class="form-control-host" placeholder="123">
                                     </div>
                                 </div>
-                                <div class="col-md-12">
+
+                                <!-- Địa chỉ đầy đủ (readonly) -->
+                                <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
-                                        <input type="text" class="form-control-host" id="fullAddressHost" readonly>
+                                        <label for="fullAddressInput" class="form-label-host">Địa chỉ đầy đủ</label>
+                                        <input type="text" id="fullAddressInput" class="form-control-host" placeholder="Địa chỉ sẽ tự động tạo" readonly>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- 🔒 Các input hidden để đẩy vào DTO -->
+                        <input type="hidden" id="provinceCodeHost" name="province">
+                        <input type="hidden" id="provinceNameHost" name="provinceName">
+
+                        <input type="hidden" id="districtCodeHost" name="district">
+                        <input type="hidden" id="districtNameHost" name="districtName">
+
+                        <input type="hidden" id="wardCodeHost" name="ward">
+                        <input type="hidden" id="wardNameHost" name="wardName">
+
+                        <input type="hidden" id="streetHost" name="street">
+                        <input type="hidden" id="houseNumberHost" name="houseNumber">
                     </div>
+
+
 
                     <!-- Mô tả Section -->
                     <div class="form-section-host">
                         <h3 class="section-title-host">Mô tả</h3>
                         <div class="section-content-host">
                             <div class="form-group-host">
-                                <textarea class="form-textarea-host" id="descriptionHost" rows="6" th:field="*{description}" placeholder="Nhập mô tả về khu trọ..."></textarea>
+                                <textarea class="form-textarea-host" id="descriptionHost" rows="6"
+                                    placeholder="Nhập mô tả về khu trọ..."></textarea>
                             </div>
                         </div>
                     </div>
-                    <div th:if="${error}" th:text="${error}" style="color: red;"></div>
+                    <div class="form-group-host text-end mt-3">
+                        <button class="btn-save-host" id="saveButtonHost" type="submit">
+                            <i class="fas fa-save me-2"></i>
+                            Lưu thông tin
+                        </button>
+                    </div>
+
                 </form>
             </div>
         </div>
     </div>
+    <script th:src="@{/js/api-map.js}"></script>
+    <script>
+    document.getElementById("addHostelFormHost").addEventListener("submit", function (e) {
+        const address = window.vietnamAddressAPI.getSelectedAddress();
 
-    <!-- JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script th:inline="javascript">
-    $(document).ready(function() {
-        $.ajaxSetup({ timeout: 5000 });
+        document.getElementById("provinceCodeHost").value = address.province.code;
+        document.getElementById("provinceNameHost").value = address.province.name;
 
-        // Load provinces
-        $.getJSON("https://provinces.open-api.vn/api/p/", function(data) {
-            let $provinceSelect = $("#provinceHost");
-            $provinceSelect.append('<option value="">Chọn tỉnh/thành phố</option>');
-            $provinceSelect.append(data.map(p => `<option value="${p.code}">${p.name}</option>`));
-            // Chọn province hiện tại
-            let provinceCode = /*[[${hostel.address.ward.district.province.code}]]*/ '';
-            if (provinceCode) $provinceSelect.val(provinceCode);
-        }).fail(function() {
-            console.error("Lỗi tải danh sách tỉnh/thành");
-        });
+        document.getElementById("districtCodeHost").value = address.district.code;
+        document.getElementById("districtNameHost").value = address.district.name;
 
-        // Load districts on province change
-        $("#provinceHost").change(function() {
-            let provinceCode = $(this).val();
-            let $districtSelect = $("#districtHost");
-            let $wardSelect = $("#wardHost");
-            $districtSelect.prop("disabled", false).empty().append('<option value="">Chọn quận/huyện</option>');
-            $wardSelect.prop("disabled", true).empty().append('<option value="">Chọn phường/xã</option>');
-            if (provinceCode) {
-                $.getJSON(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`, function(data) {
-                    $districtSelect.append(data.districts.map(d => `<option value="${d.code}">${d.name}</option>`));
-                    // Chọn district hiện tại
-                    let districtCode = /*[[${hostel.address.ward.district.code}]]*/ '';
-                    if (districtCode) $districtSelect.val(districtCode);
-                }).fail(function() {
-                    console.error("Lỗi tải danh sách quận/huyện");
-                });
-            }
-        });
+        document.getElementById("wardCodeHost").value = address.ward.code;
+        document.getElementById("wardNameHost").value = address.ward.name;
 
-        // Load wards on district change
-        $("#districtHost").change(function() {
-            let districtCode = $(this).val();
-            let $wardSelect = $("#wardHost");
-            $wardSelect.prop("disabled", false).empty().append('<option value="">Chọn phường/xã</option>');
-            if (districtCode) {
-                $.getJSON(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`, function(data) {
-                    $wardSelect.append(data.wards.map(w => `<option value="${w.code}">${w.name}</option>`));
-                    // Chọn ward hiện tại
-                    let wardCode = /*[[${hostel.address.ward.code}]]*/ '';
-                    if (wardCode) $wardSelect.val(wardCode);
-                }).fail(function() {
-                    console.error("Lỗi tải danh sách phường/xã");
-                });
-            }
-        });
-
-        // Update full address
-        $("#provinceHost, #districtHost, #wardHost, #streetHost, #houseNumberHost").change(function() {
-            let province = $("#provinceHost option:selected").text();
-            let district = $("#districtHost option:selected").text();
-            let ward = $("#wardHost option:selected").text();
-            let street = $("#streetHost").val();
-            let houseNumber = $("#houseNumberHost").val();
-            let fullAddress = `${houseNumber ? houseNumber + ', ' : ''}${street ? street + ', ' : ''}${ward ? ward + ', ' : ''}${district ? district + ', ' : ''}${province}`;
-            $("#fullAddressHost").val(fullAddress.trim() || "Chưa có địa chỉ");
-        });
-
-        // Set initial values
-        let initialStreet = /*[[${hostel.address.street}]]*/ '';
-        let initialHouseNumber = /*[[${hostel.address.houseNumber}]]*/ '' || '';
-        $("#streetHost").val(initialStreet);
-        $("#houseNumberHost").val(initialHouseNumber);
+        document.getElementById("streetHost").value = address.street;
+        document.getElementById("houseNumberHost").value = address.houseNumber;
     });
-</script>
+    </script>
+
 </body>
+
 </html>

@@ -24,7 +24,7 @@ public class Image {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer imageId;
+    private Integer id;
 
     @Column(columnDefinition = "varchar(255)", nullable = false)
     private String url;

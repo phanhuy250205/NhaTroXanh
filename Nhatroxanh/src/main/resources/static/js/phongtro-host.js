@@ -64,7 +64,7 @@ const RoomManagementUI = (function() {
         });
     }
 
-    // Basic search functionality
+    // Basic search functionality (chỉ ẩn/hiện các row có sẵn trong HTML)
     function initializeSearch() {
         const searchInput = document.getElementById("searchRoomInputHost");
         const statusFilter = document.getElementById("statusFilterHost");
@@ -120,11 +120,12 @@ const RoomManagementUI = (function() {
         }
     }
 
-    // Form validation
+    // Form validation (không xử lý submit, chỉ validation)
     function initializeFormValidation() {
         const form = document.getElementById("addRoomFormHost");
 
         if (form) {
+            // Real-time validation
             const inputs = form.querySelectorAll("input[required], select[required]");
             inputs.forEach((input) => {
                 input.addEventListener("blur", () => {
@@ -132,6 +133,7 @@ const RoomManagementUI = (function() {
                 });
             });
 
+            // Reset button
             const resetBtn = form.querySelector('button[type="reset"]');
             if (resetBtn) {
                 resetBtn.addEventListener("click", () => {
@@ -153,6 +155,7 @@ const RoomManagementUI = (function() {
             return false;
         }
 
+        // Specific validations
         if (field.id === "roomPriceHost") {
             const price = value.replace(/[^\d]/g, "");
             if (!price || parseInt(price) <= 0) {
@@ -183,8 +186,10 @@ const RoomManagementUI = (function() {
 
     function showFieldError(field, message) {
         clearFieldError(field);
+
         field.style.borderColor = "#ef4444";
         field.style.boxShadow = "0 0 0 3px rgba(239, 68, 68, 0.1)";
+
         const errorDiv = document.createElement("div");
         errorDiv.className = "field-error";
         errorDiv.style.cssText = `
@@ -194,21 +199,28 @@ const RoomManagementUI = (function() {
             font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
         `;
         errorDiv.textContent = message;
+
         field.parentNode.appendChild(errorDiv);
     }
 
     function clearFieldError(field) {
         field.style.borderColor = "";
         field.style.boxShadow = "";
+
         const errorDiv = field.parentNode.querySelector(".field-error");
-        if (errorDiv) errorDiv.remove();
+        if (errorDiv) {
+            errorDiv.remove();
+        }
     }
 
     function clearAllFieldErrors() {
         const form = document.getElementById("addRoomFormHost");
         if (form) {
-            form.querySelectorAll(".field-error").forEach(div => div.remove());
-            form.querySelectorAll("input, select, textarea").forEach(field => {
+            const errorDivs = form.querySelectorAll(".field-error");
+            errorDivs.forEach(div => div.remove());
+
+            const fields = form.querySelectorAll("input, select, textarea");
+            fields.forEach(field => {
                 field.style.borderColor = "";
                 field.style.boxShadow = "";
             });
@@ -218,13 +230,18 @@ const RoomManagementUI = (function() {
     // Utility functions
     function switchToTab(tabId) {
         const tab = document.getElementById(tabId);
-        if (tab) tab.click();
+        if (tab) {
+            tab.click();
+        }
     }
 
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
-            const later = () => { clearTimeout(timeout); func(...args); };
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
@@ -250,16 +267,25 @@ const RoomManagementUI = (function() {
                 <button type="button" class="btn-close ms-auto" onclick="this.parentElement.parentElement.remove()"></button>
             </div>
         `;
+
         document.body.appendChild(notification);
+
+        // Animate in
         setTimeout(() => {
             notification.style.opacity = "1";
             notification.style.transform = "translateX(0)";
         }, 100);
+
+        // Auto remove after 5 seconds
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.style.opacity = "0";
                 notification.style.transform = "translateX(100%)";
-                setTimeout(() => notification.remove(), 300);
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 300);
             }
         }, 5000);
     }
@@ -281,12 +307,13 @@ const RoomManagementUI = (function() {
                 initializeFormValidation();
             }
         },
+        
         switchToTab: switchToTab,
         showNotification: showNotification
     };
 })();
 
-// Image Upload Functionality
+// Image Upload Functionality - Độc lập và đóng gói
 const ImageUploader = (function() {
     'use strict';
     
@@ -306,25 +333,37 @@ const ImageUploader = (function() {
 
     ImageUploaderClass.prototype.init = function() {
         const self = this;
-        this.uploadArea.addEventListener("click", () => self.fileInput.click());
-        this.fileInput.addEventListener("change", (e) => self.handleFiles(e.target.files));
+        
+        // Click to upload
+        this.uploadArea.addEventListener("click", function() {
+            self.fileInput.click();
+        });
 
-        this.uploadArea.addEventListener("dragover", (e) => {
+        // File input change
+        this.fileInput.addEventListener("change", function(e) {
+            self.handleFiles(e.target.files);
+        });
+
+        // Drag and drop events
+        this.uploadArea.addEventListener("dragover", function(e) {
             e.preventDefault();
             self.uploadArea.classList.add("drag-over");
         });
-        this.uploadArea.addEventListener("dragleave", (e) => {
+
+        this.uploadArea.addEventListener("dragleave", function(e) {
             e.preventDefault();
             self.uploadArea.classList.remove("drag-over");
         });
-        this.uploadArea.addEventListener("drop", (e) => {
+
+        this.uploadArea.addEventListener("drop", function(e) {
             e.preventDefault();
             self.uploadArea.classList.remove("drag-over");
             self.handleFiles(e.dataTransfer.files);
         });
 
-        ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
-            self.uploadArea.addEventListener(eventName, (e) => {
+        // Prevent default drag behaviors
+        ["dragenter", "dragover", "dragleave", "drop"].forEach(function(eventName) {
+            self.uploadArea.addEventListener(eventName, function(e) {
                 e.preventDefault();
                 e.stopPropagation();
             });
@@ -333,11 +372,18 @@ const ImageUploader = (function() {
 
     ImageUploaderClass.prototype.handleFiles = function(files) {
         const fileArray = Array.from(files);
+
         if (this.selectedFiles.length + fileArray.length > this.maxFiles) {
             this.showNotification(`Chỉ có thể chọn tối đa ${this.maxFiles} ảnh`, "error");
             return;
         }
-        fileArray.forEach(file => this.validateFile(file) && this.addFile(file));
+
+        const self = this;
+        fileArray.forEach(function(file) {
+            if (self.validateFile(file)) {
+                self.addFile(file);
+            }
+        });
     };
 
     ImageUploaderClass.prototype.validateFile = function(file) {
@@ -345,20 +391,29 @@ const ImageUploader = (function() {
             this.showNotification(`File ${file.name} không đúng định dạng. Chỉ chấp nhận: JPG, PNG, GIF, WEBP`, "error");
             return false;
         }
+
         if (file.size > this.maxFileSize) {
             this.showNotification(`File ${file.name} quá lớn. Kích thước tối đa: 5MB`, "error");
             return false;
         }
+
         if (this.selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
             this.showNotification(`File ${file.name} đã được chọn`, "warning");
             return false;
         }
+
         return true;
     };
 
     ImageUploaderClass.prototype.addFile = function(file) {
         const fileId = Date.now() + Math.random();
-        const fileObj = { id: fileId, file, name: file.name, size: file.size };
+        const fileObj = {
+            id: fileId,
+            file: file,
+            name: file.name,
+            size: file.size,
+        };
+
         this.selectedFiles.push(fileObj);
         this.createPreview(fileObj);
         this.updateUploadArea();
@@ -366,10 +421,13 @@ const ImageUploader = (function() {
 
     ImageUploaderClass.prototype.createPreview = function(fileObj) {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        const self = this;
+
+        reader.onload = function(e) {
             const previewItem = document.createElement("div");
             previewItem.className = "image-preview-item";
             previewItem.dataset.fileId = fileObj.id;
+
             previewItem.innerHTML = `
                 <img src="${e.target.result}" alt="${fileObj.name}" class="preview-image" title="${fileObj.name}">
                 <button type="button" class="remove-image-btn" title="Xóa ảnh" onclick="window.imageUploader.removeFile(${fileObj.id})">
@@ -378,29 +436,37 @@ const ImageUploader = (function() {
                     </svg>
                 </button>
             `;
-            this.previewContainer.appendChild(previewItem);
-            setTimeout(() => {
+
+            self.previewContainer.appendChild(previewItem);
+
+            setTimeout(function() {
                 previewItem.style.opacity = "1";
                 previewItem.style.transform = "scale(1)";
             }, 10);
         };
+
         reader.readAsDataURL(fileObj.file);
     };
 
     ImageUploaderClass.prototype.removeFile = function(fileId) {
         this.selectedFiles = this.selectedFiles.filter(f => f.id !== fileId);
+
         const previewItem = document.querySelector(`[data-file-id="${fileId}"]`);
         if (previewItem) {
             previewItem.style.opacity = "0";
             previewItem.style.transform = "scale(0.8)";
-            setTimeout(() => previewItem.remove(), 300);
+            setTimeout(function() {
+                previewItem.remove();
+            }, 300);
         }
+
         this.updateUploadArea();
         this.showNotification("Đã xóa ảnh", "success");
     };
 
     ImageUploaderClass.prototype.updateUploadArea = function() {
         const uploadText = this.uploadArea.querySelector(".upload-text");
+
         if (this.selectedFiles.length === 0) {
             uploadText.textContent = "Kéo thả ảnh vào đây hoặc click để chọn";
             this.uploadArea.style.opacity = "1";
@@ -427,7 +493,14 @@ const ImageUploader = (function() {
     ImageUploaderClass.prototype.showNotification = function(message, type) {
         const notification = document.createElement("div");
         notification.className = `notification notification-${type}`;
-        const colors = { success: "#10b981", error: "#ef4444", warning: "#f59e0b", info: "#3e83cc" };
+
+        const colors = {
+            success: "#10b981",
+            error: "#ef4444",
+            warning: "#f59e0b",
+            info: "#3e83cc",
+        };
+
         notification.style.cssText = `
             position: fixed;
             top: 20px;
@@ -444,22 +517,34 @@ const ImageUploader = (function() {
             animation: slideInRight 0.3s ease;
             font-family: 'Inter', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
         `;
+
         notification.textContent = message;
 
         if (!document.getElementById("notificationStyles")) {
             const style = document.createElement("style");
             style.id = "notificationStyles";
             style.textContent = `
-                @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-                @keyframes slideOutRight { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+                @keyframes slideInRight {
+                    from { transform: translateX(100%); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(100%); opacity: 0; }
+                }
             `;
             document.head.appendChild(style);
         }
 
         document.body.appendChild(notification);
-        setTimeout(() => {
+
+        setTimeout(function() {
             notification.style.animation = "slideOutRight 0.3s ease";
-            setTimeout(() => notification.parentNode?.removeChild(notification), 300);
+            setTimeout(function() {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
         }, 3000);
     };
 
@@ -471,36 +556,56 @@ const ImageUploader = (function() {
     'use strict';
     
     function initializeAll() {
+        // Initialize UI functionality
         RoomManagementUI.init();
+        
+        // Initialize image uploader only if elements exist
         if (document.getElementById("uploadArea")) {
             window.imageUploader = new ImageUploader();
         }
+        
+        // Price formatting for input
         const priceInput = document.getElementById("roomPriceHost");
         if (priceInput) {
             priceInput.addEventListener("input", function(e) {
                 let value = e.target.value.replace(/[^\d]/g, "");
-                if (value) e.target.value = parseInt(value).toLocaleString("vi-VN");
+                if (value) {
+                    value = parseInt(value).toLocaleString("vi-VN");
+                    e.target.value = value;
+                }
             });
         }
+        
+        // Handle window resize
         window.addEventListener("resize", debounce(function() {
             const tableContainer = document.querySelector(".table-container-host");
-            if (tableContainer && window.innerWidth < 768) tableContainer.style.overflowX = "auto";
+            if (tableContainer && window.innerWidth < 768) {
+                tableContainer.style.overflowX = "auto";
+            }
         }, 250));
+        
+        // Initialize tooltips if Bootstrap is available
         if (typeof bootstrap !== "undefined") {
-            [].slice.call(document.querySelectorAll("[title]")).map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll("[title]"));
+            tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
         }
+        
         console.log("Room management UI initialized successfully");
     }
     
     function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
-            const later = () => { clearTimeout(timeout); func(...args); };
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     }
     
+    // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeAll);
     } else {
@@ -510,99 +615,3 @@ const ImageUploader = (function() {
 
 // Expose necessary functions to global scope
 window.RoomManagementUI = RoomManagementUI;
-
-
-    document.addEventListener('DOMContentLoaded', function () {
-        
-
-        function searchRooms() {
-            const searchTerm = document.getElementById('searchRoomInputHost').value.trim();
-            fetch(`/chu-tro/search-rooms?name=${encodeURIComponent(searchTerm)}`)
-                .then(response => response.json())
-                .then(data => updateTable(data))
-                .catch(error => console.error('Error fetching search results:', error));
-        }
-
-        function filterRooms() {
-            const status = document.getElementById('statusFilterHost').value;
-            let filteredRooms = [...initialRooms]; // Sử dụng bản sao của initialRooms
-            if (status) {
-                filteredRooms = filteredRooms.filter(room => room.status === (status === 'true'));
-            }
-            updateTable(filteredRooms);
-        }
-
-        function updateTable(rooms) {
-            const tableBody = document.getElementById('roomTableBodyHost');
-            tableBody.innerHTML = '';
-            if (!rooms || rooms.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="6">Không tìm thấy phòng nào.</td></tr>';
-                return;
-            }
-            rooms.forEach(room => {
-                const row = document.createElement('tr');
-                row.className = 'table-row-host';
-                row.innerHTML = `
-                    <td class="table-td-host room-name-host">${room.namerooms || 'N/A'}</td>
-                    <td class="table-td-host-price price-host">${room.price ? new Intl.NumberFormat('vi-VN').format(room.price) + ' ₫' : 'N/A'}</td>
-                    <td class="table-td-host">
-                        <span class="status-badge-host ${room.status ? 'status-available-host' : 'status-occupied-host'}">
-                            ${room.status ? 'Trống' : 'Đã thuê/Bảo trì'}
-                        </span>
-                    </td>
-                    <td class="table-td-host">${room.acreage ? room.acreage + ' m²' : 'N/A'}</td>
-                    <td class="table-td-host">${room.max_tenants ? room.max_tenants + ' người' : 'N/A'}</td>
-                    <td class="table-td-host">
-                        <div class="action-buttons-host">
-                            <button class="btn-edit-host" title="Chỉnh sửa" onclick="editRoom(${room.room_id || 0})">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn-delete-host" title="Xóa" onclick="deleteRoom(${room.room_id || 0})">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-
-        function editRoom(room_id) {
-            window.location.href = `/chu-tro/them-phong?id=${room_id}`;
-        }
-
-        function deleteRoom(room_id) {
-            if (confirm('Bạn có chắc muốn xóa phòng này?')) {
-                fetch(`/chu-tro/delete-room?id=${room_id}`, { method: 'DELETE' })
-                    .then(() => location.reload())
-                    .catch(error => console.error('Error deleting room:', error));
-            }
-        }
-
-        // Khởi tạo bảng với dữ liệu từ Thymeleaf
-        updateTable(initialRooms);
-
-        // Event listeners
-        document.getElementById('searchRoomInputHost').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') searchRooms();
-        });
-        document.querySelector('.search-btn-host').addEventListener('click', searchRooms);
-        document.getElementById('statusFilterHost').addEventListener('change', filterRooms);
-    });
-
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.price-host').forEach(priceElement => {
-            let price = parseFloat(priceElement.textContent.replace(' ₫', '').replace(',', ''));
-            if (!isNaN(price)) {
-                priceElement.textContent = price.toLocaleString('vi-VN') + ' ₫';
-            }
-        });
-    });
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.price-host').forEach(priceElement => {
-        let price = parseInt(priceElement.textContent.replace(' ₫', ''));
-        if (!isNaN(price)) {
-            priceElement.textContent = price + ' ₫';
-        }
-    });
-});

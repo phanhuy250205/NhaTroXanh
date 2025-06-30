@@ -1,39 +1,23 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
-public class HostelService {
+import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
-    @Autowired
-    private HostelRepository hostelRepository;
+public interface HostelService {
 
-    @Transactional
-    public void saveHostel(Hostel hostel) {
-        hostelRepository.save(hostel);
-    }
+    List<Hostel> getHostelsByOwnerId(Integer ownerId);
 
-    public Optional<Hostel> findHostelById(Integer id) {
-        return hostelRepository.findByIdWithAddress(id);
-    }
+    Optional<Hostel> getHostelById(Integer id);
 
-    public List<Hostel> findAllHostels() {
-        return hostelRepository.findAllWithDetails();
-    }
+    Hostel createHostel(HostelDTO hostelDTO);
 
-    public List<Hostel> findHostelsByName(String name) {
-        return hostelRepository.findByNameContainingIgnoreCase(name);
-    }
+    Hostel updateHostel(HostelDTO hostelDTO);
 
-    @Transactional
-    public void deleteHostelById(Integer id) {
-        hostelRepository.deleteById(id);
-    }
+    void deleteHostel(Integer hostelId);
+
+    int countByOwner(Users owner);
 }

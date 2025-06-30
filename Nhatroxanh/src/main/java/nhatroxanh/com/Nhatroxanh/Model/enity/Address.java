@@ -1,45 +1,37 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 
-@Getter
-@Setter
+import java.util.List;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Data
 @Entity
 @Table(name = "Address")
-@ToString(exclude = "ward")
 public class Address {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(nullable = false)
+    @Column(name = "street", length = 255)
     private String street;
 
-    @Column(name = "house_number")
-    private String houseNumber;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ward_id", nullable = false)
+    // Các trường khác như ward, district, province nếu có
+    @ManyToOne
+    @JoinColumn(name = "ward_id")
     private Ward ward;
 
-    // Loại bỏ hoặc bình luận nếu có
-    // @OneToOne(mappedBy = "address")
-    // private Hostel hostel;
+
 }

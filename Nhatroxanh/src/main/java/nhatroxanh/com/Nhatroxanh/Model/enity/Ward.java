@@ -45,3 +45,4 @@ public class Ward {
     @OneToMany(mappedBy = "ward", cascade = CascadeType.ALL)
     private List<Address> addresses;
 }
+

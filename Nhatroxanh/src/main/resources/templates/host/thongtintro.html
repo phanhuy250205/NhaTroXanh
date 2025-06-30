@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
+
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
+
 <body class="thongtintro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -19,13 +21,16 @@
                         Thêm khu trọ mới
                     </button>
                 </a>
+
             </div>
 
             <!-- Search Section -->
             <div class="search-section-host">
                 <div class="search-container-host">
-                    <input type="text" class="search-input-host" id="searchInputHost" th:value="${searchName}" placeholder="Tìm kiếm..." />
-                    <button class="btn-search-host" id="searchButtonHost" onclick="searchHostels()">TÌM KIẾM</button>
+                    <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
+                    <button class="btn-search-host" id="searchButtonHost">
+                        TÌM KIẾM
+                    </button>
                 </div>
             </div>
 
@@ -42,21 +47,24 @@
                     </thead>
                     <tbody class="table-body-host" id="tableBodyHost">
                         <tr class="table-row-host" th:each="hostel : ${hostels}">
-                            <td class="table-td-host" th:text="${hostel.hostelId}"></td>
-                            <td class="table-td-host" th:text="${hostel.name}"></td>
+                            <td class="table-td-host" th:text="${hostel.hostelId}">1</td>
+                            <td class="table-td-host" th:text="${hostel.name}">Tên khu trọ</td>
                             <td class="table-td-host">
-                                <span th:class="${hostel.status} ? 'status-badge-host status-active-host' : 'status-badge-host status-inactive-host'"
-                                      th:text="${hostel.status} ? 'Đang hoạt động' : 'Ngưng hoạt động'"></span>
+                                <span th:classappend="${hostel.status} ? 'status-active-host' : 'status-inactive-host'"
+                                    th:text="${hostel.status} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                    Trạng thái
+                                </span>
                             </td>
                             <td class="table-td-host">
                                 <div class="action-btns-host">
-                                    <a th:href="@{/chu-tro/edit-khu-tro(id=${hostel.hostelId})}">
+                                    <a th:href="@{'/chu-tro/them-khu-tro?id=' + ${hostel.hostelId}}">
                                         <button class="buttons-edit-host" title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i>
                                         </button>
                                     </a>
-                                    <form th:action="@{/chu-tro/delete-khu-tro(id=${hostel.hostelId})}" method="get" style="display:inline;">
-                                        <button type="submit" class="btn-delete-host" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa khu trọ này?');">
+                                    <form th:action="@{/chu-tro/xoa-khu-tro}" method="post" style="display:inline;">
+                                        <input type="hidden" name="hostelId" th:value="${hostel.hostelId}" />
+                                        <button type="submit" class="btn-delete-host" title="Xóa">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -64,21 +72,11 @@
                             </td>
                         </tr>
                     </tbody>
+
                 </table>
             </div>
         </div>
     </div>
-
-    <script th:inline="javascript">
-        function searchHostels() {
-            let searchName = $('#searchInputHost').val();
-            window.location.href = "/chu-tro/thong-tin-tro?name=" + encodeURIComponent(searchName);
-        }
-        $('#searchInputHost').on('keypress', function(e) {
-            if (e.which === 13) { // Enter key
-                searchHostels();
-            }
-        });
-    </script>
 </body>
+
 </html>

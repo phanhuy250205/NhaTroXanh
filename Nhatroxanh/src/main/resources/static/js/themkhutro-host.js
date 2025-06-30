@@ -10,6 +10,7 @@ class VietnamAddressAPI {
     async init() {
         await this.loadProvinces()
         this.setupEventListeners()
+        this.setInitialAddressFromHiddenFields()
     }
 
     async loadProvinces() {
@@ -19,8 +20,8 @@ class VietnamAddressAPI {
             this.provinces = data
             this.populateProvinces()
         } catch (error) {
-            console.error("Lỗi khi tải danh sách tỉnh thành:", error)
-            this.showError("Không thể tải danh sách tỉnh thành")
+            console.error("Lỗi khi tải tỉnh thành:", error)
+            this.showError("Không thể tải danh sách tỉnh/thành phố")
         }
     }
 
@@ -31,7 +32,7 @@ class VietnamAddressAPI {
             this.districts = data.districts || []
             this.populateDistricts()
         } catch (error) {
-            console.error("Lỗi khi tải danh sách quận/huyện:", error)
+            console.error("Lỗi khi tải quận/huyện:", error)
             this.showError("Không thể tải danh sách quận/huyện")
         }
     }
@@ -43,7 +44,7 @@ class VietnamAddressAPI {
             this.wards = data.wards || []
             this.populateWards()
         } catch (error) {
-            console.error("Lỗi khi tải danh sách phường/xã:", error)
+            console.error("Lỗi khi tải phường/xã:", error)
             this.showError("Không thể tải danh sách phường/xã")
         }
     }
@@ -51,7 +52,6 @@ class VietnamAddressAPI {
     populateProvinces() {
         const provinceSelect = document.getElementById("provinceHost")
         provinceSelect.innerHTML = '<option value="">Chọn tỉnh/thành phố</option>'
-
         this.provinces.forEach((province) => {
             const option = document.createElement("option")
             option.value = province.code
@@ -72,7 +72,6 @@ class VietnamAddressAPI {
             districtSelect.appendChild(option)
         })
 
-        // Reset ward select
         this.resetWardSelect()
     }
 
@@ -129,17 +128,9 @@ class VietnamAddressAPI {
             this.updateFullAddress()
         })
 
-        wardSelect.addEventListener("change", () => {
-            this.updateFullAddress()
-        })
-
-        houseNumberInput.addEventListener("input", () => {
-            this.updateFullAddress()
-        })
-
-        streetInput.addEventListener("input", () => {
-            this.updateFullAddress()
-        })
+        wardSelect.addEventListener("change", () => this.updateFullAddress())
+        houseNumberInput.addEventListener("input", () => this.updateFullAddress())
+        streetInput.addEventListener("input", () => this.updateFullAddress())
     }
 
     updateFullAddress() {
@@ -150,56 +141,56 @@ class VietnamAddressAPI {
         const streetInput = document.getElementById("streetHost")
         const fullAddressInput = document.getElementById("fullAddressHost")
 
-        const addressParts = []
+        const parts = []
+        if (houseNumberInput.value.trim()) parts.push(houseNumberInput.value.trim())
+        if (streetInput.value.trim()) parts.push(streetInput.value.trim())
+        if (wardSelect.value) parts.push(wardSelect.options[wardSelect.selectedIndex].text)
+        if (districtSelect.value) parts.push(districtSelect.options[districtSelect.selectedIndex].text)
+        if (provinceSelect.value) parts.push(provinceSelect.options[provinceSelect.selectedIndex].text)
 
-        if (houseNumberInput.value.trim()) {
-            addressParts.push(houseNumberInput.value.trim())
-        }
-
-        if (streetInput.value.trim()) {
-            addressParts.push(streetInput.value.trim())
-        }
-
-        if (wardSelect.value) {
-            const selectedWard = wardSelect.options[wardSelect.selectedIndex].text
-            addressParts.push(selectedWard)
-        }
-
-        if (districtSelect.value) {
-            const selectedDistrict = districtSelect.options[districtSelect.selectedIndex].text
-            addressParts.push(selectedDistrict)
-        }
-
-        if (provinceSelect.value) {
-            const selectedProvince = provinceSelect.options[provinceSelect.selectedIndex].text
-            addressParts.push(selectedProvince)
-        }
-
-        fullAddressInput.value = addressParts.join(", ")
+        fullAddressInput.value = parts.join(", ")
     }
 
     showError(message) {
-        // Tạo thông báo lỗi
         const errorDiv = document.createElement("div")
         errorDiv.className = "alert alert-danger alert-dismissible fade show"
         errorDiv.innerHTML = `
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `
-
-        // Thêm vào đầu form
         const formContainer = document.querySelector(".form-container-host")
         formContainer.insertBefore(errorDiv, formContainer.firstChild)
 
-        // Tự động ẩn sau 5 giây
         setTimeout(() => {
-            if (errorDiv.parentNode) {
-                errorDiv.remove()
-            }
+            if (errorDiv.parentNode) errorDiv.remove()
         }, 5000)
     }
 
-    // Phương thức để lấy thông tin địa chỉ đã chọn
+    async setInitialAddress(provinceCode, districtCode, wardCode) {
+        if (provinceCode) {
+            document.getElementById("provinceHost").value = provinceCode
+            await this.loadDistricts(provinceCode)
+        }
+        if (districtCode) {
+            document.getElementById("districtHost").value = districtCode
+            await this.loadWards(districtCode)
+        }
+        if (wardCode) {
+            document.getElementById("wardHost").value = wardCode
+        }
+        this.updateFullAddress()
+    }
+
+    setInitialAddressFromHiddenFields() {
+        const province = document.getElementById("hiddenProvince")?.value
+        const district = document.getElementById("hiddenDistrict")?.value
+        const ward = document.getElementById("hiddenWard")?.value
+
+        if (province && district && ward) {
+            this.setInitialAddress(province, district, ward)
+        }
+    }
+
     getSelectedAddress() {
         const provinceSelect = document.getElementById("provinceHost")
         const districtSelect = document.getElementById("districtHost")
@@ -210,15 +201,15 @@ class VietnamAddressAPI {
         return {
             province: {
                 code: provinceSelect.value,
-                name: provinceSelect.value ? provinceSelect.options[provinceSelect.selectedIndex].text : "",
+                name: provinceSelect.options[provinceSelect.selectedIndex]?.text || "",
             },
             district: {
                 code: districtSelect.value,
-                name: districtSelect.value ? districtSelect.options[districtSelect.selectedIndex].text : "",
+                name: districtSelect.options[districtSelect.selectedIndex]?.text || "",
             },
             ward: {
                 code: wardSelect.value,
-                name: wardSelect.value ? wardSelect.options[wardSelect.selectedIndex].text : "",
+                name: wardSelect.options[wardSelect.selectedIndex]?.text || "",
             },
             street: streetInput.value.trim(),
             houseNumber: houseNumberInput.value.trim(),
@@ -227,22 +218,16 @@ class VietnamAddressAPI {
     }
 }
 
-// Khởi tạo khi trang web được tải
 document.addEventListener("DOMContentLoaded", () => {
     window.vietnamAddressAPI = new VietnamAddressAPI()
 })
 
-// Thêm CSS cho loading state
+// CSS
 const style = document.createElement("style")
 style.textContent = `
     .form-select-host:disabled {
         background-color: #f8f9fa;
         opacity: 0.65;
-    }
-    
-    .loading-option {
-        color: #6c757d;
-        font-style: italic;
     }
     
     .alert {
