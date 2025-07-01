@@ -11,32 +11,49 @@
         right: 20px;
         z-index: 1050;
         min-width: 300px;
+        transition: opacity 0.5s ease, transform 0.5s ease;
     }
 
     .alert-host {
         display: flex;
         align-items: center;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        position: relative;
+        animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
     }
 
     .alert-host.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border-left: 5px solid #198754;
     }
 
     .alert-host.danger {
         background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
+        color: #842029;
+        border-left: 5px solid #dc3545;
     }
 
     .alert-icon {
         margin-right: 10px;
-        font-size: 1.2em;
+        font-size: 1.2rem;
     }
 
     .alert-message {
@@ -46,10 +63,11 @@
     .btn-close {
         background: none;
         border: none;
-        font-size: 1em;
+        font-size: 1.2rem;
+        font-weight: bold;
         cursor: pointer;
         color: inherit;
-        padding: 0 10px;
+        margin-left: 10px;
     }
 
     .host-profile-img {
@@ -357,6 +375,22 @@
             if (savedAddress) {
                 await api.setInitialAddress(savedAddress);
             }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const alerts = document.querySelectorAll(".alert-host");
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateX(100%)';
+                    setTimeout(() => alert.remove(), 500);
+                }, 3000);
+
+                // Đóng khi nhấn nút X
+                const closeBtn = alert.querySelector(".btn-close");
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => alert.remove());
+                }
+            });
         });
     </script>
 </body>

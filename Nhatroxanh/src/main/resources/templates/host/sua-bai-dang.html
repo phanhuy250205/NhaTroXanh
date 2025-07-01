@@ -552,8 +552,11 @@
                             th:value="${houseNumber}">
                     </div>
                     <div class="col-host">
-                        <!-- Placeholder để cân bằng layout -->
+                        <label class="form-label-host">Địa chỉ chi tiết:</label>
+                        <input name="fullAddress" type="text" class="form-control-host" id="displayFullAddress" readonly
+                            th:value="${fullAddress}" />
                     </div>
+
                 </div>
             </div>
 
@@ -994,6 +997,24 @@
             if (categorySelect.value) {
                 categorySelect.querySelector(`option[value="${categorySelect.value}"]`).selected = true;
             }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const displayFullAddress = document.getElementById("displayFullAddress");
+
+            const houseNumber = document.querySelector('input[name="houseNumber"]')?.value?.trim() || "";
+            const street = document.querySelector('input[name="street"]')?.value?.trim() || "";
+            const wardName = document.getElementById("wardName")?.value?.trim() || "";
+            const districtName = document.getElementById("districtName")?.value?.trim() || "";
+            const provinceName = document.getElementById("provinceName")?.value?.trim() || "";
+
+            let addressParts = [];
+            if (houseNumber) addressParts.push(houseNumber);
+            if (street) addressParts.push(street);
+            if (wardName) addressParts.push(wardName);
+            if (districtName) addressParts.push(districtName);
+            if (provinceName) addressParts.push(provinceName);
+
+            displayFullAddress.value = addressParts.join(", ");
         });
     </script>
 </body>
