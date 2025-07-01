@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -23,6 +24,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 
 @Controller
 @RequestMapping("/chu-tro")
@@ -39,6 +41,8 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
+    @Autowired
+    private TenantService tenantService;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -123,4 +127,19 @@ public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
     }
     return "redirect:/chu-tro/profile-host";
 }
+    @PostMapping("/chi-tiet-khach-thue/update")
+    public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
+                                     @RequestParam("status") Boolean newStatus,
+                                     RedirectAttributes redirectAttributes) {
+        
+        try {
+            tenantService.updateContractStatus(contractId, newStatus);
+            // Gửi một thông báo thành công về trang chi tiết
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
+        } catch (Exception e) {
+            // Gửi một thông báo lỗi về trang chi tiết
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
+    }
 }

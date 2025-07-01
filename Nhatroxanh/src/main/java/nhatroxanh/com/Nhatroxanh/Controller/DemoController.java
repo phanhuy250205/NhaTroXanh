@@ -138,6 +138,7 @@ public class DemoController {
             return "redirect:/chu-tro/khach-thue";
         }
     }
+    
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {
     //     return "host/sua-bai-dang";

@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,9 @@ import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 public class TenantServiceImpl implements TenantService {
     private final ContractsRepository contractsRepository;
     private final HostelRepository hostelRepository;
+
+    @Autowired
+    private ContractsRepository contractRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -46,10 +51,8 @@ public class TenantServiceImpl implements TenantService {
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
         UserCccd userCccd = tenant.getUserCccd();
-        
         String cccdNumber = (userCccd != null) ? userCccd.getCccdNumber() : "Chưa có";
         String issuePlace = (userCccd != null) ? userCccd.getIssuePlace() : "Chưa có";
-        
         return TenantDetailDTO.builder()
                 .contractId(contract.getContractId())
                 .startDate(contract.getStartDate())
@@ -71,10 +74,12 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
-        Contracts contract = contractsRepository.findById(contractId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
-        contract.setStatus(newStatus);
-    }
+    Contracts contract = contractRepository.findById(contractId)
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
+    
+    contract.setStatus(newStatus);
+    contractRepository.save(contract);
+}
     
     @Override
     @Transactional(readOnly = true)

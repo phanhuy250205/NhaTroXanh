@@ -15,4 +15,5 @@ public interface TenantService {
     Page<TenantInfoDTO> findAllForTesting(Pageable pageable);
     void updateContractStatus(Integer contractId, Boolean newStatus);
     TenantDetailDTO getTenantDetailByContractId(Integer contractId);
+    
 }
