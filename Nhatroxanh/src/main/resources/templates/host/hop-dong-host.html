@@ -1658,28 +1658,41 @@
                 }
 
                 // Add real-time validation for CCCD by province
-                const tenantIdInput = document.getElementById("tenant-id")
-                const tenantProvinceSelect = document.getElementById("tenant-province")
+                const tenantIdInput = document.getElementById("tenant-id");
+                const tenantProvinceSelect = document.getElementById("tenant-province");
 
                 if (tenantIdInput && tenantProvinceSelect) {
                     const validateTenantCCCD = () => {
-                        const cccd = tenantIdInput.value
-                        const selectedProvince = this.getSelectedProvince("tenant-province")
+                        const cccd = tenantIdInput.value;
+                        const selectedProvince = this.getSelectedProvince("tenant-province");
+
+                        console.log("Real-time validation:", { cccd, selectedProvince }); // Debug log
 
                         if (cccd && selectedProvince && this.validateCCCD(cccd)) {
                             if (!this.validateCCCDByProvince(cccd, selectedProvince)) {
-                                this.showError(tenantIdInput, `Số CCCD không hợp lệ cho tỉnh ${selectedProvince}`)
+                                this.showError(tenantIdInput, `Số CCCD không hợp lệ cho tỉnh ${selectedProvince}. Ba số đầu phải là: ${CCCD_PROVINCE_CODES[selectedProvince]?.join(', ')}`);
                             } else {
-                                this.clearError(tenantIdInput)
+                                this.clearError(tenantIdInput);
                             }
                         }
-                    }
+                    };
 
-                    tenantIdInput.addEventListener("blur", validateTenantCCCD)
-                    tenantProvinceSelect.addEventListener("change", validateTenantCCCD)
+                    tenantIdInput.addEventListener("blur", validateTenantCCCD);
+                    tenantIdInput.addEventListener("input", validateTenantCCCD); // Thêm validation khi nhập
+                    tenantProvinceSelect.addEventListener("change", validateTenantCCCD);
                 }
             }
+            validateCCCDWithProvince() {
+                const tenantIdInput = document.getElementById("tenant-id");
+                const cccd = tenantIdInput.value;
+                const selectedProvince = this.getSelectedProvince("tenant-province");
 
+                if (cccd && selectedProvince && this.validateCCCD(cccd)) {
+                    if (!this.validateCCCDByProvince(cccd, selectedProvince)) {
+                        this.showError(tenantIdInput, `Số CCCD không hợp lệ cho tỉnh ${selectedProvince}. Ba số đầu phải là: ${CCCD_PROVINCE_CODES[selectedProvince]?.join(', ')}`);
+                    }
+                }
+            }
             submitForm() {
                 // Submit the form
                 const form = document.querySelector("form")
@@ -1737,6 +1750,7 @@
         document.addEventListener("DOMContentLoaded", () => {
             new ContractValidator()
         })
+
     </script>
 
 </body>
