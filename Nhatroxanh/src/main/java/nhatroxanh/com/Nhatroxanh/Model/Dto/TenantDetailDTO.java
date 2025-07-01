@@ -18,8 +18,7 @@ public class TenantDetailDTO {
     private Date startDate;
     private Date endDate;
     private String terms; // Ghi chú hợp đồng
-    private Boolean contractStatus;
-
+    private String contractStatus;
     // Thông tin Phòng
     private String roomName;
     private String hostelName;

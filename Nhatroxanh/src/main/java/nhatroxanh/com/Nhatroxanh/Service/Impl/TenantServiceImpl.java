@@ -1,8 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,9 +23,6 @@ public class TenantServiceImpl implements TenantService {
     private final ContractsRepository contractsRepository;
     private final HostelRepository hostelRepository;
 
-    @Autowired
-    private ContractsRepository contractRepository;
-
     @Override
     @Transactional(readOnly = true)
     public Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId, Boolean status, Pageable pageable) {
@@ -47,7 +42,7 @@ public class TenantServiceImpl implements TenantService {
         Contracts contract = contractsRepository.findById(contractId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
         
-        Users tenant = contract.getUser();
+        Users tenant = contract.getTenant();
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
         UserCccd userCccd = tenant.getUserCccd();
@@ -58,7 +53,7 @@ public class TenantServiceImpl implements TenantService {
                 .startDate(contract.getStartDate())
                 .endDate(contract.getEndDate())
                 .terms(contract.getTerms())
-                .contractStatus(contract.getStatus())
+                .contractStatus(contract.getStatus().name()) 
                 .roomName(room.getNamerooms())
                 .hostelName(hostel.getName())
                 .userFullName(tenant.getFullname())
@@ -74,12 +69,10 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
-    Contracts contract = contractRepository.findById(contractId)
-        .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
-    
-    contract.setStatus(newStatus);
-    contractRepository.save(contract);
-}
+        Contracts contract = contractsRepository.findById(contractId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
+       contract.setStatus(newStatus ? Contracts.Status.ACTIVE : Contracts.Status.INACTIVE);
+    }
     
     @Override
     @Transactional(readOnly = true)
@@ -92,20 +85,21 @@ public class TenantServiceImpl implements TenantService {
     }
 
     private TenantInfoDTO convertToTenantInfoDTO(Contracts contract) {
-        Users tenant = contract.getUser();
+        Users tenant = contract.getTenant();
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
 
         return new TenantInfoDTO(
-            contract.getContractId(),
-            tenant.getUserId(),
-            tenant.getFullname(),
-            tenant.getPhone(),
-            hostel.getName(),
-            room.getNamerooms(),
-            contract.getStartDate(),
-            contract.getStatus()
-        );
+    contract.getContractId(),
+    tenant.getUserId(),
+    tenant.getFullname(),
+    tenant.getPhone(),
+    hostel.getName(),
+    room.getNamerooms(),
+    contract.getStartDate(),
+    contract.getStatus() == Contracts.Status.ACTIVE
+);
+
     }
     
     private String maskCccd(String cccd) {

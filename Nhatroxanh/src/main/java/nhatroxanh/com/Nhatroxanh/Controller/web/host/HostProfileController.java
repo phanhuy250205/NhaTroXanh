@@ -2,6 +2,8 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import java.io.IOException;
 import java.sql.Date;
+
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -48,7 +50,8 @@ public class HostProfileController {
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user);
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+
         int totalHostels = hostelService.countByOwner(user);
 
         HostInfoDTO dto = new HostInfoDTO();
@@ -58,6 +61,8 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
+        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
+
         if (cccd != null) {
             dto.setIssueDate(cccd.getIssueDate());
             dto.setIssuePlace(cccd.getIssuePlace());
@@ -69,62 +74,86 @@ public class HostProfileController {
         return "host/profile-host";
     }
 
-    @PostMapping("/profile-host")
+   @PostMapping("/profile-host")
 public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
-                            BindingResult bindingResult,
-                            @AuthenticationPrincipal CustomUserDetails userDetails,
-                            RedirectAttributes redirectAttributes) {
+        BindingResult bindingResult,
+        @AuthenticationPrincipal CustomUserDetails userDetails,
+        Model model,
+        RedirectAttributes redirectAttributes) {
 
-    // 1. Kiểm tra lỗi validation cơ bản
+    Users user = usersRepository.findById(userDetails.getUser().getUserId())
+            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
     if (bindingResult.hasErrors()) {
-        redirectAttributes.addFlashAttribute("error", "Dữ liệu không hợp lệ, vui lòng kiểm tra lại.");
-        return "redirect:/chu-tro/profile-host";
+        model.addAttribute("user", user);
+        model.addAttribute("totalHostels", hostelService.countByOwner(user));
+        return "host/profile-host";
     }
 
-    try {
-        Users user = usersRepository.findById(userDetails.getUser().getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với ID: " + userDetails.getUser().getUserId()));
-        MultipartFile avatarFile = dto.getAvatarFile();
-        if (avatarFile != null && !avatarFile.isEmpty()) {
+    UserCccd cccd = userCccdRepository.findByUser(user);
+
+    MultipartFile avatarFile = dto.getAvatarFile();
+    if (avatarFile != null && !avatarFile.isEmpty()) {
+        try {
             if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
                 fileUploadService.deleteFile(user.getAvatar());
             }
             String avatarPath = fileUploadService.uploadFile(avatarFile, "");
             user.setAvatar(avatarPath);
+        } catch (IOException e) {
+            model.addAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
+            model.addAttribute("user", user);
+            model.addAttribute("totalHostels", hostelService.countByOwner(user));
+            return "host/profile-host";
         }
+    }
+
+    try {
+        // Update user info
         user.setFullname(dto.getFullname());
         user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
         user.setPhone(dto.getPhone());
         user.setGender(dto.getGender());
         user.setEmail(dto.getEmail());
         user.setAddress(dto.getAddress());
-        UserCccd cccd = userCccdRepository.findByUser(user);
-        String newCccdNumber = (dto.getCccd() != null && !dto.getCccd().trim().isEmpty()) ? dto.getCccd().trim() : null;
-        if (newCccdNumber != null) {
-            UserCccd existingCccd = userCccdRepository.findByCccdNumber(newCccdNumber);
-            if (existingCccd != null && !existingCccd.getUser().getUserId().equals(user.getUserId())) {
-                redirectAttributes.addFlashAttribute("error", "Số CCCD đã được sử dụng bởi một tài khoản khác.");
-                return "redirect:/chu-tro/profile-host";
+
+        // Handle CCCD
+        if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
+            String trimmedCccd = dto.getCccdNumber().trim();
+            Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+            if (existingCccdOptional.isPresent()) {
+                UserCccd existingCccd = existingCccdOptional.get();
+                if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
+                    model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                    model.addAttribute("user", user);
+                    model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                    return "host/profile-host";
+                }
             }
+
             if (cccd == null) {
                 cccd = new UserCccd();
                 cccd.setUser(user);
             }
-            cccd.setCccdNumber(newCccdNumber);
+            cccd.setCccdNumber(trimmedCccd);
             cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
-            cccd.setIssuePlace(dto.getIssuePlace());     
+            cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
+                    ? dto.getIssuePlace().trim()
+                    : null);
+
             userCccdRepository.save(cccd);
         } else if (cccd != null) {
             userCccdRepository.delete(cccd);
         }
-        usersRepository.save(user);
 
+        usersRepository.save(user);
         redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
 
     } catch (Exception e) {
         e.printStackTrace();
         redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
     }
+
     return "redirect:/chu-tro/profile-host";
 }
     @PostMapping("/chi-tiet-khach-thue/update")

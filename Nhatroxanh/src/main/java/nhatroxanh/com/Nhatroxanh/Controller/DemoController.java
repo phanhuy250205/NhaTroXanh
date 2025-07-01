@@ -1,5 +1,4 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +15,17 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
-import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
+
+
 @Controller
 public class DemoController {
+
+
+    
+
      @Autowired
      private UserService userService;
      @Autowired
@@ -51,7 +55,8 @@ public class DemoController {
 
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {
-        return "host/hop-dong-host";
+        
+        return "redirect:/api/contracts/form";
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")
@@ -84,10 +89,10 @@ public class DemoController {
         return "host/phongtro";
     }
 
-    @GetMapping("/chu-tro/tong-quan")
-    public String tongquan() {
-        return "host/tong-quan";
-    }
+    // @GetMapping("/chu-tro/tong-quan")
+    // public String tongquan() {
+    //     return "host/tong-quan";
+    // }
 
   @GetMapping("/chu-tro/khach-thue") 
     public String khachthue(Model model,

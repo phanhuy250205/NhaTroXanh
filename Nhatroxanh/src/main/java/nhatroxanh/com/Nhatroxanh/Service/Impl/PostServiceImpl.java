@@ -2,10 +2,10 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
-import java.sql.*;
 import java.util.HashSet;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
@@ -22,31 +24,29 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
-import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.WardRepository;
 import nhatroxanh.com.Nhatroxanh.Service.AddressService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PostServiceImpl implements PostService {
 
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
+    @PersistenceContext
+    private EntityManager entityManager;
     @Autowired
     private PostRepository postRepository;
     @Autowired
     private CategoryRepository categoryRepository;
     @Autowired
     private UtilityRepository utilityRepository;
-    @Autowired
-    private AddressRepository addressRepository;
-    @Autowired
-    private WardRepository wardRepository;
     @Autowired
     private ImageRepository imageRepository;
     @Autowired
@@ -287,7 +287,7 @@ public class PostServiceImpl implements PostService {
     public Post updatePost(Integer postId, String title, String description, Float price, Float area,
             Integer categoryId, String wardCode, String street, String houseNumber,
             List<Integer> utilityIds, MultipartFile[] images, List<Integer> imagesToDelete,
-            Integer hostelId, Users user, String provinceCode, String districtCode,
+            List<Integer> imagesToKeep, Integer hostelId, Users user, String provinceCode, String districtCode,
             String provinceName, String districtName, String wardName) throws Exception {
 
         Post post = postRepository.findById(postId)
@@ -327,84 +327,35 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         post.setUtilities(utilities);
         post.setHostel(hostel);
-        post.setApprovalStatus(ApprovalStatus.PENDING);
         post.setCreatedAt(java.sql.Date.valueOf(LocalDate.now()));
 
         if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
             List<Image> imagesToRemove = imageRepository.findAllById(imagesToDelete);
+            log.info("Images to delete: {}", imagesToRemove);
+
             for (Image image : imagesToRemove) {
-                if (image.getPost().getPostId().equals(postId)) {
+                if (image.getPost() != null && image.getPost().getPostId().equals(postId)) {
+                    post.getImages().remove(image);
+                    image.setPost(null);
+                    imageRepository.save(image);
                     fileUploadService.deleteFile(image.getUrl());
                     imageRepository.delete(image);
                 }
             }
+            entityManager.flush();
+        }
+        if (imagesToKeep != null && !imagesToKeep.isEmpty()) {
+            List<Image> imagesKept = imageRepository.findAllById(imagesToKeep);
+            post.setImages(imagesKept); // Cập nhật danh sách ảnh còn lại
         }
 
+        // Thêm ảnh mới
         if (images != null && images.length > 0) {
             List<Image> newImages = uploadPostImages(images, post);
-            List<Image> currentImages = post.getImages() != null ? new ArrayList<>(post.getImages())
-                    : new ArrayList<>();
-            currentImages.addAll(newImages);
-            post.setImages(currentImages);
+            post.getImages().addAll(newImages);
         }
 
         return postRepository.save(post);
-    }
-
-    private void validatePostData1(String title, String description, Float price, Float area) {
-        if (title == null || title.trim().isEmpty()) {
-            throw new IllegalArgumentException("Tiêu đề không được để trống");
-        }
-        if (title.trim().length() > 255) {
-            throw new IllegalArgumentException("Tiêu đề không được vượt quá 255 ký tự");
-        }
-        if (price == null || price <= 0) {
-            throw new IllegalArgumentException("Giá thuê phải lớn hơn 0");
-        }
-        if (price > 1_000_000_000) {
-            throw new IllegalArgumentException("Giá thuê không được vượt quá 1 tỷ VNĐ");
-        }
-        if (area == null || area <= 0) {
-            throw new IllegalArgumentException("Diện tích phải lớn hơn 0");
-        }
-        if (area > 10_000) {
-            throw new IllegalArgumentException("Diện tích không được vượt quá 10,000 m²");
-        }
-        if (description != null && description.length() > 5000) {
-            throw new IllegalArgumentException("Mô tả không được vượt quá 5,000 ký tự");
-        }
-    }
-
-    private List<Image> uploadPostImages1(MultipartFile[] images, Post post) throws Exception {
-        List<Image> imageList = new ArrayList<>();
-        List<String> errors = new ArrayList<>();
-
-        if (images.length > 8) {
-            throw new IllegalArgumentException("Không được tải lên quá 8 ảnh");
-        }
-
-        for (int i = 0; i < images.length; i++) {
-            MultipartFile imageFile = images[i];
-            if (!imageFile.isEmpty()) {
-                if (imageFile.getSize() > 10 * 1024 * 1024) {
-                    errors.add("Ảnh " + (i + 1) + " quá lớn (tối đa 10MB)");
-                    continue;
-                }
-
-                String imageUrl = fileUploadService.uploadFile(imageFile, "uploads");
-                Image image = Image.builder().url(imageUrl).post(post).build();
-                imageList.add(imageRepository.save(image));
-            }
-        }
-
-        if (!errors.isEmpty() && imageList.isEmpty()) {
-            throw new Exception("Không thể upload ảnh nào: " + String.join(", ", errors));
-        }
-        if (!errors.isEmpty()) {
-            System.out.println("Một số ảnh không thể upload: " + String.join(", ", errors));
-        }
-
-        return imageList;
     }
 
     @Override
@@ -412,4 +363,57 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
+    @Override
+    public List<Post> getFilteredPosts(String status, String type, String sortBy, String search) {
+        List<Post> posts = postRepository.findAll();
+
+        if (status != null && !status.isEmpty()) {
+            ApprovalStatus approvalStatus = ApprovalStatus.valueOf(status.toUpperCase());
+            posts = posts.stream()
+                    .filter(post -> post.getApprovalStatus() == approvalStatus)
+                    .collect(Collectors.toList());
+        }
+
+        if (type != null && !type.isEmpty()) {
+            posts = posts.stream()
+                    .filter(post -> post.getCategory() != null &&
+                            post.getCategory().getName() != null &&
+                            post.getCategory().getName().equalsIgnoreCase(type))
+                    .collect(Collectors.toList());
+        }
+
+        if (search != null && !search.isEmpty()) {
+            posts = posts.stream()
+                    .filter(post -> post.getTitle().toLowerCase().contains(search.toLowerCase()) ||
+                            post.getDescription().toLowerCase().contains(search.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if ("newest".equalsIgnoreCase(sortBy)) {
+            posts.sort((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()));
+        } else if ("oldest".equalsIgnoreCase(sortBy)) {
+            posts.sort((p1, p2) -> p1.getCreatedAt().compareTo(p2.getCreatedAt()));
+        }
+
+        return posts;
+    }
+
+    @Override
+    public void approvePost(Integer postId, Users approvedBy) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài đăng với ID: " + postId));
+
+        post.setApprovalStatus(ApprovalStatus.APPROVED);
+        post.setApprovedBy(approvedBy);
+        post.setApprovedAt(java.sql.Date.valueOf(LocalDate.now()));
+        post.setStatus(true);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void hidePost(Integer postId) {
+        Post post = getPostById(postId);
+        post.setStatus(false);
+        postRepository.save(post);
+    }
 }

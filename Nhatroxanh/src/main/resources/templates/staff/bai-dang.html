@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head th:replace="~{/layouts/head}" />
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản lý bài đăng</title>
-    
+
     <!-- Bootstrap 5.3 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-color: #3e83cc;
@@ -27,6 +29,7 @@
             --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --border-radius: 12px;
         }
+
         .tab-content {
             padding: 0;
         }
@@ -147,7 +150,8 @@
             transition: all 0.3s ease;
             overflow: hidden;
             height: 100%;
-            cursor: pointer; /* Indicate clickable area */
+            cursor: pointer;
+            /* Indicate clickable area */
         }
 
         .post-card:hover {
@@ -355,8 +359,13 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         /* Responsive */
@@ -365,11 +374,11 @@
                 margin: 10px;
                 padding: 20px;
             }
-            
+
             .search-filter-section {
                 padding: 20px;
             }
-            
+
             .filter-select {
                 min-width: 100px;
                 font-size: 12px;
@@ -382,6 +391,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -398,6 +408,87 @@
 
         .post-card:nth-child(3) {
             animation-delay: 0.2s;
+        }
+
+        .btn-hide {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-show {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
     </style>
 </head>
@@ -416,66 +507,77 @@
 
         <!-- Search & Filter Section -->
         <div class="search-filter-section">
-            <div class="row align-items-center">
-                <!-- Search -->
+            <form th:action="@{/nhan-vien/bai-dang}" method="get" class="row align-items-center">
                 <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
                     <div class="input-group">
-                        <input type="text" class="form-control search-input" placeholder="Tìm kiếm bài đăng...">
-                        <button class="btn btn-primary search-btn">
+                        <input type="text" class="form-control search-input" name="search" th:value="${search}"
+                            placeholder="Tìm kiếm bài đăng...">
+                        <button type="submit" class="btn btn-primary search-btn">
                             <i class="fas fa-search"></i>
                             <span class="d-none d-sm-inline ms-1">Tìm kiếm</span>
                         </button>
                     </div>
                 </div>
-
-                <!-- Filters -->
                 <div class="col-lg-6 col-md-12">
                     <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
                         <div class="d-flex align-items-center gap-2">
                             <i class="fas fa-filter filter-icon"></i>
-                            <select class="form-select filter-select">
-                                <option selected>Trạng thái</option>
-                                <option value="pending">Chờ duyệt</option>
-                                <option value="approved">Đã duyệt</option>
+                            <select class="form-select filter-select" name="status">
+                                <option value="" th:selected="${status == null}">Trạng thái</option>
+                                <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ duyệt</option>
+                                <option value="APPROVED" th:selected="${status == 'APPROVED'}">Đã duyệt</option>
                             </select>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <i class="fas fa-home filter-icon"></i>
-                            <select class="form-select filter-select">
-                                <option selected>Loại</option>
-                                <option value="house">Nhà trọ</option>
-                                <option value="room">Phòng trọ</option>
+                            <select class="form-select filter-select" name="type">
+                                <option value="" th:selected="${type == null or type == ''}">Loại</option>
+                                <option th:each="category : ${categories}" th:value="${category.name}"
+                                    th:selected="${type == category.name}" th:text="${category.name}">
+                                </option>
                             </select>
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <i class="fas fa-calendar-alt filter-icon"></i>
-                            <select class="form-select filter-select">
-                                <option selected>Ngày</option>
-                                <option value="newest">Mới nhất</option>
-                                <option value="oldest">Cũ nhất</option>
+                            <select class="form-select filter-select" name="sortBy">
+                                <option value="" th:selected="${sortBy == null}">Ngày</option>
+                                <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                                <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
                             </select>
                         </div>
                     </div>
                 </div>
+            </form>
+        </div>
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
             </div>
         </div>
 
         <!-- Custom Tabs -->
         <ul class="nav nav-tabs custom-tabs" id="managementTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link custom-tab active" id="pending-tab" data-bs-toggle="tab" 
-                        data-bs-target="#pending" type="button" role="tab">
+                <button class="nav-link custom-tab active" id="pending-tab" data-bs-toggle="tab"
+                    data-bs-target="#pending" type="button" role="tab">
                     <i class="fas fa-clock me-2"></i>
                     Chờ duyệt
-                    <span class="badge bg-warning ms-2">5</span>
+                    <span class="badge bg-warning ms-2" th:text="${#lists.size(pendingPosts)}">0</span>
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link custom-tab" id="approved-tab" data-bs-toggle="tab" 
-                        data-bs-target="#approved" type="button" role="tab">
+                <button class="nav-link custom-tab" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved"
+                    type="button" role="tab">
                     <i class="fas fa-check-circle me-2"></i>
                     Đã duyệt
-                    <span class="badge bg-success ms-2">12</span>
+                    <span class="badge bg-success ms-2" th:text="${#lists.size(approvedPosts)}">0</span>
                 </button>
             </li>
         </ul>
@@ -485,124 +587,60 @@
             <!-- Pending Posts Tab -->
             <div class="tab-pane fade show active" id="pending" role="tabpanel">
                 <div class="row g-4">
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="post-card position-relative" data-post-id="1">
+                    <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${pendingPosts}">
+                        <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
                             <div class="status-badge status-pending">Chờ duyệt</div>
-                            <img src="https://file4.batdongsan.com.vn/crop/600x315/2025/02/12/20250212211500-7883_wm.jpg" 
-                                 alt="Post image" class="post-card-img">
+                            <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                alt="Post image" class="post-card-img">
                             <div class="post-card-body">
-                                <h6 class="post-title">Nhà trọ cao cấp đường Lê Văn Hiến</h6>
+                                <h6 class="post-title">
+                                    <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
+                                        th:text="${post.title}" style="text-decoration: none;">Nhà trọ cao cấp</a>
+                                </h6>
                                 <div class="post-price">
                                     <i class="fas fa-tag me-1"></i>
-                                    2.5 triệu/tháng
+                                    <span
+                                        th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.5
+                                        triệu/tháng</span>
                                 </div>
                                 <div class="post-badges">
-                                    <span class="post-badge badge-type">Nhà trọ</span>
-                                    <span class="post-badge badge-area">25m²</span>
+                                    <span class="post-badge badge-type"
+                                        th:text="${post.category?.name ?: 'Không xác định'}">Nhà trọ</span>
+                                    <span class="post-badge badge-area" th:text="${post.area + 'm²'}">25m²</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>Q. Thanh Khê, TP. Đà Nẵng</span>
+                                    <span
+                                        th:text="${post.address?.street + ', ' + post.address?.ward?.name + ', ' + post.address?.ward?.district?.name + ', ' + post.address?.ward?.district?.province?.name ?: 'Không xác định'}">Q.
+                                        Thanh Khê, TP. Đà Nẵng</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-building"></i>
-                                    <span>KTX B1 - Phòng 202</span>
+                                    <span th:text="${post.hostel?.name ?: 'Không xác định'}">KTX B1</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-info-circle"></i>
-                                    <span>Phòng mới, đầy đủ tiện nghi</span>
+                                    <span
+                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">Phòng
+                                        mới, đầy đủ tiện nghi</span>
                                 </div>
                                 <div class="action-buttons">
-                                    <button class="action-btn btn-approve" data-post-id="1">
-                                        <i class="fas fa-check"></i>
-                                        Duyệt
-                                    </button>
-                                    <button class="action-btn btn-delete" data-post-id="1">
-                                        <i class="fas fa-trash"></i>
-                                        Xóa
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                    <form th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}"
+                                        method="post" style="display:inline;">
+                                        <button type="submit" class="action-btn btn-approve"
+                                            th:attr="data-post-id=${post.postId}">
+                                            <i class="fas fa-check"></i> Duyệt
+                                        </button>
+                                    </form>
 
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="post-card position-relative" data-post-id="2">
-                            <div class="status-badge status-pending">Chờ duyệt</div>
-                            <img src="https://static.chotot.com/storage/chotot-kinhnghiem/nha/2022/10/23690945-tim-phong-tro-gia-re-1.webp" 
-                                 alt="Post image" class="post-card-img">
-                            <div class="post-card-body">
-                                <h6 class="post-title">Phòng trọ sinh viên giá rẻ</h6>
-                                <div class="post-price">
-                                    <i class="fas fa-tag me-1"></i>
-                                    1.8 triệu/tháng
-                                </div>
-                                <div class="post-badges">
-                                    <span class="post-badge badge-type">Phòng trọ</span>
-                                    <span class="post-badge badge-area">15m²</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Q. Hải Châu, TP. Đà Nẵng</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-building"></i>
-                                    <span>Số 45 đường Phan Châu Trinh</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>Gần trường ĐH Đà Nẵng</span>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="action-btn btn-approve" data-post-id="2">
-                                        <i class="fas fa-check"></i>
-                                        Duyệt
-                                    </button>
-                                    <button class="action-btn btn-delete" data-post-id="2">
-                                        <i class="fas fa-trash"></i>
-                                        Xóa
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="post-card position-relative" data-post-id="3">
-                            <div class="status-badge status-pending">Chờ duyệt</div>
-                            <img src="https://2trip.vn/wp-content/uploads/2023/06/homestay-da-nang-gan-bien-my-khe-3.jpg" 
-                                 alt="Post image" class="post-card-img">
-                            <div class="post-card-body">
-                                <h6 class="post-title">Homestay mini view biển</h6>
-                                <div class="post-price">
-                                    <i class="fas fa-tag me-1"></i>
-                                    3.2 triệu/tháng
-                                </div>
-                                <div class="post-badges">
-                                    <span class="post-badge badge-type">Homestay</span>
-                                    <span class="post-badge badge-area">30m²</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Q. Sơn Trà, TP. Đà Nẵng</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-building"></i>
-                                    <span>Đường Võ Nguyên Giáp</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>View biển tuyệt đẹp</span>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="action-btn btn-approve" data-post-id="3">
-                                        <i class="fas fa-check"></i>
-                                        Duyệt
-                                    </button>
-                                    <button class="action-btn btn-delete" data-post-id="3">
-                                        <i class="fas fa-trash"></i>
-                                        Xóa
-                                    </button>
+                                    <form th:action="@{/nhan-vien/bai-dang/{postId}/delete(postId=${post.postId})}"
+                                        method="post" style="display:inline;">
+                                        <button type="submit" class="action-btn btn-delete"
+                                            th:attr="data-post-id=${post.postId}"
+                                            onclick="return confirm('Bạn có chắc chắn muốn xóa bài đăng này?')">
+                                            <i class="fas fa-trash"></i> Xóa
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -613,83 +651,54 @@
             <!-- Approved Posts Tab -->
             <div class="tab-pane fade" id="approved" role="tabpanel">
                 <div class="row g-4">
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="post-card position-relative" data-post-id="4">
+                    <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${approvedPosts}">
+                        <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
                             <div class="status-badge status-approved">Đã duyệt</div>
-                            <img src="https://www.lanha.vn/wp-content/uploads/2023/07/thiet-ke-noi-that-chung-cu-mini-15.jpg.webp" 
-                                 alt="Post image" class="post-card-img">
+                            <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                alt="Post image" class="post-card-img">
                             <div class="post-card-body">
-                                <h6 class="post-title">Căn hộ mini đầy đủ tiện nghi</h6>
+                                <h6 class="post-title">
+                                    <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
+                                        th:text="${post.title}" style="text-decoration: none;">Nhà trọ cao cấp</a>
+                                </h6>
                                 <div class="post-price">
                                     <i class="fas fa-tag me-1"></i>
-                                    2.8 triệu/tháng
+                                    <span
+                                        th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.8
+                                        triệu/tháng</span>
                                 </div>
                                 <div class="post-badges">
-                                    <span class="post-badge badge-type">Căn hộ</span>
-                                    <span class="post-badge badge-area">35m²</span>
+                                    <span class="post-badge badge-type"
+                                        th:text="${post.category?.name ?: 'Không xác định'}">Căn hộ</span>
+                                    <span class="post-badge badge-area" th:text="${post.area + 'm²'}">35m²</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-map-marker-alt"></i>
-                                    <span>Q. Cẩm Lệ, TP. Đà Nẵng</span>
+                                    <span
+                                        th:text="${post.address?.street + ', ' + post.address?.ward?.name + ', ' + post.address?.ward?.district?.name + ', ' + post.address?.ward?.district?.province?.name ?: 'Không xác định'}">Q.
+                                        Cẩm Lệ, TP. Đà Nẵng</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-building"></i>
-                                    <span>Chung cư Melody</span>
+                                    <span th:text="${post.hostel?.name ?: 'Không xác định'}">Chung cư Melody</span>
                                 </div>
                                 <div class="post-info">
                                     <i class="fas fa-info-circle"></i>
-                                    <span>Đầy đủ nội thất</span>
+                                    <span
+                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">Đầy
+                                        đủ nội thất</span>
                                 </div>
                                 <div class="action-buttons">
-                                    <button class="action-btn btn-hide" data-post-id="4">
-                                        <i class="fas fa-eye-slash"></i>
-                                        Ẩn
-                                    </button>
-                                    <button class="action-btn btn-delete" data-post-id="4">
-                                        <i class="fas fa-trash"></i>
-                                        Xóa
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="post-card position-relative" data-post-id="5">
-                            <div class="status-badge status-approved">Đã duyệt</div>
-                            <img src="https://file4.batdongsan.com.vn/resize/745x510/2023/11/24/20231124154946-69d0_wm.jpg" 
-                                 alt="Post image" class="post-card-img">
-                            <div class="post-card-body">
-                                <h6 class="post-title">Phòng trọ cao cấp gần bến xe</h6>
-                                <div class="post-price">
-                                    <i class="fas fa-tag me-1"></i>
-                                    2.2 triệu/tháng
-                                </div>
-                                <div class="post-badges">
-                                    <span class="post-badge badge-type">Phòng trọ</span>
-                                    <span class="post-badge badge-area">20m²</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-map-marker-alt"></i>
-                                    <span>Q. Thanh Khê, TP. Đà Nẵng</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-building"></i>
-                                    <span>Đường Điện Biên Phủ</span>
-                                </div>
-                                <div class="post-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    <span>Giao thông thuận tiện</span>
-                                </div>
-                                <div class="action-buttons">
-                                    <button class="action-btn btn-hide" data-post-id="5">
-                                        <i class="fas fa-eye-slash"></i>
-                                        Ẩn
-                                    </button>
-                                    <button class="action-btn btn-delete" data-post-id="5">
-                                        <i class="fas fa-trash"></i>
-                                        Xóa
-                                    </button>
+                                    <form th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post"
+                                        style="display:inline;">
+                                        <input type="hidden" name="postId" th:value="${post.postId}" />
+                                        <button type="submit" class="action-btn"
+                                            th:classappend="${post.status} ? 'btn-hide btn-warning' : 'btn-show btn-success'">
+                                            <i class="fas"
+                                                th:classappend="${post.status} ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            <span th:text="${post.status} ? 'Ẩn' : 'Hiển thị'"></span>
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -698,132 +707,28 @@
             </div>
         </div>
     </div>
+    
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        // Notification Manager
-        class NotificationManager {
-            constructor() {
-                this.container = document.querySelector('.notification-container');
-                if (!this.container) {
-                    this.container = document.createElement('div');
-                    this.container.className = 'notification-container';
-                    document.body.appendChild(this.container);
-                }
-            }
-
-            showNotification(type, title, message, duration = 5000) {
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <div class="notification-header">
-                        <span>${title}</span>
-                        <button class="notification-close">×</button>
-                    </div>
-                    <div class="notification-body">${message}</div>
-                `;
-
-                this.container.appendChild(notification);
-
-                notification.querySelector('.notification-close').addEventListener('click', () => {
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 300);
-                });
-
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    setTimeout(() => notification.remove(), 300);
-                }, duration);
-
-                setTimeout(() => {
-                    notification.style.opacity = '1';
-                }, 100);
-            }
-
-            showSuccess(message) {
-                this.showNotification('success', 'Thành công', message);
-            }
-
-            showError(message) {
-                this.showNotification('error', 'Lỗi', message);
-            }
-
-            showWarning(message) {
-                this.showNotification('warning', 'Cảnh báo', message);
-            }
-        }
-
-        // Add interactive functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const notificationManager = new NotificationManager();
-
-            // Handle redirect to detail page on title or image click
-            document.querySelectorAll('.post-card').forEach(card => {
-                const postId = card.getAttribute('data-post-id');
-                const title = card.querySelector('.post-title');
-                const image = card.querySelector('.post-card-img');
-
-                if (title) {
-                    title.addEventListener('click', () => {
-                        window.location.href = `/nhan-vien/chi-tiet-bai-dang?id=${postId}`; // Replace with your detail page URL
-                    });
-                }
-
-                if (image) {
-                    image.addEventListener('click', () => {
-                        window.location.href = `/nhan-vien/chi-tiet-bai-dang?id=${postId}`; // Replace with your detail page URL
-                    });
-                }
-            });
-
-            // Handle action buttons
-            document.querySelectorAll('.action-btn').forEach(button => {
-                button.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    e.stopPropagation(); // Prevent card click event from triggering
-
-                    const postId = this.getAttribute('data-post-id');
-                    const action = this.classList.contains('btn-approve') ? 'approve' :
-                                  this.classList.contains('btn-hide') ? 'hide' :
-                                  this.classList.contains('btn-delete') ? 'delete' : '';
-
-                    if (action === 'delete') {
-                        if (confirm('Bạn có chắc chắn muốn xóa bài đăng này?')) {
-                            notificationManager.showSuccess(`Bài đăng ${postId} đã được xóa!`);
-                            console.log('Delete post', postId);
-                            // Add delete logic here (e.g., API call)
-                        }
-                    } else if (action === 'approve') {
-                        notificationManager.showSuccess(`Bài đăng ${postId} đã được duyệt!`);
-                        console.log('Approve post', postId);
-                        // Add approve logic here (e.g., API call)
-                    } else if (action === 'hide') {
-                        notificationManager.showSuccess(`Bài đăng ${postId} đã được ẩn!`);
-                        console.log('Hide post', postId);
-                        // Add hide logic here (e.g., API call)
-                    }
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
                 });
             });
-
-            // Handle search
-            document.querySelector('.search-btn').addEventListener('click', function() {
-                const searchTerm = document.querySelector('.search-input').value;
-                notificationManager.showInfo(`Đang tìm kiếm: ${searchTerm}`);
-                console.log('Search for:', searchTerm);
-                // Add search logic here
-            });
-
-            // Handle filter changes
-            document.querySelectorAll('.filter-select').forEach(select => {
-                select.addEventListener('change', function() {
-                    notificationManager.showInfo(`Lọc theo: ${this.value}`);
-                    console.log('Filter changed:', this.value);
-                    // Add filter logic here
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
                 });
-            });
+            }, 3000);
         });
     </script>
 </body>
+
 </html>

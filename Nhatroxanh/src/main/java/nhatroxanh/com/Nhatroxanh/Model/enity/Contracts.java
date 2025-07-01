@@ -1,3 +1,4 @@
+
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import java.sql.Date;
@@ -6,6 +7,8 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,8 +37,21 @@ public class Contracts {
     private Rooms room;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
+    @JoinColumn(name = "tenant_id", nullable = false)
+    private Users tenant;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private Users owner;
+
+    @Column(name = "tenant_phone", nullable = false)
+    private String tenantPhone;
+
+    @Column(name = "contract_date", nullable = false)
+    private Date contractDate;
+
+    @Column(name = "created_at", nullable = false)
+    private Date createdAt;
 
     @Column(name = "start_date", nullable = false)
     private Date startDate;
@@ -52,12 +68,17 @@ public class Contracts {
     @Column(name = "terms", length = 255)
     private String terms;
 
-    @Column(name = "status")
-    private Boolean status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private Status status;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
-    
+
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payments> payments;
+
+    public enum Status {
+        ACTIVE, INACTIVE
+    }
 }

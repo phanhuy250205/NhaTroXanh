@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,10 +54,18 @@ public class PostController {
 
     @Autowired
     private UtilityRepository utilityRepository;
+
     @Autowired
     private HostelRepository hostelRepository;
+
     @Autowired
     private RoomsRepository roomsRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
+    @Autowired
+    private FileUploadService fileUploadService;
 
     @GetMapping("/bai-dang")
     public String showPostList(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -129,24 +138,31 @@ public class PostController {
         if (post == null) {
             return "redirect:/chu-tro/bai-dang?error=Post not found";
         }
-        Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
-        log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
-                utilities.stream().map(Utility::getName).collect(Collectors.toList()));
+
+        Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
         List<String> images = post.getImages() != null && !post.getImages().isEmpty()
                 ? post.getImages().stream().map(Image::getUrl).distinct().collect(Collectors.toList())
                 : List.of("/images/cards/default.jpg");
-        log.info("Post {} images: {}", postId, images);
 
-        Hostel hostel = post.getHostel() != null ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId())
-                .orElse(null) : null;
+        // Lấy nhà trọ kèm phòng và thông tin chi tiết của phòng
+        Hostel hostel = post.getHostel() != null
+                ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
+                : null;
+
+        // Danh sách phòng
         List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
 
-        model.addAttribute("images", images);
-        model.addAttribute("post", post);
-        model.addAttribute("utilities", utilities != null ? utilities : new HashSet<>());
+        // Debug
+        log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+        log.info("Rooms count: {}", rooms.size());
+        rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
         model.addAttribute("hostel", hostel);
         model.addAttribute("rooms", rooms);
         model.addAttribute("roomCount", rooms.size());
+        model.addAttribute("images", images);
+        model.addAttribute("post", post);
+        model.addAttribute("utilities", utilities);
 
         return "host/chi-tiet-bai-dang";
     }
@@ -175,7 +191,7 @@ public class PostController {
             Rooms room = roomsRepository.findByIdWithDetails(roomId)
                     .orElseThrow(() -> new IllegalArgumentException("Phòng không tồn tại với ID: " + roomId));
             Map<String, Object> roomData = new HashMap<>();
-            roomData.put("roomId", room.getRoom_id());
+            roomData.put("roomId", room.getRoomId());
             roomData.put("name", room.getNamerooms());
             roomData.put("price", room.getPrice());
             roomData.put("acreage", room.getAcreage());
@@ -307,7 +323,7 @@ public class PostController {
             model.addAttribute("post", post);
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("utilities", utilityRepository.findAll());
-
+            model.addAttribute("hostels", hostelRepository.findByOwnerUserId(userDetails.getUser().getUserId())); // ✅
             Address address = post.getAddress();
             if (address != null && address.getWard() != null) {
                 Ward ward = address.getWard();
@@ -355,6 +371,7 @@ public class PostController {
             @RequestParam(value = "utilities", required = false) List<Integer> utilityIds,
             @RequestParam(value = "images", required = false) MultipartFile[] images,
             @RequestParam(value = "imagesToDelete", required = false) List<Integer> imagesToDelete,
+            @RequestParam(value = "imagesToKeep", required = false) List<Integer> imagesToKeep,
             @RequestParam(value = "hostelId", required = false) Integer hostelId,
             @RequestParam(value = "provinceId", required = false) String provinceCode,
             @RequestParam(value = "districtId", required = false) String districtCode,
@@ -369,7 +386,7 @@ public class PostController {
             Post updatedPost = postService.updatePost(
                     postId, title, description, price, area, categoryId,
                     wardCode, street, houseNumber, utilityIds, images, imagesToDelete,
-                    hostelId, userDetails.getUser(), provinceCode, districtCode,
+                    imagesToKeep, hostelId, userDetails.getUser(), provinceCode, districtCode,
                     provinceName, districtName, wardName);
 
             redirectAttributes.addFlashAttribute("successMessage",
@@ -400,5 +417,4 @@ public class PostController {
             return "redirect:/chu-tro/sua-bai-dang/" + postId;
         }
     }
-
 }
