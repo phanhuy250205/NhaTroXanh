@@ -6,6 +6,8 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
 
+
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,14 +17,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @ToString(exclude = { "notifications", "userCccd", "contracts" })
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Data
 @Table(name = "Users")
 public class Users {
 
@@ -78,6 +80,7 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
 
@@ -92,6 +95,8 @@ public class Users {
     // @Column(name = "status")
     // private Boolean status;
 
+
+    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }

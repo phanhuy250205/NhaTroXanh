@@ -15,8 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const confirmPassword = document.getElementById("confirmPassword").value;
             const agreeTerms = document.getElementById("agreeTerms").checked;
             const birthDate = document.getElementById("birthDate") ? document.getElementById("birthDate").value : null;
-
-
             if (password !== confirmPassword) {
                 alert("Mật khẩu và xác nhận mật khẩu không khớp!");
                 return;
