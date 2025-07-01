@@ -17,12 +17,12 @@ public class HostelDTO {
     private Integer roomNumber;
     private Integer ownerId;
 
-    private String province;     // Mã tỉnh (code)
-    private String provinceName; // Tên tỉnh
-    private String district;
+    private String provinceCode;
+    private String provinceName;
+    private String districtCode;
     private String districtName;
-    private String ward;
+    private String wardCode;
     private String wardName;
     private String street;
-    private String houseNumber;
+    private String houseNumber; 
 }

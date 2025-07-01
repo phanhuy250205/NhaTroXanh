@@ -52,7 +52,19 @@ public class Hostel {
     @OneToMany(mappedBy = "hostel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rooms> rooms = new ArrayList<>();
     
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "address_id")
     private Address address;
+
+    @ManyToOne
+    @JoinColumn(name = "ward_id")
+    private Ward ward;
+
+    @ManyToOne
+    @JoinColumn(name = "district_id")
+    private District district;
+
+    @ManyToOne
+    @JoinColumn(name = "province_id")
+    private Province province;
 }

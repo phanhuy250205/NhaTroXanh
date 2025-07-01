@@ -44,7 +44,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="hostelNameHost" class="form-label-host">Khu trọ</label>
-                                        <input type="text" class="form-control-host" id="hostelNameHost"
+                                        <input type="text" class="form-control-host" id="hostelNameHost" name="name"
                                             th:value="${hostel != null ? hostel.name : ''}" placeholder="Khu A">
                                     </div>
                                 </div>
@@ -58,16 +58,16 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="roomCountHost" class="form-label-host">Số phòng</label>
-                                        <input type="number" class="form-control-host" id="roomCountHost"
+                                        <input type="number" class="form-control-host" id="roomCountHost" name="roomNumber"
                                             th:value="${hostel != null ? hostel.roomNumber : ''}" placeholder="20">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="statusHost" class="form-label-host">Trạng thái</label>
-                                        <select class="form-select-host" id="statusHost">
-                                            <option value="active">Đang hoạt động</option>
-                                            <option value="inactive">Ngưng hoạt động</option>
+                                        <select class="form-select-host" id="statusHost" name="status">
+                                            <option value="true">Đang hoạt động</option>
+                                            <option value="false">Ngưng hoạt động</option>
                                         </select>
                                     </div>
                                 </div>
@@ -83,8 +83,8 @@
                                 <!-- Tỉnh/Thành phố -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="citySelect" class="form-label-host">Tỉnh/Thành phố</label>
-                                        <select id="citySelect" class="form-select-host">
+                                        <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
+                                        <select id="provinceHost" class="form-select-host">
                                             <option value="">Chọn tỉnh/thành phố</option>
                                         </select>
                                     </div>
@@ -93,8 +93,8 @@
                                 <!-- Quận/Huyện -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="districtSelect" class="form-label-host">Quận/Huyện</label>
-                                        <select id="districtSelect" class="form-select-host" disabled>
+                                        <label for="districtHost" class="form-label-host">Quận/Huyện</label>
+                                        <select id="districtHost" class="form-select-host" disabled>
                                             <option value="">Chọn quận/huyện</option>
                                         </select>
                                     </div>
@@ -103,8 +103,8 @@
                                 <!-- Phường/Xã -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="wardSelect" class="form-label-host">Phường/Xã</label>
-                                        <select id="wardSelect" class="form-select-host" disabled>
+                                        <label for="wardHost" class="form-label-host">Phường/Xã</label>
+                                        <select id="wardHost" class="form-select-host" disabled>
                                             <option value="">Chọn phường/xã</option>
                                         </select>
                                     </div>
@@ -113,30 +113,29 @@
                                 <!-- Đường/Phố -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="streetInput" class="form-label-host">Đường/Phố</label>
-                                        <input type="text" id="streetInput" class="form-control-host" placeholder="Nhập tên đường/phố">
+                                        <label for="streetHost" class="form-label-host">Đường/Phố</label>
+                                        <input type="text" id="streetHost" class="form-control-host" placeholder="Nhập tên đường/phố">
                                     </div>
                                 </div>
 
                                 <!-- Số nhà -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="houseNumberInput" class="form-label-host">Số nhà</label>
-                                        <input type="text" id="houseNumberInput" class="form-control-host" placeholder="123">
+                                        <label for="houseNumberHost" class="form-label-host">Số nhà</label>
+                                        <input type="text" id="houseNumberHost" class="form-control-host" placeholder="123">
                                     </div>
                                 </div>
 
                                 <!-- Địa chỉ đầy đủ (readonly) -->
                                 <div class="col-md-6">
                                     <div class="form-group-host">
-                                        <label for="fullAddressInput" class="form-label-host">Địa chỉ đầy đủ</label>
-                                        <input type="text" id="fullAddressInput" class="form-control-host" placeholder="Địa chỉ sẽ tự động tạo" readonly>
+                                        <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
+                                        <input type="text" id="fullAddressHost" class="form-control-host" placeholder="Địa chỉ sẽ tự động tạo" readonly>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 🔒 Các input hidden để đẩy vào DTO -->
                         <input type="hidden" id="provinceCodeHost" name="province">
                         <input type="hidden" id="provinceNameHost" name="provinceName">
 
@@ -157,7 +156,8 @@
                         <h3 class="section-title-host">Mô tả</h3>
                         <div class="section-content-host">
                             <div class="form-group-host">
-                                <textarea class="form-textarea-host" id="descriptionHost" rows="6"
+                                <textarea class="form-textarea-host" id="descriptionHost" rows="6" name="description"
+                                    th:text="${hostel != null ? hostel.description : ''}"
                                     placeholder="Nhập mô tả về khu trọ..."></textarea>
                             </div>
                         </div>
@@ -175,22 +175,41 @@
     </div>
     <script th:src="@{/js/api-map.js}"></script>
     <script>
-    document.getElementById("addHostelFormHost").addEventListener("submit", function (e) {
-        const address = window.vietnamAddressAPI.getSelectedAddress();
+document.addEventListener("DOMContentLoaded", () => {
+    // Khởi tạo VietnamAddressAPI
+    window.vietnamAddressAPI = new VietnamAddressAPI();
 
-        document.getElementById("provinceCodeHost").value = address.province.code;
-        document.getElementById("provinceNameHost").value = address.province.name;
+    // Thêm sự kiện submit cho form
+    const form = document.getElementById("addHostelFormHost");
+    if (form) {
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-        document.getElementById("districtCodeHost").value = address.district.code;
-        document.getElementById("districtNameHost").value = address.district.name;
+            if (window.vietnamAddressAPI && typeof window.vietnamAddressAPI.getSelectedAddress === 'function') {
+                const address = window.vietnamAddressAPI.getSelectedAddress();
 
-        document.getElementById("wardCodeHost").value = address.ward.code;
-        document.getElementById("wardNameHost").value = address.ward.name;
+                // Gán giá trị vào hidden fields
+                document.getElementById("provinceCodeHost").value = address.province.code || "";
+                document.getElementById("provinceNameHost").value = address.province.name || "";
+                document.getElementById("districtCodeHost").value = address.district.code || "";
+                document.getElementById("districtNameHost").value = address.district.name || "";
+                document.getElementById("wardCodeHost").value = address.ward.code || "";
+                document.getElementById("wardNameHost").value = address.ward.name || "";
+                document.getElementById("streetHost").value = address.street || "";
+                document.getElementById("houseNumberHost").value = address.houseNumber || "";
 
-        document.getElementById("streetHost").value = address.street;
-        document.getElementById("houseNumberHost").value = address.houseNumber;
-    });
-    </script>
+                // Submit form
+                this.submit();
+            } else {
+                console.error("VietnamAddressAPI không được khởi tạo hoặc phương thức getSelectedAddress không tồn tại.");
+                alert("Đã xảy ra lỗi khi xử lý địa chỉ. Vui lòng thử lại!");
+            }
+        });
+    } else {
+        console.error("Form với ID 'addHostelFormHost' không được tìm thấy.");
+    }
+});
+</script>
 
 </body>
 
