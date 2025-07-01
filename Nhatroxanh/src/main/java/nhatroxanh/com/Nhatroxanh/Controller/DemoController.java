@@ -26,15 +26,15 @@ public class DemoController {
         return "guest/phong-tro";
     }
 
-    @GetMapping("/nhan-vien/thong-tin-tro")
-    public String thongtintro() {
-        return "staff/thong-tin-tro-staff";
-    }
+    // @GetMapping("/nhan-vien/thong-tin-tro")
+    // public String thongtintro() {
+    //     return "staff/thong-tin-tro-staff";
+    // }
 
-    @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
-    public String detailthongtintro() {
-        return "staff/detail-thong-tin-tro-staff";
-    }
+    // @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
+    // public String detailthongtintro() {
+    //     return "staff/detail-thong-tin-tro-staff";
+    // }
 
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {

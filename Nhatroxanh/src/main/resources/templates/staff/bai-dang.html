@@ -590,8 +590,9 @@
                     <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${pendingPosts}">
                         <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
                             <div class="status-badge status-pending">Chờ duyệt</div>
-                            <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
-                                alt="Post image" class="post-card-img">
+                            <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}">
+                                <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                    alt="Post image" class="post-card-img"></a>
                             <div class="post-card-body">
                                 <h6 class="post-title">
                                     <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
@@ -654,8 +655,9 @@
                     <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${approvedPosts}">
                         <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
                             <div class="status-badge status-approved">Đã duyệt</div>
-                            <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
-                                alt="Post image" class="post-card-img">
+                            <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}">
+                                <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                    alt="Post image" class="post-card-img"></a>
                             <div class="post-card-body">
                                 <h6 class="post-title">
                                     <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
@@ -707,7 +709,7 @@
             </div>
         </div>
     </div>
-    
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 
 public class Vouchers {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    // @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @ManyToOne
@@ -34,6 +34,9 @@ public class Vouchers {
     @ManyToOne
     @JoinColumn(name = "room_id", nullable = false)
     private Rooms room;
+    @ManyToOne
+    @JoinColumn(name = "hostel_id", nullable = false)
+    private Hostel hostel;
 
     @Column(name = "title", nullable = false, length = 255)
     private String title;
@@ -55,4 +58,27 @@ public class Vouchers {
 
     @Column(name = "created_at")
     private Date createdAt;
+
+    @Column(name = "status")
+    private Boolean status;
+
+    @Column(name = "quantity")
+    private Integer quantity;
+
+    @Column(name = "minAmount")
+    private Float minAmount;
+
+    @Column(name = "formatted_discount", insertable = false, updatable = false)
+    private String formattedDiscount;
+
+    public String getFormattedDiscount() {
+        if (Boolean.TRUE.equals(discountType)) {
+            // Loại % giảm giá
+            return discountValue.intValue() + "%";
+        } else {
+            // Loại giảm giá cố định
+            return String.format("%,.0fđ", discountValue);
+        }
+    }
+
 }

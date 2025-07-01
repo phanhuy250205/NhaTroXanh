@@ -294,6 +294,32 @@
         </div>
       </div>
     </div>
+    <div class="custom-pagination mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}">
+            «
+          </a>
+        </li>
+
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
+          th:classappend="${i == currentPage} ? 'active'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${i}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}"
+            th:text="${i + 1}">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}">
+            »
+          </a>
+        </li>
+      </ul>
+    </div>
+
+
     <script th:src="@{/js/sidebar.js}"></script>
     <script>
       document.querySelectorAll('.delete-btn').forEach(button => {
