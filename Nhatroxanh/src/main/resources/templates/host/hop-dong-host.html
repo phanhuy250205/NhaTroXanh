@@ -181,53 +181,56 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Ngày sinh</label>
-                                    <input type="date" class="form-control" id="owner-dob">
+                                    <input type="date" class="form-control" th:field="*{owner.birthday}" >
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Số CMND/CCCD</label>
-                                    <input type="text" class="form-control" id="owner-id">
+                                    <input type="text" class="form-control" th:field="*{owner.id}" >
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Ngày cấp</label>
-                                    <input type="date" class="form-control" id="owner-id-date">
+                                    <input type="date" class="form-control" th:field="*{owner.issueDate}" >
                                 </div>
                                 <div class="col-md-9">
                                     <label class="form-label">Nơi cấp</label>
-                                    <input type="text" class="form-control" id="owner-id-place">
+                                    <input type="text" class="form-control" th:field="*{owner.issuePlace}" >
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Tỉnh/Thành phố</label>
-                                    <select class="form-select" id="owner-province">
+                                    <select class="form-select" th:field="*{owner.province}" >
                                         <option value="">Tỉnh/Thành phố</option>
+                                        <option th:value="${contract.owner.province}" th:text="${contract.owner.province}" th:unless="${contract.owner.province == null}">[[${contract.owner.province}]]</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Quận/Huyện</label>
-                                    <select class="form-select" id="owner-district">
+                                    <select class="form-select" th:field="*{owner.district}" >
                                         <option value="">Quận/Huyện</option>
+                                        <option th:value="${contract.owner.district}" th:text="${contract.owner.district}" th:unless="${contract.owner.district == null}">[[${contract.owner.district}]]</option>
                                     </select>
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Phường/Xã</label>
-                                    <select class="form-select" id="owner-ward">
+                                    <select class="form-select" th:field="*{owner.ward}" >
                                         <option value="">Phường/Xã</option>
+                                        <option th:value="${contract.owner.ward}" th:text="${contract.owner.ward}" th:unless="${contract.owner.ward == null}">[[${contract.owner.ward}]]</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tên đường/Số nhà</label>
-                                    <input type="text" class="form-control" id="owner-street">
+                                    <input type="text" class="form-control" th:field="*{owner.street}"  th:value="${contract.owner.street != null ? contract.owner.street : ''}">
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Email (nếu có)</label>
-                                    <input type="email" class="form-control" id="owner-email">
+                                    <input type="email" class="form-control" th:field="*{owner.email}" >
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" id="owner-phone">
+                                    <input type="text" class="form-control" th:field="*{owner.phone}" >
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Tài khoản ngân hàng (nếu có)</label>
-                                    <input type="text" class="form-control" id="owner-bank">
+                                    <input type="text" class="form-control" th:field="*{owner.bankAccount}" >
                                 </div>
                             </div>
 
@@ -250,21 +253,26 @@
                                     <label class="form-label">
                                         <i class="fa fa-building me-1"></i>Chọn khu trọ
                                     </label>
-                                    <select class="form-select" id="housing-area">
+                                    <select class="form-select" id="hostelId" onchange="filterRooms()">
                                         <option value="">-- Chọn khu trọ --</option>
-                                        <option value="khu-a">Khu A - Nguyễn Văn Linh</option>
-                                        <option value="khu-b">Khu B - Lê Duẩn</option>
-                                        <option value="khu-c">Khu C - Trần Hưng Đạo</option>
-                                        <option value="khu-d">Khu D - Hai Bà Trưng</option>
+                                        <option th:each="hostel : ${hostels}"
+                                                th:value="${hostel.hostelId}"
+                                                th:text="${hostel.name}"
+                                                th:selected="${hostel.hostelId == contract.room?.hostelId}"></option>
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">
+                                    <label class="form-label" th:fragment="roomSelect">
                                         <i class="fa fa-door-open me-1"></i>Chọn phòng trọ
                                     </label>
-                                    <select class="form-select" id="room-selection" disabled>
+                                    <select class="form-select" id="roomId" name="room.roomId" th:class="${#fields.hasErrors('room.roomId')} ? 'form-control is-invalid' : 'form-control'">
                                         <option value="">-- Chọn phòng trọ --</option>
+                                        <option th:each="room : ${rooms}"
+                                                th:value="${room.roomId}"
+                                                th:text="${room.roomName} + ' (' + room.address + ')'"
+                                                th:data-hostel-id="${room.hostelId}"></option>
                                     </select>
+
                                 </div>
 
                                 <div class="col-md-4">
@@ -422,6 +430,11 @@
                         </div>
                     </div>
 
+
+
+
+
+
                     <!-- Action Buttons -->
                     <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
                         <button class="btn btn-outline-info flex-fill" id="btn-update">
@@ -464,12 +477,11 @@
                             <p>Hôm nay, ngày <span id="preview-sign-date" class="nha-tro-highlight">........................</span>, chúng tôi gồm:</p>
 
                             <div class="mb-3">
-                                <p><strong>BÊN CHO THUÊ (Bên A):</strong></p>
-                                <p>Họ tên: <span id="preview-owner-name" class="nha-tro-highlight">........................</span></p>
-                                <p>Sinh ngày: <span id="preview-owner-dob" class="nha-tro-highlight">........................</span></p>
-                                <p>Số CMND/CCCD: <span id="preview-owner-id" class="nha-tro-highlight">........................</span> cấp ngày <span id="preview-owner-id-date" class="nha-tro-highlight">........................</span> tại <span id="preview-owner-id-place" class="nha-tro-highlight">........................</span></p>
-                                <p>Địa chỉ: <span id="preview-owner-address" class="nha-tro-highlight">........................</span></p>
-                                <p>Số điện thoại: <span id="preview-owner-phone" class="nha-tro-highlight">........................</span></p>
+                                <p><strong>BÊN CHO THUÊ (Bên A):</strong> <span id="preview-owner-name" class="nha-tro-highlight" th:text="${contract.owner.fullName != null ? contract.owner.fullName : '........................'}">........................</span></p>
+                                <p>Sinh ngày: <span id="preview-owner-dob" class="nha-tro-highlight" th:text="${contract.owner.birthday != null ? #dates.format(contract.owner.birthday, 'yyyy-MM-dd') : '........................'}">........................</span></p>
+                                <p>Số CMND/CCCD: <span id="preview-owner-id" class="nha-tro-highlight" th:text="${contract.owner.id != null ? contract.owner.id : '........................'}">........................</span> cấp ngày <span id="preview-owner-id-date" class="nha-tro-highlight" th:text="${contract.owner.issueDate != null ? #dates.format(contract.owner.issueDate, 'yyyy-MM-dd') : '........................'}">........................</span> tại <span id="preview-owner-id-place" class="nha-tro-highlight" th:text="${contract.owner.issuePlace != null ? contract.owner.issuePlace : '........................'}">........................</span></p>
+                                <p>Địa chỉ: <span id="preview-owner-address" class="nha-tro-highlight" th:text="${contract.owner.street != null ? contract.owner.street : '........................'} + ', ' + ${contract.owner.ward != null ? contract.owner.ward : ''} + ', ' + ${contract.owner.district != null ? contract.owner.district : ''} + ', ' + ${contract.owner.province != null ? contract.owner.province : ''}">........................</span></p>
+                                <p>Số điện thoại: <span id="preview-owner-phone" class="nha-tro-highlight" th:text="${contract.owner.phone != null ? contract.owner.phone : '........................'}">........................</span></p>
                             </div>
 
                             <div class="mb-3">
@@ -546,7 +558,7 @@
     </div>
 </div>
 
-<!-- Modals -->
+<
 <!-- Add Resident Modal -->
 <div class="modal fade" id="addResidentModal" tabindex="-1" aria-labelledby="addResidentModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -558,23 +570,6 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body nha-tro-host-modal-body">
-                <!-- <div class="mb-4">
-                    <h6 class="mb-3">
-                        <i class="fa fa-search me-2"></i>Tìm khách đã có trong hệ thống
-                    </h6>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="search-customer-phone" placeholder="Nhập số điện thoại để tìm kiếm...">
-                        <button class="btn btn-outline-primary" type="button" id="btn-search-customer">
-                            <i class="fa fa-search"></i> Tìm kiếm
-                        </button>
-                    </div>
-                    <div id="search-results" class="mt-3"></div>
-                </div>
-
-                <div class="text-center my-3">
-                    <span class="text-muted">── HOẶC ──</span>
-                </div> -->
-
                 <div>
                     <h6 class="mb-3">
                         <i class="fa fa-user-plus me-2"></i>Thêm người mới
@@ -616,6 +611,10 @@
         </div>
     </div>
 </div>
+
+
+
+
 
 <!-- Add Amenity Modal -->
 <div class="modal fade" id="addAmenityModal-host" tabindex="-1" aria-labelledby="addAmenityModalLabel-host" aria-hidden="true">
@@ -781,128 +780,6 @@
 
 <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/contract.js}"></script>
-
-<!--<script>-->
-<!--    // Housing area and room selection functionality-->
-<!--    document.addEventListener('DOMContentLoaded', function() {-->
-<!--        const housingAreaSelect = document.getElementById('housing-area');-->
-<!--        const roomSelectionSelect = document.getElementById('room-selection');-->
-
-<!--        // Sample room data for each housing area-->
-<!--        const roomData = {-->
-<!--            'khu-a': [-->
-<!--                { value: 'a101', text: 'Phòng A101 - 25m² - 3.5tr/tháng', number: 'A101', area: 25, price: 3500000 },-->
-<!--                { value: 'a102', text: 'Phòng A102 - 30m² - 4tr/tháng', number: 'A102', area: 30, price: 4000000 },-->
-<!--                { value: 'a103', text: 'Phòng A103 - 28m² - 3.8tr/tháng', number: 'A103', area: 28, price: 3800000 },-->
-<!--                { value: 'a201', text: 'Phòng A201 - 25m² - 3.5tr/tháng', number: 'A201', area: 25, price: 3500000 },-->
-<!--                { value: 'a202', text: 'Phòng A202 - 30m² - 4tr/tháng', number: 'A202', area: 30, price: 4000000 }-->
-<!--            ],-->
-<!--            'khu-b': [-->
-<!--                { value: 'b101', text: 'Phòng B101 - 22m² - 3.2tr/tháng', number: 'B101', area: 22, price: 3200000 },-->
-<!--                { value: 'b102', text: 'Phòng B102 - 27m² - 3.7tr/tháng', number: 'B102', area: 27, price: 3700000 },-->
-<!--                { value: 'b103', text: 'Phòng B103 - 25m² - 3.5tr/tháng', number: 'B103', area: 25, price: 3500000 },-->
-<!--                { value: 'b201', text: 'Phòng B201 - 22m² - 3.2tr/tháng', number: 'B201', area: 22, price: 3200000 },-->
-<!--                { value: 'b202', text: 'Phòng B202 - 27m² - 3.7tr/tháng', number: 'B202', area: 27, price: 3700000 }-->
-<!--            ],-->
-<!--            'khu-c': [-->
-<!--                { value: 'c101', text: 'Phòng C101 - 35m² - 4.5tr/tháng', number: 'C101', area: 35, price: 4500000 },-->
-<!--                { value: 'c102', text: 'Phòng C102 - 32m² - 4.2tr/tháng', number: 'C102', area: 32, price: 4200000 },-->
-<!--                { value: 'c103', text: 'Phòng C103 - 30m² - 4tr/tháng', number: 'C103', area: 30, price: 4000000 },-->
-<!--                { value: 'c201', text: 'Phòng C201 - 35m² - 4.5tr/tháng', number: 'C201', area: 35, price: 4500000 }-->
-<!--            ],-->
-<!--            'khu-d': [-->
-<!--                { value: 'd101', text: 'Phòng D101 - 20m² - 2.8tr/tháng', number: 'D101', area: 20, price: 2800000 },-->
-<!--                { value: 'd102', text: 'Phòng D102 - 24m² - 3.2tr/tháng', number: 'D102', area: 24, price: 3200000 },-->
-<!--                { value: 'd103', text: 'Phòng D103 - 26m² - 3.4tr/tháng', number: 'D103', area: 26, price: 3400000 },-->
-<!--                { value: 'd201', text: 'Phòng D201 - 20m² - 2.8tr/tháng', number: 'D201', area: 20, price: 2800000 },-->
-<!--                { value: 'd202', text: 'Phòng D202 - 24m² - 3.2tr/tháng', number: 'D202', area: 24, price: 3200000 }-->
-<!--            ]-->
-<!--        };-->
-
-<!--        // Handle housing area selection change-->
-<!--        housingAreaSelect.addEventListener('change', function() {-->
-<!--            const selectedArea = this.value;-->
-
-<!--            // Clear room selection-->
-<!--            roomSelectionSelect.innerHTML = '<option value="">&#45;&#45; Chọn phòng trọ &#45;&#45;</option>';-->
-
-<!--            if (selectedArea && roomData[selectedArea]) {-->
-<!--                // Enable room selection-->
-<!--                roomSelectionSelect.disabled = false;-->
-
-<!--                // Populate room options-->
-<!--                roomData[selectedArea].forEach(room => {-->
-<!--                    const option = document.createElement('option');-->
-<!--                    option.value = room.value;-->
-<!--                    option.textContent = room.text;-->
-<!--                    roomSelectionSelect.appendChild(option);-->
-<!--                });-->
-<!--            } else {-->
-<!--                // Disable room selection if no area selected-->
-<!--                roomSelectionSelect.disabled = true;-->
-<!--                // Clear form fields-->
-<!--                document.getElementById('room-number').value = '';-->
-<!--                document.getElementById('room-area').value = '';-->
-<!--                document.getElementById('rent-price').value = '';-->
-
-<!--                // Update preview-->
-<!--                if (window.NhaTroContract) {-->
-<!--                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');-->
-<!--                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');-->
-<!--                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');-->
-<!--                }-->
-<!--            }-->
-<!--        });-->
-
-<!--        // Handle room selection change-->
-<!--        roomSelectionSelect.addEventListener('change', function() {-->
-<!--            const selectedArea = housingAreaSelect.value;-->
-<!--            const selectedRoomValue = this.value;-->
-
-<!--            if (selectedArea && selectedRoomValue && roomData[selectedArea]) {-->
-<!--                // Find the selected room data-->
-<!--                const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);-->
-
-<!--                if (selectedRoom) {-->
-<!--                    // Auto-fill room information-->
-<!--                    document.getElementById('room-number').value = selectedRoom.number;-->
-<!--                    document.getElementById('room-area').value = selectedRoom.area;-->
-<!--                    document.getElementById('rent-price').value = selectedRoom.price;-->
-
-<!--                    // Update contract preview using the existing NhaTroContract methods-->
-<!--                    if (window.NhaTroContract) {-->
-<!--                        // Update preview fields with highlight effect-->
-<!--                        window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');-->
-<!--                        window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');-->
-<!--                        window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');-->
-
-<!--                        // Recalculate deposit based on new rent price-->
-<!--                        window.NhaTroContract.calculateDeposit();-->
-
-<!--                        // Show notification-->
-<!--                        window.NhaTroContract.showNotification(-->
-<!--                            `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,-->
-<!--                            'success'-->
-<!--                        );-->
-<!--                    }-->
-<!--                }-->
-<!--            } else {-->
-<!--                // Clear fields if no room selected-->
-<!--                document.getElementById('room-number').value = '';-->
-<!--                document.getElementById('room-area').value = '';-->
-<!--                document.getElementById('rent-price').value = '';-->
-
-<!--                // Update preview-->
-<!--                if (window.NhaTroContract) {-->
-<!--                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');-->
-<!--                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');-->
-<!--                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');-->
-<!--                    window.NhaTroContract.calculateDeposit();-->
-<!--                }-->
-<!--            }-->
-<!--        });-->
-<!--    });-->
-<!--</script>-->
 
 </body>
 

@@ -5,6 +5,7 @@ import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -76,5 +77,10 @@ public class Users {
 
     public Users orElse(Object object) {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
     }
 }

@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -47,5 +48,16 @@ public interface HostelRepository extends JpaRepository<Hostel, Integer> {
 
     @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
     long countHostelsByOwnerId(Integer ownerId);
+
+    // Truy vấn cơ bản để lấy khu trọ theo ownerId
+    @Query("SELECT h FROM Hostel h WHERE h.owner.userId = :ownerId")
+    List<Hostel> findHostelsByOwnerId(@Param("ownerId") Integer ownerId);
+
+    // Truy vấn với JOIN FETCH để lấy khu trọ và phòng trọ cùng lúc
+    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.rooms r WHERE h.owner.userId = :ownerId")
+    List<Hostel> findHostelsWithRoomsByOwnerId(@Param("ownerId") Integer ownerId);
+    // Truy vấn lấy phòng trọ theo hostelId
+    @Query("SELECT r FROM Rooms r WHERE r.hostel.hostelId = :hostelId")
+    List<Rooms> findRoomsByHostelId(@Param("hostelId") Integer hostelId);
 
 }

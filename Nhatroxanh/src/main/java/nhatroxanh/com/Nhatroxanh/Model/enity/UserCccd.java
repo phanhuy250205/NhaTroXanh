@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import java.sql.Date;
+import java.util.Objects;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -49,5 +50,9 @@ public class UserCccd {
     public UserCccd orElse(Object object) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cccdNumber, issueDate, issuePlace); // Không bao gồm user
     }
 }

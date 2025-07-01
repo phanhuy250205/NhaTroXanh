@@ -79,13 +79,13 @@ public class PostController {
 
     @GetMapping("/bai-dang/tim-kiem")
     public String searchPosts(@AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) ApprovalStatus status,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
-            @RequestParam(required = false) String sort,
-            Model model) {
+                              @RequestParam(required = false) String keyword,
+                              @RequestParam(required = false) Integer categoryId,
+                              @RequestParam(required = false) ApprovalStatus status,
+                              @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+                              @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
+                              @RequestParam(required = false) String sort,
+                              Model model) {
 
         Integer userId = userDetails.getUser().getUserId();
 
@@ -110,7 +110,7 @@ public class PostController {
 
     @PostMapping("/xoa-bai-dang/{postId}")
     public String deletePost(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes) {
         try {
             Integer userId = userDetails.getUser().getUserId();
             Post post = postService.getPostById(postId);
@@ -138,32 +138,39 @@ public class PostController {
         if (post == null) {
             return "redirect:/chu-tro/bai-dang?error=Post not found";
         }
-        Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
-        log.info("Post {} utilities (size: {}): {}", postId, utilities.size(),
-                utilities.stream().map(Utility::getName).collect(Collectors.toList()));
+
+        Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
         List<String> images = post.getImages() != null && !post.getImages().isEmpty()
                 ? post.getImages().stream().map(Image::getUrl).distinct().collect(Collectors.toList())
                 : List.of("/images/cards/default.jpg");
-        log.info("Post {} images: {}", postId, images);
 
-        Hostel hostel = post.getHostel() != null ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId())
-                .orElse(null) : null;
+        // Lấy nhà trọ kèm phòng và thông tin chi tiết của phòng
+        Hostel hostel = post.getHostel() != null
+                ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
+                : null;
+
+        // Danh sách phòng
         List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
 
-        model.addAttribute("images", images);
-        model.addAttribute("post", post);
-        model.addAttribute("utilities", utilities != null ? utilities : new HashSet<>());
+        // Debug
+        log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+        log.info("Rooms count: {}", rooms.size());
+        rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
         model.addAttribute("hostel", hostel);
         model.addAttribute("rooms", rooms);
         model.addAttribute("roomCount", rooms.size());
+        model.addAttribute("images", images);
+        model.addAttribute("post", post);
+        model.addAttribute("utilities", utilities);
 
         return "host/chi-tiet-bai-dang";
     }
 
     @PostMapping("/cap-nhat-trang-thai")
     public String updatePostStatus(@RequestParam("postId") Integer postId,
-            @RequestParam("status") Boolean status,
-            RedirectAttributes redirectAttributes) {
+                                   @RequestParam("status") Boolean status,
+                                   RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(postId);
         if (post == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy bài đăng.");
@@ -304,7 +311,7 @@ public class PostController {
 
     @GetMapping("/sua-bai-dang/{postId}")
     public String showEditPostForm(@PathVariable Integer postId, Model model,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new IllegalArgumentException("Bài đăng không tồn tại với ID: " + postId));

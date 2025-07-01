@@ -82,6 +82,18 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
     // Đếm số phòng đang cọc
     @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'ĐANG_CỌC'")
     long countDepositedRoomsByOwnerId(Integer ownerId);
+    @Query("SELECT r FROM Rooms r WHERE r.namerooms = :roomNumber")
+    Optional<Rooms> findByRoomNumber(@Param("roomNumber") String roomNumber);
+
+
+
+    // Truy vấn để lấy phòng trọ theo hostelId
+    @Query("SELECT r FROM Rooms r WHERE r.hostel.hostelId = :hostelId")
+    List<Rooms> findRoomsByHostelId(@Param("hostelId") Integer hostelId);
+
+    // Truy vấn với JOIN FETCH để lấy phòng trọ cùng thông tin khu trọ và tiện ích
+    @Query("SELECT r FROM Rooms r LEFT JOIN FETCH r.hostel h LEFT JOIN FETCH r.utilities u WHERE r.hostel.hostelId = :hostelId")
+    List<Rooms> findRoomsWithDetailsByHostelId(@Param("hostelId") Integer hostelId);
 }
 
 
