@@ -3,6 +3,9 @@
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head>
+<head>
+    
+</head>
 <body class="phongtro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -184,15 +187,32 @@
 
                     <div class="add-room-container-modern">
                         <form id="addRoomFormHost" class="add-room-form-modern">
-                            <!-- Row 1: Tên phòng và Giá thuê -->
+                            <!-- Row 1: Khu trọ và Tên phòng -->
                             <div class="form-row-modern">
+                                <div class="form-group-modern">
+                                    <label for="roomAreaSelectHost" class="form-label-modern">
+                                        Khu trọ <span class="required-star">*</span>
+                                    </label>
+                                    <select class="form-select-modern" id="roomAreaSelectHost" required>
+                                        <option value="">Chọn khu trọ</option>
+                                        <option value="khu-a">Khu A - Tầng 1</option>
+                                        <option value="khu-b">Khu B - Tầng 2</option>
+                                        <option value="khu-c">Khu C - Tầng 3</option>
+                                        <option value="khu-d">Khu D - Tầng 4</option>
+                                        <option value="khu-e">Khu E - Tầng 5</option>
+                                    </select>
+                                </div>
                                 <div class="form-group-modern">
                                     <label for="roomNameHost" class="form-label-modern">
                                         Tên phòng <span class="required-star">*</span>
                                     </label>
                                     <input type="text" class="form-input-modern" id="roomNameHost"
-                                        placeholder="Nhập tên phòng" required>
+                                        placeholder="Nhập tên phòng (VD: A101)" required>
                                 </div>
+                            </div>
+
+                            <!-- Row 2: Giá thuê và Trạng thái -->
+                            <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomPriceHost" class="form-label-modern">
                                         Giá thuê (VNĐ) <span class="required-star">*</span>
@@ -200,10 +220,6 @@
                                     <input type="text" class="form-input-modern" id="roomPriceHost"
                                         placeholder="Nhập giá thuê phòng" required>
                                 </div>
-                            </div>
-
-                            <!-- Row 2: Trạng thái, Diện tích, Số người tối đa -->
-                            <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomStatusHost" class="form-label-modern">
                                         Trạng thái <span class="required-star">*</span>
@@ -215,6 +231,10 @@
                                         <option value="maintenance">Bảo trì</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <!-- Row 3: Diện tích và Số người tối đa -->
+                            <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomAreaHost" class="form-label-modern">
                                         Diện tích (m²) <span class="required-star">*</span>
@@ -231,11 +251,67 @@
                                 </div>
                             </div>
 
-                            <!-- Row 3: Mô tả -->
+                            <!-- Row 4: Tiện ích phòng -->
                             <div class="form-group-modern full-width">
-                                <label for="roomDescriptionHost" class="form-label-modern">Mô tả</label>
+                                <label class="form-label-modern">Tiện ích phòng</label>
+                                <div class="amenities-grid">
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="wifi" name="amenities" value="wifi" class="amenity-checkbox">
+                                        <label for="wifi" class="amenity-label">
+                                            <i class="fas fa-wifi"></i>
+                                            <span>WiFi</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="ac" name="amenities" value="ac" class="amenity-checkbox">
+                                        <label for="ac" class="amenity-label">
+                                            <i class="fas fa-snowflake"></i>
+                                            <span>Điều hòa</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="fridge" name="amenities" value="fridge" class="amenity-checkbox">
+                                        <label for="fridge" class="amenity-label">
+                                            <i class="fas fa-cube"></i>
+                                            <span>Tủ lạnh</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="washing-machine" name="amenities" value="washing-machine" class="amenity-checkbox">
+                                        <label for="washing-machine" class="amenity-label">
+                                            <i class="fas fa-tshirt"></i>
+                                            <span>Máy giặt</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="water-heater" name="amenities" value="water-heater" class="amenity-checkbox">
+                                        <label for="water-heater" class="amenity-label">
+                                            <i class="fas fa-fire"></i>
+                                            <span>Nước nóng</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="kitchen" name="amenities" value="kitchen" class="amenity-checkbox">
+                                        <label for="kitchen" class="amenity-label">
+                                            <i class="fas fa-utensils"></i>
+                                            <span>Bếp riêng</span>
+                                        </label>
+                                    </div>
+                                    <div class="amenity-item">
+                                        <input type="checkbox" id="bathroom" name="amenities" value="bathroom" class="amenity-checkbox">
+                                        <label for="bathroom" class="amenity-label">
+                                            <i class="fas fa-bath"></i>
+                                            <span>WC riêng</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Row 5: Mô tả -->
+                            <div class="form-group-modern full-width">
+                                <label for="roomDescriptionHost" class="form-label-modern">Mô tả chi tiết</label>
                                 <textarea class="form-textarea-modern" id="roomDescriptionHost"
-                                    placeholder="Mô tả chi tiết về phòng..." rows="4"></textarea>
+                                    placeholder="Mô tả chi tiết về phòng, vị trí, môi trường xung quanh..." rows="4"></textarea>
                             </div>
 
                             <!-- Image Upload Section -->
@@ -465,5 +541,9 @@
 
             </div>
         </div>
+
+        <!-- CSS cho phần tiện ích -->
+        
+    </div>
 </body>
 </html>
