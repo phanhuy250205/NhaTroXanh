@@ -17,8 +17,6 @@ import nhatroxanh.com.Nhatroxanh.Service.Impl.HostelServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 
-
-
 @Controller
 public class HostelController {
 
@@ -40,41 +38,55 @@ public class HostelController {
             return "host/thongtintro";
         }
     }
-    @GetMapping("chu-tro/them-khu-tro")
+
+    @GetMapping("/chu-tro/them-khu-tro")
     public String themkhuatro(Model model) {
         model.addAttribute("hostel", new HostelDTO());
         return "host/themkhutro";
     }
-    @PostMapping("/chu-tro/them-khu-tro")
-    public String saveHostel(@ModelAttribute HostelDTO hostelDTO,
-                            @RequestParam("province") String provinceCode,
-                            @RequestParam("provinceName") String provinceName,
-                            @RequestParam("district") String districtCode,
-                            @RequestParam("districtName") String districtName,
-                            @RequestParam("ward") String wardCode,
-                            @RequestParam("wardName") String wardName,
-                            @RequestParam("street") String street,
-                            @RequestParam("houseNumber") String houseNumber,
-                            @AuthenticationPrincipal CustomUserDetails userDetails,
-                            RedirectAttributes redirectAttributes) {
-        try {
-            hostelDTO.setOwnerId(userDetails.getUser().getUserId());
-            hostelDTO.setStreet(street);
-            hostelDTO.setHouseNumber(houseNumber);
-            hostelDTO.setProvinceCode(provinceCode);
-            hostelDTO.setProvinceName(provinceName);
-            hostelDTO.setDistrictCode(districtCode);
-            hostelDTO.setDistrictName(districtName);
-            hostelDTO.setWardCode(wardCode);
-            hostelDTO.setWardName(wardName);
 
-            hostelServiceImpl.createHostel(hostelDTO);
-            redirectAttributes.addFlashAttribute("successMessage", "Thêm khu trọ thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi thêm khu trọ: " + e.getMessage());
-        }
-        return "redirect:/chu-tro/thong-tin-tro";
+   @PostMapping("/chu-tro/them-khu-tro")
+public String saveHostel(@ModelAttribute HostelDTO hostelDTO,
+                        @RequestParam("province") String provinceCode,
+                        @RequestParam("provinceName") String provinceName,
+                        @RequestParam("district") String districtCode,
+                        @RequestParam("districtName") String districtName,
+                        @RequestParam("ward") String wardCode,
+                        @RequestParam("wardName") String wardName,
+                        @RequestParam("street") String street,
+                        @RequestParam("houseNumber") String houseNumber,
+                        @AuthenticationPrincipal CustomUserDetails userDetails,
+                        RedirectAttributes redirectAttributes) {
+    try {
+        hostelDTO.setOwnerId(userDetails.getUser().getUserId());
+        hostelDTO.setProvinceCode(provinceCode);
+        hostelDTO.setProvinceName(provinceName);
+        hostelDTO.setDistrictCode(districtCode);
+        hostelDTO.setDistrictName(districtName);
+        hostelDTO.setWardCode(wardCode);
+        hostelDTO.setWardName(wardName);
+        hostelDTO.setStreet(street);
+        hostelDTO.setHouseNumber(houseNumber);
+
+        System.out.println("HostelDTO before save: " + hostelDTO); // Log để kiểm tra
+        String combinedAddress = hostelDTO.getCombinedAddress();
+        hostelDTO.setAddress(combinedAddress);
+        System.out.println("Combined Address: " + combinedAddress); // Log địa chỉ
+        System.out.println("Province Code: " + provinceCode);
+        System.out.println("District Code: " + districtCode);
+        System.out.println("Ward Code: " + wardCode);
+        System.out.println("Street: " + street);
+        System.out.println("House Number: " + houseNumber);
+
+        hostelServiceImpl.createHostel(hostelDTO);
+        redirectAttributes.addFlashAttribute("successMessage", "Thêm khu trọ thành công!");
+    } catch (Exception e) {
+        System.out.println("Error when saving hostel: " + e.getMessage()); // Log lỗi
+        e.printStackTrace();
+        redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi thêm khu trọ: " + e.getMessage());
     }
+    return "redirect:/chu-tro/thong-tin-tro";
+}
 
     @PostMapping("/chu-tro/xoa-khu-tro")
     public String deleteHostel(@RequestParam("hostelId") Integer hostelId, RedirectAttributes redirectAttributes) {
