@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -34,6 +35,9 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 
 @Controller
 @RequestMapping("/chu-tro")
@@ -44,7 +48,7 @@ public class PostController {
     private PostService postService;
 
     @Autowired
-    private CategoryReponsitory categoryRepository;
+    private CategoryRepository categoryRepository;
 
     @Autowired
     private PostRepository postRepository;
@@ -68,42 +72,45 @@ public class PostController {
     private FileUploadService fileUploadService;
 
     @GetMapping("/bai-dang")
-    public String showPostList(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showPostList(@AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
         Integer userId = userDetails.getUser().getUserId();
-        List<Post> posts = postService.getPostsByUserId(userId);
+        Pageable pageable = PageRequest.of(page, 6, Sort.by("postId").descending());
+        Page<Post> posts = postService.getPostsByUserId(userId, pageable);
 
         model.addAttribute("posts", posts);
         model.addAttribute("categories", categoryRepository.findAll());
+        model.addAttribute("currentPage", page);
         return "host/quan-ly-bai-dang";
     }
 
     @GetMapping("/bai-dang/tim-kiem")
     public String searchPosts(@AuthenticationPrincipal CustomUserDetails userDetails,
-                              @RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) Integer categoryId,
-                              @RequestParam(required = false) ApprovalStatus status,
-                              @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
-                              @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
-                              @RequestParam(required = false) String sort,
-                              Model model) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) ApprovalStatus status,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") Date toDate,
+            @RequestParam(required = false) String sort,
+            @RequestParam(defaultValue = "0") int page,
+            Model model) {
 
         Integer userId = userDetails.getUser().getUserId();
+        Pageable pageable = PageRequest.of(page, 6, Sort.by("postId").descending());
 
-        List<Post> posts = postService.searchPosts(keyword, categoryId, status, fromDate, toDate, sort)
-                .stream()
-                .filter(p -> p.getUser().getUserId().equals(userId))
-                .collect(Collectors.toList());
+        Page<Post> posts = postService.searchPosts(keyword, categoryId, status, fromDate, toDate, sort, userId,
+                pageable);
 
         model.addAttribute("posts", posts);
         model.addAttribute("categories", categoryRepository.findAll());
-
-        // Giữ lại giá trị sau khi lọc
         model.addAttribute("keyword", keyword);
         model.addAttribute("categoryId", categoryId);
         model.addAttribute("status", status);
         model.addAttribute("sort", sort);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
+        model.addAttribute("currentPage", page);
 
         return "host/quan-ly-bai-dang";
     }

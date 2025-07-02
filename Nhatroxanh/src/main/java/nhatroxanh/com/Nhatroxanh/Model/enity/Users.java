@@ -22,17 +22,17 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@ToString(exclude = { "notifications", "userCccd", "contracts" })
+@ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "Users")
+@Table(name = "users") // Đảm bảo tên bảng khớp với database
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
+    @Column(name = "user_id") // Đảm bảo tên cột khớp với database
     private Integer userId;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Notification> notifications;
 
     @Column(name = "password", nullable = false, length = 256)
@@ -82,16 +82,14 @@ public class Users {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
 
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Contracts> contracts;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contracts> ownedContracts;
 
     @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contracts> rentedContracts;
 
-    // @Column(name = "status")
-    // private Boolean status;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<Vouchers> vouchers;
 
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
