@@ -5,13 +5,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
-import ch.qos.logback.core.model.Model;
+
 
 @Controller
 public class DemoController {
 
-
-    
 
      @Autowired
      private UserService userService;
@@ -101,8 +99,12 @@ public class DemoController {
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
-    // @GetMapping("/chu-tro/sua-bai-dang")
-    // public String chitiethopdong() {
-    //     return "host/sua-bai-dang";
-    // }
+    @GetMapping("/khach-thue/quan-ly-thue-tra")
+    public String quanLyThueTra() {
+        return "guest/quan-ly-thue-tra";
+    }
+    @GetMapping("/khach-thue/chitiet-phongthue")
+    public String chiTietPhongThue() {
+        return "guest/chitiet-phongthue";
+    }
 }

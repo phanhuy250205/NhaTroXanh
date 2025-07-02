@@ -17,7 +17,9 @@ public class ContractDto {
         this.tenant = new Tenant();
         this.room = new Room();
         this.terms = new Terms();
+        this.contractDate = LocalDate.now(); // Gán mặc định
     }
+
 
     // Getters and setters
     public Long getId() { return id; }
@@ -38,7 +40,7 @@ public class ContractDto {
     public static class Owner {
         private String fullName;
         private String phone;
-        private String id; // CCCD
+        private String cccdNumber; // CCCD number
         private String email;
         private Date birthday;
         private String bankAccount;
@@ -48,14 +50,25 @@ public class ContractDto {
         private String district;
         private String ward;
         private String street;
+        private String cccdFrontUrl; // Thêm trường cho URL hình ảnh CCCD mặt trước
+        private String cccdBackUrl;  // Thêm trường cho URL hình ảnh CCCD mặt sau
+
+
+        public String getCccdNumber() {
+            return cccdNumber;
+        }
+
+        public void setCccdNumber(String cccdNumber) {
+            this.cccdNumber = cccdNumber;
+        }
 
         // Getters and setters
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
+        public String getId() { return cccdNumber; }
+        public void setId(String id) { this.cccdNumber = id; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public Date getBirthday() { return birthday; }
@@ -74,12 +87,16 @@ public class ContractDto {
         public void setWard(String ward) { this.ward = ward; }
         public String getStreet() { return street; }
         public void setStreet(String street) { this.street = street; }
+        public String getCccdFrontUrl() { return cccdFrontUrl; }
+        public void setCccdFrontUrl(String cccdFrontUrl) { this.cccdFrontUrl = cccdFrontUrl; }
+        public String getCccdBackUrl() { return cccdBackUrl; }
+        public void setCccdBackUrl(String cccdBackUrl) { this.cccdBackUrl = cccdBackUrl; }
     }
 
     public static class Tenant {
         private String fullName;
         private String phone;
-        private String id; // CCCD
+        private String cccdNumber; // Đổi từ id thành cccdNumber
         private String email;
         private Date issueDate;
         private String issuePlace;
@@ -87,24 +104,18 @@ public class ContractDto {
         private String district;
         private String ward;
         private String street;
-        private Date birthday; // Thêm trường birthday
+        private Date birthday;
+        private String cccdFrontUrl; // Thêm trường cho URL hình ảnh CCCD mặt trước
+        private String cccdBackUrl;  // Thêm trường cho URL hình ảnh CCCD mặt sau
 
-
-        public Date getBirthday() {
-            return birthday;
-        }
-
-        public void setBirthday(Date birthday) {
-            this.birthday = birthday;
-        }
 
         // Getters and setters
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
         public void setPhone(String phone) { this.phone = phone; }
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
+        public String getId() { return cccdNumber; }
+        public void setId(String id) { this.cccdNumber = id; }
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public Date getIssueDate() { return issueDate; }
@@ -119,6 +130,20 @@ public class ContractDto {
         public void setWard(String ward) { this.ward = ward; }
         public String getStreet() { return street; }
         public void setStreet(String street) { this.street = street; }
+        public Date getBirthday() { return birthday; }
+        public void setBirthday(Date birthday) { this.birthday = birthday; }
+        public String getCccdFrontUrl() { return cccdFrontUrl; }
+        public void setCccdFrontUrl(String cccdFrontUrl) { this.cccdFrontUrl = cccdFrontUrl; }
+        public String getCccdBackUrl() { return cccdBackUrl; }
+        public void setCccdBackUrl(String cccdBackUrl) { this.cccdBackUrl = cccdBackUrl; }
+
+        public String getCccdNumber() {
+            return cccdNumber;
+        }
+
+        public void setCccdNumber(String cccdNumber) {
+            this.cccdNumber = cccdNumber;
+        }
     }
 
     public static class Room {

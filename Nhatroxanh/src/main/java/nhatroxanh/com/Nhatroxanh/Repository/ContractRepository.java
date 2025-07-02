@@ -49,7 +49,7 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
     @Query("SELECT c FROM Contracts c WHERE c.tenantPhone = :phone")
     List<Contracts> findByTenantPhone(@Param("phone") String phone);
 
-    @Query("SELECT c FROM Contracts c WHERE c.tenant.cccd = :cccd")
+    @Query("SELECT c FROM Contracts c WHERE c.tenant.userCccd.cccdNumber = :cccd")
     List<Contracts> findByTenantCccd(@Param("cccd") String cccd);
 
     @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId AND c.status = :status")

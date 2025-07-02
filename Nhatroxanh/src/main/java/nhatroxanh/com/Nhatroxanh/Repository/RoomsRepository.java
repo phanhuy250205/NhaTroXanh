@@ -65,7 +65,7 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
            "LEFT JOIN FETCH r.category " +
            "WHERE r.status = 'AVAILABLE'")
     List<Rooms> findAvailableRooms();
-}
+
 
     // Đếm tổng số phòng trọ của một chủ trọ
     @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId")
@@ -83,4 +83,5 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
     @Query("SELECT COUNT(r) FROM Rooms r WHERE r.hostel.owner.userId = :ownerId AND r.status = 'ĐANG_CỌC'")
     long countDepositedRoomsByOwnerId(Integer ownerId);
 }
+
 

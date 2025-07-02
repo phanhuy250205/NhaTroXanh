@@ -14,7 +14,7 @@
 
 <body>
     <!-- NAVBAR -->
-    <div th:replace="~{/layouts/sidebar-host}"></div>
+    <!-- <div th:replace="~{/layouts/sidebar-host}"></div> -->
     <!-- Main Content -->
     <div class="nha-tro-main-content">
         <div class="nha-tro-header">
@@ -81,118 +81,6 @@
                             </li>
                         </ul>
 
-                        <!-- Tab Content -->
-                        <div class="tab-content card p-4 nha-tro-tab-content">
-                            <!-- Tenant Info Tab -->
-                            <div class="tab-pane fade show active" id="tenantInfo">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h6 class="mb-0">Thông tin người thuê</h6>
-                                    <button type="button" class="btn btn-outline-success btn-sm nha-tro-host-btn-add-customer" id="btn-add-customer-host">
-                                        <i class="fa fa-user-plus"></i> Thêm khách mới
-                                    </button>
-                                </div>
-                                <hr class="mb-4">
-
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Họ và tên</label>
-                                        <input type="text" class="form-control" name="tenant.fullName" id="tenant-name">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Ngày sinh</label>
-                                        <input type="date" class="form-control" name="tenant.birthday" id="tenant-dob">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Số CMND/CCCD</label>
-                                        <input type="text" class="form-control" name="tenant.id" id="tenant-id">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Ngày cấp</label>
-                                        <input type="date" class="form-control" name="tenant.idDate" id="tenant-id-date">
-                                    </div>
-                                    <div class="col-md-9">
-                                        <label class="form-label">Nơi cấp</label>
-                                        <input type="text" class="form-control" name="tenant.idPlace" id="tenant-id-place">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Tỉnh/Thành phố</label>
-                                        <select class="form-select" name="tenant.province" id="tenant-province">
-                                            <option value="">Tỉnh/Thành phố</option>
-                                            <option value="hanoi">Hà Nội</option>
-                                            <option value="hcm">TP. Hồ Chí Minh</option>
-                                            <option value="danang">Đà Nẵng</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Quận/Huyện</label>
-                                        <select class="form-select" name="tenant.district" id="tenant-district">
-                                            <option value="">Quận/Huyện</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Phường/Xã</label>
-                                        <select class="form-select" name="tenant.ward" id="tenant-ward">
-                                            <option value="">Phường/Xã</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tên đường/Số nhà</label>
-                                        <input type="text" class="form-control" name="tenant.street" id="tenant-street">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Email (nếu có)</label>
-                                        <input type="email" class="form-control" name="tenant.email" id="tenant-email">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Ảnh CCCD mặt trước</label>
-                                        <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-front').click()">
-                                            <input type="file" id="cccd-front" name="cccdFront" accept="image/*" style="display: none;">
-                                            <div id="cccd-front-preview" class="nha-tro-image-preview">
-                                                <i class="fa fa-camera fa-2x"></i>
-                                                <div class="mt-2">Tải ảnh mặt trước</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Ảnh CCCD mặt sau</label>
-                                        <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-back').click()">
-                                            <input type="file" id="cccd-back" name="cccdBack" accept="image/*" style="display: none;">
-                                            <div id="cccd-back-preview" class="nha-tro-image-preview">
-                                                <i class="fa fa-camera fa-2x"></i>
-                                                <div class="mt-2">Tải ảnh mặt sau</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-end mt-4">
-                                    <button type="button" class="btn btn-primary nha-tro-btn-next" id="btn-next-owner">
-                                        <i class="fa fa-arrow-right"></i> Tiếp tục
-                                    </button>
-                                </div>
-
-                    <!-- Tabs Navigation -->
-                    <ul class="nav nav-tabs nha-tro-tabs" id="contractTabs">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-tab="tenantInfo" href="#tenantInfo">
-                                <i class="fa fa-user me-2"></i> Người thuê
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-tab="ownerInfo" href="#ownerInfo">
-                                <i class="fa fa-id-card me-2"></i> Chủ trọ
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-tab="roomInfo" href="#roomInfo">
-                                <i class="fa fa-house me-2"></i> Nhà trọ
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-tab="terms" href="#terms">
-                                <i class="fa fa-file-contract me-2"></i> Điều khoản
-                            </a>
-                        </li>
-                    </ul>
 
                     <!-- Tab Content -->
                     <div class="tab-content card p-4 nha-tro-tab-content" style="border-radius: 0px;">
@@ -285,76 +173,6 @@
                             </div>
                         </div>
 
-                        <!-- Owner Info Tab -->
-                        <div class="tab-pane fade" id="ownerInfo">
-                            <h6 class="mb-3">Thông tin chủ trọ</h6>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Họ và tên</label>
-                                    <input type="text" class="form-control" id="owner-name">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Ngày sinh</label>
-                                    <input type="date" class="form-control" id="owner-dob">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Số CMND/CCCD</label>
-                                    <input type="text" class="form-control" id="owner-id">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label">Ngày cấp</label>
-                                    <input type="date" class="form-control" id="owner-id-date">
-                                </div>
-                                <div class="col-md-9">
-                                    <label class="form-label">Nơi cấp</label>
-                                    <input type="text" class="form-control" id="owner-id-place">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Tỉnh/Thành phố</label>
-                                    <select class="form-select" id="owner-province">
-                                        <option value="">Tỉnh/Thành phố</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Quận/Huyện</label>
-                                    <select class="form-select" id="owner-district">
-                                        <option value="">Quận/Huyện</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Phường/Xã</label>
-                                    <select class="form-select" id="owner-ward">
-                                        <option value="">Phường/Xã</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tên đường/Số nhà</label>
-                                    <input type="text" class="form-control" id="owner-street">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Email (nếu có)</label>
-                                    <input type="email" class="form-control" id="owner-email">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Số điện thoại</label>
-                                    <input type="text" class="form-control" id="owner-phone">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Tài khoản ngân hàng (nếu có)</label>
-                                    <input type="text" class="form-control" id="owner-bank">
-                                </div>
-                            </div>
-
-                            <div class="d-flex justify-content-between mt-4">
-                                <button class="btn btn-secondary" id="btn-prev-tenant">
-                                    <i class="fa fa-arrow-left me-1"></i> Quay lại
-                                </button>
-                                <button class="btn btn-primary nha-tro-btn-next" id="btn-next-room">
-                                    Tiếp tục <i class="fa fa-arrow-right ms-1"></i>
-                                </button>
-
-                            </div>
-
 
                             <!-- Owner Info Tab -->
                             <div class="tab-pane fade" id="ownerInfo">
@@ -442,7 +260,7 @@
                                         <option value="">-- Chọn phòng trọ --</option>
                                     </select>
                                 </div>
-                                
+
                                 <div class="col-md-4">
                                     <label class="form-label">Tỉnh/Thành phố</label>
                                     <select class="form-select" id="room-province">
@@ -504,7 +322,7 @@
                                             <i class="fa fa-user-plus me-1"></i> Thêm người ở
                                         </button>
                                     </div>
-                                    
+
                                     <div id="residents-list" class="nha-tro-residents-container">
                                         <div class="text-center text-muted py-4" id="no-residents-message">
                                             <i class="fa fa-users fa-2x mb-2"></i>
@@ -744,7 +562,7 @@
                                     <p><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</strong></p>
                                     <p><strong>HỢP ĐỒNG THUÊ NHÀ</strong></p>
                                 </div>
-                                
+
                                 <p>Hôm nay, ngày <span id="preview-sign-date" class="nha-tro-highlight">........................</span>, chúng tôi gồm:</p>
 
 
@@ -2084,14 +1902,14 @@
         /*]]>*/
 
 
-    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    // <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/contract.js}"></script>
-    
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const housingAreaSelect = document.getElementById('housing-area');
             const roomSelectionSelect = document.getElementById('room-selection');
-            
+
             // Sample room data for each housing area
             const roomData = {
         'khu-a': [
@@ -2122,18 +1940,18 @@
             { value: 'd202', text: 'Phòng D202 - 24m² - 3.2tr/tháng', number: 'D202', area: 24, price: 3200000 }
         ]
     };
-    
+
     // Handle housing area selection change
     housingAreaSelect.addEventListener('change', function() {
         const selectedArea = this.value;
-        
+
         // Clear room selection
         roomSelectionSelect.innerHTML = '<option value="">-- Chọn phòng trọ --</option>';
-        
+
         if (selectedArea && roomData[selectedArea]) {
             // Enable room selection
             roomSelectionSelect.disabled = false;
-            
+
             // Populate room options
             roomData[selectedArea].forEach(room => {
                 const option = document.createElement('option');
@@ -2148,7 +1966,7 @@
             document.getElementById('room-number').value = '';
             document.getElementById('room-area').value = '';
             document.getElementById('rent-price').value = '';
-            
+
             // Update preview
             if (window.NhaTroContract) {
                 window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
@@ -2157,35 +1975,35 @@
             }
         }
     });
-    
+
     // Handle room selection change
     roomSelectionSelect.addEventListener('change', function() {
         const selectedArea = housingAreaSelect.value;
         const selectedRoomValue = this.value;
-        
+
         if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
             // Find the selected room data
             const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
-            
+
             if (selectedRoom) {
                 // Auto-fill room information
                 document.getElementById('room-number').value = selectedRoom.number;
                 document.getElementById('room-area').value = selectedRoom.area;
                 document.getElementById('rent-price').value = selectedRoom.price;
-                
+
                 // Update contract preview using the existing NhaTroContract methods
                 if (window.NhaTroContract) {
                     // Update preview fields with highlight effect
                     window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
                     window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
                     window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-                    
+
                     // Recalculate deposit based on new rent price
                     window.NhaTroContract.calculateDeposit();
-                    
+
                     // Show notification
                     window.NhaTroContract.showNotification(
-                        `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`, 
+                        `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,
                         'success'
                     );
                 }
@@ -2195,7 +2013,7 @@
             document.getElementById('room-number').value = '';
             document.getElementById('room-area').value = '';
             document.getElementById('rent-price').value = '';
-            
+
             // Update preview
             if (window.NhaTroContract) {
                 window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
@@ -2209,6 +2027,8 @@
 
     </script>
 
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <!-- <script th:src="@{/js/contract.js}"></script> -->
 </body>
 
 </html>

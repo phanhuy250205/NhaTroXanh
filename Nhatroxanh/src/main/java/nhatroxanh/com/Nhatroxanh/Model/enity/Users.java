@@ -1,15 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -40,7 +35,6 @@ public class Users {
     @Column(name = "birthday")
     private Date birthday;
 
-
     @Column(name = "bank_account", length = 50)
     private String bankAccount;
 
@@ -64,6 +58,9 @@ public class Users {
 
     @Column(name = "address", length = 255)
     private String address;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserCccd userCccd;
 
     @ManyToOne
     @JoinColumn(name = "address_id")
