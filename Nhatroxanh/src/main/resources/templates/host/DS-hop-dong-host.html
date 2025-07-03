@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+  <div class="main-content ">
+  <h5 class="fw-bold mb-4">Danh sách hợp đồng</h5>
+
+  <!-- Thống kê hợp đồng -->
+  <div class="row g-3 host-stats">
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-blue">
+        <div class="host-stat-icon"><i class="fa fa-file-alt"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Tổng hợp đồng</div>
+          <div class="host-stat-number">57</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-green">
+        <div class="host-stat-icon"><i class="fa fa-users"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Tổng số người thuê</div>
+          <div class="host-stat-number">153</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-yellow">
+        <div class="host-stat-icon"><i class="fa fa-hourglass-half"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Thanh toán đang chờ xử lý</div>
+          <div class="host-stat-number">15</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-purple">
+        <div class="host-stat-icon"><i class="fa fa-wallet"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Tổng doanh thu</div>
+          <div class="host-stat-number">4.564.000 đ</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Danh sách hợp đồng -->
+  <div class="card mt-4 shadow-sm host-contract-table">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+      <h6 class="mb-0 fw-bold">Danh sách các hợp đồng cho thuê</h6>
+      <a href="/chu-tro/hop-dong"><button class="btn btn-sm btn-outline-primary">
+        <i class="fa fa-plus-circle"></i> Hợp đồng mới
+      </button></a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered mb-0 text-center">
+        <thead class="table-light">
+          <tr>
+            <th>MÃ SỐ HĐ</th>
+            <th>NGƯỜI THUÊ</th>
+            <th>NGÀY BẮT ĐẦU</th>
+            <th>NGÀY KẾT THÚC</th>
+            <th>TRẠNG THÁI</th>
+            <th>HÀNH ĐỘNG</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>001</td>
+            <td>Nguyễn Văn A</td>
+            <td>15/01/2024</td>
+            <td>14/01/2025</td>
+            <td><span class="host-badge badge bg-success">Đang thuê</span></td>
+            <td>
+              <i class="fa fa-pen text-success me-2 cursor-pointer"></i>
+              <i class="fa fa-trash text-danger cursor-pointer"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>002</td>
+            <td>Nguyễn Văn B</td>
+            <td>10/03/2024</td>
+            <td>09/12/2025</td>
+            <td><span class="host-badge badge bg-danger">Đã huỷ</span></td>
+            <td>
+              <i class="fa fa-pen text-success me-2 cursor-pointer"></i>
+              <i class="fa fa-trash text-danger cursor-pointer"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>003</td>
+            <td>Nguyễn Văn C</td>
+            <td>22/05/2024</td>
+            <td>21/05/2025</td>
+            <td><span class="host-badge badge bg-warning text-dark">Sắp hết hạn</span></td>
+            <td>
+              <i class="fa fa-pen text-success me-2 cursor-pointer"></i>
+              <i class="fa fa-trash text-danger cursor-pointer"></i>
+            </td>
+          </tr>
+          <tr>
+            <td>007</td>
+            <td>Nguyễn Văn G</td>
+            <td>27/07/2024</td>
+            <td>30/05/2025</td>
+            <td><span class="host-badge badge bg-light text-warning border border-warning">Chờ xác nhận</span></td>
+            <td>
+              <i class="fa fa-pen text-success me-2 cursor-pointer"></i>
+              <i class="fa fa-trash text-danger cursor-pointer"></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <small>Hiển thị 1 đến 7 trong số 57 hợp đồng</small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0">
+          <li class="page-item disabled"><a class="page-link">Trước</a></li>
+          <li class="page-item active"><a class="page-link" href="#">1</a></li>
+          <li class="page-item"><a class="page-link" href="#">2</a></li>
+          <li class="page-item"><a class="page-link" href="#">3</a></li>
+          <li class="page-item"><a class="page-link" href="#">Kế tiếp</a></li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+</body>
+
+</html>
