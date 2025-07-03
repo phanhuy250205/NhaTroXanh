@@ -90,10 +90,10 @@ public class DemoController {
     //     return "host/quan-ly-bai-dang";
     // }
 
-    // @GetMapping("/chu-tro/chi-tiet-bai-dang")
-    // public String chitietbaidang() {
-    //     return "host/chi-tiet-bai-dang";
-    // }
+     @GetMapping("/chu-tro/Qlthue-tra")
+     public String chitietbaidang() {
+         return "guest/quan-ly-thue-tra";
+     }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {

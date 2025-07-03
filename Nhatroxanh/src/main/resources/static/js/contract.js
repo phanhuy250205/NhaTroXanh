@@ -1310,6 +1310,7 @@ window.NhaTroContract = {
         const saveCustomerBtn = document.getElementById("saveCustomer-host");
         const customerForm = document.getElementById("addCustomerForm-host");
 
+
         if (addCustomerBtn) {
             addCustomerBtn.addEventListener("click", () => {
                 const modal = new bootstrap.Modal(document.getElementById("addCustomerModal-host"));
