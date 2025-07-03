@@ -4,45 +4,57 @@ window.NhaTroContract = {
     zoomLevel: 1,
 
     init() {
+        // Kiểm tra các phần tử select cần thiết
+        const requiredSelects = ["tenant-province", "owner-province", "room-province", "newCustomer-province"];
+        const missingSelects = requiredSelects.filter(id => !document.getElementById(id));
+        if (missingSelects.length > 0) {
+            console.error("Missing select elements in DOM:", missingSelects);
+            this.showNotification("Không tìm thấy một số trường tỉnh/thành phố trong giao diện", "error");
+        }
+
         this.setupEventListeners();
         this.setCurrentDate();
         this.updateAllPreview();
         this.setupAmenityModal();
         this.setupCustomerModal();
-        this.loadProvinces();
-
-        // Điền thông tin chủ trọ từ backend
-        const contract = /*[[${contract}]]*/ null;
-        if (contract && contract.owner) {
-            document.getElementById("owner-name").value = contract.owner.fullName || "";
-            document.getElementById("owner-dob").value = contract.owner.birthday ? new Date(contract.owner.birthday).toISOString().split('T')[0] : "";
-            document.getElementById("owner-id").value = contract.owner.cccdNumber || "";
-            document.getElementById("owner-phone").value = contract.owner.phone || "";
-            document.getElementById("owner-email").value = contract.owner.email || "";
-            document.getElementById("owner-street").value = contract.owner.street || "";
-            if (contract.owner.province) {
-                this.loadDistricts(contract.owner.province, "owner-district", "owner-ward");
-                document.getElementById("owner-province").value = contract.owner.province;
-                setTimeout(() => {
-                    if (contract.owner.district) {
-                        document.getElementById("owner-district").value = contract.owner.district;
-                        this.loadWards(contract.owner.district, "owner-ward");
-                        setTimeout(() => {
-                            document.getElementById("owner-ward").value = contract.owner.ward || "";
-                            this.updateAddress("owner");
-                        }, 200);
-                    }
-                }, 200);
+        return this.loadProvinces().then(() => {
+            console.log("Provinces loaded");
+            const contract = /*[[${contract}]]*/ null;
+            if (contract && contract.owner) {
+                document.getElementById("owner-name").value = contract.owner.fullName || "";
+                if (contract.owner.province) {
+                    this.loadDistricts(contract.owner.province, "owner-district", "owner-ward");
+                    document.getElementById("owner-province").value = contract.owner.province;
+                    setTimeout(() => {
+                        if (contract.owner.district) {
+                            document.getElementById("owner-district").value = contract.owner.district;
+                            this.loadWards(contract.owner.district, "owner-ward");
+                            setTimeout(() => {
+                                document.getElementById("owner-ward").value = contract.owner.ward || "";
+                                this.updateAddress("owner");
+                            }, 200);
+                        }
+                    }, 200);
+                }
             }
-        }
-
-        // Tải phòng nếu khu trọ được chọn mặc định
-        const hostelSelect = document.getElementById('hostelId');
-        if (hostelSelect && hostelSelect.value) {
-            this.filterRooms();
-        }
+            const hostelSelect = document.getElementById('hostelId');
+            if (hostelSelect && hostelSelect.value) {
+                this.filterRooms();
+            }
+        }).catch(error => {
+            console.error("Error loading provinces:", error);
+            this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố", "error");
+        });
     },
 
+    safeEncodeURL(value) {
+        try {
+            return encodeURIComponent(value).replace(/%25/g, '%');
+        } catch (e) {
+            console.error('Error encoding URL component:', value, e);
+            return value;
+        }
+    },
     normalizeName(name) {
         if (!name) return "";
         return name
@@ -207,7 +219,14 @@ window.NhaTroContract = {
     },
 
     async onRoomSelected() {
-        const roomId = document.getElementById('roomId').value;
+        const roomSelect = document.getElementById('roomId');
+        if (!roomSelect) {
+            this.showNotification('Không tìm thấy dropdown phòng trọ!', 'error');
+            return;
+        }
+
+        const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+        const roomId = roomSelect.value;
         if (!roomId) {
             this.clearRoomFields();
             return;
@@ -230,61 +249,106 @@ window.NhaTroContract = {
 
             if (data.success && data.room) {
                 const room = data.room;
-                document.getElementById('room-number').value = room.roomName || room.namerooms || '';
-                document.getElementById('room-area').value = room.area || '';
+                document.getElementById('room-number').value = room.namerooms || selectedOption.text.split(' (')[0] || '';
+                document.getElementById('room-area').value = room.acreage || '';
                 document.getElementById('rent-price').value = room.price || '';
-                document.getElementById('room-street').value = room.street || '';
 
-                // Điền địa chỉ vào dropdown với fallback
-                if (room.province) {
-                    const provinceCode = await this.mapProvinceNameToCode(room.province);
+                // Tách địa chỉ từ text của option nếu API không cung cấp
+                let address = room.address;
+                if (!address && selectedOption.text.includes('(')) {
+                    address = selectedOption.text.split(' (')[1].replace(')', '');
+                }
+                console.log('Processed address:', address);
+
+                if (address) {
+                    const addressParts = address.split(', ');
+                    const street = addressParts.length > 0 ? addressParts[0].trim() : '';
+                    const ward = addressParts.length > 1 ? addressParts[1].trim() : '';
+                    const district = addressParts.length > 2 ? addressParts[2].trim() : '';
+                    const province = addressParts.length > 3 ? addressParts[3].trim() : '';
+                    console.log('Address parts:', { street, ward, district, province });
+
+                    // Điền vào ô Địa chỉ (street)
+                    document.getElementById('room-street').value = street;
+
+                    // Điền vào dropdown Tỉnh/Thành phố
                     const provinceSelect = document.getElementById('room-province');
-                    if (provinceCode) {
-                        provinceSelect.value = provinceCode;
-                        await this.loadDistricts(provinceCode, 'room-district', 'room-ward');
-                        if (room.district) {
-                            const districtCode = await this.mapDistrictNameToCode(provinceCode, room.district);
-                            const districtSelect = document.getElementById('room-district');
-                            if (districtCode) {
-                                districtSelect.value = districtCode;
-                                await this.loadWards(districtCode, 'room-ward');
-                                if (room.ward) {
-                                    const wardCode = await this.mapWardNameToCode(districtCode, room.ward);
-                                    const wardSelect = document.getElementById('room-ward');
-                                    if (wardCode) {
-                                        wardSelect.value = wardCode;
-                                    } else {
-                                        console.warn('Ward code not found for:', room.ward);
-                                        // Fallback: thêm tùy chọn mới với tên phường
-                                        const option = document.createElement('option');
-                                        option.value = room.ward;
-                                        option.textContent = room.ward;
-                                        wardSelect.appendChild(option);
-                                        wardSelect.value = room.ward;
-                                        this.showNotification(`Không tìm thấy mã phường/xã cho ${room.ward}, sử dụng tên trực tiếp`, 'warning');
-                                    }
-                                }
+                    if (provinceSelect) {
+                        const provinceCode = await this.mapProvinceNameToCode(province);
+                        console.log('Mapped province code:', provinceCode);
+                        if (provinceCode) {
+                            const provinceOption = provinceSelect.querySelector(`option[value="${provinceCode}"]`);
+                            console.log('Province option found:', provinceOption);
+                            if (provinceOption) {
+                                provinceSelect.value = provinceCode;
+                                console.log('Province set to:', provinceCode);
+                                await this.loadDistricts(provinceCode, 'room-district', 'room-ward');
                             } else {
-                                console.warn('District code not found for:', room.district);
-                                // Fallback: thêm tùy chọn mới với tên quận
-                                const option = document.createElement('option');
-                                option.value = room.district;
-                                option.textContent = room.district;
-                                districtSelect.appendChild(option);
-                                districtSelect.value = room.district;
-                                this.showNotification(`Không tìm thấy mã quận/huyện cho ${room.district}, sử dụng tên trực tiếp`, 'warning');
+                                provinceSelect.value = ''; // Reset nếu không tìm thấy
+                                this.showNotification(`Không tìm thấy option cho mã tỉnh/thành phố ${provinceCode} (${province})`, 'warning');
                             }
+                        } else {
+                            provinceSelect.value = province; // Fallback với tên
+                            this.showNotification(`Không ánh xạ được mã cho ${province}`, 'warning');
                         }
-                    } else {
-                        console.warn('Province code not found for:', room.province);
-                        // Fallback: thêm tùy chọn mới với tên tỉnh
-                        const option = document.createElement('option');
-                        option.value = room.province;
-                        option.textContent = room.province;
-                        provinceSelect.appendChild(option);
-                        provinceSelect.value = room.province;
-                        this.showNotification(`Không tìm thấy mã tỉnh/thành phố cho ${room.province}, sử dụng tên trực tiếp`, 'warning');
                     }
+
+                    // Điền vào dropdown Quận/Huyện
+                    const districtSelect = document.getElementById('room-district');
+                    if (districtSelect && provinceSelect && provinceSelect.value) {
+                        const districtCode = await this.mapDistrictNameToCode(provinceSelect.value, district);
+                        console.log('Mapped district code:', districtCode);
+                        if (districtCode) {
+                            const districtOption = districtSelect.querySelector(`option[value="${districtCode}"]`);
+                            console.log('District option found:', districtOption);
+                            if (districtOption) {
+                                districtSelect.value = districtCode;
+                                console.log('District set to:', districtCode);
+                                await this.loadWards(districtCode, 'room-ward', provinceSelect.value); // Truyền provinceCode
+                            } else {
+                                districtSelect.value = ''; // Reset nếu không tìm thấy
+                                this.showNotification(`Không tìm thấy option cho mã quận/huyện ${districtCode} (${district})`, 'warning');
+                            }
+                        } else {
+                            districtSelect.value = district; // Fallback với tên
+                            this.showNotification(`Không ánh xạ được mã cho ${district}`, 'warning');
+                        }
+                    }
+
+                    // Điền vào dropdown Phường/Xã
+                    const wardSelect = document.getElementById('room-ward');
+                    if (wardSelect && districtSelect && districtSelect.value) {
+                        const wardCode = await this.mapWardNameToCode(districtSelect.value, ward, provinceSelect.value);
+                        console.log('Mapped ward code:', wardCode);
+                        if (wardCode) {
+                            const wardOption = wardSelect.querySelector(`option[value="${wardCode}"]`);
+                            console.log('Ward option found:', wardOption);
+                            if (wardOption) {
+                                wardSelect.value = wardCode;
+                                console.log('Ward set to:', wardCode);
+                            } else {
+                                // Fallback: Thêm option mới với tên "Hòa Thuận" nếu không tìm thấy
+                                const newOption = document.createElement("option");
+                                newOption.value = ward; // Sử dụng tên làm value
+                                newOption.textContent = ward; // Hiển thị "Hòa Thuận"
+                                wardSelect.appendChild(newOption);
+                                wardSelect.value = ward;
+                                console.log(`Added fallback ward: ${ward}`);
+                                this.showNotification(`Không tìm thấy mã cho ${ward}, sử dụng tên trực tiếp`, 'warning');
+                            }
+                        } else {
+                            // Fallback: Thêm option mới với tên "Hòa Thuận" nếu không ánh xạ được
+                            const newOption = document.createElement("option");
+                            newOption.value = ward; // Sử dụng tên làm value
+                            newOption.textContent = ward; // Hiển thị "Hòa Thuận"
+                            wardSelect.appendChild(newOption);
+                            wardSelect.value = ward;
+                            console.log(`Added fallback ward: ${ward}`);
+                            this.showNotification(`Không ánh xạ được mã cho ${ward}, sử dụng tên trực tiếp`, 'warning');
+                        }
+                    }
+                } else {
+                    this.showNotification('Không tìm thấy địa chỉ để điền!', 'warning');
                 }
 
                 this.updatePreviewField('room-number', 'preview-room-number');
@@ -294,7 +358,7 @@ window.NhaTroContract = {
                 this.calculateDeposit();
 
                 this.showNotification(
-                    `Đã chọn ${room.roomName || room.namerooms} - Diện tích: ${room.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(room.price)} VNĐ/tháng`,
+                    `Đã chọn ${room.namerooms || selectedOption.text.split(' (')[0]} - Diện tích: ${room.acreage || ''}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(room.price || 0)} VNĐ/tháng`,
                     'success'
                 );
             } else {
@@ -357,9 +421,13 @@ window.NhaTroContract = {
         }
     },
 
-    // Hàm điền thông tin người thuê
+    // 4. SỬA HÀM FILL TENANT FIELDS - thêm debug và đảm bảo load provinces trước
     async fillTenantFields(tenant) {
         console.log("Filling tenant fields with data:", tenant);
+
+        // THÊM: Đảm bảo provinces đã được load
+        await this.loadProvinces();
+
         document.getElementById("tenant-name").value = tenant.fullName || "";
         document.getElementById("tenant-dob").value = tenant.birthday || "";
         document.getElementById("tenant-id").value = tenant.cccdNumber || "";
@@ -367,61 +435,101 @@ window.NhaTroContract = {
         document.getElementById("tenant-id-place").value = tenant.issuePlace || "";
         document.getElementById("tenant-email").value = tenant.email || "";
         document.getElementById("tenant-street").value = tenant.street || "";
+
         const frontPreview = document.getElementById("cccd-front-preview");
         const backPreview = document.getElementById("cccd-back-preview");
-        if (tenant.cccdFrontUrl) {
-            frontPreview.innerHTML = `<img src="${tenant.cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%;">`;
-        }
-        if (tenant.cccdBackUrl) {
-            backPreview.innerHTML = `<img src="${tenant.cccdBackUrl}" alt="CCCD Back" style="max-width: 100%;">`;
-        }
+        if (tenant.cccdFrontUrl) frontPreview.innerHTML = `<img src="${tenant.cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%;">`;
+        if (tenant.cccdBackUrl) backPreview.innerHTML = `<img src="${tenant.cccdBackUrl}" alt="CCCD Back" style="max-width: 100%;">`;
 
         const provinceSelect = document.getElementById("tenant-province");
         const districtSelect = document.getElementById("tenant-district");
         const wardSelect = document.getElementById("tenant-ward");
 
+        let provinceCode = null;
+
         if (tenant.province && provinceSelect) {
             console.log("Attempting to map province:", tenant.province);
-            const provinceCode = await this.mapProvinceNameToCode(tenant.province);
+            provinceCode = await this.mapProvinceNameToCode(tenant.province);
             console.log("Province code:", provinceCode);
-            if (provinceCode) {
+
+            // THÊM DEBUG
+            this.debugDropdownOptions("tenant-province", provinceCode);
+
+            if (provinceCode && provinceSelect.querySelector(`option[value="${provinceCode}"]`)) {
                 provinceSelect.value = provinceCode;
                 await this.loadDistricts(provinceCode, "tenant-district", "tenant-ward");
-                if (tenant.district && districtSelect) {
-                    console.log("Attempting to map district:", tenant.district);
-                    const districtCode = await this.mapDistrictNameToCode(provinceCode, tenant.district);
-                    console.log("District code:", districtCode);
-                    if (districtCode) {
-                        districtSelect.value = districtCode;
-                        await this.loadWards(districtCode, "tenant-ward");
-                        if (tenant.ward && wardSelect) {
-                            console.log("Attempting to map ward:", tenant.ward);
-                            const wardCode = await this.mapWardNameToCode(districtCode, tenant.ward);
-                            console.log("Ward code:", wardCode);
-                            if (wardCode) {
-                                wardSelect.value = wardCode;
-                            } else {
-                                console.warn("Ward not mapped, using raw value:", tenant.ward);
-                                wardSelect.innerHTML = `<option value="${tenant.ward}">${tenant.ward}</option>`;
-                                wardSelect.value = tenant.ward;
-                            }
-                        }
-                    } else {
-                        console.warn("District not mapped, using raw value:", tenant.district);
-                        districtSelect.innerHTML = `<option value="${tenant.district}">${tenant.district}</option>`;
-                        districtSelect.value = tenant.district;
-                    }
-                }
             } else {
-                console.warn("Province not mapped, using raw value:", tenant.province);
-                provinceSelect.innerHTML = `<option value="${tenant.province}">${tenant.province}</option>`;
-                provinceSelect.value = tenant.province;
+                console.warn("Province code not found in options, using raw value:", tenant.province);
+                // THÊM: Tạo option mới với code thay vì name
+                if (!provinceSelect.querySelector(`option[value="${provinceCode}"]`)) {
+                    const option = document.createElement("option");
+                    option.value = provinceCode || tenant.province;
+                    option.textContent = tenant.province;
+                    provinceSelect.appendChild(option);
+                }
+                provinceSelect.value = provinceCode || tenant.province;
+                this.showNotification(`Không tìm thấy mã tỉnh/thành phố cho ${tenant.province}, sử dụng tên trực tiếp`, "warning");
+            }
+
+            let districtCode = null;
+
+            if (tenant.district && districtSelect) {
+                console.log("Attempting to map district:", tenant.district);
+                districtCode = await this.mapDistrictNameToCode(provinceCode || tenant.province, tenant.district);
+                console.log("District code:", districtCode);
+
+                // THÊM DEBUG
+                this.debugDropdownOptions("tenant-district", districtCode);
+
+                if (districtCode && districtSelect.querySelector(`option[value="${districtCode}"]`)) {
+                    districtSelect.value = districtCode;
+                    await this.loadWards(districtCode, "tenant-ward");
+                } else {
+                    console.warn("District not mapped, using raw value:", tenant.district);
+                    if (!districtSelect.querySelector(`option[value="${districtCode}"]`)) {
+                        const option = document.createElement("option");
+                        option.value = districtCode || tenant.district;
+                        option.textContent = tenant.district;
+                        districtSelect.appendChild(option);
+                    }
+                    districtSelect.value = districtCode || tenant.district;
+                    this.showNotification(`Không tìm thấy mã quận/huyện cho ${tenant.district}, sử dụng tên trực tiếp`, "warning");
+                }
+
+                if (tenant.ward && wardSelect && districtCode && provinceCode) {
+                    console.log("Attempting to map ward:", tenant.ward);
+                    const wardCode = await this.mapWardNameToCode(districtCode, tenant.ward, provinceCode);
+                    console.log("Ward code:", wardCode);
+
+                    if (wardCode && wardSelect.querySelector(`option[value="${wardCode}"]`)) {
+                        wardSelect.value = wardCode;
+                    } else {
+                        console.warn("Ward not mapped, using raw value:", tenant.ward);
+                        if (!wardSelect.querySelector(`option[value="${tenant.ward}"]`)) {
+                            const option = document.createElement("option");
+                            option.value = tenant.ward;
+                            option.textContent = tenant.ward;
+                            wardSelect.appendChild(option);
+                        }
+                        wardSelect.value = tenant.ward;
+                        this.showNotification(`Không tìm thấy mã phường/xã cho ${tenant.ward}, sử dụng tên trực tiếp`, "warning");
+                    }
+                } else if (tenant.ward && wardSelect) {
+                    console.warn("Ward not mapped due to missing district or province code, using raw value:", tenant.ward);
+                    if (!wardSelect.querySelector(`option[value="${tenant.ward}"]`)) {
+                        const option = document.createElement("option");
+                        option.value = tenant.ward;
+                        option.textContent = tenant.ward;
+                        wardSelect.appendChild(option);
+                    }
+                    wardSelect.value = tenant.ward;
+                    this.showNotification(`Không thể tải danh sách phường/xã do mã quận hoặc mã tỉnh không hợp lệ`, "warning");
+                }
             }
         }
         this.updateAddress("tenant");
         this.updateAllPreview();
     },
-
     // Hàm xóa các trường thông tin người thuê
     clearTenantFields() {
         document.getElementById("tenant-name").value = "";
@@ -439,150 +547,357 @@ window.NhaTroContract = {
 
     async mapProvinceNameToCode(provinceName) {
         try {
-            const response = await fetch("https://provinces.open-api.vn/api/p/");
+            const response = await fetch("/api/proxy/provinces"); // Sử dụng proxy
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const provinces = await response.json();
             console.log("Danh sách tỉnh từ API:", provinces.map(p => ({ name: p.name, code: p.code })));
             const normalizedProvinceName = this.normalizeName(provinceName);
             console.log("Normalized province name:", normalizedProvinceName);
-            const province = provinces.find(p => this.normalizeName(p.name) === normalizedProvinceName);
+            const province = provinces.find(p => {
+                const normalizedApiName = this.normalizeName(p.name);
+                return normalizedApiName === normalizedProvinceName ||
+                    normalizedApiName.includes(normalizedProvinceName) ||
+                    normalizedProvinceName.includes(normalizedApiName);
+            });
             if (!province) {
-                this.showNotification(`Không tìm thấy tỉnh "${provinceName}"`, "warning");
+                console.warn(`No match for province: ${provinceName}, checked variants:`, provinces.map(p => this.normalizeName(p.name)));
                 return null;
             }
-            console.log(`Tìm thấy tỉnh: ${provinceName} -> Code: ${province.code}`);
-            return province.code;
+            const provinceCode = String(province.code).padStart(2, '0'); // Chuyển thành chuỗi và pad
+            console.log(`Found province: ${provinceName} -> Code: ${provinceCode}`);
+            return provinceCode;
         } catch (error) {
-            console.error("Lỗi khi ánh xạ tên tỉnh:", error);
-            this.showNotification("Không thể tải danh sách tỉnh/thành phố: " + error.message, "error");
+            console.error("Mapping error:", error);
             return null;
         }
     },
 
     async mapDistrictNameToCode(provinceCode, districtName) {
         try {
-            const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+            // Validate provinceCode
+            const provinceCodeStr = String(provinceCode).padStart(2, '0');
+            if (!/^\d{2}$/.test(provinceCodeStr)) {
+                console.warn("Invalid province code:", provinceCode);
+                return null;
+            }
+
+            const response = await fetch(`/api/proxy/provinces/${provinceCodeStr}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
             const province = await response.json();
-            console.log(`Districts fetched for province ${provinceCode}:`, province.districts.map(d => d.name));
+            console.log(`Districts fetched for province ${provinceCodeStr}:`, province.districts.map(d => d.name));
+
             let normalizedDistrictName = this.normalizeName(districtName);
             const districtVariants = [
                 normalizedDistrictName,
-                normalizedDistrictName.replace('quận', ''),
-                normalizedDistrictName.replace('huyện', '')
+                `quận ${normalizedDistrictName}`,
+                `huyện ${normalizedDistrictName}`,
+                `thành phố ${normalizedDistrictName}`,
+                `thị xã ${normalizedDistrictName}`,
+                normalizedDistrictName.replace(/^quận\s+/i, ''),
+                normalizedDistrictName.replace(/^huyện\s+/i, ''),
+                normalizedDistrictName.replace(/^thành phố\s+/i, ''),
+                normalizedDistrictName.replace(/^thị xã\s+/i, '')
             ];
+
             const district = province.districts.find(d =>
-                districtVariants.includes(this.normalizeName(d.name))
+                districtVariants.some(variant =>
+                    this.normalizeName(d.name) === variant ||
+                    this.normalizeName(d.name).includes(variant) ||
+                    variant.includes(this.normalizeName(d.name))
+                )
             );
+
             if (!district) {
-                console.warn(`District not found: ${districtName}`);
-                this.showNotification(`Không tìm thấy quận "${districtName}"`, "warning");
+                console.warn(`District not found: ${districtName}, variants checked: ${districtVariants.join(', ')}`);
                 return null;
             }
+
             console.log(`Mapped district: ${districtName} -> ${district.code}`);
             return district.code;
         } catch (error) {
             console.error("Lỗi khi ánh xạ tên quận:", error);
-            this.showNotification("Không thể tải danh sách quận/huyện", "error");
             return null;
         }
     },
 
-    async mapWardNameToCode(districtCode, wardName) {
+    // SỬA LỖI: Thêm tham số provinceCode vào hàm mapWardNameToCode
+    async mapWardNameToCode(districtCode, wardName, provinceCode) {
         try {
-            const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-            const district = await response.json();
-            console.log(`Wards fetched for district ${districtCode}:`, district.wards.map(w => w.name));
-            let normalizedWardName = this.normalizeName(wardName);
-            const wardVariants = [
-                normalizedWardName,
-                normalizedWardName.replace('phường', ''),
-                normalizedWardName.replace('xã', '')
-            ];
-            const ward = district.wards.find(w =>
-                wardVariants.includes(this.normalizeName(w.name))
-            );
-            if (!ward) {
-                console.warn(`Ward not found: ${wardName}`);
-                this.showNotification(`Không tìm thấy phường "${wardName}"`, "warning");
+            // Chuyển districtCode thành string và validate
+            const districtCodeStr = String(districtCode).trim();
+
+            if (!districtCodeStr || districtCodeStr === 'null' || districtCodeStr === 'undefined') {
+                console.warn(`Invalid district code: ${districtCode}`);
                 return null;
             }
-            console.log(`Mapped ward: ${wardName} -> ${ward.code}`);
+
+            // SỬA LỖI: Sử dụng provinceCode được truyền vào thay vì lấy từ districtCode
+            const provinceCodeStr = String(provinceCode).padStart(2, '0');
+
+            if (!provinceCodeStr || !/^\d{2}$/.test(provinceCodeStr)) {
+                console.warn(`Invalid province code: ${provinceCode}`);
+                return null;
+            }
+
+            console.log(`Mapping ward: ${wardName} for district ${districtCodeStr} in province ${provinceCodeStr}`);
+
+            // Gọi API để lấy thông tin tỉnh
+            const response = await fetch(`/api/proxy/provinces/${this.safeEncodeURL(provinceCodeStr)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, URL: /api/proxy/provinces/${provinceCodeStr}`);
+            }
+
+            const province = await response.json();
+
+            // Tìm quận/huyện theo code
+            const district = province.districts.find(d => String(d.code) === districtCodeStr);
+
+            if (!district) {
+                console.warn(`District with code ${districtCodeStr} not found in province ${provinceCodeStr}`);
+                return null;
+            }
+
+            console.log(`Wards fetched for district ${districtCodeStr}:`, district.wards.map(w => w.name));
+
+            // Chuẩn hóa tên phường/xã
+            const normalizedWardName = this.normalizeName(wardName);
+
+            // Tạo các biến thể tên phường/xã
+            const wardVariants = new Set([
+                normalizedWardName,
+                `phường ${normalizedWardName}`,
+                `xã ${normalizedWardName}`,
+                `thị trấn ${normalizedWardName}`,
+                normalizedWardName.replace(/^(phường|xã|thị trấn)\s+/i, '').trim()
+            ]);
+
+            const cleanVariants = Array.from(wardVariants).filter(v => v && v.length > 0);
+            console.log(`Ward variants for "${wardName}":`, cleanVariants);
+
+            // Tìm phường/xã
+            const ward = district.wards.find(w => {
+                const normalizedApiName = this.normalizeName(w.name);
+                return cleanVariants.some(variant => {
+                    if (normalizedApiName === variant) return true;
+                    const apiNameWithoutPrefix = normalizedApiName.replace(/^(phường|xã|thị trấn)\s+/i, '').trim();
+                    if (apiNameWithoutPrefix === variant) return true;
+                    if (normalizedApiName.includes(variant) && variant.length > 3) return true;
+                    if (variant.includes(normalizedApiName) && normalizedApiName.length > 3) return true;
+                    return false;
+                });
+            });
+
+            if (!ward) {
+                console.warn(`Ward not found: ${wardName}`);
+                console.warn(`Available wards:`, district.wards.map(w => w.name));
+                console.warn(`Variants tried:`, cleanVariants);
+                return null;
+            }
+
+            console.log(`Mapped ward: ${wardName} -> ${ward.name} (${ward.code})`);
             return ward.code;
         } catch (error) {
-            console.error("Lỗi khi ánh xạ tên phường:", error);
-            this.showNotification("Không thể tải danh sách phường/xã", "error");
+            console.error(`Error mapping ward ${wardName} for district ${districtCode}:`, error.message);
             return null;
         }
     },
 
-    // Các hàm API cho địa chỉ
     async loadProvinces() {
         try {
-            const response = await fetch("https://provinces.open-api.vn/api/p/");
+            const response = await fetch("/api/proxy/provinces");
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const provinces = await response.json();
+            console.log("Loaded provinces:", provinces.map(p => ({ code: p.code, name: p.name })));
+
             const selects = ["tenant-province", "owner-province", "room-province", "newCustomer-province"];
             selects.forEach((selectId) => {
                 const select = document.getElementById(selectId);
-                if (select) {
-                    select.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
-                    provinces.forEach((province) => {
-                        const option = document.createElement("option");
-                        option.value = province.code;
-                        option.textContent = province.name;
-                        select.appendChild(option);
-                    });
+                if (!select) {
+                    console.warn(`Select element with ID ${selectId} not found in DOM`);
+                    this.showNotification(`Không tìm thấy dropdown ${selectId}`, "error");
+                    return;
                 }
+                // Xóa nội dung hiện tại và thêm tùy chọn mặc định
+                select.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                // Thêm các tỉnh từ API
+                provinces.forEach((province) => {
+                    const option = document.createElement("option");
+                    // SỬA: Đảm bảo format code giống nhau
+                    const provinceCode = String(province.code).padStart(2, '0');
+                    option.value = provinceCode;
+                    option.textContent = province.name;
+                    select.appendChild(option);
+
+                    // DEBUG: Log để kiểm tra
+                    if (selectId === "tenant-province") {
+                        console.log(`Added province option: ${provinceCode} - ${province.name}`);
+                    }
+                });
+                console.log(`Populated ${selectId} with ${provinces.length} provinces`);
             });
+
+            return provinces;
         } catch (error) {
-            console.error("Lỗi khi tải danh sách tỉnh/thành phố:", error);
-            this.showNotification("Không thể tải danh sách tỉnh/thành phố", "warning");
+            console.error("Error loading provinces:", error);
+            this.showNotification("Không thể tải danh sách tỉnh/thành phố: " + error.message, "error");
+            return [];
         }
     },
 
+    // SỬA LỖI: Cải thiện hàm loadDistricts để đảm bảo reset hoàn toàn
     async loadDistricts(provinceCode, districtSelectId, wardSelectId) {
         try {
-            const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+            const provinceCodeStr = String(provinceCode).padStart(2, '0');
+            if (!/^\d{2}$/.test(provinceCodeStr)) {
+                throw new Error(`Invalid province code: ${provinceCode}`);
+            }
+
+            const response = await fetch(`/api/proxy/provinces/${this.safeEncodeURL(provinceCodeStr)}`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const province = await response.json();
+            console.log(`Loaded districts for province ${provinceCodeStr}:`, province.districts.map(d => ({ code: d.code, name: d.name })));
+
             const districtSelect = document.getElementById(districtSelectId);
             const wardSelect = document.getElementById(wardSelectId);
+
             if (districtSelect) {
-                districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                // QUAN TRỌNG: Xóa hoàn toàn và reset
+                districtSelect.innerHTML = '';
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Chọn Quận/Huyện";
+                districtSelect.appendChild(defaultOption);
+
+                // Thêm các quận/huyện mới
                 province.districts.forEach((district) => {
                     const option = document.createElement("option");
-                    option.value = district.code;
+                    option.value = String(district.code);
                     option.textContent = district.name;
                     districtSelect.appendChild(option);
+
+                    if (districtSelectId === "tenant-district") {
+                        console.log(`Added district option: ${district.code} - ${district.name}`);
+                    }
                 });
+
+                // Đảm bảo giá trị được reset
+                districtSelect.value = "";
             }
+
             if (wardSelect) {
-                wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                // QUAN TRỌNG: Xóa hoàn toàn và reset wards
+                wardSelect.innerHTML = '';
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Chọn Phường/Xã";
+                wardSelect.appendChild(defaultOption);
+                wardSelect.value = "";
             }
         } catch (error) {
-            console.error("Lỗi khi tải danh sách quận/huyện:", error);
-            this.showNotification("Không thể tải danh sách quận/huyện", "warning");
+            console.error(`Error loading districts for province ${provinceCode}:`, error);
+            this.showNotification("Không thể tải danh sách quận/huyện", "error");
         }
     },
 
-    async loadWards(districtCode, wardSelectId) {
+
+
+    // 3. THÊM HÀM DEBUG KIỂM TRA DROPDOWN
+    debugDropdownOptions(selectId, expectedValue) {
+        const select = document.getElementById(selectId);
+        if (!select) {
+            console.error(`Select ${selectId} not found`);
+            return;
+        }
+
+        console.log(`=== DEBUG ${selectId} ===`);
+        console.log(`Looking for value: "${expectedValue}"`);
+        console.log(`Total options: ${select.options.length}`);
+
+        Array.from(select.options).forEach((option, index) => {
+            console.log(`Option ${index}: value="${option.value}", text="${option.textContent}"`);
+            if (option.value === expectedValue) {
+                console.log(`✅ FOUND MATCH at index ${index}`);
+            }
+        });
+
+        const foundOption = select.querySelector(`option[value="${expectedValue}"]`);
+        console.log(`querySelector result:`, foundOption ? "Found" : "Not found");
+        console.log(`=== END DEBUG ===`);
+    },
+    async safeFetch(url, options = {}) {
         try {
-            const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-            const district = await response.json();
+            const response = await fetch(url, options);
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}, URL: ${url}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Error in safeFetch for ${url}:`, error.message);
+            this.showNotification(`Lỗi khi gọi API: ${error.message}`, 'error');
+            throw error;
+        }
+    },
+    async loadWards(districtCode, wardSelectId, provinceCode) {
+        try {
+            // Chuyển districtCode và provinceCode thành string và validate
+            const districtCodeStr = String(districtCode).trim();
+            const provinceCodeStr = String(provinceCode).padStart(2, '0');
+
+            if (!districtCodeStr || districtCodeStr === 'null' || districtCodeStr === 'undefined' || !/^\d+$/.test(districtCodeStr)) {
+                throw new Error(`Invalid district code: ${districtCode}`);
+            }
+            if (!provinceCodeStr || !/^\d{2}$/.test(provinceCodeStr)) {
+                throw new Error(`Invalid province code: ${provinceCode}`);
+            }
+
+            console.log(`Loading wards for district ${districtCodeStr} in province ${provinceCodeStr}`);
+
+            // Gọi API để lấy thông tin tỉnh
+            const response = await fetch(`/api/proxy/provinces/${this.safeEncodeURL(provinceCodeStr)}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}, URL: /api/proxy/provinces/${provinceCodeStr}`);
+            }
+
+            const province = await response.json();
+
+            // Tìm quận/huyện theo code
+            const district = province.districts.find(d => String(d.code) === districtCodeStr);
+
+            if (!district) {
+                throw new Error(`District with code ${districtCodeStr} not found in province ${provinceCodeStr}`);
+            }
+
+            // Cập nhật dropdown phường/xã
             const wardSelect = document.getElementById(wardSelectId);
             if (wardSelect) {
                 wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                district.wards.forEach((ward) => {
-                    const option = document.createElement("option");
-                    option.value = ward.code;
-                    option.textContent = ward.name;
-                    wardSelect.appendChild(option);
-                });
+                if (district.wards && district.wards.length > 0) {
+                    district.wards.forEach((ward) => {
+                        const option = document.createElement("option");
+                        option.value = ward.code;
+                        option.textContent = ward.name;
+                        wardSelect.appendChild(option);
+                        console.log(`Added ward option: ${ward.code} - ${ward.name}`);
+                    });
+                    console.log(`Loaded ${district.wards.length} wards for district ${districtCodeStr}`);
+                } else {
+                    console.warn(`No wards found for district ${districtCodeStr}`);
+                    this.showNotification(`Không tìm thấy phường/xã cho quận ${districtCodeStr}`, 'warning');
+                }
             }
         } catch (error) {
-            console.error("Lỗi khi tải danh sách phường/xã:", error);
-            this.showNotification("Không thể tải danh sách phường/xã", "warning");
+            console.error(`Error loading wards for district ${districtCode}:`, error.message);
+            this.showNotification(`Không thể tải danh sách phường/xã: ${error.message}`, "error");
+            const wardSelect = document.getElementById(wardSelectId);
+            if (wardSelect) {
+                wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
         }
     },
 
+    // SỬA LỖI: Thêm hàm reset districts và wards khi chọn tỉnh mới
     setupLocationListeners() {
         const prefixes = ["tenant", "owner", "room", "newCustomer"];
         prefixes.forEach((prefix) => {
@@ -592,23 +907,38 @@ window.NhaTroContract = {
 
             if (provinceSelect) {
                 provinceSelect.addEventListener("change", () => {
+                    // QUAN TRỌNG: Reset districts và wards trước khi load mới
+                    if (districtSelect) {
+                        districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                        districtSelect.value = ""; // Reset giá trị
+                    }
+                    if (wardSelect) {
+                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        wardSelect.value = ""; // Reset giá trị
+                    }
+
                     if (provinceSelect.value) {
                         this.loadDistricts(provinceSelect.value, `${prefix}-district`, `${prefix}-ward`);
-                    } else {
-                        districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
                     }
+
+                    // Cập nhật địa chỉ sau khi reset
                     this.updateAddress(prefix);
                 });
             }
 
             if (districtSelect) {
                 districtSelect.addEventListener("change", () => {
+                    // QUAN TRỌNG: Reset wards trước khi load mới
+                    if (wardSelect) {
+                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        wardSelect.value = ""; // Reset giá trị
+                    }
+
                     if (districtSelect.value) {
                         this.loadWards(districtSelect.value, `${prefix}-ward`);
-                    } else {
-                        wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
                     }
+
+                    // Cập nhật địa chỉ sau khi reset
                     this.updateAddress(prefix);
                 });
             }
@@ -713,24 +1043,44 @@ window.NhaTroContract = {
         }
     },
 
+    // SỬA LỖI: Cải thiện hàm updateAddress để lấy text thay vì value
     updateAddress(prefix) {
-        const street = document.getElementById(`${prefix}-street`)?.value || "";
-        const ward = this.getSelectText(`${prefix}-ward`);
-        const district = this.getSelectText(`${prefix}-district`);
-        const province = this.getSelectText(`${prefix}-province`);
+        const streetInput = document.getElementById(`${prefix}-street`);
+        const provinceSelect = document.getElementById(`${prefix}-province`);
+        const districtSelect = document.getElementById(`${prefix}-district`);
+        const wardSelect = document.getElementById(`${prefix}-ward`);
+        const addressDiv = document.getElementById(`${prefix}-address`);
 
-        const parts = [street, ward, district, province].filter((part) => part && !part.includes("Chọn") && part !== "");
-        const fullAddress = parts.join(", ");
+        if (!addressDiv) return;
 
-        const previewId = `preview-${prefix === "room" ? "room" : prefix}-address`;
-        const preview = document.getElementById(previewId);
-        if (preview) {
-            preview.textContent = fullAddress || "........................";
-            if (fullAddress) {
-                preview.classList.add("nha-tro-updated");
-                setTimeout(() => preview.classList.remove("nha-tro-updated"), 1000);
-            }
+        let addressParts = [];
+
+        // Lấy tên đường/số nhà
+        if (streetInput && streetInput.value.trim()) {
+            addressParts.push(streetInput.value.trim());
         }
+
+        // QUAN TRỌNG: Lấy TEXT (tên hiển thị) thay vì VALUE (mã code)
+        if (wardSelect && wardSelect.value && wardSelect.selectedIndex > 0) {
+            const selectedWardText = wardSelect.options[wardSelect.selectedIndex].text;
+            addressParts.push(selectedWardText);
+        }
+
+        if (districtSelect && districtSelect.value && districtSelect.selectedIndex > 0) {
+            const selectedDistrictText = districtSelect.options[districtSelect.selectedIndex].text;
+            addressParts.push(selectedDistrictText);
+        }
+
+        if (provinceSelect && provinceSelect.value && provinceSelect.selectedIndex > 0) {
+            const selectedProvinceText = provinceSelect.options[provinceSelect.selectedIndex].text;
+            addressParts.push(selectedProvinceText);
+        }
+
+        // Tạo địa chỉ đầy đủ
+        const fullAddress = addressParts.join(", ");
+        addressDiv.textContent = fullAddress || "Chưa có địa chỉ";
+
+        console.log(`Updated ${prefix} address:`, fullAddress);
     },
 
     updatePaymentMethod() {

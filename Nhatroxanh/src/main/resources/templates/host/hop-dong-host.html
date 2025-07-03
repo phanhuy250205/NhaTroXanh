@@ -286,7 +286,7 @@
                                         <label class="form-label">
                                             Tỉnh/Thành phố <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-select" id="tenant-province" required>
+                                        <select class="form-select" id="tenant-province">
                                             <option value="">Tỉnh/Thành phố</option>
                                         </select>
                                     </div>
@@ -295,16 +295,16 @@
                                         <label class="form-label">
                                             Quận/Huyện <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-select" id="tenant-district" required>
-                                            <option value="">Quận/Huyện</option>
-                                        </select>
+                                        <select class="form-select" id="tenant-district">
+                                        <option value="">Quận/Huyện</option>
+                                    </select>
                                     </div>
 
                                     <div class="col-md-4">
                                         <label class="form-label">
                                             Phường/Xã <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-select" id="tenant-ward" required>
+                                        <select class="form-select" id="tenant-ward">
                                             <option value="">Phường/Xã</option>
                                         </select>
                                     </div>
@@ -1100,7 +1100,7 @@
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/contract.js}"></script>
 
-    <!-- Contract Validation JavaScript -->
+
     <script>
         // CCCD Province Codes Mapping - Move this OUTSIDE the class
         const CCCD_PROVINCE_CODES = {
@@ -1224,10 +1224,10 @@
                 let isValid = true
 
                 // Validate tenant phone
-                const tenantPhone = document.getElementById("tenant-phone")
-                if (!this.validatePhone(tenantPhone.value)) {
-                    this.showError(tenantPhone, "Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0")
-                    isValid = false
+                const tenantPhone = document.getElementById("tenant-phone");
+                if (tenantPhone.value && !this.validatePhone(tenantPhone.value)) {
+                    this.showError(tenantPhone, "Số điện thoại phải có đúng 10 chữ số và bắt đầu bằng số 0");
+                    isValid = false;
                 }
 
                 // Validate tenant name
@@ -1460,8 +1460,8 @@
             }
 
             validatePhone(phone) {
-                const phoneRegex = /^[0-9]{9}$/
-                return phoneRegex.test(phone)
+                const phoneRegex = /^0[0-9]{9}$/;
+                return phoneRegex.test(phone);
             }
 
             validateCCCD(cccd) {
