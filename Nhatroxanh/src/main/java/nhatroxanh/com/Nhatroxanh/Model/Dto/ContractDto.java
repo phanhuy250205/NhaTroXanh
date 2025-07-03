@@ -1,5 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
+
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -9,6 +11,8 @@ public class ContractDto {
     private String status;
     private Owner owner;
     private Tenant tenant;
+    private UnregisteredTenants unregisteredTenant; // Người thuê chưa đăng ký
+    private String tenantType; // "REGISTERED" hoặc "UNREGISTERED"
     private Room room;
     private Terms terms;
 
@@ -18,7 +22,12 @@ public class ContractDto {
         this.room = new Room();
         this.terms = new Terms();
         this.contractDate = LocalDate.now(); // Gán mặc định
+        this.status = "DRAFT"; // Gán trạng thái mặc định
+        this.tenantType = "REGISTERED"; // Mặc định là người thuê đã đăng ký
     }
+
+
+    // Getters and setters
 
 
     // Getters and setters
@@ -32,10 +41,17 @@ public class ContractDto {
     public void setOwner(Owner owner) { this.owner = owner; }
     public Tenant getTenant() { return tenant != null ? tenant : (tenant = new Tenant()); }
     public void setTenant(Tenant tenant) { this.tenant = tenant; }
+    public UnregisteredTenants getUnregisteredTenant() { return unregisteredTenant != null ? unregisteredTenant : (unregisteredTenant = new UnregisteredTenants()); }
+    public void setUnregisteredTenant(UnregisteredTenants unregisteredTenant) { this.unregisteredTenant = unregisteredTenant; }
+    public String getTenantType() { return tenantType; }
+    public void setTenantType(String tenantType) { this.tenantType = tenantType; }
     public Room getRoom() { return room != null ? room : (room = new Room()); }
     public void setRoom(Room room) { this.room = room; }
     public Terms getTerms() { return terms != null ? terms : (terms = new Terms()); }
     public void setTerms(Terms terms) { this.terms = terms; }
+
+
+
 
     public static class Owner {
         private String fullName;
@@ -50,8 +66,7 @@ public class ContractDto {
         private String district;
         private String ward;
         private String street;
-        private String cccdFrontUrl; // Thêm trường cho URL hình ảnh CCCD mặt trước
-        private String cccdBackUrl;  // Thêm trường cho URL hình ảnh CCCD mặt sau
+
 
 
         public String getCccdNumber() {
@@ -87,12 +102,131 @@ public class ContractDto {
         public void setWard(String ward) { this.ward = ward; }
         public String getStreet() { return street; }
         public void setStreet(String street) { this.street = street; }
-        public String getCccdFrontUrl() { return cccdFrontUrl; }
-        public void setCccdFrontUrl(String cccdFrontUrl) { this.cccdFrontUrl = cccdFrontUrl; }
-        public String getCccdBackUrl() { return cccdBackUrl; }
-        public void setCccdBackUrl(String cccdBackUrl) { this.cccdBackUrl = cccdBackUrl; }
     }
 
+
+    public static class UnregisteredTenant{
+        private String fullName;
+        private String phone;
+        private String cccdNumber;
+        private String email;
+        private Date issueDate;
+        private String issuePlace;
+        private String province;
+        private String district;
+        private String ward;
+        private String street;
+        private Date birthday;
+        private String cccdFrontUrl;
+        private String cccdBackUrl;
+
+
+        // Getters and setters
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public void setFullName(String fullName) {
+            this.fullName = fullName;
+        }
+
+        public String getPhone() {
+            return phone;
+        }
+
+        public void setPhone(String phone) {
+            this.phone = phone;
+        }
+
+        public String getCccdNumber() {
+            return cccdNumber;
+        }
+
+        public void setCccdNumber(String cccdNumber) {
+            this.cccdNumber = cccdNumber;
+        }
+
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
+
+        public Date getIssueDate() {
+            return issueDate;
+        }
+
+        public void setIssueDate(Date issueDate) {
+            this.issueDate = issueDate;
+        }
+
+        public String getIssuePlace() {
+            return issuePlace;
+        }
+
+        public void setIssuePlace(String issuePlace) {
+            this.issuePlace = issuePlace;
+        }
+
+        public String getProvince() {
+            return province;
+        }
+
+        public void setProvince(String province) {
+            this.province = province;
+        }
+
+        public String getDistrict() {
+            return district;
+        }
+
+        public void setDistrict(String district) {
+            this.district = district;
+        }
+
+        public String getWard() {
+            return ward;
+        }
+
+        public void setWard(String ward) {
+            this.ward = ward;
+        }
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
+
+        public Date getBirthday() {
+            return birthday;
+        }
+
+        public void setBirthday(Date birthday) {
+            this.birthday = birthday;
+        }
+
+        public String getCccdFrontUrl() {
+            return cccdFrontUrl;
+        }
+
+        public void setCccdFrontUrl(String cccdFrontUrl) {
+            this.cccdFrontUrl = cccdFrontUrl;
+        }
+
+        public String getCccdBackUrl() {
+            return cccdBackUrl;
+        }
+
+        public void setCccdBackUrl(String cccdBackUrl) {
+            this.cccdBackUrl = cccdBackUrl;
+        }
+    }
     public static class Tenant {
         private String fullName;
         private String phone;
@@ -147,26 +281,78 @@ public class ContractDto {
     }
 
     public static class Room {
-        private String roomNumber;
-        private Double area;
-        private String province;
-        private String district;
-        private String ward;
-        private String street;
+        private Integer roomId; // Ánh xạ với roomId trong entity Rooms
+        private String roomName; // Ánh xạ với namerooms (tên phòng, ví dụ: "Phòng 101")
+        private Float area; // Ánh xạ với acreage, dùng Float để đồng bộ với entity
+        private Float price; // Ánh xạ với price trong entity
+        private String status; // Ánh xạ với status (RoomStatus), dùng String để đơn giản hóa
+        private Integer hostelId; // ID của khu trọ, để biết phòng thuộc khu nào
+        private String hostelName; // Tên khu trọ, để hiển thị trong dropdown
+        private String address; // Địa chỉ đầy đủ của khu trọ (kết hợp street, ward, district, province)
 
-        // Getters and setters
-        public String getRoomNumber() { return roomNumber; }
-        public void setRoomNumber(String roomNumber) { this.roomNumber = roomNumber; }
-        public Double getArea() { return area; }
-        public void setArea(Double area) { this.area = area; }
-        public String getProvince() { return province; }
-        public void setProvince(String province) { this.province = province; }
-        public String getDistrict() { return district; }
-        public void setDistrict(String district) { this.district = district; }
-        public String getWard() { return ward; }
-        public void setWard(String ward) { this.ward = ward; }
-        public String getStreet() { return street; }
-        public void setStreet(String street) { this.street = street; }
+        public Integer getRoomId() {
+            return roomId;
+        }
+
+        public void setRoomId(Integer roomId) {
+            this.roomId = roomId;
+        }
+
+        public String getRoomName() {
+            return roomName;
+        }
+
+        public void setRoomName(String roomName) {
+            this.roomName = roomName;
+        }
+
+        public Float getArea() {
+            return area;
+        }
+
+        public void setArea(Float area) {
+            this.area = area;
+        }
+
+        public Float getPrice() {
+            return price;
+        }
+
+        public void setPrice(Float price) {
+            this.price = price;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public Integer getHostelId() {
+            return hostelId;
+        }
+
+        public void setHostelId(Integer hostelId) {
+            this.hostelId = hostelId;
+        }
+
+        public String getHostelName() {
+            return hostelName;
+        }
+
+        public void setHostelName(String hostelName) {
+            this.hostelName = hostelName;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
     }
 
     public static class Terms {
