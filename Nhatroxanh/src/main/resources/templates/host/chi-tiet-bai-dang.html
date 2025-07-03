@@ -1173,8 +1173,7 @@
                 <div th:each="image, iterStat : ${images}"
                   th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'" th:data-image="${image}"
                   onclick="changeMainImage(this.getAttribute('data-image'), this)">
-                  <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}"
-                    style="width: 80px; height: 60px; object-fit: cover;">
+                  <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}" style="width: 80px; height: 60px; ">
                 </div>
               </div>
               <button class="thumbnail-nav next" onclick="scrollThumbnails('next')">
@@ -1267,14 +1266,18 @@
               <i class="fas fa-door-open"></i>
               Danh sách phòng
             </h3>
+
             <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="text-muted">
               Nhà trọ này hiện không có phòng nào.
             </div>
+
             <div th:unless="${rooms == null or #lists.isEmpty(rooms)}">
-              <div th:each="room : ${rooms}" class="room-item-host" th:data-room-id="${room.room_id}"
+              <div th:each="room : ${rooms}" class="room-item-host" th:data-room-id="${room.roomId}"
                 onclick="openRoomModal(this.getAttribute('data-room-id'))">
+
                 <div class="room-item-title-host"
                   th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"></div>
+
                 <div class="room-item-info-host">
                   <span
                     th:text="'Giá: ' + ${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'"></span>

@@ -2,11 +2,14 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -112,17 +115,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getPostsByUserId(Integer userId) {
-        return postRepository.findByUserId(userId);
+    public Page<Post> getPostsByUserId(Integer userId, Pageable pageable) {
+        return postRepository.findByUserUserId(userId, pageable);
     }
 
     @Override
-    public List<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
-            Date fromDate, Date toDate, String sort) {
+    public Page<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
+            Date fromDate, Date toDate, String sort, Integer userId, Pageable pageable) {
         if (sort == null || sort.isEmpty() || sort.equals("newest")) {
-            return postRepository.searchNewestPosts(keyword, categoryId, status, fromDate, toDate);
+            return postRepository.searchNewestPostsPaged(keyword, categoryId, status, fromDate, toDate, userId,
+                    pageable);
         } else {
-            return postRepository.searchOldestPosts(keyword, categoryId, status, fromDate, toDate);
+            return postRepository.searchOldestPostsPaged(keyword, categoryId, status, fromDate, toDate, userId,
+                    pageable);
         }
     }
 
@@ -326,7 +331,6 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         post.setUtilities(utilities);
         post.setHostel(hostel);
-        post.setApprovalStatus(ApprovalStatus.PENDING);
         post.setCreatedAt(java.sql.Date.valueOf(LocalDate.now()));
 
         if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
@@ -363,4 +367,57 @@ public class PostServiceImpl implements PostService {
         postRepository.save(post);
     }
 
+    @Override
+    public List<Post> getFilteredPosts(String status, String type, String sortBy, String search) {
+        List<Post> posts = postRepository.findAll();
+
+        if (status != null && !status.isEmpty()) {
+            ApprovalStatus approvalStatus = ApprovalStatus.valueOf(status.toUpperCase());
+            posts = posts.stream()
+                    .filter(post -> post.getApprovalStatus() == approvalStatus)
+                    .collect(Collectors.toList());
+        }
+
+        if (type != null && !type.isEmpty()) {
+            posts = posts.stream()
+                    .filter(post -> post.getCategory() != null &&
+                            post.getCategory().getName() != null &&
+                            post.getCategory().getName().equalsIgnoreCase(type))
+                    .collect(Collectors.toList());
+        }
+
+        if (search != null && !search.isEmpty()) {
+            posts = posts.stream()
+                    .filter(post -> post.getTitle().toLowerCase().contains(search.toLowerCase()) ||
+                            post.getDescription().toLowerCase().contains(search.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+
+        if ("newest".equalsIgnoreCase(sortBy)) {
+            posts.sort((p1, p2) -> p2.getCreatedAt().compareTo(p1.getCreatedAt()));
+        } else if ("oldest".equalsIgnoreCase(sortBy)) {
+            posts.sort((p1, p2) -> p1.getCreatedAt().compareTo(p2.getCreatedAt()));
+        }
+
+        return posts;
+    }
+
+    @Override
+    public void approvePost(Integer postId, Users approvedBy) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy bài đăng với ID: " + postId));
+
+        post.setApprovalStatus(ApprovalStatus.APPROVED);
+        post.setApprovedBy(approvedBy);
+        post.setApprovedAt(java.sql.Date.valueOf(LocalDate.now()));
+        post.setStatus(true);
+        postRepository.save(post);
+    }
+
+    @Override
+    public void hidePost(Integer postId) {
+        Post post = getPostById(postId);
+        post.setStatus(false);
+        postRepository.save(post);
+    }
 }

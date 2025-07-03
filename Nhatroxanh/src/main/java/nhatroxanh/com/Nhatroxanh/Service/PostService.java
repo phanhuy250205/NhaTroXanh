@@ -5,7 +5,8 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
@@ -20,10 +21,10 @@ public interface PostService {
 
         List<Post> getAllActivePosts();
 
-        List<Post> getPostsByUserId(Integer userId);
+        Page<Post> getPostsByUserId(Integer userId, Pageable pageable);
 
-        List<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status, Date fromDate, Date toDate,
-                        String sort);
+        Page<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
+                        Date fromDate, Date toDate, String sort, Integer userId, Pageable pageable);
 
         Post getPostById(Integer postId);
 
@@ -45,4 +46,11 @@ public interface PostService {
                         String provinceName, String districtName, String wardName) throws Exception;
 
         void save(Post post);
+
+        void approvePost(Integer postId, Users approvedBy);
+
+        void hidePost(Integer postId);
+
+        List<Post> getFilteredPosts(String status, String type, String sortBy, String search);
+
 }

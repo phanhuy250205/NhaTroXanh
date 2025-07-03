@@ -467,10 +467,10 @@
                                         th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ
                                         trọ</h4>
                                     <p class="owner-role mb-0 text-muted" th:switch="${owner.role.name()}">
-                                        <span th:case="'owner'">Chủ trọ</span>
-                                        <span th:case="'admin'">Quản trị viên</span>
-                                        <span th:case="'staff'">Nhân viên</span>
-                                        <span th:case="'customer'">Khách thuê</span>
+                                        <span th:case="'OWNER'">Chủ trọ</span>
+                                        <span th:case="'ADMIN'">Quản trị viên</span>
+                                        <span th:case="'STAFF'">Nhân viên</span>
+                                        <span th:case="'CUSTOMER'">Khách thuê</span>
                                         <span th:case="*">Không xác định</span>
                                     </p>
 
@@ -673,7 +673,9 @@
                                     </div>
 
                                     <div th:if="${!reviews.isEmpty()}">
-                                        <div th:each="review : ${reviews}" class="border rounded p-3 mb-3">
+                                        <div th:each="review, iter : ${reviews}" th:id="'review-' + ${review.reviewId}"
+                                            th:classappend="${iter.index >= 10} ? 'd-none hidden-review' : ''"
+                                            class="border rounded p-3 mb-3 review-item">
                                             <div class="d-flex align-items-start">
                                                 <img th:src="@{${review.user.avatar != null ? review.user.avatar : '/images/avatar-default.png'}}"
                                                     alt="avatar" class="rounded-circle me-3"
@@ -754,7 +756,11 @@
                                         </div>
                                     </div>
                                     <p th:if="${reviews.isEmpty()}" class="text-muted">Chưa có đánh giá nào.</p>
-
+                                    <div class="text-center mt-3" th:if="${reviews.size() > 10}">
+                                        <button id="loadMoreReviews" class="btn btn-outline-primary btn-sm">
+                                            Xem thêm đánh giá
+                                        </button>
+                                    </div>
                                     <!-- Form tạo đánh giá -->
                                     <h5>Đánh giá của bạn</h5>
                                     <div th:if="${#authentication.authenticated}">
@@ -802,11 +808,15 @@
                         <div class="col-lg-3 col-md-6 col-sm-12 mb-4" th:each="room : ${rooms}">
                             <div class="card property-card h-100">
                                 <div class="card-image-container position-relative">
-                                    <img th:src="@{${room.images[0].url}}" class="card-img-top"
-                                        style="height: 200px; object-fit: cover;" alt="Ảnh phòng" />
+                                    <img th:src="@{${(room.images != null and !room.images.isEmpty()) ? room.images[0].url : '/images/cards/default.jpg'}}"
+                                        class="card-img-top" style="height: 200px; object-fit: cover;"
+                                        alt="Ảnh phòng" />
                                 </div>
                                 <div class="card-body">
-                                    <h5 th:text="${room.namerooms}" class="property-title">Phòng</h5>
+                                    <h5 th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"
+                                        class="property-title">
+                                        Phòng
+                                    </h5>
                                     <p><strong>Diện tích:</strong> <span th:text="${room.acreage} + ' m²'">20m²</span>
                                     </p>
                                     <p class="property-price mb-3">
@@ -817,14 +827,17 @@
                                         </span>
                                     </p>
                                     <p><strong>Trạng thái:</strong>
-                                        <span th:if="${room.status.name() == 'unactive'}"
-                                            class="text-danger">Trống</span>
-                                        <span th:if="${room.status.name() == 'active'}" class="text-success">Đã
-                                            thuê</span>
-                                        <span th:if="${room.status.name() == 'repair'}" class="text-warning">Bảo
-                                            trì</span>
+                                        <span th:if="${room.status != null}">
+                                            <span th:switch="${room.status.name()}">
+                                                <span th:case="'unactive'" class="text-danger">Trống</span>
+                                                <span th:case="'active'" class="text-success">Đã thuê</span>
+                                                <span th:case="'repair'" class="text-warning">Bảo trì</span>
+                                                <span th:case="*">Không xác định</span>
+                                            </span>
+                                        </span>
+                                        <span th:if="${room.status == null}">Không xác định</span>
                                     </p>
-                                    <button class="btn btn-outline-primary w-100" th:attr="data-room-id=${room.room_id}"
+                                    <button class="btn btn-outline-primary w-100" th:attr="data-room-id=${room.roomId}"
                                         onclick="openRoomDetailModal(this.getAttribute('data-room-id'))">
                                         <i class="fas fa-eye me-1"></i> Xem chi tiết
                                     </button>
@@ -834,6 +847,7 @@
                     </div>
                 </div>
             </div>
+
             <!-- Similar Properties -->
             <div class="row mt-5">
                 <div class="col-12">
@@ -1536,6 +1550,28 @@
                 });
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('loadMoreReviews');
+            const hiddenReviews = document.querySelectorAll('.hidden-review');
+            let expanded = false; // Trạng thái: đang ẩn
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    if (!expanded) {
+                        // Mở rộng – hiển thị tất cả đánh giá
+                        hiddenReviews.forEach(item => item.classList.remove('d-none'));
+                        toggleBtn.textContent = 'Ẩn bớt đánh giá';
+                        expanded = true;
+                    } else {
+                        // Thu gọn – ẩn lại các đánh giá >= 10
+                        hiddenReviews.forEach(item => item.classList.add('d-none'));
+                        toggleBtn.textContent = 'Xem thêm đánh giá';
+                        expanded = false;
+                    }
+                });
+            }
+        });
+
         // document.addEventListener('DOMContentLoaded', function () {
         //     const toasts = document.querySelectorAll('.toast-host');
         //     toasts.forEach(toast => {

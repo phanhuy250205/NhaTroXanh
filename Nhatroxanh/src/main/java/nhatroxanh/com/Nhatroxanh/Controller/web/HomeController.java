@@ -67,7 +67,8 @@ public class HomeController {
             }
 
             // 2. Tiện ích
-            Set<Utility> utilities = postRepository.findUtilitiesByPostId(postId);
+            Set<Utility> utilities = new HashSet<>(postRepository.findUtilitiesByPostId(postId));
+
             model.addAttribute("post", post);
             model.addAttribute("owner", post.getUser() != null ? post.getUser() : new Users());
             model.addAttribute("utilities", utilities != null ? new HashSet<>(utilities) : new HashSet<>());
@@ -82,7 +83,15 @@ public class HomeController {
             Hostel hostel = post.getHostel() != null
                     ? hostelRepository.findByIdWithRooms(post.getHostel().getHostelId()).orElse(null)
                     : null;
+
+            // Danh sách phòng
             List<Rooms> rooms = hostel != null && hostel.getRooms() != null ? hostel.getRooms() : List.of();
+
+            // Debug
+            log.info("Post {} utilities: {}", postId, utilities.stream().map(Utility::getName).toList());
+            log.info("Rooms count: {}", rooms.size());
+            rooms.forEach(room -> log.info("Room: id={}, name={}, price={}, area={}",
+                    room.getRoomId(), room.getNamerooms(), room.getPrice(), room.getAcreage()));
             model.addAttribute("hostel", hostel);
             model.addAttribute("rooms", rooms);
             model.addAttribute("roomCount", rooms.size());

@@ -5,22 +5,34 @@ import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 @Entity
-@ToString(exclude = "notifications")
-@Table(name = "Users")
+@ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "users") // Đảm bảo tên bảng khớp với database
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
+    @Column(name = "user_id") // Đảm bảo tên cột khớp với database
     private Integer userId;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Notification> notifications;
 
     @Column(name = "password", nullable = false, length = 256)
@@ -59,9 +71,6 @@ public class Users {
     @Column(name = "address", length = 255)
     private String address;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private UserCccd userCccd;
-
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address addressEntity;
@@ -70,11 +79,28 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserCccd userCccd;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> ownedContracts;
+
+    @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> rentedContracts;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<Vouchers> vouchers;
+
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }
 
     public Users orElse(Object object) {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
     }
 }

@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng Tin Trọ</title>
@@ -461,6 +461,13 @@
                 right: 20px;
             }
         }
+
+        .error-message-host {
+            color: red;
+            font-size: 13px;
+            margin-top: 4px;
+            margin-left: 10px;
+        }
     </style>
 </head>
 
@@ -497,6 +504,7 @@
                         th:selected="${categoryId != null && categoryId == category.categoryId}">
                     </option>
                 </select>
+                <div class="error-message-host" id="error-category"></div>
             </div>
 
             <div class="form-section-host">
@@ -505,6 +513,7 @@
                     th:value="${hostelId}">
                     <option value="">-- Chọn nhà trọ --</option>
                 </select>
+                <div class="error-message-host" id="error-hostel"></div>
             </div>
 
             <div class="form-section-host">
@@ -530,7 +539,7 @@
                     </div>
                     <div class="col-host">
                         <input name="street" type="text" class="form-control-host" placeholder="Nhập tên đường/phố..."
-                            th:value="${street}" required>
+                            th:value="${street}">
                     </div>
                 </div>
             </div>
@@ -543,7 +552,9 @@
                             th:value="${houseNumber}">
                     </div>
                     <div class="col-host">
-                        <!-- Placeholder để cân bằng layout -->
+                        <label class="form-label-host">Địa chỉ chi tiết:</label>
+                        <input name="fullAddress" type="text" class="form-control-host" id="displayFullAddress"
+                            readonly />
                     </div>
                 </div>
             </div>
@@ -551,7 +562,9 @@
             <div class="form-section-host">
                 <label class="form-label-host">Tiêu đề bài đăng <span style="color: red;">*</span></label>
                 <textarea name="title" class="form-control-host" placeholder="Nhập tiêu đề hấp dẫn cho bài đăng..."
-                    rows="2" required th:text="${title}"></textarea>
+                    rows="2" th:text="${title}"></textarea>
+                <div class="error-message-host" id="error-title"></div>
+
             </div>
 
             <div class="form-section-host">
@@ -560,20 +573,22 @@
                         <label class="form-label-host">Giá cho thuê <span style="color: red;">*</span></label>
                         <div class="input-group-host">
                             <input name="price" type="number" class="form-control-host" placeholder="Nhập giá..."
-                                required th:value="${price}">
+                                th:value="${price}">
                             <select class="form-control-host form-select-host" style="width: 120px;">
                                 <option>VNĐ/Tháng</option>
                                 <option>VNĐ/Ngày</option>
                             </select>
                         </div>
+                        <div class="error-message-host" id="error-price"></div>
                     </div>
                     <div class="col-host">
                         <label class="form-label-host">Diện tích <span style="color: red;">*</span></label>
                         <div class="input-group-host">
                             <input name="area" type="number" class="form-control-host" placeholder="Nhập diện tích..."
-                                required th:value="${area}">
+                                th:value="${area}">
                             <input type="text" class="form-control-host area-unit-host" value="m²" disabled>
                         </div>
+                        <div class="error-message-host" id="error-area"></div>
                     </div>
                 </div>
             </div>
@@ -583,6 +598,7 @@
                 <textarea name="description" class="form-control-host"
                     placeholder="Mô tả chi tiết về phòng trọ, vị trí, tiện ích..." rows="5"
                     th:text="${description}"></textarea>
+                <div class="error-message-host" id="error-description"></div>
             </div>
 
             <div class="form-section-host">
@@ -635,6 +651,7 @@
             setupAddressCascade();
             setupFormSubmission();
             initializeToasts();
+            setupLiveAddressPreview();
         });
 
         async function loadProvinces() {
@@ -992,6 +1009,95 @@
                 }
             });
         }
+        function setupLiveAddressPreview() {
+            const houseNumber = document.querySelector('input[name="houseNumber"]');
+            const street = document.querySelector('input[name="street"]');
+            const ward = document.getElementById('wardSelect');
+            const district = document.getElementById('districtSelect');
+            const province = document.getElementById('provinceSelect');
+            const fullAddressInput = document.getElementById('displayFullAddress');
+
+            function updateAddressDisplay() {
+                const house = houseNumber.value.trim();
+                const streetName = street.value.trim();
+                const wardName = ward.options[ward.selectedIndex]?.text || "";
+                const districtName = district.options[district.selectedIndex]?.text || "";
+                const provinceName = province.options[province.selectedIndex]?.text || "";
+
+                let address = "";
+
+                if (house) address += house + ", ";
+                if (streetName) address += streetName + ", ";
+                if (ward.value) address += wardName + ", ";
+                if (district.value) address += districtName + ", ";
+                if (province.value) address += provinceName;
+
+                fullAddressInput.value = address;
+            }
+
+            // Lắng nghe thay đổi
+            [houseNumber, street, ward, district, province].forEach(el => {
+                el.addEventListener("input", updateAddressDisplay);
+                el.addEventListener("change", updateAddressDisplay);
+            });
+
+            updateAddressDisplay(); // Lần đầu tiên
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            setupLiveAddressPreview();
+        });
+        document.getElementById("postForm").addEventListener("submit", function (e) {
+            let isValid = true;
+
+            // Reset lỗi cũ
+            document.querySelectorAll(".error-message-host").forEach(el => el.innerText = "");
+
+            // Lấy các trường
+            const categoryId = document.querySelector('[name="categoryId"]');
+            const hostelId = document.querySelector('[name="hostelId"]');
+            const title = document.querySelector('[name="title"]');
+            const price = document.querySelector('[name="price"]');
+            const area = document.querySelector('[name="area"]');
+            const description = document.querySelector('[name="description"]');
+            // Validate Loại danh mục
+            if (!categoryId.value) {
+                isValid = false;
+                document.getElementById("error-category").innerText = "Vui lòng chọn loại danh mục.";
+            }
+
+            // Validate Nhà trọ
+            if (!hostelId.value) {
+                isValid = false;
+                document.getElementById("error-hostel").innerText = "Vui lòng chọn nhà trọ.";
+            }
+
+            // Validate Tiêu đề
+            if (!title.value.trim()) {
+                isValid = false;
+                document.getElementById("error-title").innerText = "Vui lòng nhập tiêu đề cho bài đăng.";
+            }
+
+            // Validate Giá
+            if (!price.value || parseFloat(price.value) <= 0) {
+                isValid = false;
+                document.getElementById("error-price").innerText = "Giá phải lớn hơn 0.";
+            }
+
+            // Validate Diện tích
+            if (!area.value || parseFloat(area.value) <= 0) {
+                isValid = false;
+                document.getElementById("error-area").innerText = "Diện tích phải lớn hơn 0.";
+            }
+            if (!description.value.trim()) {
+                isValid = false;
+                document.getElementById("error-description").innerText = "Mô tả không được để trống.";
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 
