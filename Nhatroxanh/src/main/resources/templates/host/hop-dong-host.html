@@ -5,6 +5,7 @@
     <!-- ICON -->
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
     <!-- Font Awesome -->
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
@@ -236,7 +237,7 @@
                                 <h6 class="mb-0">Thông tin người thuê</h6>
                                 <button type="button"
                                         class="btn btn-outline-success btn-sm nha-tro-host-btn-add-customer"
-                                        id="btn-add-customer-host">
+                                        id="btn-add-customer-host" data-bs-toggle="modal" data-bs-target="#addCustomerModal-host">
                                     <i class="fa fa-user-plus me-1"></i> Thêm khách mới
                                 </button>
                             </div>
@@ -247,7 +248,7 @@
                                     <label class="form-label">
                                         Họ và tên <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-name" required
+                                    <input type="text" class="form-control" id="tenant-name" th:field="*{tenant.fullName}" required
                                            placeholder="Nhập họ và tên">
                                 </div>
 
@@ -256,7 +257,7 @@
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" class="form-control" id="tenant-dob" required
-                                           max="2006-12-31">
+                                           max="2006-12-31" th:field="*{tenant.birthday}">
                                 </div>
 
                                 <div class="col-md-3">
@@ -264,19 +265,19 @@
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="tenant-id" required
-                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số">
+                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{tenant.id}">
                                 </div>
 
                                 <div class="col-md-5">
                                     <label class="form-label">
                                         Ngày cấp <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="tenant-id-date" required>
+                                    <input type="date" class="form-control" id="tenant-id-date" th:field="*{tenant.issueDate}" required>
                                 </div>
 
                                 <div class="col-md-7">
                                     <label class="form-label">
-                                        Nơi cấp <span class="text-danger">*</span>
+                                        Nơi cấp <span class="text-danger" th:field="*{tenant.issuePlace}">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="tenant-id-place" required
                                            placeholder="Nơi cấp CMND/CCCD">
@@ -362,19 +363,22 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="owner-name" required
+                                    <input type="text" class="form-control" id="owner-name"  th:field="*{owner.fullName}" required
                                            placeholder="Nhập họ và tên">
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label class="form-label">Ngày sinh <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="owner-dob" required>
+                                    <label class="form-label">
+                                        Ngày sinh <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" th:field="*{owner.birthday}" required>
                                 </div>
 
                                 <div class="col-md-3">
-                                    <label class="form-label">Số CMND/CCCD <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="owner-id" required
+                                    <label class="form-label">
+                                        Số CMND/CCCD <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" th:field="*{owner.id}" required
                                            pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số">
                                 </div>
 
@@ -391,47 +395,63 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">Tỉnh/Thành phố</label>
-                                    <select class="form-select" id="owner-province">
-                                        <option value="">Chọn Tỉnh/Thành phố</option>
+                                    <select class="form-select" th:field="*{owner.province}" id="owner-province">
+                                        <option value="">Tỉnh/Thành phố</option>
+                                        <option th:value="${contract.owner.province}"
+                                                th:text="${contract.owner.province}"
+                                                th:unless="${contract.owner.province == null}">
+                                            [[${contract.owner.province}]]
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Quận/Huyện</label>
-                                    <select class="form-select" id="owner-district">
-                                        <option value="">Chọn Quận/Huyện</option>
+                                    <select class="form-select" th:field="*{owner.district}" id="owner-district">
+                                        <option value="">Quận/Huyện</option>
+                                        <option th:value="${contract.owner.district}"
+                                                th:text="${contract.owner.district}"
+                                                th:unless="${contract.owner.district == null}">
+                                            [[${contract.owner.district}]]
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Phường/Xã</label>
-                                    <select class="form-select" id="owner-ward">
-                                        <option value="">Chọn Phường/Xã</option>
+                                    <select class="form-select" th:field="*{owner.ward}" id="owner-ward">
+                                        <option value="">Phường/Xã</option>
+                                        <option th:value="${contract.owner.ward}" th:text="${contract.owner.ward}"
+                                                th:unless="${contract.owner.ward == null}">
+                                            [[${contract.owner.ward}]]
+                                        </option>
                                     </select>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Tên đường/Số nhà</label>
-                                    <input type="text" class="form-control" id="owner-street"
+                                    <input type="text" class="form-control" th:field="*{owner.street}"
+                                           th:value="${contract.owner.street != null ? contract.owner.street : ''}"
                                            placeholder="Số nhà, tên đường">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Email (nếu có)</label>
-                                    <input type="email" class="form-control" id="owner-email"
+                                    <input type="email" class="form-control" th:field="*{owner.email}"
                                            pattern=".*@gmail\.com$" placeholder="example@gmail.com">
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Số điện thoại <span
-                                            class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="owner-phone" required
+                                    <label class="form-label">
+                                        Số điện thoại <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" th:field="*{owner.phone}" required
                                            pattern="[0-9]{10}" maxlength="10" placeholder="10 chữ số">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Tài khoản ngân hàng (nếu có)</label>
-                                    <input type="text" class="form-control" id="owner-bank"
+                                    <input type="text" class="form-control" th:field="*{owner.bankAccount}"
                                            placeholder="Số tài khoản ngân hàng">
                                 </div>
                             </div>
@@ -452,6 +472,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">
+
                                         <i class="fa fa-building me-1"></i>Chọn khu trọ <span
                                             class="text-danger">*</span>
                                     </label>
@@ -484,7 +505,6 @@
                                         <option value="">Tỉnh/Thành phố</option>
                                     </select>
                                 </div>
-
                                 <div class="col-md-4">
                                     <label class="form-label">Quận/Huyện</label>
                                     <select class="form-select" id="room-district">
@@ -542,7 +562,7 @@
                                         <label class="form-label">Tiện ích</label>
                                         <button type="button"
                                                 class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-amenity"
-                                                id="btn-add-amenity-host">
+                                                id="btn-add-amenity-host" data-bs-toggle="modal" data-bs-target="#addAmenityModal-host">
                                             <i class="fa fa-plus me-1"></i> Thêm tiện ích
                                         </button>
                                     </div>
@@ -734,20 +754,13 @@
 
                             <div class="mb-3">
                                 <p><strong>BÊN THUÊ (Bên B):</strong></p>
-                                <p>Họ tên: <span id="preview-tenant-name"
-                                                 class="nha-tro-highlight">........................</span></p>
-                                <p>Sinh ngày: <span id="preview-tenant-dob"
-                                                    class="nha-tro-highlight">........................</span></p>
-                                <p>Số CMND/CCCD: <span id="preview-tenant-id"
-                                                       class="nha-tro-highlight">........................</span> cấp ngày <span
-                                        id="preview-tenant-id-date"
-                                        class="nha-tro-highlight">........................</span> tại <span
-                                        id="preview-tenant-id-place"
-                                        class="nha-tro-highlight">........................</span></p>
-                                <p>Địa chỉ: <span id="preview-tenant-address"
-                                                  class="nha-tro-highlight">........................</span></p>
-                                <p>Số điện thoại: <span id="preview-tenant-phone"
-                                                        class="nha-tro-highlight">........................</span></p>
+                                <p>Họ tên: <span id="preview-tenant-name" class="nha-tro-highlight">........................</span></p>
+                                <p>Sinh ngày: <span id="preview-tenant-dob" class="nha-tro-highlight">........................</span></p>
+                                <p>Số CMND/CCCD: <span id="preview-tenant-id" class="nha-tro-highlight">........................</span> cấp ngày <span
+                                        id="preview-tenant-id-date" class="nha-tro-highlight">........................</span> tại <span
+                                        id="preview-tenant-id-place" class="nha-tro-highlight">........................</span></p>
+                                <p>Địa chỉ: <span id="preview-tenant-address" class="nha-tro-highlight">........................</span></p>
+                                <p>Số điện thoại: <span id="preview-tenant-phone" class="nha-tro-highlight">........................</span></p>
                             </div>
 
                             <div id="preview-residents-section" style="display: none;" class="mb-3">
@@ -1071,6 +1084,162 @@
         </div>
     </div>
 </div>
+
+<script>
+    // CCCD Province Codes Mapping - Move this OUTSIDE the class
+    const CCCD_PROVINCE_CODES = {
+        "Hà Nội": ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012"],
+        "TP. Hồ Chí Minh": ["079", "080", "081", "082", "083", "084", "085", "086", "087", "088", "089", "090"],
+        "Hải Phòng": ["031", "032", "033", "034", "035"],
+        "Đà Nẵng": ["048", "049"],
+        "Cần Thơ": ["065", "066", "067"],
+        "An Giang": ["089", "090"],
+        "Bà Rịa - Vũng Tàu": ["077", "078"],
+        "Bắc Giang": ["024", "025"],
+        "Bắc Kạn": ["006"],
+        "Bạc Liêu": ["095"],
+        "Bắc Ninh": ["027"],
+        "Bến Tre": ["075"],
+        "Bình Định": ["052"],
+        "Bình Dương": ["074"],
+        "Bình Phước": ["070"],
+        "Bình Thuận": ["060"],
+        "Cà Mau": ["096"],
+        "Cao Bằng": ["004"],
+        "Đắk Lắk": ["062"],
+        "Đắk Nông": ["067"],
+        "Điện Biên": ["011"],
+        "Đồng Nai": ["075"],
+        "Đồng Tháp": ["087"],
+        "Gia Lai": ["064"],
+        "Hà Giang": ["002"],
+        "Hà Nam": ["035"],
+        "Hà Tĩnh": ["042"],
+        "Hải Dương": ["030"],
+        "Hậu Giang": ["093"],
+        "Hòa Bình": ["017"],
+        "Hưng Yên": ["033"],
+        "Khánh Hòa": ["058"],
+        "Kiên Giang": ["091"],
+        "Kon Tum": ["066"],
+        "Lai Châu": ["012"],
+        "Lâm Đồng": ["068"],
+        "Lạng Sơn": ["009"],
+        "Lào Cai": ["010"],
+        "Long An": ["080"],
+        "Nam Định": ["036"],
+        "Nghệ An": ["040"],
+        "Ninh Bình": ["037"],
+        "Ninh Thuận": ["059"],
+        "Phú Thọ": ["025"],
+        "Phú Yên": ["054"],
+        "Quảng Bình": ["044"],
+        "Quảng Nam": ["049"],
+        "Quảng Ngãi": ["051"],
+        "Quảng Ninh": ["022"],
+        "Quảng Trị": ["045"],
+        "Sóc Trăng": ["094"],
+        "Sơn La": ["014"],
+        "Tây Ninh": ["072"],
+        "Thái Bình": ["034"],
+        "Thái Nguyên": ["019"],
+        "Thanh Hóa": ["038"],
+        "Thừa Thiên Huế": ["046"],
+        "Tiền Giang": ["082"],
+        "Trà Vinh": ["084"],
+        "Tuyên Quang": ["008"],
+        "Vĩnh Long": ["086"],
+        "Vĩnh Phúc": ["026"],
+        "Yên Bái": ["015"]
+    };
+
+    // Sample room data for each housing area
+
+
+    // Handle housing area selection change
+    housingAreaSelect.addEventListener('change', function() {
+        const selectedArea = this.value;
+
+        // Clear room selection
+        roomSelectionSelect.innerHTML = '<option value="">-- Chọn phòng trọ --</option>';
+
+        if (selectedArea && roomData[selectedArea]) {
+            // Enable room selection
+            roomSelectionSelect.disabled = false;
+
+            // Populate room options
+            roomData[selectedArea].forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.value;
+                option.textContent = room.text;
+                roomSelectionSelect.appendChild(option);
+            });
+        } else {
+            // Disable room selection if no area selected
+            roomSelectionSelect.disabled = true;
+            // Clear form fields
+            document.getElementById('room-number').value = '';
+            document.getElementById('room-area').value = '';
+            document.getElementById('rent-price').value = '';
+
+            // Update preview
+            if (window.NhaTroContract) {
+                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+            }
+        }
+    });
+
+    // Handle room selection change
+    roomSelectionSelect.addEventListener('change', function() {
+        const selectedArea = housingAreaSelect.value;
+        const selectedRoomValue = this.value;
+
+        if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
+            // Find the selected room data
+            const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
+
+            if (selectedRoom) {
+                // Auto-fill room information
+                document.getElementById('room-number').value = selectedRoom.number;
+                document.getElementById('room-area').value = selectedRoom.area;
+                document.getElementById('rent-price').value = selectedRoom.price;
+
+                // Update contract preview using the existing NhaTroContract methods
+                if (window.NhaTroContract) {
+                    // Update preview fields with highlight effect
+                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+
+                    // Recalculate deposit based on new rent price
+                    window.NhaTroContract.calculateDeposit();
+
+                    // Show notification
+                    window.NhaTroContract.showNotification(
+                        `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,
+                        'success'
+                    );
+                }
+            }
+        } else {
+            // Clear fields if no room selected
+            document.getElementById('room-number').value = '';
+            document.getElementById('room-area').value = '';
+            document.getElementById('rent-price').value = '';
+
+            // Update preview
+            if (window.NhaTroContract) {
+                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+                window.NhaTroContract.calculateDeposit();
+            }
+        }
+    });
+
+</script>
 
 <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/contract.js}"></script>

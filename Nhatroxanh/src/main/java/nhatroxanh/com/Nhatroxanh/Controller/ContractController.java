@@ -283,60 +283,41 @@ public class ContractController {
     }
     @PostMapping
     @PreAuthorize("hasRole('OWNER')")
-    public String createContract(
+    public ResponseEntity<?> createContract(
             @ModelAttribute("contract") ContractDto contract,
             @RequestParam(value = "cccdFront", required = false) MultipartFile cccdFront,
             @RequestParam(value = "cccdBack", required = false) MultipartFile cccdBack,
             BindingResult result,
-            Model model,
             Authentication authentication) {
         logger.info("Creating new contract with data: {}", contract);
 
+        Map<String, Object> response = new HashMap<>();
+
         try {
+            // Kiểm tra lỗi validation
             if (result.hasErrors()) {
                 logger.error("Validation errors: {}", result.getAllErrors());
-                model.addAttribute("error", "Dữ liệu không hợp lệ!");
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                model.addAttribute("hostels", hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId()));
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
+                response.put("success", false);
+                return ResponseEntity.badRequest().body(response);
             }
 
             // Kiểm tra roomId
             if (contract.getRoom() == null || contract.getRoom().getRoomId() == null) {
                 logger.error("Room ID is missing");
-                model.addAttribute("error", "Vui lòng chọn phòng!");
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                model.addAttribute("hostels", hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId()));
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
+                response.put("success", false);
+                response.put("message", "Vui lòng chọn phòng!");
+                return ResponseEntity.badRequest().body(response);
             }
 
-            // Kiểm tra trạng thái phòng
+            // Lấy thông tin người dùng hiện tại (chủ trọ)
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId());
-            Rooms selectedRoom = hostels.stream()
-                    .flatMap(hostel -> hostel.getRooms().stream())
-                    .filter(room -> room.getRoomId().equals(contract.getRoom().getRoomId()))
-                    .findFirst()
-                    .orElse(null);
-            if (selectedRoom == null || !selectedRoom.getStatus().name().equals("AVAILABLE")) {
-                logger.error("Selected room is not available or does not exist: {}", contract.getRoom().getRoomId());
-                model.addAttribute("error", "Phòng đã chọn không tồn tại hoặc không trống!");
-                model.addAttribute("hostels", hostels);
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
-            }
-
-            // Find owner
             String ownerCccd = userDetails.getCccd();
             Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
             if (owner == null) {
                 logger.error("Owner not found for CCCD: {}", ownerCccd);
-                model.addAttribute("error", "Không tìm thấy chủ trọ với CCCD: " + ownerCccd);
-                model.addAttribute("hostels", hostels);
-                initializeModelAttributes(model, contract);
-                return "host/hop-dong-host";
+                response.put("success", false);
+                response.put("message", "Không tìm thấy chủ trọ với CCCD: " + ownerCccd);
+                return ResponseEntity.badRequest().body(response);
             }
 
             // Cập nhật thông tin chủ trọ
@@ -345,18 +326,30 @@ public class ContractController {
             if (contract.getOwner().getBirthday() != null) {
                 owner.setBirthday(new java.sql.Date(contract.getOwner().getBirthday().getTime()));
             }
-            UserCccd ownerCccdEntity = userService.findUserCccdByUserId(owner.getUserId());
+            UserCccd ownerCccdEntity = userCccdRepository.findByUserId(owner.getUserId()).orElse(null);
             if (ownerCccdEntity != null) {
                 ownerCccdEntity.setCccdNumber(contract.getOwner().getCccdNumber());
                 ownerCccdEntity.setIssueDate(contract.getOwner().getIssueDate());
                 ownerCccdEntity.setIssuePlace(contract.getOwner().getIssuePlace());
-                userService.saveUserCccd(ownerCccdEntity);
+                if (cccdFront != null && !cccdFront.isEmpty()) {
+                    ownerCccdEntity.setFrontImageUrl(saveFile(cccdFront));
+                }
+                if (cccdBack != null && !cccdBack.isEmpty()) {
+                    ownerCccdEntity.setBackImageUrl(saveFile(cccdBack));
+                }
+                userCccdRepository.save(ownerCccdEntity);
             } else if (contract.getOwner().getCccdNumber() != null && !contract.getOwner().getCccdNumber().trim().isEmpty()) {
                 UserCccd newOwnerCccd = new UserCccd();
                 newOwnerCccd.setUser(owner);
                 newOwnerCccd.setCccdNumber(contract.getOwner().getCccdNumber());
                 newOwnerCccd.setIssueDate(contract.getOwner().getIssueDate());
                 newOwnerCccd.setIssuePlace(contract.getOwner().getIssuePlace());
+                if (cccdFront != null && !cccdFront.isEmpty()) {
+                    newOwnerCccd.setFrontImageUrl(saveFile(cccdFront));
+                }
+                if (cccdBack != null && !cccdBack.isEmpty()) {
+                    newOwnerCccd.setBackImageUrl(saveFile(cccdBack));
+                }
                 userCccdRepository.save(newOwnerCccd);
             }
             Optional<Address> addressOptional = userService.findAddressByUserId(owner.getUserId());
@@ -364,20 +357,24 @@ public class ContractController {
                 Address address = addressOptional.get();
                 address.setStreet(contract.getOwner().getStreet());
                 userService.saveAddress(address);
+            } else {
+                Address newAddress = new Address();
+                newAddress.setUser(owner);
+                newAddress.setStreet(contract.getOwner().getStreet());
+                userService.saveAddress(newAddress);
             }
             userService.saveUser(owner);
 
-            // Handle tenant
+            // Xử lý thông tin người thuê
             Users tenant = null;
             UnregisteredTenants unregisteredTenant = null;
             String tenantPhone = null;
             if ("UNREGISTERED".equals(contract.getTenantType())) {
                 if (contract.getUnregisteredTenant().getPhone() == null || contract.getUnregisteredTenant().getPhone().trim().isEmpty()) {
                     logger.error("Unregistered tenant phone is empty");
-                    model.addAttribute("error", "Số điện thoại người thuê không được để trống!");
-                    model.addAttribute("hostels", hostels);
-                    initializeModelAttributes(model, contract);
-                    return "host/hop-dong-host";
+                    response.put("success", false);
+                    response.put("message", "Số điện thoại người thuê không được để trống!");
+                    return ResponseEntity.badRequest().body(response);
                 }
                 unregisteredTenant = new UnregisteredTenants();
                 unregisteredTenant.setUser(owner);
@@ -387,95 +384,134 @@ public class ContractController {
                 unregisteredTenant.setIssueDate(contract.getUnregisteredTenant().getIssueDate());
                 unregisteredTenant.setIssuePlace(contract.getUnregisteredTenant().getIssuePlace());
                 unregisteredTenant.setBirthday(contract.getUnregisteredTenant().getBirthday());
-                unregisteredTenant.setCccdFrontUrl(cccdFront != null && !cccdFront.isEmpty() ? saveFile(cccdFront) : null);
-                unregisteredTenant.setCccdBackUrl(cccdBack != null && !cccdBack.isEmpty() ? saveFile(cccdBack) : null);
+                if (cccdFront != null && !cccdFront.isEmpty()) {
+                    unregisteredTenant.setCccdFrontUrl(saveFile(cccdFront));
+                }
+                if (cccdBack != null && !cccdBack.isEmpty()) {
+                    unregisteredTenant.setCccdBackUrl(saveFile(cccdBack));
+                }
                 unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
-                Address address = new Address();
-                address.setStreet(contract.getUnregisteredTenant().getAddress().getStreet());
-                unregisteredTenant.setAddress(address);
+                Address tenantAddress = new Address();
+                tenantAddress.setStreet(contract.getUnregisteredTenant().getAddress().getStreet());
+                unregisteredTenant.setAddress(tenantAddress);
                 unregisteredTenantsRepository.save(unregisteredTenant);
                 tenantPhone = contract.getUnregisteredTenant().getPhone();
             } else {
                 if (contract.getTenant().getPhone() == null || contract.getTenant().getPhone().trim().isEmpty()) {
                     logger.error("Tenant phone is empty");
-                    model.addAttribute("error", "Số điện thoại người thuê không được để trống!");
-                    model.addAttribute("hostels", hostels);
-                    initializeModelAttributes(model, contract);
-                    return "host/hop-dong-host";
+                    response.put("success", false);
+                    response.put("message", "Số điện thoại người thuê không được để trống!");
+                    return ResponseEntity.badRequest().body(response);
                 }
                 Optional<Users> tenantUser = userRepository.findByPhone(contract.getTenant().getPhone());
                 if (tenantUser.isPresent()) {
                     tenant = tenantUser.get();
-                    UserCccd tenantCccd = userService.findUserCccdByUserId(tenant.getUserId());
+                    UserCccd tenantCccd = userCccdRepository.findByUserId(tenant.getUserId()).orElse(null);
                     if (tenantCccd != null) {
-                        contract.getTenant().setCccdNumber(tenantCccd.getCccdNumber());
-                        contract.getTenant().setIssueDate(tenantCccd.getIssueDate());
-                        contract.getTenant().setIssuePlace(tenantCccd.getIssuePlace());
+                        tenantCccd.setCccdNumber(contract.getTenant().getCccdNumber());
+                        tenantCccd.setIssueDate(contract.getTenant().getIssueDate());
+                        tenantCccd.setIssuePlace(contract.getTenant().getIssuePlace());
+                        if (cccdFront != null && !cccdFront.isEmpty()) {
+                            tenantCccd.setFrontImageUrl(saveFile(cccdFront));
+                        }
+                        if (cccdBack != null && !cccdBack.isEmpty()) {
+                            tenantCccd.setBackImageUrl(saveFile(cccdBack));
+                        }
+                        userCccdRepository.save(tenantCccd);
                     } else if (contract.getTenant().getCccdNumber() != null && !contract.getTenant().getCccdNumber().trim().isEmpty()) {
                         UserCccd newTenantCccd = new UserCccd();
                         newTenantCccd.setUser(tenant);
                         newTenantCccd.setCccdNumber(contract.getTenant().getCccdNumber());
                         newTenantCccd.setIssueDate(contract.getTenant().getIssueDate());
                         newTenantCccd.setIssuePlace(contract.getTenant().getIssuePlace());
-                        newTenantCccd.setFrontImageUrl(cccdFront != null && !cccdFront.isEmpty() ? saveFile(cccdFront) : null);
-                        newTenantCccd.setBackImageUrl(cccdBack != null && !cccdBack.isEmpty() ? saveFile(cccdBack) : null);
+                        if (cccdFront != null && !cccdFront.isEmpty()) {
+                            newTenantCccd.setFrontImageUrl(saveFile(cccdFront));
+                        }
+                        if (cccdBack != null && !cccdBack.isEmpty()) {
+                            newTenantCccd.setBackImageUrl(saveFile(cccdBack));
+                        }
                         userCccdRepository.save(newTenantCccd);
                     }
-                    contract.getTenant().setFullName(tenant.getFullname());
-                    contract.getTenant().setPhone(tenant.getPhone());
-                    if (tenant.getBirthday() != null) {
-                        contract.getTenant().setBirthday(new Date(tenant.getBirthday().getTime()));
+                    tenant.setFullname(contract.getTenant().getFullName());
+                    if (contract.getTenant().getBirthday() != null) {
+                        tenant.setBirthday(new java.sql.Date(contract.getTenant().getBirthday().getTime()));
                     }
                     Optional<Address> tenantAddress = userService.findAddressByUserId(tenant.getUserId());
                     if (tenantAddress.isPresent()) {
                         Address address = tenantAddress.get();
-                        contract.getTenant().setStreet(address.getStreet());
-                        if (address.getWard() != null) {
-                            contract.getTenant().setWard(address.getWard().getName());
-                            if (address.getWard().getDistrict() != null) {
-                                contract.getTenant().setDistrict(address.getWard().getDistrict().getName());
-                                if (address.getWard().getDistrict().getProvince() != null) {
-                                    contract.getTenant().setProvince(address.getWard().getDistrict().getProvince().getName());
-                                }
-                            }
-                        }
+                        address.setStreet(contract.getTenant().getStreet());
+                        userService.saveAddress(address);
+                    } else {
+                        Address newAddress = new Address();
+                        newAddress.setUser(tenant);
+                        newAddress.setStreet(contract.getTenant().getStreet());
+                        userService.saveAddress(newAddress);
                     }
+                    userService.saveUser(tenant);
                     tenantPhone = contract.getTenant().getPhone();
                 } else {
                     logger.error("No tenant found with phone: {}", contract.getTenant().getPhone());
-                    model.addAttribute("error", "Không tìm thấy người thuê với số điện thoại: " + contract.getTenant().getPhone());
-                    model.addAttribute("hostels", hostels);
-                    initializeModelAttributes(model, contract);
-                    return "host/hop-dong-host";
+                    response.put("success", false);
+                    response.put("message", "Không tìm thấy người thuê với số điện thoại: " + contract.getTenant().getPhone());
+                    return ResponseEntity.badRequest().body(response);
                 }
             }
 
-            Contracts savedContract = contractService.createContract(
-                    tenantPhone,
-                    contract.getRoom().getRoomId(),
-                    Date.valueOf(contract.getContractDate()),
-                    Date.valueOf(contract.getTerms().getStartDate()),
-                    Date.valueOf(contract.getTerms().getEndDate()),
-                    contract.getTerms().getPrice().floatValue(),
-                    contract.getTerms().getDeposit().floatValue(),
-                    contract.getTerms().getTerms(),
-                    Contracts.Status.valueOf(contract.getStatus().toUpperCase()),
-                    ownerCccd,
-                    tenant,
-                    unregisteredTenant);
+            // Kiểm tra trạng thái phòng
+            Rooms room = roomsService.findById(contract.getRoom().getRoomId())
+                    .orElseThrow(() -> new IllegalArgumentException("Phòng không tồn tại!"));
+            if (!"unactive".equals(room.getStatus().name().toLowerCase())) {
+                logger.error("Room {} is not available, status: {}", room.getRoomId(), room.getStatus());
+                response.put("success", false);
+                response.put("message", "Phòng đã chọn không trống!");
+                return ResponseEntity.badRequest().body(response);
+            }
 
-            logger.info("Contract created successfully with ID: {}", savedContract.getContractId());
-            return "redirect:/api/contracts/list";
+            // Tạo và lưu hợp đồng
+            try {
+                Contracts savedContract = contractService.createContract(
+                        tenantPhone,
+                        contract.getRoom().getRoomId(),
+                        Date.valueOf(contract.getContractDate()),
+                        Date.valueOf(contract.getTerms().getStartDate()),
+                        Date.valueOf(contract.getTerms().getEndDate()),
+                        contract.getTerms().getPrice().floatValue(),
+                        contract.getTerms().getDeposit().floatValue(),
+                        contract.getTerms().getTerms(),
+                        Contracts.Status.valueOf(contract.getStatus().toUpperCase()),
+                        ownerCccd,
+                        tenant,
+                        unregisteredTenant
+                );
+                logger.info("Contract created successfully with ID: {}", savedContract.getContractId());
+
+                // Cập nhật trạng thái phòng thành "active"
+                room.setStatus(RoomStatus.active);
+                roomsService.save(room);
+                logger.info("Room {} status updated to ACTIVE", room.getRoomId());
+
+                response.put("success", true);
+                response.put("message", "Hợp đồng đã được tạo thành công!");
+                response.put("contractId", savedContract.getContractId());
+                return ResponseEntity.ok(response);
+            } catch (Exception e) {
+                logger.error("Error creating contract: {}", e.getMessage(), e);
+                response.put("success", false);
+                response.put("message", "Lỗi khi tạo hợp đồng: " + e.getMessage());
+                return ResponseEntity.status(500).body(response);
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid data: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
             logger.error("Error creating contract: {}", e.getMessage(), e);
-            model.addAttribute("error", "Lỗi khi tạo hợp đồng: " + e.getMessage());
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            model.addAttribute("hostels", hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId()));
-            initializeModelAttributes(model, contract);
-            return "host/hop-dong-host";
+            response.put("success", false);
+            response.put("message", "Lỗi khi tạo hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
-
     @PostMapping("/get-tenant-by-phone")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<Map<String, Object>> getTenantByPhone(@RequestParam String phone, Model model) {
