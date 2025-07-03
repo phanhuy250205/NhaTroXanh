@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -779,4 +780,104 @@ public class ContractController {
         logger.info("File type validation result: {}", isValid);
         return isValid;
     }
+
+
+
+// PUBLIC CONTRACT
+    // @GetMapping("/public/hop-dong")
+    // public String initPublicContractForm(
+    //         @RequestParam(value = "hostelId", required = false) Integer hostelId,
+    //         Model model) {
+    //     logger.info("Initializing public contract form, hostelId: {}", hostelId);
+
+    //     try {
+    //         // Khởi tạo ContractDto cho form công khai
+    //         ContractDto contract = new ContractDto();
+    //         contract.setContractDate(LocalDate.now());
+    //         contract.setStatus("DRAFT");
+
+    //         // Kiểm tra authentication để hỗ trợ cả người dùng đã đăng nhập và chưa đăng nhập
+    //         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //         List<Hostel> hostels = new ArrayList<>();
+    //         List<ContractDto.Room> rooms = new ArrayList<>();
+
+    //         if (authentication != null && authentication.isAuthenticated() && 
+    //             !"anonymousUser".equals(authentication.getPrincipal())) {
+    //             // Người dùng đã đăng nhập
+    //             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+    //             Integer ownerId = userDetails.getUserId();
+                
+    //             // Lấy thông tin chủ trọ
+    //             Users user = userService.findOwnerByCccdOrPhone(authentication, userDetails.getCccd(), userDetails.getPhone());
+    //             if (user != null) {
+    //                 contract.getOwner().setFullName(user.getFullname());
+    //                 contract.getOwner().setPhone(user.getPhone());
+    //                 contract.getOwner().setCccdNumber(userDetails.getCccdNumber());
+    //                 contract.getOwner().setEmail(user.getEmail());
+    //                 if (user.getBirthday() != null) {
+    //                     contract.getOwner().setBirthday(new Date(user.getBirthday().getTime()));
+    //                 }
+    //                 contract.getOwner().setBankAccount(user.getBankAccount());
+    //                 contract.getOwner().setIssueDate(userDetails.getIssueDate());
+    //                 contract.getOwner().setIssuePlace(userDetails.getIssuePlace());
+
+    //                 // Lấy địa chỉ
+    //                 Optional<Address> addressOptional = userService.findAddressByUserId(user.getUserId());
+    //                 if (addressOptional.isPresent()) {
+    //                     Address address = addressOptional.get();
+    //                     contract.getOwner().setStreet(address.getStreet());
+    //                     if (address.getWard() != null) {
+    //                         contract.getOwner().setWard(address.getWard().getName());
+    //                         if (address.getWard().getDistrict() != null) {
+    //                             contract.getOwner().setDistrict(address.getWard().getDistrict().getName());
+    //                             if (address.getWard().getDistrict().getProvince() != null) {
+    //                                 contract.getOwner().setProvince(address.getWard().getDistrict().getProvince().getName());
+    //                             }
+    //                         }
+    //                     }
+    //                 }
+
+    //                 // Lấy danh sách khu trọ
+    //                 hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
+    //                 if (hostels.isEmpty()) {
+    //                     logger.warn("No hostels found for ownerId: {}", ownerId);
+    //                     model.addAttribute("warning", "Không tìm thấy khu trọ nào cho chủ trọ này.");
+    //                 }
+    //             }
+
+    //             // Lấy danh sách phòng nếu có hostelId
+    //             if (hostelId != null) {
+    //                 rooms = roomsService.getRoomsByHostelId(hostelId);
+    //                 if (rooms.isEmpty()) {
+    //                     logger.warn("No rooms found for hostelId: {}", hostelId);
+    //                 }
+    //             }
+    //         } else {
+    //             // Người dùng chưa đăng nhập
+    //             logger.info("Public user accessing contract form, no owner data loaded.");
+    //             model.addAttribute("warning", "Vui lòng đăng nhập để xem thông tin chi tiết khu trọ và phòng.");
+                
+    //             // Nếu có hostelId, vẫn cố gắng lấy danh sách phòng (nếu phù hợp với logic ứng dụng)
+    //             if (hostelId != null) {
+    //                 rooms = roomsService.getRoomsByHostelId(hostelId);
+    //                 if (rooms.isEmpty()) {
+    //                     logger.warn("No rooms found for hostelId: {}", hostelId);
+    //                 }
+    //             }
+    //         }
+
+    //         // Thêm dữ liệu vào model
+    //         model.addAttribute("hostels", hostels);
+    //         model.addAttribute("rooms", rooms);
+    //         initializeModelAttributes(model, contract);
+    //         logger.info("Public contract form initialized successfully.");
+    //         return "host/hop-dong-host"; // Trả về view tương tự như form cho OWNER
+
+    //     } catch (Exception e) {
+    //         logger.error("Error initializing public contract form: {}", e.getMessage(), e);
+    //         model.addAttribute("error", "Lỗi khi tải form hợp đồng: " + e.getMessage());
+    //         initializeModelAttributes(model, new ContractDto());
+    //         return "host/hop-dong-host";
+    //     }
+    // }
 }

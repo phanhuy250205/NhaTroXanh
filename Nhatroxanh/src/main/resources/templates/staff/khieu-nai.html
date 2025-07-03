@@ -442,12 +442,26 @@
                         </tr>
                     </thead>
                     <tbody id="complaintTableBody">
+                        <tr>
+                            <td>1</td>
+                            <td>Nguyễn Văn An</td>
+                            <td>Sự cố điện</td>
+                            <td>
+                                <span class="priority-badge-staff priority-high-staff">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Cao
+                                </span>
+                            </td>
+                            <td>KTX A1</td>
+                            <td>15/12/2024 14:30</td>
+
                         <tr th:each="report : ${reportPage.content}">
                             <td th:text="${report.reportId}">1</td>
                             <td th:text="${report.user.fullname}">Nguyễn Văn An</td>
                             <td th:text="${report.incidentType}">Sự cố điện</td>
                             <td th:text="${report.room.hostel.name}">KTX A1</td>
                             <td th:text="${#dates.format(report.reportedAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30</td>
+
                             <td>
                                 <span
                                     th:class="'status-badge-staff status-' + ${report.status.name().toLowerCase()} + '-staff'">
@@ -462,9 +476,66 @@
                                 </span>
                             </td>
                             <td>
+
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Trần Thị Bình</td>
+                            <td>Sự cố nước</td>
+                            <td>
+                                <span class="priority-badge-staff priority-medium-staff">
+                                    <i class="fas fa-exclamation"></i>
+                                    Trung bình
+                                </span>
+                            </td>
+                            <td>KTX B2</td>
+                            <td>14/12/2024 09:15</td>
+                            <td>
+                                <span class="status-badge-staff status-processing-staff">
+                                    <i class="fas fa-cog"></i>
+                                    Đang xử lý
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Lê Minh Cường</td>
+                            <td>Khiếu nại tiếng ồn</td>
+                            <td>
+                                <span class="priority-badge-staff priority-low-staff">
+                                    <i class="fas fa-info-circle"></i>
+                                    Thấp
+                                </span>
+                            </td>
+                            <td>KTX C3</td>
+                            <td>13/12/2024 22:45</td>
+                            <td>
+                                <span class="status-badge-staff status-completed-staff">
+                                    <i class="fas fa-check-circle"></i>
+                                    Đã xử lý
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+=======
                                 <a th:href="@{'/nhan-vien/chi-tiet-khieu-nai/' + ${report.reportId}}"
                                     class="action-btn-staff">
                                     <i class="fas fa-eye"></i> Xem chi tiết
+>>>>>>> c1463ec9d00580ad0be55e7cf59d43748752e9d3
+>>>>>>> 2daa13aac9aa41d17a3f89156a3b2464acaf86ea
                                 </a>
                             </td>
                         </tr>
