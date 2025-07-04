@@ -1,30 +1,34 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 
 <head th:replace="~{/layouts/head}">
-    <title>Chi Tiết - Nhà Trọ Xanh</title>
+    <title>Hồ Sơ Chủ Trọ - Nhà Trọ Xanh</title>
 </head>
+
 <style>
+    /* Enhanced Toast Notifications */
     .toast-container-host {
         position: fixed;
         top: 20px;
         right: 20px;
         z-index: 1050;
-        min-width: 300px;
+        min-width: 350px;
         transition: opacity 0.5s ease, transform 0.5s ease;
     }
 
     .alert-host {
         display: flex;
         align-items: center;
-        padding: 12px 16px;
+        padding: 15px 20px;
         margin-bottom: 12px;
-        border-radius: 8px;
+        border-radius: 12px;
         font-size: 14px;
         font-weight: 500;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         position: relative;
         animation: slideIn 0.5s ease-out;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     @keyframes slideIn {
@@ -40,34 +44,76 @@
     }
 
     .alert-host.success {
-        background-color: #d1e7dd;
+        background: linear-gradient(135deg, #d1e7dd, #a3d9a5);
         color: #0f5132;
         border-left: 5px solid #198754;
     }
 
     .alert-host.danger {
-        background-color: #f8d7da;
+        background: linear-gradient(135deg, #f8d7da, #f1aeb5);
         color: #842029;
         border-left: 5px solid #dc3545;
     }
 
+    .alert-host.warning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        color: #664d03;
+        border-left: 5px solid #ffc107;
+    }
+
     .alert-icon {
-        margin-right: 10px;
-        font-size: 1.2rem;
+        margin-right: 12px;
+        font-size: 1.3rem;
     }
 
     .alert-message {
         flex-grow: 1;
+        line-height: 1.4;
     }
 
     .btn-close {
         background: none;
         border: none;
-        font-size: 1.2rem;
+        font-size: 1.4rem;
         font-weight: bold;
         cursor: pointer;
         color: inherit;
-        margin-left: 10px;
+        margin-left: 15px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-close:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Enhanced Profile Styles */
+    .main-content {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .host-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .host-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     }
 
     .host-profile-img {
@@ -75,127 +121,503 @@
         height: 150px;
         object-fit: cover;
         border-radius: 50%;
+        border: 5px solid #007bff;
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .host-profile-img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
+    }
+
+    .host-profile-img::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .host-profile-img:hover::after {
+        opacity: 1;
     }
 
     .host-verified {
-        background-color: #28a745;
+        background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.9em;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .host-inactive {
-        background-color: #dc3545;
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
         color: white;
-        padding: 2px 8px;
-        border-radius: 4px;
-        font-size: 0.9em;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .host-badge {
         display: inline-flex;
         align-items: center;
-        gap: 4px;
+        gap: 6px;
+        animation: pulse 2s infinite;
     }
 
-    .verification-row {
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .host-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .host-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .host-section h6 {
+        color: #007bff;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 8px;
     }
 
-    .verification-label {
-        flex: 0 0 auto;
+    .host-section h6 i {
+        font-size: 1.1rem;
     }
 
-    .verification-badge {
-        flex: 0 0 auto;
+    .host-rating {
+        color: #ffc107;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    /* Enhanced Form Styles */
+    .form-control,
+    .form-select {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .form-control.is-valid {
+        border-color: #28a745;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+
+    @keyframes shake {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .invalid-feedback {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(220, 53, 69, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #dc3545;
+        color: #dc3545;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback::before {
+        content: "\f071";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+    }
+
+    .valid-feedback {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(40, 167, 69, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
+        color: #28a745;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .valid-feedback::before {
+        content: "\f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+    }
+
+    .field-info {
+        margin-top: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .field-info.text-success {
+        color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+    }
+
+    .field-info.text-info {
+        color: #17a2b8;
+        background: rgba(23, 162, 184, 0.1);
+    }
+
+    .field-info.text-warning {
+        color: #ffc107;
+        background: rgba(255, 193, 7, 0.1);
+    }
+
+    /* Enhanced Button Styles */
+    .btn {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn-outline-primary {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-outline-primary:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        color: white;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .loading-spinner i {
+        font-size: 2rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 1rem;
+        }
+
+        .host-card {
+            padding: 1.5rem;
+        }
+
+        .host-profile-img {
+            width: 120px;
+            height: 120px;
+        }
+
+        .host-section {
+            padding: 1rem;
+        }
+
+        .toast-container-host {
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+        }
+    }
+
+    /* Animation Classes */
+    .animate-fade-in {
+        animation: fadeIn 0.8s ease-out;
+    }
+
+    .animate-slide-up {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
 
 <body>
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
+
     <div class="main-content">
+        <!-- Enhanced Toast Container -->
         <div class="toast-container-host" id="toastContainer">
-            <div th:if="${success}" class="alert-host success" role="alert">
+            <div th:if="${success}" class="alert-host success animate-fade-in" role="alert">
                 <i class="alert-icon fas fa-check-circle"></i>
                 <span class="alert-message" th:text="${success}"></span>
                 <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
             </div>
-            <div th:if="${error}" class="alert-host danger" role="alert">
+            <div th:if="${error}" class="alert-host danger animate-fade-in" role="alert">
                 <i class="alert-icon fas fa-exclamation-circle"></i>
                 <span class="alert-message" th:text="${error}"></span>
                 <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
             </div>
         </div>
-        <h4 class="mb-4">Thông tin tài khoản</h4>
-        <hr>
-        <form th:action="@{/chu-tro/profile-host}" th:object="${hostInfo}" method="post" enctype="multipart/form-data">
+
+        <div class="animate-fade-in">
+            <h4 class="mb-4" style="color: #007bff; font-weight: 700;">
+                <i class="fas fa-user-circle me-2"></i>Thông tin tài khoản
+            </h4>
+            <hr style="border: 2px solid #007bff; border-radius: 2px;">
+        </div>
+
+        <form th:action="@{/chu-tro/profile-host}" th:object="${hostInfo}" method="post" enctype="multipart/form-data"
+            id="hostProfileForm" class="animate-slide-up">
+
             <div class="row g-4">
-                <!-- Cột trái -->
+                <!-- Cột trái - Profile Card -->
                 <div class="col-12 col-lg-4 text-center text-lg-start">
                     <div class="host-card text-center">
                         <input type="file" id="avatarInput" name="avatarFile" class="d-none" accept="image/*">
-                        <img th:src="${user.avatar != null and user.avatar.startsWith('/uploads/') 
-              ? user.avatar 
-              : '/uploads/' + user.avatar}" class="host-profile-img mb-3" alt="Avatar" id="avatarPreview"
-                            style="cursor: pointer;" onclick="document.getElementById('avatarInput').click()" />
 
-                        <h5 th:text="${user.fullname != null ? user.fullname : 'Chưa có tên'}">Nguyễn Văn A</h5>
-                        <span th:if="${user.enabled}" class="host-badge host-verified ms-1">Đang hoạt động</span>
-                        <span th:if="${!user.enabled}" class="host-badge host-inactive ms-1">Chưa kích hoạt</span>
-                        <div class="mt-3">
-                            <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-pen"></i> Cập
-                                nhật</button>
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:src="${user.avatar != null and user.avatar.startsWith('/uploads/') 
+                                  ? user.avatar 
+                                  : '/uploads/' + user.avatar}" class="host-profile-img" alt="Avatar"
+                                id="avatarPreview" onclick="document.getElementById('avatarInput').click()" />
+
+                            <div class="position-absolute bottom-0 end-0 bg-primary text-white rounded-circle p-2"
+                                style="cursor: pointer; box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);"
+                                onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-camera"></i>
+                            </div>
                         </div>
 
-                        <div class="host-section mt-4 text-start">
-                            <h6><i class="fa fa-circle-info me-1"></i> Thông tin bổ sung</h6>
-                            <p class="mb-1">Ngày tham gia: <strong>01/06/2025</strong></p>
-                            <p class="mb-1">Tổng số khu trọ: <strong th:text="${totalHostels}">5 khu trọ</strong></p>
-                            <p class="mb-1">Xác minh tài khoản:
-                                <span
-                                    th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
-                                    class="host-badge host-verified ms-1">
-                                    <i class="fa fa-check-circle"></i> Đã xác minh
-                                </span>
-                                <span
-                                    th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
-                                    class="host-badge host-inactive ms-1">
-                                    <i class="fa fa-times-circle"></i> Chưa xác minh
-                                </span>
-                            </p>
-                            <p class="mb-0">Đánh giá: <span class="host-rating">★ 4.8/5</span> (30 đánh giá)</p>
+                        <h5 th:text="${user.fullname != null ? user.fullname : 'Chưa có tên'}"
+                            style="color: #495057; font-weight: 700;">Nguyễn Văn A</h5>
+
+                        <div class="mb-3">
+                            <span th:if="${user.enabled}" class="host-badge host-verified">
+                                <i class="fas fa-check-circle"></i> Đang hoạt động
+                            </span>
+                            <span th:if="${!user.enabled}" class="host-badge host-inactive">
+                                <i class="fas fa-times-circle"></i> Chưa kích hoạt
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <button type="submit" class="btn btn-outline-primary" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>Cập nhật thông tin
+                            </button>
+                        </div>
+
+                        <div class="host-section text-start">
+                            <h6><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <p class="mb-2"><strong>Ngày tham gia:</strong> 01/06/2025</p>
+                                </div>
+                                <div class="col-12">
+                                    <p class="mb-2"><strong>Tổng số khu trọ:</strong>
+                                        <span class="text-primary fw-bold" th:text="${totalHostels}">5 khu trọ</span>
+                                    </p>
+                                </div>
+                                <div class="col-12">
+                                    <p class="mb-2"><strong>Xác minh tài khoản:</strong></p>
+                                    <span
+                                        th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
+                                        class="host-badge host-verified">
+                                        <i class="fas fa-shield-check"></i> Đã xác minh
+                                    </span>
+                                    <span
+                                        th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
+                                        class="host-badge host-inactive">
+                                        <i class="fas fa-shield-exclamation"></i> Chưa xác minh
+                                    </span>
+                                </div>
+                                <div class="col-12">
+                                    <p class="mb-0"><strong>Đánh giá:</strong>
+                                        <span class="host-rating">★ 4.8/5</span> (30 đánh giá)
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <!-- Cột phải -->
+
+                <!-- Cột phải - Form Information -->
                 <div class="col-12 col-lg-8">
                     <!-- Thông tin cá nhân -->
-                    <div class="host-section mb-4">
-                        <h6><i class="fa fa-user me-1"></i> Thông tin cá nhân</h6>
-                        <div class="row g-3 mt-2">
+                    <div class="host-section">
+                        <h6><i class="fas fa-user me-2"></i>Thông tin cá nhân</h6>
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" th:field="*{fullname}" required>
+                                <label class="form-label">Họ và tên *</label>
+                                <input type="text" class="form-control" id="fullname" th:field="*{fullname}" required>
+                                <div class="invalid-feedback" id="fullnameError" style="display: none;"></div>
+                                <div class="valid-feedback" id="fullnameSuccess" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày sinh</label>
-                                <input type="date" class="form-control" th:field="*{birthday}">
+                                <input type="date" class="form-control" id="birthday" th:field="*{birthday}">
+                                <div class="invalid-feedback" id="birthdayError" style="display: none;"></div>
+                                <div class="valid-feedback" id="birthdaySuccess" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control" th:field="*{cccdNumber}">
+                                <input type="text" class="form-control" id="cccdNumber" th:field="*{cccdNumber}"
+                                    maxlength="12">
+                                <div class="invalid-feedback" id="cccdNumberError" style="display: none;"></div>
+                                <div class="valid-feedback" id="cccdNumberSuccess" style="display: none;"></div>
+                                <div class="field-info" id="cccdInfo" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày cấp</label>
-                                <input type="date" class="form-control" th:field="*{issueDate}">
+                                <input type="date" class="form-control" id="issueDate" th:field="*{issueDate}">
+                                <div class="invalid-feedback" id="issueDateError" style="display: none;"></div>
+                                <div class="valid-feedback" id="issueDateSuccess" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Nơi cấp</label>
-                                <input type="text" class="form-control" th:field="*{issuePlace}">
+                                <input type="text" class="form-control" id="issuePlace" th:field="*{issuePlace}">
+                                <div class="invalid-feedback" id="issuePlaceError" style="display: none;"></div>
+                                <div class="valid-feedback" id="issuePlaceSuccess" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label d-block">Giới tính</label>
@@ -209,38 +631,56 @@
                                         value="false" th:checked="${hostInfo.gender} == false">
                                     <label class="form-check-label" for="genderNu">Nữ</label>
                                 </div>
+                                <div class="invalid-feedback" id="genderError" style="display: none;"></div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Thông tin liên hệ -->
                     <div class="host-section">
-                        <h6><i class="fa fa-envelope me-1"></i> Thông tin liên hệ</h6>
-                        <div class="row g-3 mt-2">
+                        <h6><i class="fas fa-envelope me-2"></i>Thông tin liên hệ</h6>
+                        <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" th:field="*{email}" required>
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                <div class="invalid-feedback" id="emailError" style="display: none;"></div>
+                                <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="text" class="form-control" th:field="*{phone}" required>
+                                <label class="form-label">Số điện thoại *</label>
+                                <input type="tel" class="form-control" id="phone" th:field="*{phone}" required>
+                                <div class="invalid-feedback" id="phoneError" style="display: none;"></div>
+                                <div class="valid-feedback" id="phoneSuccess" style="display: none;"></div>
+                                <div class="field-info" id="phoneInfo" style="display: none;"></div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Tỉnh/Thành phố</label>
-                                <select class="form-select" id="province" name="province"></select>
+                                <select class="form-select" id="province" name="province">
+                                    <option value="">Chọn Tỉnh/TP</option>
+                                </select>
+                                <div class="invalid-feedback" id="provinceError" style="display: none;"></div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Quận/Huyện</label>
-                                <select class="form-select" id="district" name="district"></select>
+                                <select class="form-select" id="district" name="district">
+                                    <option value="">Chọn Quận/Huyện</option>
+                                </select>
+                                <div class="invalid-feedback" id="districtError" style="display: none;"></div>
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Phường/Xã</label>
-                                <select class="form-select" id="ward" name="ward"></select>
+                                <select class="form-select" id="ward" name="ward">
+                                    <option value="">Chọn Phường/Xã</option>
+                                </select>
+                                <div class="invalid-feedback" id="wardError" style="display: none;"></div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Tên đường/Số nhà</label>
                                 <input type="text" class="form-control" id="street" name="street">
+                                <div class="invalid-feedback" id="streetError" style="display: none;"></div>
+                                <div class="valid-feedback" id="streetSuccess" style="display: none;"></div>
                             </div>
+
                             <!-- Hidden chứa địa chỉ đầy đủ -->
                             <input type="hidden" name="address" th:field="*{address}" id="fullAddress">
                             <input type="hidden" id="savedAddress" th:value="*{address}" />
@@ -251,30 +691,566 @@
         </form>
     </div>
 
-    <!-- JavaScript for Avatar Preview and Address API -->
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Đang xử lý...</p>
+        </div>
+    </div>
+
+    <!-- Enhanced JavaScript with Validation -->
     <script>
-        // Avatar Preview
-        document.getElementById('avatarInput').addEventListener('change', function (event) {
-            const file = event.target.files[0];
-            if (file && file.type.startsWith('image/')) {
+        // CCCD Province Codes - Mã tỉnh CCCD Việt Nam
+        const CCCD_PROVINCE_CODES = {
+            // Miền Bắc
+            "001": "Hà Nội", "002": "Hà Giang", "004": "Cao Bằng", "006": "Bắc Kạn",
+            "008": "Tuyên Quang", "010": "Lào Cai", "011": "Điện Biên", "012": "Lai Châu",
+            "014": "Sơn La", "015": "Yên Bái", "017": "Hoà Bình", "019": "Thái Nguyên",
+            "020": "Lạng Sơn", "022": "Quảng Ninh", "024": "Bắc Giang", "025": "Phú Thọ",
+            "026": "Vĩnh Phúc", "027": "Bắc Ninh", "030": "Hải Dương", "031": "Hải Phòng",
+            "033": "Hưng Yên", "034": "Thái Bình", "035": "Hà Nam", "036": "Nam Định",
+            "037": "Ninh Bình",
+
+            // Miền Trung
+            "038": "Thanh Hóa", "040": "Nghệ An", "042": "Hà Tĩnh", "044": "Quảng Bình",
+            "045": "Quảng Trị", "046": "Thừa Thiên Huế", "048": "Đà Nẵng", "049": "Quảng Nam",
+            "051": "Quảng Ngãi", "052": "Bình Định", "054": "Phú Yên", "056": "Khánh Hòa",
+            "058": "Ninh Thuận", "060": "Bình Thuận", "062": "Kon Tum", "064": "Gia Lai",
+            "066": "Đắk Lắk", "067": "Đắk Nông", "068": "Lâm Đồng",
+
+            // Miền Nam
+            "070": "Bình Phước", "072": "Tây Ninh", "074": "Bình Dương", "075": "Đồng Nai",
+            "077": "Bà Rịa - Vũng Tàu", "079": "Hồ Chí Minh", "080": "Long An", "082": "Tiền Giang",
+            "083": "Bến Tre", "084": "Trà Vinh", "086": "Vĩnh Long", "087": "Đồng Tháp",
+            "089": "An Giang", "091": "Kiên Giang", "092": "Cần Thơ", "093": "Hậu Giang",
+            "094": "Sóc Trăng", "095": "Bạc Liêu", "096": "Cà Mau"
+        };
+
+        // Phone Network Codes - Mã nhà mạng Việt Nam
+        const PHONE_NETWORK_CODES = {
+            // Viettel
+            "032": "Viettel", "033": "Viettel", "034": "Viettel",
+            "035": "Viettel", "036": "Viettel", "037": "Viettel",
+            "038": "Viettel", "039": "Viettel", "096": "Viettel",
+            "097": "Viettel", "098": "Viettel",
+
+            // Vinaphone
+            "081": "Vinaphone", "082": "Vinaphone", "083": "Vinaphone",
+            "084": "Vinaphone", "085": "Vinaphone", "091": "Vinaphone",
+            "094": "Vinaphone",
+
+            // Mobifone
+            "070": "Mobifone", "076": "Mobifone", "077": "Mobifone",
+            "078": "Mobifone", "079": "Mobifone", "090": "Mobifone",
+            "093": "Mobifone",
+
+            // Vietnamobile
+            "056": "Vietnamobile", "058": "Vietnamobile", "092": "Vietnamobile",
+
+            // Gmobile
+            "059": "Gmobile", "099": "Gmobile"
+        };
+
+        // Enhanced Host Profile Manager
+        class EnhancedHostProfileManager {
+            constructor() {
+                this.formElements = [
+                    "fullname", "email", "phone", "birthday", "cccdNumber",
+                    "issueDate", "issuePlace", "street"
+                ];
+                this.init();
+            }
+
+            async init() {
+                try {
+                    // Setup event listeners
+                    this.setupEventListeners();
+
+                    // Initialize form validation
+                    this.initializeValidation();
+
+                    // Show existing data validation
+                    this.validateExistingData();
+
+                    // Initialize animations
+                    this.initializeAnimations();
+                } catch (error) {
+                    console.error("Error initializing host profile:", error);
+                    this.showNotification("Có lỗi xảy ra khi khởi tạo trang", "error");
+                }
+            }
+
+            setupEventListeners() {
+                // Avatar upload
+                const avatarInput = document.getElementById("avatarInput");
+                if (avatarInput) {
+                    avatarInput.addEventListener("change", (e) => this.handleAvatarChange(e));
+                }
+
+                // Form validation
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                        element.addEventListener("blur", () => this.validateField(id));
+                    }
+                });
+
+                // Phone and CCCD formatting
+                const phoneInput = document.getElementById("phone");
+                const cccdInput = document.getElementById("cccdNumber");
+
+                if (phoneInput) {
+                    phoneInput.addEventListener("input", (e) => this.formatPhone(e));
+                }
+
+                if (cccdInput) {
+                    cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
+                }
+
+                // Form submission
+                const form = document.getElementById("hostProfileForm");
+                if (form) {
+                    form.addEventListener("submit", (e) => this.handleFormSubmit(e));
+                }
+            }
+
+            // Enhanced form validation
+            validateField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                let successMessage = "";
+                const value = element.value.trim();
+
+                switch (fieldId) {
+                    case "fullname":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được để trống";
+                        } else if (value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Họ tên phải có ít nhất 2 ký tự";
+                        } else if (value.length > 100) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                        } else {
+                            successMessage = "Họ tên hợp lệ";
+                        }
+                        break;
+
+                    case "email":
+                        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Email không được để trống";
+                        } else if (!emailRegex.test(value)) {
+                            isValid = false;
+                            errorMessage = "Email không đúng định dạng";
+                        } else {
+                            successMessage = "Email hợp lệ";
+                        }
+                        break;
+
+                    case "phone":
+                        const phoneValidation = this.validatePhoneNumber(value);
+                        if (!phoneValidation.isValid) {
+                            isValid = false;
+                            errorMessage = phoneValidation.message;
+                        } else {
+                            successMessage = "Số điện thoại hợp lệ";
+                            this.showPhoneNetworkInfo(value);
+                        }
+                        break;
+
+                    case "cccdNumber":
+                        if (value) {
+                            const cccdValidation = this.validateCCCDNumber(value);
+                            if (!cccdValidation.isValid) {
+                                isValid = false;
+                                errorMessage = cccdValidation.message;
+                            } else {
+                                successMessage = "CCCD hợp lệ";
+                                this.showCCCDProvinceInfo(value);
+                            }
+                        }
+                        break;
+
+                    case "birthday":
+                        if (value) {
+                            const birthDate = new Date(value);
+                            const today = new Date();
+                            const age = today.getFullYear() - birthDate.getFullYear();
+
+                            if (age < 18) {
+                                isValid = false;
+                                errorMessage = "Chủ trọ phải từ 18 tuổi trở lên";
+                            } else if (age > 100) {
+                                isValid = false;
+                                errorMessage = "Tuổi không được vượt quá 100";
+                            } else {
+                                successMessage = `Tuổi: ${age} (hợp lệ)`;
+                            }
+                        }
+                        break;
+
+                    case "issueDate":
+                        if (value) {
+                            const issueDate = new Date(value);
+                            const birthDate = new Date(document.getElementById("birthday").value);
+                            const today = new Date();
+
+                            if (birthDate && issueDate <= birthDate) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD phải sau ngày sinh";
+                            } else if (issueDate > today) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD không được là tương lai";
+                            } else {
+                                successMessage = "Ngày cấp hợp lệ";
+                            }
+                        }
+                        break;
+
+                    case "issuePlace":
+                        if (value && value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
+                        } else if (value) {
+                            successMessage = "Nơi cấp hợp lệ";
+                        }
+                        break;
+
+                    case "street":
+                        if (value && value.length < 5) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
+                        } else if (value) {
+                            successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                }
+
+                // Update UI
+                this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                return isValid;
+            }
+
+            // Validate Vietnamese phone number
+            validatePhoneNumber(phoneNumber) {
+                if (!phoneNumber) {
+                    return { isValid: false, message: "Số điện thoại không được để trống" };
+                }
+
+                const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+
+                if (!cleanPhone.startsWith("0")) {
+                    return { isValid: false, message: "Số điện thoại phải bắt đầu bằng số 0" };
+                }
+
+                if (!/^0[0-9]{9}$/.test(cleanPhone)) {
+                    return { isValid: false, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0" };
+                }
+
+                const networkCode = cleanPhone.substring(0, 3);
+                const validNetworks = Object.keys(PHONE_NETWORK_CODES);
+
+                let isValidNetwork = false;
+                for (const validCode of validNetworks) {
+                    if (networkCode.startsWith(validCode.substring(0, 2))) {
+                        isValidNetwork = true;
+                        break;
+                    }
+                }
+
+                if (!isValidNetwork) {
+                    return { isValid: false, message: "Số điện thoại không đúng định dạng nhà mạng Việt Nam" };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Validate CCCD number
+            validateCCCDNumber(cccdNumber) {
+                if (!cccdNumber) {
+                    return { isValid: true, message: "" };
+                }
+
+                const cleanCCCD = cccdNumber.replace(/\s/g, "");
+
+                if (!/^[0-9]{12}$/.test(cleanCCCD)) {
+                    return { isValid: false, message: "CCCD phải có đúng 12 chữ số" };
+                }
+
+                const provinceCode = cleanCCCD.substring(0, 3);
+
+                if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                    return {
+                        isValid: false,
+                        message: `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                    };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Show phone network information
+            showPhoneNetworkInfo(phoneNumber) {
+                const networkInfo = this.getNetworkFromPhone(phoneNumber);
+                const phoneInfo = document.getElementById("phoneInfo");
+
+                if (networkInfo && phoneInfo) {
+                    phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
+                    phoneInfo.className = "field-info text-success";
+                    phoneInfo.style.display = "flex";
+                }
+            }
+
+            // Show CCCD province information
+            showCCCDProvinceInfo(cccdNumber) {
+                const provinceInfo = this.getProvinceFromCCCD(cccdNumber);
+                const cccdInfo = document.getElementById("cccdInfo");
+
+                if (provinceInfo && cccdInfo) {
+                    cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
+                    cccdInfo.className = "field-info text-info";
+                    cccdInfo.style.display = "flex";
+                }
+            }
+
+            // Get network from phone number
+            getNetworkFromPhone(phoneNumber) {
+                if (!phoneNumber || !phoneNumber.startsWith("0") || phoneNumber.length !== 10) {
+                    return null;
+                }
+
+                const networkCode = phoneNumber.substring(0, 3);
+                return PHONE_NETWORK_CODES[networkCode] || null;
+            }
+
+            // Get province from CCCD
+            getProvinceFromCCCD(cccdNumber) {
+                if (!cccdNumber || cccdNumber.length < 3) {
+                    return null;
+                }
+
+                const provinceCode = cccdNumber.substring(0, 3);
+                return CCCD_PROVINCE_CODES[provinceCode] || null;
+            }
+
+            // Update validation UI
+            updateValidationUI(fieldId, isValid, errorMessage, successMessage) {
+                const element = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+
+                if (!element) return;
+
+                // Clear previous states
+                element.classList.remove("is-invalid", "is-valid");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                // Apply new state
+                if (isValid && successMessage) {
+                    element.classList.add("is-valid");
+                    if (successElement) {
+                        successElement.textContent = successMessage;
+                        successElement.style.display = "flex";
+                    }
+                } else if (!isValid && errorMessage) {
+                    element.classList.add("is-invalid");
+                    if (errorElement) {
+                        errorElement.textContent = errorMessage;
+                        errorElement.style.display = "flex";
+                    }
+                }
+            }
+
+            // Validate existing data on page load
+            validateExistingData() {
+                const phoneElement = document.getElementById("phone");
+                if (phoneElement && phoneElement.value) {
+                    this.showPhoneNetworkInfo(phoneElement.value);
+                }
+
+                const cccdElement = document.getElementById("cccdNumber");
+                if (cccdElement && cccdElement.value) {
+                    this.showCCCDProvinceInfo(cccdElement.value);
+                }
+            }
+
+            validateForm() {
+                let isValid = true;
+
+                this.formElements.forEach((fieldId) => {
+                    if (!this.validateField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Format phone input
+            formatPhone(event) {
+                let value = event.target.value;
+
+                if (value && !value.startsWith("0")) {
+                    value = "0" + value.replace(/\D/g, "");
+                } else {
+                    value = value.replace(/[^\d]/g, "");
+                }
+
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+
+                event.target.value = value;
+                this.validateField("phone");
+            }
+
+            // Format CCCD input
+            formatCCCD(event) {
+                let value = event.target.value.replace(/\D/g, "");
+
+                if (value.length > 12) {
+                    value = value.substring(0, 12);
+                }
+
+                event.target.value = value;
+                this.validateField("cccdNumber");
+            }
+
+            // Handle avatar change
+            handleAvatarChange(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Chỉ được chọn file ảnh (JPG, PNG, GIF)", "error");
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Kích thước file không được vượt quá 5MB", "error");
+                    return;
+                }
+
                 const reader = new FileReader();
-                reader.onload = function (e) {
-                    document.getElementById('avatarPreview').src = e.target.result;
+                reader.onload = (e) => {
+                    document.getElementById("avatarPreview").src = e.target.result;
                 };
                 reader.readAsDataURL(file);
-            }
-        });
 
-        // Vietnam Address API
-        class VietnamAddressAPI {
+                this.showNotification("Ảnh đại diện đã được chọn", "success");
+            }
+
+            // Form submission
+            async handleFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validateForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin đã nhập", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting form:", error);
+                    this.showNotification("Có lỗi xảy ra khi lưu thông tin", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // Utility functions
+            showLoading(show) {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay) {
+                    overlay.style.display = show ? "flex" : "none";
+                }
+            }
+
+            showNotification(message, type = "info") {
+                const container = document.getElementById("toastContainer");
+                if (!container) return;
+
+                const notification = document.createElement("div");
+                notification.className = `alert-host ${type} animate-fade-in`;
+                notification.innerHTML = `
+                    <i class="alert-icon fas fa-${this.getNotificationIcon(type)}"></i>
+                    <span class="alert-message">${message}</span>
+                    <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+                `;
+
+                container.appendChild(notification);
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateX(100%)';
+                        setTimeout(() => notification.remove(), 500);
+                    }
+                }, 5000);
+
+                // Close button
+                const closeBtn = notification.querySelector(".btn-close");
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => notification.remove());
+                }
+            }
+
+            getNotificationIcon(type) {
+                const icons = {
+                    success: "check-circle",
+                    error: "exclamation-circle",
+                    warning: "exclamation-triangle",
+                    info: "info-circle",
+                };
+                return icons[type] || "info-circle";
+            }
+
+            initializeAnimations() {
+                const sections = document.querySelectorAll(".host-section");
+                sections.forEach((section, index) => {
+                    section.style.animationDelay = `${index * 0.1}s`;
+                    section.classList.add("animate-slide-up");
+                });
+            }
+
+            initializeValidation() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                    }
+                });
+            }
+        }
+
+        // Enhanced Vietnam Address API
+        class EnhancedVietnamAddressAPI {
             constructor() {
                 this.provinceSelect = document.getElementById('province');
                 this.districtSelect = document.getElementById('district');
                 this.wardSelect = document.getElementById('ward');
                 this.streetInput = document.getElementById('street');
                 this.fullAddress = document.getElementById('fullAddress');
-
-                this.init();
             }
 
             async init() {
@@ -283,31 +1259,47 @@
             }
 
             async loadProvinces() {
-                const res = await fetch('https://provinces.open-api.vn/api/p/');
-                const provinces = await res.json();
-                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
-                provinces.forEach(p => {
-                    this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
-                });
+                try {
+                    const res = await fetch('https://provinces.open-api.vn/api/p/');
+                    const provinces = await res.json();
+
+                    this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+                    provinces.forEach(p => {
+                        this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error('Error loading provinces:', error);
+                }
             }
 
             async loadDistricts(provinceCode) {
-                const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
-                const data = await res.json();
-                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                data.districts.forEach(d => {
-                    this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
-                });
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    const data = await res.json();
+
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    data.districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                    });
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                } catch (error) {
+                    console.error('Error loading districts:', error);
+                }
             }
 
             async loadWards(districtCode) {
-                const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-                const data = await res.json();
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                data.wards.forEach(w => {
-                    this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
-                });
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    const data = await res.json();
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    data.wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error('Error loading wards:', error);
+                }
             }
 
             addListeners() {
@@ -332,51 +1324,73 @@
                 const wardText = this.wardSelect.options[this.wardSelect.selectedIndex]?.text || '';
                 const districtText = this.districtSelect.options[this.districtSelect.selectedIndex]?.text || '';
                 const provinceText = this.provinceSelect.options[this.provinceSelect.selectedIndex]?.text || '';
-                const address = [street, wardText, districtText, provinceText].filter(Boolean).join(', ');
-                this.fullAddress.value = address;
+
+                const addressParts = [street, wardText, districtText, provinceText].filter(part =>
+                    part && !part.includes('Chọn')
+                );
+
+                this.fullAddress.value = addressParts.join(', ');
             }
 
             async setInitialAddress(fullAddress) {
                 if (!fullAddress) return;
 
-                const parts = fullAddress.split(',').map(p => p.trim());
-                if (parts.length < 4) return;
+                try {
+                    const parts = fullAddress.split(',').map(p => p.trim());
+                    if (parts.length < 4) return;
 
-                const [street, wardName, districtName, provinceName] = parts;
+                    const [street, wardName, districtName, provinceName] = parts;
+                    this.streetInput.value = street;
 
-                this.streetInput.value = street;
+                    // Load and set province
+                    const provincesRes = await fetch('https://provinces.open-api.vn/api/p/');
+                    const provinces = await provincesRes.json();
+                    const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
 
-                const provincesRes = await fetch('https://provinces.open-api.vn/api/p/');
-                const provinces = await provincesRes.json();
-                const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
-                if (!province) return;
-                this.provinceSelect.value = province.code;
-                await this.loadDistricts(province.code);
+                    if (!province) return;
 
-                const districtsRes = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`);
-                const districtData = await districtsRes.json();
-                const district = districtData.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
-                if (!district) return;
-                this.districtSelect.value = district.code;
-                await this.loadWards(district.code);
+                    this.provinceSelect.value = province.code;
+                    await this.loadDistricts(province.code);
 
-                const wardsRes = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`);
-                const wardData = await wardsRes.json();
-                const ward = wardData.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
-                if (ward) this.wardSelect.value = ward.code;
+                    // Load and set district
+                    const districtsRes = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`);
+                    const districtData = await districtsRes.json();
+                    const district = districtData.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
 
-                this.updateFullAddress();
+                    if (!district) return;
+
+                    this.districtSelect.value = district.code;
+                    await this.loadWards(district.code);
+
+                    // Load and set ward
+                    const wardsRes = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`);
+                    const wardData = await wardsRes.json();
+                    const ward = wardData.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
+
+                    if (ward) this.wardSelect.value = ward.code;
+
+                    this.updateFullAddress();
+                } catch (error) {
+                    console.error('Error setting initial address:', error);
+                }
             }
         }
 
+        // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
-            const api = new VietnamAddressAPI();
+            // Initialize enhanced profile manager
+            window.hostProfileManager = new EnhancedHostProfileManager();
+
+            // Initialize enhanced address API
+            const addressAPI = new EnhancedVietnamAddressAPI();
+            await addressAPI.init();
+
             const savedAddress = document.getElementById('savedAddress')?.value;
             if (savedAddress) {
-                await api.setInitialAddress(savedAddress);
+                await addressAPI.setInitialAddress(savedAddress);
             }
-        });
-        document.addEventListener("DOMContentLoaded", function () {
+
+            // Handle existing toast messages
             const alerts = document.querySelectorAll(".alert-host");
             alerts.forEach(alert => {
                 setTimeout(() => {

@@ -53,4 +53,13 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
             """)
     List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
 
+    @Query("SELECT u FROM Users u WHERE u.role = :role "
+            + "AND (:keyword IS NULL OR u.fullname LIKE %:keyword% OR u.email LIKE %:keyword% OR u.phone LIKE %:keyword%) "
+            + "AND (:enabled IS NULL OR u.enabled = :enabled)")
+    Page<Users> searchOwners(
+            @Param("role") Users.Role role,
+            @Param("keyword") String keyword,
+            @Param("enabled") Boolean enabled,
+            Pageable pageable);
+
 }
