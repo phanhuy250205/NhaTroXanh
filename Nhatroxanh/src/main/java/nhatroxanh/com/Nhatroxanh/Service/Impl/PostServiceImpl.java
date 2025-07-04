@@ -7,7 +7,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -113,17 +115,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> getPostsByUserId(Integer userId) {
-        return postRepository.findByUserId(userId);
+    public Page<Post> getPostsByUserId(Integer userId, Pageable pageable) {
+        return postRepository.findByUserUserId(userId, pageable);
     }
 
     @Override
-    public List<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
-            Date fromDate, Date toDate, String sort) {
+    public Page<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
+            Date fromDate, Date toDate, String sort, Integer userId, Pageable pageable) {
         if (sort == null || sort.isEmpty() || sort.equals("newest")) {
-            return postRepository.searchNewestPosts(keyword, categoryId, status, fromDate, toDate);
+            return postRepository.searchNewestPostsPaged(keyword, categoryId, status, fromDate, toDate, userId,
+                    pageable);
         } else {
-            return postRepository.searchOldestPosts(keyword, categoryId, status, fromDate, toDate);
+            return postRepository.searchOldestPostsPaged(keyword, categoryId, status, fromDate, toDate, userId,
+                    pageable);
         }
     }
 

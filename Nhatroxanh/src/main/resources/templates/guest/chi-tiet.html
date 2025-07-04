@@ -673,7 +673,9 @@
                                     </div>
 
                                     <div th:if="${!reviews.isEmpty()}">
-                                        <div th:each="review : ${reviews}" class="border rounded p-3 mb-3">
+                                        <div th:each="review, iter : ${reviews}" th:id="'review-' + ${review.reviewId}"
+                                            th:classappend="${iter.index >= 10} ? 'd-none hidden-review' : ''"
+                                            class="border rounded p-3 mb-3 review-item">
                                             <div class="d-flex align-items-start">
                                                 <img th:src="@{${review.user.avatar != null ? review.user.avatar : '/images/avatar-default.png'}}"
                                                     alt="avatar" class="rounded-circle me-3"
@@ -754,7 +756,11 @@
                                         </div>
                                     </div>
                                     <p th:if="${reviews.isEmpty()}" class="text-muted">Chưa có đánh giá nào.</p>
-
+                                    <div class="text-center mt-3" th:if="${reviews.size() > 10}">
+                                        <button id="loadMoreReviews" class="btn btn-outline-primary btn-sm">
+                                            Xem thêm đánh giá
+                                        </button>
+                                    </div>
                                     <!-- Form tạo đánh giá -->
                                     <h5>Đánh giá của bạn</h5>
                                     <div th:if="${#authentication.authenticated}">
@@ -1544,6 +1550,28 @@
                 });
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('loadMoreReviews');
+            const hiddenReviews = document.querySelectorAll('.hidden-review');
+            let expanded = false; // Trạng thái: đang ẩn
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    if (!expanded) {
+                        // Mở rộng – hiển thị tất cả đánh giá
+                        hiddenReviews.forEach(item => item.classList.remove('d-none'));
+                        toggleBtn.textContent = 'Ẩn bớt đánh giá';
+                        expanded = true;
+                    } else {
+                        // Thu gọn – ẩn lại các đánh giá >= 10
+                        hiddenReviews.forEach(item => item.classList.add('d-none'));
+                        toggleBtn.textContent = 'Xem thêm đánh giá';
+                        expanded = false;
+                    }
+                });
+            }
+        });
+
         // document.addEventListener('DOMContentLoaded', function () {
         //     const toasts = document.querySelectorAll('.toast-host');
         //     toasts.forEach(toast => {

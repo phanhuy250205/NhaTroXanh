@@ -42,6 +42,10 @@ public class HostelServiceImpl implements HostelService {
     }
 
     @Override
+    public List<Hostel> getHostelsWithRoomsByOwnerId(Integer ownerId) {
+        return hostelRepository.findHostelsWithRoomsByOwnerId(ownerId);
+    }
+    @Override
     public Optional<Hostel> getHostelById(Integer id) {
         return hostelRepository.findById(id);
     }
