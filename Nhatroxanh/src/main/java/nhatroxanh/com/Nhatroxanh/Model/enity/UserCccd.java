@@ -54,7 +54,7 @@ public class UserCccd {
     private Users user;
 
     public UserCccd orElse(Object object) {
-        // TODO Auto-generated method stub
+        
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
     @Override

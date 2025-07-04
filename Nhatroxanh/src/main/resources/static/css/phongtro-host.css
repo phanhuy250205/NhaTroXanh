@@ -1503,3 +1503,147 @@
         display: none;
     }
 }
+
+
+
+/* CSS đơn giản cho checkbox tiện ích - Tên class riêng biệt */
+
+.amenities-wrapper {
+    margin-top: 20px;
+}
+
+.amenities-heading {
+    font-size: 16px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 12px;
+    font-family: "Inter", sans-serif;
+}
+
+.checkbox-container {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 12px;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.checkbox-item:hover {
+    border-color: #3E83CC;
+    background: #f0f7ff;
+}
+
+.checkbox-item.selected {
+    background: #3E83CC;
+    border-color: #3E83CC;
+    color: white;
+}
+
+.checkbox-input {
+    display: none;
+}
+
+.checkbox-icon {
+    margin-right: 8px;
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+}
+
+.checkbox-text {
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+}
+
+.checkbox-mark {
+    margin-left: auto;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #d1d5db;
+    border-radius: 3px;
+    position: relative;
+    background: white;
+}
+
+.checkbox-item.selected .checkbox-mark {
+    background: white;
+    border-color: white;
+}
+
+.checkbox-mark::after {
+    content: "✓";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    color: #3E83CC;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0;
+}
+
+.checkbox-item.selected .checkbox-mark::after {
+    opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .checkbox-container {
+        padding: 16px;
+    }
+    
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+        gap: 10px;
+    }
+    
+    .checkbox-item {
+        padding: 10px;
+    }
+    
+    .checkbox-text {
+        font-size: 13px;
+    }
+    
+    .checkbox-icon {
+        font-size: 14px;
+        margin-right: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .checkbox-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    
+    .checkbox-item {
+        padding: 8px;
+    }
+    
+    .checkbox-text {
+        font-size: 12px;
+    }
+    
+    .checkbox-mark {
+        width: 14px;
+        height: 14px;
+    }
+}

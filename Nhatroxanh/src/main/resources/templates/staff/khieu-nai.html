@@ -193,6 +193,38 @@
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
         }
 
+        /* Priority Badge Styles */
+        .priority-badge-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .priority-high-staff {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .priority-medium-staff {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-low-staff {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
         .action-btn-staff {
             background: #3e83cc;
             color: white;
@@ -321,7 +353,8 @@
                 padding: 8px 6px;
             }
 
-            .status-badge-staff {
+            .status-badge-staff,
+            .priority-badge-staff {
                 font-size: 10px;
                 padding: 4px 8px;
             }
@@ -401,6 +434,7 @@
                             <th>ID</th>
                             <th>Người gửi</th>
                             <th>Loại sự cố</th>
+                            <th>Mức độ</th>
                             <th>Khu trọ</th>
                             <th>Thời gian</th>
                             <th>Trạng thái</th>
@@ -428,9 +462,59 @@
                                 </span>
                             </td>
                             <td>
-                                <a th:href="@{'/nhan-vien/chi-tiet-khieu-nai/' + ${report.reportId}}"
-                                    class="action-btn-staff">
-                                    <i class="fas fa-eye"></i> Xem chi tiết
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Trần Thị Bình</td>
+                            <td>Sự cố nước</td>
+                            <td>
+                                <span class="priority-badge-staff priority-medium-staff">
+                                    <i class="fas fa-exclamation"></i>
+                                    Trung bình
+                                </span>
+                            </td>
+                            <td>KTX B2</td>
+                            <td>14/12/2024 09:15</td>
+                            <td>
+                                <span class="status-badge-staff status-processing-staff">
+                                    <i class="fas fa-cog"></i>
+                                    Đang xử lý
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Lê Minh Cường</td>
+                            <td>Khiếu nại tiếng ồn</td>
+                            <td>
+                                <span class="priority-badge-staff priority-low-staff">
+                                    <i class="fas fa-info-circle"></i>
+                                    Thấp
+                                </span>
+                            </td>
+                            <td>KTX C3</td>
+                            <td>13/12/2024 22:45</td>
+                            <td>
+                                <span class="status-badge-staff status-completed-staff">
+                                    <i class="fas fa-check-circle"></i>
+                                    Đã xử lý
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/nhan-vien/chi-tiet-khieu-nai}" class="action-btn-staff">
+                                    <i class="fas fa-eye"></i>
+                                    Xem chi tiết
                                 </a>
                             </td>
                         </tr>

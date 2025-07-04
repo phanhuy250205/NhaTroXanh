@@ -11,8 +11,6 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 public class DemoController {
 
 
-    
-
      @Autowired
      private UserService userService;
     @GetMapping("/chi-tiet")
@@ -92,17 +90,21 @@ public class DemoController {
     //     return "host/quan-ly-bai-dang";
     // }
 
-    // @GetMapping("/chu-tro/chi-tiet-bai-dang")
-    // public String chitietbaidang() {
-    //     return "host/chi-tiet-bai-dang";
-    // }
+     @GetMapping("/chu-tro/Qlthue-tra")
+     public String chitietbaidang() {
+         return "guest/quan-ly-thue-tra";
+     }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
-    // @GetMapping("/chu-tro/sua-bai-dang")
-    // public String chitiethopdong() {
-    //     return "host/sua-bai-dang";
-    // }
+    @GetMapping("/khach-thue/quan-ly-thue-tra")
+    public String quanLyThueTra() {
+        return "guest/quan-ly-thue-tra";
+    }
+    @GetMapping("/khach-thue/chitiet-phongthue")
+    public String chiTietPhongThue() {
+        return "guest/chitiet-phongthue";
+    }
 }

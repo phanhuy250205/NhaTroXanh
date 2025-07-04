@@ -208,6 +208,52 @@
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
         }
 
+        /* Priority Badge Styles */
+        .priority-container-staff {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .priority-badge-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .priority-badge-staff:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .priority-high-staff {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .priority-medium-staff {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-low-staff {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
         .images-section-staff {
             margin-top: 24px;
             padding: 20px;
@@ -695,13 +741,20 @@
                         <label class="form-label-staff">Loại sự cố</label>
                         <input type="text" class="form-control-staff" th:value="${report.incidentType}" disabled>
                     </div>
+                    <div class="form-group-staff priority-container-staff">
+                        <label class="form-label-staff">Mức độ ưu tiên</label>
+                        <button id="priorityBtn" class="priority-badge-staff priority-high-staff" onclick="togglePriority()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Cao
+                        </button>
+                    </div>
+                </div>
+                <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">Thời gian gửi</label>
                         <input type="text" class="form-control-staff"
                             th:value="${#dates.format(report.reportedAt, 'dd/MM/yyyy HH:mm')}" disabled>
                     </div>
-                </div>
-                <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">Họ và tên người gửi</label>
                         <input type="text" class="form-control-staff" th:value="${report.user.fullname}" disabled>
@@ -710,12 +763,12 @@
                         <label class="form-label-staff">Số điện thoại</label>
                         <input type="text" class="form-control-staff" th:value="${report.user.phone}" disabled>
                     </div>
+                </div>
+                <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">Khu trọ</label>
                         <input type="text" class="form-control-staff" th:value="${report.room.hostel.name}" disabled>
                     </div>
-                </div>
-                <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">Phòng</label>
                         <input type="text" class="form-control-staff" th:value="${report.room.namerooms}" disabled>
@@ -815,10 +868,29 @@
         //     }
         // ];
 
-        // function toggleStatus() {
-        //     currentStatus = (currentStatus + 1) % statuses.length;
-        //     updateStatusDisplay();
-        // }
+        let currentPriority = 0; // 0: Cao, 1: Trung bình, 2: Thấp
+        const priorities = [
+            {
+                text: 'Cao',
+                class: 'priority-high-staff',
+                icon: 'fas fa-exclamation-triangle'
+            },
+            {
+                text: 'Trung bình',
+                class: 'priority-medium-staff',
+                icon: 'fas fa-exclamation'
+            },
+            {
+                text: 'Thấp',
+                class: 'priority-low-staff',
+                icon: 'fas fa-info-circle'
+            }
+        ];
+
+        function toggleStatus() {
+            currentStatus = (currentStatus + 1) % statuses.length;
+            updateStatusDisplay();
+        }
 
         // function updateStatusDisplay() {
         //     const statusBtn = document.getElementById('statusBtn');
@@ -828,6 +900,20 @@
         //     statusBtn.className = 'status-badge-staff ' + status.class;
         //     statusBtn.innerHTML = `<i class="${status.icon}"></i> ${status.text}`;
         // }
+
+        function togglePriority() {
+            currentPriority = (currentPriority + 1) % priorities.length;
+            updatePriorityDisplay();
+        }
+
+        function updatePriorityDisplay() {
+            const priorityBtn = document.getElementById('priorityBtn');
+            const priority = priorities[currentPriority];
+            
+            // Remove all priority classes
+            priorityBtn.className = 'priority-badge-staff ' + priority.class;
+            priorityBtn.innerHTML = `<i class="${priority.icon}"></i> ${priority.text}`;
+        }
 
         // New function to get image source from clicked element
         function viewImageFromElement(element) {
