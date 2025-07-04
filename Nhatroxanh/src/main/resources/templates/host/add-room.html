@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Phòng Trọ - Nhà Trọ Xanh</title>
+    <!-- Bạn có thể thêm các liên kết CSS/JS cần thiết ở đây -->
+</head>
+<body class="phongtro">
+    <div class="add-room-container-modern">
+        <form id="addRoomFormHost" class="add-room-form-modern">
+            <!-- Row 1: Khu trọ và Tên phòng -->
+            <div class="form-row-modern">
+                <div class="form-group-modern">
+                    <label for="roomAreaSelectHost" class="form-label-modern">
+                        Khu trọ <span class="required-star">*</span>
+                    </label>
+                    <select class="form-select-modern" id="roomAreaSelectHost" required>
+                        <option value="">Chọn khu trọ</option>
+                        <option value="khu-a">Khu A - Tầng 1</option>
+                        <option value="khu-b">Khu B - Tầng 2</option>
+                        <option value="khu-c">Khu C - Tầng 3</option>
+                        <option value="khu-d">Khu D - Tầng 4</option>
+                        <option value="khu-e">Khu E - Tầng 5</option>
+                    </select>
+                </div>
+                <div class="form-group-modern">
+                    <label for="roomNameHost" class="form-label-modern">
+                        Tên phòng <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input-modern" id="roomNameHost"
+                        placeholder="Nhập tên phòng (VD: A101)" required>
+                </div>
+            </div>
+
+            <!-- Row 2: Giá thuê và Trạng thái -->
+            <div class="form-row-modern">
+                <div class="form-group-modern">
+                    <label for="roomPriceHost" class="form-label-modern">
+                        Giá thuê (VNĐ) <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input-modern" id="roomPriceHost"
+                        placeholder="Nhập giá thuê phòng" required>
+                </div>
+                <div class="form-group-modern">
+                    <label for="roomStatusHost" class="form-label-modern">
+                        Trạng thái <span class="required-star">*</span>
+                    </label>
+                    <select class="form-select-modern" id="roomStatusHost" required>
+                        <option value="">Chọn trạng thái</option>
+                        <option value="available">Trống</option>
+                        <option value="occupied">Đã thuê</option>
+                        <option value="maintenance">Bảo trì</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Row 3: Diện tích và Số người tối đa -->
+            <div class="form-row-modern">
+                <div class="form-group-modern">
+                    <label for="roomAreaHost" class="form-label-modern">
+                        Diện tích (m²) <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input-modern" id="roomAreaHost"
+                        placeholder="Nhập diện tích phòng" required>
+                </div>
+                <div class="form-group-modern">
+                    <label for="roomCapacityHost" class="form-label-modern">
+                        Số người tối đa <span class="required-star">*</span>
+                    </label>
+                    <input type="text" class="form-input-modern" id="roomCapacityHost"
+                        placeholder="Số người thuê phòng tối đa" required>
+                </div>
+            </div>
+
+            <!-- Row 4: Tiện ích phòng -->
+            <div class="form-group-modern full-width">
+                <label class="form-label-modern">Tiện ích phòng</label>
+                <div class="amenities-grid">
+                    <div class="amenity-item">
+                        <input type="checkbox" id="wifi" name="amenities" value="wifi" class="amenity-checkbox">
+                        <label for="wifi" class="amenity-label">
+                            <i class="fas fa-wifi"></i>
+                            <span>WiFi</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="ac" name="amenities" value="ac" class="amenity-checkbox">
+                        <label for="ac" class="amenity-label">
+                            <i class="fas fa-snowflake"></i>
+                            <span>Điều hòa</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="fridge" name="amenities" value="fridge" class="amenity-checkbox">
+                        <label for="fridge" class="amenity-label">
+                            <i class="fas fa-cube"></i>
+                            <span>Tủ lạnh</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="washing-machine" name="amenities" value="washing-machine" class="amenity-checkbox">
+                        <label for="washing-machine" class="amenity-label">
+                            <i class="fas fa-tshirt"></i>
+                            <span>Máy giặt</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="water-heater" name="amenities" value="water-heater" class="amenity-checkbox">
+                        <label for="water-heater" class="amenity-label">
+                            <i class="fas fa-fire"></i>
+                            <span>Nước nóng</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="kitchen" name="amenities" value="kitchen" class="amenity-checkbox">
+                        <label for="kitchen" class="amenity-label">
+                            <i class="fas fa-utensils"></i>
+                            <span>Bếp riêng</span>
+                        </label>
+                    </div>
+                    <div class="amenity-item">
+                        <input type="checkbox" id="bathroom" name="amenities" value="bathroom" class="amenity-checkbox">
+                        <label for="bathroom" class="amenity-label">
+                            <i class="fas fa-bath"></i>
+                            <span>WC riêng</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 5: Mô tả -->
+            <div class="form-group-modern full-width">
+                <label for="roomDescriptionHost" class="form-label-modern">Mô tả chi tiết</label>
+                <textarea class="form-textarea-modern" id="roomDescriptionHost"
+                    placeholder="Mô tả chi tiết về phòng, vị trí, môi trường xung quanh..." rows="4"></textarea>
+            </div>
+
+            <!-- Image Upload Section -->
+            <div class="image-upload-section">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M14 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.89 22 5.99 22H18C19.1 22 20 21.1 20 20V8L14 2Z"
+                                stroke="#3E83CC" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M14 2V8H20" stroke="#3E83CC" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M16 13L12 9L8 13" stroke="#3E83CC" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round" />
+                            <path d="M12 9V19" stroke="#3E83CC" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <p class="upload-text">Kéo thả ảnh vào đây hoặc click để chọn</p>
+                    <input type="file" id="imageUpload" multiple accept="image/*"
+                        style="display: none;">
+                </div>
+
+                <!-- Image Preview Section -->
+                <div class="image-preview-container" id="imagePreviewContainer">
+                    <!-- Preview images will be dynamically added here -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="form-actions-modern">
+                <button type="button" class="btn-cancel-modern">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Hủy bỏ
+                </button>
+                <button type="submit" class="btn-submit-modern">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Thêm phòng
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

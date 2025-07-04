@@ -41,31 +41,34 @@ public class HostelServiceImpl implements HostelService {
         return hostelRepository.findById(id);
     }
 
-   @Override
-@Transactional
-public Hostel createHostel(HostelDTO dto) {
-    System.out.println("Creating hostel with DTO: " + dto); // Log DTO
-    Users owner = usersRepository.findById(dto.getOwnerId())
-            .orElseThrow(() -> new RuntimeException("Không tìm thấy chủ trọ"));
+    @Override
+    @Transactional
+    public Hostel createHostel(HostelDTO dto) {
+        System.out.println("Creating hostel with DTO: " + dto);
+        Users owner = usersRepository.findById(dto.getOwnerId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy chủ trọ"));
 
-    Address address = new Address();
-    address.setStreet(dto.getCombinedAddress());
-    System.out.println("Saving address: " + address.getStreet()); // Log address
-    address.setUser(owner);
-    address = addressRepository.save(address);
+        String combinedAddress = dto.getCombinedAddress();
+        System.out.println("Saving address: " + combinedAddress);
 
-    Hostel hostel = Hostel.builder()
-            .name(dto.getName())
-            .description(dto.getDescription())
-            .status(dto.getStatus())
-            .room_number(dto.getRoomNumber())
-            .createdAt(new java.sql.Date(System.currentTimeMillis()))
-            .address(address)
-            .owner(owner)
-            .build();
-    System.out.println("Saving hostel: " + hostel); // Log hostel
-    return hostelRepository.save(hostel);
-}
+        Address address = new Address();
+        address.setStreet(combinedAddress);
+        address.setUser(owner);
+        address = addressRepository.save(address);
+
+        Hostel hostel = Hostel.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .status(dto.getStatus())
+                .room_number(dto.getRoomNumber())
+                .createdAt(new java.sql.Date(System.currentTimeMillis()))
+                .address(address)
+                .owner(owner)
+                .build();
+
+        System.out.println("Saving hostel: " + hostel);
+        return hostelRepository.save(hostel);
+    }   
 
     @Override
     public Hostel updateHostel(HostelDTO hostelDTO) {

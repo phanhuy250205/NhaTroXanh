@@ -67,10 +67,7 @@ public class DemoController {
         return "host/QL-danh-gia-host";
     }
 
-    @GetMapping("/chu-tro/quan-ly-tro")
-    public String phongtro() {
-        return "host/phongtro";
-    }
+    
 
     // @GetMapping("/chu-tro/tong-quan")
     // public String tongquan() {

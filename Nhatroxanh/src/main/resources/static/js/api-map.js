@@ -126,6 +126,52 @@ class VietnamAddressAPI {
         }
     }
 
+    setInitialAddressFromForm() {
+        const fullAddressHost = document.getElementById("fullAddressHost");
+        const initialAddress = fullAddressHost ? fullAddressHost.value.trim() : "";
+        if (initialAddress) {
+            const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
+            if (parts.length >= 4) {
+                const [, wardName, districtName, provinceName] = parts; // Lấy theo thứ tự từ cuối
+                const provinceSelect = document.getElementById("provinceHost");
+                const districtSelect = document.getElementById("districtHost");
+                const wardSelect = document.getElementById("wardHost");
+                const houseNumberInput = document.getElementById("houseNumberHost");
+                const streetInput = document.getElementById("streetHost");
+
+                // Chọn province
+                const provinceOption = Array.from(provinceSelect.options).find(opt => opt.textContent === provinceName);
+                if (provinceOption) {
+                    provinceOption.selected = true;
+                    provinceSelect.dispatchEvent(new Event("change")); // Tải districts
+                }
+
+                // Chờ districts tải xong
+                setTimeout(() => {
+                    const districtOption = Array.from(districtSelect.options).find(opt => opt.textContent === districtName);
+                    if (districtOption) {
+                        districtOption.selected = true;
+                        districtSelect.dispatchEvent(new Event("change")); // Tải wards
+                    }
+
+                    // Chờ wards tải xong
+                    setTimeout(() => {
+                        const wardOption = Array.from(wardSelect.options).find(opt => opt.textContent === wardName);
+                        if (wardOption) {
+                            wardOption.selected = true;
+                        }
+                    }, 500);
+                }, 500);
+
+                // Tách houseNumber và street
+                const addressPart = parts[0].trim();
+                const firstSpaceIndex = addressPart.indexOf(" ");
+                houseNumberInput.value = firstSpaceIndex > 0 ? addressPart.substring(0, firstSpaceIndex) : addressPart;
+                streetInput.value = firstSpaceIndex > 0 ? addressPart.substring(firstSpaceIndex + 1) : "";
+            }
+        }
+    }
+    
     resetDistrictSelect() {
         const districtSelect = document.getElementById("districtHost");
         districtSelect.innerHTML = '<option value="">Chọn quận/huyện</option>';
@@ -180,20 +226,24 @@ class VietnamAddressAPI {
         const streetInput = document.getElementById("streetHost");
         const fullAddressInput = document.getElementById("fullAddressHost");
 
-        const houseNumber = houseNumberInput.value.trim();
-        const street = streetInput.value.trim();
-        const ward = wardSelect.value ? wardSelect.options[wardSelect.selectedIndex].text.trim() : "";
-        const district = districtSelect.value ? districtSelect.options[districtSelect.selectedIndex].text.trim() : "";
-        const province = provinceSelect.value ? provinceSelect.options[provinceSelect.selectedIndex].text.trim() : "";
+        // Hàm làm sạch triệt để
+        const clean = (text) => (text || "").replace(/,+/g, "").replace(/\s+/g, " ").trim();
 
-        const parts = [];
-        if (houseNumber || street) parts.push(`${houseNumber} ${street}`.trim());
-        if (ward) parts.push(ward);
-        if (district) parts.push(district);
-        if (province) parts.push(province);
+        const houseNumber = clean(houseNumberInput.value);
+        const street = clean(streetInput.value);
+        const ward = wardSelect.value ? clean(wardSelect.options[wardSelect.selectedIndex].text) : "";
+        const district = districtSelect.value ? clean(districtSelect.options[districtSelect.selectedIndex].text) : "";
+        const province = provinceSelect.value ? clean(provinceSelect.options[provinceSelect.selectedIndex].text) : "";
 
+        // Gộp houseNumber và street thành một phần duy nhất nếu có street
+        let addressPart = houseNumber;
+        if (street) {
+            addressPart += (houseNumber ? " " : "") + street;
+        }
+
+        const parts = [addressPart, ward, district, province].filter(part => part && part.length > 0);
         fullAddressInput.value = parts.join(", ").replace(/,+(?=,|$)/g, "").trim();
-        console.log("Updated Full Address:", fullAddressInput.value); // Debug
+        console.log("Updated Full Address:", fullAddressInput.value);
     }
 
     showError(message) {
@@ -247,36 +297,46 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Xử lý submit form
     const form = document.getElementById("addHostelFormHost");
-    if (form) {
-        form.addEventListener("submit", function (e) {
+        if (form) {
+            form.addEventListener("submit", function (e) {
             e.preventDefault();
-            const address = window.vietnamAddressAPI.getSelectedAddress();
-            if (address.houseNumber || address.street || address.ward.code || address.district.code || address.province.code) {
-                document.getElementById("provinceCodeHost").value = address.province.code;
-                document.getElementById("provinceNameHost").value = address.province.name;
-                document.getElementById("districtCodeHost").value = address.district.code;
-                document.getElementById("districtNameHost").value = address.district.name;
-                document.getElementById("wardCodeHost").value = address.ward.code;
-                document.getElementById("wardNameHost").value = address.ward.name;
-                document.getElementById("streetHost").value = address.street;
-                document.getElementById("houseNumberHost").value = address.houseNumber;
 
-                console.log("Submitting with:", {
-                    provinceCode: address.province.code,
-                    provinceName: address.province.name,
-                    districtCode: address.district.code,
-                    districtName: address.district.name,
-                    wardCode: address.ward.code,
-                    wardName: address.ward.name,
-                    street: address.street,
-                    houseNumber: address.houseNumber,
-                    fullAddress: address.fullAddress
-                });
-                this.submit(); // Submit form sau khi gán giá trị
-            } else {
-                e.preventDefault();
-                alert("Vui lòng điền đầy đủ thông tin địa chỉ!");
-            }
+            let address = window.vietnamAddressAPI.getSelectedAddress();
+
+            // Hàm làm sạch triệt để
+            const clean = (text) => (text || "").replace(/,+/g, "").replace(/\s+/g, " ").trim();
+
+            address.houseNumber = clean(address.houseNumber);
+            address.street = clean(address.street);
+            address.ward.name = clean(address.ward.name);
+            address.district.name = clean(address.district.name);
+            address.province.name = clean(address.province.name);
+
+            // Gộp phần đầu địa chỉ: houseNumber + street
+            const addressPart = [address.houseNumber, address.street]
+                .filter(Boolean)
+                .join(" ");
+
+            // Gộp địa chỉ đầy đủ
+            const fullAddress = [addressPart, address.ward.name, address.district.name, address.province.name]
+                .filter(Boolean)
+                .join(", ");
+
+            // Gán lại giá trị input
+            document.getElementById("houseNumberHost").value = address.houseNumber;
+            document.getElementById("streetHost").value = address.street;
+            document.getElementById("fullAddressHost").value = fullAddress;
+            document.getElementById("provinceCodeHost").value = address.province.code;
+            document.getElementById("provinceNameHost").value = address.province.name;
+            document.getElementById("districtCodeHost").value = address.district.code;
+            document.getElementById("districtNameHost").value = address.district.name;
+            document.getElementById("wardCodeHost").value = address.ward.code;
+            document.getElementById("wardNameHost").value = address.ward.name;
+
+            console.log("Submitting cleaned address:", fullAddress);
+
+            // Gửi form
+            this.submit();
         });
     }
 });

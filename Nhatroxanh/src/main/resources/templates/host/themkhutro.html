@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head th:replace="~{/layouts/head}">
+
     <title>Nhà Trọ Xanh</title>
 </head>
 <body class="themkhutro">
@@ -78,7 +79,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="provinceHost" class="form-label-host">Tỉnh/Thành phố</label>
-                                        <select id="provinceHost" class="form-select-host">
+                                        <select id="provinceHost" class="form-select-host" th:name="province">
                                             <option value="">Chọn tỉnh/thành phố</option>
                                         </select>
                                     </div>
@@ -86,7 +87,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="districtHost" class="form-label-host">Quận/Huyện</label>
-                                        <select id="districtHost" class="form-select-host" disabled>
+                                        <select id="districtHost" class="form-select-host" th:name="district">
                                             <option value="">Chọn quận/huyện</option>
                                         </select>
                                     </div>
@@ -94,7 +95,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="wardHost" class="form-label-host">Phường/Xã</label>
-                                        <select id="wardHost" class="form-select-host" disabled>
+                                        <select id="wardHost" class="form-select-host" th:name="ward">
                                             <option value="">Chọn phường/xã</option>
                                         </select>
                                     </div>
@@ -118,11 +119,11 @@
                                     </div>
                                 </div>
                             </div>
-                            <input type="hidden" id="provinceCodeHost" name="province">
+                            <input type="hidden" id="provinceCodeHost" name="province" th:value="${hostel.provinceCode}">
+                            <input type="hidden" id="districtCodeHost" name="district" th:value="${hostel.districtCode}">
+                            <input type="hidden" id="wardCodeHost" name="ward" th:value="${hostel.wardCode}">
                             <input type="hidden" id="provinceNameHost" name="provinceName">
-                            <input type="hidden" id="districtCodeHost" name="district">
                             <input type="hidden" id="districtNameHost" name="districtName">
-                            <input type="hidden" id="wardCodeHost" name="ward">
                             <input type="hidden" id="wardNameHost" name="wardName">
                             <input type="hidden" id="streetHost" name="street">
                             <input type="hidden" id="houseNumberHost" name="houseNumber">

@@ -10,12 +10,15 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
 import nhatroxanh.com.Nhatroxanh.Service.Impl.HostelServiceImpl;
 
 import java.util.HashMap;
 import java.util.List;
+
 
 @Controller
 public class HostelController {
@@ -25,6 +28,9 @@ public class HostelController {
 
     @Autowired
     private HostelService hostelService;
+
+    @Autowired
+    private RoomsService roomsService;
 
     @GetMapping("/chu-tro/thong-tin-tro")
     public String hostthongtintro(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -98,9 +104,20 @@ public class HostelController {
             hostelDTO.setStatus(hostel.getStatus());
             hostelDTO.setRoomNumber(hostel.getRoom_number());
             hostelDTO.setCreatedAt(hostel.getCreatedAt());
-            // Phân tách địa chỉ từ string
+
+            // Lấy địa chỉ từ database và phân tách
             String address = hostel.getAddress() != null ? hostel.getAddress().getStreet() : "";
             hostelDTO.parseAddress(address);
+
+            // Nếu các trường con vẫn rỗng, thử lấy từ database (nếu có)
+            if (hostel.getAddress() != null && hostel.getAddress().getWard() != null) {
+                hostelDTO.setWardCode(hostel.getAddress().getWard().getCode());
+                hostelDTO.setWardName(hostel.getAddress().getWard().getName());
+                hostelDTO.setDistrictCode(hostel.getAddress().getWard().getDistrict().getCode());
+                hostelDTO.setDistrictName(hostel.getAddress().getWard().getDistrict().getName());
+                hostelDTO.setProvinceCode(hostel.getAddress().getWard().getDistrict().getProvince().getCode());
+                hostelDTO.setProvinceName(hostel.getAddress().getWard().getDistrict().getProvince().getName());
+            }
 
             model.addAttribute("hostel", hostelDTO);
             return "host/themkhutro";
@@ -156,4 +173,5 @@ public class HostelController {
         }
         return "redirect:/chu-tro/thong-tin-tro";
     }
+    
 }
