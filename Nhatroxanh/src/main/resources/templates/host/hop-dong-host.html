@@ -257,7 +257,7 @@
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" class="form-control" id="tenant-dob" required
-                                           max="2006-12-31" th:field="*{tenant.birthday}">
+                                            th:field="*{tenant.birthday}" max="2006-12-31">
                                 </div>
 
                                 <div class="col-md-3">
@@ -265,7 +265,7 @@
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="tenant-id" required
-                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{tenant.id}">
+                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{tenant.cccdNumber}">
                                 </div>
 
                                 <div class="col-md-5">
@@ -371,25 +371,25 @@
                                     <label class="form-label">
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" th:field="*{owner.birthday}" required>
+                                    <input type="date" class="form-control" id="owner-dob" th:field="*{owner.birthday}" required>
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" th:field="*{owner.id}" required
-                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số">
+                                    <input type="text" class="form-control" id="owner-id" required
+                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{owner.cccdNumber}">
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">Ngày cấp <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="owner-id-date" required>
+                                    <input type="date" class="form-control" id="owner-id-date" th:field="*{owner.issueDate}" required>
                                 </div>
 
                                 <div class="col-md-9">
                                     <label class="form-label">Nơi cấp <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="owner-id-place" required
+                                    <input type="text" class="form-control" id="owner-id-place" th:field="*{owner.issuePlace}" required
                                            placeholder="Nơi cấp CMND/CCCD">
                                 </div>
 
@@ -437,7 +437,7 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label">Email (nếu có)</label>
-                                    <input type="email" class="form-control" th:field="*{owner.email}"
+                                    <input type="email" class="form-control" id="owner-email" th:field="*{owner.email}"
                                            pattern=".*@gmail\.com$" placeholder="example@gmail.com">
                                 </div>
 
@@ -445,7 +445,7 @@
                                     <label class="form-label">
                                         Số điện thoại <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" th:field="*{owner.phone}" required
+                                    <input type="text" class="form-control" id="owner-phone" th:field="*{owner.phone}" required
                                            pattern="[0-9]{10}" maxlength="10" placeholder="10 chữ số">
                                 </div>
 
@@ -476,7 +476,7 @@
                                         <i class="fa fa-building me-1"></i>Chọn khu trọ <span
                                             class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="hostelId" onchange="filterRooms()" required>
+                                    <select class="form-select" id="hostelId" onchange="NhaTroContract.filterRooms()" required>
                                         <option value="">-- Chọn khu trọ --</option>
                                         <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
                                                 th:text="${hostel.name}"
@@ -526,7 +526,7 @@
 
                                 <div class="col-md-3">
                                     <label class="form-label">Số phòng</label>
-                                    <input type="text" class="form-control" id="room-number">
+                                    <input type="text" class="form-control" id="room-number" readonly>
                                 </div>
 
                                 <div class="col-md-3">
@@ -646,7 +646,7 @@
                                         Thời hạn hợp đồng <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" value="0" id="contract-duration"
+                                        <input type="number" class="form-control" value="0" id="contract-duration" th:field="*{terms.duration}"
                                                required min="1" placeholder="Số tháng">
                                         <span class="input-group-text">Tháng</span>
                                     </div>
@@ -656,7 +656,7 @@
                                     <label class="form-label">
                                         Ngày bắt đầu HĐ <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="start-date" required>
+                                    <input type="date" class="form-control" id="start-date" name="terms.startDate" th:field="*{terms.startDate}" required>
                                 </div>
 
                                 <div class="col-md-6">
@@ -738,7 +738,7 @@
                                                     th:text="${contract.owner.birthday != null ? #dates.format(contract.owner.birthday, 'yyyy-MM-dd') : '........................'}">........................</span>
                                 </p>
                                 <p>Số CMND/CCCD: <span id="preview-owner-id" class="nha-tro-highlight"
-                                                       th:text="${contract.owner.id != null ? contract.owner.id : '........................'}">........................</span>
+                                                       th:text="${contract.owner.cccdNumber != null ? contract.owner.cccdNumber : '........................'}">........................</span>
                                     cấp ngày <span id="preview-owner-id-date" class="nha-tro-highlight"
                                                    th:text="${contract.owner.issueDate != null ? #dates.format(contract.owner.issueDate, 'yyyy-MM-dd') : '........................'}">........................</span>
                                     tại <span id="preview-owner-id-place" class="nha-tro-highlight"
@@ -747,6 +747,7 @@
                                 <p>Địa chỉ: <span id="preview-owner-address" class="nha-tro-highlight"
                                                   th:text="${contract.owner.street != null ? contract.owner.street : '........................'} + ', ' + ${contract.owner.ward != null ? contract.owner.ward : ''} + ', ' + ${contract.owner.district != null ? contract.owner.district : ''} + ', ' + ${contract.owner.province != null ? contract.owner.province : ''}">........................</span>
                                 </p>
+
                                 <p>Số điện thoại: <span id="preview-owner-phone" class="nha-tro-highlight"
                                                         th:text="${contract.owner.phone != null ? contract.owner.phone : '........................'}">........................</span>
                                 </p>

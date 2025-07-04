@@ -50,7 +50,7 @@ public class ContractServiceImpl implements ContractService {
     public Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
-            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception {
+            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant, Integer duration) throws Exception {
         logger.info("Creating new contract for tenant with phone: {}", tenantPhone);
 
         // Validate inputs
@@ -85,6 +85,10 @@ public class ContractServiceImpl implements ContractService {
         if (tenant == null && unregisteredTenant == null) {
             logger.error("No tenant or unregistered tenant provided");
             throw new IllegalArgumentException("Phải cung cấp thông tin người thuê (đã đăng ký hoặc chưa đăng ký)!");
+        }
+        if (duration != null && duration <= 0) {
+            logger.error("Invalid duration: {}", duration);
+            throw new IllegalArgumentException("Thời hạn hợp đồng phải lớn hơn 0!");
         }
 
         // Find owner
@@ -126,16 +130,17 @@ public class ContractServiceImpl implements ContractService {
                 .status(status)
                 .owner(owner)
                 .room(room)
+                .duration(Float.valueOf(duration))
                 .build();
 
         // Handle tenant
         if (unregisteredTenant != null) {
             if (unregisteredTenant.getStatus() == null) {
-                unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE); // Gán trạng thái mặc định
+                unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
             }
             unregisteredTenantsRepository.save(unregisteredTenant);
             contract.setUnregisteredTenant(unregisteredTenant);
-            contract.setTenant(null); // Đảm bảo tenant là null khi dùng unregisteredTenant
+            contract.setTenant(null);
         } else if (tenant != null) {
             if (tenant.getRole() != Users.Role.CUSTOMER) {
                 logger.error("User with ID {} is not a customer", tenant.getUserId());
@@ -179,6 +184,10 @@ public class ContractServiceImpl implements ContractService {
             logger.error("Terms too long");
             throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
         }
+        if (contractDto.getTerms().getDuration() != null && contractDto.getTerms().getDuration() <= 0) {
+            logger.error("Invalid duration: {}", contractDto.getTerms().getDuration());
+            throw new IllegalArgumentException("Thời hạn hợp đồng phải lớn hơn 0!");
+        }
 
         // Find room
         Integer roomId = roomRepository.findByRoomNumber(String.valueOf(contractDto.getRoom().getRoomName()))
@@ -202,7 +211,8 @@ public class ContractServiceImpl implements ContractService {
                 Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()),
                 ownerCccd,
                 tenant,
-                unregisteredTenant);
+                unregisteredTenant,
+                contractDto.getTerms().getDuration());
     }
 
     @Override
@@ -266,6 +276,9 @@ public class ContractServiceImpl implements ContractService {
         }
         if (updatedContract.getStatus() != null) {
             contract.setStatus(updatedContract.getStatus());
+        }
+        if (updatedContract.getDuration() != null && updatedContract.getDuration() > 0) {
+            contract.setDuration(updatedContract.getDuration());
         }
 
         if (updatedContract.getRoom() != null && updatedContract.getRoom().getRoomId() != null) {
@@ -341,6 +354,7 @@ public class ContractServiceImpl implements ContractService {
         contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
         contract.setTerms(contractDto.getTerms().getTerms());
         contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
 
         Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByCccdNumber(contractDto.getOwner().getCccdNumber());
         Users owner = ownerCccdOpt.map(UserCccd::getUser)
@@ -361,9 +375,9 @@ public class ContractServiceImpl implements ContractService {
             unregisteredTenantUpdate.setBirthday(contractDto.getUnregisteredTenant().getBirthday());
             unregisteredTenantUpdate.setCccdFrontUrl(contractDto.getUnregisteredTenant().getCccdFrontUrl());
             unregisteredTenantUpdate.setCccdBackUrl(contractDto.getUnregisteredTenant().getCccdBackUrl());
-            unregisteredTenantUpdate.setStatus(UnregisteredTenants.Status.ACTIVE); // Gán trạng thái mặc định
+            unregisteredTenantUpdate.setStatus(UnregisteredTenants.Status.ACTIVE);
             Address address = new Address();
-            address.setStreet(contractDto.getUnregisteredTenant().getAddress().getStreet());
+            address.setStreet(contractDto.getUnregisteredTenant().getStreet());
             unregisteredTenantUpdate.setAddress(address);
             unregisteredTenantsRepository.save(unregisteredTenantUpdate);
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
