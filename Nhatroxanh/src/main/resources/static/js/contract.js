@@ -2,6 +2,8 @@
 window.NhaTroContract = {
   currentTab: "tenantInfo",
   zoomLevel: 1,
+  residents: [],
+  contractTerms: [], // New array to store individual terms
 
   init() {
     // Kiểm tra các phần tử select cần thiết
@@ -13,11 +15,13 @@ window.NhaTroContract = {
     }
 
     this.setupEventListeners()
+    this.setupTermsManagement() // New setup for terms management
     this.setCurrentDate()
     this.updateAllPreview()
     this.setupAmenityModal()
     this.setupCustomerModal()
-    this.setupResidentModal() // FIX: Thêm setup cho resident modal
+    this.setupResidentModal()
+    this.initializePreviewUpdates()
     return this.loadProvinces()
       .then(() => {
         console.log("Provinces loaded")
@@ -50,6 +54,424 @@ window.NhaTroContract = {
       })
   },
 
+  // New method to setup terms management
+  setupTermsManagement() {
+    const addTermBtn = document.getElementById("btn-add-term")
+    const newTermInput = document.getElementById("new-term-input")
+
+    if (addTermBtn) {
+      addTermBtn.addEventListener("click", () => {
+        this.addNewTerm()
+      })
+    }
+
+    if (newTermInput) {
+      // Allow adding term with Enter key (Ctrl+Enter for new line)
+      newTermInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.ctrlKey && !e.shiftKey) {
+          e.preventDefault()
+          this.addNewTerm()
+        }
+      })
+    }
+  },
+
+  // New method to add a term
+  addNewTerm() {
+    const newTermInput = document.getElementById("new-term-input")
+    const termText = newTermInput.value.trim()
+
+    if (!termText) {
+      this.showNotification("Vui lòng nhập nội dung điều khoản", "warning")
+      newTermInput.focus()
+      return
+    }
+
+    // Add term to array
+    const newTerm = {
+      id: Date.now(),
+      text: termText,
+      order: this.contractTerms.length + 1,
+    }
+
+    this.contractTerms.push(newTerm)
+
+    // Clear input
+    newTermInput.value = ""
+
+    // Update UI
+    this.updateTermsList()
+    this.updateTermsPreview()
+    this.updateTermsCount()
+
+    // Show success message
+    this.showNotification(`Đã thêm điều khoản thứ ${newTerm.order}`, "success")
+
+    // Focus back to input for easy adding more terms
+    newTermInput.focus()
+  },
+
+  // New method to update terms list in UI
+  updateTermsList() {
+    const termsList = document.getElementById("terms-list")
+    const emptyMessage = document.getElementById("empty-terms-message")
+
+    if (this.contractTerms.length === 0) {
+      emptyMessage.style.display = "block"
+      return
+    }
+
+    emptyMessage.style.display = "none"
+
+    // Clear existing terms (except empty message)
+    const existingTerms = termsList.querySelectorAll(".term-item")
+    existingTerms.forEach((term) => term.remove())
+
+    // Add all terms
+    this.contractTerms.forEach((term, index) => {
+      const termElement = this.createTermElement(term, index + 1)
+      termsList.appendChild(termElement)
+    })
+  },
+
+  // New method to create term element
+  createTermElement(term, displayOrder) {
+    const termDiv = document.createElement("div")
+    termDiv.className = "term-item"
+    termDiv.dataset.termId = term.id
+
+    termDiv.innerHTML = `
+      <div class="term-content">
+        <span class="term-number">${displayOrder}.</span>
+        <span class="term-text">${this.escapeHtml(term.text)}</span>
+      </div>
+      <div class="term-actions">
+        <button type="button" class="btn btn-outline-primary btn-term-action" 
+                onclick="NhaTroContract.editTerm(${term.id})" title="Sửa điều khoản">
+          <i class="fa fa-edit"></i>
+        </button>
+        <button type="button" class="btn btn-outline-danger btn-term-action" 
+                onclick="NhaTroContract.removeTerm(${term.id})" title="Xóa điều khoản">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    `
+
+    return termDiv
+  },
+
+  // New method to edit term
+  editTerm(termId) {
+    const term = this.contractTerms.find((t) => t.id === termId)
+    if (!term) return
+
+    const newText = prompt("Sửa điều khoản:", term.text)
+    if (newText !== null && newText.trim() !== "") {
+      term.text = newText.trim()
+      this.updateTermsList()
+      this.updateTermsPreview()
+      this.showNotification("Đã cập nhật điều khoản", "success")
+    }
+  },
+
+  // New method to remove term
+  removeTerm(termId) {
+    const term = this.contractTerms.find((t) => t.id === termId)
+    if (!term) return
+
+    if (
+      confirm(
+        `Bạn có chắc chắn muốn xóa điều khoản: "${term.text.substring(0, 50)}${term.text.length > 50 ? "..." : ""}"?`,
+      )
+    ) {
+      this.contractTerms = this.contractTerms.filter((t) => t.id !== termId)
+
+      // Reorder remaining terms
+      this.contractTerms.forEach((t, index) => {
+        t.order = index + 1
+      })
+
+      this.updateTermsList()
+      this.updateTermsPreview()
+      this.updateTermsCount()
+      this.showNotification("Đã xóa điều khoản", "info")
+    }
+  },
+
+  // New method to update terms count
+  updateTermsCount() {
+    const termsCount = document.getElementById("terms-count")
+    if (termsCount) {
+      termsCount.textContent = this.contractTerms.length
+    }
+  },
+
+  // New method to update terms preview
+  updateTermsPreview() {
+    const previewTermsList = document.getElementById("preview-terms-list")
+
+    if (!previewTermsList) return
+
+    if (this.contractTerms.length === 0) {
+      previewTermsList.innerHTML = '<p class="text-muted fst-italic">Chưa có điều khoản nào được thêm</p>'
+      return
+    }
+
+    let termsHtml = ""
+    this.contractTerms.forEach((term, index) => {
+      termsHtml += `<p><strong>6.${index + 1}.</strong> ${this.escapeHtml(term.text)}</p>`
+    })
+
+    previewTermsList.innerHTML = termsHtml
+  },
+
+  // Helper method to escape HTML
+  escapeHtml(text) {
+    const div = document.createElement("div")
+    div.textContent = text
+    return div.innerHTML
+  },
+
+  // Add preview updates initialization
+  initializePreviewUpdates() {
+    // Update preview when payment method changes
+    document.getElementById("payment-method")?.addEventListener("change", (e) => {
+      this.updatePaymentMethodPreview(e.target.value)
+    })
+
+    // Add form field listeners for real-time preview updates
+    this.addFormFieldListeners()
+  },
+
+  // Add resident to preview functionality
+  addResidentToPreview() {
+    const residentName = document.getElementById("resident-name")?.value
+    const residentBirthYear = document.getElementById("resident-birth-year")?.value
+    const residentPhone = document.getElementById("resident-phone")?.value
+    const residentId = document.getElementById("resident-id")?.value
+
+    if (residentName && residentBirthYear) {
+      // Add to residents array
+      const resident = {
+        name: residentName,
+        birthYear: residentBirthYear,
+        phone: residentPhone || "",
+        id: residentId || "",
+      }
+
+      this.residents.push(resident)
+
+      // Update residents count
+      const residentsCount = document.getElementById("residents-count")
+      if (residentsCount) {
+        residentsCount.textContent = this.residents.length
+      }
+
+      // Update preview
+      this.updateResidentsPreview()
+    }
+  },
+
+  // Update residents in preview
+  updateResidentsPreview() {
+    const previewSection = document.getElementById("preview-residents-section")
+    const previewResidents = document.getElementById("preview-residents")
+
+    if (this.residents.length > 0) {
+      if (previewSection) previewSection.style.display = "block"
+
+      const residentsText = this.residents
+        .map((resident) => {
+          let info = resident.name
+          if (resident.birthYear) info += ` (${resident.birthYear})`
+          if (resident.phone) info += ` - SĐT: ${resident.phone}`
+          if (resident.id) info += ` - CCCD: ${resident.id}`
+          return info
+        })
+        .join("; ")
+
+      if (previewResidents) {
+        previewResidents.textContent = residentsText
+      }
+    } else {
+      if (previewSection) previewSection.style.display = "none"
+    }
+  },
+
+  // Update payment method in preview
+  updatePaymentMethodPreview(paymentMethod) {
+    const previewElement = document.getElementById("preview-payment-method")
+    if (previewElement) {
+      let methodText = ""
+      switch (paymentMethod) {
+        case "cash":
+          methodText = "tiền mặt"
+          break
+        case "transfer":
+          methodText = "chuyển khoản"
+          break
+        default:
+          methodText = "........................"
+      }
+      previewElement.textContent = methodText
+    }
+  },
+
+  // Add comprehensive form field listeners
+  addFormFieldListeners() {
+    // Update tenant info in preview
+    document.getElementById("tenant-name")?.addEventListener("input", (e) => {
+      const previewName = document.getElementById("preview-tenant-name")
+      const previewSignature = document.getElementById("preview-tenant-signature")
+      const value = e.target.value || "........................"
+      if (previewName) previewName.textContent = value
+      if (previewSignature) previewSignature.textContent = value
+    })
+
+    document.getElementById("tenant-phone")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-tenant-phone")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("tenant-dob")?.addEventListener("change", (e) => {
+      const preview = document.getElementById("preview-tenant-dob")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("tenant-id")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-tenant-id")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("tenant-id-date")?.addEventListener("change", (e) => {
+      const preview = document.getElementById("preview-tenant-id-date")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("tenant-id-place")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-tenant-id-place")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    // Update address preview
+    const updateTenantAddress = () => {
+      const street = document.getElementById("tenant-street")?.value || ""
+      const wardSelect = document.getElementById("tenant-ward")
+      const districtSelect = document.getElementById("tenant-district")
+      const provinceSelect = document.getElementById("tenant-province")
+
+      const ward = wardSelect?.selectedOptions[0]?.text || ""
+      const district = districtSelect?.selectedOptions[0]?.text || ""
+      const province = provinceSelect?.selectedOptions[0]?.text || ""
+
+      const addressParts = [street, ward, district, province].filter(
+        (item) => item && item !== "Chọn Tỉnh/Thành phố" && item !== "Chọn Quận/Huyện" && item !== "Chọn Phường/Xã",
+      )
+
+      const address = addressParts.join(", ")
+      const preview = document.getElementById("preview-tenant-address")
+      if (preview) preview.textContent = address || "........................"
+    }
+
+    document.getElementById("tenant-street")?.addEventListener("input", updateTenantAddress)
+    document.getElementById("tenant-ward")?.addEventListener("change", updateTenantAddress)
+    document.getElementById("tenant-district")?.addEventListener("change", updateTenantAddress)
+    document.getElementById("tenant-province")?.addEventListener("change", updateTenantAddress)
+
+    // Update contract terms in preview
+    document.getElementById("rent-price")?.addEventListener("input", (e) => {
+      const price = e.target.value ? new Intl.NumberFormat("vi-VN").format(e.target.value) : "........................"
+      const preview = document.getElementById("preview-rent")
+      if (preview) preview.textContent = price
+    })
+
+    document.getElementById("payment-date")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-payment-date")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("contract-duration")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-duration")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    document.getElementById("start-date")?.addEventListener("change", (e) => {
+      const preview = document.getElementById("preview-start-date")
+      if (preview) preview.textContent = e.target.value || "........................"
+
+      // Calculate end date
+      if (e.target.value) {
+        const startDate = new Date(e.target.value)
+        const duration = Number.parseInt(document.getElementById("contract-duration")?.value || 0)
+        if (duration > 0) {
+          const endDate = new Date(startDate)
+          endDate.setMonth(endDate.getMonth() + duration)
+          const endPreview = document.getElementById("preview-end-date")
+          if (endPreview) endPreview.textContent = endDate.toISOString().split("T")[0]
+        }
+      }
+    })
+
+    document.getElementById("deposit-months")?.addEventListener("input", (e) => {
+      const months = e.target.value || 0
+      const rentPrice = document.getElementById("rent-price")?.value || 0
+      const deposit = months * rentPrice
+
+      const monthsPreview = document.getElementById("preview-deposit-months")
+      const depositPreview = document.getElementById("preview-deposit")
+
+      if (monthsPreview) monthsPreview.textContent = months
+      if (depositPreview) {
+        depositPreview.textContent = deposit
+          ? new Intl.NumberFormat("vi-VN").format(deposit)
+          : "........................"
+      }
+    })
+
+    document.getElementById("contract-date")?.addEventListener("change", (e) => {
+      const preview = document.getElementById("preview-sign-date")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    // Update room info in preview
+    document.getElementById("roomId")?.addEventListener("change", (e) => {
+      const selectedOption = e.target.selectedOptions[0]
+      if (selectedOption) {
+        const roomText = selectedOption.text
+        // Extract room info from the option text
+        const roomMatch = roomText.match(/^(.+?)\s*$$(.+)$$$/)
+        if (roomMatch) {
+          const roomNumberPreview = document.getElementById("preview-room-number")
+          const roomAddressPreview = document.getElementById("preview-room-address")
+          if (roomNumberPreview) roomNumberPreview.textContent = roomMatch[1]
+          if (roomAddressPreview) roomAddressPreview.textContent = roomMatch[2]
+        }
+      }
+    })
+
+    document.getElementById("room-area")?.addEventListener("input", (e) => {
+      const preview = document.getElementById("preview-room-area")
+      if (preview) preview.textContent = e.target.value || "........................"
+    })
+
+    // Update amenities preview
+    const updateAmenitiesPreview = () => {
+      const amenities = []
+      document.querySelectorAll('#amenities-list-host input[type="checkbox"]:checked').forEach((checkbox) => {
+        const label = document.querySelector(`label[for="${checkbox.id}"]`)
+        if (label) {
+          amenities.push(label.textContent)
+        }
+      })
+      const preview = document.getElementById("preview-amenities")
+      if (preview) preview.textContent = amenities.join(", ") || "........................"
+    }
+
+    document.querySelectorAll('#amenities-list-host input[type="checkbox"]').forEach((checkbox) => {
+      checkbox.addEventListener("change", updateAmenitiesPreview)
+    })
+  },
+
   safeEncodeURL(value) {
     try {
       return encodeURIComponent(value).replace(/%25/g, "%")
@@ -58,6 +480,7 @@ window.NhaTroContract = {
       return value
     }
   },
+
   normalizeName(name) {
     if (!name) return ""
     return name
@@ -1036,6 +1459,7 @@ window.NhaTroContract = {
     this.calculateDeposit()
     this.updatePaymentMethod()
     this.updateAmenities()
+    this.updateTermsPreview() // Add this line to update terms preview
   },
 
   updatePreviewField(inputId, previewId) {
@@ -1227,6 +1651,12 @@ window.NhaTroContract = {
     const formData = new FormData(form)
     formData.append("tenantType", document.getElementById("tenantType")?.value || "REGISTERED")
 
+    // Add contract terms to form data
+    if (this.contractTerms.length > 0) {
+      const termsText = this.contractTerms.map((term, index) => `${index + 1}. ${term.text}`).join("\n")
+      formData.append("contractTerms", termsText)
+    }
+
     fetch("/api/contracts", {
       method: "POST",
       body: formData,
@@ -1291,7 +1721,10 @@ window.NhaTroContract = {
       return
     }
 
-    // Thêm resident vào danh sách
+    // Add to residents array for preview
+    this.addResidentToPreview()
+
+    // Thêm resident vào danh sách UI
     this.addResidentToList({
       name: residentName,
       birthYear: residentBirthYear,
@@ -1352,6 +1785,13 @@ window.NhaTroContract = {
     const residentName = residentElement.querySelector("h6").textContent
 
     if (confirm(`Bạn có chắc chắn muốn xóa người ở "${residentName}"?`)) {
+      // Remove from residents array
+      const residentIndex = this.residents.findIndex((r) => r.name === residentName)
+      if (residentIndex > -1) {
+        this.residents.splice(residentIndex, 1)
+        this.updateResidentsPreview()
+      }
+
       residentElement.remove()
       this.updateResidentsCount()
       this.showNotification(`Đã xóa người ở "${residentName}"`, "info")
@@ -1656,7 +2096,6 @@ window.NhaTroContract = {
       { input: "payment-date", preview: "preview-payment-date" },
       { input: "contract-duration", preview: "preview-duration" },
       { input: "deposit-months", preview: "preview-deposit-months" },
-      { input: "terms-conditions", preview: "preview-terms" },
     ]
 
     previewFields.forEach((field) => {
