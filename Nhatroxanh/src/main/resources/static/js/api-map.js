@@ -9,10 +9,87 @@ class VietnamAddressAPI {
     }
 
     async init() {
-        await this.loadProvinces();
-        this.setupEventListeners();
-        this.setInitialAddressFromForm();
+    await this.loadProvinces();
+    this.setupEventListeners();
+    await this.setInitialAddressFromForm(); 
+}
+    async setInitialAddressFromForm() {
+    const fullAddressHost = document.getElementById("fullAddressHost");
+    if (!fullAddressHost) return;
+
+    const initialAddress = fullAddressHost.value.trim();
+    if (!initialAddress) return;
+
+    const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
+    const normalize = (text) => text.toLowerCase()
+        .replace("tỉnh", "")
+        .replace("thành phố", "")
+        .replace("huyện", "")
+        .replace("quận", "")
+        .replace("thị xã", "")
+        .replace("xã", "")
+        .replace("phường", "")
+        .replace("thị trấn", "")
+        .trim();
+
+    const provinceSelect = document.getElementById("provinceHost");
+    const districtSelect = document.getElementById("districtHost");
+    const wardSelect = document.getElementById("wardHost");
+    const houseNumberInput = document.getElementById("houseNumberHost");
+    const streetInput = document.getElementById("streetHost");
+
+    // Step 1: Tỉnh/Thành phố
+    if (parts.length >= 4) {
+        const provinceName = parts[3];
+        const provinceOption = Array.from(provinceSelect.options).find(opt =>
+            normalize(opt.textContent) === normalize(provinceName)
+        );
+        if (provinceOption) {
+            provinceOption.selected = true;
+            await this.loadDistricts(provinceOption.value); // CHỜ load huyện xong
+        }
     }
+
+    // Step 2: Quận/Huyện
+    if (parts.length >= 3) {
+        const districtName = parts[2];
+        const districtOption = Array.from(districtSelect.options).find(opt =>
+            normalize(opt.textContent) === normalize(districtName)
+        );
+        if (districtOption) {
+            districtOption.selected = true;
+            await this.loadWards(districtOption.value); // CHỜ load xã xong
+        }
+    }
+
+    // Step 3: Phường/Xã
+    if (parts.length >= 2) {
+        const wardName = parts[1];
+        const wardOption = Array.from(wardSelect.options).find(opt =>
+            normalize(opt.textContent) === normalize(wardName)
+        );
+        if (wardOption) {
+            wardOption.selected = true;
+        }
+    }
+
+    // Step 4: Số nhà và đường
+    if (parts.length >= 1) {
+        const addressPart = parts[0].trim();
+        const firstSpaceIndex = addressPart.indexOf(" ");
+        if (firstSpaceIndex > 0) {
+            houseNumberInput.value = addressPart.substring(0, firstSpaceIndex).trim();
+            streetInput.value = addressPart.substring(firstSpaceIndex + 1).trim();
+        } else {
+            houseNumberInput.value = addressPart;
+            streetInput.value = "";
+        }
+    }
+
+    // Cập nhật lại địa chỉ đầy đủ sau khi set xong
+    this.updateFullAddress();
+}
+
 
     async loadProvinces() {
         try {
@@ -26,15 +103,16 @@ class VietnamAddressAPI {
         }
     }
 
-    async loadDistricts(provinceCode) {
+        async loadDistricts(provinceCode) {
+        console.log("Đang tải quận/huyện với mã tỉnh:", provinceCode); 
         try {
             const response = await fetch(`${this.baseURL}/p/${provinceCode}?depth=2`);
             const data = await response.json();
+            console.log("Danh sách quận/huyện:", data.districts); 
             this.districts = data.districts || [];
             this.populateDistricts();
         } catch (error) {
             console.error("Lỗi khi tải quận/huyện:", error);
-            this.showError("Không thể tải danh sách quận/huyện");
         }
     }
 
@@ -46,7 +124,6 @@ class VietnamAddressAPI {
             this.populateWards();
         } catch (error) {
             console.error("Lỗi khi tải phường/xã:", error);
-            this.showError("Không thể tải danh sách phường/xã");
         }
     }
 
@@ -59,14 +136,16 @@ class VietnamAddressAPI {
             option.textContent = province.name;
             provinceSelect.appendChild(option);
         });
-        // Đổ dữ liệu province khi sửa
         const fullAddressHost = document.getElementById("fullAddressHost");
         const initialAddress = fullAddressHost ? fullAddressHost.value.trim() : "";
         if (initialAddress) {
             const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
             if (parts.length >= 4) {
                 const [, , , province] = parts;
-                const provinceOption = Array.from(provinceSelect.options).find(opt => opt.textContent === province);
+                const normalize = (text) => text.toLowerCase().replace("tỉnh", "").replace("thành phố", "").trim();
+                const provinceOption = Array.from(provinceSelect.options).find(opt =>
+                    normalize(opt.textContent) === normalize(province)
+                );
                 if (provinceOption) {
                     provinceOption.selected = true;
                     provinceSelect.dispatchEvent(new Event("change"));
@@ -92,7 +171,9 @@ class VietnamAddressAPI {
             const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
             if (parts.length >= 3) {
                 const [, , district] = parts;
-                const districtOption = Array.from(districtSelect.options).find(opt => opt.textContent === district);
+                const districtOption = Array.from(districtSelect.options).find(opt =>
+                    normalize(opt.textContent) === normalize(district)
+                );
                 if (districtOption) {
                     districtOption.selected = true;
                     districtSelect.dispatchEvent(new Event("change"));
@@ -118,7 +199,9 @@ class VietnamAddressAPI {
             const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
             if (parts.length >= 2) {
                 const [, ward] = parts;
-                const wardOption = Array.from(wardSelect.options).find(opt => opt.textContent === ward);
+                const wardOption = Array.from(wardSelect.options).find(opt =>
+                    normalize(opt.textContent) === normalize(ward)
+                );
                 if (wardOption) {
                     wardOption.selected = true;
                 }
@@ -126,51 +209,6 @@ class VietnamAddressAPI {
         }
     }
 
-    setInitialAddressFromForm() {
-        const fullAddressHost = document.getElementById("fullAddressHost");
-        const initialAddress = fullAddressHost ? fullAddressHost.value.trim() : "";
-        if (initialAddress) {
-            const parts = initialAddress.split(",").map(part => part.trim()).filter(part => part.length > 0);
-            if (parts.length >= 4) {
-                const [, wardName, districtName, provinceName] = parts; // Lấy theo thứ tự từ cuối
-                const provinceSelect = document.getElementById("provinceHost");
-                const districtSelect = document.getElementById("districtHost");
-                const wardSelect = document.getElementById("wardHost");
-                const houseNumberInput = document.getElementById("houseNumberHost");
-                const streetInput = document.getElementById("streetHost");
-
-                // Chọn province
-                const provinceOption = Array.from(provinceSelect.options).find(opt => opt.textContent === provinceName);
-                if (provinceOption) {
-                    provinceOption.selected = true;
-                    provinceSelect.dispatchEvent(new Event("change")); // Tải districts
-                }
-
-                // Chờ districts tải xong
-                setTimeout(() => {
-                    const districtOption = Array.from(districtSelect.options).find(opt => opt.textContent === districtName);
-                    if (districtOption) {
-                        districtOption.selected = true;
-                        districtSelect.dispatchEvent(new Event("change")); // Tải wards
-                    }
-
-                    // Chờ wards tải xong
-                    setTimeout(() => {
-                        const wardOption = Array.from(wardSelect.options).find(opt => opt.textContent === wardName);
-                        if (wardOption) {
-                            wardOption.selected = true;
-                        }
-                    }, 500);
-                }, 500);
-
-                // Tách houseNumber và street
-                const addressPart = parts[0].trim();
-                const firstSpaceIndex = addressPart.indexOf(" ");
-                houseNumberInput.value = firstSpaceIndex > 0 ? addressPart.substring(0, firstSpaceIndex) : addressPart;
-                streetInput.value = firstSpaceIndex > 0 ? addressPart.substring(firstSpaceIndex + 1) : "";
-            }
-        }
-    }
     
     resetDistrictSelect() {
         const districtSelect = document.getElementById("districtHost");
@@ -260,11 +298,6 @@ class VietnamAddressAPI {
             if (errorDiv.parentNode) errorDiv.remove();
         }, 5000);
     }
-
-    setInitialAddressFromForm() {
-        // Logic này đã được xử lý trong populateProvinces, populateDistricts, populateWards
-    }
-
     getSelectedAddress() {
         const provinceSelect = document.getElementById("provinceHost");
         const districtSelect = document.getElementById("districtHost");
