@@ -54,4 +54,6 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
     @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId AND c.status = :status")
     List<Contracts> findByRoomIdAndStatus(@Param("roomId") Integer roomId, @Param("status") Contracts.Status status);
+
+    
 }

@@ -66,4 +66,5 @@ public interface UserService {
     // List<Users> getAllCustomers();
 
     Page<Users> getAllCustomers(int page, int size);
+    Optional<Users> findByEmail(String email);
 }

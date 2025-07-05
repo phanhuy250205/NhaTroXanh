@@ -42,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     // ---- PHẦN THAY ĐỔI ----
                     // 1. Thay đổi thông báo
-                    alert("Đăng ký thành công! Đang chuyển đến trang đăng nhập.");
+                  
                     // 2. Chuyển hướng thẳng đến trang đăng nhập của chủ trọ
                     window.location.href = '/dang-nhap-chu-tro'; 
                     // -----------------------

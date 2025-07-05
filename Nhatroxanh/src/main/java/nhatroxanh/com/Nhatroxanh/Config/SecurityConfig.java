@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
+                        .requestMatchers("/api/users/**","/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
                                 "/uploads/**")
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**")
@@ -63,7 +63,9 @@ public class SecurityConfig {
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .anyRequest().authenticated())
+                        
                 .formLogin(form -> form
+                
                         .loginPage("/dang-nhap-chu-tro")
                         // <<< SỬA: Đổi URL để tường minh và khớp với file JS
                         .loginProcessingUrl("/login-processing")

@@ -24,23 +24,21 @@ import java.util.List;
 
 @Repository
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> { 
-      @Query("SELECT c FROM Contracts c JOIN c.user u " +
-           // Thêm LEFT JOIN để không bị lỗi nếu khách chưa có thông tin CCCD
-           "LEFT JOIN u.userCccd ucccd " + 
-           "JOIN c.room r JOIN r.hostel h WHERE h.owner.userId = :ownerId " +
-           "AND (:hostelId IS NULL OR h.hostelId = :hostelId) " +
-           "AND (:status IS NULL OR c.status = :status) " +
-           "AND (LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "OR u.phone LIKE CONCAT('%', :keyword, '%') " +
-           // Tìm kiếm trên bảng user_cccd
-           "OR ucccd.cccdNumber LIKE CONCAT('%', :keyword, '%'))")
+    @Query("SELECT c FROM Contracts c " +
+           "WHERE c.owner.userId = :ownerId " +
+           "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) " +
+           "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
+           "AND (:status IS NULL OR c.status = :status)")
     Page<Contracts> findTenantsByOwnerWithFilters(
         @Param("ownerId") Integer ownerId,
         @Param("keyword") String keyword,
         @Param("hostelId") Integer hostelId,
-        @Param("status") Boolean status,
-        Pageable pageable 
+        @Param("status") Contracts.Status status,
+        Pageable pageable
     );
+
+    @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId")
+    List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
       
 

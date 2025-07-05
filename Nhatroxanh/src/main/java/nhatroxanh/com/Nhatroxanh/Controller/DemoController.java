@@ -13,8 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
@@ -31,7 +34,9 @@ public class DemoController {
      @Autowired
      private TenantService tenantService;
      @Autowired
-    private HostelRepository hostelRepository;
+     private HostelRepository hostelRepository;
+     @Autowired
+    private ContractService contractService;
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -65,9 +70,37 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/lich-su-thue")
-    public String LsThuetra() {
-        return "host/LS-thue-tra-host";
-    }
+public String showRentalHistory(
+    Model model,
+    @AuthenticationPrincipal CustomUserDetails loggedInUser,
+    @RequestParam(name = "page", defaultValue = "0") int page,
+    @RequestParam(name = "keyword", required = false) String keyword,
+    @RequestParam(name = "hostelId", required = false) Integer selectedHostelId) {
+
+    Integer ownerId = loggedInUser.getUserId();
+
+    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+        ownerId,
+        keyword,
+        selectedHostelId,
+        Contracts.Status.INACTIVE, // ✅ chỉ lấy hợp đồng đã trả
+        PageRequest.of(page, 10)
+    );
+
+    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+
+    model.addAttribute("tenants", tenantPage.getContent());
+    model.addAttribute("totalPages", tenantPage.getTotalPages());
+    model.addAttribute("currentPage", tenantPage.getNumber());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("selectedHostelId", selectedHostelId);
+    model.addAttribute("hostels", ownerHostels);
+    model.addAttribute("isHistoryPage", true); // optional
+
+    return "host/LS-thue-tra-host";
+}
+
+
 
     @GetMapping("/chu-tro/thanh-toan")
     public String Thanhtoan() {
@@ -94,27 +127,39 @@ public class DemoController {
     //     return "host/tong-quan";
     // }
 
-  @GetMapping("/chu-tro/khach-thue") 
-    public String khachthue(Model model,
-                                @RequestParam(defaultValue = "") String keyword,
-                                @RequestParam(required = false) Integer hostelId,
-                                @RequestParam(required = false) Boolean status,
-                                @RequestParam(defaultValue = "0") int page,
-                                @RequestParam(defaultValue = "10") int size) {
-        
-        Page<TenantInfoDTO> tenantPage = tenantService.findAllForTesting(PageRequest.of(page, size));
-        List<Hostel> hostels = hostelRepository.findAll();
+    @GetMapping("/chu-tro/khach-thue")
+public String showTenantManagementPage(
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails loggedInUser,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "hostelId", required = false) Integer selectedHostelId) {
 
-        model.addAttribute("tenants", tenantPage.getContent());
-        model.addAttribute("hostels", hostels);
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", tenantPage.getTotalPages());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("selectedHostelId", hostelId);
-        model.addAttribute("selectedStatus", status);
+    Integer ownerId = loggedInUser.getUserId();
 
-        return "host/quan-ly-khach-thue"; // Tên file HTML danh sách
-    }
+    // Lấy danh sách khách đang thuê
+    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+        ownerId,
+        keyword,
+        selectedHostelId,
+        Contracts.Status.ACTIVE, // 👉 chỉ lấy hợp đồng đang thuê
+        PageRequest.of(page, 10)
+    );
+
+    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+
+    model.addAttribute("tenants", tenantPage.getContent());
+    model.addAttribute("totalPages", tenantPage.getTotalPages());
+    model.addAttribute("currentPage", tenantPage.getNumber());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("selectedHostelId", selectedHostelId);
+    model.addAttribute("hostels", ownerHostels);
+    model.addAttribute("selectedStatus", true); // nếu muốn gửi sang để giữ trạng thái filter
+
+    return "host/quan-ly-khach-thue";
+}
+
+
 
     // @GetMapping("/chu-tro/dang-tin")
     // public String dangtin() {
@@ -142,7 +187,18 @@ public class DemoController {
             // (Bạn có thể tạo một trang lỗi riêng nếu muốn)
             return "redirect:/chu-tro/khach-thue";
         }
+        
     }
+
+    private Integer getCurrentOwnerId() {
+    String email = org.springframework.security.core.context.SecurityContextHolder
+        .getContext().getAuthentication().getName();
+
+    return userService.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
+        .getUserId();
+}
+    
     
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {

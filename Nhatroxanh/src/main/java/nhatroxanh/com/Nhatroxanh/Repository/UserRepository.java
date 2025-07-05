@@ -52,5 +52,5 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
                 WHERE u.userId IN :userIds
             """)
     List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
-
+    
 }

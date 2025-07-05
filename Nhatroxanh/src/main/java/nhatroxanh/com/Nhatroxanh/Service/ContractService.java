@@ -48,4 +48,7 @@ public interface ContractService {
     Float getTotalRevenueByOwnerId(Integer ownerId);
 
     List<Contracts> findContractsByOwnerCccd(String cccd);
+
+
+    List<Contracts> getMyContracts();
 }
