@@ -618,7 +618,7 @@
                                     <label class="form-label">
                                         Giá thuê hàng tháng (VND) <span class="text-danger">*</span>
                                     </label>
-                                    <input type="number" class="form-control" id="rent-price" required min="1"
+                                    <input type="number" class="form-control" id="rent-price"  name="terms.price" th:field="*{terms.price}" required min="1"
                                            placeholder="Nhập giá thuê">
                                 </div>
 
@@ -662,7 +662,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label">Đặt cọc trước</label>
                                     <div class="input-group">
-                                        <input type="number" class="form-control" value="2" id="deposit-months"
+                                        <input type="number" class="form-control" name="terms.deposit" th:field="*{terms.deposit}"  value="2" id="deposit-months"
                                                min="0">
                                         <span class="input-group-text">tháng tiền nhà</span>
                                     </div>

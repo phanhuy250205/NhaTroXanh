@@ -35,7 +35,7 @@ public class Vouchers {
     @JoinColumn(name = "room_id", nullable = false)
     private Rooms room;
     @ManyToOne
-    @JoinColumn(name = "hostel_id", nullable = false)
+    @JoinColumn(name = "hostel_id", nullable = true) // Cho phép null tạm thời
     private Hostel hostel;
 
     @Column(name = "title", nullable = false, length = 255)

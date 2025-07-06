@@ -51,66 +51,91 @@ public class ContractServiceImpl implements ContractService {
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
             Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant, Integer duration) throws Exception {
-        logger.info("Creating new contract for tenant with phone: {}", tenantPhone);
+        logger.info("=== START CREATE CONTRACT ===");
+        logger.info("Creating new contract for tenant phone: {}", tenantPhone);
+        logger.info("Input parameters - roomId: {}, contractDate: {}, startDate: {}, endDate: {}, price: {}, deposit: {}, duration: {}, status: {}",
+                roomId, contractDate, startDate, endDate, price, deposit, duration, status);
 
         // Validate inputs
         if (tenantPhone == null || tenantPhone.trim().isEmpty()) {
             logger.error("Tenant phone is null or empty");
             throw new IllegalArgumentException("Số điện thoại khách thuê không được để trống!");
         }
+        logger.info("Tenant phone validated: {}", tenantPhone);
+
         if (roomId == null || roomId <= 0) {
             logger.error("Invalid room ID: {}", roomId);
             throw new IllegalArgumentException("ID phòng không hợp lệ!");
         }
+        logger.info("Room ID validated: {}", roomId);
+
         if (contractDate == null) {
             logger.error("Contract date is null");
             throw new IllegalArgumentException("Ngày lập hợp đồng không được null!");
         }
+        logger.info("Contract date validated: {}", contractDate);
+
         if (startDate == null || endDate == null) {
-            logger.error("Start date or end date is null");
+            logger.error("Start date or end date is null, startDate: {}, endDate: {}", startDate, endDate);
             throw new IllegalArgumentException("Ngày bắt đầu và kết thúc không được null!");
         }
+        logger.info("Start and end dates validated: {}, {}", startDate, endDate);
+
         if (price == null || price <= 0) {
             logger.error("Invalid price: {}", price);
             throw new IllegalArgumentException("Giá thuê phải lớn hơn 0!");
         }
+        logger.info("Price validated: {}", price);
+
         if (deposit == null || deposit < 0) {
             logger.error("Invalid deposit: {}", deposit);
             throw new IllegalArgumentException("Tiền đặt cọc phải lớn hơn hoặc bằng 0!");
         }
+        logger.info("Deposit validated: {}", deposit);
+
         if (terms != null && terms.length() > 255) {
-            logger.error("Terms too long");
+            logger.error("Terms too long: {}", terms.length());
             throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
         }
+        logger.info("Terms validated: {}", terms);
+
         if (tenant == null && unregisteredTenant == null) {
             logger.error("No tenant or unregistered tenant provided");
             throw new IllegalArgumentException("Phải cung cấp thông tin người thuê (đã đăng ký hoặc chưa đăng ký)!");
         }
+        logger.info("Tenant/unregisteredTenant provided: tenant={}, unregisteredTenant={}", tenant != null, unregisteredTenant != null);
+
         if (duration != null && duration <= 0) {
             logger.error("Invalid duration: {}", duration);
             throw new IllegalArgumentException("Thời hạn hợp đồng phải lớn hơn 0!");
         }
+        logger.info("Duration validated: {}", duration);
 
         // Find owner
+        logger.info("Searching for owner with CCCD: {}", ownerCccd);
         Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByCccdNumber(ownerCccd);
         Users owner = ownerCccdOpt.map(UserCccd::getUser)
                 .orElseThrow(() -> {
                     logger.error("Owner not found with CCCD: {}", ownerCccd);
                     return new IllegalArgumentException("Chủ trọ không tồn tại!");
                 });
+        logger.info("Owner found: {}", owner.getFullname());
         if (owner.getRole() != Users.Role.OWNER) {
             logger.error("User with CCCD {} is not an owner", ownerCccd);
             throw new IllegalArgumentException("Người dùng không phải là chủ trọ!");
         }
 
         // Find room
+        logger.info("Searching for room with ID: {}", roomId);
         Rooms room = roomRepository.findById(roomId)
                 .orElseThrow(() -> {
                     logger.error("Room not found: {}", roomId);
                     return new IllegalArgumentException("Phòng không tồn tại!");
                 });
+        logger.info("Room found: {}", room.getNamerooms());
 
         // Check for active contract on room
+        logger.info("Checking for active contract on room ID: {}", roomId);
         Optional<Contracts> activeContract = contractRepository.findActiveContractByRoomId(roomId, Contracts.Status.ACTIVE);
         if (activeContract.isPresent()) {
             logger.error("Room {} has an active contract", roomId);
@@ -118,6 +143,8 @@ public class ContractServiceImpl implements ContractService {
         }
 
         // Create contract
+        logger.info("Building new contract entity");
+        System.out.println("STATUS: " + status);
         Contracts contract = Contracts.builder()
                 .tenantPhone(tenantPhone)
                 .contractDate(contractDate)
@@ -130,76 +157,101 @@ public class ContractServiceImpl implements ContractService {
                 .status(status)
                 .owner(owner)
                 .room(room)
-                .duration(Float.valueOf(duration))
+                .duration(duration != null ? Float.valueOf(duration) : null)
                 .build();
+        logger.info("Contract entity built: {}", contract);
 
         // Handle tenant
         if (unregisteredTenant != null) {
+            logger.info("Handling unregistered tenant: {}", unregisteredTenant.getFullName());
             if (unregisteredTenant.getStatus() == null) {
                 unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
             }
             unregisteredTenantsRepository.save(unregisteredTenant);
             contract.setUnregisteredTenant(unregisteredTenant);
             contract.setTenant(null);
+            logger.info("Unregistered tenant saved and set to contract");
         } else if (tenant != null) {
+            logger.info("Handling registered tenant: {}", tenant.getFullname());
             if (tenant.getRole() != Users.Role.CUSTOMER) {
                 logger.error("User with ID {} is not a customer", tenant.getUserId());
                 throw new IllegalArgumentException("Người dùng không phải là khách thuê!");
             }
             contract.setTenant(tenant);
+            logger.info("Registered tenant set to contract");
         }
 
+        logger.info("Saving contract to repository");
         Contracts savedContract = contractRepository.save(contract);
         logger.info("Contract created successfully: {}", savedContract.getContractId());
+        logger.info("=== END CREATE CONTRACT ===");
         return savedContract;
     }
 
     @Override
     @Transactional
     public Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception {
+        logger.info("=== START CREATE CONTRACT FROM DTO ===");
         logger.info("Creating new contract from DTO with tenant type: {}", contractDto.getTenantType());
+        logger.info("Contract DTO received: {}", contractDto);
 
         // Validate DTO
         if (contractDto.getTenantType() == null || (!"REGISTERED".equals(contractDto.getTenantType()) && !"UNREGISTERED".equals(contractDto.getTenantType()))) {
             logger.error("Invalid tenant type: {}", contractDto.getTenantType());
             throw new IllegalArgumentException("Loại người thuê không hợp lệ!");
         }
+        logger.info("Tenant type validated: {}", contractDto.getTenantType());
+
         if (contractDto.getContractDate() == null) {
             logger.error("Contract date is null");
             throw new IllegalArgumentException("Ngày lập hợp đồng không được null!");
         }
+        logger.info("Contract date validated: {}", contractDto.getContractDate());
+
         if (contractDto.getTerms().getStartDate() == null || contractDto.getTerms().getEndDate() == null) {
-            logger.error("Start date or end date is null");
+            logger.error("Start date or end date is null, startDate: {}, endDate: {}", contractDto.getTerms().getStartDate(), contractDto.getTerms().getEndDate());
             throw new IllegalArgumentException("Ngày bắt đầu và kết thúc không được null!");
         }
+        logger.info("Start and end dates validated: {}, {}", contractDto.getTerms().getStartDate(), contractDto.getTerms().getEndDate());
+
         if (contractDto.getTerms().getPrice() == null || contractDto.getTerms().getPrice() <= 0) {
             logger.error("Invalid price: {}", contractDto.getTerms().getPrice());
             throw new IllegalArgumentException("Giá thuê phải lớn hơn 0!");
         }
+        logger.info("Price validated: {}", contractDto.getTerms().getPrice());
+
         if (contractDto.getTerms().getDeposit() == null || contractDto.getTerms().getDeposit() < 0) {
             logger.error("Invalid deposit: {}", contractDto.getTerms().getDeposit());
             throw new IllegalArgumentException("Tiền đặt cọc phải lớn hơn hoặc bằng 0!");
         }
+        logger.info("Deposit validated: {}", contractDto.getTerms().getDeposit());
+
         if (contractDto.getTerms().getTerms() != null && contractDto.getTerms().getTerms().length() > 255) {
-            logger.error("Terms too long");
+            logger.error("Terms too long: {}", contractDto.getTerms().getTerms().length());
             throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
         }
+        logger.info("Terms validated: {}", contractDto.getTerms().getTerms());
+
         if (contractDto.getTerms().getDuration() != null && contractDto.getTerms().getDuration() <= 0) {
             logger.error("Invalid duration: {}", contractDto.getTerms().getDuration());
             throw new IllegalArgumentException("Thời hạn hợp đồng phải lớn hơn 0!");
         }
+        logger.info("Duration validated: {}", contractDto.getTerms().getDuration());
 
         // Find room
+        logger.info("Searching for room with name: {}", contractDto.getRoom().getRoomName());
         Integer roomId = roomRepository.findByRoomNumber(String.valueOf(contractDto.getRoom().getRoomName()))
                 .map(Rooms::getRoomId)
                 .orElseThrow(() -> {
                     logger.error("Room not found: {}", contractDto.getRoom().getRoomName());
                     return new IllegalArgumentException("Phòng không tồn tại!");
                 });
+        logger.info("Room ID found: {}", roomId);
 
         String tenantPhone = contractDto.getTenantType().equals("REGISTERED") ? contractDto.getTenant().getPhone() : contractDto.getUnregisteredTenant().getPhone();
+        logger.info("Tenant phone extracted: {}", tenantPhone);
 
-        return createContract(
+        Contracts contract = createContract(
                 tenantPhone,
                 roomId,
                 Date.valueOf(contractDto.getContractDate()),
@@ -213,12 +265,16 @@ public class ContractServiceImpl implements ContractService {
                 tenant,
                 unregisteredTenant,
                 contractDto.getTerms().getDuration());
+        logger.info("=== END CREATE CONTRACT FROM DTO ===");
+        return contract;
     }
 
     @Override
     @Transactional
     public Contracts updateContract(Integer contractId, Contracts updatedContract) throws Exception {
+        logger.info("=== START UPDATE CONTRACT ===");
         logger.info("Updating contract with ID: {}", contractId);
+        logger.info("Updated contract data: {}", updatedContract);
 
         if (contractId == null || contractId <= 0) {
             logger.error("Invalid contract ID: {}", contractId);
@@ -232,37 +288,43 @@ public class ContractServiceImpl implements ContractService {
         }
 
         Contracts contract = existingContract.get();
-        logger.debug("Current contract: {}", contract);
+        logger.info("Current contract: {}", contract);
 
         if (updatedContract.getTenantPhone() != null && !updatedContract.getTenantPhone().isEmpty()) {
             contract.setTenantPhone(updatedContract.getTenantPhone());
+            logger.info("Updated tenant phone: {}", updatedContract.getTenantPhone());
         }
         if (updatedContract.getContractDate() != null) {
             contract.setContractDate(updatedContract.getContractDate());
+            logger.info("Updated contract date: {}", updatedContract.getContractDate());
         } else {
             logger.error("Contract date is null for contract ID: {}", contractId);
             throw new IllegalArgumentException("Ngày lập hợp đồng không được null!");
         }
         if (updatedContract.getStartDate() != null) {
             contract.setStartDate(updatedContract.getStartDate());
+            logger.info("Updated start date: {}", updatedContract.getStartDate());
         } else {
             logger.error("Start date is null for contract ID: {}", contractId);
             throw new IllegalArgumentException("Ngày bắt đầu không được null!");
         }
         if (updatedContract.getEndDate() != null) {
             contract.setEndDate(updatedContract.getEndDate());
+            logger.info("Updated end date: {}", updatedContract.getEndDate());
         } else {
             logger.error("End date is null for contract ID: {}", contractId);
             throw new IllegalArgumentException("Ngày kết thúc không được null!");
         }
         if (updatedContract.getPrice() != null && updatedContract.getPrice() > 0) {
             contract.setPrice(updatedContract.getPrice());
+            logger.info("Updated price: {}", updatedContract.getPrice());
         } else {
             logger.error("Invalid price: {} for contract ID: {}", updatedContract.getPrice(), contractId);
             throw new IllegalArgumentException("Giá thuê phải lớn hơn 0!");
         }
         if (updatedContract.getDeposit() != null && updatedContract.getDeposit() >= 0) {
             contract.setDeposit(updatedContract.getDeposit());
+            logger.info("Updated deposit: {}", updatedContract.getDeposit());
         } else {
             logger.error("Invalid deposit: {} for contract ID: {}", updatedContract.getDeposit(), contractId);
             throw new IllegalArgumentException("Tiền đặt cọc phải lớn hơn hoặc bằng 0!");
@@ -273,23 +335,29 @@ public class ContractServiceImpl implements ContractService {
                 throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
             }
             contract.setTerms(updatedContract.getTerms());
+            logger.info("Updated terms: {}", updatedContract.getTerms());
         }
         if (updatedContract.getStatus() != null) {
             contract.setStatus(updatedContract.getStatus());
+            logger.info("Updated status: {}", updatedContract.getStatus());
         }
         if (updatedContract.getDuration() != null && updatedContract.getDuration() > 0) {
             contract.setDuration(updatedContract.getDuration());
+            logger.info("Updated duration: {}", updatedContract.getDuration());
         }
 
         if (updatedContract.getRoom() != null && updatedContract.getRoom().getRoomId() != null) {
+            logger.info("Updating room with ID: {}", updatedContract.getRoom().getRoomId());
             Rooms room = roomRepository.findById(updatedContract.getRoom().getRoomId())
                     .orElseThrow(() -> {
                         logger.error("Room not found: {}", updatedContract.getRoom().getRoomId());
                         return new IllegalArgumentException("Phòng không tồn tại!");
                     });
             contract.setRoom(room);
+            logger.info("Room updated: {}", room.getNamerooms());
         }
         if (updatedContract.getTenant() != null && updatedContract.getTenant().getUserId() != null) {
+            logger.info("Updating tenant with ID: {}", updatedContract.getTenant().getUserId());
             Users tenant = userRepository.findById(updatedContract.getTenant().getUserId())
                     .orElseThrow(() -> {
                         logger.error("Tenant not found: {}", updatedContract.getTenant().getUserId());
@@ -297,8 +365,10 @@ public class ContractServiceImpl implements ContractService {
                     });
             contract.setTenant(tenant);
             contract.setUnregisteredTenant(null);
+            logger.info("Tenant updated: {}", tenant.getFullname());
         }
         if (updatedContract.getUnregisteredTenant() != null && updatedContract.getUnregisteredTenant().getId() != null) {
+            logger.info("Updating unregistered tenant with ID: {}", updatedContract.getUnregisteredTenant().getId());
             UnregisteredTenants unregisteredTenantUpdate = unregisteredTenantsRepository.findById(updatedContract.getUnregisteredTenant().getId())
                     .orElseThrow(() -> {
                         logger.error("Unregistered tenant not found: {}", updatedContract.getUnregisteredTenant().getId());
@@ -310,34 +380,43 @@ public class ContractServiceImpl implements ContractService {
             }
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
             contract.setTenant(null);
+            logger.info("Unregistered tenant updated: {}", unregisteredTenantUpdate.getFullName());
         }
         if (updatedContract.getOwner() != null && updatedContract.getOwner().getUserId() != null) {
+            logger.info("Updating owner with ID: {}", updatedContract.getOwner().getUserId());
             Users owner = userRepository.findById(updatedContract.getOwner().getUserId())
                     .orElseThrow(() -> {
                         logger.error("Owner not found: {}", updatedContract.getOwner().getUserId());
                         return new Exception("Chủ trọ không tồn tại!");
                     });
             contract.setOwner(owner);
+            logger.info("Owner updated: {}", owner.getFullname());
         }
 
+        logger.info("Saving updated contract");
         Contracts savedContract = contractRepository.save(contract);
         logger.info("Contract updated successfully: {}", savedContract.getContractId());
+        logger.info("=== END UPDATE CONTRACT ===");
         return savedContract;
     }
 
     @Override
     @Transactional
     public Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception {
+        logger.info("=== START UPDATE CONTRACT FROM DTO ===");
         logger.info("Updating contract with ID: {} from DTO with tenant type: {}", contractId, contractDto.getTenantType());
+        logger.info("Contract DTO received: {}", contractDto);
 
         if (contractId == null || contractId <= 0) {
             logger.error("Invalid contract ID: {}", contractId);
             throw new IllegalArgumentException("ID hợp đồng không hợp lệ!");
         }
+
         if (contractDto.getTenantType() == null || (!"REGISTERED".equals(contractDto.getTenantType()) && !"UNREGISTERED".equals(contractDto.getTenantType()))) {
             logger.error("Invalid tenant type: {}", contractDto.getTenantType());
             throw new IllegalArgumentException("Loại người thuê không hợp lệ!");
         }
+        logger.info("Tenant type validated: {}", contractDto.getTenantType());
 
         Optional<Contracts> existingContract = contractRepository.findById(contractId);
         if (!existingContract.isPresent()) {
@@ -346,16 +425,36 @@ public class ContractServiceImpl implements ContractService {
         }
 
         Contracts contract = existingContract.get();
-        contract.setTenantPhone(contractDto.getTenantType().equals("REGISTERED") ? contractDto.getTenant().getPhone() : contractDto.getUnregisteredTenant().getPhone());
-        contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
-        contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
-        contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
-        contract.setPrice(contractDto.getTerms().getPrice().floatValue());
-        contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
-        contract.setTerms(contractDto.getTerms().getTerms());
-        contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
-        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+        logger.info("Current contract: {}", contract);
 
+        contract.setTenantPhone(contractDto.getTenantType().equals("REGISTERED") ? contractDto.getTenant().getPhone() : contractDto.getUnregisteredTenant().getPhone());
+        logger.info("Updated tenant phone: {}", contract.getTenantPhone());
+
+        contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
+        logger.info("Updated contract date: {}", contract.getContractDate());
+
+        contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
+        logger.info("Updated start date: {}", contract.getStartDate());
+
+        contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
+        logger.info("Updated end date: {}", contract.getEndDate());
+
+        contract.setPrice(contractDto.getTerms().getPrice().floatValue());
+        logger.info("Updated price: {}", contract.getPrice());
+
+        contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
+        logger.info("Updated deposit: {}", contract.getDeposit());
+
+        contract.setTerms(contractDto.getTerms().getTerms());
+        logger.info("Updated terms: {}", contract.getTerms());
+
+        contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+        logger.info("Updated status: {}", contract.getStatus());
+
+        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+        logger.info("Updated duration: {}", contract.getDuration());
+
+        logger.info("Searching for owner with CCCD: {}", contractDto.getOwner().getCccdNumber());
         Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByCccdNumber(contractDto.getOwner().getCccdNumber());
         Users owner = ownerCccdOpt.map(UserCccd::getUser)
                 .orElseThrow(() -> {
@@ -363,8 +462,10 @@ public class ContractServiceImpl implements ContractService {
                     return new IllegalArgumentException("Chủ trọ không tồn tại!");
                 });
         contract.setOwner(owner);
+        logger.info("Owner updated: {}", owner.getFullname());
 
         if ("UNREGISTERED".equals(contractDto.getTenantType())) {
+            logger.info("Creating new unregistered tenant from DTO");
             UnregisteredTenants unregisteredTenantUpdate = new UnregisteredTenants();
             unregisteredTenantUpdate.setUser(owner);
             unregisteredTenantUpdate.setFullName(contractDto.getUnregisteredTenant().getFullName());
@@ -382,7 +483,9 @@ public class ContractServiceImpl implements ContractService {
             unregisteredTenantsRepository.save(unregisteredTenantUpdate);
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
             contract.setTenant(null);
+            logger.info("Unregistered tenant created and set: {}", unregisteredTenantUpdate.getFullName());
         } else {
+            logger.info("Finding tenant with phone: {}", contractDto.getTenant().getPhone());
             Optional<Users> tenantOpt = userRepository.findByPhone(contractDto.getTenant().getPhone());
             Users tenantUpdate = tenantOpt.orElseThrow(() -> {
                 logger.error("Tenant not found with phone: {}", contractDto.getTenant().getPhone());
@@ -390,16 +493,20 @@ public class ContractServiceImpl implements ContractService {
             });
             contract.setTenant(tenantUpdate);
             contract.setUnregisteredTenant(null);
+            logger.info("Tenant updated: {}", tenantUpdate.getFullname());
         }
 
+        logger.info("Saving updated contract");
         Contracts savedContract = contractRepository.save(contract);
         logger.info("Contract updated successfully: {}", savedContract.getContractId());
+        logger.info("=== END UPDATE CONTRACT FROM DTO ===");
         return savedContract;
     }
 
     @Override
     @Transactional
     public void deleteContract(Integer contractId) throws Exception {
+        logger.info("=== START DELETE CONTRACT ===");
         logger.info("Deleting contract with ID: {}", contractId);
 
         if (contractId == null || contractId <= 0) {
@@ -413,57 +520,69 @@ public class ContractServiceImpl implements ContractService {
             throw new Exception("Hợp đồng không tồn tại!");
         }
 
+        logger.info("Deleting contract: {}", contract.get().getContractId());
         contractRepository.delete(contract.get());
         logger.info("Contract deleted successfully: {}", contractId);
+        logger.info("=== END DELETE CONTRACT ===");
     }
 
     @Override
     public Optional<Contracts> findContractById(Integer contractId) {
+        logger.info("Finding contract by ID: {}", contractId);
         return contractRepository.findById(contractId);
     }
 
     @Override
     public List<Contracts> findContractsByRoomId(Integer roomId) {
+        logger.info("Finding contracts by room ID: {}", roomId);
         return contractRepository.findByRoomId(roomId);
     }
 
     @Override
     public List<Contracts> findContractsByTenantUserId(Integer tenantUserId) {
+        logger.info("Finding contracts by tenant user ID: {}", tenantUserId);
         return contractRepository.findByTenantUserId(tenantUserId);
     }
 
     @Override
     public List<Contracts> findContractsByOwnerId(Integer ownerId) {
+        logger.info("Finding contracts by owner ID: {}", ownerId);
         return contractRepository.findByOwnerId(ownerId);
     }
 
     @Override
     public List<Contracts> findContractsByStatus(Contracts.Status status) {
+        logger.info("Finding contracts by status: {}", status);
         return contractRepository.findByStatus(status);
     }
 
     @Override
     public List<Contracts> findContractsByTenantName(String name) {
+        logger.info("Finding contracts by tenant name: {}", name);
         return contractRepository.findByTenantName(name);
     }
 
     @Override
     public List<Contracts> findContractsByTenantPhone(String phone) {
+        logger.info("Finding contracts by tenant phone: {}", phone);
         return contractRepository.findByTenantPhone(phone);
     }
 
     @Override
     public List<Contracts> findContractsByTenantCccd(String cccd) {
+        logger.info("Finding contracts by tenant CCCD: {}", cccd);
         return contractRepository.findByTenantCccd(cccd);
     }
 
     @Override
     public List<Contracts> findContractsByDateRange(Date startDate, Date endDate) {
+        logger.info("Finding contracts by date range: {} to {}", startDate, endDate);
         return contractRepository.findByDateRange(startDate, endDate);
     }
 
     @Override
     public List<Contracts> findContractsExpiringWithin30Days() {
+        logger.info("Finding contracts expiring within 30 days");
         LocalDate now = LocalDate.now();
         LocalDate threshold = now.plusDays(30);
         Date sqlThreshold = Date.valueOf(threshold);
@@ -472,27 +591,33 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     public Optional<Contracts> findActiveContractByRoomId(Integer roomId) {
+        logger.info("Finding active contract by room ID: {}", roomId);
         return contractRepository.findActiveContractByRoomId(roomId, Contracts.Status.ACTIVE);
     }
 
     @Override
     public Long countContractsByOwnerId(Integer ownerId) {
+        logger.info("Counting contracts by owner ID: {}", ownerId);
         return contractRepository.countByOwnerId(ownerId);
     }
 
     @Override
     public Long countContractsByOwnerIdAndStatus(Integer ownerId, Contracts.Status status) {
+        logger.info("Counting contracts by owner ID: {} and status: {}", ownerId, status);
         return contractRepository.countByOwnerIdAndStatus(ownerId, status);
     }
 
     @Override
     public Float getTotalRevenueByOwnerId(Integer ownerId) {
+        logger.info("Calculating total revenue for owner ID: {}", ownerId);
         Float revenue = contractRepository.getTotalRevenueByOwnerId(ownerId, Contracts.Status.ACTIVE);
+        logger.info("Revenue calculated: {}", revenue);
         return revenue != null ? revenue : 0.0f;
     }
 
     @Override
     public List<Contracts> findContractsByOwnerCccd(String cccd) {
+        logger.info("=== START FIND CONTRACTS BY OWNER CCCD ===");
         logger.info("Finding contracts for owner with CCCD: {}", cccd);
 
         if (cccd == null || cccd.trim().isEmpty()) {
@@ -512,13 +637,15 @@ public class ContractServiceImpl implements ContractService {
             return Collections.emptyList();
         }
 
+        logger.info("Owner found: {}", owner.getFullname());
         List<Contracts> contracts = contractRepository.findByOwnerId(owner.getUserId());
+        logger.info("Found {} contracts for owner", contracts.size());
         contracts.forEach(contract -> {
             if (contract.getOwner() == null) {
                 logger.error("Contract ID {} has null owner", contract.getContractId());
             }
         });
-
+        logger.info("=== END FIND CONTRACTS BY OWNER CCCD ===");
         return contracts;
     }
 }
