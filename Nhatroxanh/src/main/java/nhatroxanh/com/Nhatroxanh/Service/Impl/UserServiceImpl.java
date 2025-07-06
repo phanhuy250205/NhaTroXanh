@@ -247,20 +247,34 @@ public class UserServiceImpl implements UserService {
     }
 
     public Page<Users> getFilteredOwners(String keyword, String statusFilter, int page, int size) {
-    Pageable pageable = PageRequest.of(page, size, Sort.by("fullname").ascending());
-    Boolean enabled = null;
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fullname").ascending());
+        Boolean enabled = null;
 
-    if ("active".equalsIgnoreCase(statusFilter)) {
-        enabled = true;
-    } else if ("inactive".equalsIgnoreCase(statusFilter)) {
-        enabled = false;
+        if ("active".equalsIgnoreCase(statusFilter)) {
+            enabled = true;
+        } else if ("inactive".equalsIgnoreCase(statusFilter)) {
+            enabled = false;
+        }
+
+        if (keyword != null && keyword.trim().isEmpty()) {
+            keyword = null;
+        }
+
+        return userRepository.searchOwners(Users.Role.OWNER, keyword, enabled, pageable);
     }
 
-    if (keyword != null && keyword.trim().isEmpty()) {
-        keyword = null;
+    public Page<Users> getStaffUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.STAFF, pageable);
+        List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
+        return new PageImpl<>(users, pageable, customerIds.getTotalElements());
+
     }
 
-    return userRepository.searchOwners(Users.Role.OWNER, keyword, enabled, pageable);
-}
-
+    @Override
+    public Users getById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
 }

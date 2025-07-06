@@ -1745,70 +1745,70 @@
                 this.wardSelect = document.getElementById("ward");
                 this.streetInput = document.getElementById("street");
                 this.fullAddress = document.getElementById("fullAddress");
+                this.addressData = []; // lưu toàn bộ JSON đã load
             }
 
             async init(savedAddress = "") {
-                await this.loadProvinces();
+                await this.loadData();
+                this.populateProvinces();
                 this.addListeners();
                 if (savedAddress) {
                     await this.setInitialAddress(savedAddress);
                 }
             }
 
-            async loadProvinces() {
+            async loadData() {
                 try {
-                    const response = await fetch("https://provinces.open-api.vn/api/p/");
-                    const provinces = await response.json();
-
-                    this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
-                    provinces.forEach((province) => {
-                        this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
-                    });
+                    const response = await fetch("/data/vietnam_full_address.json");
+                    this.addressData = await response.json();
                 } catch (error) {
-                    console.error("Error loading provinces:", error);
+                    console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
                 }
             }
 
-            async loadDistricts(provinceCode) {
-                try {
-                    const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
-                    const data = await response.json();
-
-                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                    data.districts.forEach((district) => {
-                        this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
-                    });
-
-                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                } catch (error) {
-                    console.error("Error loading districts:", error);
-                }
+            populateProvinces() {
+                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                this.addressData.forEach(province => {
+                    this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
+                });
             }
 
-            async loadWards(districtCode) {
-                try {
-                    const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
-                    const data = await response.json();
+            populateDistricts(provinceCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
 
-                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                    data.wards.forEach((ward) => {
-                        this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
-                    });
-                } catch (error) {
-                    console.error("Error loading wards:", error);
-                }
+                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                province.districts.forEach(district => {
+                    this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
+                });
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
+
+            populateWards(provinceCode, districtCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
+
+                const district = province.districts.find(d => d.code === districtCode);
+                if (!district) return;
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                district.wards.forEach(ward => {
+                    this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
+                });
             }
 
             addListeners() {
-                this.provinceSelect.addEventListener("change", async (e) => {
-                    const code = e.target.value;
-                    if (code) await this.loadDistricts(code);
+                this.provinceSelect.addEventListener("change", (e) => {
+                    const provinceCode = e.target.value;
+                    this.populateDistricts(provinceCode);
                     this.updateFullAddress();
                 });
 
-                this.districtSelect.addEventListener("change", async (e) => {
-                    const code = e.target.value;
-                    if (code) await this.loadWards(code);
+                this.districtSelect.addEventListener("change", (e) => {
+                    const provinceCode = this.provinceSelect.value;
+                    const districtCode = e.target.value;
+                    this.populateWards(provinceCode, districtCode);
                     this.updateFullAddress();
                 });
 
@@ -1818,52 +1818,49 @@
 
             updateFullAddress() {
                 const street = this.streetInput.value;
-                const wardText = this.wardSelect.selectedOptions[0]?.text || "";
-                const districtText = this.districtSelect.selectedOptions[0]?.text || "";
-                const provinceText = this.provinceSelect.selectedOptions[0]?.text || "";
+                const ward = this.wardSelect.selectedOptions[0]?.text || "";
+                const district = this.districtSelect.selectedOptions[0]?.text || "";
+                const province = this.provinceSelect.selectedOptions[0]?.text || "";
 
-                const addressParts = [street, wardText, districtText, provinceText].filter(
-                    (part) => part && part !== "Chọn Tỉnh/Thành phố" && part !== "Chọn Quận/Huyện" && part !== "Chọn Phường/Xã"
-                );
+                const parts = [street, ward, district, province].filter(part =>
+                    part && !part.startsWith("Chọn"));
 
-                this.fullAddress.value = addressParts.join(", ");
+                this.fullAddress.value = parts.join(", ");
             }
 
             async setInitialAddress(fullAddress) {
                 try {
-                    const parts = fullAddress.split(",").map((p) => p.trim());
+                    const parts = fullAddress.split(",").map(p => p.trim());
                     if (parts.length < 4) return;
 
                     const [street, wardName, districtName, provinceName] = parts;
                     this.streetInput.value = street;
 
-                    // Load and set province
-                    const provinces = await (await fetch("https://provinces.open-api.vn/api/p/")).json();
-                    const province = provinces.find((p) => p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    const province = this.addressData.find(p =>
+                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
                     if (!province) return;
 
                     this.provinceSelect.value = province.code;
-                    await this.loadDistricts(province.code);
+                    this.populateDistricts(province.code);
 
-                    // Load and set district
-                    const districtData = await (await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`)).json();
-                    const district = districtData.districts.find((d) => d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    const district = province.districts.find(d =>
+                        d.name.toLowerCase().includes(districtName.toLowerCase()));
                     if (!district) return;
 
                     this.districtSelect.value = district.code;
-                    await this.loadWards(district.code);
+                    this.populateWards(province.code, district.code);
 
-                    // Load and set ward
-                    const wardData = await (await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`)).json();
-                    const ward = wardData.wards.find((w) => w.name.toLowerCase().includes(wardName.toLowerCase()));
+                    const ward = district.wards.find(w =>
+                        w.name.toLowerCase().includes(wardName.toLowerCase()));
                     if (ward) this.wardSelect.value = ward.code;
 
                     this.updateFullAddress();
                 } catch (error) {
-                    console.error("Error setting initial address:", error);
+                    console.error("❌ Lỗi khi set địa chỉ ban đầu:", error);
                 }
             }
         }
+
 
         // Global functions for HTML onclick events
         function goBack() {
