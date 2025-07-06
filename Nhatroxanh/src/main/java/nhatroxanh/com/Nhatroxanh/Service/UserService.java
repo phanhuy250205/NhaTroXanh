@@ -66,4 +66,12 @@ public interface UserService {
     // List<Users> getAllCustomers();
 
     Page<Users> getAllCustomers(int page, int size);
+
+    Page<Users> getAllOwner(int page, int size);
+
+    Page<Users> getFilteredOwners(String keyword, String statusFilter, int page, int size);
+
+    Page<Users> getStaffUsers(int page, int size);
+
+    Users getById(Integer id);
 }

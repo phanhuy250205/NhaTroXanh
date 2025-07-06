@@ -1,9 +1,15 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,13 +52,14 @@ public class ViewRoomController {
             @RequestParam(value = "province", required = false) Integer provinceId,
             @RequestParam(value = "priceRange", required = false) String priceRange,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
         try {
             System.out.println("Request: Category ID: " + id + ", Sort: " + sort + ", Province ID: " + provinceId +
-                    ", Price Range: " + priceRange + ", Search Term: " + searchTerm);
+                    ", Price Range: " + priceRange + ", Search Term: " + searchTerm + ", Page: " + page);
             long startTime = System.currentTimeMillis();
 
-            // Load provinces và utilities cho filter
+            // Load provinces and utilities for filter
             List<Province> provinces = provinceRepository.findAll();
             if (provinces == null) {
                 provinces = new ArrayList<>();
@@ -69,12 +76,13 @@ public class ViewRoomController {
             model.addAttribute("categoryId", id);
 
             Category category = categoryRepository.findById(id).orElse(null);
-            List<Post> posts = new ArrayList<>();
+            Page<Post> postPage;
+            int pageSize = 10;
 
             Float minPrice = null;
             Float maxPrice = null;
 
-            // Xử lý khoảng giá
+            // Process price range
             if (priceRange != null && !priceRange.isEmpty()) {
                 if (priceRange.startsWith("custom_")) {
                     String[] customRange = priceRange.replace("custom_", "").split("_");
@@ -111,78 +119,76 @@ public class ViewRoomController {
             }
 
             if (category != null) {
-                // Kiểm tra xem có filter nào được áp dụng không
+                // Create Pageable object
+                Sort pageSort;
+                switch (sort.toLowerCase()) {
+                    case "price_asc":
+                        pageSort = Sort.by(Sort.Direction.ASC, "price");
+                        break;
+                    case "price_desc":
+                        pageSort = Sort.by(Sort.Direction.DESC, "price");
+                        break;
+                    case "latest":
+                    default:
+                        pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
+                        break;
+                }
+
+                Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+
+                // Check if any filters are applied
                 boolean hasFilters = (provinceId != null || priceRange != null ||
                         (searchTerm != null && !searchTerm.trim().isEmpty()));
 
                 if (hasFilters) {
-                    // Sử dụng các method có filter
-                    switch (sort.toLowerCase()) {
-                        case "price_asc":
-                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceAsc(
-                                    id, provinceId, minPrice, maxPrice, searchTerm);
-                            break;
-                        case "price_desc":
-                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByPriceDesc(
-                                    id, provinceId, minPrice, maxPrice, searchTerm);
-                            break;
-                        case "latest":
-                            posts = postRepository
-                                    .findByCategoryAndProvinceAndPriceRangeAndSearchTermSortedByCreatedAtDesc(
-                                            id, provinceId, minPrice, maxPrice, searchTerm);
-                            break;
-                        default:
-                            posts = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTerm(
-                                    id, provinceId, minPrice, maxPrice, searchTerm);
-                            break;
-                    }
+                    // Use filtered search with pagination
+                    postPage = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTerm(
+                            id, provinceId, minPrice, maxPrice, searchTerm, pageable);
                 } else {
-                    // Không có filter, sử dụng method đơn giản với ApprovalStatus
-                    posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(id, true,
-                            ApprovalStatus.APPROVED);
-
-                    // Sắp xếp theo yêu cầu
-                    switch (sort.toLowerCase()) {
-                        case "price_asc":
-                            posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
-                            break;
-                        case "price_desc":
-                            posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
-                            break;
-                        case "latest":
-                        default:
-                            posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
-                            break;
-                    }
+                    // Simple search with ApprovalStatus and pagination
+                    postPage = postRepository.findByCategoryIdAndStatusAndApprovalStatus(
+                            id, true, ApprovalStatus.APPROVED, pageable);
                 }
 
-                System.out.println("Posts fetched: " + posts.size() + ", Time taken: " +
-                        (System.currentTimeMillis() - startTime) + "ms");
+                System.out.println("Posts fetched: " + postPage.getTotalElements() +
+                        ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
 
                 model.addAttribute("category", category);
-                model.addAttribute("posts", posts);
-                model.addAttribute("totalPosts", posts.size());
+                model.addAttribute("posts", postPage.getContent());
+                model.addAttribute("totalPosts", postPage.getTotalElements());
+                model.addAttribute("currentPage", postPage.getNumber());
+                model.addAttribute("totalPages", postPage.getTotalPages());
+                model.addAttribute("pageSize", pageSize);
                 model.addAttribute("selectedProvince", provinceId);
                 model.addAttribute("selectedPriceRange", priceRange);
                 model.addAttribute("searchTerm", searchTerm);
                 model.addAttribute("selectedSort", sort);
 
-                System.out.println("Category: " + category.getName() + ", Posts: " + posts.size());
+                System.out.println("Category: " + category.getName() + ", Posts: " + postPage.getTotalElements());
             } else {
                 model.addAttribute("category", null);
                 model.addAttribute("posts", new ArrayList<>());
                 model.addAttribute("totalPosts", 0);
+                model.addAttribute("currentPage", 0);
+                model.addAttribute("totalPages", 0);
+                model.addAttribute("pageSize", pageSize);
                 model.addAttribute("error", "Danh mục không tồn tại");
             }
         } catch (NumberFormatException e) {
             model.addAttribute("error", "Khoảng giá không hợp lệ: " + e.getMessage());
             model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("totalPosts", 0);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("pageSize", 10);
             System.out.println("NumberFormatException in showPostsByCategory: " + e.getMessage());
         } catch (Exception e) {
             model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu: " + e.getMessage());
             model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("totalPosts", 0);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("pageSize", 10);
             System.out.println("Exception in showPostsByCategory: " + e.getMessage());
             e.printStackTrace();
         }
@@ -245,13 +251,48 @@ public class ViewRoomController {
 
     @GetMapping("/api/test-category/{categoryId}")
     @ResponseBody
-    public ResponseEntity<?> testCategory(@PathVariable("categoryId") Integer categoryId) {
+    public ResponseEntity<?> testCategory(
+            @PathVariable("categoryId") Integer categoryId,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "sort", defaultValue = "latest") String sort) {
         try {
-            // Sử dụng phương thức từ PostRepository để lọc bài đăng có status = true và
-            // approvalStatus = 'APPROVED'
-            List<Post> posts = postRepository.findByCategoryIdAndStatusAndApprovalStatus(categoryId, true,
-                    ApprovalStatus.APPROVED);
-            return ResponseEntity.ok("Category " + categoryId + " has " + posts.size() + " approved posts");
+            // Define page size
+            int pageSize = 10;
+
+            // Create Sort object based on sort parameter
+            Sort pageSort;
+            switch (sort.toLowerCase()) {
+                case "price_asc":
+                    pageSort = Sort.by(Sort.Direction.ASC, "price");
+                    break;
+                case "price_desc":
+                    pageSort = Sort.by(Sort.Direction.DESC, "price");
+                    break;
+                case "latest":
+                default:
+                    pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
+                    break;
+            }
+
+            // Create Pageable object
+            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+
+            // Fetch paginated posts
+            Page<Post> postPage = postRepository.findByCategoryIdAndStatusAndApprovalStatus(
+                    categoryId, true, ApprovalStatus.APPROVED, pageable);
+
+            // Prepare response
+            Map<String, Object> response = new HashMap<>();
+            response.put("categoryId", categoryId);
+            response.put("message",
+                    "Category " + categoryId + " has " + postPage.getTotalElements() + " approved posts");
+            response.put("posts", postPage.getContent());
+            response.put("totalPosts", postPage.getTotalElements());
+            response.put("currentPage", postPage.getNumber());
+            response.put("totalPages", postPage.getTotalPages());
+            response.put("pageSize", pageSize);
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }

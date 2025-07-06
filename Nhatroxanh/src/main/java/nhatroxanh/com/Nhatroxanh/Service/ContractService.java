@@ -6,16 +6,29 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ContractService {
 
+
+
+    @Transactional
     Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
-            Contracts.Status status, String ownerId) throws Exception;
+            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant , Integer duration) throws Exception;
+
+    @Transactional
+    Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
 
     Contracts updateContract(Integer contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
+
+    @Transactional
+    Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception;
 
     void deleteContract(Integer contractId) throws Exception;
 
