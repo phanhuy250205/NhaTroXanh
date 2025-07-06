@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head th:replace="~{/layouts/head}"></head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thông Tin Cá Nhân</title>
+    <link rel="stylesheet" th:href="@{/css/navbar.css}">
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --primary-hover: #2c6ba8;
+            --light-bg: #f8f9fa;
+            --border-color: #e9ecef;
+        }
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .main-container-khach-thue {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        .profile-card-khach-thue {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .profile-header-khach-thue {
+            background: linear-gradient(135deg, #00c6ff, #008fcc);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .profile-header-khach-thue h2 {
+            margin-bottom: 2rem;
+            font-weight: 600;
+            font-size: 1.5rem;
+        }
+        .profile-image-container-khach-thue {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .profile-image-khach-thue {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 5px solid white;
+            object-fit: cover;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+        .profile-image-khach-thue:hover {
+            transform: scale(1.05);
+        }
+        .upload-overlay-khach-thue {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        .profile-image-container-khach-thue:hover .upload-overlay-khach-thue {
+            opacity: 1;
+        }
+        .online-status-khach-thue {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            width: 24px;
+            height: 24px;
+            background-color: #28a745;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            animation: pulse-online 2s infinite;
+        }
+        @keyframes pulse-online {
+            0% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
+            }
+        }
+        .username-khach-thue {
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .user-status-khach-thue {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        .status-dot-khach-thue {
+            width: 8px;
+            height: 8px;
+            background-color: #28a745;
+            border-radius: 50%;
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.3; }
+        }
+        .action-buttons-khach-thue {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        .btn-action-khach-thue {
+            padding: 0.6rem 1.5rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 2px solid;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-update-khach-thue {
+            background-color: #28a745;
+            border-color: #28a745;
+            color: white;
+        }
+        .btn-update-khach-thue:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+        .btn-password-khach-thue {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        .btn-password-khach-thue:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+        .btn-feedback-khach-thue {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+            color: white;
+        }
+        .btn-feedback-khach-thue:hover {
+            background-color: #5a32a3;
+            transform: translateY(-2px);
+        }
+        .form-section-khach-thue {
+            padding: 2rem;
+        }
+        .section-title-khach-thue {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+        }
+        .form-label-khach-thue {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .form-control-khach-thue, .form-select-khach-thue {
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+        .form-control-khach-thue:focus, .form-select-khach-thue:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(62, 131, 204, 0.25);
+        }
+        .row {
+            margin-bottom: 1rem;
+        }
+        #imagePreview {
+            display: none;
+        }
+        .fade-in-khach-thue {
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .action-buttons-khach-thue {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn-action-khach-thue {
+                width: 200px;
+                justify-content: center;
+            }
+            .profile-image-khach-thue {
+                width: 140px;
+                height: 140px;
+            }
+            .username-khach-thue {
+                font-size: 1.2rem;
+            }
+        }
+        /* Password Modal Styles */
+        .modal-content-khach-thue {
+          border-radius: 15px;
+          border: none;
+          overflow: hidden;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        .modal-header-khach-thue {
+          background: linear-gradient(135deg, #00c6ff, #0072ff);
+          color: white;
+          padding: 1.5rem;
+          border-bottom: none;
+          position: relative;
+          text-align: center;
+        }
+        .modal-title-khach-thue {
+          font-weight: 600;
+          font-size: 1.3rem;
+          margin: 0;
+        }
+        .btn-close-khach-thue {
+          position: absolute;
+          top: 15px;
+          right: 15px;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 1.2rem;
+          cursor: pointer;
+          padding: 0;
+          width: 30px;
+          height: 30px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: background-color 0.3s ease;
+        }
+        .btn-close-khach-thue:hover {
+          background-color: rgba(255, 255, 255, 0.2);
+        }
+        .modal-decoration-khach-thue {
+          position: absolute;
+          top: 10px;
+          right: 60px;
+          opacity: 0.3;
+        }
+        .modal-decoration-khach-thue i {
+          font-size: 1.5rem;
+          margin-left: 10px;
+          transform: rotate(-15deg);
+        }
+        .modal-body-khach-thue {
+          padding: 2rem;
+          background-color: #f8f9fa;
+        }
+        .password-field-khach-thue {
+          position: relative;
+        }
+        .input-group-khach-thue {
+          position: relative;
+          display: flex;
+          align-items: center;
+          background: white;
+          border: 2px solid #e9ecef;
+          border-radius: 10px;
+          padding: 0.75rem;
+          transition: border-color 0.3s ease;
+        }
+        .input-group-khach-thue:focus-within {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 0.2rem rgba(62, 131, 204, 0.25);
+        }
+        .input-icon-khach-thue {
+          color: #6c757d;
+          margin-right: 10px;
+          font-size: 1.1rem;
+        }
+        .password-input-khach-thue {
+          border: none;
+          outline: none;
+          flex: 1;
+          background: transparent;
+          font-size: 1rem;
+          padding: 0;
+        }
+        .password-input-khach-thue::placeholder {
+          color: #adb5bd;
+        }
+        .password-toggle-khach-thue {
+          background: none;
+          border: none;
+          color: #6c757d;
+          cursor: pointer;
+          padding: 0;
+          margin-left: 10px;
+          font-size: 1.1rem;
+          transition: color 0.3s ease;
+        }
+        .password-toggle-khach-thue:hover {
+          color: var(--primary-color);
+        }
+        .password-requirements-khach-thue {
+          background: white;
+          border-radius: 8px;
+          padding: 1rem;
+          border-left: 4px solid var(--primary-color);
+        }
+        .password-requirements-khach-thue ul {
+          margin: 0;
+          padding-left: 1.2rem;
+          list-style: none;
+        }
+        .password-requirements-khach-thue li {
+          color: #6c757d;
+          font-size: 0.9rem;
+          margin-bottom: 0.3rem;
+          position: relative;
+        }
+        .password-requirements-khach-thue li::before {
+          content: "•";
+          color: #dc3545;
+          margin-right: 0.5rem;
+        }
+        .password-requirements-khach-thue li.valid::before {
+          content: "✓";
+          color: #28a745;
+        }
+        .btn-complete-khach-thue {
+          background: linear-gradient(135deg, #00c6ff, #0072ff);
+          border: none;
+          padding: 0.875rem;
+          border-radius: 10px;
+          color: white;
+          font-weight: 600;
+          font-size: 1.1rem;
+          transition: all 0.3s ease;
+        }
+        .btn-complete-khach-thue:hover {
+          background: linear-gradient(135deg, #3e83cc, #3e83cc);
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+        .btn-complete-khach-thue:disabled {
+          background: #6c757d;
+          cursor: not-allowed;
+          transform: none;
+          box-shadow: none;
+        }
+        .feedback-textarea-khach-thue {
+          min-height: 120px;
+          resize: vertical;
+          border: 2px solid var(--border-color);
+          border-radius: 10px;
+          padding: 1rem;
+          transition: all 0.3s ease;
+        }
+        .feedback-textarea-khach-thue:focus {
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 0.2rem rgba(62, 131, 204, 0.25);
+        }
+        .success-message-khach-thue {
+          background: linear-gradient(135deg, #d4edda, #c3e6cb);
+          border: 1px solid #c3e6cb;
+          color: #155724;
+          padding: 1rem;
+          border-radius: 10px;
+          text-align: center;
+          margin-bottom: 1rem;
+          display: none;
+        }
+        .success-message-khach-thue i {
+          color: #28a745;
+          margin-right: 0.5rem;
+        }
+        /* Success Notification Styles */
+        .success-notification-khach-thue {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #d4edda, #c3e6cb);
+          border: 1px solid #c3e6cb;
+          color: #155724;
+          padding: 1rem 1.5rem;
+          border-radius: 10px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          z-index: 9999;
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          transform: translateX(400px);
+          transition: transform 0.3s ease;
+          max-width: 350px;
+        }
+        .success-notification-khach-thue.show {
+          transform: translateX(0);
+        }
+        .success-notification-khach-thue i {
+          color: #28a745;
+          font-size: 1.2rem;
+        }
+        .success-notification-khach-thue .notification-content-khach-thue {
+          flex: 1;
+        }
+        .success-notification-khach-thue .notification-title-khach-thue {
+          font-weight: 600;
+          margin-bottom: 0.25rem;
+          font-size: 1rem;
+        }
+        .success-notification-khach-thue .notification-message-khach-thue {
+          font-size: 0.9rem;
+          margin: 0;
+          opacity: 0.8;
+        }
+        .success-notification-khach-thue .close-notification-khach-thue {
+          background: none;
+          border: none;
+          color: #155724;
+          cursor: pointer;
+          padding: 0;
+          font-size: 1.1rem;
+          opacity: 0.7;
+          transition: opacity 0.3s ease;
+        }
+        .success-notification-khach-thue .close-notification-khach-thue:hover {
+          opacity: 1;
+        }
+        @media (max-width: 768px) {
+          .success-notification-khach-thue {
+            top: 10px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            transform: translateY(-100px);
+          }
+          .success-notification-khach-thue.show {
+            transform: translateY(0);
+          }
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <!-- LOGIN MODAL -->
+    <div th:replace="~{/layouts/login-modal}"></div>
+
+    <!-- REGISTER MODAL -->
+    <div th:replace="~{/layouts/register-modal}"></div>
+
+    <!-- VERIFICATION MODAL -->
+    <div th:replace="~{/layouts/verification-modal}"></div>
+
+    <div class="main-container-khach-thue">
+        <div class="profile-card-khach-thue fade-in-khach-thue">
+            <!-- Profile Header -->
+            <div class="profile-header-khach-thue">
+                <h2>THÔNG TIN CÁ NHÂN</h2>
+                
+                <div class="profile-image-container-khach-thue">
+                    <img src="https://i.pinimg.com/736x/93/d8/6c/93d86ca25c88ec9ee14c882b2966791e.jpg" alt="Profile Picture" class="profile-image-khach-thue" id="profileImage">
+                    <div class="online-status-khach-thue"></div>
+                    <div class="upload-overlay-khach-thue" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-camera fa-2x"></i>
+                    </div>
+                    <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                </div>
+                
+                <div class="username-khach-thue">Nguyễn Văn A</div>
+                <div class="user-status-khach-thue">
+                    <span class="status-dot-khach-thue"></span>
+                    Đang hoạt động
+                </div>
+                
+                <div class="action-buttons-khach-thue">
+                    <a href="#" class="btn-action-khach-thue btn-update-khach-thue">
+                        <i class="fas fa-sync-alt"></i>CẬP NHẬT THÔNG TIN
+                    </a>
+                    <a href="#" class="btn-action-khach-thue btn-password-khach-thue">
+                        <i class="fas fa-key"></i>ĐỔI MẬT KHẨU
+                    </a>
+                    <a href="#" class="btn-action-khach-thue btn-feedback-khach-thue">
+                        <i class="fas fa-comment"></i>GỬI PHẢN HỒI
+                    </a>
+                </div>
+            </div>
+
+            <!-- Personal Information Form -->
+            <div class="form-section-khach-thue">
+                <h3 class="section-title-khach-thue">THÔNG TIN CÁ NHÂN</h3>
+                
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="hoVaTen" class="form-label form-label-khach-thue">Họ và tên</label>
+                            <input type="text" class="form-control form-control-khach-thue" id="hoVaTen" value="Nguyễn Văn A">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="ngaySinh" class="form-label form-label-khach-thue">Ngày sinh</label>
+                            <input type="date" class="form-control form-control-khach-thue" id="ngaySinh" value="2000-01-01">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="gioiTinh" class="form-label form-label-khach-thue">Giới tính</label>
+                            <select class="form-select form-select-khach-thue" id="gioiTinh">
+                                <option value="Nam" selected>Nam</option>
+                                <option value="Nữ">Nữ</option>
+                                <option value="Khác">Khác</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cccd" class="form-label form-label-khach-thue">Số CMND/CCCD</label>
+                            <input type="text" class="form-control form-control-khach-thue" id="cccd" value="000000000000">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Contact Information Form -->
+            <div class="form-section-khach-thue" style="border-top: 1px solid var(--border-color); padding-top: 2rem;">
+                <h3 class="section-title-khach-thue">THÔNG TIN LIÊN HỆ</h3>
+                
+                <form id="contactForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="soDienThoai" class="form-label form-label-khach-thue">Số điện thoại</label>
+                            <input type="tel" class="form-control form-control-khach-thue" id="soDienThoai" value="0987654321">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="diaChiEmail" class="form-label form-label-khach-thue">Email</label>
+                            <input type="email" class="form-control form-control-khach-thue" id="diaChiEmail" value="demo@gmail.com">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="diaChiThuongTru" class="form-label form-label-khach-thue">Địa chỉ thường trú</label>
+                        <input type="text" class="form-control form-control-khach-thue" id="diaChiThuongTru" value="Thôn Tân Lộc, xã Tân Thủy, huyện Lệ Thủy, tỉnh Quảng Bình">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="diaChiHienTai" class="form-label form-label-khach-thue">Địa chỉ hiện tại</label>
+                        <input type="text" class="form-control form-control-khach-thue" id="diaChiHienTai" value="K414A/18 Trần Cao Vân, P.Thanh Khê Đông, Q.Thanh Khê, TP.Đà Nẵng">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Change Modal -->
+    <div class="modal fade" id="passwordModal" tabindex="-1" aria-labelledby="passwordModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-khach-thue">
+          <div class="modal-header-khach-thue">
+            <h5 class="modal-title-khach-thue" id="passwordModalLabel">Đổi mật khẩu</h5>
+            <button type="button" class="btn-close-khach-thue" data-bs-dismiss="modal" aria-label="Close">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-decoration-khach-thue">
+              <i class="fas fa-home"></i>
+              <i class="fas fa-home"></i>
+            </div>
+          </div>
+          <div class="modal-body-khach-thue">
+            <form id="passwordChangeForm">
+              <div class="password-field-khach-thue mb-3">
+                <div class="input-group-khach-thue">
+                  <span class="input-icon-khach-thue">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                  <input type="password" class="form-control form-control-khach-thue password-input-khach-thue" id="oldPassword" placeholder="Nhập mật khẩu cũ" required>
+                  <button type="button" class="password-toggle-khach-thue" onclick="togglePassword('oldPassword')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="password-field-khach-thue mb-3">
+                <div class="input-group-khach-thue">
+                  <span class="input-icon-khach-thue">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                  <input type="password" class="form-control form-control-khach-thue password-input-khach-thue" id="newPassword" placeholder="Nhập mật khẩu" required>
+                  <button type="button" class="password-toggle-khach-thue" onclick="togglePassword('newPassword')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="password-field-khach-thue mb-4">
+                <div class="input-group-khach-thue">
+                  <span class="input-icon-khach-thue">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                  <input type="password" class="form-control form-control-khach-thue password-input-khach-thue" id="confirmPassword" placeholder="Nhập lại mật khẩu" required>
+                  <button type="button" class="password-toggle-khach-thue" onclick="togglePassword('confirmPassword')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div class="password-requirements-khach-thue mb-4">
+                <ul>
+                  <li id="req-length">Mật khẩu tối thiểu 8 ký tự</li>
+                  <li id="req-uppercase">Chứa ít nhất 1 ký tự viết hoa</li>
+                  <li id="req-number">Chứa ít nhất 1 ký tự số</li>
+                </ul>
+              </div>
+              
+              <button type="submit" class="btn btn-complete-khach-thue w-100">Hoàn Tất</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feedback Modal -->
+    <div class="modal fade" id="feedbackModal" tabindex="-1" aria-labelledby="feedbackModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-khach-thue">
+          <div class="modal-header-khach-thue">
+            <h5 class="modal-title-khach-thue" id="feedbackModalLabel">Gửi phản hồi</h5>
+            <button type="button" class="btn-close-khach-thue" data-bs-dismiss="modal" aria-label="Close">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="modal-decoration-khach-thue">
+              <i class="fas fa-comment"></i>
+              <i class="fas fa-heart"></i>
+            </div>
+          </div>
+          <div class="modal-body-khach-thue">
+            <form id="feedbackForm">
+              <div class="mb-4">
+                <label for="feedbackContent" class="form-label form-label-khach-thue">Nội dung phản hồi</label>
+                <textarea class="form-control form-control-khach-thue" id="feedbackContent" rows="6" placeholder="Vui lòng chia sẻ ý kiến, góp ý hoặc báo cáo vấn đề của bạn..." required></textarea>
+              </div>
+              
+              <button type="submit" class="btn btn-complete-khach-thue w-100">
+                <i class="fas fa-paper-plane me-2"></i>Gửi phản hồi
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success Notification -->
+    <div id="successNotification" class="success-notification-khach-thue">
+      <i class="fas fa-check-circle"></i>
+      <div class="notification-content-khach-thue">
+        <div class="notification-title-khach-thue">Đổi mật khẩu thành công!</div>
+        <p class="notification-message-khach-thue">Mật khẩu của bạn đã được cập nhật.</p>
+      </div>
+      <button class="close-notification-khach-thue" onclick="hideSuccessNotification()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <script th:src="@{/js/navbar.js}"></script>
+    <script>
+        // Image upload functionality
+        document.getElementById('imageInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Kích thước file không được vượt quá 10MB!');
+                    return;
+                }
+                
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Chỉ chấp nhận file JPG, PNG, JPEG!');
+                    return;
+                }
+                
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('profileImage').src = e.target.result;
+                    
+                    // Add upload animation
+                    const img = document.getElementById('profileImage');
+                    img.style.opacity = '0';
+                    setTimeout(() => {
+                        img.style.transition = 'opacity 0.5s ease';
+                        img.style.opacity = '1';
+                    }, 100);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Form validation and submission
+        function validateForm() {
+            const requiredFields = ['hoVaTen', 'ngaySinh', 'cccd', 'soDienThoai', 'diaChiEmail'];
+            let isValid = true;
+            
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+            
+            // Email validation
+            const email = document.getElementById('diaChiEmail');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (email.value && !emailRegex.test(email.value)) {
+                email.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            // Phone validation
+            const phone = document.getElementById('soDienThoai');
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (phone.value && !phoneRegex.test(phone.value)) {
+                phone.classList.add('is-invalid');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // Action button handlers
+        document.querySelector('.btn-update-khach-thue').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (validateForm()) {
+                // Simulate update process
+                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang cập nhật...';
+                this.style.pointerEvents = 'none';
+                
+                setTimeout(() => {
+                    this.innerHTML = '<i class="fas fa-check me-2"></i>Cập nhật thành công!';
+                    this.style.backgroundColor = '#28a745';
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-sync-alt me-2"></i>CẬP NHẬT THÔNG TIN';
+                        this.style.backgroundColor = '';
+                        this.style.pointerEvents = '';
+                    }, 2000);
+                }, 1500);
+            } else {
+                alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+            }
+        });
+
+        document.querySelector('.btn-password-khach-thue').addEventListener('click', function(e) {
+            e.preventDefault();
+            const passwordModal = new bootstrap.Modal(document.getElementById('passwordModal'));
+            passwordModal.show();
+        });
+
+        document.querySelector('.btn-feedback-khach-thue').addEventListener('click', function(e) {
+            e.preventDefault();
+            const feedbackModal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+            feedbackModal.show();
+        });
+
+        // Handle feedback form submission
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const feedbackContent = document.getElementById('feedbackContent').value.trim();
+            
+            if (!feedbackContent) {
+                alert('Vui lòng nhập nội dung phản hồi!');
+                return;
+            }
+            
+            // Simulate feedback submission process
+            const submitBtn = this.querySelector('.btn-complete-khach-thue');
+            const originalContent = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Show success message
+                const modalBody = document.querySelector('#feedbackModal .modal-body-khach-thue');
+                modalBody.innerHTML = `
+                    <div class="success-message-khach-thue" style="display: block;">
+                        <i class="fas fa-check-circle fa-2x mb-3"></i>
+                        <h5>Đã gửi phản hồi thành công!</h5>
+                        <p class="mb-0">Chúng tôi sẽ xử lý phản hồi của bạn sớm nhất có thể.</p>
+                    </div>
+                    <button type="button" class="btn btn-complete-khach-thue w-100" data-bs-dismiss="modal">
+                        Đóng
+                    </button>
+                `;
+                
+                // Auto close modal after 3 seconds
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
+                    
+                    // Reset form when modal is hidden
+                    setTimeout(() => {
+                        document.getElementById('feedbackForm').reset();
+                        submitBtn.innerHTML = originalContent;
+                        submitBtn.disabled = false;
+                        
+                        // Reset modal body to original form
+                        modalBody.innerHTML = `
+                            <form id="feedbackForm">
+                                <div class="mb-4">
+                                    <label for="feedbackContent" class="form-label form-label-khach-thue">Nội dung phản hồi</label>
+                                    <textarea class="form-control form-control-khach-thue" id="feedbackContent" rows="6" placeholder="Vui lòng chia sẻ ý kiến, góp ý hoặc báo cáo vấn đề của bạn..." required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-complete-khach-thue w-100">
+                                    <i class="fas fa-paper-plane me-2"></i>Gửi phản hồi
+                                </button>
+                            </form>
+                        `;
+                        
+                        // Re-attach event listener
+                        document.getElementById('feedbackForm').addEventListener('submit', arguments.callee);
+                    }, 300);
+                }, 3000);
+                
+            }, 2000);
+        });
+
+        // Add smooth scrolling and form interactions
+        document.querySelectorAll('.form-control-khach-thue, .form-select-khach-thue').forEach(field => {
+            field.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+            
+            field.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+
+        // Add loading animation on page load
+        window.addEventListener('load', function() {
+            document.querySelector('.profile-card-khach-thue').classList.add('fade-in-khach-thue');
+        });
+
+        // Toggle password visibility
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.parentElement.querySelector('.password-toggle-khach-thue i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                button.classList.remove('fa-eye');
+                button.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                button.classList.remove('fa-eye-slash');
+                button.classList.add('fa-eye');
+            }
+        }
+
+        // Password validation
+        function validatePassword(password) {
+            const requirements = {
+                length: password.length >= 8,
+                uppercase: /[A-Z]/.test(password),
+                number: /\d/.test(password)
+            };
+            
+            // Update requirement indicators
+            document.getElementById('req-length').classList.toggle('valid', requirements.length);
+            document.getElementById('req-uppercase').classList.toggle('valid', requirements.uppercase);
+            document.getElementById('req-number').classList.toggle('valid', requirements.number);
+            
+            return Object.values(requirements).every(req => req);
+        }
+
+        // Real-time password validation
+        document.getElementById('newPassword').addEventListener('input', function() {
+            validatePassword(this.value);
+            checkPasswordMatch();
+        });
+
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            checkPasswordMatch();
+        });
+
+        function checkPasswordMatch() {
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = document.querySelector('.btn-complete-khach-thue');
+            
+            if (newPassword && confirmPassword) {
+                if (newPassword === confirmPassword && validatePassword(newPassword)) {
+                    submitBtn.disabled = false;
+                } else {
+                    submitBtn.disabled = true;
+                }
+            }
+        }
+
+        // Handle password change form submission
+        document.getElementById('passwordChangeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                alert('Mật khẩu mới và xác nhận mật khẩu không khớp!');
+                return;
+            }
+            
+            if (!validatePassword(newPassword)) {
+                alert('Mật khẩu mới không đáp ứng yêu cầu!');
+                return;
+            }
+            
+            // Simulate password change process
+            const submitBtn = this.querySelector('.btn-complete-khach-thue');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Hide modal first
+                bootstrap.Modal.getInstance(document.getElementById('passwordModal')).hide();
+                
+                // Show success notification
+                showSuccessNotification();
+                
+                // Reset form
+                this.reset();
+                submitBtn.innerHTML = 'Hoàn Tất';
+                submitBtn.disabled = false;
+                
+                // Reset requirement indicators
+                document.querySelectorAll('.password-requirements-khach-thue li').forEach(li => {
+                    li.classList.remove('valid');
+                });
+            }, 2000);
+        });
+
+        // Success notification functions
+        function showSuccessNotification() {
+            const notification = document.getElementById('successNotification');
+            notification.classList.add('show');
+            
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                hideSuccessNotification();
+            }, 5000);
+        }
+
+        function hideSuccessNotification() {
+            const notification = document.getElementById('successNotification');
+            notification.classList.remove('show');
+        }
+    </script>
+</body>
+</html>

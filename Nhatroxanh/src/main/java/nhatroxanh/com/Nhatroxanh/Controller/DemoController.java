@@ -105,4 +105,9 @@ public class DemoController {
     // public String chitiethopdong() {
     //     return "host/sua-bai-dang";
     // }
+
+    @GetMapping("/profile-khach-thue")
+    public String profileKhachThue() {
+        return "guest/profile";
+    }
 }

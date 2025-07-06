@@ -13,4 +13,6 @@ public class LoginController {
     public String registerHost() {
         return "auth/register-host";
     }
+
+    
 }
