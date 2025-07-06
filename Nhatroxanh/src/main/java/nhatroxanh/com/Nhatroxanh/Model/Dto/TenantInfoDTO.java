@@ -16,5 +16,6 @@ public class TenantInfoDTO {
     private String hostelName; 
     private String roomName; 
     private Date moveInDate;
+    private Date endDate;
     private Boolean contractStatus;
 }

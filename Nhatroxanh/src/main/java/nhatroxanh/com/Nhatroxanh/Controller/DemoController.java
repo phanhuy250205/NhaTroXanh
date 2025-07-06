@@ -83,7 +83,7 @@ public String showRentalHistory(
         ownerId,
         keyword,
         selectedHostelId,
-        Contracts.Status.INACTIVE, // ✅ chỉ lấy hợp đồng đã trả
+        Contracts.Status.INACTIVE, 
         PageRequest.of(page, 10)
     );
 
@@ -142,7 +142,7 @@ public String showTenantManagementPage(
         ownerId,
         keyword,
         selectedHostelId,
-        Contracts.Status.ACTIVE, // 👉 chỉ lấy hợp đồng đang thuê
+        Contracts.Status.ACTIVE, 
         PageRequest.of(page, 10)
     );
 

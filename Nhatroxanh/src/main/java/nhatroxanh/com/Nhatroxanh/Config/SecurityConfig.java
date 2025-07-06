@@ -63,30 +63,18 @@ public class SecurityConfig {
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .anyRequest().authenticated())
-                        
                 .formLogin(form -> form
-                
-                        .loginPage("/dang-nhap-chu-tro")
-                        // <<< SỬA: Đổi URL để tường minh và khớp với file JS
-                        .loginProcessingUrl("/login-processing")
-                        // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
-                        .usernameParameter("username")
-                        // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
-                        .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler)
-                        .successHandler((request, response, authentication) -> {
-                            // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển
-                            // hướng.
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
-                        .failureHandler((request, response, exception) -> {
-                            // Khi thất bại, trả về status 401 Unauthorized và thông báo lỗi
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("text/plain; charset=UTF-8");
-                            // <<< SỬA: Rút gọn thông báo lỗi cho phù hợp với cả hai luồng đăng nhập
-                            response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                        })
-                        .permitAll())
+    .loginPage("/dang-nhap-chu-tro")
+    .loginProcessingUrl("/login-processing")
+    .usernameParameter("username")
+    .passwordParameter("password")
+    .successHandler(customLoginSuccessHandler) // CHỈ DÙNG handler này thôi
+    .failureHandler((request, response, exception) -> {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("text/plain; charset=UTF-8");
+        response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
+    })
+    .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/perform_logout")
                         .logoutSuccessUrl("/?logout=true")

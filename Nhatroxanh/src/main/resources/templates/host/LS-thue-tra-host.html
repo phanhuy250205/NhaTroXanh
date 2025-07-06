@@ -421,9 +421,14 @@
                 <span th:text="${#dates.format(tenant.moveInDate, 'dd/MM/yyyy')}">Ngày thuê</span>
             </div>
         </td>
+        
         <td>
-            <div class="text-muted">
-                 Đã kết thúc
+            <div class="date-info" th:if="${tenant.endDate != null}">
+                <i class="fas fa-calendar me-1 text-danger"></i>
+                <span th:text="${#dates.format(tenant.endDate, 'dd/MM/yyyy')}">Ngày trả</span>
+            </div>
+            <div class="text-muted" th:if="${tenant.endDate == null}">
+                Chưa cập nhật
             </div>
         </td>
         <td>

@@ -75,9 +75,11 @@ public class TenantServiceImpl implements TenantService {
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
         Contracts contract = contractsRepository.findById(contractId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
+                if (!newStatus) {
+        contract.setEndDate(new java.sql.Date(System.currentTimeMillis()));
+    }
         contract.setStatus(newStatus ? Contracts.Status.ACTIVE : Contracts.Status.INACTIVE);
     }
-
     @Override
     @Transactional(readOnly = true)
     public Page<TenantInfoDTO> findAllForTesting(Pageable pageable) {
@@ -98,6 +100,7 @@ public class TenantServiceImpl implements TenantService {
                 hostel.getName(),
                 room.getNamerooms(),
                 contract.getStartDate(),
+                contract.getEndDate(),
                 contract.getStatus() == Contracts.Status.ACTIVE
         );
     }
