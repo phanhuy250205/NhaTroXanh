@@ -7,9 +7,11 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
-public interface HostelService {
+public interface    HostelService {
 
     List<Hostel> getHostelsByOwnerId(Integer ownerId);
+
+    List<Hostel> getHostelsWithRoomsByOwnerId(Integer ownerId);
 
     Optional<Hostel> getHostelById(Integer id);
 
@@ -20,4 +22,6 @@ public interface HostelService {
     void deleteHostel(Integer hostelId);
 
     int countByOwner(Users owner);
+
+
 }

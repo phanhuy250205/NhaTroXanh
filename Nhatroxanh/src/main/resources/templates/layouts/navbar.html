@@ -3,14 +3,116 @@
     <div class="container-fluid">
         <!-- Logo -->
         <a class="navbar-brand" th:href="@{/}">
-            <img th:src="@{/images/logo/nhatroxanh.png}" alt="Nhà Trọ Xanh Logo">
+            <img th:src="@{/images/logo/nhatroxanh(title).png}" alt="Nhà Trọ Xanh Logo">
         </a>
 
-        <!-- Toggle button -->
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
+        <!-- Mobile controls container -->
+        <div class="mobile-controls d-lg-none">
+            <!-- Mobile notification - Always visible on mobile (for both authenticated and anonymous) -->
+            <div class="notification-wrapper mobile-notification">
+                <div class="dropdown">
+                    <button class="btn btn-notification dropdown-toggle" type="button" id="mobileNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    
+                    <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="mobileNotificationDropdown">
+                        <!-- Header -->
+                        <li class="dropdown-header notification-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold">Thông báo</span>
+                                <small class="text-muted">3 mới</small>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider m-0"></li>
+                        
+                        <!-- Notification Items -->
+                        <li>
+                            <a class="dropdown-item notification-item unread" href="#">
+                                <div class="notification-icon bg-primary">
+                                    <i class="fas fa-home text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Phòng trọ mới</div>
+                                    <div class="notification-text">Có phòng trọ mới phù hợp với yêu cầu của bạn</div>
+                                    <div class="notification-time">2 phút trước</div>
+                                </div>
+                                <div class="notification-dot"></div>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item notification-item unread" href="#">
+                                <div class="notification-icon bg-success">
+                                    <i class="fas fa-check text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Đặt phòng thành công</div>
+                                    <div class="notification-text">Yêu cầu đặt phòng của bạn đã được xác nhận</div>
+                                    <div class="notification-time">1 giờ trước</div>
+                                </div>
+                                <div class="notification-dot"></div>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item notification-item unread" href="#">
+                                <div class="notification-icon bg-warning">
+                                    <i class="fas fa-exclamation text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Nhắc nhở thanh toán</div>
+                                    <div class="notification-text">Hạn thanh toán tiền phòng sắp đến</div>
+                                    <div class="notification-time">3 giờ trước</div>
+                                </div>
+                                <div class="notification-dot"></div>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item notification-item" href="#">
+                                <div class="notification-icon bg-info">
+                                    <i class="fas fa-star text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Đánh giá mới</div>
+                                    <div class="notification-text">Bạn có đánh giá mới từ chủ trọ</div>
+                                    <div class="notification-time">1 ngày trước</div>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li>
+                            <a class="dropdown-item notification-item" href="#">
+                                <div class="notification-icon bg-secondary">
+                                    <i class="fas fa-bell text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">Cập nhật hệ thống</div>
+                                    <div class="notification-text">Hệ thống đã được cập nhật với tính năng mới</div>
+                                    <div class="notification-time">2 ngày trước</div>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li><hr class="dropdown-divider m-0"></li>
+                        
+                        <!-- Footer -->
+                        <li>
+                            <a class="dropdown-item text-center notification-footer" href="#">
+                                <small class="text-primary fw-bold">Xem tất cả thông báo</small>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Toggle button -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        </div>
 
         <!-- Main content -->
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -40,11 +142,103 @@
 
             <!-- Authenticated user -->
             <div class="d-flex align-items-center" sec:authorize="isAuthenticated()">
-                <div class="notification-wrapper me-3">
-                    <button class="btn btn-notification" type="button">
-                        <i class="fas fa-bell"></i>
-                        <span class="notification-badge">3</span>
-                    </button>
+                <!-- Desktop notification - Hiển thị trên desktop -->
+                <div class="notification-wrapper desktop-notification d-none d-lg-flex me-3">
+                    <div class="dropdown">
+                        <button class="btn btn-notification dropdown-toggle" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        
+                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="notificationDropdown">
+                            <!-- Header -->
+                            <li class="dropdown-header notification-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">Thông báo</span>
+                                    <small class="text-muted">3 mới</small>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Notification Items -->
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-primary">
+                                        <i class="fas fa-home text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Phòng trọ mới</div>
+                                        <div class="notification-text">Có phòng trọ mới phù hợp với yêu cầu của bạn</div>
+                                        <div class="notification-time">2 phút trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-success">
+                                        <i class="fas fa-check text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Đặt phòng thành công</div>
+                                        <div class="notification-text">Yêu cầu đặt phòng của bạn đã được xác nhận</div>
+                                        <div class="notification-time">1 giờ trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-warning">
+                                        <i class="fas fa-exclamation text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Nhắc nhở thanh toán</div>
+                                        <div class="notification-text">Hạn thanh toán tiền phòng sắp đến</div>
+                                        <div class="notification-time">3 giờ trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item" href="#">
+                                    <div class="notification-icon bg-info">
+                                        <i class="fas fa-star text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Đánh giá mới</div>
+                                        <div class="notification-text">Bạn có đánh giá mới từ chủ trọ</div>
+                                        <div class="notification-time">1 ngày trước</div>
+                                    </div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item" href="#">
+                                    <div class="notification-icon bg-secondary">
+                                        <i class="fas fa-bell text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Cập nhật hệ thống</div>
+                                        <div class="notification-text">Hệ thống đã được cập nhật với tính năng mới</div>
+                                        <div class="notification-time">2 ngày trước</div>
+                                    </div>
+                                </a>
+                            </li>
+                            
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Footer -->
+                            <li>
+                                <a class="dropdown-item text-center notification-footer" href="#">
+                                    <small class="text-primary fw-bold">Xem tất cả thông báo</small>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
                 <!-- User dropdown -->
@@ -64,10 +258,10 @@
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" th:href="@{/thong-tin-tai-khoan}"><i class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
-                        <li><a class="dropdown-item" th:href="@{/doi-mat-khau}"><i class="fas fa-key me-2"></i>Đổi mật khẩu</a></li>
+                        <li><a class="dropdown-item" th:href="@{/profile-khach-thue}"><i class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
                         <li><a class="dropdown-item" th:href="@{/tro-da-luu}"><i class="fas fa-heart me-2"></i>Trọ đã lưu</a></li>
-                        <li><a class="dropdown-item" th:href="@{/quan-ly-danh-gia}"><i class="fas fa-cog me-2"></i>Quản lý đánh giá</a></li>
+                        <li><a class="dropdown-item" th:href="@{/khach-thue/quan-ly-danh-gia}"><i class="fas fa-cog me-2"></i>Quản lý đánh giá</a></li>
+                        <li><a class="dropdown-item" th:href="@{/khach-thue/quan-ly-thue-tra}"><i class="fas fa-file-contract me-2"></i>Quản lý thuê trả</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <form id="logoutForm" th:action="@{/perform_logout}" method="post">
@@ -81,7 +275,106 @@
             </div>
 
             <!-- Anonymous user -->
-            <div class="d-flex" sec:authorize="isAnonymous()">
+            <div class="d-flex justify-content-center" sec:authorize="isAnonymous()">
+                <!-- Desktop notification for anonymous users -->
+                <div class="notification-wrapper desktop-notification d-none d-lg-flex me-3">
+                    <div class="dropdown">
+                        <button class="btn btn-notification dropdown-toggle" type="button" id="anonymousNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="notification-badge">3</span>
+                        </button>
+                        
+                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu" aria-labelledby="anonymousNotificationDropdown">
+                            <!-- Header -->
+                            <li class="dropdown-header notification-header">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold">Thông báo</span>
+                                    <small class="text-muted">3 mới</small>
+                                </div>
+                            </li>
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Notification Items -->
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-primary">
+                                        <i class="fas fa-home text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Phòng trọ mới</div>
+                                        <div class="notification-text">Có phòng trọ mới phù hợp với yêu cầu của bạn</div>
+                                        <div class="notification-time">2 phút trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-success">
+                                        <i class="fas fa-check text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Đặt phòng thành công</div>
+                                        <div class="notification-text">Yêu cầu đặt phòng của bạn đã được xác nhận</div>
+                                        <div class="notification-time">1 giờ trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item unread" href="#">
+                                    <div class="notification-icon bg-warning">
+                                        <i class="fas fa-exclamation text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Nhắc nhở thanh toán</div>
+                                        <div class="notification-text">Hạn thanh toán tiền phòng sắp đến</div>
+                                        <div class="notification-time">3 giờ trước</div>
+                                    </div>
+                                    <div class="notification-dot"></div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item" href="#">
+                                    <div class="notification-icon bg-info">
+                                        <i class="fas fa-star text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Đánh giá mới</div>
+                                        <div class="notification-text">Bạn có đánh giá mới từ chủ trọ</div>
+                                        <div class="notification-time">1 ngày trước</div>
+                                    </div>
+                                </a>
+                            </li>
+                            
+                            <li>
+                                <a class="dropdown-item notification-item" href="#">
+                                    <div class="notification-icon bg-secondary">
+                                        <i class="fas fa-bell text-white"></i>
+                                    </div>
+                                    <div class="notification-content">
+                                        <div class="notification-title">Cập nhật hệ thống</div>
+                                        <div class="notification-text">Hệ thống đã được cập nhật với tính năng mới</div>
+                                        <div class="notification-time">2 ngày trước</div>
+                                    </div>
+                                </a>
+                            </li>
+                            
+                            <li><hr class="dropdown-divider m-0"></li>
+                            
+                            <!-- Footer -->
+                            <li>
+                                <a class="dropdown-item text-center notification-footer" href="#">
+                                    <small class="text-primary fw-bold">Xem tất cả thông báo</small>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
                 <button class="btn btn-login me-2" type="button" id="loginBtnTrigger">
                     <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>
                 </button>
