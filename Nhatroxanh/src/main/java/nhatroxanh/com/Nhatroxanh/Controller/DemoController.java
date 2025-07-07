@@ -155,4 +155,12 @@ public class DemoController {
     public String chiTietPhongThue() {
         return "guest/chitiet-phongthue";
     }
+    @GetMapping("/khach-thue/thanh-toan")
+    public String thanhToan() {
+        return "guest/thanh-toan";
+    }
+    @GetMapping("/chu-tro/voucher")
+    public String voucherHosst() {
+        return "host/voucher-host";
+    }
 }

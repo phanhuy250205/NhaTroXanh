@@ -28,8 +28,6 @@
       --border-radius: 12px;
     }
 
-
-
     .header-section {
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
       color: white;
@@ -149,6 +147,23 @@
     .btn-warning:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
       color: white;
     }
 
@@ -898,15 +913,15 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-            onclick="document.querySelector('.modal-backdrop').remove();">
-            <i class="fas fa-times me-2"></i>Đóng
-          </button>
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
-          <button type="button" class="btn btn-success" onclick="downloadInvoice()">
-            <i class="fas fa-download me-2"></i>Tải xuống
+           <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
+            <i class="fas fa-trash me-2"></i>Xóa
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+            onclick="document.querySelector('.modal-backdrop').remove();">
+            <i class="fas fa-times me-2"></i>Đóng
           </button>
         </div>
       </div>
@@ -932,7 +947,6 @@
                 <label for="invoiceRoomSelect" class="form-label">Phòng</label>
                 <select class="form-select" id="invoiceRoomSelect" name="contractId" required>
                   <option value="">Chọn phòng</option>
-
                 </select>
               </div>
               <div class="col-md-6">
@@ -947,51 +961,48 @@
               </div>
               <div class="col-md-6">
                 <label for="wifiFeeInput" class="form-label">Tiền Wifi (VNĐ)</label>
-                <input type="number" class="form-control" id="wifiFeeInput" name="wifiFee"  required>
+                <input type="number" class="form-control" id="wifiFeeInput" name="wifiFee" required>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="electricityPrevInput" class="form-label">Chỉ số điện cũ (kWh)</label>
-                <input type="number" class="form-control" id="electricityPrevInput" name="electricityPrev" 
-                  required>
+                <input type="number" class="form-control" id="electricityPrevInput" name="electricityPrev" required>
               </div>
               <div class="col-md-6">
                 <label for="electricityCurrInput" class="form-label">Chỉ số điện mới (kWh)</label>
-                <input type="number" class="form-control" id="electricityCurrInput" name="electricityCurr" 
-                  required>
+                <input type="number" class="form-control" id="electricityCurrInput" name="electricityCurr" required>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="electricityUnitPriceInput" class="form-label">Đơn giá điện (VNĐ/kWh)</label>
                 <input type="number" class="form-control" id="electricityUnitPriceInput" name="electricityUnitPrice"
-                   required>
+                  required>
               </div>
               <div class="col-md-6">
                 <label for="waterUnitPriceInput" class="form-label">Đơn giá nước (VNĐ/m³)</label>
-                <input type="number" class="form-control" id="waterUnitPriceInput" name="waterUnitPrice"
-                  required>
+                <input type="number" class="form-control" id="waterUnitPriceInput" name="waterUnitPrice" required>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="waterPrevInput" class="form-label">Chỉ số nước cũ (m³)</label>
-                <input type="number" class="form-control" id="waterPrevInput" name="waterPrev"  required>
+                <input type="number" class="form-control" id="waterPrevInput" name="waterPrev" required>
               </div>
               <div class="col-md-6">
                 <label for="waterCurrInput" class="form-label">Chỉ số nước mới (m³)</label>
-                <input type="number" class="form-control" id="waterCurrInput" name="waterCurr"  required>
+                <input type="number" class="form-control" id="waterCurrInput" name="waterCurr" required>
               </div>
             </div>
             <div class="row mb-3">
               <div class="col-md-6">
                 <label for="trashFeeInput" class="form-label">Tiền rác (VNĐ)</label>
-                <input type="number" class="form-control" id="trashFeeInput" name="trashFee"  required>
+                <input type="number" class="form-control" id="trashFeeInput" name="trashFee" required>
               </div>
               <div class="col-md-6">
                 <label for="otherFeeInput" class="form-label">Phí khác (VNĐ)</label>
-                <input type="number" class="form-control" id="otherFeeInput" name="otherFee" >
+                <input type="number" class="form-control" id="otherFeeInput" name="otherFee">
               </div>
             </div>
             <div class="mb-3">
@@ -1001,11 +1012,12 @@
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="removeModalBackdrop()">
-            <i class="fas fa-times me-2"></i>Hủy
-          </button>
+          
           <button type="button" class="btn btn-primary" onclick="createNewInvoice()">
             <i class="fas fa-plus me-2"></i>Tạo hóa đơn
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="removeModalBackdrop()">
+            <i class="fas fa-times me-2"></i>Hủy
           </button>
         </div>
       </div>
