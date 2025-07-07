@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
 
     <style>
-        /* Previous styles remain unchanged */
+        /* Complete CSS Styles */
         body .main-content-staff {
             margin-left: 100px;
             padding: 1.5rem;
@@ -142,6 +143,7 @@
             position: relative;
             overflow: hidden;
             text-decoration: none;
+            cursor: pointer;
         }
 
         .btn-action-staff::before {
@@ -151,7 +153,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transition: left 0.5s;
         }
 
@@ -169,24 +171,12 @@
             box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
         }
 
-        .btn-permissions-staff {
-            background: linear-gradient(135deg, var(--info-color-staff) 0%, #138496 100%);
-        }
-
-        .btn-permissions-staff:hover {
-            background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(23, 162, 184, 0.3);
-        }
-
-        .btn-disable-staff {
+        .btn-edit-staff.save-mode {
             background: linear-gradient(135deg, var(--danger-color-staff) 0%, #dc2626 100%);
         }
 
-        .btn-disable-staff:hover {
+        .btn-edit-staff.save-mode:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.3);
         }
 
         .profile-overview-staff {
@@ -230,15 +220,16 @@
         .avatar-container-staff:hover::after {
             content: 'Thay đổi ảnh';
             position: absolute;
-            bottom: -20px;
+            bottom: -30px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.8);
             color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding: 8px 12px;
+            border-radius: 6px;
             font-size: 0.8rem;
             white-space: nowrap;
+            z-index: 10;
         }
 
         .avatar-staff {
@@ -377,12 +368,90 @@
             z-index: 2;
         }
 
+        .form-control-staff:focus {
+            border-color: var(--primary-color-staff);
+            box-shadow: 0 0 0 4px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+
         .form-control-staff:disabled,
         .form-control-staff[readonly] {
             background: linear-gradient(135deg, var(--gray-100-staff), rgba(248, 249, 250, 0.8));
             border-color: var(--gray-300-staff);
             color: var(--gray-600-staff);
             cursor: not-allowed;
+        }
+
+        .form-control-staff.is-invalid {
+            border-color: var(--danger-color-staff);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
+            animation: shake-staff 0.5s ease-in-out;
+        }
+
+        .form-control-staff.is-valid {
+            border-color: var(--success-color-staff);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+        }
+
+        .invalid-feedback {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--danger-color-staff);
+            color: var(--danger-color-staff);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .invalid-feedback::before {
+            content: "\f071";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+
+        .valid-feedback {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 0.5rem;
+            border-left: 3px solid var(--success-color-staff);
+            color: var(--success-color-staff);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .valid-feedback::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+        }
+
+        .field-info {
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .field-info.text-success {
+            color: var(--success-color-staff);
+        }
+
+        .field-info.text-info {
+            color: var(--info-color-staff);
+        }
+
+        .field-info.text-warning {
+            color: var(--warning-color-staff);
         }
 
         .badge-staff {
@@ -407,319 +476,136 @@
             color: white;
         }
 
-        .badge-admin-staff {
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid var(--gray-200-staff);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: var(--transition-staff);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-primary {
             background: linear-gradient(135deg, var(--primary-color-staff), var(--primary-dark-staff));
             color: white;
         }
 
-        .badge-manager-staff {
-            background: linear-gradient(135deg, var(--info-color-staff), #138496);
-            color: white;
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark-staff), #1a4480);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(74, 144, 226, 0.3);
         }
 
-        .badge-staff-role {
-            background: linear-gradient(135deg, var(--warning-color-staff), #e0a800);
-            color: white;
-        }
-
-        .stats-grid-staff {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card-staff {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 0.75rem;
-            padding: 1.5rem;
-            text-align: center;
-            border: 1px solid var(--gray-200-staff);
-            transition: var(--transition-staff);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card-staff::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color-staff), var(--primary-dark-staff));
-        }
-
-        .stat-card-staff:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-number-staff {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--primary-color-staff);
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label-staff {
-            color: var(--gray-600-staff);
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .permissions-grid-staff {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-        }
-
-        .permission-item-staff {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1rem;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 0.75rem;
-            border: 1px solid var(--gray-200-staff);
-            transition: var(--transition-staff);
-        }
-
-        .permission-item-staff:hover {
-            background: rgba(74, 144, 226, 0.05);
-            border-color: var(--primary-color-staff);
-        }
-
-        .permission-label-staff {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gray-300-staff), #94a3b8);
             color: var(--gray-700-staff);
         }
 
-        .permission-label-staff i {
-            color: var(--primary-color-staff);
-            width: 20px;
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            transform: translateY(-2px);
         }
 
-        .permission-toggle-staff {
-            position: relative;
-            width: 50px;
-            height: 24px;
-            background: var(--gray-300-staff);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: var(--transition-staff);
-        }
-
-        .permission-toggle-staff.active-staff {
-            background: var(--success-color-staff);
-        }
-
-        .permission-toggle-staff::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            width: 20px;
-            height: 20px;
-            background: white;
-            border-radius: 50%;
-            transition: var(--transition-staff);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .permission-toggle-staff.active-staff::after {
-            transform: translateX(26px);
-        }
-
-        .activity-timeline-staff {
-            position: relative;
-            padding-left: 2rem;
-        }
-
-        .activity-timeline-staff::before {
-            content: '';
-            position: absolute;
-            left: 0.75rem;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: var(--gray-300-staff);
-        }
-
-        .activity-item-staff {
-            position: relative;
-            margin-bottom: 2rem;
-            padding-left: 2rem;
-        }
-
-        .activity-item-staff::before {
-            content: '';
-            position: absolute;
-            left: -0.5rem;
-            top: 0.25rem;
-            width: 12px;
-            height: 12px;
-            background: var(--primary-color-staff);
-            border-radius: 50%;
-            border: 3px solid white;
-            box-shadow: 0 0 0 2px var(--primary-color-staff);
-        }
-
-        .activity-time-staff {
-            font-size: 0.875rem;
-            color: var(--gray-600-staff);
-            margin-bottom: 0.25rem;
-        }
-
-        .activity-content-staff {
-            color: var(--gray-700-staff);
-            line-height: 1.5;
-        }
-
-        .btn-loading-staff {
-            position: relative;
-            color: transparent !important;
-            pointer-events: none;
-        }
-
-        .btn-loading-staff::after {
-            content: '';
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            top: 50%;
-            left: 50%;
-            margin-left: -10px;
-            margin-top: -10px;
-            border: 2px solid transparent;
-            border-top-color: currentColor;
-            border-radius: 50%;
-            animation: spin-staff 1s linear infinite;
-        }
-
-        @keyframes spin-staff {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .alert-staff {
+        .custom-toast-container {
             position: fixed;
-            top: 30px;
-            right: 30px;
-            z-index: 9999;
-            min-width: 350px;
-            padding: 1.25rem 1.5rem;
-            border-radius: var(--border-radius-staff);
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-weight: 600;
-            box-shadow: var(--shadow-lg-staff);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .alert-success-staff {
-            background: linear-gradient(135deg, var(--success-color-staff), #1e7e34);
-            color: white;
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
         }
 
-        .alert-warning-staff {
-            background: linear-gradient(135deg, var(--warning-color-staff), #e0a800);
-            color: white;
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
         }
 
-        .alert-info-staff {
-            background: linear-gradient(135deg, var(--info-color-staff), #138496);
-            color: white;
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
         }
 
-        .btn-close-staff {
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
             background: none;
             border: none;
-            color: currentColor;
-            font-size: 1.25rem;
+            font-size: 18px;
+            color: #999;
             cursor: pointer;
-            margin-left: auto;
-            padding: 0.25rem;
-            opacity: 0.8;
-            transition: var(--transition-staff);
-            border-radius: 0.25rem;
+            transition: color 0.2s;
         }
 
-        .btn-close-staff:hover {
-            opacity: 1;
-            background: rgba(255, 255, 255, 0.1);
+        .toast-close:hover {
+            color: #333;
         }
 
-        .fade-show-staff {
-            opacity: 1;
-            transform: translateX(0);
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
         }
 
-        .fade-staff {
-            opacity: 0;
-            transform: translateX(100%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        .loading-spinner {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            box-shadow: var(--shadow-lg-staff);
         }
 
-        @media (max-width: 768px) {
-            .header-content-staff {
-                flex-direction: column;
-                gap: 1rem;
-                text-align: center;
-            }
-            
-            .header-actions-staff {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .btn-action-staff {
-                flex: 1;
-                justify-content: center;
-                padding: 0.75rem 1rem;
-                font-size: 0.9rem;
-            }
-            
-            .profile-header-staff {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .staff-meta-staff {
-                justify-content: center;
-            }
-            
-            .info-section-staff {
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-            
-            .page-title-staff {
-                font-size: 1.25rem;
-            }
-
-            .stats-grid-staff {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 1rem;
-            }
-
-            .permissions-grid-staff {
-                grid-template-columns: 1fr;
-            }
-
-            .alert-staff {
-                right: 1rem;
-                left: 1rem;
-                min-width: auto;
-            }
+        .loading-spinner i {
+            font-size: 2rem;
+            color: var(--primary-color-staff);
+            margin-bottom: 1rem;
         }
 
+        /* Animations */
         .animate-slide-up-staff {
             animation: slideInUp-staff 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -733,6 +619,7 @@
                 transform: translateY(40px);
                 opacity: 0;
             }
+
             to {
                 transform: translateY(0);
                 opacity: 1;
@@ -744,36 +631,106 @@
                 transform: scale(0.95);
                 opacity: 0;
             }
+
             to {
                 transform: scale(1);
                 opacity: 1;
             }
         }
 
-        .is-invalid-staff {
-            border-color: var(--danger-color-staff) !important;
-            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
-            animation: shake-staff 0.5s ease-in-out;
+        @keyframes shake-staff {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
         }
 
-        @keyframes shake-staff {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         input[type="file"] {
             display: none;
         }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content-staff {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .header-actions-staff {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .btn-action-staff {
+                flex: 1;
+                justify-content: center;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .profile-header-staff {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .staff-meta-staff {
+                justify-content: center;
+            }
+
+            .info-section-staff {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .field-info {
+                font-size: 0.8rem;
+            }
+
+            .invalid-feedback,
+            .valid-feedback {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.6rem;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
 
-    <!-- Main Content -->
     <div class="main-content-staff">
-        <!-- Header -->
+        <!-- Header Section -->
         <div class="header-container-staff animate-fade-in-scale-staff">
             <div class="header-content-staff">
                 <div class="header-left-staff">
@@ -786,107 +743,198 @@
                     </h1>
                 </div>
                 <div class="header-actions-staff">
-                    <button class="btn-action-staff btn-edit-staff" onclick="editStaff()">
+                    <button class="btn-action-staff btn-edit-staff" id="editBtn" onclick="toggleEditMode()">
                         <i class="fas fa-edit"></i>
-                        Chỉnh sửa
+                        <span id="editBtnText">Chỉnh sửa</span>
                     </button>
-                    
                 </div>
+            </div>
+        </div>
+
+        <!-- Toast Messages -->
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
             </div>
         </div>
 
         <!-- Profile Overview -->
         <div class="profile-overview-staff animate-slide-up-staff">
             <div class="profile-header-staff">
-                <div class="avatar-container-staff">
-                    <img src="https://i.pinimg.com/736x/b7/91/44/b79144e03dc4996ce319ff59118caf65.jpg" alt="Avatar" class="avatar-staff" id="staffAvatar">
-                    <input type="file" id="avatarInput" accept="image/*">
-                    <div class="status-indicator-staff status-active-staff" id="statusIndicator"></div>
+                <div class="avatar-container-staff" onclick="triggerAvatarUpload()">
+                    <img th:src="${user.avatar != null and user.avatar.startsWith('/uploads/') 
+                          ? user.avatar 
+                          : '/uploads/' + user.avatar}" alt="Avatar" class="avatar-staff" id="staffAvatar">
+                    <div class="status-indicator-staff status-active-staff"></div>
                 </div>
                 <div class="profile-info-staff">
-                    <h2 class="staff-name-staff" id="staffName">Nguyễn Văn Quản Lý</h2>
-                    <div class="staff-position-staff" id="staffPosition">Quản lý khu trọ</div>
+                    <h2 class="staff-name-staff" th:text="${user.fullname}">Tên nhân viên</h2>
+                    <div class="staff-position-staff">Nhân viên</div>
                     <div class="staff-meta-staff">
                         <div class="meta-item-staff">
                             <i class="fas fa-id-badge"></i>
-                            <span>ID: NV001</span>
+                            <span th:text="'ID: ' + ${user.userId}">ID: NV001</span>
                         </div>
-                        <div class="meta-item-staff">
-                            <i class="fas fa-calendar-alt"></i>
-                            <span>Gia nhập: 15/01/2023</span>
-                        </div>
-                        <div class="meta-item-staff">
-                            <i class="fas fa-building"></i>
-                            <span>Khu A - Tòa nhà chính</span>
-                        </div>
-                        <div class="meta-item-staff">
-                            <i class="fas fa-circle"></i>
+                        <div class="meta-item-staff" th:if="${user.enabled}">
                             <span class="badge-staff badge-active-staff">
                                 <i class="fas fa-check-circle"></i>
                                 Đang hoạt động
                             </span>
                         </div>
+                        <div class="meta-item-staff" th:if="${!user.enabled}">
+                            <span class="badge-staff badge-inactive-staff">
+                                <i class="fas fa-times-circle"></i>
+                                Không hoạt động
+                            </span>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <!-- Performance Stats -->
-            <div class="stats-grid-staff">
-                <div class="stat-card-staff">
-                    <div class="stat-number-staff">45</div>
-                    <div class="stat-label-staff">Phòng quản lý</div>
-                </div>
-                <div class="stat-card-staff">
-                    <div class="stat-number-staff">38</div>
-                    <div class="stat-label-staff">Khách hàng</div>
-                </div>
-                <div class="stat-card-staff">
-                    <div class="stat-number-staff">12</div>
-                    <div class="stat-label-staff">Tháng làm việc</div>
-                </div>
-                <div class="stat-card-staff">
-                    <div class="stat-number-staff">4.8</div>
-                    <div class="stat-label-staff">Đánh giá (5★)</div>
                 </div>
             </div>
         </div>
 
-        <!-- Personal Information -->
+        <!-- Personal Information Form -->
         <div class="info-section-staff animate-slide-up-staff">
             <h3 class="section-title-staff">
                 <i class="fas fa-user"></i>
                 Thông tin cá nhân
             </h3>
-            <form id="personalForm">
+
+            <form id="personalForm" th:action="@{/nhan-vien/profile-nhan-vien}" method="post"
+                enctype="multipart/form-data" th:object="${hostInfo}">
+
+                <!-- Hidden avatar file input -->
+                <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;">
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="fullName" class="form-label-staff">Họ và tên</label>
-                        <input type="text" class="form-control-staff" id="fullName" value="Nguyễn Văn Quản Lý" readonly>
+                        <label for="fullName" class="form-label-staff">Họ và tên *</label>
+                        <input type="text" class="form-control-staff" id="fullName" name="fullname"
+                            th:field="*{fullname}" readonly required>
+                        <div class="invalid-feedback" id="fullNameError" style="display: none;"></div>
+                        <div class="valid-feedback" id="fullNameSuccess" style="display: none;"></div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label-staff">Email</label>
-                        <input type="email" class="form-control-staff" id="email" value="quanly@nhatroxanh.com" readonly>
+                        <label for="email" class="form-label-staff">Email *</label>
+                        <input type="email" class="form-control-staff" id="email" name="email" th:field="*{email}"
+                            readonly required>
+                        <div class="invalid-feedback" id="emailError" style="display: none;"></div>
+                        <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="phone" class="form-label-staff">Số điện thoại</label>
-                        <input type="tel" class="form-control-staff" id="phone" value="0987654321" readonly>
+                        <label for="phone" class="form-label-staff">Số điện thoại *</label>
+                        <input type="tel" class="form-control-staff" id="phone" name="phone" th:field="*{phone}"
+                            readonly required>
+                        <div class="invalid-feedback" id="phoneError" style="display: none;"></div>
+                        <div class="valid-feedback" id="phoneSuccess" style="display: none;"></div>
+                        <div class="field-info" id="phoneInfo" style="display: none;"></div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="birthDate" class="form-label-staff">Ngày sinh</label>
-                        <input type="date" class="form-control-staff" id="birthDate" value="1985-03-15" readonly>
+                        <input type="date" class="form-control-staff" id="birthDate" name="birthday"
+                            th:field="*{birthday}" readonly>
+                        <div class="invalid-feedback" id="birthDateError" style="display: none;"></div>
+                        <div class="valid-feedback" id="birthDateSuccess" style="display: none;"></div>
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-md-6 mb-3">
-                        <label for="idNumber" class="form-label-staff">CCCD/CMND</label>
-                        <input type="text" class="form-control-staff" id="idNumber" value="123456789012" readonly>
+                        <label class="form-label-staff d-block">Giới tính</label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="gender" id="genderNam" value="true"
+                                th:checked="${hostInfo.gender} == true" disabled>
+                            <label class="form-check-label" for="genderNam">Nam</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="gender" id="genderNu" value="false"
+                                th:checked="${hostInfo.gender} == false" disabled>
+                            <label class="form-check-label" for="genderNu">Nữ</label>
+                        </div>
+                        <div class="invalid-feedback" id="genderError" style="display: none;"></div>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label for="address" class="form-label-staff">Địa chỉ</label>
-                        <input type="text" class="form-control-staff" id="address" value="123 Đường ABC, Quận 1, TP.HCM" readonly>
+                        <label for="cccdNumber" class="form-label-staff">CCCD/CMND</label>
+                        <input type="text" class="form-control-staff" id="cccdNumber" name="cccdNumber"
+                            th:field="*{cccdNumber}" readonly maxlength="12">
+                        <div class="invalid-feedback" id="cccdNumberError" style="display: none;"></div>
+                        <div class="valid-feedback" id="cccdNumberSuccess" style="display: none;"></div>
+                        <div class="field-info" id="cccdInfo" style="display: none;"></div>
                     </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="issueDate" class="form-label-staff">Ngày cấp CCCD</label>
+                        <input type="date" class="form-control-staff" id="issueDate" name="issueDate"
+                            th:field="*{issueDate}" readonly>
+                        <div class="invalid-feedback" id="issueDateError" style="display: none;"></div>
+                        <div class="valid-feedback" id="issueDateSuccess" style="display: none;"></div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="issuePlace" class="form-label-staff">Nơi cấp CCCD</label>
+                        <input type="text" class="form-control-staff" id="issuePlace" name="issuePlace"
+                            th:field="*{issuePlace}" readonly>
+                        <div class="invalid-feedback" id="issuePlaceError" style="display: none;"></div>
+                        <div class="valid-feedback" id="issuePlaceSuccess" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Address Section -->
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="province" class="form-label-staff">Tỉnh/Thành phố</label>
+                        <select class="form-control-staff" id="province" name="province" disabled>
+                            <option value="">Chọn Tỉnh/Thành phố</option>
+                        </select>
+                        <div class="invalid-feedback" id="provinceError" style="display: none;"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="district" class="form-label-staff">Quận/Huyện</label>
+                        <select class="form-control-staff" id="district" name="district" disabled>
+                            <option value="">Chọn Quận/Huyện</option>
+                        </select>
+                        <div class="invalid-feedback" id="districtError" style="display: none;"></div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="ward" class="form-label-staff">Phường/Xã</label>
+                        <select class="form-control-staff" id="ward" name="ward" disabled>
+                            <option value="">Chọn Phường/Xã</option>
+                        </select>
+                        <div class="invalid-feedback" id="wardError" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-12 mb-3">
+                        <label for="street" class="form-label-staff">Tên đường/Số nhà</label>
+                        <input type="text" class="form-control-staff" id="street" name="street" readonly>
+                        <div class="invalid-feedback" id="streetError" style="display: none;"></div>
+                        <div class="valid-feedback" id="streetSuccess" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Hidden fields -->
+                <input type="hidden" name="address" th:field="*{address}" id="fullAddress">
+                <input type="hidden" id="savedAddress" th:value="*{address}">
+
+                <!-- Form Actions -->
+                <div class="form-actions" id="formActions" style="display: none;">
+                    <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                        <i class="fas fa-times"></i> Hủy
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="saveBtn">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
                 </div>
             </form>
         </div>
@@ -897,561 +945,970 @@
                 <i class="fas fa-briefcase"></i>
                 Thông tin công việc
             </h3>
-            <form id="workForm">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="employeeId" class="form-label-staff">Mã nhân viên</label>
-                        <input type="text" class="form-control-staff" id="employeeId" value="NV001" readonly>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="department" class="form-label-staff">Phòng ban</label>
-                        <input type="text" class="form-control-staff" id="department" value="Quản lý nhà trọ" readonly>
-                    </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-staff">Mã nhân viên</label>
+                    <input type="text" class="form-control-staff" th:value="${user.userId}" readonly>
                 </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="position" class="form-label-staff">Chức vụ</label>
-                        <input type="text" class="form-control-staff" id="position" value="Quản lý khu trọ" readonly>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="salary" class="form-label-staff">Mức lương</label>
-                        <input type="text" class="form-control-staff" id="salary" value="15,000,000 VNĐ" readonly>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="startDate" class="form-label-staff">Ngày bắt đầu</label>
-                        <input type="date" class="form-control-staff" id="startDate" value="2023-01-15" readonly>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="workArea" class="form-label-staff">Khu vực phụ trách</label>
-                        <input type="text" class="form-control-staff" id="workArea" value="Khu A - Tòa nhà chính" readonly>
-                    </div>
-                </div>
-            </form>
-        </div>
-
-        <!-- Permissions Management -->
-        <div class="info-section-staff animate-slide-up-staff">
-            <h3 class="section-title-staff">
-                <i class="fas fa-key"></i>
-                Phân quyền hệ thống
-            </h3>
-            <div class="permissions-grid-staff">
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-users"></i>
-                        Quản lý khách hàng
-                    </div>
-                    <div class="permission-toggle-staff active-staff" data-permission="customers"></div>
-                </div>
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-home"></i>
-                        Quản lý phòng trọ
-                    </div>
-                    <div class="permission-toggle-staff active-staff" data-permission="rooms"></div>
-                </div>
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-money-bill"></i>
-                        Quản lý thanh toán
-                    </div>
-                    <div class="permission-toggle-staff active-staff" data-permission="payments"></div>
-                </div>
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-chart-bar"></i>
-                        Xem báo cáo
-                    </div>
-                    <div class="permission-toggle-staff active-staff" data-permission="reports"></div>
-                </div>
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-cog"></i>
-                        Cài đặt hệ thống
-                    </div>
-                    <div class="permission-toggle-staff" data-permission="settings"></div>
-                </div>
-                <div class="permission-item-staff">
-                    <div class="permission-label-staff">
-                        <i class="fas fa-user-shield"></i>
-                        Quản lý nhân viên
-                    </div>
-                    <div class="permission-toggle-staff" data-permission="staff"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Activity Timeline -->
-        <div class="info-section-staff animate-slide-up-staff">
-            <h3 class="section-title-staff">
-                <i class="fas fa-history"></i>
-                Lịch sử hoạt động
-            </h3>
-            <div class="activity-timeline-staff">
-                <div class="activity-item-staff">
-                    <div class="activity-time-staff">2 giờ trước</div>
-                    <div class="activity-content-staff">
-                        Cập nhật thông tin khách hàng <strong>Nguyễn Văn A</strong> - Phòng A101
-                    </div>
-                </div>
-                <div class="activity-item-staff">
-                    <div class="activity-time-staff">5 giờ trước</div>
-                    <div class="activity-content-staff">
-                        Xử lý thanh toán tiền phòng tháng 12/2024 cho <strong>15 khách hàng</strong>
-                    </div>
-                </div>
-                <div class="activity-item-staff">
-                    <div class="activity-time-staff">1 ngày trước</div>
-                    <div class="activity-content-staff">
-                        Kiểm tra và bảo trì <strong>8 phòng trọ</strong> trong khu A
-                    </div>
-                </div>
-                <div class="activity-item-staff">
-                    <div class="activity-time-staff">2 ngày trước</div>
-                    <div class="activity-content-staff">
-                        Tạo báo cáo doanh thu tháng 11/2024 - <strong>Tổng: 45,000,000 VNĐ</strong>
-                    </div>
-                </div>
-                <div class="activity-item-staff">
-                    <div class="activity-time-staff">3 ngày trước</div>
-                    <div class="activity-content-staff">
-                        Đăng ký khách hàng mới <strong>Trần Thị B</strong> - Phòng A205
-                    </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label-staff">Chức vụ</label>
+                    <input type="text" class="form-control-staff" value="Nhân viên" readonly>
                 </div>
             </div>
         </div>
     </div>
 
-    <script th:src="@{/js/sidebar.js}"></script>
-    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Đang xử lý...</p>
+        </div>
+    </div>
+
     <script>
-    // Global state
-    let isEditMode = false;
+        // CCCD Province Codes - Mã tỉnh CCCD Việt Nam
+        const CCCD_PROVINCE_CODES = {
+            // Miền Bắc
+            "001": "Hà Nội",
+            "002": "Hà Giang",
+            "004": "Cao Bằng",
+            "006": "Bắc Kạn",
+            "008": "Tuyên Quang",
+            "010": "Lào Cai",
+            "011": "Điện Biên",
+            "012": "Lai Châu",
+            "014": "Sơn La",
+            "015": "Yên Bái",
+            "017": "Hoà Bình",
+            "019": "Thái Nguyên",
+            "020": "Lạng Sơn",
+            "022": "Quảng Ninh",
+            "024": "Bắc Giang",
+            "025": "Phú Thọ",
+            "026": "Vĩnh Phúc",
+            "027": "Bắc Ninh",
+            "030": "Hải Dương",
+            "031": "Hải Phòng",
+            "033": "Hưng Yên",
+            "034": "Thái Bình",
+            "035": "Hà Nam",
+            "036": "Nam Định",
+            "037": "Ninh Bình",
 
-    // Form elements arrays - chỉ chứa các trường thông tin cá nhân
-    const personalFormElements = [
-        'fullName', 'email', 'phone', 'birthDate', 'idNumber', 'address'
-    ];
+            // Miền Trung
+            "038": "Thanh Hóa",
+            "040": "Nghệ An",
+            "042": "Hà Tĩnh",
+            "044": "Quảng Bình",
+            "045": "Quảng Trị",
+            "046": "Thừa Thiên Huế",
+            "048": "Đà Nẵng",
+            "049": "Quảng Nam",
+            "051": "Quảng Ngãi",
+            "052": "Bình Định",
+            "054": "Phú Yên",
+            "056": "Khánh Hòa",
+            "058": "Ninh Thuận",
+            "060": "Bình Thuận",
+            "062": "Kon Tum",
+            "064": "Gia Lai",
+            "066": "Đắk Lắk",
+            "067": "Đắk Nông",
+            "068": "Lâm Đồng",
 
-    // Initialize page
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Staff profile page loaded');
-        setReadOnlyMode(); // Set initial read-only state
-        initializeAnimations();
-        initializePermissionToggles();
-        initializeAvatarUpload();
-    });
-
-    // Initialize animations
-    function initializeAnimations() {
-        const sections = document.querySelectorAll('.info-section-staff, .profile-overview-staff');
-        sections.forEach((section, index) => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(40px)';
-            
-            setTimeout(() => {
-                section.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
-                section.style.opacity = '1';
-                section.style.transform = 'translateY(0)';
-            }, (index + 1) * 200);
-        });
-    }
-
-    // Initialize permission toggles - chỉ cho phép thay đổi khi có quyền
-    function initializePermissionToggles() {
-        const toggles = document.querySelectorAll('.permission-toggle-staff');
-        toggles.forEach(toggle => {
-            toggle.style.pointerEvents = 'none';
-            toggle.style.opacity = '0.7';
-        });
-    }
-
-    // Initialize avatar upload
-    function initializeAvatarUpload() {
-        const avatar = document.getElementById('staffAvatar');
-        const avatarInput = document.getElementById('avatarInput');
-
-        avatar.addEventListener('click', () => {
-            avatarInput.click();
-        });
-
-        avatarInput.addEventListener('change', handleAvatarChange);
-    }
-
-    // Handle avatar change
-    function handleAvatarChange(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        // Validate file type
-        const validImageTypes = ['image/jpeg', 'image/png', 'image/gif'];
-        if (!validImageTypes.includes(file.type)) {
-            showNotification('Vui lòng chọn file ảnh (JPEG, PNG, hoặc GIF)', 'warning');
-            event.target.value = '';
-            return;
-        }
-
-        // Validate file size (max 5MB)
-        const maxSize = 5 * 1024 * 1024; // 5MB in bytes
-        if (file.size > maxSize) {
-            showNotification('Ảnh phải nhỏ hơn 5MB', 'warning');
-            event.target.value = '';
-            return;
-        }
-
-        // Create preview
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const avatar = document.getElementById('staffAvatar');
-            
-            // Show loading state
-            avatar.style.opacity = '0.5';
-            avatar.style.cursor = 'wait';
-
-            // Simulate upload
-            setTimeout(() => {
-                avatar.src = e.target.result;
-                avatar.style.opacity = '1';
-                avatar.style.cursor = 'pointer';
-                
-                // Update activity timeline
-                updateActivityTimeline('Cập nhật ảnh đại diện mới');
-                
-                showNotification('Ảnh đại diện đã được cập nhật thành công!', 'success');
-                
-                // Reset input
-                event.target.value = '';
-            }, 1500);
+            // Miền Nam
+            "070": "Bình Phước",
+            "072": "Tây Ninh",
+            "074": "Bình Dương",
+            "075": "Đồng Nai",
+            "077": "Bà Rịa - Vũng Tàu",
+            "079": "Hồ Chí Minh",
+            "080": "Long An",
+            "082": "Tiền Giang",
+            "083": "Bến Tre",
+            "084": "Trà Vinh",
+            "086": "Vĩnh Long",
+            "087": "Đồng Tháp",
+            "089": "An Giang",
+            "091": "Kiên Giang",
+            "092": "Cần Thơ",
+            "093": "Hậu Giang",
+            "094": "Sóc Trăng",
+            "095": "Bạc Liêu",
+            "096": "Cà Mau"
         };
-        reader.readAsDataURL(file);
-    }
 
-    // Update activity timeline
-    function updateActivityTimeline(activity) {
-        const timeline = document.querySelector('.activity-timeline-staff');
-        const newItem = document.createElement('div');
-        newItem.className = 'activity-item-staff';
-        newItem.innerHTML = `
-            <div class="activity-time-staff">Vừa xong</div>
-            <div class="activity-content-staff">${activity}</div>
-        `;
-        
-        // Add animation
-        newItem.style.opacity = '0';
-        newItem.style.transform = 'translateX(20px)';
-        
-        timeline.insertBefore(newItem, timeline.firstChild);
-        
-        setTimeout(() => {
-            newItem.style.transition = 'all 0.5s ease';
-            newItem.style.opacity = '1';
-            newItem.style.transform = 'translateX(0)';
-        }, 100);
+        // Phone Network Codes - Mã nhà mạng Việt Nam
+        const PHONE_NETWORK_CODES = {
+            // Viettel
+            "032": "Viettel", "033": "Viettel", "034": "Viettel",
+            "035": "Viettel", "036": "Viettel", "037": "Viettel",
+            "038": "Viettel", "039": "Viettel", "096": "Viettel",
+            "097": "Viettel", "098": "Viettel",
 
-        // Limit to 5 activities
-        const items = timeline.querySelectorAll('.activity-item-staff');
-        if (items.length > 5) {
-            items[items.length - 1].remove();
-        }
-    }
+            // Vinaphone
+            "081": "Vinaphone", "082": "Vinaphone", "083": "Vinaphone",
+            "084": "Vinaphone", "085": "Vinaphone", "091": "Vinaphone",
+            "094": "Vinaphone",
 
-    // Go back function
-    function goBack() {
-        window.history.back();
-    }
+            // Mobifone
+            "070": "Mobifone", "076": "Mobifone", "077": "Mobifone",
+            "078": "Mobifone", "079": "Mobifone", "090": "Mobifone",
+            "093": "Mobifone",
 
-    // Edit staff function - chỉ áp dụng cho thông tin cá nhân
-    function editStaff() {
-        const editBtn = document.querySelector('.btn-edit-staff');
-        
-        if (!isEditMode) {
-            // Switch to edit mode chỉ cho thông tin cá nhân
-            setEditMode();
-            editBtn.style.background = 'linear-gradient(135deg, var(--success-color-staff) 0%, #1e7e34 100%)';
-            editBtn.innerHTML = '<i class="fas fa-save"></i> Lưu thay đổi';
-            isEditMode = true;
-            
-            showNotification('Chế độ chỉnh sửa thông tin cá nhân đã được bật', 'info');
-        } else {
-            // Validate and save changes chỉ cho thông tin cá nhân
-            if (validatePersonalForm()) {
-                savePersonalChanges();
-            } else {
-                showNotification('Vui lòng kiểm tra lại thông tin cá nhân đã nhập', 'warning');
+            // Vietnamobile
+            "056": "Vietnamobile", "058": "Vietnamobile", "092": "Vietnamobile",
+
+            // Gmobile
+            "059": "Gmobile", "099": "Gmobile"
+        };
+
+        // Enhanced Staff Profile Manager with CCCD and Phone validation
+        class EnhancedStaffProfileManager {
+            constructor() {
+                this.isEditMode = false;
+                this.addressAPI = null;
+                this.formElements = [
+                    "fullName", "email", "phone", "birthDate", "cccdNumber",
+                    "issueDate", "issuePlace", "street", "province", "district", "ward"
+                ];
+                this.init();
             }
-        }
-    }
 
-    // Set edit mode chỉ cho thông tin cá nhân
-    function setEditMode() {
-        personalFormElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.readOnly = false;
-                element.classList.remove('is-invalid-staff');
-            }
-        });
-    }
+            async init() {
+                try {
+                    // Initialize address API
+                    this.addressAPI = new VietnamAddressAPI();
+                    const savedAddress = document.getElementById("savedAddress")?.value;
+                    await this.addressAPI.init(savedAddress);
 
-    // Set read-only mode cho tất cả các trường
-    function setReadOnlyMode() {
-        personalFormElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) {
-                element.readOnly = true;
-                element.classList.remove('is-invalid-staff');
-            }
-        });
-    }
+                    // Setup event listeners
+                    this.setupEventListeners();
 
-    // Validate chỉ form thông tin cá nhân
-    function validatePersonalForm() {
-        const requiredFields = [
-            { id: 'fullName', name: 'Họ và tên' },
-            { id: 'email', name: 'Email' },
-            { id: 'phone', name: 'Số điện thoại' }
-        ];
-        
-        let isValid = true;
-        let errorMessages = [];
-        
-        requiredFields.forEach(field => {
-            const element = document.getElementById(field.id);
-            if (element && !element.value.trim()) {
-                element.classList.add('is-invalid-staff');
-                errorMessages.push(field.name);
-                isValid = false;
-            } else if (element) {
-                element.classList.remove('is-invalid-staff');
-            }
-        });
+                    // Initialize form validation
+                    this.initializeValidation();
 
-        // Validate email format
-        const emailElement = document.getElementById('email');
-        if (emailElement && emailElement.value.trim()) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(emailElement.value.trim())) {
-                emailElement.classList.add('is-invalid-staff');
-                if (!errorMessages.includes('Email')) {
-                    errorMessages.push('Email (định dạng không hợp lệ)');
+                    // Show flash messages
+                    this.showFlashMessages();
+
+                    // Initialize animations
+                    this.initializeAnimations();
+
+                    // Initial validation display for existing data
+                    this.validateExistingData();
+                } catch (error) {
+                    console.error("Error initializing staff profile:", error);
+                    this.showNotification("Có lỗi xảy ra khi khởi tạo trang", "error");
                 }
-                isValid = false;
             }
-        }
 
-        // Validate phone number format
-        const phoneElement = document.getElementById('phone');
-        if (phoneElement && phoneElement.value.trim()) {
-            const phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(phoneElement.value.trim())) {
-                phoneElement.classList.add('is-invalid-staff');
-                if (!errorMessages.includes('Số điện thoại')) {
-                    errorMessages.push('Số điện thoại (định dạng không hợp lệ)');
+            setupEventListeners() {
+                // Avatar upload
+                const avatarInput = document.getElementById("avatarInput");
+                if (avatarInput) {
+                    avatarInput.addEventListener("change", (e) => this.handleAvatarChange(e));
                 }
-                isValid = false;
-            }
-        }
-        
-        if (!isValid) {
-            showNotification(`Vui lòng kiểm tra: ${errorMessages.join(', ')}`, 'warning');
-        }
-        
-        return isValid;
-    }
 
-    // Save changes chỉ cho thông tin cá nhân
-    function savePersonalChanges() {
-        const editBtn = document.querySelector('.btn-edit-staff');
-        
-        // Show loading state
-        editBtn.classList.add('btn-loading-staff');
-        editBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
-        
-        // Simulate API call
-        setTimeout(() => {
-            // Collect personal form data
-            const formData = {};
-            
-            personalFormElements.forEach(id => {
-                const element = document.getElementById(id);
-                if (element) {
-                    formData[id] = element.value;
-                }
-            });
-            
-            console.log('Saving personal data:', formData);
-            
-            // Update profile header if name changed
-            const nameElement = document.getElementById('fullName');
-            const profileName = document.getElementById('staffName');
-            if (nameElement && profileName) {
-                profileName.textContent = nameElement.value;
-            }
-            
-            // Update activity timeline
-            updateActivityTimeline('Cập nhật thông tin cá nhân');
-            
-            // Switch back to read-only mode
-            setReadOnlyMode();
-            editBtn.classList.remove('btn-loading-staff');
-            editBtn.style.background = 'linear-gradient(135deg, var(--primary-color-staff) 0%, var(--primary-dark-staff) 100%)';
-            editBtn.innerHTML = '<i class="fas fa-edit"></i> Chỉnh sửa';
-            isEditMode = false;
-            
-            showNotification('Thông tin cá nhân đã được cập nhật thành công!', 'success');
-        }, 1500);
-    }
-
-    // Manage permissions - chỉ hiển thị thông báo
-    function managePermissions() {
-        showNotification('Chỉ quản trị viên mới có thể thay đổi phân quyền', 'warning');
-    }
-
-    // Disable staff - chỉ hiển thị thông báo
-    function disableStaff() {
-        showNotification('Chỉ quản trị viên mới có thể vô hiệu hóa nhân viên', 'warning');
-    }
-
-    // Show notification
-    function showNotification(message, type = 'info') {
-        // Remove existing notifications
-        document.querySelectorAll('.alert-staff').forEach(alert => alert.remove());
-        
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `alert-staff alert-${type}-staff fade-staff`;
-        notification.innerHTML = `
-            <i class="fas fa-${type === 'info' ? 'info-circle' : type === 'success' ? 'check-circle' : 'exclamation-triangle'}"></i>
-            ${message}
-            <button type="button" class="btn-close-staff" onclick="this.parentElement.remove()">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Trigger animation
-        setTimeout(() => {
-            notification.classList.remove('fade-staff');
-            notification.classList.add('fade-show-staff');
-        }, 10);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.classList.remove('fade-show-staff');
-                notification.classList.add('fade-staff');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.remove();
+                // Form validation
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                        element.addEventListener("blur", () => this.validateField(id));
                     }
-                }, 400);
-            }
-        }, 5000);
-    }
+                });
 
-    // Prevent form submission
-    document.getElementById('personalForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-    });
+                // Phone and CCCD formatting
+                const phoneInput = document.getElementById("phone");
+                const cccdInput = document.getElementById("cccdNumber");
 
-    document.getElementById('workForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-    });
+                if (phoneInput) {
+                    phoneInput.addEventListener("input", (e) => this.formatPhone(e));
+                }
 
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        // Ctrl/Cmd + E to edit staff
-        if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
-            e.preventDefault();
-            editStaff();
-        }
-    });
+                if (cccdInput) {
+                    cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
+                }
 
-    // Stats animation on scroll
-    const observerOptions = {
-        threshold: 0.5,
-        rootMargin: '0px 0px -100px 0px'
-    };
+                // Form submission
+                const personalForm = document.getElementById("personalForm");
+                if (personalForm) {
+                    personalForm.addEventListener("submit", (e) => this.handleFormSubmit(e));
+                }
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const statNumbers = entry.target.querySelectorAll('.stat-number-staff');
-                statNumbers.forEach(stat => {
-                    const finalValue = parseFloat(stat.textContent);
-                    animateNumber(stat, 0, finalValue, 1500);
+                // Gender radio buttons
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.addEventListener("change", () => this.validateField("gender"));
                 });
             }
-        });
-    }, observerOptions);
 
-    const statsGrid = document.querySelector('.stats-grid-staff');
-    if (statsGrid) {
-        observer.observe(statsGrid);
-    }
+            // Toggle edit mode
+            toggleEditMode() {
+                this.isEditMode = !this.isEditMode;
+                const editBtn = document.getElementById("editBtn");
+                const editBtnText = document.getElementById("editBtnText");
+                const formActions = document.getElementById("formActions");
 
-    // Animate number function
-    function animateNumber(element, start, end, duration) {
-        const startTime = performance.now();
-        const isFloat = end.toString().includes('.');
-        
-        function updateNumber(currentTime) {
-            const elapsed = currentTime - startTime;
-            const progress = Math.min(elapsed / duration, 1);
-            
-            const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-            const current = start + (end - start) * easeOutQuart;
-            
-            if (isFloat) {
-                element.textContent = current.toFixed(1);
-            } else {
-                element.textContent = Math.floor(current);
-            }
-            
-            if (progress < 1) {
-                requestAnimationFrame(updateNumber);
-            }
-        }
-        
-        requestAnimationFrame(updateNumber);
-    }
-
-    // Real-time validation chỉ cho các trường thông tin cá nhân
-    personalFormElements.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('input', function() {
-                if (this.classList.contains('is-invalid-staff')) {
-                    this.classList.remove('is-invalid-staff');
+                if (this.isEditMode) {
+                    this.enableEditMode();
+                    editBtn.classList.add("save-mode");
+                    editBtn.innerHTML = '<i class="fas fa-times"></i> <span>Hủy chỉnh sửa</span>';
+                    formActions.style.display = "flex";
+                } else {
+                    this.disableEditMode();
+                    editBtn.classList.remove("save-mode");
+                    editBtn.innerHTML = '<i class="fas fa-edit"></i> <span>Chỉnh sửa</span>';
+                    formActions.style.display = "none";
+                    this.resetForm();
                 }
+            }
+
+            enableEditMode() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element && id !== "email") { // Email không được chỉnh sửa
+                        if (element.type === "select-one") {
+                            element.disabled = false;
+                        } else {
+                            element.readOnly = false;
+                        }
+                    }
+                });
+
+                // Enable gender radio buttons
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.disabled = false;
+                });
+            }
+
+            disableEditMode() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        if (element.type === "select-one") {
+                            element.disabled = true;
+                        } else {
+                            element.readOnly = true;
+                        }
+                        this.clearValidationState(element);
+                    }
+                });
+
+                // Disable gender radio buttons
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.disabled = true;
+                });
+            }
+
+            // Avatar handling
+            triggerAvatarUpload() {
+                if (this.isEditMode) {
+                    document.getElementById("avatarInput").click();
+                }
+            }
+
+            handleAvatarChange(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                // Validate file type
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Chỉ được chọn file ảnh (JPG, PNG, GIF)", "error");
+                    return;
+                }
+
+                // Validate file size (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Kích thước file không được vượt quá 5MB", "error");
+                    return;
+                }
+
+                // Preview image
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById("staffAvatar").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                this.showNotification("Ảnh đại diện đã được chọn", "success");
+            }
+
+            // Enhanced form validation
+            validateField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                let successMessage = "";
+                const value = element.value.trim();
+
+                switch (fieldId) {
+                    case "fullName":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được để trống";
+                        } else if (value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Họ tên phải có ít nhất 2 ký tự";
+                        } else if (value.length > 100) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                        } else {
+                            successMessage = "Họ tên hợp lệ";
+                        }
+                        break;
+
+                    case "email":
+                        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Email không được để trống";
+                        } else if (!emailRegex.test(value)) {
+                            isValid = false;
+                            errorMessage = "Email không đúng định dạng";
+                        } else {
+                            successMessage = "Email hợp lệ";
+                        }
+                        break;
+
+                    case "phone":
+                        const phoneValidation = this.validatePhoneNumber(value);
+                        if (!phoneValidation.isValid) {
+                            isValid = false;
+                            errorMessage = phoneValidation.message;
+                        } else {
+                            successMessage = "Số điện thoại hợp lệ";
+                            this.showPhoneNetworkInfo(value);
+                        }
+                        break;
+
+                    case "cccdNumber":
+                        if (value) {
+                            const cccdValidation = this.validateCCCDNumber(value);
+                            if (!cccdValidation.isValid) {
+                                isValid = false;
+                                errorMessage = cccdValidation.message;
+                            } else {
+                                successMessage = "CCCD hợp lệ";
+                                this.showCCCDProvinceInfo(value);
+                            }
+                        }
+                        break;
+
+                    case "birthDate":
+                        if (value) {
+                            const birthDate = new Date(value);
+                            const today = new Date();
+                            const age = today.getFullYear() - birthDate.getFullYear();
+
+                            if (age < 18) {
+                                isValid = false;
+                                errorMessage = "Nhân viên phải từ 18 tuổi trở lên";
+                            } else if (age > 65) {
+                                isValid = false;
+                                errorMessage = "Tuổi không được vượt quá 65";
+                            } else {
+                                successMessage = `Tuổi: ${age} (hợp lệ)`;
+                            }
+                        }
+                        break;
+
+                    case "issueDate":
+                        if (value) {
+                            const issueDate = new Date(value);
+                            const birthDate = new Date(document.getElementById("birthDate").value);
+                            const today = new Date();
+
+                            if (birthDate && issueDate <= birthDate) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD phải sau ngày sinh";
+                            } else if (issueDate > today) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD không được là tương lai";
+                            } else {
+                                successMessage = "Ngày cấp hợp lệ";
+                            }
+                        }
+                        break;
+
+                    case "issuePlace":
+                        if (value && value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
+                        } else if (value) {
+                            successMessage = "Nơi cấp hợp lệ";
+                        }
+                        break;
+
+                    case "street":
+                        if (value && value.length < 5) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
+                        } else if (value) {
+                            successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                }
+
+                // Update UI
+                this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                return isValid;
+            }
+
+            // Validate Vietnamese phone number
+            validatePhoneNumber(phoneNumber) {
+                if (!phoneNumber) {
+                    return { isValid: false, message: "Số điện thoại không được để trống" };
+                }
+
+                // Remove spaces and special characters
+                const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+
+                // Must start with 0
+                if (!cleanPhone.startsWith("0")) {
+                    return { isValid: false, message: "Số điện thoại phải bắt đầu bằng số 0" };
+                }
+
+                // Must have 10 digits
+                if (!/^0[0-9]{9}$/.test(cleanPhone)) {
+                    return { isValid: false, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0" };
+                }
+
+                // Check Vietnamese network codes
+                const networkCode = cleanPhone.substring(0, 3);
+                const validNetworks = Object.keys(PHONE_NETWORK_CODES);
+
+                let isValidNetwork = false;
+                for (const validCode of validNetworks) {
+                    if (networkCode.startsWith(validCode.substring(0, 2))) {
+                        isValidNetwork = true;
+                        break;
+                    }
+                }
+
+                if (!isValidNetwork) {
+                    return { isValid: false, message: "Số điện thoại không đúng định dạng nhà mạng Việt Nam" };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Validate CCCD number
+            validateCCCDNumber(cccdNumber) {
+                if (!cccdNumber) {
+                    return { isValid: true, message: "" }; // CCCD is optional
+                }
+
+                // Remove spaces
+                const cleanCCCD = cccdNumber.replace(/\s/g, "");
+
+                // Must have 12 digits
+                if (!/^[0-9]{12}$/.test(cleanCCCD)) {
+                    return { isValid: false, message: "CCCD phải có đúng 12 chữ số" };
+                }
+
+                // Check province code (first 3 digits)
+                const provinceCode = cleanCCCD.substring(0, 3);
+
+                if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                    return {
+                        isValid: false,
+                        message: `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                    };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Show phone network information
+            showPhoneNetworkInfo(phoneNumber) {
+                const networkInfo = this.getNetworkFromPhone(phoneNumber);
+                const phoneInfo = document.getElementById("phoneInfo");
+
+                if (networkInfo && phoneInfo) {
+                    phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
+                    phoneInfo.className = "field-info text-success";
+                    phoneInfo.style.display = "flex";
+                }
+            }
+
+            // Show CCCD province information
+            showCCCDProvinceInfo(cccdNumber) {
+                const provinceInfo = this.getProvinceFromCCCD(cccdNumber);
+                const cccdInfo = document.getElementById("cccdInfo");
+
+                if (provinceInfo && cccdInfo) {
+                    cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
+                    cccdInfo.className = "field-info text-info";
+                    cccdInfo.style.display = "flex";
+                }
+            }
+
+            // Get network from phone number
+            getNetworkFromPhone(phoneNumber) {
+                if (!phoneNumber || !phoneNumber.startsWith("0") || phoneNumber.length !== 10) {
+                    return null;
+                }
+
+                const networkCode = phoneNumber.substring(1, 4);
+                return PHONE_NETWORK_CODES[networkCode] || null;
+            }
+
+            // Get province from CCCD
+            getProvinceFromCCCD(cccdNumber) {
+                if (!cccdNumber || cccdNumber.length < 3) {
+                    return null;
+                }
+
+                const provinceCode = cccdNumber.substring(0, 3);
+                return CCCD_PROVINCE_CODES[provinceCode] || null;
+            }
+
+            // Update validation UI
+            updateValidationUI(fieldId, isValid, errorMessage, successMessage) {
+                const element = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+
+                if (!element) return;
+
+                // Clear previous states
+                element.classList.remove("is-invalid", "is-valid");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                // Apply new state
+                if (this.isEditMode) {
+                    if (isValid && successMessage) {
+                        element.classList.add("is-valid");
+                        if (successElement) {
+                            successElement.textContent = successMessage;
+                            successElement.style.display = "flex";
+                        }
+                    } else if (!isValid && errorMessage) {
+                        element.classList.add("is-invalid");
+                        if (errorElement) {
+                            errorElement.textContent = errorMessage;
+                            errorElement.style.display = "flex";
+                        }
+                    }
+                }
+            }
+
+            // Clear validation state
+            clearValidationState(element) {
+                element.classList.remove("is-invalid", "is-valid");
+
+                const fieldId = element.id;
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+                const infoElement = document.getElementById(fieldId + "Info");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                if (infoElement) {
+                    infoElement.style.display = "none";
+                    infoElement.innerHTML = "";
+                }
+            }
+
+            // Validate existing data on page load
+            validateExistingData() {
+                // Validate phone if exists
+                const phoneElement = document.getElementById("phone");
+                if (phoneElement && phoneElement.value) {
+                    this.showPhoneNetworkInfo(phoneElement.value);
+                }
+
+                // Validate CCCD if exists
+                const cccdElement = document.getElementById("cccdNumber");
+                if (cccdElement && cccdElement.value) {
+                    this.showCCCDProvinceInfo(cccdElement.value);
+                }
+            }
+
+            validateForm() {
+                let isValid = true;
+
+                this.formElements.forEach((fieldId) => {
+                    if (!this.validateField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Format phone input
+            formatPhone(event) {
+                if (!event.target.readOnly) {
+                    let value = event.target.value;
+
+                    // Ensure it starts with 0
+                    if (value && !value.startsWith("0")) {
+                        value = "0" + value.replace(/\D/g, "");
+                    } else {
+                        value = value.replace(/[^\d]/g, "");
+                    }
+
+                    // Limit to 10 digits
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+
+                    event.target.value = value;
+
+                    // Validate in real-time
+                    if (this.isEditMode) {
+                        this.validateField("phone");
+                    }
+                }
+            }
+
+            // Format CCCD input
+            formatCCCD(event) {
+                if (!event.target.readOnly) {
+                    let value = event.target.value.replace(/\D/g, "");
+
+                    // Limit to 12 digits
+                    if (value.length > 12) {
+                        value = value.substring(0, 12);
+                    }
+
+                    event.target.value = value;
+
+                    // Validate in real-time
+                    if (this.isEditMode) {
+                        this.validateField("cccdNumber");
+                    }
+                }
+            }
+
+            // Form submission
+            async handleFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validateForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin đã nhập", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    // Submit form
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting form:", error);
+                    this.showNotification("Có lỗi xảy ra khi lưu thông tin", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // Reset form
+            resetForm() {
+                const form = document.getElementById("personalForm");
+                if (form) {
+                    // Reset to original values
+                    location.reload();
+                }
+            }
+
+            // Cancel edit
+            cancelEdit() {
+                this.toggleEditMode();
+            }
+
+            // Utility functions
+            showLoading(show) {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay) {
+                    overlay.style.display = show ? "flex" : "none";
+                }
+            }
+
+            showNotification(message, type = "info") {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll(".notification-toast");
+                existingNotifications.forEach((notification) => notification.remove());
+
+                // Create notification
+                const notification = document.createElement("div");
+                notification.className = `notification-toast notification-${type}`;
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-${this.getNotificationIcon(type)}"></i>
+                        <span>${message}</span>
+                        <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+
+                // Add to page
+                document.body.appendChild(notification);
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            getNotificationIcon(type) {
+                const icons = {
+                    success: "check-circle",
+                    error: "exclamation-circle",
+                    warning: "exclamation-triangle",
+                    info: "info-circle",
+                };
+                return icons[type] || "info-circle";
+            }
+
+            showFlashMessages() {
+                // Get flash messages from URL parameters or server-side rendering
+                const urlParams = new URLSearchParams(window.location.search);
+                const successMessage = urlParams.get("success");
+                const errorMessage = urlParams.get("error");
+
+                if (successMessage) {
+                    this.showNotification(decodeURIComponent(successMessage), "success");
+                }
+
+                if (errorMessage) {
+                    this.showNotification(decodeURIComponent(errorMessage), "error");
+                }
+
+                // Also check for Thymeleaf flash attributes
+                const successFlash = document.querySelector("[data-success-message]");
+                const errorFlash = document.querySelector("[data-error-message]");
+
+                if (successFlash) {
+                    this.showNotification(successFlash.dataset.successMessage, "success");
+                }
+
+                if (errorFlash) {
+                    this.showNotification(errorFlash.dataset.errorMessage, "error");
+                }
+            }
+
+            initializeAnimations() {
+                // Add stagger animation to form sections
+                const sections = document.querySelectorAll(".info-section-staff");
+                sections.forEach((section, index) => {
+                    section.style.animationDelay = `${index * 0.1}s`;
+                });
+            }
+
+            initializeValidation() {
+                // Real-time validation setup
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => {
+                            if (this.isEditMode) {
+                                this.validateField(id);
+                            }
+                        });
+                    }
+                });
+            }
+        }
+
+        // Vietnam Address API Handler
+        class VietnamAddressAPI {
+            constructor() {
+                this.provinceSelect = document.getElementById("province");
+                this.districtSelect = document.getElementById("district");
+                this.wardSelect = document.getElementById("ward");
+                this.streetInput = document.getElementById("street");
+                this.fullAddress = document.getElementById("fullAddress");
+                this.addressData = []; // lưu toàn bộ JSON đã load
+            }
+
+            async init(savedAddress = "") {
+                await this.loadData();
+                this.populateProvinces();
+                this.addListeners();
+                if (savedAddress) {
+                    await this.setInitialAddress(savedAddress);
+                }
+            }
+
+            async loadData() {
+                try {
+                    const response = await fetch("/data/vietnam_full_address.json");
+                    this.addressData = await response.json();
+                } catch (error) {
+                    console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
+                }
+            }
+
+            populateProvinces() {
+                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                this.addressData.forEach(province => {
+                    this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
+                });
+            }
+
+            populateDistricts(provinceCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
+
+                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                province.districts.forEach(district => {
+                    this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
+                });
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
+
+            populateWards(provinceCode, districtCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
+
+                const district = province.districts.find(d => d.code === districtCode);
+                if (!district) return;
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                district.wards.forEach(ward => {
+                    this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
+                });
+            }
+
+            addListeners() {
+                this.provinceSelect.addEventListener("change", (e) => {
+                    const provinceCode = e.target.value;
+                    this.populateDistricts(provinceCode);
+                    this.updateFullAddress();
+                });
+
+                this.districtSelect.addEventListener("change", (e) => {
+                    const provinceCode = this.provinceSelect.value;
+                    const districtCode = e.target.value;
+                    this.populateWards(provinceCode, districtCode);
+                    this.updateFullAddress();
+                });
+
+                this.wardSelect.addEventListener("change", () => this.updateFullAddress());
+                this.streetInput.addEventListener("input", () => this.updateFullAddress());
+            }
+
+            updateFullAddress() {
+                const street = this.streetInput.value;
+                const ward = this.wardSelect.selectedOptions[0]?.text || "";
+                const district = this.districtSelect.selectedOptions[0]?.text || "";
+                const province = this.provinceSelect.selectedOptions[0]?.text || "";
+
+                const parts = [street, ward, district, province].filter(part =>
+                    part && !part.startsWith("Chọn"));
+
+                this.fullAddress.value = parts.join(", ");
+            }
+
+            async setInitialAddress(fullAddress) {
+                try {
+                    const parts = fullAddress.split(",").map(p => p.trim());
+                    if (parts.length < 4) return;
+
+                    const [street, wardName, districtName, provinceName] = parts;
+                    this.streetInput.value = street;
+
+                    const province = this.addressData.find(p =>
+                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    if (!province) return;
+
+                    this.provinceSelect.value = province.code;
+                    this.populateDistricts(province.code);
+
+                    const district = province.districts.find(d =>
+                        d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    if (!district) return;
+
+                    this.districtSelect.value = district.code;
+                    this.populateWards(province.code, district.code);
+
+                    const ward = district.wards.find(w =>
+                        w.name.toLowerCase().includes(wardName.toLowerCase()));
+                    if (ward) this.wardSelect.value = ward.code;
+
+                    this.updateFullAddress();
+                } catch (error) {
+                    console.error("❌ Lỗi khi set địa chỉ ban đầu:", error);
+                }
+            }
+        }
+
+
+        // Global functions for HTML onclick events
+        function goBack() {
+            window.history.back();
+        }
+
+        function toggleEditMode() {
+            if (window.staffProfileManager) {
+                window.staffProfileManager.toggleEditMode();
+            }
+        }
+
+        function triggerAvatarUpload() {
+            if (window.staffProfileManager) {
+                window.staffProfileManager.triggerAvatarUpload();
+            }
+        }
+
+        function cancelEdit() {
+            if (window.staffProfileManager) {
+                window.staffProfileManager.cancelEdit();
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener("DOMContentLoaded", () => {
+            window.staffProfileManager = new EnhancedStaffProfileManager();
+        });
+
+        // Toast message handling
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
             });
-        }
-    });
 
-    // Phone number formatting
-    document.getElementById('phone').addEventListener('input', function(e) {
-        if (!this.readOnly) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 10) {
-                value = value.substring(0, 10);
-            }
-            e.target.value = value;
-        }
-    });
-
-    // ID number formatting
-    document.getElementById('idNumber').addEventListener('input', function(e) {
-        if (!this.readOnly) {
-            let value = e.target.value.replace(/\D/g, '');
-            if (value.length > 12) {
-                value = value.substring(0, 12);
-            }
-            e.target.value = value;
-        }
-    });
-</script>
+            // Auto-hide toasts after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
 </body>
+
 </html>

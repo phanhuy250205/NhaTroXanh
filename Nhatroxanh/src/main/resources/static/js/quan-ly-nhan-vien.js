@@ -136,18 +136,18 @@ function viewEmployee(row) {
 }
 
 // Delete employee
-function deleteEmployee(row, employeeName) {
-    if (confirm(`Bạn có chắc chắn muốn xóa nhân viên "${employeeName}"?\n\nHành động này không thể hoàn tác.`)) {
-        row.style.transition = 'all 0.3s ease';
-        row.style.opacity = '0';
-        row.style.transform = 'translateX(100px)';
-        setTimeout(() => {
-            row.remove();
-            updateStats();
-            showNotification('Đã xóa nhân viên thành công!', 'success');
-        }, 300);
-    }
-}
+// function deleteEmployee(row, employeeName) {
+//     if (confirm(`Bạn có chắc chắn muốn xóa nhân viên "${employeeName}"?\n\nHành động này không thể hoàn tác.`)) {
+//         row.style.transition = 'all 0.3s ease';
+//         row.style.opacity = '0';
+//         row.style.transform = 'translateX(100px)';
+//         setTimeout(() => {
+//             row.remove();
+//             updateStats();
+//             showNotification('Đã xóa nhân viên thành công!', 'success');
+//         }, 300);
+//     }
+// }
 
 // Extract employee data from table row
 function extractEmployeeData(row) {
