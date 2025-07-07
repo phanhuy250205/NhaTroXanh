@@ -600,11 +600,11 @@
                 <p class="profile-role">Quản Trị Viên Hệ Thống</p>
                 <div class="profile-stats">
                     <div class="stat-item">
-                        <span class="stat-number">25</span>
+                        <span class="stat-number" th:text="${roomCount}"></span>
                         <span class="stat-label">Phòng trọ</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">48</span>
+                        <span class="stat-number" th:text="${tenantCount}">48</span>
                         <span class="stat-label">Khách thuê</span>
                     </div>
                 </div>
@@ -790,8 +790,7 @@
             </div>
         </div>
 
-        <!-- Dashboard Statistics -->
-        <div class="dashboard-stats">
+        <!-- <div class="dashboard-stats">
             <div class="stat-card">
                 <div class="stat-card-header">
                     <div>
@@ -850,7 +849,6 @@
             </div>
         </div>
 
-        <!-- Recent Notifications -->
         <div class="notifications-panel">
             <h3><i class="fas fa-bell"></i> Thông Báo Gần Đây</h3>
             <div class="notification-item">
@@ -883,7 +881,7 @@
                 </div>
                 <div class="notification-time">1 ngày trước</div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="loading-overlay" style="display: none;">
@@ -1854,8 +1852,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             window.adminProfileManager = new EnhancedAdminProfileManager();
-
-            // Toast message handling
             document.querySelectorAll('.notification-close').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const toast = btn.closest('.notification-toast');
@@ -1870,6 +1866,21 @@
                     setTimeout(() => toast.remove(), 300);
                 });
             }, 5000);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
         });
     </script>
 </body>

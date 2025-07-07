@@ -3,6 +3,7 @@
 
 <head th:replace="~{/layouts/head}">
     <title>Chi Tiết - Nhà Trọ Xanh</title>
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
 
 <body>
@@ -57,9 +58,7 @@
                                 <img th:unless="${post.images != null and !post.images.isEmpty()}"
                                     src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
                             </a>
-                            <button class="btn-favorite">
-                                <i class="fas fa-heart"></i>
-                            </button>
+                            
                         </div>
 
                         <div class="post-info ps-3 d-flex flex-column justify-content-between">
@@ -345,8 +344,8 @@
                         <a href="/chi-tiet/${post.postId}">
                             <img src="${imageUrl}" alt="Phòng trọ" class="img-fluid" onerror="this.src='/images/no-image.jpg'" />
                         </a>
-                        <button class="btn-favorite">
-                            <i class="fas fa-heart"></i>
+                        <button class="btn-favorite" th:attr="data-post-id=${post.postId}">
+                            <i class="far fa-heart"></i>
                         </button>
                     </div>
                     
@@ -420,6 +419,9 @@
             postsContainer.style.display = 'block';
         }
     </script>
+
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

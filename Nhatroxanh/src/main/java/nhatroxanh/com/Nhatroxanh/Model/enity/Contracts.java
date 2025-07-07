@@ -19,7 +19,7 @@ public class Contracts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contract_id")
-    private Long contractId; // Đổi sang Long để thống nhất
+    private Integer contractId; // Giữ Integer để phù hợp với database hiện tại
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)

@@ -366,8 +366,8 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="owner-name"
-                                            th:field="*{owner.fullName}" required placeholder="Nhập họ và tên">
+                                        <input type="text" class="form-control" id="owner-name" required
+                                            placeholder="Nhập họ và tên">
                                     </div>
 
                                     <div class="col-md-3">
@@ -389,14 +389,13 @@
 
                                     <div class="col-md-3">
                                         <label class="form-label">Ngày cấp <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control" id="owner-id-date"
-                                            th:field="*{owner.issueDate}" required>
+                                        <input type="date" class="form-control" id="owner-id-date" required>
                                     </div>
 
                                     <div class="col-md-9">
                                         <label class="form-label">Nơi cấp <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control" id="owner-id-place"
-                                            th:field="*{owner.issuePlace}" required placeholder="Nơi cấp CMND/CCCD">
+                                        <input type="text" class="form-control" id="owner-id-place" required
+                                            placeholder="Nơi cấp CMND/CCCD">
                                     </div>
 
                                     <div class="col-md-4">
@@ -518,104 +517,118 @@
                                             <option value="">Tỉnh/Thành phố</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Quận/Huyện</label>
-                                        <select class="form-select" id="room-district" name="room.district">
-                                            <option value="">Quận/Huyện</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Phường/Xã</label>
-                                        <select class="form-select" id="room-ward" name="room.ward">
-                                            <option value="">Phường/Xã</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Tên đường/Số nhà</label>
-                                        <input type="text" class="form-control" id="room-street" name="room.address">
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Số phòng</label>
-                                        <input type="text" class="form-control" id="room-number" readonly>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <label class="form-label">Diện tích (m²)</label>
-                                        <input type="number" class="form-control" id="room-area" readonly>
-                                    </div>
-
-                                    <!-- Các trường ẩn để gửi dữ liệu đầy đủ cho ContractDto.room -->
-                                    <input type="hidden" name="room.roomName" id="room-name-hidden">
-                                    <input type="hidden" name="room.price" id="room-price-hidden">
-                                    <input type="hidden" name="room.status" id="room-status-hidden" value="unactive">
-                                    <input type="hidden" name="room.hostelId" id="room-hostelId-hidden">
-                                    <input type="hidden" name="room.hostelName" id="room-hostelName-hidden">
-
-                                    <!-- Residents Section -->
-                                    <div class="col-12">
-                                        <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <label class="form-label mb-0">
-                                                <i class="fa fa-users me-2"></i>Số người ở
-                                                <span class="badge bg-primary ms-2" id="residents-count">0</span>
-                                            </label>
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-resident"
-                                                id="btn-add-resident" data-bs-toggle="modal"
-                                                data-bs-target="#addResidentModal">
-                                                <i class="fa fa-user-plus me-1"></i> Thêm người ở
-                                            </button>
+                                    <<<<<<< HEAD=======<<<<<<< HEAD=======>>>>>>>
+                                        2daa13aac9aa41d17a3f89156a3b2464acaf86ea
+                                        >>>>>>> e9e8223004c36af3124e79a086b6f548d0c75336
+                                        <div class="col-md-4">
+                                            <label class="form-label">Quận/Huyện</label>
+                                            <select class="form-select" id="room-district" name="room.district">
+                                                <option value="">Quận/Huyện</option>
+                                            </select>
                                         </div>
-                                        <div id="residents-list" class="nha-tro-residents-container">
-                                            <div class="text-center text-muted py-4" id="no-residents-message">
-                                                <i class="fa fa-users fa-2x mb-2"></i>
-                                                <p>Chưa có người ở nào được thêm</p>
-                                                <small>Nhấn "Thêm người ở" để bắt đầu</small>
-                                            </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label">Phường/Xã</label>
+                                            <select class="form-select" id="room-ward" name="room.ward">
+                                                <option value="">Phường/Xã</option>
+                                            </select>
                                         </div>
-                                    </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Tên đường/Số nhà</label>
+                                            <input type="text" class="form-control" id="room-street"
+                                                name="room.address">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Số phòng</label>
+                                            <input type="text" class="form-control" id="room-number" readonly>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label">Diện tích (m²)</label>
+                                            <input type="number" class="form-control" id="room-area" readonly>
+                                        </div>
 
-                                    <!-- Amenities Section -->
-                                    <div class="col-12">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label">Tiện ích</label>
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-amenity"
-                                                id="btn-add-amenity-host" data-bs-toggle="modal"
-                                                data-bs-target="#addAmenityModal-host">
-                                                <i class="fa fa-plus me-1"></i> Thêm tiện ích
-                                            </button>
-                                        </div>
-                                        <div class="nha-tro-amenities" id="amenities-list-host">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="wifi">
-                                                <label class="form-check-label" for="wifi">Wifi</label>
+                                        <!-- Các trường ẩn để gửi dữ liệu đầy đủ cho ContractDto.room -->
+                                        <input type="hidden" name="room.roomName" id="room-name-hidden">
+                                        <input type="hidden" name="room.price" id="room-price-hidden">
+                                        <input type="hidden" name="room.status" id="room-status-hidden"
+                                            value="unactive">
+                                        <input type="hidden" name="room.hostelId" id="room-hostelId-hidden">
+                                        <input type="hidden" name="room.hostelName" id="room-hostelName-hidden">
+
+                                        <!-- Residents Section -->
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <label class="form-label mb-0">
+                                                    <i class="fa fa-users me-2"></i>Số người ở
+                                                    <span class="badge bg-primary ms-2" id="residents-count">0</span>
+                                                </label>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-resident"
+                                                    <<<<<<< HEAD id="btn-add-resident" data-bs-toggle="modal"
+                                                    data-bs-target="#addResidentModal">
+                                                    =======
+                                                    id="btn-add-resident" data-bs-toggle="modal"
+                                                    data-bs-target="#addResidentModal">
+                                                    >>>>>>> e9e8223004c36af3124e79a086b6f548d0c75336
+                                                    <i class="fa fa-user-plus me-1"></i> Thêm người ở
+                                                </button>
                                             </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="ac">
-                                                <label class="form-check-label" for="ac">Máy lạnh</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="fridge">
-                                                <label class="form-check-label" for="fridge">Tủ lạnh</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="kitchen">
-                                                <label class="form-check-label" for="kitchen">Bếp</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="parking">
-                                                <label class="form-check-label" for="parking">Chỗ để xe</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="security">
-                                                <label class="form-check-label" for="security">Camera an ninh</label>
+                                            <div id="residents-list" class="nha-tro-residents-container">
+                                                <div class="text-center text-muted py-4" id="no-residents-message">
+                                                    <i class="fa fa-users fa-2x mb-2"></i>
+                                                    <p>Chưa có người ở nào được thêm</p>
+                                                    <small>Nhấn "Thêm người ở" để bắt đầu</small>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div class="col-12">
-                                        <label class="form-label">Ghi chú</label>
-                                        <textarea class="form-control" rows="3" id="room-notes"></textarea>
-                                    </div>
+                                        <!-- Amenities Section -->
+                                        <div class="col-12">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <label class="form-label">Tiện ích</label>
+                                                <button type="button"
+                                                    class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-amenity"
+                                                    <<<<<<< HEAD id="btn-add-amenity-host" data-bs-toggle="modal"
+                                                    data-bs-target="#addAmenityModal-host">
+                                                    =======
+                                                    id="btn-add-amenity-host" data-bs-toggle="modal"
+                                                    data-bs-target="#addAmenityModal-host">
+                                                    >>>>>>> e9e8223004c36af3124e79a086b6f548d0c75336
+                                                    <i class="fa fa-plus me-1"></i> Thêm tiện ích
+                                                </button>
+                                            </div>
+                                            <div class="nha-tro-amenities" id="amenities-list-host">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="wifi">
+                                                    <label class="form-check-label" for="wifi">Wifi</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="ac">
+                                                    <label class="form-check-label" for="ac">Máy lạnh</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="fridge">
+                                                    <label class="form-check-label" for="fridge">Tủ lạnh</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="kitchen">
+                                                    <label class="form-check-label" for="kitchen">Bếp</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="parking">
+                                                    <label class="form-check-label" for="parking">Chỗ để xe</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox" id="security">
+                                                    <label class="form-check-label" for="security">Camera an
+                                                        ninh</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label class="form-label">Ghi chú</label>
+                                            <textarea class="form-control" rows="3" id="room-notes"></textarea>
+                                        </div>
                                 </div>
 
                                 <div class="d-flex justify-content-between mt-4">
@@ -1135,7 +1148,7 @@
         </div>
     </div>
 
-    <script>
+    <!-- <script>
         // CCCD Province Codes Mapping - Move this OUTSIDE the class
         const CCCD_PROVINCE_CODES = {
             "Hà Nội": ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012"],
@@ -1203,9 +1216,6 @@
             "Yên Bái": ["015"]
         };
 
-        // Sample room data for each housing area
-
-
         // Handle housing area selection change
         housingAreaSelect.addEventListener('change', function () {
             const selectedArea = this.value;
@@ -1233,64 +1243,147 @@
                 document.getElementById('rent-price').value = '';
 
                 // Update preview
-                if (window.NhaTroContract) {
-                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-                }
-            }
-        });
 
-        // Handle room selection change
-        roomSelectionSelect.addEventListener('change', function () {
-            const selectedArea = housingAreaSelect.value;
-            const selectedRoomValue = this.value;
+                // Sample room data for each housing area
+                const roomData = {
+                    'khu-a': [
+                        { value: 'a101', text: 'Phòng A101 - 25m² - 3.5tr/tháng', number: 'A101', area: 25, price: 3500000 },
+                        { value: 'a102', text: 'Phòng A102 - 30m² - 4tr/tháng', number: 'A102', area: 30, price: 4000000 },
+                        { value: 'a103', text: 'Phòng A103 - 28m² - 3.8tr/tháng', number: 'A103', area: 28, price: 3800000 },
+                        { value: 'a201', text: 'Phòng A201 - 25m² - 3.5tr/tháng', number: 'A201', area: 25, price: 3500000 },
+                        { value: 'a202', text: 'Phòng A202 - 30m² - 4tr/tháng', number: 'A202', area: 30, price: 4000000 }
+                    ],
+                    'khu-b': [
+                        { value: 'b101', text: 'Phòng B101 - 22m² - 3.2tr/tháng', number: 'B101', area: 22, price: 3200000 },
+                        { value: 'b102', text: 'Phòng B102 - 27m² - 3.7tr/tháng', number: 'B102', area: 27, price: 3700000 },
+                        { value: 'b103', text: 'Phòng B103 - 25m² - 3.5tr/tháng', number: 'B103', area: 25, price: 3500000 },
+                        { value: 'b201', text: 'Phòng B201 - 22m² - 3.2tr/tháng', number: 'B201', area: 22, price: 3200000 },
+                        { value: 'b202', text: 'Phòng B202 - 27m² - 3.7tr/tháng', number: 'B202', area: 27, price: 3700000 }
+                    ],
+                    'khu-c': [
+                        { value: 'c101', text: 'Phòng C101 - 35m² - 4.5tr/tháng', number: 'C101', area: 35, price: 4500000 },
+                        { value: 'c102', text: 'Phòng C102 - 32m² - 4.2tr/tháng', number: 'C102', area: 32, price: 4200000 },
+                        { value: 'c103', text: 'Phòng C103 - 30m² - 4tr/tháng', number: 'C103', area: 30, price: 4000000 },
+                        { value: 'c201', text: 'Phòng C201 - 35m² - 4.5tr/tháng', number: 'C201', area: 35, price: 4500000 }
+                    ],
+                    'khu-d': [
+                        { value: 'd101', text: 'Phòng D101 - 20m² - 2.8tr/tháng', number: 'D101', area: 20, price: 2800000 },
+                        { value: 'd102', text: 'Phòng D102 - 24m² - 3.2tr/tháng', number: 'D102', area: 24, price: 3200000 },
+                        { value: 'd103', text: 'Phòng D103 - 26m² - 3.4tr/tháng', number: 'D103', area: 26, price: 3400000 },
+                        { value: 'd201', text: 'Phòng D201 - 20m² - 2.8tr/tháng', number: 'D201', area: 20, price: 2800000 },
+                        { value: 'd202', text: 'Phòng D202 - 24m² - 3.2tr/tháng', number: 'D202', area: 24, price: 3200000 }
+                    ]
+                };
 
-            if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
-                // Find the selected room data
-                const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
+                // Handle housing area selection change
+                housingAreaSelect.addEventListener('change', function () {
+                    const selectedArea = this.value;
 
-                if (selectedRoom) {
-                    // Auto-fill room information
-                    document.getElementById('room-number').value = selectedRoom.number;
-                    document.getElementById('room-area').value = selectedRoom.area;
-                    document.getElementById('rent-price').value = selectedRoom.price;
+                    // Clear room selection
+                    roomSelectionSelect.innerHTML = '<option value="">-- Chọn phòng trọ --</option>';
 
-                    // Update contract preview using the existing NhaTroContract methods
-                    if (window.NhaTroContract) {
-                        // Update preview fields with highlight effect
-                        window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                        window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                        window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+                    if (selectedArea && roomData[selectedArea]) {
+                        // Enable room selection
+                        roomSelectionSelect.disabled = false;
 
-                        // Recalculate deposit based on new rent price
-                        window.NhaTroContract.calculateDeposit();
+                        // Populate room options
+                        roomData[selectedArea].forEach(room => {
+                            const option = document.createElement('option');
+                            option.value = room.value;
+                            option.textContent = room.text;
+                            roomSelectionSelect.appendChild(option);
+                        });
+                    } else {
+                        // Disable room selection if no area selected
+                        roomSelectionSelect.disabled = true;
+                        // Clear form fields
+                        document.getElementById('room-number').value = '';
+                        document.getElementById('room-area').value = '';
+                        document.getElementById('rent-price').value = '';
 
-                        // Show notification
-                        window.NhaTroContract.showNotification(
-                            `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,
-                            'success'
-                        );
+                        // Update preview
+                        if (window.NhaTroContract) {
+                            window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                            window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                            window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+                        }
                     }
-                }
-            } else {
-                // Clear fields if no room selected
-                document.getElementById('room-number').value = '';
-                document.getElementById('room-area').value = '';
-                document.getElementById('rent-price').value = '';
+                });
 
-                // Update preview
-                if (window.NhaTroContract) {
-                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-                    window.NhaTroContract.calculateDeposit();
-                }
-            }
-        });
+                // Handle room selection change
+                roomSelectionSelect.addEventListener('change', function () {
+                    const selectedArea = housingAreaSelect.value;
+                    const selectedRoomValue = this.value;
 
-    </script>
+                    if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
+                        // Find the selected room data
+                        const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
 
+                        if (selectedRoom) {
+                            // Auto-fill room information
+                            document.getElementById('room-number').value = selectedRoom.number;
+                            document.getElementById('room-area').value = selectedRoom.area;
+                            document.getElementById('rent-price').value = selectedRoom.price;
+
+                            if (window.NhaTroContract) {
+                                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+                            }
+                        }
+                    }
+                });
+
+
+                // Handle room selection change
+                roomSelectionSelect.addEventListener('change', function () {
+                    const selectedArea = housingAreaSelect.value;
+                    const selectedRoomValue = this.value;
+
+                    if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
+                        // Find the selected room data
+                        const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
+
+                        if (selectedRoom) {
+                            // Auto-fill room information
+                            document.getElementById('room-number').value = selectedRoom.number;
+                            document.getElementById('room-area').value = selectedRoom.area;
+                            document.getElementById('rent-price').value = selectedRoom.price;
+
+                            // Update contract preview using the existing NhaTroContract methods
+                            if (window.NhaTroContract) {
+                                // Update preview fields with highlight effect
+                                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+
+                                // Recalculate deposit based on new rent price
+                                window.NhaTroContract.calculateDeposit();
+
+                                // Show notification
+                                window.NhaTroContract.showNotification(
+                                    `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,
+                                    'success'
+                                );
+                            }
+                        }
+                    } else {
+                        // Clear fields if no room selected
+                        document.getElementById('room-number').value = '';
+                        document.getElementById('room-area').value = '';
+                        document.getElementById('rent-price').value = '';
+
+                        // Update preview
+                        if (window.NhaTroContract) {
+                            window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
+                            window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
+                            window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
+                            window.NhaTroContract.calculateDeposit();
+                        }
+                    }
+                });
+
+    </script> -->
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/contract.js}"></script>
 </body>

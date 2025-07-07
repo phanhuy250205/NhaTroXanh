@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
@@ -11,7 +12,7 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
 import org.slf4j.Logger;
@@ -39,8 +40,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @Autowired
-    // private OtpService otpService;
+    @Autowired
+    private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -71,6 +72,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         newUser.setEnabled(false);
         newUser.setRole(Users.Role.CUSTOMER);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
@@ -92,7 +94,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // otpService.createAndSendOtp(savedUser);
+        otpService.createAndSendOtp(savedUser);
 
         return savedUser;
     }
@@ -128,6 +130,7 @@ public class UserServiceImpl implements UserService {
         }
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(true);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new owner with ID: {}", savedUser.getUserId());
@@ -276,5 +279,19 @@ public class UserServiceImpl implements UserService {
     public Users getById(Integer id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    @Override
+    public Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status) {
+        Pageable pageable = PageRequest.of(page, size);
+        keyword = keyword == null ? "" : keyword.trim();
+
+        if ("active".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, true, keyword, pageable);
+        } else if ("inactive".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, false, keyword, pageable);
+        } else {
+            return userRepository.findByRoleAndKeyword(Users.Role.STAFF, keyword, pageable);
+        }
     }
 }
