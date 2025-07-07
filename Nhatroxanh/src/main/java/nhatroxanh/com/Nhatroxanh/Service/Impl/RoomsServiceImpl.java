@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -59,6 +60,26 @@ public class RoomsServiceImpl implements RoomsService {
                 .collect(Collectors.toList());
         logger.info("Returning {} rooms", result.size());
         return result;
+    }
+
+    @Override
+    public Rooms save(Rooms room) {
+        logger.info("Saving room: {}", room.getNamerooms());
+        if (room == null) {
+            logger.error("Room is null");
+            throw new IllegalArgumentException("Phòng không được null!");
+        }
+        return roomsRepository.save(room);
+    }
+
+    @Override
+    public Optional<Rooms> findById(Integer id) {
+        logger.info("Finding room by ID: {}", id);
+        if (id == null) {
+            logger.warn("Room ID is null");
+            return Optional.empty();
+        }
+        return roomsRepository.findById(id);
     }
 
     private ContractDto.Room convertToRoomDto(Rooms room) {

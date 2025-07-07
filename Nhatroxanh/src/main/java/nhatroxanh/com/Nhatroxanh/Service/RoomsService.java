@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,8 @@ public interface RoomsService {
 
     List<ContractDto.Room> getRoomsByOwnerId(Integer ownerId);
     List<ContractDto.Room> getRoomsByHostelId(Integer hostelId); // Thêm phương thức mới
-
+    Optional<Rooms> findById(Integer id);
+    Rooms save(Rooms room);
 
 
 }

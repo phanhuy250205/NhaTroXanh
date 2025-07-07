@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-
         :root {
             --primary-color: #3e83cc;
             --primary-dark: #2d6bb8;
@@ -36,6 +35,7 @@
             background: #e3f2fd;
 
         }
+
         /* Header */
         .header {
             background: white;
@@ -422,19 +422,85 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--primary-dark);
         }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 
 </head>
 
 <body>
     <div th:replace="~{/layouts/sidebar-admin}"></div>
-    <!-- Main Content -->
     <div class="main-content">
-
-
-        <!-- Content -->
         <div class="content">
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card primary">
                     <div class="stat-icon">
@@ -495,152 +561,63 @@
                             <ul class="dropdown-menu" aria-labelledby="filterDropdown">
                                 <li><a class="dropdown-item" href="#">Tất cả</a></li>
                                 <li><a class="dropdown-item" href="#">Hoạt động</a></li>
-                                <li><a class="dropdown-item" href="#">Chờ duyệt</a></li>
                                 <li><a class="dropdown-item" href="#">Ngưng hoạt động</a></li>
                             </ul>
                         </div>
                     </div>
                 </div>
-
+                <div class="custom-toast-container">
+                    <div th:if="${successMessage}" class="custom-toast success">
+                        <i class="toast-icon fas fa-check-circle"></i>
+                        <span class="toast-message" th:text="${successMessage}"></span>
+                        <button class="toast-close" aria-label="Đóng">×</button>
+                    </div>
+                    <div th:if="${errorMessage}" class="custom-toast error">
+                        <i class="toast-icon fas fa-exclamation-circle"></i>
+                        <span class="toast-message" th:text="${errorMessage}"></span>
+                        <button class="toast-close" aria-label="Đóng">×</button>
+                    </div>
+                </div>
                 <div class="table-container">
                     <table class="table custom-table">
                         <thead>
                             <tr>
                                 <th>Nhân viên</th>
                                 <th>Trạng thái</th>
-                                <th>Lương</th>
                                 <th>Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
+                            <tr th:each="user : ${staffPage.content}">
                                 <td>
                                     <div class="employee-info">
-                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/56204e9b-4736-4f3e-b9ac-bb96e8e15c16.png"
-                                            alt="Professional headshot of Nguyen Van An, male employee with friendly smile wearing business attire"
-                                            class="employee-avatar">
+                                        <img th:src="${user.avatar}" class="employee-avatar"
+                                            th:alt="'Avatar của ' + ${user.fullname}" />
                                         <div class="employee-details">
-                                            <h6>Nguyễn Văn An</h6>
-                                            <span>nvan.an@tromanager.com</span>
+                                            <h6 th:text="${user.fullname}">Tên nhân viên</h6>
+                                            <span th:text="${user.email}">email@example.com</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="status-badge status-active">Hoạt động</span></td>
-                                <td>15,000,000đ</td>
                                 <td>
-                                    <button class="action-btn" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-btn danger" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <span
+                                        th:class="'status-badge ' + (${user.enabled} ? 'status-active' : 'status-inactive')"
+                                        th:text="${user.enabled} ? 'Hoạt động' : 'Ngưng hoạt động'"></span>
                                 </td>
-                            </tr>
-                            <tr>
                                 <td>
-                                    <div class="employee-info">
-                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/89bfd98a-c2ac-4f00-8c72-ffdb76c6f1ed.png"
-                                            alt="Professional headshot of Tran Thi Mai, female employee with warm smile wearing professional blouse"
-                                            class="employee-avatar">
-                                        <div class="employee-details">
-                                            <h6>Trần Thị Mai</h6>
-                                            <span>tthi.mai@tromanager.com</span>
-                                        </div>
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/admin/quan-ly-nhan-vien/{id}(id=${user.userId}, page=${currentPage})}"
+                                            class="action-btn" title="Xem chi tiết">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <form th:action="@{/admin/quan-ly-nhan-vien/xoa}" method="post"
+                                            class="delete-user-form" onsubmit="return confirmDelete(event)">
+                                            <input type="hidden" name="userId" th:value="${user.userId}" />
+                                            <button type="submit" class="action-btn danger" title="Xóa">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
                                     </div>
-                                </td>
-                                <td><span class="status-badge status-active">Hoạt động</span></td>
-                                <td>8,500,000đ</td>
-                                <td>
-                                    <button class="action-btn" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-btn danger" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-info">
-                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5eae0dd4-0a2e-4509-bca1-6554b2c6052d.png"
-                                            alt="Professional headshot of Le Minh Duc, young male employee with confident expression in formal shirt"
-                                            class="employee-avatar">
-                                        <div class="employee-details">
-                                            <h6>Lê Minh Đức</h6>
-                                            <span>lminh.duc@tromanager.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-pending">Chờ duyệt</span></td>
-                                <td>7,000,000đ</td>
-                                <td>
-                                    <button class="action-btn" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-btn danger" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-info">
-                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e6382ad-643a-42fb-9c0a-318ae6a50cf9.png"
-                                            alt="Professional headshot of Pham Thi Lan, female employee with professional appearance wearing navy blazer"
-                                            class="employee-avatar">
-                                        <div class="employee-details">
-                                            <h6>Phạm Thị Lan</h6>
-                                            <span>pthi.lan@tromanager.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-active">Hoạt động</span></td>
-                                <td>8,000,000đ</td>
-                                <td>
-                                    <button class="action-btn" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-btn danger" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="employee-info">
-                                        <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/5d0898f5-87ad-4781-8349-115927b89b97.png"
-                                            alt="Professional headshot of Hoang Van Binh, middle-aged male employee with serious expression wearing dark suit"
-                                            class="employee-avatar">
-                                        <div class="employee-details">
-                                            <h6>Hoàng Văn Bình</h6>
-                                            <span>hvan.binh@tromanager.com</span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><span class="status-badge status-inactive">Ngưng hoạt động</span></td>
-                                <td>12,000,000đ</td>
-                                <td>
-                                    <button class="action-btn" title="Chỉnh sửa">
-                                        <i class="fas fa-edit"></i>
-                                    </button>
-                                    <button class="action-btn" title="Xem chi tiết">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button class="action-btn danger" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
                                 </td>
                             </tr>
                         </tbody>
@@ -650,25 +627,25 @@
                 <!-- Pagination -->
                 <div class="pagination-wrapper">
                     <div class="d-flex justify-content-between align-items-center w-100">
-                        <span class="text-muted">Hiển thị 1-5 trong tổng số 24 nhân viên</span>
+                        <span class="text-muted"
+                            th:text="'Hiển thị ' + (${staffPage.number * staffPage.size + 1}) + '-' + (${staffPage.number * staffPage.size + staffPage.numberOfElements}) + ' trong tổng số ' + ${staffPage.totalElements} + ' nhân viên'">
+                        </span>
                         <nav>
                             <ul class="pagination mb-0">
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1">
+                                <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users/staffs(page=${currentPage - 1})}">
                                         <i class="fas fa-chevron-left"></i>
                                     </a>
                                 </li>
-                                <li class="page-item active">
-                                    <a class="page-link" href="#">1</a>
+
+                                <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+                                    th:classappend="${i == currentPage} ? 'active'">
+                                    <a class="page-link" th:href="@{/admin/users/staffs(page=${i})}"
+                                        th:text="${i + 1}">1</a>
                                 </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">2</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">3</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link" href="#">
+
+                                <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                                    <a class="page-link" th:href="@{/admin/users/staffs(page=${currentPage + 1})}">
                                         <i class="fas fa-chevron-right"></i>
                                     </a>
                                 </li>
@@ -680,7 +657,6 @@
         </div>
     </div>
 
-    <!-- Create Employee Modal -->
     <div class="modal fade" id="createEmployeeModal" tabindex="-1" aria-labelledby="createEmployeeModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg">
@@ -693,186 +669,163 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="createEmployeeForm">
+                    <form th:action="@{/admin/quan-ly-nhan-vien/tao-moi}" method="post">
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">
+                                <i class="fas fa-user me-1"></i> Họ và tên
+                            </label>
+                            <input type="text" class="form-control" id="fullname" name="fullname" required>
+                        </div>
+
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="firstName" class="form-label">
-                                        <i class="fas fa-user me-1"></i>
-                                        Họ và tên đệm
-                                    </label>
-                                    <input type="text" class="form-control" id="firstName" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label"><i class="fas fa-envelope me-1"></i> Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="lastName" class="form-label">Tên</label>
-                                    <input type="text" class="form-control" id="lastName" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label"><i class="fas fa-phone me-1"></i> Số điện
+                                    thoại</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" required>
                             </div>
                         </div>
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">
-                                        <i class="fas fa-envelope me-1"></i>
-                                        Email
-                                    </label>
-                                    <input type="email" class="form-control" id="email" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label"><i class="fas fa-lock me-1"></i> Mật
+                                    khẩu</label>
+                                <input type="password" class="form-control" id="password" name="password" required>
                             </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="phone" class="form-label">
-                                        <i class="fas fa-phone me-1"></i>
-                                        Số điện thoại
-                                    </label>
-                                    <input type="tel" class="form-control" id="phone" required>
-                                </div>
-                            </div>
-                        </div>
-                      
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">
-                                        <i class="fas fa-lock me-1"></i>
-                                        Mật khẩu
-                                    </label>
-                                    <input type="password" class="form-control" id="salary" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="salary" class="form-label">
-                                        <i class="fas fa-key me-1"></i>
-                                        Nhập lại mât
-                                    </label>
-                                    <input type="password" class="form-control" id="salary" required>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="salary" class="form-label">
-                                        <i class="fas fa-money-bill-wave me-1"></i>
-                                        Mức lương (VNĐ)
-                                    </label>
-                                    <input type="number" class="form-control" id="salary" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="salary" class="form-label">
-                                        <i class="fas fa-map-marker-alt me-1"></i>
-                                        Địa chỉ
-                                    </label>
-                                    <input type="number" class="form-control" id="salary" required>
-                                </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="confirmPassword" class="form-label"><i class="fas fa-key me-1"></i> Nhập lại
+                                    mật khẩu</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
+                                    required>
                             </div>
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="idNumber" class="form-label">
-                                        <i class="fas fa-id-card me-1"></i>
-                                        Số CCCD/CMND
-                                    </label>
-                                    <input type="text" class="form-control" id="idNumber" required>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">
-                                        <i class="fas fa-toggle-on me-1"></i>
-                                        Trạng thái
-                                    </label>
-                                    <select class="form-select" id="status" required>
-                                        <option value="active">Hoạt động</option>
-                                        <option value="pending">Chờ duyệt</option>
-                                        <option value="inactive">Ngưng hoạt động</option>
-                                    </select>
-                                </div>
-                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i> Hủy
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i> Tạo tài khoản
+                            </button>
                         </div>
                     </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i>
-                        Hủy
-                    </button>
-                    <button type="button" class="btn btn-primary-custom" onclick="createEmployee()">
-                        <i class="fas fa-save me-1"></i>
-                        Tạo tài khoản
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- View Employee Modal -->
     <div class="modal fade" id="viewEmployeeModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row g-3">
-                        <div class="col-md-4 text-center">
-                            <img id="viewAvatar"
-                                src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0d71d413-1c8d-477c-8e0c-ebfcbd222c41.png"
-                                class="img-fluid rounded-circle mb-3" alt="Employee avatar"
-                                style="width: 200px; height: 200px; object-fit: cover;">
-                            <h4 id="viewName" class="mb-1">Nguyễn Văn An</h4>
-                            <span id="viewStatus" class="badge rounded-pill bg-success">Active</span>
-                        </div>
-                        <div class="col-md-8">
-                            <h5 class="mb-4">Thông tin cá nhân</h5>
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-envelope me-2"></i>Email:</strong> <span
-                                            id="viewEmail">nvan.an@tromanager.com</span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-phone me-2"></i>Phone:</strong> <span
-                                            id="viewPhone">0987654321</span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-id-card me-2"></i>CCCD:</strong> <span
-                                            id="viewId">0123456789</span></p>
-                                </div>
-                                <div class="col-md-6">
-                                    <p><strong><i class="fas fa-money-bill-wave me-2"></i>Lương:</strong> <span
-                                            id="viewSalary">15,000,000đ</span></p>
-                                </div>
-                                <div class="col-12">
-                                    <p><strong><i class="fas fa-map-marker-alt me-2"></i>Địa chỉ:</strong> <span
-                                            id="viewAddress">123 Nguyễn Văn Linh, Quận 1, TP.HCM</span></p>
+        <div th:if="${staffDetail != null}" class="modal fade show" id="viewEmployeeModal" tabindex="-1"
+            aria-modal="true" style="display:block;">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên</h5>
+                        <a th:href="@{/admin/quan-ly-nhan-vien(page=${currentPage})}" class="btn-close"></a>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-4 text-center">
+                                <img th:src="${staffDetail.avatar}" class="img-fluid rounded-circle mb-3"
+                                    style="width: 200px; height: 200px; object-fit: cover;">
+                                <h4 th:text="${staffDetail.fullname}" class="mb-1"></h4>
+                                <form th:action="@{/admin/quan-ly-nhan-vien/toggle-enable}" method="post">
+                                    <input type="hidden" name="userId" th:value="${staffDetail.userId}" />
+                                    <button type="submit" class="btn-disable-staff"
+                                        th:classappend="${staffDetail.enabled} ? 'btn-danger' : 'btn-primary'">
+                                        <i class="fas"
+                                            th:classappend="${staffDetail.enabled} ? 'fa-ban' : 'fa-undo'"></i>
+                                        <span th:text="${staffDetail.enabled} ? 'Vô hiệu hóa' : 'Mở khóa'"></span>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="col-md-8">
+                                <h5 class="mb-4">Thông tin cá nhân</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <p><strong>Email:</strong> <span th:text="${staffDetail.email}"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Phone:</strong> <span th:text="${staffDetail.phone}"></span></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>CCCD:</strong> <span
+                                                th:text="${staffDetail.userCccd?.cccdNumber}">--- </span></p>
+                                    </div>
+                                    <div class="col-12">
+                                        <p><strong>Địa chỉ:</strong> <span th:text="${staffDetail.address}">---</span>
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-1"></i> Đóng
-                    </button>
+                    <div class="modal-footer">
+                        <a th:href="@{/admin/quan-ly-nhan-vien(page=${currentPage})}" class="btn btn-secondary">
+                            <i class="fas fa-times me-1"></i> Đóng
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <th:block th:if="${staffDetail != null}">
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const modalEl = document.getElementById('viewEmployeeModal');
+                const modal = new bootstrap.Modal(modalEl);
+                modal.show();
+            });
+        </script>
+    </th:block>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-     <script th:src="@{/js/quan-ly-nhan-vien.js}"></script>
+    <script th:src="@{/js/quan-ly-nhan-vien.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(event) {
+            event.preventDefault();
+            const form = event.target;
 
+            Swal.fire({
+                title: 'Bạn có chắc chắn?',
+                text: "Xóa nhân viên này?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+
+            return false;
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
 </body>
 
 </html>

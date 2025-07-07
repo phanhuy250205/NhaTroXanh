@@ -141,6 +141,21 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
+    // @GetMapping("/chu-tro/dang-tin")
+    // public String dangtin() {
+    //     return "host/bai-dang-host";
+    // }
+
+    // @GetMapping("/chu-tro/bai-dang")
+    // public String quanlyhopdong() {
+    //     return "host/quan-ly-bai-dang";
+    // }
+
+     @GetMapping("/chu-tro/Qlthue-tra")
+     public String chitietbaidang() {
+         return "guest/quan-ly-thue-tra";
+     }
+
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";

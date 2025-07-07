@@ -55,6 +55,10 @@ public class Contracts {
     @Column(name = "deposit", nullable = false)
     private Float deposit;
 
+    @Column(name = "duration", nullable = false)
+    private Float duration;
+
+
     @Column(name = "terms", length = 1000) // Tăng giới hạn để khớp với ContractServiceImpl
     private String terms;
 
