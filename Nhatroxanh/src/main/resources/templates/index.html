@@ -3,6 +3,8 @@
 
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
+    <!-- Include favorite styles -->
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
 
 <body>
@@ -35,7 +37,7 @@
                                     <p class="slide-description">Khám phá hàng ngàn phòng trọ chất lượng với giá cả phải
                                         chăng</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-search"></i> Tìm kiếm ngay
+                                        <i class="fas fa-search me-2" ></i> Tìm kiếm ngay
                                     </button>
                                 </div>
                             </div>
@@ -53,7 +55,7 @@
                                     <h2 class="slide-title">Căn Hộ Cao Cấp</h2>
                                     <p class="slide-description">Không gian sống hiện đại với đầy đủ tiện nghi</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </div>
                             </div>
@@ -71,7 +73,7 @@
                                     <h2 class="slide-title">Nhà Nguyên Căn</h2>
                                     <p class="slide-description">Sự riêng tư tuyệt đối cho gia đình bạn</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-home"></i> Khám phá
+                                        <i class="fas fa-home me-2"></i> Khám phá
                                     </button>
                                 </div>
                             </div>
@@ -109,9 +111,7 @@
                                 alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
 
                             <div class="card-overlay">
-                                <button class="btn-favorite">
-                                    <i class="far fa-heart"></i>
-                                </button>
+                               
                                 <div class="card-badges">
                                     <span class="badge badge-featured" th:if="${post.approvalStatus == 'APPROVED'}">Nổi
                                         bật</span>
@@ -153,11 +153,11 @@
                             </div>
                             <div class="card-actions">
                                 <button class="btn btn-contact">
-                                    <i class="fas fa-phone"></i> Liên hệ
+                                    <i class="fas fa-phone me-2"></i> Liên hệ
                                 </button>
                                 <a th:href="@{'/chi-tiet/' + ${post.postId}}">
                                     <button class="btn btn-view">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </a>
                             </div>
@@ -178,6 +178,9 @@
     </section>
 
     <div th:replace="~{/layouts/footer}"></div>
+
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

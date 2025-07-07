@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 
     <style>
         :root {
@@ -391,6 +392,7 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
+    
     <!-- Breadcrumb -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -430,7 +432,11 @@
                             <img th:unless="${images != null and !#lists.isEmpty(images)}"
                                 src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
-                                <button class="btn-favorite-large"><i class="fas fa-heart"></i></button>
+                                <button class="btn-favorite-large" 
+                                        th:attr="data-post-id=${post.postId}"
+                                        onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Thêm vào yêu thích">
+                                    <i class="far fa-heart"></i>
+                                </button>
                             </div>
                         </div>
                         <!-- Thumbnail Images -->
@@ -866,7 +872,7 @@
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite">
+                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}" >
                                                 <i class="far fa-heart"></i>
                                             </button>
                                         </div>
@@ -1043,8 +1049,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+ 
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1591,6 +1596,9 @@
         // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

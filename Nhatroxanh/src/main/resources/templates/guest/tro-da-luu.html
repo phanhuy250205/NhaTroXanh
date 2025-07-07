@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <title>Trọ đã lưu - Nhà Trọ Xanh</title>
+    <style>
+        :root {
+            --primary-blue: #3E83CC;
+            --secondary-blue: #549eed;
+            --dark-blue: #1f2937;
+            --light-blue: #f0f8ff;
+            --accent-blue: #2563eb;
+            --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+            --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --text-muted: #6b7280;
+        }
+
+        .saved-posts-section {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .saved-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-primary);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .property-card:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-5px);
+        }
+
+        .card-image-container {
+            position: relative;
+            height: 250px;
+            overflow: hidden;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .property-card:hover .card-image {
+            transform: scale(1.05);
+        }
+
+        .card-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: flex-end;
+            /* Aligns content to the right */
+            align-items: flex-start;
+            /* Aligns content to the top */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card-image-container:hover .card-overlay {
+            opacity: 1;
+        }
+
+        .btn-remove-favorite {
+            background: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 8px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-remove-favorite:hover {
+            background: var(--danger-red);
+            transform: scale(1.1);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .property-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .property-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 1rem;
+        }
+
+        .property-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-item i {
+            color: var(--primary-blue);
+        }
+
+        .property-address {
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .property-address i {
+            color: var(--primary-blue);
+            margin-top: 0.2rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-view-detail {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .btn-view-detail:hover {
+            background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow-primary);
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 1rem;
+        }
+
+        .empty-description {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn-browse {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .btn-browse:hover {
+            background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .loading-spinner {
+            width: 3rem;
+            height: 3rem;
+            border: 3px solid rgba(62, 131, 204, 0.3);
+            border-top: 3px solid var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .filter-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-primary);
+            margin-bottom: 2rem;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-clear-all {
+            background: var(--danger-red);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-clear-all:hover {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .property-details {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .card-actions {
+                flex-direction: column;
+            }
+
+            .filter-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <!-- LOGIN MODAL -->
+    <div th:replace="~{/layouts/login-modal}"></div>
+
+    <!-- REGISTER MODAL -->
+    <div th:replace="~{/layouts/register-modal}"></div>
+
+    <!-- VERIFICATION MODAL -->
+    <div th:replace="~{/layouts/verification-modal}"></div>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1 class="page-title">
+                <i class="fas fa-heart me-3"></i>Trọ đã lưu
+            </h1>
+            <p class="page-subtitle">Danh sách các nhà trọ bạn đã lưu để xem sau</p>
+            <div class="saved-count">
+                <i class="fas fa-bookmark me-2"></i>
+                <span
+                    th:text="${favoritePosts != null ? #lists.size(favoritePosts) + ' nhà trọ đã lưu' : '0 nhà trọ đã lưu'}">0
+                    nhà trọ đã lưu</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <section class="saved-posts-section">
+        <div class="container">
+            <!-- Filter Section -->
+            <div class="filter-section" th:if="${favoritePosts != null and !#lists.isEmpty(favoritePosts)}">
+                <div class="filter-actions">
+                    <h5 class="mb-0">
+                        <i class="fas fa-filter me-2"></i>Quản lý danh sách
+                    </h5>
+                    <button class="btn-clear-all" onclick="clearAllFavorites()">
+                        <i class="fas fa-trash me-2"></i>Xóa tất cả
+                    </button>
+                </div>
+            </div>
+
+            <!-- Posts Container -->
+            <div class="row" th:if="${favoritePosts != null and !#lists.isEmpty(favoritePosts)}">
+                <div class="col-lg-4 col-md-4 col-sm-12 mb-4" th:each="post : ${favoritePosts}">
+                    <div class="property-card" th:attr="data-post-id=${post.postId}">
+                        <div class="card-image-container">
+                            <img th:if="${post.images != null and !#lists.isEmpty(post.images)}"
+                                th:src="${post.images[0].url}" th:alt="${post.title}" class="card-image"
+                                onerror="this.src='/images/cards/default.jpg';">
+                            <img th:unless="${post.images != null and !#lists.isEmpty(post.images)}"
+                                src="/images/cards/default.jpg" th:alt="${post.title}" class="card-image">
+                            <div class="card-overlay">
+                                <button class="btn-remove-favorite" th:attr="data-post-id=${post.postId}"
+                                    onclick="removeFromFavorites(this.getAttribute('data-post-id'))" title="Bỏ lưu">
+                                    <i class="fas fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <h3 class="property-title" th:text="${post.title}">Tiêu đề</h3>
+                            <div class="property-price">
+                                <span
+                                    th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">0
+                                    VNĐ/tháng</span>
+                            </div>
+                            <div class="property-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-expand-arrows-alt"></i>
+                                    <span th:text="${post.area} + 'm²'">0m²</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-tag"></i>
+                                    <span
+                                        th:text="${post.category != null ? post.category.name : 'Chưa phân loại'}">Danh
+                                        mục</span>
+                                </div>
+                            </div>
+                            <div class="property-address">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span th:if="${post.address != null}"
+                                    th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
+                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
+                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                </span>
+                                <span th:unless="${post.address != null}">
+                                    Địa chỉ chưa cập nhật
+                                </span>
+                            </div>
+                            <div class="card-actions">
+                                <a th:href="@{'/chi-tiet/' + ${post.postId}}" class="btn-view-detail">
+                                    <i class="fas fa-eye me-2"></i>Xem chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${favoritePosts == null or #lists.isEmpty(favoritePosts)}">
+                <div class="empty-icon">
+                    <i class="far fa-heart"></i>
+                </div>
+                <h3 class="empty-title">Chưa có trọ nào được lưu</h3>
+                <p class="empty-description">
+                    Bạn chưa lưu nhà trọ nào. Hãy duyệt qua các bài đăng và nhấn vào biểu tượng trái tim để lưu những
+                    nhà trọ yêu thích.
+                </p>
+                <a href="/" class="btn-browse">
+                    <i class="fas fa-search me-2"></i>Khám phá nhà trọ
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Remove from favorites function
+        async function removeFromFavorites(postId) {
+            try {
+                const result = await Swal.fire({
+                    title: 'Bỏ lưu nhà trọ?',
+                    text: 'Bạn có chắc chắn muốn bỏ lưu nhà trọ này?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Bỏ lưu',
+                    cancelButtonText: 'Hủy'
+                });
+
+                if (result.isConfirmed) {
+                    const response = await fetch(`/api/favorites/toggle/${postId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Remove card with animation
+                        const card = document.querySelector(`[data-post-id="${postId}"]`).closest('.col-lg-6');
+                        if (card) {
+                            card.style.transition = 'all 0.3s ease';
+                            card.style.transform = 'scale(0.8)';
+                            card.style.opacity = '0';
+
+                            setTimeout(() => {
+                                card.remove();
+
+                                // Check if no more cards exist
+                                const remainingCards = document.querySelectorAll('.property-card');
+                                if (remainingCards.length === 0) {
+                                    location.reload(); // Reload to show empty state
+                                }
+                            }, 300);
+                        }
+
+                        showNotification('Đã bỏ lưu nhà trọ', 'success');
+                    } else {
+                        showNotification(data.message || 'Có lỗi xảy ra', 'error');
+                    }
+                }
+            } catch (error) {
+                console.error('Error removing from favorites:', error);
+                showNotification('Có lỗi xảy ra. Vui lòng thử lại sau', 'error');
+            }
+        }
+
+        // Clear all favorites function
+        async function clearAllFavorites() {
+            try {
+                const result = await Swal.fire({
+                    title: 'Xóa tất cả nhà trọ đã lưu?',
+                    text: 'Hành động này không thể hoàn tác!',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ef4444',
+                    cancelButtonColor: '#6b7280',
+                    confirmButtonText: 'Xóa tất cả',
+                    cancelButtonText: 'Hủy'
+                });
+
+                if (result.isConfirmed) {
+                    const cards = document.querySelectorAll('.property-card');
+                    const promises = [];
+
+                    cards.forEach(card => {
+                        const postId = card.getAttribute('data-post-id');
+                        promises.push(
+                            fetch(`/api/favorites/toggle/${postId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                }
+                            })
+                        );
+                    });
+
+                    await Promise.all(promises);
+                    location.reload(); // Reload to show empty state
+                    showNotification('Đã xóa tất cả nhà trọ đã lưu', 'success');
+                }
+            } catch (error) {
+                console.error('Error clearing all favorites:', error);
+                showNotification('Có lỗi xảy ra. Vui lòng thử lại sau', 'error');
+            }
+        }
+
+        // Show notification function
+        function showNotification(message, type = 'info') {
+            const Toast = Swal.mixin({
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.addEventListener('mouseenter', Swal.stopTimer)
+                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                }
+            });
+
+            Toast.fire({
+                icon: type,
+                title: message
+            });
+        }
+    </script>
+</body>
+
+</html>

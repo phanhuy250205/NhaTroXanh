@@ -1,6 +1,7 @@
 /* Property Cards Section */
 .property-section {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    background: #ffffff;
+    /* background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); */
     position: relative;
     overflow: hidden;
 }
@@ -54,7 +55,7 @@
 /* Card Image Container */
 .card-image-container {
     position: relative;
-    height: 220px;
+    height: 200px;
     overflow: hidden;
 }
 
