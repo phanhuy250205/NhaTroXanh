@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tạo Voucher - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/voucher-host.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+<body>
+    <!-- <div th:replace="~{/layouts/sidebar-host"></div> -->
+    <!-- Main Container -->
+    <div class="main-container-voucher">
+        <!-- Navigation Tabs -->
+        <nav class="main-nav">
+            <div class="container-fluid">
+                <div class="nav-tabs-container">
+                    <div class="nav-tabs">
+                        <button class="nav-tab active" onclick="showSection('create')" data-section="create">
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Tạo Voucher</span>
+                        </button>
+                        <button class="nav-tab" onclick="showSection('list')" data-section="list">
+                            <i class="fas fa-list"></i>
+                            <span>Danh Sách</span>
+                        </button>
+                    </div>
+                    
+                    <div class="nav-actions">
+                        <!-- <button class="action-btn" onclick="exportAllVouchers()" title="Xuất dữ liệu">
+                            <i class="fas fa-download"></i>
+                        </button> -->
+                        <button class="action-btn" onclick="resetForm()" title="Làm mới">
+                            <i class="fas fa-refresh"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content-voucher">
+            <div class="container-fluid">
+                <!-- Create Voucher Section -->
+                <section class="content-section active" id="createSection">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Tạo Voucher Mới</h2>
+                            <p>Tạo voucher giảm giá cho khách hàng của bạn</p>
+                        </div>
+                        
+                        <!-- Progress Steps - Centered -->
+                        <div class="section-progress">
+                            <div class="progress-steps">
+                                <div class="progress-step active" data-step="1">
+                                    <div class="step-number">1</div>
+                                    <div class="step-label">Thông tin</div>
+                                </div>
+                                <div class="progress-step" data-step="2">
+                                    <div class="step-number">2</div>
+                                    <div class="step-label">Giảm giá</div>
+                                </div>
+                                <div class="progress-step" data-step="3">
+                                    <div class="step-number">3</div>
+                                    <div class="step-label">Thời gian</div>
+                                </div>
+                                <div class="progress-step" data-step="4">
+                                    <div class="step-number">4</div>
+                                    <div class="step-label">Phạm vi</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="create-container">
+                        <div class="form-container">
+                            <div class="form-card">
+                                <form id="voucherForm" novalidate>
+                                    <!-- Step 1: Basic Information -->
+                                    <div class="form-step active" id="step1">
+                                        <div class="step-header">
+                                            <div class="step-icon">
+                                                <i class="fas fa-info-circle"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h3>Thông tin cơ bản</h3>
+                                                <p>Nhập thông tin cơ bản cho voucher của bạn</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-body">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label required">Tên voucher</label>
+                                                    <div class="input-wrapper">
+                                                        <input type="text" class="form-control" id="voucherName" required placeholder="Nhập tên voucher...">
+                                                        <!-- <div class="input-icon">
+                                                            <i class="fas fa-tag"></i>
+                                                        </div> -->
+                                                    </div>
+                                                    <div class="form-feedback">Vui lòng nhập tên voucher</div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="form-label required">Mã voucher</label>
+                                                    <div class="input-group">
+                                                        <div class="input-wrapper">
+                                                            <input type="text" class="form-control" id="voucherCode" required placeholder="Nhập mã voucher...">
+                                                            <!-- <div class="input-icon">
+                                                                <i class="fas fa-barcode"></i>
+                                                            </div> -->
+                                                        </div>
+                                                        <button type="button" class="generate-btn" onclick="generateVoucherCode()">
+                                                            <i class="fas fa-magic"></i>
+                                                            Tạo mã
+                                                        </button>
+                                                    </div>
+                                                    <div class="form-feedback">Vui lòng nhập mã voucher</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="form-label">Mô tả voucher</label>
+                                                <div class="input-wrapper">
+                                                    <textarea class="form-control" id="voucherDescription" rows="3" placeholder="Mô tả chi tiết về voucher..."></textarea>
+                                                    <!-- <div class="input-icon">
+                                                        <i class="fas fa-align-left"></i>
+                                                    </div> -->
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="form-label required">Trạng thái</label>
+                                                <div class="select-wrapper">
+                                                    <select class="form-control" id="voucherStatus" required>
+                                                        <option value="active">Kích hoạt ngay</option>
+                                                        <!-- <option value="draft">Bản nháp</option> -->
+                                                        <option value="scheduled">Lên lịch</option>
+                                                    </select>
+                                                    <div class="select-icon">
+                                                        <i class="fas fa-chevron-down"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 2: Discount Setup -->
+                                    <div class="form-step" id="step2">
+                                        <div class="step-header">
+                                            <div class="step-icon">
+                                                <i class="fas fa-percentage"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h3>Thiết lập giảm giá</h3>
+                                                <p>Cấu hình mức giảm giá cho voucher</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-body">
+                                            <div class="discount-card">
+                                                <div class="discount-header">
+                                                    <h4>Số tiền giảm</h4>
+                                                    <p>Nhập số tiền giảm cố định</p>
+                                                </div>
+                                                <div class="discount-input">
+                                                    <div class="currency-input">
+                                                        <input type="number" class="form-control large" id="discountValue" required min="1000" step="1000" placeholder="0">
+                                                        <div class="currency-label">VNĐ</div>
+                                                    </div>
+                                                    <div class="form-help">Số tiền giảm tối thiểu là 1,000 VNĐ</div>
+                                                    <div class="form-feedback">Vui lòng nhập số tiền giảm hợp lệ</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="form-label">Giảm tối đa (tùy chọn)</label>
+                                                <div class="currency-input">
+                                                    <input type="number" class="form-control" id="maxDiscount" min="0" step="1000" placeholder="Không giới hạn">
+                                                    <div class="currency-label">VNĐ</div>
+                                                </div>
+                                                <div class="form-help">Để trống nếu không giới hạn số tiền giảm tối đa</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 3: Time Settings -->
+                                    <div class="form-step" id="step3">
+                                        <div class="step-header">
+                                            <div class="step-icon">
+                                                <i class="fas fa-calendar-alt"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h3>Thời gian áp dụng</h3>
+                                                <p>Thiết lập thời gian hiệu lực của voucher</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-body">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label class="form-label required">Ngày bắt đầu</label>
+                                                    <div class="input-wrapper">
+                                                        <input type="datetime-local" class="form-control" id="startDate" required>
+                                                        <div class="input-icon">
+                                                            <i class="fas fa-calendar-plus"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-feedback">Vui lòng chọn ngày bắt đầu</div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="form-label required">Ngày kết thúc</label>
+                                                    <div class="input-wrapper">
+                                                        <input type="datetime-local" class="form-control" id="endDate" required>
+                                                        <div class="input-icon">
+                                                            <i class="fas fa-calendar-minus"></i>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-feedback">Vui lòng chọn ngày kết thúc</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="form-label">Giới hạn số lần sử dụng</label>
+                                                <div class="input-wrapper">
+                                                    <input type="number" class="form-control" id="totalUsageLimit" min="1" placeholder="Không giới hạn">
+                                                    <div class="input-icon">
+                                                        <i class="fas fa-users"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="form-help">Để trống nếu không giới hạn số lần sử dụng</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Step 4: Hostel Selection -->
+                                    <div class="form-step" id="step4">
+                                        <div class="step-header">
+                                            <div class="step-icon">
+                                                <i class="fas fa-building"></i>
+                                            </div>
+                                            <div class="step-content">
+                                                <h3>Phạm vi áp dụng</h3>
+                                                <p>Chọn khu trọ áp dụng voucher</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-body">
+                                            <div class="scope-options">
+                                                <div class="scope-option">
+                                                    <input type="radio" name="hostelScope" value="all" id="scopeAll" checked>
+                                                    <label for="scopeAll" class="scope-card">
+                                                        <div class="scope-icon">
+                                                            <i class="fas fa-globe"></i>
+                                                        </div>
+                                                        <div class="scope-content">
+                                                            <h4>Tất cả khu trọ</h4>
+                                                            <p>Áp dụng cho toàn bộ hệ thống</p>
+                                                        </div>
+                                                        <div class="scope-check">
+                                                            <i class="fas fa-check"></i>
+                                                        </div>
+                                                    </label>
+                                                </div>
+
+                                                <div class="scope-option">
+                                                    <input type="radio" name="hostelScope" value="specific" id="scopeSpecific">
+                                                    <label for="scopeSpecific" class="scope-card">
+                                                        <div class="scope-icon">
+                                                            <i class="fas fa-map-marker-alt"></i>
+                                                        </div>
+                                                        <div class="scope-content">
+                                                            <h4>Khu trọ cụ thể</h4>
+                                                            <p>Chọn khu trọ áp dụng</p>
+                                                        </div>
+                                                        <div class="scope-check">
+                                                            <i class="fas fa-check"></i>
+                                                        </div>
+                                                    </label>
+                                                </div>
+                                            </div>
+
+                                            <div class="hostel-selection" id="specificHostelsSection" style="display: none;">
+                                                <div class="selection-header">
+                                                    <h4>Chọn khu trọ</h4>
+                                                    <div class="search-box">
+                                                        <input type="text" placeholder="Tìm kiếm khu trọ..." id="hostelSearch">
+                                                        <i class="fas fa-search"></i>
+                                                    </div>
+                                                </div>
+
+                                                <div class="hostel-list">
+                                                    <div class="hostel-item">
+                                                        <input type="checkbox" value="1" id="hostel1">
+                                                        <label for="hostel1" class="hostel-card">
+                                                            <div class="hostel-info">
+                                                                <h5>Khu trọ Xanh - Quận 1</h5>
+                                                                <p>123 Nguyễn Huệ, Quận 1, TP.HCM</p>
+                                                                <span class="hostel-rooms">50 phòng</span>
+                                                            </div>
+                                                            <div class="hostel-check">
+                                                                <i class="fas fa-check"></i>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="hostel-item">
+                                                        <input type="checkbox" value="2" id="hostel2">
+                                                        <label for="hostel2" class="hostel-card">
+                                                            <div class="hostel-info">
+                                                                <h5>Khu trọ Hạnh Phúc - Quận 3</h5>
+                                                                <p>456 Võ Văn Tần, Quận 3, TP.HCM</p>
+                                                                <span class="hostel-rooms">30 phòng</span>
+                                                            </div>
+                                                            <div class="hostel-check">
+                                                                <i class="fas fa-check"></i>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+
+                                                    <div class="hostel-item">
+                                                        <input type="checkbox" value="3" id="hostel3">
+                                                        <label for="hostel3" class="hostel-card">
+                                                            <div class="hostel-info">
+                                                                <h5>Khu trọ An Khang - Quận 7</h5>
+                                                                <p>789 Nguyễn Thị Thập, Quận 7, TP.HCM</p>
+                                                                <span class="hostel-rooms">40 phòng</span>
+                                                            </div>
+                                                            <div class="hostel-check">
+                                                                <i class="fas fa-check"></i>
+                                                            </div>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <div class="form-actions">
+                                    <button type="button" class="btn btn-secondary" id="prevBtn" onclick="changeStep(-1)" style="display: none;">
+                                        <i class="fas fa-arrow-left"></i>
+                                        Quay lại
+                                    </button>
+                                    
+                                    <div class="actions-right">
+                                        <button type="button" class="btn btn-primary" id="nextBtn" onclick="changeStep(1)">
+                                            Tiếp theo
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                        <button type="submit" class="btn btn-success" id="submitBtn" style="display: none;" form="voucherForm">
+                                            <i class="fas fa-save"></i>
+                                            Tạo voucher
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="preview-container">
+                            <div class="preview-card">
+                                <div class="preview-header">
+                                    <h3>
+                                        <i class="fas fa-eye"></i>
+                                        Xem trước voucher
+                                    </h3>
+                                </div>
+
+                                <div class="voucher-preview">
+                                    <div class="voucher-ticket">
+                                        <div class="ticket-pattern"></div>
+                                        <div class="ticket-content">
+                                            <div class="ticket-header">
+                                                <div class="ticket-brand">
+                                                    <i class="fas fa-home"></i>
+                                                    <span>Nhà Trọ Xanh</span>
+                                                </div>
+                                                <div class="ticket-status">
+                                                    <span class="status-badge active" id="previewStatusBadge">Kích hoạt</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="ticket-main">
+                                                <div class="voucher-info">
+                                                    <h4 id="previewName">Tên voucher</h4>
+                                                    <p id="previewCode">VOUCHER_CODE</p>
+                                                </div>
+                                                
+                                                <div class="voucher-discount">
+                                                    <div class="discount-value">
+                                                        <span class="amount" id="previewDiscount">0</span>
+                                                        <span class="currency">VNĐ</span>
+                                                    </div>
+                                                    <div class="discount-label">GIẢM GIÁ</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="ticket-details">
+                                                <p class="voucher-description" id="previewDescription">Mô tả voucher sẽ hiển thị ở đây</p>
+                                                
+                                                <div class="detail-list">
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-calendar"></i>
+                                                        <span id="previewValidDate">Chưa thiết lập thời gian</span>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-building"></i>
+                                                        <span id="previewTarget">Tất cả khu trọ</span>
+                                                    </div>
+                                                    <div class="detail-item">
+                                                        <i class="fas fa-users"></i>
+                                                        <span id="previewUsage">Không giới hạn</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-stats">
+                                    <h4>Thống kê dự kiến</h4>
+                                    <div class="stats-list">
+                                        <div class="stat-row">
+                                            <span class="stat-label">Khu trọ áp dụng</span>
+                                            <span class="stat-value" id="estimatedHostels">0</span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">Lượt sử dụng tối đa</span>
+                                            <span class="stat-value" id="maxUsage">∞</span>
+                                        </div>
+                                        <div class="stat-row">
+                                            <span class="stat-label">Thời gian hiệu lực</span>
+                                            <span class="stat-value" id="validDays">0 ngày</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Voucher List Section -->
+                <section class="content-section" id="listSection">
+                    <div class="section-header">
+                        <div class="section-title">
+                            <h2>Danh sách voucher</h2>
+                            <p>Quản lý tất cả voucher trong hệ thống</p>
+                        </div>
+                        <div class="section-filters">
+                            <div class="filter-group">
+                                <div class="filter-item">
+                                    <select class="form-control" id="statusFilter">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="active">Đang hoạt động</option>
+                                        <!-- <option value="draft">Bản nháp</option> -->
+                                        <option value="scheduled">Lên lịch</option>
+                                        <option value="expired">Hết hạn</option>
+                                        <option value="disabled">Đã vô hiệu hóa</option>
+                                    </select>
+                                </div>
+                                <div class="filter-item">
+                                    <div class="search-input">
+                                        <input type="text" placeholder="Tìm kiếm voucher..." id="voucherSearchInput">
+                                        <i class="fas fa-search"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="voucher-grid" id="voucherGrid">
+                        <!-- Voucher items will be populated here -->
+                    </div>
+
+                    <div class="pagination-wrapper">
+                        <nav aria-label="Voucher pagination">
+                            <ul class="pagination" id="voucherPagination">
+                                <!-- Pagination will be populated here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Edit Voucher Modal -->
+    <div class="modal fade" id="editVoucherModal" tabindex="-1" aria-labelledby="editVoucherModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVoucherModalLabel">
+                        <i class="fas fa-edit"></i>
+                        Chỉnh sửa voucher
+                    </h5>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> -->
+                    <button type="button" class="btn-close" onclick="closeEditModal()" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editVoucherForm">
+                        <input type="hidden" id="editVoucherId">
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Tên voucher</label>
+                                <input type="text" class="form-control" id="editVoucherName">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Mã voucher</label>
+                                <input type="text" class="form-control" id="editVoucherCode">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="editVoucherDescription" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Số tiền giảm</label>
+                            <div class="currency-input">
+                                <input type="number" class="form-control" id="editDiscountValue">
+                                <div class="currency-label">VNĐ</div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Ngày bắt đầu</label>
+                                <input type="datetime-local" class="form-control" id="editStartDate">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Ngày kết thúc</label>
+                                <input type="datetime-local" class="form-control" id="editEndDate">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Trạng thái</label>
+                            <select class="form-control" id="editVoucherStatus">
+                                <option value="active">Kích hoạt</option>
+                                <!-- <option value="draft">Bản nháp</option> -->
+                                <option value="scheduled">Lên lịch</option>
+                                <option value="disabled">Vô hiệu hóa</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button> -->
+                    <button type="button" class="btn btn-outline-secondary" onclick="closeEditModal()">Hủy</button>
+                    <!-- <button type="button" class="btn btn-primary" onclick="saveVoucherEdit()">
+                        <i class="fas fa-save"></i>
+                        Lưu thay đổi
+                    </button> -->
+                    <button type="button" class="btn btn-primary" onclick="saveVoucherEdit()">
+                        <i class="fas fa-save me-2"></i>
+                        Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container">
+        <div class="toast success" id="successToast">
+            <div class="toast-content">
+                <div class="toast-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="toast-text">
+                    <div class="toast-title">Thành công!</div>
+                    <div class="toast-message" id="successMessage">Thao tác đã được thực hiện thành công.</div>
+                </div>
+            </div>
+            <button class="toast-close" onclick="hideToast('successToast')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="toast error" id="errorToast">
+            <div class="toast-content">
+                <div class="toast-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="toast-text">
+                    <div class="toast-title">Lỗi!</div>
+                    <div class="toast-message" id="errorMessage">Có lỗi xảy ra, vui lòng thử lại.</div>
+                </div>
+            </div>
+            <button class="toast-close" onclick="hideToast('errorToast')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/voucher-host.js}"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+</html>
