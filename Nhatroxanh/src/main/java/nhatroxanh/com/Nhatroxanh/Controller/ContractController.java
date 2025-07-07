@@ -2,7 +2,9 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 
 import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
@@ -14,6 +16,7 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -32,9 +35,11 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
-
+//@RestController
 @Controller
 @RequestMapping("/api/contracts")
+
+
 public class ContractController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
@@ -59,6 +64,8 @@ public class ContractController {
 
     @Autowired
     private RoomsService roomsService;
+    @Autowired
+    private ContractsRepository contractsRepository;
 
     private void initializeModelAttributes(Model model, ContractDto contract) {
         if (contract == null) {
@@ -992,24 +999,7 @@ public class ContractController {
         }
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<?> findContractById(@PathVariable Integer id) {
-        logger.info("Received request to find contract by ID: {}", id);
-        try {
-            Optional<Contracts> contract = contractService.findContractById(id);
-            if (contract.isPresent()) {
-                logger.info("Found contract with ID: {}", id);
-                return ResponseEntity.ok(contract.get());
-            } else {
-                logger.warn("Contract with ID {} not found", id);
-                return ResponseEntity.notFound().build();
-            }
-        } catch (Exception e) {
-            logger.error("Error finding contract ID {}: {}", id, e.getMessage(), e);
-            return ResponseEntity.status(500).body("Lỗi khi tìm hợp đồng: " + e.getMessage());
-        }
-    }
+
 
     private String saveFile(MultipartFile file) {
         logger.info("Saving file");
@@ -1055,5 +1045,200 @@ public class ContractController {
                 .anyMatch(ext -> fileName.toLowerCase().endsWith(ext));
         logger.info("File type validation result: {}", isValid);
         return isValid;
+    }
+
+
+
+    /**
+     * API endpoint để lấy danh sách hợp đồng cho owner
+     */
+    @GetMapping("/list")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Map<String, Object>> getContractsListApi(Authentication authentication) {
+        logger.info("Getting contracts list API for owner");
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            List<ContractListDto> contractsList = contractService.getContractsListByOwnerId(ownerId);
+
+            response.put("success", true);
+            response.put("contracts", contractsList);
+            response.put("totalContracts", contractsList.size());
+            response.put("message", "Lấy danh sách hợp đồng thành công");
+
+            logger.info("API: Found {} contracts for owner ID: {}", contractsList.size(), ownerId);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error getting contracts list API: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("contracts", List.of());
+            response.put("totalContracts", 0);
+            response.put("message", "Lỗi khi lấy danh sách hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+
+    /**
+     * API endpoint để lấy tất cả hợp đồng cho admin
+     */
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Map<String, Object>> getAllContractsApi() {
+        logger.info("Getting all contracts API for admin");
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            List<ContractListDto> contractsList = contractService.getAllContractsForList();
+
+            response.put("success", true);
+            response.put("contracts", contractsList);
+            response.put("totalContracts", contractsList.size());
+            response.put("message", "Lấy tất cả hợp đồng thành công");
+
+            logger.info("API: Found {} total contracts", contractsList.size());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Error getting all contracts API: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("contracts", List.of());
+            response.put("totalContracts", 0);
+            response.put("message", "Lỗi khi lấy tất cả hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    @PostMapping("/hop-dong/update-status/{contractId}")
+    public ResponseEntity<Map<String, Object>> updateContractStatus(
+            @PathVariable Long contractId,
+            @RequestBody Map<String, String> request) {
+
+        logger.info("🔄 === BẮT ĐẦU UPDATE CONTRACT STATUS ===");
+        logger.info("📝 Contract ID: {}", contractId);
+        logger.info("📝 Request body: {}", request);
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String newStatus = request.get("status");
+            logger.info("📊 Status từ request: '{}'", newStatus);
+
+            // 🔍 VALIDATE STATUS
+            if (newStatus == null || newStatus.trim().isEmpty()) {
+                logger.error("❌ Status is null or empty!");
+                response.put("success", false);
+                response.put("message", "Trạng thái không được để trống");
+                response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 🔍 KIỂM TRA STATUS HỢP LỆ
+            try {
+                Contracts.Status.valueOf(newStatus.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                logger.error("❌ Status không hợp lệ: '{}'", newStatus);
+                response.put("success", false);
+                response.put("message", "Trạng thái không hợp lệ: " + newStatus);
+                response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // 🔄 GỌI SERVICE
+            logger.info("🔄 Gọi contractService.updateStatus({}, '{}')", contractId, newStatus);
+            contractService.updateStatus(contractId, newStatus);
+
+            // ✅ THÀNH CÔNG
+            logger.info("✅ Cập nhật thành công!");
+            response.put("success", true);
+            response.put("message", "Cập nhật trạng thái hợp đồng thành công");
+            response.put("contractId", contractId);
+            response.put("newStatus", newStatus.toUpperCase());
+
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("❌ IllegalArgumentException: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+            return ResponseEntity.badRequest().body(response);
+
+        } catch (Exception e) {
+            logger.error("❌ Unexpected Exception: ", e);
+            response.put("success", false);
+            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    // 🧪 DEBUG ENDPOINT
+    @GetMapping("/debug/contract/{contractId}")
+    public ResponseEntity<Map<String, Object>> debugContract(@PathVariable Long contractId) {
+        logger.info("🧪 Debug contract: {}", contractId);
+
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Tìm contract
+            Optional<Contracts> contractOpt = contractsRepository.findById(Math.toIntExact(contractId));
+
+            if (contractOpt.isPresent()) {
+                Contracts contract = contractOpt.get();
+                response.put("found", true);
+                response.put("contractId", contract.getContractId());
+                response.put("currentStatus", contract.getStatus());
+                response.put("statusType", contract.getStatus().getClass().getSimpleName());
+            } else {
+                response.put("found", false);
+                response.put("message", "Contract not found");
+            }
+
+            response.put("success", true);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("❌ Debug error: ", e);
+            response.put("success", false);
+            response.put("error", e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+    // 🧪 TEST ENDPOINT ĐỂ KIỂM TRA CONTROLLER
+    @GetMapping("/test-controller")
+    public ResponseEntity<Map<String, Object>> testController() {
+        logger.info("🧪 Test controller endpoint được gọi");
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Controller hoạt động bình thường!");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("contractServiceAvailable", contractService != null);
+
+        return ResponseEntity.ok(response);
+    }
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> findContractById(@PathVariable Integer id) {
+        logger.info("Received request to find contract by ID: {}", id);
+        try {
+            Optional<Contracts> contract = contractService.findContractById(id);
+            if (contract.isPresent()) {
+                logger.info("Found contract with ID: {}", id);
+                return ResponseEntity.ok(contract.get());
+            } else {
+                logger.warn("Contract with ID {} not found", id);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("Error finding contract ID {}: {}", id, e.getMessage(), e);
+            return ResponseEntity.status(500).body("Lỗi khi tìm hợp đồng: " + e.getMessage());
+        }
     }
 }

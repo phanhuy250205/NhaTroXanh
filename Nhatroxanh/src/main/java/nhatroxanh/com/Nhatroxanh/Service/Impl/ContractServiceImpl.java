@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
@@ -13,6 +14,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import org.apache.hc.core5.annotation.Contract;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ContractServiceImpl implements ContractService {
@@ -648,4 +653,279 @@ public class ContractServiceImpl implements ContractService {
         logger.info("=== END FIND CONTRACTS BY OWNER CCCD ===");
         return contracts;
     }
+
+    @Override
+    public List<ContractListDto> getAllContractsForList() {
+        logger.info("Getting all contracts for list view");
+        try {
+            List<Contracts> contracts = contractRepository.findAllOrderByContractDateDesc();
+            return convertToContractListDto(contracts);
+        } catch (Exception e) {
+            logger.error("Error getting contracts for list: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi lấy danh sách hợp đồng: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ContractListDto> getContractsListByOwnerId(Integer ownerId) {
+        logger.info("Getting contracts list for owner ID: {}", ownerId);
+        try {
+            List<Contracts> contracts = contractRepository.findByOwnerUserIdOrderByContractDateDesc(ownerId);
+            return convertToContractListDto(contracts);
+        } catch (Exception e) {
+            logger.error("Error getting contracts list for owner ID {}: {}", ownerId, e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi lấy danh sách hợp đồng của chủ trọ: " + e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public void updateStatus(Long contractId, String newStatusString) {
+        logger.info("🔄 === SERVICE: UPDATE STATUS ===");
+        logger.info("📝 Contract ID: {}", contractId);
+        logger.info("📝 New Status String: '{}'", newStatusString);
+
+        try {
+            // 🔄 CONVERT STRING TO ENUM
+            Contracts.Status newStatus;
+            try {
+                newStatus = Contracts.Status.valueOf(newStatusString.toUpperCase());
+                logger.info("✅ Converted to enum: {}", newStatus);
+            } catch (IllegalArgumentException e) {
+                logger.error("❌ Status không hợp lệ: '{}'", newStatusString);
+                logger.error("❌ Các status cho phép: {}", java.util.Arrays.toString(Contracts.Status.values()));
+                throw new IllegalArgumentException("Status không hợp lệ: " + newStatusString +
+                        ". Các giá trị cho phép: " + java.util.Arrays.toString(Contracts.Status.values()));
+            }
+
+            // 🔍 TÌM HỢP ĐỒNG
+            logger.info("🔍 Tìm hợp đồng với ID: {}", contractId);
+            Optional<Contracts> contractOpt = contractRepository.findById(Math.toIntExact(contractId));
+
+            if (contractOpt.isEmpty()) {
+                logger.error("❌ Không tìm thấy hợp đồng với ID: {}", contractId);
+                throw new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId);
+            }
+
+            Contracts contract = contractOpt.get();
+            logger.info("✅ Tìm thấy hợp đồng: ID={}, Status hiện tại={}",
+                    contract.getContractId(), contract.getStatus());
+
+            // 🔄 CẬP NHẬT STATUS
+            Contracts.Status oldStatus = contract.getStatus();
+            contract.setStatus(newStatus);
+
+            logger.info("🔄 Lưu hợp đồng với status mới...");
+            Contracts savedContract = contractRepository.save(contract);
+
+            logger.info("✅ Cập nhật thành công! {} -> {}",
+                    oldStatus, savedContract.getStatus());
+
+        } catch (IllegalArgumentException e) {
+            logger.error("❌ IllegalArgumentException: {}", e.getMessage());
+            throw e; // Re-throw để Controller xử lý
+
+        } catch (Exception e) {
+            logger.error("❌ Lỗi trong service updateStatus: ", e);
+            throw new RuntimeException("Lỗi cập nhật trạng thái hợp đồng: " + e.getMessage(), e);
+        }
+    }
+    // 🔍 TÌM HỢP ĐỒNG THEO ID
+    @Override
+    @Transactional(readOnly = true)
+    public Contracts getContractById(Long contractId) {
+        logger.info("🔍 Service: Tìm hợp đồng với ID: {}", contractId);
+        return contractRepository.findById(Math.toIntExact(contractId))
+                .orElseThrow(() -> {
+                    logger.warn("⚠️ Không tìm thấy hợp đồng với ID: {}", contractId);
+                    return new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId);
+                });
+    }
+
+    // 🔄 CHUYỂN ĐỔI STRING THÀNH ENUM STATUS
+    private Contracts.Status parseStatusFromString(String statusString) {
+        logger.info("🔄 Parse status string: '{}'", statusString);
+
+        try {
+            // Chuyển đổi các giá trị phổ biến
+            switch (statusString.toUpperCase()) {
+                case "DRAFT":
+                case "BAN_NHAP":
+                    return Contracts.Status.DRAFT;
+
+                case "ACTIVE":
+                case "DANG_THUE":
+                case "HOAT_DONG":
+                    return Contracts.Status.ACTIVE;
+
+                case "TERMINATED":
+                case "DA_HUY":
+                case "CANCELLED":
+                    return Contracts.Status.TERMINATED;
+
+                case "EXPIRED":
+                case "HET_HAN":
+                    return Contracts.Status.EXPIRED;
+
+                default:
+                    // Thử parse trực tiếp từ enum
+                    return Contracts.Status.valueOf(statusString.toUpperCase());
+            }
+        } catch (IllegalArgumentException e) {
+            logger.error("❌ Trạng thái không hợp lệ: '{}'", statusString);
+            throw new RuntimeException("Trạng thái không hợp lệ: " + statusString +
+                    ". Các trạng thái hợp lệ: DRAFT, ACTIVE, TERMINATED, EXPIRED");
+        }
+    }
+
+    // 🔧 METHOD BỔ SUNG
+    public List<String> getAllValidStatuses() {
+        return java.util.Arrays.stream(Contracts.Status.values())
+                .map(Enum::name)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public boolean isValidStatus(String status) {
+        try {
+            Contracts.Status.valueOf(status.toUpperCase());
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+
+
+    // 🔄 KIỂM TRA LOGIC CHUYỂN ĐỔI TRẠNG THÁI
+    private boolean canChangeStatus(Contracts.Status currentStatus, Contracts.Status newStatus) {
+        logger.info("🔄 Kiểm tra chuyển đổi: {} -> {}", currentStatus, newStatus);
+
+        if (currentStatus == null) return true;
+
+        // Logic chuyển đổi trạng thái theo enum
+        switch (currentStatus) {
+            case DRAFT:
+                return Arrays.asList(Contracts.Status.ACTIVE, Contracts.Status.TERMINATED)
+                        .contains(newStatus);
+
+            case ACTIVE:
+                return Arrays.asList(Contracts.Status.TERMINATED, Contracts.Status.EXPIRED)
+                        .contains(newStatus);
+
+            case TERMINATED:
+                return newStatus == Contracts.Status.DRAFT;
+
+            case EXPIRED:
+                return Arrays.asList(Contracts.Status.ACTIVE, Contracts.Status.TERMINATED)
+                        .contains(newStatus);
+
+            default:
+                return false;
+        }
+    }
+    // 🏷️ LẤY NHÃN TRẠNG THÁI TIẾNG VIỆT
+    private String getStatusLabel(Contracts.Status status) {
+        if (status == null) return "Không xác định";
+
+        switch (status) {
+            case DRAFT:
+                return "Bản nháp";
+            case ACTIVE:
+                return "Đang thuê";
+            case TERMINATED:
+                return "Đã hủy";
+            case EXPIRED:
+                return "Hết hạn";
+            default:
+                return status.name();
+        }
+    }
+
+    private List<ContractListDto> convertToContractListDto(List<Contracts> contracts) {
+        logger.debug("Converting {} contracts to ContractListDto", contracts.size());
+
+        return contracts.stream().map(contract -> {
+                    try {
+                        ContractListDto dto = new ContractListDto();
+
+                        // Mã số hợp đồng
+                        if (contract.getContractId() != null) {
+                            dto.setContractId(contract.getContractId().longValue());
+                        }
+
+                        // Ngày bắt đầu
+                        if (contract.getStartDate() != null) {
+                            dto.setStartDate(contract.getStartDate().toLocalDate());
+                        }
+                        //tên Khách thuê
+                        if (contract.getTenant() != null) {
+                            dto.setTenantName(contract.getTenant().getFullname());
+                        } else if (contract.getUnregisteredTenant() != null) {
+                            dto.setTenantName(contract.getUnregisteredTenant().getFullName());
+                        } else {
+                            dto.setTenantName("Chưa xác định");
+                        }
+
+
+                        // Ngày kết thúc - Tính từ startDate + duration (tháng)
+                        if (contract.getStartDate() != null && contract.getDuration() != null && contract.getDuration() > 0) {
+                            LocalDate startDate = contract.getStartDate().toLocalDate();
+
+                            // Xử lý duration an toàn hơn
+                            int durationMonths = contract.getDuration().intValue();
+                            LocalDate endDate = startDate.plusMonths(durationMonths);
+
+                            dto.setEndDate(endDate);
+                            logger.debug("Calculated end date for contract {}: {} + {} months = {}",
+                                    contract.getContractId(), startDate, durationMonths, endDate);
+                        }
+                        else if (contract.getEndDate() != null) {
+                            // Fallback: nếu có sẵn endDate trong database
+                            dto.setEndDate(contract.getEndDate().toLocalDate());
+                            logger.debug("Using existing end date for contract {}: {}",
+                                    contract.getContractId(), contract.getEndDate().toLocalDate());
+                        }
+
+                        // Số điện thoại người thuê
+                        String tenantPhone = getTenantPhone(contract);
+                        dto.setTenantPhone(tenantPhone);
+
+                        // Trạng thái
+                        dto.setStatus(contract.getStatus() != null ? contract.getStatus().toString() : "UNKNOWN");
+
+                        return dto;
+
+                    } catch (Exception e) {
+                        logger.error("Error converting contract {} to DTO: {}",
+                                contract.getContractId(), e.getMessage(), e);
+                        return null;
+                    }
+                })
+                .filter(dto -> dto != null) // Loại bỏ các DTO null
+                .collect(Collectors.toList());
+    }
+
+
+
+    private String getTenantPhone(Contracts contract) {
+        try {
+            // Kiểm tra tenant đã đăng ký
+            if (contract.getTenant() != null && contract.getTenant().getPhone() != null) {
+                return contract.getTenant().getPhone();
+            }
+
+            // Kiểm tra unregistered tenant
+            if (contract.getUnregisteredTenant() != null && contract.getUnregisteredTenant().getPhone() != null) {
+                return contract.getUnregisteredTenant().getPhone();
+            }
+
+            return ""; // Trả về chuỗi rỗng nếu không có số điện thoại
+
+        } catch (Exception e) {
+            logger.error("Error getting tenant phone for contract {}: {}",
+                    contract.getContractId(), e.getMessage());
+            return "";
+        }
+    }
+
 }
