@@ -1250,70 +1250,71 @@
                 this.wardSelect = document.getElementById('ward');
                 this.streetInput = document.getElementById('street');
                 this.fullAddress = document.getElementById('fullAddress');
-                this.addressData = [];
             }
 
             async init(savedAddress = "") {
-                await this.loadAddressData();
-                this.populateProvinces();
+                await this.populateProvinces();
                 this.addListeners();
                 if (savedAddress) {
                     await this.setInitialAddress(savedAddress);
                 }
             }
 
-            async loadAddressData() {
+            async populateProvinces() {
                 try {
-                    const res = await fetch("/data/vietnam_full_address.json");
-                    this.addressData = await res.json();
+                    const res = await fetch("https://provinces.open-api.vn/api/p/");
+                    const provinces = await res.json();
+                    this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+                    provinces.forEach(p => {
+                        this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
+                    });
                 } catch (error) {
-                    console.error("❌ Lỗi khi load file địa chỉ:", error);
+                    console.error("❌ Lỗi khi load tỉnh/thành:", error);
                 }
             }
 
-            populateProvinces() {
-                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
-                this.addressData.forEach(p => {
-                    this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
-                });
+            async populateDistricts(provinceCode) {
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    const province = await res.json();
+                    const districts = province.districts || [];
+
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                    });
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                } catch (error) {
+                    console.error("❌ Lỗi khi load quận/huyện:", error);
+                }
             }
 
-            populateDistricts(provinceCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
+            async populateWards(districtCode) {
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    const district = await res.json();
+                    const wards = district.wards || [];
 
-                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                province.districts.forEach(d => {
-                    this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
-                });
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-            }
-
-            populateWards(provinceCode, districtCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
-
-                const district = province.districts.find(d => d.code === districtCode);
-                if (!district) return;
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                district.wards.forEach(w => {
-                    this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
-                });
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error("❌ Lỗi khi load phường/xã:", error);
+                }
             }
 
             addListeners() {
-                this.provinceSelect.addEventListener("change", (e) => {
+                this.provinceSelect.addEventListener("change", async (e) => {
                     const provinceCode = e.target.value;
-                    this.populateDistricts(provinceCode);
+                    await this.populateDistricts(provinceCode);
                     this.updateFullAddress();
                 });
 
-                this.districtSelect.addEventListener("change", (e) => {
-                    const provinceCode = this.provinceSelect.value;
+                this.districtSelect.addEventListener("change", async (e) => {
                     const districtCode = e.target.value;
-                    this.populateWards(provinceCode, districtCode);
+                    await this.populateWards(districtCode);
                     this.updateFullAddress();
                 });
 
@@ -1339,28 +1340,35 @@
                     const [street, wardName, districtName, provinceName] = parts;
                     this.streetInput.value = street;
 
-                    const province = this.addressData.find(p =>
-                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    const provinces = await fetch("https://provinces.open-api.vn/api/p/").then(res => res.json());
+                    const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
                     if (!province) return;
                     this.provinceSelect.value = province.code;
-                    this.populateDistricts(province.code);
 
-                    const district = province.districts.find(d =>
-                        d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    const provinceDetail = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`).then(res => res.json());
+                    const district = provinceDetail.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
                     if (!district) return;
-                    this.districtSelect.value = district.code;
-                    this.populateWards(province.code, district.code);
 
-                    const ward = district.wards.find(w =>
-                        w.name.toLowerCase().includes(wardName.toLowerCase()));
-                    if (ward) this.wardSelect.value = ward.code;
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    provinceDetail.districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}" ${d.code === district.code ? 'selected' : ''}>${d.name}</option>`;
+                    });
+
+                    const districtDetail = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`).then(res => res.json());
+                    const ward = districtDetail.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    districtDetail.wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}" ${ward && w.code === ward.code ? 'selected' : ''}>${w.name}</option>`;
+                    });
 
                     this.updateFullAddress();
                 } catch (error) {
-                    console.error("❌ Lỗi set địa chỉ ban đầu:", error);
+                    console.error("❌ Lỗi khi thiết lập địa chỉ ban đầu:", error);
                 }
             }
         }
+
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {
