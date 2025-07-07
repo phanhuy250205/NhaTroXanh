@@ -42,6 +42,11 @@
         }
 
         @Override
+        public List<Hostel> searchHostelsByOwnerIdAndName(Integer ownerId, String keyword) {
+            return hostelRepository.findByOwnerUserIdAndNameContainingIgnoreCase(ownerId, keyword);
+        }
+
+        @Override
         @Transactional
         public Hostel createHostel(HostelDTO dto) {
             System.out.println("Creating hostel with DTO: " + dto);
@@ -115,4 +120,10 @@
                     .build();
             return addressRepository.save(address);
         }
+
+        @Override
+        public List<Hostel> getHostelsWithRoomsByOwnerId(Integer ownerId) {
+            return hostelRepository.findHostelsWithRoomsByOwnerId(ownerId);
+        }
+
     }

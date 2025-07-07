@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head th:replace="~{/layouts/head}">
 
     <title>Nhà Trọ Xanh</title>
 </head>
+
 <body class="themkhutro">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -84,6 +86,7 @@
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="districtHost" class="form-label-host">Quận/Huyện</label>
@@ -92,6 +95,7 @@
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="wardHost" class="form-label-host">Phường/Xã</label>
@@ -100,18 +104,21 @@
                                         </select>
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="streetHost" class="form-label-host">Đường/Phố</label>
                                         <input type="text" id="streetHost" class="form-control-host" name="street" th:value="${hostel != null ? hostel.street : ''}" placeholder="Nhập tên đường/phố">
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="houseNumberHost" class="form-label-host">Số nhà</label>
                                         <input type="text" id="houseNumberHost" class="form-control-host" name="houseNumber" th:value="${hostel != null ? hostel.houseNumber : ''}" placeholder="123">
                                     </div>
                                 </div>
+
                                 <div class="col-md-6">
                                     <div class="form-group-host">
                                         <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
@@ -129,6 +136,7 @@
                             <input type="hidden" id="houseNumberHost" name="houseNumber">
                         </div>
                     </div>
+
 
                     <!-- Mô tả Section -->
                     <div class="form-section-host">
@@ -160,4 +168,5 @@
         }
     </style>
 </body>
+
 </html>

@@ -3,6 +3,9 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +15,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
 public interface HostelRepository extends JpaRepository<Hostel, Integer> {
 
-
+    
 
     @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE h.owner.userId = :ownerId")
     List<Hostel> findByOwner_UserId(@Param("ownerId") Integer ownerId);
@@ -22,6 +25,11 @@ public interface HostelRepository extends JpaRepository<Hostel, Integer> {
     
     int countByOwner(Users owner);
 
+     @Query("SELECT h FROM Hostel h WHERE h.hostelId = :id OR LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+        Page<Hostel> findByHostelIdOrNameContainingIgnoreCase(@Param("id") Integer id, @Param("keyword") String keyword,
+                        Pageable pageable);
+
+    Page<Hostel> findByNameContainingIgnoreCase(String name, Pageable pageable);
     
     // SỬA LẠI: Sử dụng 'street' thay vì 'address'
     List<Hostel> findByAddress_StreetContainingIgnoreCase(String street);
@@ -47,5 +55,12 @@ public interface HostelRepository extends JpaRepository<Hostel, Integer> {
 
     @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
     long countHostelsByOwnerId(Integer ownerId);
+
+    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.rooms WHERE h.owner.userId = :ownerId")
+    List<Hostel> findHostelsWithRoomsByOwnerId(@Param("ownerId") Integer ownerId);
+
+    List<Hostel> findByOwner(Users owner);
+
+     List<Hostel> findByOwnerUserIdAndNameContainingIgnoreCase(Integer ownerId, String keyword);
 
 }

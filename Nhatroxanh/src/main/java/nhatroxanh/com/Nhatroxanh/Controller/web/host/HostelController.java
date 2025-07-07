@@ -33,16 +33,25 @@ public class HostelController {
     private RoomsService roomsService;
 
     @GetMapping("/chu-tro/thong-tin-tro")
-    public String hostthongtintro(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
-        try {
-            Integer ownerId = userDetails.getUser().getUserId();
-            List<Hostel> hostels = hostelService.getHostelsByOwnerId(ownerId);
-            model.addAttribute("hostels", hostels);
-            return "host/thongtintro";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách khu trọ: " + e.getMessage());
-            return "host/thongtintro";
+    public String hostthongtintro(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(value = "keyword", required = false) String keyword) {
+       try {
+        Integer ownerId = userDetails.getUser().getUserId();
+        List<Hostel> hostels;
+
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            hostels = hostelService.searchHostelsByOwnerIdAndName(ownerId, keyword);
+        } else {
+            hostels = hostelService.getHostelsByOwnerId(ownerId);
         }
+
+        model.addAttribute("hostels", hostels);
+        model.addAttribute("keyword", keyword); // giữ lại giá trị ô tìm kiếm
+        return "host/thongtintro";
+
+    } catch (Exception e) {
+        model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách khu trọ: " + e.getMessage());
+        return "host/thongtintro";
+    }
     }
 
     @GetMapping("/chu-tro/them-khu-tro")
@@ -109,7 +118,6 @@ public class HostelController {
             String address = hostel.getAddress() != null ? hostel.getAddress().getStreet() : "";
             hostelDTO.parseAddress(address);
 
-            // Nếu các trường con vẫn rỗng, thử lấy từ database (nếu có)
             if (hostel.getAddress() != null && hostel.getAddress().getWard() != null) {
                 hostelDTO.setWardCode(hostel.getAddress().getWard().getCode());
                 hostelDTO.setWardName(hostel.getAddress().getWard().getName());

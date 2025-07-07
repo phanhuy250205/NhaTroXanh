@@ -29,7 +29,7 @@ import jakarta.persistence.EnumType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Rooms")
+@Table(name = "rooms")
 
 public class Rooms {
     @Id

@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    
     <style>
         .complaint-detail-body-staff {
             font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -202,6 +201,52 @@
         }
 
         .status-completed-staff {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        /* Priority Badge Styles */
+        .priority-container-staff {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .priority-badge-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .priority-badge-staff:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .priority-high-staff {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+        }
+
+        .priority-medium-staff {
+            background: #f59e0b;
+            color: white;
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+        }
+
+        .priority-low-staff {
             background: #10b981;
             color: white;
             box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
@@ -578,8 +623,80 @@
         .form-textarea-staff::-webkit-scrollbar-thumb:hover {
             background: #549eed;
         }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
+
 <body class="complaint-detail-body-staff">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-staff}"></div>
@@ -594,7 +711,18 @@
                 <h1 class="page-title-staff">Chi tiết khiếu nại và sự cố</h1>
             </div>
         </div>
-
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
         <!-- Complaint Information Section -->
         <div class="info-section-staff">
             <h3 class="section-header-staff">
@@ -605,48 +733,73 @@
                 <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">ID khiếu nại</label>
-                        <input type="text" class="form-control-staff" value="KN001" disabled>
+                        <input type="text" class="form-control-staff" th:value="${report.reportId}" disabled>
                     </div>
                     <div class="form-group-staff">
                         <label class="form-label-staff">Loại sự cố</label>
-                        <input type="text" class="form-control-staff" value="Sự cố điện" disabled>
+                        <input type="text" class="form-control-staff" th:value="${report.incidentType}" disabled>
                     </div>
-                    <div class="form-group-staff">
-                        <label class="form-label-staff">Thời gian gửi</label>
-                        <input type="text" class="form-control-staff" value="15/12/2024 14:30" disabled>
+                    <div class="form-group-staff priority-container-staff">
+                        <label class="form-label-staff">Mức độ ưu tiên</label>
+                        <button id="priorityBtn" class="priority-badge-staff priority-high-staff" onclick="togglePriority()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Cao
+                        </button>
                     </div>
                 </div>
                 <div class="form-row-staff">
                     <div class="form-group-staff">
+                        <label class="form-label-staff">Thời gian gửi</label>
+                        <input type="text" class="form-control-staff"
+                            th:value="${#dates.format(report.reportedAt, 'dd/MM/yyyy HH:mm')}" disabled>
+                    </div>
+                    <div class="form-group-staff">
                         <label class="form-label-staff">Họ và tên người gửi</label>
-                        <input type="text" class="form-control-staff" value="Nguyễn Văn An" disabled>
+                        <input type="text" class="form-control-staff" th:value="${report.user.fullname}" disabled>
                     </div>
                     <div class="form-group-staff">
                         <label class="form-label-staff">Số điện thoại</label>
-                        <input type="text" class="form-control-staff" value="0123456789" disabled>
-                    </div>
-                    <div class="form-group-staff">
-                        <label class="form-label-staff">Khu trọ</label>
-                        <input type="text" class="form-control-staff" value="KTX A1" disabled>
+                        <input type="text" class="form-control-staff" th:value="${report.user.phone}" disabled>
                     </div>
                 </div>
                 <div class="form-row-staff">
                     <div class="form-group-staff">
+                        <label class="form-label-staff">Khu trọ</label>
+                        <input type="text" class="form-control-staff" th:value="${report.room.hostel.name}" disabled>
+                    </div>
+                    <div class="form-group-staff">
                         <label class="form-label-staff">Phòng</label>
-                        <input type="text" class="form-control-staff" value="A101" disabled>
+                        <input type="text" class="form-control-staff" th:value="${report.room.namerooms}" disabled>
                     </div>
                     <div class="form-group-staff status-container-staff">
                         <label class="form-label-staff">Trạng thái</label>
-                        <button id="statusBtn" class="status-badge-staff status-pending-staff" onclick="toggleStatus()">
-                            <i class="fas fa-clock"></i>
-                            Chờ xử lý
-                        </button>
+                        <form th:action="@{/nhan-vien/cap-nhat-trang-thai}" method="post">
+                            <input type="hidden" name="reportId" th:value="${report.reportId}" />
+                            <input type="hidden" name="status" th:value="${report.status.name() == 'CHUA_XU_LY' ? 'DANG_XU_LY' :
+                      (report.status.name() == 'DANG_XU_LY' ? 'DA_XU_LY' : report.status.name())}" />
+
+                            <button type="submit" th:if="${report.status.name() == 'CHUA_XU_LY'}"
+                                class="status-badge-staff status-pending-staff">
+                                <i class="fas fa-clock"></i> Chờ xử lý
+                            </button>
+
+                            <button type="submit" th:if="${report.status.name() == 'DANG_XU_LY'}"
+                                class="status-badge-staff status-processing-staff">
+                                <i class="fas fa-cog"></i> Đang xử lý
+                            </button>
+
+                            <button type="button" th:if="${report.status.name() == 'DA_XU_LY'}"
+                                class="status-badge-staff status-completed-staff" disabled>
+                                <i class="fas fa-check-circle"></i> Đã xử lý
+                            </button>
+                        </form>
                     </div>
                 </div>
                 <div class="form-row-staff">
                     <div class="form-group-staff" style="grid-column: 1 / -1;">
                         <label class="form-label-staff">Nội dung khiếu nại</label>
-                        <textarea class="form-textarea-staff" disabled>Điện trong phòng bị mất từ sáng nay, không thể sử dụng các thiết bị điện. Đã kiểm tra cầu dao nhưng vẫn không có điện. Mong được hỗ trợ sớm nhất có thể. Tình trạng này đã kéo dài từ 6h sáng và ảnh hưởng nghiêm trọng đến sinh hoạt hàng ngày.</textarea>
+                        <textarea class="form-textarea-staff" th:text="${report.description}"
+                            disabled>Điện trong phòng bị mất từ sáng nay, không thể sử dụng các thiết bị điện. Đã kiểm tra cầu dao nhưng vẫn không có điện. Mong được hỗ trợ sớm nhất có thể. Tình trạng này đã kéo dài từ 6h sáng và ảnh hưởng nghiêm trọng đến sinh hoạt hàng ngày.</textarea>
                     </div>
                 </div>
 
@@ -656,15 +809,10 @@
                         <i class="fas fa-images"></i>
                         Hình ảnh đính kèm
                     </h5>
-                    <div class="images-container-staff" id="imagesContainer">
-                        <div class="image-item-staff" onclick="viewImageFromElement(this)">
-                            <img th:src="@{/images/slider/slider1.jpg}" alt="Hình ảnh sự cố 1">
-                            <div class="view-icon-staff">
-                                <i class="fas fa-eye"></i>
-                            </div>
-                        </div>
-                        <div class="image-item-staff" onclick="viewImageFromElement(this)">
-                            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=400&fit=crop" alt="Hình ảnh sự cố 2">
+                    <div class="images-container-staff">
+                        <div class="image-item-staff" th:each="img : ${report.images}"
+                            onclick="viewImageFromElement(this)">
+                            <img th:src="${img.url}" alt="Ảnh khiếu nại">
                             <div class="view-icon-staff">
                                 <i class="fas fa-eye"></i>
                             </div>
@@ -672,8 +820,7 @@
                     </div>
                 </div>
 
-                <!-- Actions Section -->
-                <div class="actions-section-staff">
+                <!-- <div class="actions-section-staff">
                     <button class="update-btn-staff" onclick="updateComplaintStatus()">
                         <i class="fas fa-save"></i>
                         Cập nhật trạng thái
@@ -682,7 +829,7 @@
                         <i class="fas fa-times"></i>
                         Hủy bỏ
                     </button>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -700,22 +847,41 @@
     <script th:src="@{/js/sidebar.js}"></script>
 
     <script>
-        let currentStatus = 0; // 0: Chờ xử lý, 1: Đang xử lý, 2: Đã xử lý
-        const statuses = [
+        // let currentStatus = 0; // 0: Chờ xử lý, 1: Đang xử lý, 2: Đã xử lý
+        // const statuses = [
+        //     {
+        //         text: 'Chờ xử lý',
+        //         class: 'status-pending-staff',
+        //         icon: 'fas fa-clock'
+        //     },
+        //     {
+        //         text: 'Đang xử lý',
+        //         class: 'status-processing-staff',
+        //         icon: 'fas fa-cog'
+        //     },
+        //     {
+        //         text: 'Đã xử lý',
+        //         class: 'status-completed-staff',
+        //         icon: 'fas fa-check-circle'
+        //     }
+        // ];
+
+        let currentPriority = 0; // 0: Cao, 1: Trung bình, 2: Thấp
+        const priorities = [
             {
-                text: 'Chờ xử lý',
-                class: 'status-pending-staff',
-                icon: 'fas fa-clock'
+                text: 'Cao',
+                class: 'priority-high-staff',
+                icon: 'fas fa-exclamation-triangle'
             },
             {
-                text: 'Đang xử lý',
-                class: 'status-processing-staff',
-                icon: 'fas fa-cog'
+                text: 'Trung bình',
+                class: 'priority-medium-staff',
+                icon: 'fas fa-exclamation'
             },
             {
-                text: 'Đã xử lý',
-                class: 'status-completed-staff',
-                icon: 'fas fa-check-circle'
+                text: 'Thấp',
+                class: 'priority-low-staff',
+                icon: 'fas fa-info-circle'
             }
         ];
 
@@ -724,13 +890,27 @@
             updateStatusDisplay();
         }
 
-        function updateStatusDisplay() {
-            const statusBtn = document.getElementById('statusBtn');
-            const status = statuses[currentStatus];
+        // function updateStatusDisplay() {
+        //     const statusBtn = document.getElementById('statusBtn');
+        //     const status = statuses[currentStatus];
+
+        //     // Remove all status classes
+        //     statusBtn.className = 'status-badge-staff ' + status.class;
+        //     statusBtn.innerHTML = `<i class="${status.icon}"></i> ${status.text}`;
+        // }
+
+        function togglePriority() {
+            currentPriority = (currentPriority + 1) % priorities.length;
+            updatePriorityDisplay();
+        }
+
+        function updatePriorityDisplay() {
+            const priorityBtn = document.getElementById('priorityBtn');
+            const priority = priorities[currentPriority];
             
-            // Remove all status classes
-            statusBtn.className = 'status-badge-staff ' + status.class;
-            statusBtn.innerHTML = `<i class="${status.icon}"></i> ${status.text}`;
+            // Remove all priority classes
+            priorityBtn.className = 'priority-badge-staff ' + priority.class;
+            priorityBtn.innerHTML = `<i class="${priority.icon}"></i> ${priority.text}`;
         }
 
         // New function to get image source from clicked element
@@ -744,7 +924,6 @@
         function viewImage(imageSrc) {
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
-            
             modalImage.src = imageSrc;
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
@@ -774,7 +953,6 @@
             `;
             successMsg.innerHTML = '<i class="fas fa-check"></i> Cập nhật trạng thái thành công!';
             document.body.appendChild(successMsg);
-            
             setTimeout(() => {
                 successMsg.remove();
             }, 3000);
@@ -785,14 +963,14 @@
         }
 
         // Close modal when clicking outside the image
-        document.getElementById('imageModal').addEventListener('click', function(e) {
+        document.getElementById('imageModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeImageModal();
             }
         });
 
         // Close modal with Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 closeImageModal();
             }
@@ -817,6 +995,22 @@
             }
         `;
         document.head.appendChild(style);
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
     </script>
 </body>
+
 </html>

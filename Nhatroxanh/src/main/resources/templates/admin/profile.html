@@ -1,23 +1,1877 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 
-<head th:replace="~{/layouts/head}">
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hồ Sơ Admin - Quản Lý Nhà Trọ</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-    
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* Profile Card */
+        .profile-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            height: fit-content;
+        }
+
+        .profile-avatar {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .profile-avatar img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid #3E83CC;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .profile-avatar:hover img {
+            transform: scale(1.1);
+        }
+
+        .avatar-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            border: 3px solid white;
+        }
+
+        .profile-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .profile-role {
+            color: #3E83CC;
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .profile-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 25px 0;
+        }
+
+        .stat-item {
+            background: rgba(62, 131, 204, 0.1);
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #3E83CC;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .profile-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3E83CC, #2C5F96);
+            color: white;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #3E83CC;
+            border: 2px solid #3E83CC;
+        }
+
+        .btn-secondary:hover {
+            background: #3E83CC;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Settings Panel */
+        .settings-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            color: #666;
+            cursor: pointer;
+            border-radius: 25px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, #3E83CC, #2C5F96);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3E83CC;
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Dashboard Stats */
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-card h3 {
+            color: #333;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stat-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .stat-card-icon.rooms {
+            background: linear-gradient(45deg, #3E83CC, #5A9BD4);
+        }
+
+        .stat-card-icon.tenants {
+            background: linear-gradient(45deg, #4ECDC4, #44A08D);
+        }
+
+        .stat-card-icon.revenue {
+            background: linear-gradient(45deg, #45B7D1, #3E83CC);
+        }
+
+        .stat-card-icon.maintenance {
+            background: linear-gradient(45deg, #FFA726, #FF7043);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .stat-change {
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-change.positive {
+            color: #4CAF50;
+        }
+
+        .stat-change.negative {
+            color: #F44336;
+        }
+
+        /* Notifications */
+        .notifications-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: background 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .notification-icon.warning {
+            background: #FF9800;
+        }
+
+        .notification-icon.success {
+            background: #4CAF50;
+        }
+
+        .notification-icon.info {
+            background: #2196F3;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .notification-text {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .notification-time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-left: auto;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+
+            .profile-card,
+            .settings-panel {
+                padding: 20px;
+            }
+
+            .settings-tabs {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3E83CC;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .form-check-inline {
+            margin-right: 15px;
+        }
+
+        .form-check-input[type="radio"] {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 2px;
+            vertical-align: middle;
+            cursor: not-allowed;
+            /* vì đang disabled */
+        }
+
+        .form-check-label {
+            margin-left: 5px;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .form-group[disabled],
+        .form-check-input:disabled+.form-check-label {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
 <body>
-    <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-admin}"></div>
-    <div class="main-content">
-   
-
+    <!-- Main Content -->
+    <div class="custom-toast-container">
+        <div th:if="${successMessage}" class="custom-toast success">
+            <i class="toast-icon fas fa-check-circle"></i>
+            <span class="toast-message" th:text="${successMessage}"></span>
+            <button class="toast-close" aria-label="Đóng">×</button>
+        </div>
+        <div th:if="${errorMessage}" class="custom-toast error">
+            <i class="toast-icon fas fa-exclamation-circle"></i>
+            <span class="toast-message" th:text="${errorMessage}"></span>
+            <button class="toast-close" aria-label="Đóng">×</button>
+        </div>
     </div>
+    <div class="main-content">
+        <div class="profile-card">
+            <div class="profile-avatar" onclick="triggerAvatarUpload()">
+                <img th:src="${user.avatar != null and user.avatar.startsWith('/uploads/') 
+                          ? user.avatar 
+                          : '/uploads/' + user.avatar}" alt="Avatar" class="avatar-staff" id="staffAvatar">
+                <div class="avatar-badge">
+                    <i class="fas fa-crown"></i>
+                </div>
+            </div>
+            <div class="profile-info">
+                <h2 th:text="${user.fullname}">Nguyễn Văn Admin</h2>
+                <p class="profile-role">Quản Trị Viên Hệ Thống</p>
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">25</span>
+                        <span class="stat-label">Phòng trọ</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">48</span>
+                        <span class="stat-label">Khách thuê</span>
+                    </div>
+                </div>
+                <div class="profile-actions">
+                    <button id="editBtn" class="btn btn-primary" onclick="toggleEditMode()">
+                        <i class="fas fa-edit"></i> <span>Chỉnh sửa</span>
+                    </button>
+                    <button class="btn btn-secondary" onclick="changePassword()">
+                        <i class="fas fa-key"></i> Đổi mật khẩu
+                    </button>
+                </div>
+            </div>
+        </div>
 
-<script>
+        <!-- Settings Panel -->
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2><i class="fas fa-cogs"></i> Cài Đặt Tài Khoản</h2>
+            </div>
 
-</script>
+            <div class="success-message" id="successMessage" th:if="${successMessage}">
+                <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+            </div>
+            <div class="error-message" id="errorMessage" th:if="${errorMessage}">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+            </div>
+
+            <div class="settings-tabs">
+                <button class="tab-btn active" onclick="showTab('personal')">Thông Tin Cá Nhân</button>
+                <button class="tab-btn" onclick="showTab('security')">Bảo Mật</button>
+            </div>
+
+            <!-- Personal Info Tab -->
+            <div class="tab-content active" id="personal">
+                <form id="personalForm" th:action="@{/admin/profile/update}" method="post" enctype="multipart/form-data"
+                    th:object="${user}">
+                    <input type="file" id="avatarInput" name="avatarFile" accept="image/*" style="display: none;" />
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Họ và tên *</label>
+                            <input type="text" class="form-control" id="fullName" name="fullname" th:field="*{fullname}"
+                                readonly required />
+                            <div class="invalid-feedback" id="fullNameError" style="display: none;"></div>
+                            <div class="valid-feedback" id="fullNameSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Số điện thoại *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" th:field="*{phone}" readonly
+                                required />
+                            <div class="invalid-feedback" id="phoneError" style="display: none;"></div>
+                            <div class="valid-feedback" id="phoneSuccess" style="display: none;"></div>
+                            <div class="field-info" id="phoneInfo" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" th:field="*{email}"
+                                readonly required />
+                            <div class="invalid-feedback" id="emailError" style="display: none;"></div>
+                            <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="birthDate">Ngày sinh</label>
+                            <input type="date" class="form-control" id="birthDate" name="birthday"
+                                th:field="*{birthday}" readonly />
+                            <div class="invalid-feedback" id="birthDateError" style="display: none;"></div>
+                            <div class="valid-feedback" id="birthDateSuccess" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gender">Giới tính</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNam" value="true"
+                                    th:checked="${user.gender} == true" disabled />
+                                <label class="form-check-label" for="genderNam">Nam</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNu" value="false"
+                                    th:checked="${user.gender} == false" disabled />
+                                <label class="form-check-label" for="genderNu">Nữ</label>
+                            </div>
+                            <div class="invalid-feedback" id="genderError" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="cccdNumber">Số CCCD</label>
+                            <input type="text" class="form-control" id="cccdNumber" name="cccdNumber"
+                                th:value="${user.userCccd != null ? user.userCccd.cccdNumber : ''}" readonly
+                                maxlength="12" />
+                            <div class="invalid-feedback" id="cccdNumberError" style="display: none;"></div>
+                            <div class="valid-feedback" id="cccdNumberSuccess" style="display: none;"></div>
+                            <div class="field-info" id="cccdInfo" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issueDate">Ngày cấp</label>
+                            <input type="date" class="form-control" id="issueDate" name="issueDate"
+                                th:value="${user.userCccd != null ? #dates.format(user.userCccd.issueDate, 'yyyy-MM-dd') : ''}"
+                                readonly />
+                            <div class="invalid-feedback" id="issueDateError" style="display: none;"></div>
+                            <div class="valid-feedback" id="issueDateSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="issuePlace">Nơi cấp</label>
+                            <input type="text" class="form-control" id="issuePlace" name="issuePlace"
+                                th:value="${user.userCccd != null ? user.userCccd.issuePlace : ''}" readonly />
+                            <div class="invalid-feedback" id="issuePlaceError" style="display: none;"></div>
+                            <div class="valid-feedback" id="issuePlaceSuccess" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Address Section -->
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="province">Tỉnh/Thành phố</label>
+                            <select id="province" class="form-control" name="province" disabled>
+                                <option value="">Chọn Tỉnh/Thành phố</option>
+                            </select>
+                            <div class="invalid-feedback" id="provinceError" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="district">Quận/Huyện</label>
+                            <select id="district" class="form-control" name="district" disabled>
+                                <option value="">Chọn Quận/Huyện</option>
+                            </select>
+                            <div class="invalid-feedback" id="districtError" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="ward">Phường/Xã</label>
+                            <select id="ward" class="form-control" name="ward" disabled>
+                                <option value="">Chọn Phường/Xã</option>
+                            </select>
+                            <div class="invalid-feedback" id="wardError" style="display: none;"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="street">Địa chỉ chi tiết (số nhà, đường...)</label>
+                            <input type="text" id="street" class="form-control" name="street" readonly />
+                            <div class="invalid-feedback" id="streetError" style="display: none;"></div>
+                            <div class="valid-feedback" id="streetSuccess" style="display: none;"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" name="address" th:field="*{address}" id="fullAddress" />
+                    <input type="hidden" id="savedAddress" th:value="*{address}" />
+                    <div class="form-actions" id="formActions" style="display: none;">
+                        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">
+                            <i class="fas fa-times"></i> Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary ms-2" id="saveBtn">
+                            <i class="fas fa-save"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Security Tab -->
+            <div class="tab-content" id="security">
+                <form th:action="@{/admin/profile/change-password}" method="post" id="securityForm">
+                    <div class="form-group">
+                        <label for="currentPassword">Mật khẩu hiện tại</label>
+                        <input type="password" id="currentPassword" name="currentPassword" class="form-control"
+                            placeholder="******" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="newPassword">Mật khẩu mới</label>
+                        <input type="password" id="newPassword" name="newPassword" class="form-control" required />
+                        <div class="invalid-feedback" id="newPasswordError" style="display: none;"></div>
+                        <div class="valid-feedback" id="newPasswordSuccess" style="display: none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Xác nhận mật khẩu mới</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                            required />
+                        <div class="invalid-feedback" id="confirmPasswordError" style="display: none;"></div>
+                        <div class="valid-feedback" id="confirmPasswordSuccess" style="display: none;"></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-shield-alt"></i> Cập Nhật Bảo Mật
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Dashboard Statistics -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>Tổng số phòng</h3>
+                        <div class="stat-value">25</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> +2 từ tháng trước
+                        </div>
+                    </div>
+                    <div class="stat-card-icon rooms">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>Khách thuê hiện tại</h3>
+                        <div class="stat-value">48</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> +5 người mới
+                        </div>
+                    </div>
+                    <div class="stat-card-icon tenants">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>Doanh thu tháng</h3>
+                        <div class="stat-value">48M</div>
+                        <div class="stat-change positive">
+                            <i class="fas fa-arrow-up"></i> +12% so với tháng trước
+                        </div>
+                    </div>
+                    <div class="stat-card-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-header">
+                    <div>
+                        <h3>Yêu cầu bảo trì</h3>
+                        <div class="stat-value">3</div>
+                        <div class="stat-change negative">
+                            <i class="fas fa-arrow-down"></i> -2 từ tuần trước
+                        </div>
+                    </div>
+                    <div class="stat-card-icon maintenance">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Notifications -->
+        <div class="notifications-panel">
+            <h3><i class="fas fa-bell"></i> Thông Báo Gần Đây</h3>
+            <div class="notification-item">
+                <div class="notification-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">Phòng 201 cần bảo trì điện</div>
+                    <div class="notification-text">Khách thuê báo cáo vấn đề về hệ thống điện trong phòng</div>
+                </div>
+                <div class="notification-time">2 giờ trước</div>
+            </div>
+            <div class="notification-item">
+                <div class="notification-icon success">
+                    <i class="fas fa-check"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">Thanh toán tiền thuê tháng 12</div>
+                    <div class="notification-text">Phòng 305 - Nguyễn Thị B đã thanh toán đầy đủ</div>
+                </div>
+                <div class="notification-time">5 giờ trước</div>
+            </div>
+            <div class="notification-item">
+                <div class="notification-icon info">
+                    <i class="fas fa-info"></i>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">Khách thuê mới đăng ký</div>
+                    <div class="notification-text">Trần Văn C quan tâm đến phòng 102</div>
+                </div>
+                <div class="notification-time">1 ngày trước</div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Đang xử lý...</p>
+            </div>
+        </div>
+    </div>
+    </div>
+    <script>
+        // CCCD Province Codes và PHONE_NETWORK_CODES giữ nguyên như trong mã nhân viên
+        const CCCD_PROVINCE_CODES = {
+            "001": "Hà Nội",
+            "002": "Hà Giang",
+            "004": "Cao Bằng",
+            "006": "Bắc Kạn",
+            "008": "Tuyên Quang",
+            "010": "Lào Cai",
+            "011": "Điện Biên",
+            "012": "Lai Châu",
+            "014": "Sơn La",
+            "015": "Yên Bái",
+            "017": "Hoà Bình",
+            "019": "Thái Nguyên",
+            "020": "Lạng Sơn",
+            "022": "Quảng Ninh",
+            "024": "Bắc Giang",
+            "025": "Phú Thọ",
+            "026": "Vĩnh Phúc",
+            "027": "Bắc Ninh",
+            "030": "Hải Dương",
+            "031": "Hải Phòng",
+            "033": "Hưng Yên",
+            "034": "Thái Bình",
+            "035": "Hà Nam",
+            "036": "Nam Định",
+            "037": "Ninh Bình",
+            "038": "Thanh Hóa",
+            "040": "Nghệ An",
+            "042": "Hà Tĩnh",
+            "044": "Quảng Bình",
+            "045": "Quảng Trị",
+            "046": "Thừa Thiên Huế",
+            "048": "Đà Nẵng",
+            "049": "Quảng Nam",
+            "051": "Quảng Ngãi",
+            "052": "Bình Định",
+            "054": "Phú Yên",
+            "056": "Khánh Hòa",
+            "058": "Ninh Thuận",
+            "060": "Bình Thuận",
+            "062": "Kon Tum",
+            "064": "Gia Lai",
+            "066": "Đắk Lắk",
+            "067": "Đắk Nông",
+            "068": "Lâm Đồng",
+            "070": "Bình Phước",
+            "072": "Tây Ninh",
+            "074": "Bình Dương",
+            "075": "Đồng Nai",
+            "077": "Bà Rịa - Vũng Tàu",
+            "079": "Hồ Chí Minh",
+            "080": "Long An",
+            "082": "Tiền Giang",
+            "083": "Bến Tre",
+            "084": "Trà Vinh",
+            "086": "Vĩnh Long",
+            "087": "Đồng Tháp",
+            "089": "An Giang",
+            "091": "Kiên Giang",
+            "092": "Cần Thơ",
+            "093": "Hậu Giang",
+            "094": "Sóc Trăng",
+            "095": "Bạc Liêu",
+            "096": "Cà Mau"
+        };
+
+        const PHONE_NETWORK_CODES = {
+            "032": "Viettel", "033": "Viettel", "034": "Viettel",
+            "035": "Viettel", "036": "Viettel", "037": "Viettel",
+            "038": "Viettel", "039": "Viettel", "096": "Viettel",
+            "097": "Viettel", "098": "Viettel",
+            "081": "Vinaphone", "082": "Vinaphone", "083": "Vinaphone",
+            "084": "Vinaphone", "085": "Vinaphone", "091": "Vinaphone",
+            "094": "Vinaphone",
+            "070": "Mobifone", "076": "Mobifone", "077": "Mobifone",
+            "078": "Mobifone", "079": "Mobifone", "090": "Mobifone",
+            "093": "Mobifone",
+            "056": "Vietnamobile", "058": "Vietnamobile", "092": "Vietnamobile",
+            "059": "Gmobile", "099": "Gmobile"
+        };
+
+        class EnhancedAdminProfileManager {
+            constructor() {
+                this.isEditMode = false;
+                this.addressAPI = null;
+                this.formElements = [
+                    "fullName", "email", "phone", "birthDate", "cccdNumber",
+                    "issueDate", "issuePlace", "street", "province", "district", "ward"
+                ];
+                this.securityElements = ["newPassword", "confirmPassword"];
+                this.init();
+            }
+
+            async init() {
+                try {
+                    // Initialize address API
+                    this.addressAPI = new VietnamAddressAPI();
+                    const savedAddress = document.getElementById("savedAddress")?.value;
+                    await this.addressAPI.init(savedAddress);
+
+                    // Setup event listeners
+                    this.setupEventListeners();
+
+                    // Initialize form validation
+                    this.initializeValidation();
+
+                    // Show flash messages
+                    this.showFlashMessages();
+
+                    // Initial validation display for existing data
+                    this.validateExistingData();
+                } catch (error) {
+                    console.error("Error initializing admin profile:", error);
+                    this.showNotification("Có lỗi xảy ra khi khởi tạo trang", "error");
+                }
+            }
+
+            setupEventListeners() {
+                // Avatar upload
+                const avatarInput = document.getElementById("avatarInput");
+                if (avatarInput) {
+                    avatarInput.addEventListener("change", (e) => this.handleAvatarChange(e));
+                }
+
+                // Personal form validation
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                        element.addEventListener("blur", () => this.validateField(id));
+                    }
+                });
+
+                // Security form validation
+                this.securityElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateSecurityField(id));
+                        element.addEventListener("blur", () => this.validateSecurityField(id));
+                    }
+                });
+
+                // Phone and CCCD formatting
+                const phoneInput = document.getElementById("phone");
+                const cccdInput = document.getElementById("cccdNumber");
+
+                if (phoneInput) {
+                    phoneInput.addEventListener("input", (e) => this.formatPhone(e));
+                }
+
+                if (cccdInput) {
+                    cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
+                }
+
+                // Form submission
+                const personalForm = document.getElementById("personalForm");
+                if (personalForm) {
+                    personalForm.addEventListener("submit", (e) => this.handlePersonalFormSubmit(e));
+                }
+
+                const securityForm = document.getElementById("securityForm");
+                if (securityForm) {
+                    securityForm.addEventListener("submit", (e) => this.handleSecurityFormSubmit(e));
+                }
+
+                // Gender radio buttons
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.addEventListener("change", () => this.validateField("gender"));
+                });
+            }
+
+            toggleEditMode() {
+                this.isEditMode = !this.isEditMode;
+                const editBtn = document.getElementById("editBtn");
+                const formActions = document.getElementById("formActions");
+
+                if (this.isEditMode) {
+                    this.enableEditMode();
+                    editBtn.innerHTML = '<i class="fas fa-times"></i> <span>Hủy chỉnh sửa</span>';
+                    formActions.style.display = "flex";
+                    showTab('personal');
+                } else {
+                    this.disableEditMode();
+                    editBtn.innerHTML = '<i class="fas fa-edit"></i> <span>Chỉnh sửa</span>';
+                    formActions.style.display = "none";
+                    this.resetForm();
+                }
+            }
+
+            enableEditMode() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element && id !== "email") { // Email không được chỉnh sửa
+                        if (element.type === "select-one") {
+                            element.disabled = false;
+                        } else {
+                            element.readOnly = false;
+                        }
+                    }
+                });
+
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.disabled = false;
+                });
+            }
+
+            disableEditMode() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        if (element.type === "select-one") {
+                            element.disabled = true;
+                        } else {
+                            element.readOnly = true;
+                        }
+                        this.clearValidationState(element);
+                    }
+                });
+
+                const genderInputs = document.querySelectorAll('input[name="gender"]');
+                genderInputs.forEach(input => {
+                    input.disabled = true;
+                });
+            }
+
+            triggerAvatarUpload() {
+                if (this.isEditMode) {
+                    document.getElementById("avatarInput").click();
+                }
+            }
+
+            handleAvatarChange(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Chỉ được chọn file ảnh (JPG, PNG, GIF)", "error");
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Kích thước file không được vượt quá 5MB", "error");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById("staffAvatar").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                this.showNotification("Ảnh đại diện đã được chọn", "success");
+            }
+
+            validateField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                let successMessage = "";
+                const value = element.value.trim();
+
+                switch (fieldId) {
+                    case "fullName":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được để trống";
+                        } else if (value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Họ tên phải có ít nhất 2 ký tự";
+                        } else if (value.length > 100) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                        } else {
+                            successMessage = "Họ tên hợp lệ";
+                        }
+                        break;
+
+                    case "email":
+                        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Email không được để trống";
+                        } else if (!emailRegex.test(value)) {
+                            isValid = false;
+                            errorMessage = "Email không đúng định dạng";
+                        } else {
+                            successMessage = "Email hợp lệ";
+                        }
+                        break;
+
+                    case "phone":
+                        const phoneValidation = this.validatePhoneNumber(value);
+                        if (!phoneValidation.isValid) {
+                            isValid = false;
+                            errorMessage = phoneValidation.message;
+                        } else {
+                            successMessage = "Số điện thoại hợp lệ";
+                            this.showPhoneNetworkInfo(value);
+                        }
+                        break;
+
+                    case "cccdNumber":
+                        if (value) {
+                            const cccdValidation = this.validateCCCDNumber(value);
+                            if (!cccdValidation.isValid) {
+                                isValid = false;
+                                errorMessage = cccdValidation.message;
+                            } else {
+                                successMessage = "CCCD hợp lệ";
+                                this.showCCCDProvinceInfo(value);
+                            }
+                        }
+                        break;
+
+                    case "birthDate":
+                        if (value) {
+                            const birthDate = new Date(value);
+                            const today = new Date();
+                            const age = today.getFullYear() - birthDate.getFullYear();
+
+                            if (age < 18) {
+                                isValid = false;
+                                errorMessage = "Người dùng phải từ 18 tuổi trở lên";
+                            } else if (age > 65) {
+                                isValid = false;
+                                errorMessage = "Tuổi không được vượt quá 65";
+                            } else {
+                                successMessage = `Tuổi: ${age} (hợp lệ)`;
+                            }
+                        }
+                        break;
+
+                    case "issueDate":
+                        if (value) {
+                            const issueDate = new Date(value);
+                            const birthDate = new Date(document.getElementById("birthDate").value);
+                            const today = new Date();
+
+                            if (birthDate && issueDate <= birthDate) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD phải sau ngày sinh";
+                            } else if (issueDate > today) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD không được là tương lai";
+                            } else {
+                                successMessage = "Ngày cấp hợp lệ";
+                            }
+                        }
+                        break;
+
+                    case "issuePlace":
+                        if (value && value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
+                        } else if (value) {
+                            successMessage = "Nơi cấp hợp lệ";
+                        }
+                        break;
+
+                    case "street":
+                        if (value && value.length < 5) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
+                        } else if (value) {
+                            successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+
+                    case "province":
+                    case "district":
+                    case "ward":
+                        if (this.isEditMode && !value) {
+                            isValid = false;
+                            errorMessage = `Vui lòng chọn ${fieldId === "province" ? "Tỉnh/Thành phố" : fieldId === "district" ? "Quận/Huyện" : "Phường/Xã"}`;
+                        } else if (value) {
+                            successMessage = "Đã chọn hợp lệ";
+                        }
+                        break;
+                }
+
+                this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                return isValid;
+            }
+
+            validateSecurityField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                let successMessage = "";
+                const value = element.value.trim();
+
+                switch (fieldId) {
+                    case "newPassword":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu mới không được để trống";
+                        } else if (value.length < 6) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
+                        } else if (!/[A-Z]/.test(value)) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu phải chứa ít nhất 1 chữ cái in hoa";
+                        } else if (!/[!@#$%^&*(),.?\":{}|<>]/.test(value)) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt";
+                        } else {
+                            successMessage = "Mật khẩu mới hợp lệ";
+                        }
+                        break;
+                    case "confirmPassword":
+                        const newPassword = document.getElementById("newPassword").value;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Xác nhận mật khẩu không được để trống";
+                        } else if (value !== newPassword) {
+                            isValid = false;
+                            errorMessage = "Xác nhận mật khẩu không khớp";
+                        } else {
+                            successMessage = "Xác nhận mật khẩu hợp lệ";
+                        }
+                        break;
+                }
+
+                this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                return isValid;
+            }
+
+            validatePhoneNumber(phoneNumber) {
+                if (!phoneNumber) {
+                    return { isValid: false, message: "Số điện thoại không được để trống" };
+                }
+
+                const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+                if (!cleanPhone.startsWith("0")) {
+                    return { isValid: false, message: "Số điện thoại phải bắt đầu bằng số 0" };
+                }
+
+                if (!/^0[0-9]{9}$/.test(cleanPhone)) {
+                    return { isValid: false, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0" };
+                }
+
+                const networkCode = cleanPhone.substring(0, 3);
+                const validNetworks = Object.keys(PHONE_NETWORK_CODES);
+
+                let isValidNetwork = false;
+                for (const validCode of validNetworks) {
+                    if (networkCode.startsWith(validCode.substring(0, 2))) {
+                        isValidNetwork = true;
+                        break;
+                    }
+                }
+
+                if (!isValidNetwork) {
+                    return { isValid: false, message: "Số điện thoại không đúng định dạng nhà mạng Việt Nam" };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            validateCCCDNumber(cccdNumber) {
+                if (!cccdNumber) {
+                    return { isValid: true, message: "" };
+                }
+
+                const cleanCCCD = cccdNumber.replace(/\s/g, "");
+                if (!/^[0-9]{12}$/.test(cleanCCCD)) {
+                    return { isValid: false, message: "CCCD phải có đúng 12 chữ số" };
+                }
+
+                const provinceCode = cleanCCCD.substring(0, 3);
+                if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                    return {
+                        isValid: false,
+                        message: `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                    };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            showPhoneNetworkInfo(phoneNumber) {
+                const networkInfo = this.getNetworkFromPhone(phoneNumber);
+                const phoneInfo = document.getElementById("phoneInfo");
+
+                if (networkInfo && phoneInfo) {
+                    phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
+                    phoneInfo.className = "field-info text-success";
+                    phoneInfo.style.display = "flex";
+                }
+            }
+
+            showCCCDProvinceInfo(cccdNumber) {
+                const provinceInfo = this.getProvinceFromCCCD(cccdNumber);
+                const cccdInfo = document.getElementById("cccdInfo");
+
+                if (provinceInfo && cccdInfo) {
+                    cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
+                    cccdInfo.className = "field-info text-info";
+                    cccdInfo.style.display = "flex";
+                }
+            }
+
+            getNetworkFromPhone(phoneNumber) {
+                if (!phoneNumber || !phoneNumber.startsWith("0") || phoneNumber.length !== 10) {
+                    return null;
+                }
+
+                const networkCode = phoneNumber.substring(1, 4);
+                return PHONE_NETWORK_CODES[networkCode] || null;
+            }
+
+            getProvinceFromCCCD(cccdNumber) {
+                if (!cccdNumber || cccdNumber.length < 3) {
+                    return null;
+                }
+
+                const provinceCode = cccdNumber.substring(0, 3);
+                return CCCD_PROVINCE_CODES[provinceCode] || null;
+            }
+
+            updateValidationUI(fieldId, isValid, errorMessage, successMessage) {
+                const element = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+
+                if (!element) return;
+
+                element.classList.remove("is-invalid", "is-valid");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                if (this.isEditMode || fieldId.startsWith("newPassword") || fieldId.startsWith("confirmPassword")) {
+                    if (isValid && successMessage) {
+                        element.classList.add("is-valid");
+                        if (successElement) {
+                            successElement.textContent = successMessage;
+                            successElement.style.display = "flex";
+                        }
+                    } else if (!isValid && errorMessage) {
+                        element.classList.add("is-invalid");
+                        if (errorElement) {
+                            errorElement.textContent = errorMessage;
+                            errorElement.style.display = "flex";
+                        }
+                    }
+                }
+            }
+
+            clearValidationState(element) {
+                element.classList.remove("is-invalid", "is-valid");
+
+                const fieldId = element.id;
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+                const infoElement = document.getElementById(fieldId + "Info");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                if (infoElement) {
+                    infoElement.style.display = "none";
+                    infoElement.innerHTML = "";
+                }
+            }
+
+            validateExistingData() {
+                const phoneElement = document.getElementById("phone");
+                if (phoneElement && phoneElement.value) {
+                    this.showPhoneNetworkInfo(phoneElement.value);
+                }
+
+                const cccdElement = document.getElementById("cccdNumber");
+                if (cccdElement && cccdElement.value) {
+                    this.showCCCDProvinceInfo(cccdElement.value);
+                }
+            }
+
+            validatePersonalForm() {
+                let isValid = true;
+
+                this.formElements.forEach((fieldId) => {
+                    if (!this.validateField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            validateSecurityForm() {
+                let isValid = true;
+
+                this.securityElements.forEach((fieldId) => {
+                    if (!this.validateSecurityField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            formatPhone(event) {
+                if (!event.target.readOnly) {
+                    let value = event.target.value;
+
+                    if (value && !value.startsWith("0")) {
+                        value = "0" + value.replace(/\D/g, "");
+                    } else {
+                        value = value.replace(/[^\d]/g, "");
+                    }
+
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+
+                    event.target.value = value;
+
+                    if (this.isEditMode) {
+                        this.validateField("phone");
+                    }
+                }
+            }
+
+            formatCCCD(event) {
+                if (!event.target.readOnly) {
+                    let value = event.target.value.replace(/\D/g, "");
+
+                    if (value.length > 12) {
+                        value = value.substring(0, 12);
+                    }
+
+                    event.target.value = value;
+
+                    if (this.isEditMode) {
+                        this.validateField("cccdNumber");
+                    }
+                }
+            }
+
+            async handlePersonalFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validatePersonalForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin đã nhập", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting personal form:", error);
+                    this.showNotification("Có lỗi xảy ra khi lưu thông tin", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            async handleSecurityFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validateSecurityForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin mật khẩu", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting security form:", error);
+                    this.showNotification("Có lỗi xảy ra khi cập nhật mật khẩu", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            resetForm() {
+                const form = document.getElementById("personalForm");
+                if (form) {
+                    location.reload();
+                }
+            }
+
+            cancelEdit() {
+                this.toggleEditMode();
+            }
+
+            showLoading(show) {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay) {
+                    overlay.style.display = show ? "flex" : "none";
+                }
+            }
+
+            showNotification(message, type = "info") {
+                const existingNotifications = document.querySelectorAll(".notification-toast");
+                existingNotifications.forEach((notification) => notification.remove());
+
+                const notification = document.createElement("div");
+                notification.className = `notification-toast notification-${type}`;
+                notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${this.getNotificationIcon(type)}"></i>
+                <span>${message}</span>
+                <button class="notification-close" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `;
+
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            getNotificationIcon(type) {
+                const icons = {
+                    success: "check-circle",
+                    error: "exclamation-circle",
+                    warning: "exclamation-triangle",
+                    info: "info-circle",
+                };
+                return icons[type] || "info-circle";
+            }
+
+            showFlashMessages() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const successMessage = urlParams.get("success");
+                const errorMessage = urlParams.get("error");
+
+                if (successMessage) {
+                    this.showNotification(decodeURIComponent(successMessage), "success");
+                }
+
+                if (errorMessage) {
+                    this.showNotification(decodeURIComponent(errorMessage), "error");
+                }
+
+                const successFlash = document.getElementById("successMessage");
+                const errorFlash = document.getElementById("errorMessage");
+
+                if (successFlash && successFlash.textContent.trim()) {
+                    this.showNotification(successFlash.textContent.trim(), "success");
+                }
+
+                if (errorFlash && errorFlash.textContent.trim()) {
+                    this.showNotification(errorFlash.textContent.trim(), "error");
+                }
+            }
+
+            initializeValidation() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => {
+                            if (this.isEditMode) {
+                                this.validateField(id);
+                            }
+                        });
+                    }
+                });
+
+                this.securityElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => {
+                            this.validateSecurityField(id);
+                        });
+                    }
+                });
+            }
+        }
+
+        class VietnamAddressAPI {
+            constructor() {
+                this.provinceSelect = document.getElementById("province");
+                this.districtSelect = document.getElementById("district");
+                this.wardSelect = document.getElementById("ward");
+                this.streetInput = document.getElementById("street");
+                this.fullAddress = document.getElementById("fullAddress");
+                this.addressData = []; // lưu toàn bộ JSON đã load
+            }
+
+            async init(savedAddress = "") {
+                await this.loadData();
+                this.populateProvinces();
+                this.addListeners();
+                if (savedAddress) {
+                    await this.setInitialAddress(savedAddress);
+                }
+            }
+
+            async loadData() {
+                try {
+                    const response = await fetch("/data/vietnam_full_address.json");
+                    this.addressData = await response.json();
+                } catch (error) {
+                    console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
+                }
+            }
+
+            populateProvinces() {
+                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                this.addressData.forEach(province => {
+                    this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
+                });
+            }
+
+            populateDistricts(provinceCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
+
+                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                province.districts.forEach(district => {
+                    this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
+                });
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            }
+
+            populateWards(provinceCode, districtCode) {
+                const province = this.addressData.find(p => p.code === provinceCode);
+                if (!province) return;
+
+                const district = province.districts.find(d => d.code === districtCode);
+                if (!district) return;
+
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                district.wards.forEach(ward => {
+                    this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
+                });
+            }
+
+            addListeners() {
+                this.provinceSelect.addEventListener("change", (e) => {
+                    const provinceCode = e.target.value;
+                    this.populateDistricts(provinceCode);
+                    this.updateFullAddress();
+                });
+
+                this.districtSelect.addEventListener("change", (e) => {
+                    const provinceCode = this.provinceSelect.value;
+                    const districtCode = e.target.value;
+                    this.populateWards(provinceCode, districtCode);
+                    this.updateFullAddress();
+                });
+
+                this.wardSelect.addEventListener("change", () => this.updateFullAddress());
+                this.streetInput.addEventListener("input", () => this.updateFullAddress());
+            }
+
+            updateFullAddress() {
+                const street = this.streetInput.value;
+                const ward = this.wardSelect.selectedOptions[0]?.text || "";
+                const district = this.districtSelect.selectedOptions[0]?.text || "";
+                const province = this.provinceSelect.selectedOptions[0]?.text || "";
+
+                const parts = [street, ward, district, province].filter(part =>
+                    part && !part.startsWith("Chọn"));
+
+                this.fullAddress.value = parts.join(", ");
+            }
+
+            async setInitialAddress(fullAddress) {
+                try {
+                    const parts = fullAddress.split(",").map(p => p.trim());
+                    if (parts.length < 4) return;
+
+                    const [street, wardName, districtName, provinceName] = parts;
+                    this.streetInput.value = street;
+
+                    const province = this.addressData.find(p =>
+                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    if (!province) return;
+
+                    this.provinceSelect.value = province.code;
+                    this.populateDistricts(province.code);
+
+                    const district = province.districts.find(d =>
+                        d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    if (!district) return;
+
+                    this.districtSelect.value = district.code;
+                    this.populateWards(province.code, district.code);
+
+                    const ward = district.wards.find(w =>
+                        w.name.toLowerCase().includes(wardName.toLowerCase()));
+                    if (ward) this.wardSelect.value = ward.code;
+
+                    this.updateFullAddress();
+                } catch (error) {
+                    console.error("❌ Lỗi khi set địa chỉ ban đầu:", error);
+                }
+            }
+        }
+
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function changePassword() {
+            showTab('security');
+            document.getElementById('currentPassword').focus();
+        }
+
+        function toggleEditMode() {
+            if (window.adminProfileManager) {
+                window.adminProfileManager.toggleEditMode();
+            }
+        }
+
+        function triggerAvatarUpload() {
+            if (window.adminProfileManager) {
+                window.adminProfileManager.triggerAvatarUpload();
+            }
+        }
+
+        function cancelEdit() {
+            if (window.adminProfileManager) {
+                window.adminProfileManager.cancelEdit();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            window.adminProfileManager = new EnhancedAdminProfileManager();
+
+            // Toast message handling
+            document.querySelectorAll('.notification-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.notification-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+
+            setTimeout(() => {
+                document.querySelectorAll('.notification-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 5000);
+        });
+    </script>
 </body>
 
 </html>

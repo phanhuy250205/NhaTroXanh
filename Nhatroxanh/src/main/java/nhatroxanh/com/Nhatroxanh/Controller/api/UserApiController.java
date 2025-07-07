@@ -27,8 +27,8 @@ import java.util.Map;
 public class UserApiController {
     @Autowired
     private UserService userService;
-    @Autowired
-    private OtpService otpService;
+    // @Autowired
+    // private OtpService otpService;
     @Autowired
     private UserRepository userRepository;
 
@@ -49,9 +49,10 @@ public class UserApiController {
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản đã được kích hoạt.");
-        if (otpService.verifyOtp(user, otp)) {
-            return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
-        } else {
+        // if (otpService.verifyOtp(user, otp)) {
+        //     return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
+        // }
+        else {
             return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
     }

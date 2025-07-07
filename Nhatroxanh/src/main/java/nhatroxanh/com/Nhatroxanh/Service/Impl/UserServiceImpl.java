@@ -11,7 +11,7 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
 import org.slf4j.Logger;
@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,8 +39,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private OtpService otpService;
+    // @Autowired
+    // private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -91,7 +92,7 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        otpService.createAndSendOtp(savedUser);
+        // otpService.createAndSendOtp(savedUser);
 
         return savedUser;
     }
@@ -235,5 +236,45 @@ public class UserServiceImpl implements UserService {
         Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.CUSTOMER, pageable);
         List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
         return new PageImpl<>(users, pageable, customerIds.getTotalElements());
+    }
+
+    public Page<Users> getAllOwner(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.OWNER, pageable);
+        List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
+        return new PageImpl<>(users, pageable, customerIds.getTotalElements());
+    }
+
+    public Page<Users> getFilteredOwners(String keyword, String statusFilter, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("fullname").ascending());
+        Boolean enabled = null;
+
+        if ("active".equalsIgnoreCase(statusFilter)) {
+            enabled = true;
+        } else if ("inactive".equalsIgnoreCase(statusFilter)) {
+            enabled = false;
+        }
+
+        if (keyword != null && keyword.trim().isEmpty()) {
+            keyword = null;
+        }
+
+        return userRepository.searchOwners(Users.Role.OWNER, keyword, enabled, pageable);
+    }
+
+    public Page<Users> getStaffUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Integer> customerIds = userRepository.findCustomerIds(Users.Role.STAFF, pageable);
+        List<Users> users = userRepository.findCustomersWithDetails(customerIds.getContent());
+        return new PageImpl<>(users, pageable, customerIds.getTotalElements());
+
+    }
+
+    @Override
+    public Users getById(Integer id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }

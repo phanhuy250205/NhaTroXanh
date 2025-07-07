@@ -422,8 +422,124 @@
                 padding: 4px 8px;
             }
         }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-disable-staff {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            color: white;
+            background-color: #ef4444;
+            /* đỏ */
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            outline: none;
+            background-clip: padding-box;
+            /* tránh nền trắng */
+        }
+
+        /* Hover đẹp hơn */
+        .btn-disable-staff:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Xóa nền trắng và viền đen nếu có từ thẻ button hoặc trình duyệt */
+        .btn-disable-staff:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .btn-disable-staff i {
+            font-size: 16px;
+        }
+
+        /* Form không nên có padding hoặc background */
+        .deactivate-btn-staff form {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
     </style>
 </head>
+
 <body>
     <div th:replace="~{/layouts/sidebar-staff}"></div>
     <div class="main-content-staff">
@@ -435,46 +551,65 @@
                 </button>
                 <h1 class="page-title-staff">Chi tiết chủ trọ</h1>
             </div>
-            <button class="deactivate-btn-staff" onclick="deactivateLandlord()">
-                <i class="fas fa-ban"></i>
-                Vô hiệu hóa
-            </button>
+            <div class="">
+                <form th:action="@{/nhan-vien/chu-tro/toggle-enable}" method="post">
+                    <input type="hidden" name="userId" th:value="${user.userId}" />
+                    <button type="submit" class="btn-disable-staff"
+                        th:classappend="${user.enabled} ? 'btn-danger' : 'btn-primary'">
+                        <i class="fas" th:classappend="${user.enabled} ? 'fa-ban' : 'fa-undo'"></i>
+                        <span th:text="${user.enabled} ? 'Vô hiệu hóa' : 'Mở khóa'"></span>
+                    </button>
+                </form>
+            </div>
         </div>
-
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
         <!-- Landlord Information Section -->
         <div class="content-section-staff">
-            <h2 class="section-title-staff">thông tin chủ trọ</h2>
-            
+            <h2 class="section-title-staff">Thông tin chủ trọ</h2>
+
             <div class="form-row-staff">
                 <div class="form-group-staff">
                     <label class="form-label-staff">Họ và tên</label>
-                    <input type="text" class="form-input-staff" value="Nguyễn Văn A" disabled>
+                    <input type="text" class="form-input-staff" th:value="${user.fullname}" disabled>
                 </div>
                 <div class="form-group-staff">
                     <label class="form-label-staff">Số điện thoại</label>
-                    <input type="text" class="form-input-staff" value="0987654321" disabled>
+                    <input type="text" class="form-input-staff" th:value="${user.phone}" disabled>
                 </div>
             </div>
 
             <div class="form-row-staff">
                 <div class="form-group-staff">
                     <label class="form-label-staff">Ngày sinh</label>
-                    <input type="text" class="form-input-staff" value="17/09/1990" disabled>
+                    <input type="text" class="form-input-staff" th:value="${#dates.format(user.birthday, 'dd/MM/yyyy')}"
+                        disabled>
                 </div>
                 <div class="form-group-staff">
                     <label class="form-label-staff">Ngày cấp</label>
-                    <input type="text" class="form-input-staff" value="15/01/2020" disabled>
+                    <input type="text" class="form-input-staff"
+                        th:value="${#dates.format(cccd.issueDate, 'dd/MM/yyyy')}" disabled>
                 </div>
             </div>
 
             <div class="form-row-staff">
                 <div class="form-group-staff">
                     <label class="form-label-staff">CCCD/CMND</label>
-                    <input type="text" class="form-input-staff" value="001234567890" disabled>
+                    <input type="text" class="form-input-staff" th:value="${cccd.cccdNumber}" disabled>
                 </div>
                 <div class="form-group-staff">
                     <label class="form-label-staff">Nơi cấp</label>
-                    <input type="text" class="form-input-staff" value="Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư" disabled>
+                    <input type="text" class="form-input-staff" th:value="${cccd.issuePlace}" disabled>
                 </div>
             </div>
 
@@ -483,33 +618,39 @@
                     <label class="form-label-staff">Giới tính</label>
                     <div class="gender-group-staff">
                         <div class="gender-option-staff">
-                            <input type="radio" id="male" name="gender" class="gender-radio-staff" checked disabled>
+                            <input type="radio" id="male" name="gender" class="gender-radio-staff"
+                                th:checked="${user.gender != null and user.gender}" disabled>
                             <label for="male" class="gender-label-staff">Nam</label>
                         </div>
                         <div class="gender-option-staff">
-                            <input type="radio" id="female" name="gender" class="gender-radio-staff" disabled>
+                            <input type="radio" id="female" name="gender" class="gender-radio-staff"
+                                th:checked="${user.gender != null and !user.gender}" disabled>
                             <label for="female" class="gender-label-staff">Nữ</label>
                         </div>
                     </div>
                 </div>
                 <div class="form-group-staff">
-                    <!-- Empty space for alignment -->
                 </div>
             </div>
 
             <div class="status-section-staff">
-                <span class="form-label-staff">Trạng thái thuê :</span>
-                <span class="status-badge-staff status-active-staff">
+            
+                <span class="form-label-staff">Trạng thái :</span>
+                <span th:if="${user.enabled}" class="status-badge-staff status-active-staff">
                     <i class="fas fa-check-circle"></i>
-                    Đang thuê
+                    Đang hoạt động
+                </span>
+                <span th:if="${!user.enabled}" class="status-badge-staff table-status-full-staff">
+                    <i class="fas fa-times-circle"></i>
+                    Ngừng hoạt động
                 </span>
             </div>
+
         </div>
 
-        <!-- Boarding House List Section -->
         <div class="content-section-staff">
             <h2 class="section-title-staff">Danh sách khu trọ</h2>
-            
+
             <div class="table-container-staff">
                 <table class="custom-table-staff">
                     <thead>
@@ -521,36 +662,18 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Khu trọ Sinh viên A</td>
-                            <td>123 Đường ABC, Phường XYZ, Quận 1, TP.HCM</td>
+                        <tr th:each="hostel : ${hostels}">
+                            <td th:text="${hostel.hostelId}">1</td>
+                            <td th:text="${hostel.name}">Tên khu trọ</td>
+                            <td
+                                th:text="${hostel.address?.street + ', ' + hostel.address?.ward?.name + ', ' + hostel.address?.ward?.district?.name + ', ' + hostel.address?.ward?.district?.province?.name ?: 'Không xác định'}">
+                                Địa chỉ</td>
                             <td>
-                                <span class="table-status-badge-staff table-status-active-staff">
-                                    <i class="fas fa-check-circle"></i>
-                                    Hoạt động
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Nhà trọ Bình Dân</td>
-                            <td>456 Đường DEF, Phường UVW, Quận 2, TP.HCM</td>
-                            <td>
-                                <span class="table-status-badge-staff table-status-full-staff">
-                                    <i class="fas fa-times-circle"></i>
-                                    Hết phòng
-                                </span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>3</td>
-                            <td>Khu trọ Cao cấp C</td>
-                            <td>789 Đường GHI, Phường RST, Quận 3, TP.HCM</td>
-                            <td>
-                                <span class="table-status-badge-staff table-status-active-staff">
-                                    <i class="fas fa-check-circle"></i>
-                                    Hoạt động
+                                <span class="table-status-badge-staff"
+                                    th:classappend="${hostel.status} ? ' table-status-active-staff' : ' table-status-full-staff'">
+                                    <i class="fas"
+                                        th:classappend="${hostel.status} ? ' fa-check-circle' : ' fa-times-circle'"></i>
+                                    <span th:text="${hostel.status} ? 'Hoạt động' : 'Hết phòng'"></span>
                                 </span>
                             </td>
                         </tr>
@@ -562,50 +685,27 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
-        // Go back functionality
         function goBack() {
-            window.location.href = '/nhan-vien/chu-tro'; // Redirect to landlord management page
-            // showSuccessMessage("Quay lại trang quản lý chủ trọ")
-            // In real application: window.history.back() or navigate to previous page
+            window.location.href = '/nhan-vien/chu-tro';
+
         }
-
-        // Deactivate landlord
-        function deactivateLandlord() {
-            if (confirm("Bạn có chắc chắn muốn vô hiệu hóa chủ trọ này?")) {
-                showSuccessMessage("Đã vô hiệu hóa chủ trọ thành công")
-                // Update status badge
-                const statusBadge = document.querySelector('.status-badge-staff')
-                statusBadge.innerHTML = '<i class="fas fa-times-circle"></i> Đã vô hiệu hóa'
-                statusBadge.className = 'status-badge-staff'
-                statusBadge.style.background = '#ef4444'
-                statusBadge.style.color = 'white'
-                
-                // Disable deactivate button
-                const deactivateBtn = document.querySelector('.deactivate-btn-staff')
-                deactivateBtn.disabled = true
-                deactivateBtn.style.opacity = '0.5'
-                deactivateBtn.style.cursor = 'not-allowed'
-            }
-        }
-
-        // Show success message
-        function showSuccessMessage(message) {
-            const successMsg = document.createElement("div")
-            successMsg.className = "success-message-staff"
-            successMsg.innerHTML = `<i class="fas fa-check"></i> ${message}`
-            document.body.appendChild(successMsg)
-
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
             setTimeout(() => {
-                successMsg.remove()
-            }, 3000)
-        }
-
-        // Initialize page
-        document.addEventListener("DOMContentLoaded", () => {
-            console.log("Trang chi tiết chủ trọ đã được tải")
-        })
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
     </script>
 
     <script th:src="@{/js/sidebar.js}"></script>

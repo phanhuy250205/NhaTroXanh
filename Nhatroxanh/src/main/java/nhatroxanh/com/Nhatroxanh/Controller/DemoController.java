@@ -11,8 +11,6 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 public class DemoController {
 
 
-    
-
      @Autowired
      private UserService userService;
     @GetMapping("/chi-tiet")
@@ -26,15 +24,15 @@ public class DemoController {
         return "guest/phong-tro";
     }
 
-    @GetMapping("/nhan-vien/thong-tin-tro")
-    public String thongtintro() {
-        return "staff/thong-tin-tro-staff";
-    }
+    // @GetMapping("/nhan-vien/thong-tin-tro")
+    // public String thongtintro() {
+    //     return "staff/thong-tin-tro-staff";
+    // }
 
-    @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
-    public String detailthongtintro() {
-        return "staff/detail-thong-tin-tro-staff";
-    }
+    // @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
+    // public String detailthongtintro() {
+    //     return "staff/detail-thong-tin-tro-staff";
+    // }
 
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {
@@ -67,7 +65,10 @@ public class DemoController {
         return "host/QL-danh-gia-host";
     }
 
-    
+    @GetMapping("/chu-tro/quan-ly-tro")
+    public String phongtro() {
+        return "host/phongtro";
+    }
 
     // @GetMapping("/chu-tro/tong-quan")
     // public String tongquan() {
@@ -89,14 +90,22 @@ public class DemoController {
     //     return "host/quan-ly-bai-dang";
     // }
 
-    // @GetMapping("/chu-tro/chi-tiet-bai-dang")
-    // public String chitietbaidang() {
-    //     return "host/chi-tiet-bai-dang";
-    // }
+     @GetMapping("/chu-tro/Qlthue-tra")
+     public String chitietbaidang() {
+         return "guest/quan-ly-thue-tra";
+     }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
+    }
+    @GetMapping("/khach-thue/quan-ly-thue-tra")
+    public String quanLyThueTra() {
+        return "guest/quan-ly-thue-tra";
+    }
+    @GetMapping("/khach-thue/chitiet-phongthue")
+    public String chiTietPhongThue() {
+        return "guest/chitiet-phongthue";
     }
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {
