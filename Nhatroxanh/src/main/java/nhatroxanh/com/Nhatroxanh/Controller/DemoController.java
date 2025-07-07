@@ -1,6 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
-
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +28,7 @@ import java.util.Optional;
 
 @Controller
 public class DemoController {
+    private static final Logger logger = LoggerFactory.getLogger(DemoController.class);
 
     @Autowired
     private UserService userService;
@@ -75,8 +81,8 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")
-    public String thuetra() {
-        return "host/DS-hop-dong-host";
+    public String contractsPage() {
+        return "host/DS-hop-dong-host"; // Chỉ trả view, data load bằng AJAX
     }
 
     @GetMapping("/chu-tro/lich-su-thue")
