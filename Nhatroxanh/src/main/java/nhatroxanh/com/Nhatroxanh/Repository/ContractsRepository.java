@@ -40,5 +40,4 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Optional<Contracts> findTopByTenantOrderByStartDateDesc(Users tenant);
 
         Long countByStatus(Contracts.Status status);
-
 }
