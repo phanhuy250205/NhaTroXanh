@@ -49,6 +49,8 @@ public class StaffAdminController {
         model.addAttribute("staffPage", staffPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", staffPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("statusFilter", status);
 
         return "admin/quan-ly-nhan-vien";
     }
