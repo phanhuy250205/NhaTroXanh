@@ -78,7 +78,7 @@ public class TenantServiceImpl implements TenantService {
                 if (!newStatus) {
         contract.setEndDate(new java.sql.Date(System.currentTimeMillis()));
     }
-        contract.setStatus(newStatus ? Contracts.Status.ACTIVE : Contracts.Status.INACTIVE);
+        contract.setStatus(newStatus ? Contracts.Status.ACTIVE : Contracts.Status.EXPIRED);
     }
     @Override
     @Transactional(readOnly = true)

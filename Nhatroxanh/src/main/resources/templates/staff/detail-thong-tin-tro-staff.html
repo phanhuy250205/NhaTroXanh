@@ -274,6 +274,77 @@
                 margin-bottom: 20px;
             }
         }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 
@@ -294,12 +365,23 @@
                         <p class="m-0 opacity-75">Quản lý thông tin chi tiết khu trọ</p>
                     </div>
                 </div>
-                <button class="btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">
+                <!-- <button class="btn edit-btn" data-bs-toggle="modal" data-bs-target="#editModal">
                     <i class="fas fa-edit me-2"></i>Chỉnh sửa
-                </button>
+                </button> -->
             </div>
         </div>
-
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
         <div class="row">
             <!-- Thông tin Khu trọ -->
             <div class="col-lg-6 mb-4">
@@ -310,12 +392,13 @@
                     <h5><i class="fas fa-home me-2"></i>Thông tin Khu trọ</h5>
                     <div class="mb-3">
                         <label class="form-label">Tên khu trọ</label>
-                        <input type="text" class="form-control" value="Nhà Trọ Xanh" readonly />
+                        <input type="text" class="form-control" th:value="${hostel.name}" disabled />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Địa chỉ</label>
                         <input type="text" class="form-control"
-                            value="123 Đường Nguyễn Văn Linh, Quận Hải Châu, Đà Nẵng" readonly />
+                            th:value="${hostel.address.street + ', ' + hostel.address.ward.name + ', ' + hostel.address.ward.district.name + ', ' + hostel.address.ward.district.province.name}"
+                            disabled />
                     </div>
                     <div class="status-info">
                         <div class="row">
@@ -324,16 +407,25 @@
                                     <i class="fas fa-door-open text-primary me-2"></i>
                                     <div>
                                         <strong>Số phòng:</strong>
-                                        <div class="h4 text-primary mb-0">99</div>
+                                        <div class="h4 text-primary mb-0" th:text="${#lists.size(rooms)}">99</div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-6">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-check-circle text-success me-2"></i>
                                     <div>
                                         <strong>Trạng thái:</strong>
-                                        <div><span class="badge bg-success">Hoạt động</span></div>
+                                        <form th:action="@{/nhan-vien/cap-nhat-trang-thai-tro}" method="post"
+                                            style="display:inline;">
+                                            <input type="hidden" name="hostelId" th:value="${hostel.hostelId}">
+                                            <input type="hidden" name="status" th:value="${!hostel.status}">
+                                            <button type="submit"
+                                                th:classappend="${hostel.status} ? 'btn btn-success btn-sm' : 'btn btn-danger btn-sm'">
+                                                <i class="fas"
+                                                    th:classappend="${hostel.status} ? ' fa-check-circle' : ' fa-times-circle'"></i>
+                                                <span th:text="${hostel.status} ? 'Hoạt động' : 'Tạm dừng'"></span>
+                                            </button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -351,19 +443,22 @@
                     <h5><i class="fas fa-user-crown me-2"></i>Thông tin Chủ trọ</h5>
                     <div class="mb-3">
                         <label class="form-label">Họ và tên</label>
-                        <input type="text" class="form-control" value="Nguyễn Văn Minh" readonly />
+                        <input type="text" class="form-control" th:value="${owner.fullname}" disabled />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Số điện thoại</label>
-                        <input type="text" class="form-control" value="0905123456" readonly />
+                        <input type="text" class="form-control" th:value="${owner.phone}" disabled />
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Số CCCD</label>
-                        <input type="text" class="form-control" value="123456789012" readonly />
+                        <input type="text" class="form-control"
+                            th:value="${owner.userCccd.cccdNumber.substring(0, 2) + '********' + owner.userCccd.cccdNumber.substring(owner.userCccd.cccdNumber.length() - 2)}"
+                            disabled />
+
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="text" class="form-control" value="nguyenvanminh@email.com" readonly />
+                        <input type="text" class="form-control" th:value="${owner.email}" disabled />
                     </div>
                 </div>
             </div>
@@ -384,40 +479,23 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td><strong>P001</strong></td>
-                            <td>25</td>
-                            <td>3.500.000</td>
-                            <td><span class="badge bg-success">Đang thuê</span></td>
-                            <td>Phòng VIP, có điều hòa</td>
+                        <tr th:each="room : ${rooms}" th:if="${rooms != null and !rooms.isEmpty()}">
+                            <td><strong th:text="${room.namerooms}">P001</strong></td>
+                            <td th:text="${room.acreage + ' m²'}">25 m²</td>
+                            <td th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng'}">
+                                3.500.000 VNĐ/tháng</td>
+                            <td>
+                                <span class="badge bg-success" th:if="${room.status.name() == 'active'}">Đang
+                                    thuê</span>
+                                <span class="badge bg-warning text-dark"
+                                    th:if="${room.status.name() == 'unactive'}">Trống</span>
+                            </td>
+                            <td th:text="${room.description}">Phòng VIP</td>
                         </tr>
-                        <tr>
-                            <td><strong>P002</strong></td>
-                            <td>20</td>
-                            <td>3.000.000</td>
-                            <td><span class="badge bg-warning text-dark">Trống</span></td>
-                            <td>Phòng thường</td>
-                        </tr>
-                        <tr>
-                            <td><strong>P003</strong></td>
-                            <td>22</td>
-                            <td>3.200.000</td>
-                            <td><span class="badge bg-success">Đang thuê</span></td>
-                            <td>Có ban công</td>
-                        </tr>
-                        <tr>
-                            <td><strong>P004</strong></td>
-                            <td>18</td>
-                            <td>2.800.000</td>
-                            <td><span class="badge bg-warning text-dark">Trống</span></td>
-                            <td>Cần sửa chữa nhỏ</td>
-                        </tr>
-                        <tr>
-                            <td><strong>P005</strong></td>
-                            <td>30</td>
-                            <td>4.000.000</td>
-                            <td><span class="badge bg-success">Đang thuê</span></td>
-                            <td>Phòng lớn, 2 người</td>
+                        <tr th:if="${rooms == null or rooms.isEmpty()}">
+                            <td colspan="5" class="text-center text-muted fw-semibold">
+                                Khu trọ này chưa có phòng nào.
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -426,7 +504,7 @@
     </div>
 
     <!-- Modal chỉnh sửa khu trọ -->
-    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <!-- <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -437,15 +515,12 @@
                 </div>
                 <div class="modal-body p-4">
                     <form>
-                        <!-- Tên khu trọ -->
                         <div class="mb-4">
                             <label class="form-label">
                                 <i class="fas fa-building me-2 text-primary"></i>Tên khu trọ
                             </label>
                             <input type="text" class="form-control" value="Nhà Trọ Xanh">
                         </div>
-
-                        <!-- Địa chỉ chi tiết -->
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">
@@ -485,11 +560,9 @@
                                 <label class="form-label">
                                     <i class="fas fa-address-card me-2 text-primary"></i>Địa chỉ đầy đủ
                                 </label>
-                                <input type="text" class="form-control" id="fullAddressInput" readonly>
+                                <input type="text" class="form-control" id="fullAddressInput" disabled>
                             </div>
                         </div>
-
-                        <!-- Số lượng & Trạng thái -->
                         <div class="row mb-4">
                             <div class="col-md-6">
                                 <label class="form-label">
@@ -507,8 +580,6 @@
                                 </select>
                             </div>
                         </div>
-
-                        <!-- Nút hành động -->
                         <div class="action-buttons d-flex justify-content-center gap-3">
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save me-2"></i>LƯU THAY ĐỔI
@@ -521,11 +592,27 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script th:src="@{/js/api-map.js}"></script>
-
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
 </body>
 
 </html>

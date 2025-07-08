@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 
     <style>
         :root {
@@ -391,6 +392,7 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
+    
     <!-- Breadcrumb -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -430,7 +432,11 @@
                             <img th:unless="${images != null and !#lists.isEmpty(images)}"
                                 src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
-                                <button class="btn-favorite-large"><i class="fas fa-heart"></i></button>
+                                <button class="btn-favorite-large" 
+                                        th:attr="data-post-id=${post.postId}"
+                                        onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Thêm vào yêu thích">
+                                    <i class="far fa-heart"></i>
+                                </button>
                             </div>
                         </div>
                         <!-- Thumbnail Images -->
@@ -673,7 +679,9 @@
                                     </div>
 
                                     <div th:if="${!reviews.isEmpty()}">
-                                        <div th:each="review : ${reviews}" class="border rounded p-3 mb-3">
+                                        <div th:each="review, iter : ${reviews}" th:id="'review-' + ${review.reviewId}"
+                                            th:classappend="${iter.index >= 10} ? 'd-none hidden-review' : ''"
+                                            class="border rounded p-3 mb-3 review-item">
                                             <div class="d-flex align-items-start">
                                                 <img th:src="@{${review.user.avatar != null ? review.user.avatar : '/images/avatar-default.png'}}"
                                                     alt="avatar" class="rounded-circle me-3"
@@ -754,7 +762,11 @@
                                         </div>
                                     </div>
                                     <p th:if="${reviews.isEmpty()}" class="text-muted">Chưa có đánh giá nào.</p>
-
+                                    <div class="text-center mt-3" th:if="${reviews.size() > 10}">
+                                        <button id="loadMoreReviews" class="btn btn-outline-primary btn-sm">
+                                            Xem thêm đánh giá
+                                        </button>
+                                    </div>
                                     <!-- Form tạo đánh giá -->
                                     <h5>Đánh giá của bạn</h5>
                                     <div th:if="${#authentication.authenticated}">
@@ -860,7 +872,7 @@
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite">
+                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}" >
                                                 <i class="far fa-heart"></i>
                                             </button>
                                         </div>
@@ -1037,8 +1049,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+ 
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1544,6 +1555,28 @@
                 });
             });
         });
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('loadMoreReviews');
+            const hiddenReviews = document.querySelectorAll('.hidden-review');
+            let expanded = false; // Trạng thái: đang ẩn
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    if (!expanded) {
+                        // Mở rộng – hiển thị tất cả đánh giá
+                        hiddenReviews.forEach(item => item.classList.remove('d-none'));
+                        toggleBtn.textContent = 'Ẩn bớt đánh giá';
+                        expanded = true;
+                    } else {
+                        // Thu gọn – ẩn lại các đánh giá >= 10
+                        hiddenReviews.forEach(item => item.classList.add('d-none'));
+                        toggleBtn.textContent = 'Xem thêm đánh giá';
+                        expanded = false;
+                    }
+                });
+            }
+        });
+
         // document.addEventListener('DOMContentLoaded', function () {
         //     const toasts = document.querySelectorAll('.toast-host');
         //     toasts.forEach(toast => {
@@ -1563,6 +1596,9 @@
         // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

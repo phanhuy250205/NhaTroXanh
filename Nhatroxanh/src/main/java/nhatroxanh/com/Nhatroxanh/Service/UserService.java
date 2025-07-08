@@ -67,4 +67,12 @@ public interface UserService {
 
     Page<Users> getAllCustomers(int page, int size);
     Optional<Users> findByEmail(String email);
+
+    Page<Users> getAllOwner(int page, int size);
+
+    Page<Users> getFilteredOwners(String keyword, String statusFilter, int page, int size);
+
+    Page<Users> getStaffUsers(int page, int size);
+
+    Users getById(Integer id);
 }

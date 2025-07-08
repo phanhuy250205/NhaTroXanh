@@ -18,10 +18,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import jakarta.persistence.EnumType;
 
 @Data
@@ -29,7 +26,7 @@ import jakarta.persistence.EnumType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Rooms")
+@Table(name = "rooms")
 
 public class Rooms {
     @Id
@@ -39,6 +36,7 @@ public class Rooms {
 
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @EqualsAndHashCode.Exclude
     private Category category;
 
     @ManyToOne
@@ -47,7 +45,7 @@ public class Rooms {
 
     @Column(name = "description", columnDefinition = "NVARCHAR(200)")
     private String description;
-    
+
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 
@@ -71,4 +69,21 @@ public class Rooms {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
+
+    @Override
+    public String toString() {
+        return "Rooms{" +
+                "roomId=" + roomId +
+                ", category=" + category +
+                ", hostel=" + hostel +
+                ", description='" + description + '\'' +
+                ", namerooms='" + namerooms + '\'' +
+                ", status=" + status +
+                ", acreage=" + acreage +
+                ", max_tenants=" + max_tenants +
+                ", price=" + price +
+                ", utilities=" + utilities +
+                ", images=" + images +
+                '}';
+    }
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head th:replace="~{/layouts/head}" />
-<head>
+<!-- <head> -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lịch sử thuê trả - Nhà Trọ Xanh</title>
@@ -432,9 +432,11 @@
             </div>
         </td>
         <td>
-            <span class="status-badge status-completed">
-                <i class="fas fa-check-circle"></i> Đã trả phòng
-            </span>
+          <span 
+  class="status-badge"
+  th:classappend="${tenant.contractStatus == 'EXPIRED'} ? ' status-completed' : ' status-active'" 
+  th:text="${tenant.contractStatus == 'EXPIRED'} ? 'Đã trả phòng' : 'Đang thuê'">
+</span>
         </td>
     </tr>
 </tbody>

@@ -5,12 +5,12 @@ import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@ToString(exclude = { "notifications", "userCccd", "contracts" })
+@ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Data
 @Table(name = "Users")
@@ -30,10 +30,10 @@ public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
+    @Column(name = "user_id") // Đảm bảo tên cột khớp với database
     private Integer userId;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Notification> notifications;
 
     @Column(name = "password", nullable = false, length = 256)
@@ -84,16 +84,14 @@ public class Users {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
 
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<Contracts> contracts;
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contracts> ownedContracts;
 
     @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Contracts> rentedContracts;
 
-    // @Column(name = "status")
-    // private Boolean status;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<Vouchers> vouchers;
 
 
     
@@ -103,5 +101,10 @@ public class Users {
 
     public Users orElse(Object object) {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
     }
 }

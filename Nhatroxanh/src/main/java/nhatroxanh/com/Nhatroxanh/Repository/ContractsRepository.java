@@ -65,4 +65,13 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
 
          Optional<Contracts> findTopByTenantOrderByStartDateDesc(Users tenant);
 
+        /**
+         * 🔍 Tìm theo trạng thái
+         */
+        List<Contracts> findByStatus(Contracts.Status status);
+
+        /**
+         * 📊 Đếm theo trạng thái
+         */
+        long countByStatus(Contracts.Status status);
 }
