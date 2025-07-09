@@ -115,4 +115,8 @@ public class DemoController {
     public String voucherHosst() {
         return "host/voucher-host";
     }
+    @GetMapping("/notifications")
+    public String notifications() {
+        return "guest/chitiet-thongbao";
+    }
 }
