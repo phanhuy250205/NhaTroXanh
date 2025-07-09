@@ -39,6 +39,9 @@ public class IncidentReports {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
+    @Column(name = "incident_type", columnDefinition = "NVARCHAR(100)", nullable = false)
+    private String incidentType;
+
     @Column(name = "description", columnDefinition = "NVARCHAR(255)", nullable = false)
     private String description;
 

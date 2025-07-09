@@ -1,21 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.sql.Date;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -23,12 +12,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "Notifications")
 public class Notification {
-@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer notificationId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore // Prevent circular reference
     private Users user;
 
     @Column(nullable = false, length = 200)

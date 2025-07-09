@@ -31,6 +31,7 @@ import lombok.NoArgsConstructor;
 public class Hostel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "hostel_id")
     private Integer hostelId;
 
     private String name;

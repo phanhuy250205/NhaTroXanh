@@ -1,43 +1,37 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import jakarta.persistence.*;
+import lombok.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
 @Entity
-@ToString(exclude = "notifications")
-@Table(name = "Users")
+@ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Table(name = "users") // Đảm bảo tên bảng khớp với database
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "userId")
+    @Column(name = "user_id") // Đảm bảo tên cột khớp với database
     private Integer userId;
 
-    @Column(name = "username", nullable = false, length = 100, unique = true)
-    private String username;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Notification> notifications;
 
     @Column(name = "password", nullable = false, length = 256)
@@ -46,11 +40,14 @@ public class Users {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @Column(name = "phone", length = 15)
+    @Column(name = "phone", length = 15, unique = true)
     private String phone;
 
     @Column(name = "birthday")
     private Date birthday;
+
+    @Column(name = "bank_account", length = 50)
+    private String bankAccount;
 
     @Column(name = "gender")
     private Boolean gender;
@@ -58,10 +55,7 @@ public class Users {
     @Column(name = "email", length = 100, unique = true)
     private String email;
 
-    @Column(name = "cccd", length = 20)
-    private String cccd;
-
-    @Column(name = "avatar", length = 50)
+    @Column(name = "avatar", length = 1000)
     private String avatar;
 
     @Column(name = "otp_code")
@@ -73,14 +67,39 @@ public class Users {
     @Column(name = "enabled", nullable = false)
     private boolean enabled = false;
 
+    @Column(name = "address", length = 255)
+    private String address;
+
+    @ManyToOne
+    @JoinColumn(name = "address_id")
+    private Address addressEntity;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
 
-    // @Column(name = "status")
-    // private Boolean status; 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private UserCccd userCccd;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> ownedContracts;
+
+    @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Contracts> rentedContracts;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    private List<Vouchers> vouchers;
 
     public enum Role {
-        admin, staff, owner, customer
+        ADMIN, STAFF, OWNER, CUSTOMER
+    }
+
+    public Users orElse(Object object) {
+        throw new UnsupportedOperationException("Unimplemented method 'orElse'");
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
     }
 }
