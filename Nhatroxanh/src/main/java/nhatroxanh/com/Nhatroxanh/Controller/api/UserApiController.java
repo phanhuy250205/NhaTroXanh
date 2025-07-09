@@ -1,6 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Controller.api;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
