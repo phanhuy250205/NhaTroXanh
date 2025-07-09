@@ -8,6 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
@@ -16,15 +18,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-@Getter
-@Setter
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@Table(name = "users") // Đảm bảo tên bảng khớp với database
+@Data
+@Table(name = "Users")
 public class Users {
 
     @Id
@@ -82,6 +84,7 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
 
@@ -94,6 +97,8 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Vouchers> vouchers;
 
+
+    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }

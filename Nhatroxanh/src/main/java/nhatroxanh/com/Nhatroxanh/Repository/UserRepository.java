@@ -43,6 +43,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
         @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
         Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
 
+
         @Query("""
                             SELECT DISTINCT u FROM Users u
                             LEFT JOIN FETCH u.userCccd

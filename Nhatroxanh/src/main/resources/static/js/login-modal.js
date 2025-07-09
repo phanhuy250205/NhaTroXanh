@@ -53,15 +53,14 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
 
             const errorMessageDiv = document.getElementById("login-error-message");
-            errorMessageDiv.style.display = 'none'; // Ẩn thông báo lỗi cũ
+            errorMessageDiv.style.display = 'none'; 
 
             // 1. Lấy dữ liệu từ form trong modal
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
             const rememberMe = document.getElementById("rememberMe").checked;
-            // 2. Chuẩn bị dữ liệu dạng form-urlencoded để gửi cho Spring Security
             const formData = new URLSearchParams();
-            formData.append('username', username); // Tên param phải là "username"
+            formData.append('username', username); 
             formData.append('password', password);
             if (rememberMe) {
                 // Tên parameter phải là 'remember-me' theo mặc định của Spring Security

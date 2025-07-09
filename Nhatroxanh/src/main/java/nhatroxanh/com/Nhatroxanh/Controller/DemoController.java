@@ -4,9 +4,14 @@ import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +25,17 @@ import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 import java.util.List;
@@ -29,6 +45,9 @@ import java.util.Optional;
 @Controller
 public class DemoController {
     private static final Logger logger = LoggerFactory.getLogger(DemoController.class);
+
+
+    
 
     @Autowired
     private UserService userService;
@@ -65,6 +84,13 @@ public class DemoController {
         return "guest/tro-da-luu";
     }
 
+     
+     @Autowired
+     private TenantService tenantService;
+     @Autowired
+     private HostelRepository hostelRepository;
+     @Autowired
+    private ContractService contractService;
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -86,9 +112,37 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/lich-su-thue")
-    public String LsThuetra() {
-        return "host/LS-thue-tra-host";
-    }
+public String showRentalHistory(
+    Model model,
+    @AuthenticationPrincipal CustomUserDetails loggedInUser,
+    @RequestParam(name = "page", defaultValue = "0") int page,
+    @RequestParam(name = "keyword", required = false) String keyword,
+    @RequestParam(name = "hostelId", required = false) Integer selectedHostelId) {
+
+    Integer ownerId = loggedInUser.getUserId();
+
+    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+        ownerId,
+        keyword,
+        selectedHostelId,
+        Contracts.Status.EXPIRED, 
+        PageRequest.of(page, 10)
+    );
+
+    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+
+    model.addAttribute("tenants", tenantPage.getContent());
+    model.addAttribute("totalPages", tenantPage.getTotalPages());
+    model.addAttribute("currentPage", tenantPage.getNumber());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("selectedHostelId", selectedHostelId);
+    model.addAttribute("hostels", ownerHostels);
+    model.addAttribute("isHistoryPage", true); // optional
+
+    return "host/LS-thue-tra-host";
+}
+
+
 
     @GetMapping("/chu-tro/thanh-toan")
     public String Thanhtoan(Model model, Authentication authentication) {
@@ -139,9 +193,38 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/khach-thue")
-    public String khachthue(Model model) {
-        return "host/quan-ly-khach-thue";
-    }
+public String showTenantManagementPage(
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails loggedInUser,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "hostelId", required = false) Integer selectedHostelId) {
+
+    Integer ownerId = loggedInUser.getUserId();
+
+    // Lấy danh sách khách đang thuê
+    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+        ownerId,
+        keyword,
+        selectedHostelId,
+        Contracts.Status.ACTIVE, 
+        PageRequest.of(page, 10)
+    );
+
+    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+
+    model.addAttribute("tenants", tenantPage.getContent());
+    model.addAttribute("totalPages", tenantPage.getTotalPages());
+    model.addAttribute("currentPage", tenantPage.getNumber());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("selectedHostelId", selectedHostelId);
+    model.addAttribute("hostels", ownerHostels);
+    model.addAttribute("selectedStatus", true); // nếu muốn gửi sang để giữ trạng thái filter
+
+    return "host/quan-ly-khach-thue";
+}
+
+
 
     // @GetMapping("/chu-tro/dang-tin")
     // public String dangtin() {
@@ -176,8 +259,31 @@ public class DemoController {
     public String thanhToan() {
         return "guest/thanh-toan";
     }
-    // @GetMapping("/chu-tro/voucher")
-    // public String voucherHosst() {
-    //     return "host/voucher-host";
+
+     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
+    public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+        try {
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
+            model.addAttribute("tenant", tenantDetail);
+            return "host/chi-tiet-khach-thue"; // Tên file HTML chi tiết
+        } catch (Exception e) {
+            return "redirect:/chu-tro/khach-thue";
+        }
+        
+    }
+
+    private Integer getCurrentOwnerId() {
+    String email = org.springframework.security.core.context.SecurityContextHolder
+        .getContext().getAuthentication().getName();
+
+    return userService.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
+        .getUserId();
+}
+    
+    
+    // @GetMapping("/chu-tro/sua-bai-dang")
+    // public String chitiethopdong() {
+    //     return "host/sua-bai-dang";
     // }
 }

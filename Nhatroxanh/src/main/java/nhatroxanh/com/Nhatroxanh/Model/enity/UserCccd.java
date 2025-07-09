@@ -53,6 +53,7 @@ public class UserCccd {
     @JoinColumn(name = "user_id")
     private Users user;
 
+
     public UserCccd orElse(Object object) {
         
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");

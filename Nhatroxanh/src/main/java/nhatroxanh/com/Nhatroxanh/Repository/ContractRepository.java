@@ -67,4 +67,6 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
             "WHERE h.owner.userId = :ownerId " +
             "ORDER BY c.contractDate DESC")
     List<Contracts> findByOwnerUserIdOrderByContractDateDesc(@Param("ownerId") Integer ownerId);
+
+    
 }

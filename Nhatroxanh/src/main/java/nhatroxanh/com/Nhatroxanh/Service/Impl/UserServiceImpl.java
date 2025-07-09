@@ -57,14 +57,10 @@ public class UserServiceImpl implements UserService {
             logger.error("Email already exists: {}", userRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
-
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userRequest.getCccd());
-                throw new RuntimeException("Số CCCD đã được sử dụng!");
-            }
+        if (userRepository.findByPhone(userRequest.getPhoneNumber()).isPresent()) {
+            logger.error("Phone number already exists: {}", userRequest.getPhoneNumber());
+            throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
-
         Users newUser = new Users();
         newUser.setFullname(userRequest.getFullName());
         newUser.setEmail(userRequest.getEmail());
@@ -76,24 +72,6 @@ public class UserServiceImpl implements UserService {
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
-
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            UserCccd userCccd = new UserCccd();
-            userCccd.setUser(savedUser);
-            userCccd.setCccdNumber(userRequest.getCccd());
-            try {
-                if (userRequest.getIssueDate() != null && !userRequest.getIssueDate().isEmpty()) {
-                    userCccd.setIssueDate(Date.valueOf(userRequest.getIssueDate()));
-                }
-                userCccd.setIssuePlace(userRequest.getIssuePlace());
-                userCccdRepository.save(userCccd);
-                logger.info("Saved UserCccd for userId: {}", savedUser.getUserId());
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid CCCD issue date format: {}", userRequest.getIssueDate(), e);
-                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userRequest.getIssueDate());
-            }
-        }
-
         otpService.createAndSendOtp(savedUser);
 
         return savedUser;
@@ -103,23 +81,27 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Users registerOwner(UserOwnerRequest userOwnerRequest) {
         logger.info("Registering new owner with email: {}", userOwnerRequest.getEmail());
+
+        // Kiểm tra email trùng lặp
         if (userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()) {
             logger.error("Email already exists: {}", userOwnerRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
 
-        if (userOwnerRequest.getCccd() != null && !userOwnerRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userOwnerRequest.getCccd());
-                throw new RuntimeException("Số CCCD đã được sử dụng!");
-            }
+        // Kiểm tra số điện thoại trùng lặp
+        if (userRepository.findByPhone(userOwnerRequest.getPhoneNumber()).isPresent()) {
+            logger.error("Phone number already exists: {}", userOwnerRequest.getPhoneNumber());
+            throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
 
+        // Tạo user mới
         Users newUser = new Users();
         newUser.setFullname(userOwnerRequest.getFullName());
         newUser.setEmail(userOwnerRequest.getEmail());
         newUser.setPhone(userOwnerRequest.getPhoneNumber());
         newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
+
+        // Xử lý ngày sinh
         if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
             try {
                 newUser.setBirthday(Date.valueOf(userOwnerRequest.getBirthDate()));
@@ -128,29 +110,15 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException("Định dạng ngày sinh không hợp lệ: " + userOwnerRequest.getBirthDate());
             }
         }
+
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(true);
         newUser.setCreatedAt(LocalDateTime.now());
 
+        // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new owner with ID: {}", savedUser.getUserId());
 
-        if (userOwnerRequest.getCccd() != null && !userOwnerRequest.getCccd().trim().isEmpty()) {
-            UserCccd userCccd = new UserCccd();
-            userCccd.setUser(savedUser);
-            userCccd.setCccdNumber(userOwnerRequest.getCccd());
-            try {
-                if (userOwnerRequest.getIssueDate() != null && !userOwnerRequest.getIssueDate().isEmpty()) {
-                    userCccd.setIssueDate(Date.valueOf(userOwnerRequest.getIssueDate()));
-                }
-                userCccd.setIssuePlace(userOwnerRequest.getIssuePlace());
-                userCccdRepository.save(userCccd);
-                logger.info("Saved UserCccd for owner with userId: {}", savedUser.getUserId());
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid CCCD issue date format: {}", userOwnerRequest.getIssueDate(), e);
-                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
-            }
-        }
         return savedUser;
     }
 
@@ -293,5 +261,9 @@ public class UserServiceImpl implements UserService {
         } else {
             return userRepository.findByRoleAndKeyword(Users.Role.STAFF, keyword, pageable);
         }
+    }
+
+    public Optional<Users> findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }
