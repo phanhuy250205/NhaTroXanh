@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
@@ -67,6 +68,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         newUser.setEnabled(false);
         newUser.setRole(Users.Role.CUSTOMER);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
@@ -111,6 +113,7 @@ public class UserServiceImpl implements UserService {
 
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(true);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
@@ -247,7 +250,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status) {
+        Pageable pageable = PageRequest.of(page, size);
+        keyword = keyword == null ? "" : keyword.trim();
+
+        if ("active".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, true, keyword, pageable);
+        } else if ("inactive".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, false, keyword, pageable);
+        } else {
+            return userRepository.findByRoleAndKeyword(Users.Role.STAFF, keyword, pageable);
+        }
+    }
+
     public Optional<Users> findByEmail(String email) {
-         return userRepository.findByEmail(email);
+        return userRepository.findByEmail(email);
     }
 }

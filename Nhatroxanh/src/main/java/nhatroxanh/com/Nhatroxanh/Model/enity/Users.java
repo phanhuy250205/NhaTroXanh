@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Model.enity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -72,6 +73,9 @@ public class Users {
     @Column(name = "address", length = 255)
     private String address;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address addressEntity;
@@ -106,5 +110,9 @@ public class Users {
     @Override
     public int hashCode() {
         return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
+    }
+   @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 }

@@ -108,7 +108,7 @@ public class DemoController {
 
     @GetMapping("/chu-tro/DS-hop-dong-host")
     public String contractsPage() {
-        return "host/DS-hop-dong-host"; // Chỉ trả view, data load bằng AJAX
+        return "host/DS-hop-dong-host"; 
     }
 
     @GetMapping("/chu-tro/lich-su-thue")
@@ -186,10 +186,6 @@ public String showRentalHistory(
         return "host/gia-han-tra-phong-host";
     }
 
-    @GetMapping("/chu-tro/danh-gia")
-    public String danhgia() {
-        return "host/QL-danh-gia-host";
-    }
 
     @GetMapping("/chu-tro/quan-ly-tro")
     public String phongtro() {
@@ -263,10 +259,7 @@ public String showTenantManagementPage(
     public String thanhToan() {
         return "guest/thanh-toan";
     }
-    @GetMapping("/chu-tro/voucher")
-    public String voucherHosst() {
-        return "host/voucher-host";
-    }
+
      @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
     public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
         try {

@@ -24,6 +24,7 @@ import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.HostInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
@@ -44,10 +45,23 @@ public class ProfileAdminController {
     @Autowired
     private FileUploadService fileUploadService;
 
+    @Autowired
+    private RoomsRepository roomsRepository;
+
     @GetMapping
     public String showProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         Users user = usersRepository.findById(currentUser.getUserId()).orElse(null);
+        if (user == null) {
+            return "redirect:/login?error";
+        }
+
+        long roomCount = roomsRepository.count(); // tổng số phòng trọ
+        long tenantCount = usersRepository.countByRole(Users.Role.CUSTOMER); // tổng số khách thuê
+
         model.addAttribute("user", user);
+        model.addAttribute("roomCount", roomCount);
+        model.addAttribute("tenantCount", tenantCount);
+
         return "admin/profile";
     }
 

@@ -556,19 +556,9 @@
                 <label>Mô tả</label>
                 <textarea class="form-control" th:field="*{description}"></textarea>
             </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label>Loại giảm giá</label>
-                    <select class="form-select" th:field="*{discountType}">
-                        <option th:value="true">Phần trăm (%)</option>
-                        <option th:value="false">Số tiền (VNĐ)</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label>Giá trị giảm</label>
-                    <input type="number" class="form-control" th:field="*{discountValue}">
-                </div>
+            <div class="mb-3">
+                <label>Giá trị giảm</label>
+                <input type="number" class="form-control" th:field="*{discountValue}">
             </div>
 
             <div class="row mb-3">

@@ -67,4 +67,23 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
 
         boolean existsByPhone(String phone);
 
+        long countByRole(Users.Role role);
+
+        long countByRoleAndEnabled(Users.Role role, boolean enabled);
+
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND " +
+                        "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Users> findByRoleAndKeyword(@Param("role") Users.Role role,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
+
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND " +
+                        "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Users> findByRoleAndEnabledAndKeyword(@Param("role") Users.Role role,
+                        @Param("enabled") boolean enabled,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
+
 }
