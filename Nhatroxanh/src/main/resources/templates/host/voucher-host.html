@@ -96,9 +96,6 @@
                                                     <label class="form-label required">Tên voucher</label>
                                                     <div class="input-wrapper">
                                                         <input type="text" class="form-control" id="voucherName" required placeholder="Nhập tên voucher...">
-                                                        <!-- <div class="input-icon">
-                                                            <i class="fas fa-tag"></i>
-                                                        </div> -->
                                                     </div>
                                                     <div class="form-feedback">Vui lòng nhập tên voucher</div>
                                                 </div>
@@ -108,9 +105,6 @@
                                                     <div class="input-group">
                                                         <div class="input-wrapper">
                                                             <input type="text" class="form-control" id="voucherCode" required placeholder="Nhập mã voucher...">
-                                                            <!-- <div class="input-icon">
-                                                                <i class="fas fa-barcode"></i>
-                                                            </div> -->
                                                         </div>
                                                         <button type="button" class="generate-btn" onclick="generateVoucherCode()">
                                                             <i class="fas fa-magic"></i>
@@ -125,23 +119,6 @@
                                                 <label class="form-label">Mô tả voucher</label>
                                                 <div class="input-wrapper">
                                                     <textarea class="form-control" id="voucherDescription" rows="3" placeholder="Mô tả chi tiết về voucher..."></textarea>
-                                                    <!-- <div class="input-icon">
-                                                        <i class="fas fa-align-left"></i>
-                                                    </div> -->
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <label class="form-label required">Trạng thái</label>
-                                                <div class="select-wrapper">
-                                                    <select class="form-control" id="voucherStatus" required>
-                                                        <option value="active">Kích hoạt ngay</option>
-                                                        <!-- <option value="draft">Bản nháp</option> -->
-                                                        <option value="scheduled">Lên lịch</option>
-                                                    </select>
-                                                    <div class="select-icon">
-                                                        <i class="fas fa-chevron-down"></i>
-                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -455,10 +432,7 @@
                                     <select class="form-control" id="statusFilter">
                                         <option value="">Tất cả trạng thái</option>
                                         <option value="active">Đang hoạt động</option>
-                                        <!-- <option value="draft">Bản nháp</option> -->
-                                        <option value="scheduled">Lên lịch</option>
                                         <option value="expired">Hết hạn</option>
-                                        <option value="disabled">Đã vô hiệu hóa</option>
                                     </select>
                                 </div>
                                 <div class="filter-item">

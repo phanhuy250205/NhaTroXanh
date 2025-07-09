@@ -63,15 +63,7 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c WHERE c.tenant.userCccd.cccdNumber = :cccd")
         List<Contract> findByTenantCccd(@Param("cccd") String cccd);
 
-         Optional<Contracts> findTopByTenantOrderByStartDateDesc(Users tenant);
+        Optional<Contracts> findTopByTenantOrderByStartDateDesc(Users tenant);
 
-        /**
-         * 🔍 Tìm theo trạng thái
-         */
-        List<Contracts> findByStatus(Contracts.Status status);
-
-        /**
-         * 📊 Đếm theo trạng thái
-         */
-        long countByStatus(Contracts.Status status);
+        Long countByStatus(Contracts.Status status);
 }

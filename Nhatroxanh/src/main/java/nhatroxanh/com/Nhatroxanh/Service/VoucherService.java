@@ -12,35 +12,37 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 
 public interface VoucherService {
+    // Lấy danh sách voucher đang hoạt động
     Page<Vouchers> getActiveVouchers(Pageable pageable);
 
-    Page<Vouchers> getPendingVouchers(Pageable pageable);
+    // Lấy danh sách voucher theo trạng thái true/false
+    Page<Vouchers> getVouchersByStatus(Boolean status, Pageable pageable);
 
-    void deleteVoucher(Integer voucherId, CustomUserDetails userDetails);
-
-    // New methods
-    Vouchers createVoucher(VoucherDTO voucherDTO, CustomUserDetails userDetails);
-
-    Vouchers updateVoucher(Integer voucherId, VoucherDTO voucherDTO, CustomUserDetails userDetails);
-
-    Optional<Vouchers> getVoucherById(Integer voucherId);
-
-    Page<Vouchers> searchVouchers(String keyword, Pageable pageable);
-
-    Page<Vouchers> getVouchersByStatus(VoucherStatus status, Pageable pageable);
-
+    // Lấy voucher theo người dùng
     Page<Vouchers> getVouchersByUserId(Integer userId, Pageable pageable);
 
+    // Lấy danh sách voucher đang hoạt động theo hostel
     List<Vouchers> getActiveVouchersByHostelId(Integer hostelId);
 
-    void approveVoucher(Integer voucherId, CustomUserDetails userDetails);
+    // Tạo mới voucher từ DTO
+    Vouchers createVoucher(VoucherDTO voucherDTO, CustomUserDetails userDetails);
 
-    void rejectVoucher(Integer voucherId, CustomUserDetails userDetails);
+    // Cập nhật voucher
+    Vouchers updateVoucher(Integer voucherId, VoucherDTO voucherDTO, CustomUserDetails userDetails);
 
+    // Xóa voucher
+    void deleteVoucher(Integer voucherId, CustomUserDetails userDetails);
+
+    // Tìm voucher theo ID
+    Optional<Vouchers> getVoucherById(Integer voucherId);
+
+    // Tìm kiếm voucher theo từ khóa
+    Page<Vouchers> searchVouchers(String keyword, Pageable pageable);
+
+    // Kiểm tra mã voucher đã tồn tại chưa
     boolean isVoucherCodeExists(String code);
 
+    // Sinh mã code tự động
     String generateUniqueVoucherCode();
 
-    Page<Vouchers> searchAndFilterVouchers(String keyword, String statusFilter,
-            String discountType, VoucherStatus voucherStatus, Pageable pageable);
 }

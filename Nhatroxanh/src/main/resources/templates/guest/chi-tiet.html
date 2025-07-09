@@ -504,7 +504,7 @@
                                 <i class="fas fa-bookmark"></i>
                                 <span>Lưu tin</span>
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm me-2" th:attr="data-post-id=${post.postId}"
+                            <button class="btn btn-outline-secondary me-2" th:attr="data-post-id=${post.postId}"
                                 onclick="shareProperty(event)">
                                 <i class="fas fa-share-alt"></i>
                                 <span>Chia sẻ</span>
@@ -1399,64 +1399,6 @@
             alert('Chức năng báo cáo đang được phát triển!');
         }
 
-        let map;
-        function initMap() {
-            const defaultLatLng = { lat: 16.068, lng: 108.212 };
-            const address = document.querySelector('.location-info p span[th:text]')?.textContent?.trim();
-            map = new google.maps.Map(document.getElementById('map'), { center: defaultLatLng, zoom: 13 });
-            const geocoder = new google.maps.Geocoder();
-
-            if (!address) {
-                new google.maps.Marker({ position: defaultLatLng, map, title: "Trung tâm TP. Đà Nẵng" });
-                return;
-            }
-
-            geocoder.geocode({ address: address }, (results, status) => {
-                if (status === 'OK') {
-                    const location = results[0].geometry.location;
-                    map.setCenter(location);
-                    map.setZoom(15);
-                    new google.maps.Marker({ map, position: location, title: address });
-                } else {
-                    console.warn('Không tìm thấy địa chỉ: ' + status);
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const mapScript = document.createElement('script');
-            mapScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAW7YMulhdUYW1RwiUNjijM3Mv222fLrWc&callback=initMap';
-            mapScript.async = true;
-            mapScript.defer = true;
-            document.body.appendChild(mapScript);
-
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tabEl => {
-                tabEl.addEventListener('shown.bs.tab', function (event) {
-                    if (event.target.getAttribute('data-bs-target') === '#location') {
-                        setTimeout(() => initMap(), 300);
-                    }
-                });
-            });
-
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            const hiddenReviews = document.querySelectorAll('.hidden-review');
-            let visibleCount = 5;
-            const step = 5;
-
-            loadMoreBtn?.addEventListener('click', () => {
-                const nextHidden = Array.from(hiddenReviews).slice(visibleCount - 5, visibleCount + step);
-                nextHidden.forEach(item => item.classList.remove('hidden-review'));
-                visibleCount += step;
-
-                if (visibleCount >= hiddenReviews.length + 5) {
-                    loadMoreBtn.style.display = 'none';
-                }
-            });
-
-            if (hiddenReviews.length === 0) {
-                loadMoreBtn.style.display = 'none';
-            }
-        });
         function showEditForm(reviewId) {
             document.getElementById('edit-form-' + reviewId).style.display = 'block';
         }

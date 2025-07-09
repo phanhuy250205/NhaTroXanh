@@ -143,20 +143,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      background: white;
-      border-radius: 8px;
       padding: 8px 16px;
-      box-shadow: var(--shadow-primary);
-      transition: all 0.2s ease;
     }
-
-    .form-status-update:hover {
-      box-shadow: var(--shadow-hover);
-    }
-
     .form-status-update .form-label-host {
       margin-bottom: 0;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: var(--dark-blue);
     }
@@ -1107,6 +1098,60 @@
     ::-webkit-scrollbar-thumb:hover {
       background: var(--secondary-blue);
     }
+
+    .status-badge-host.rejected-clickable {
+      background-color: #dc3545;
+      /* đỏ đậm */
+      color: #fff;
+      /* chữ trắng */
+      border: none;
+      /* xóa border đen */
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+
+    .status-badge-host.rejected-clickable:hover {
+      background-color: #c82333;
+      /* đỏ đậm hơn khi hover */
+    }
+
+    .form-label-host {
+      font-weight: 600;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .btn-toggle-status {
+      border: none;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 15px;
+      color: white;
+      font-weight: 600;
+      box-shadow: none;
+      outline: none;
+    }
+
+    .btn-hide {
+      background-color: #ffc107;
+      /* Màu vàng */
+    }
+
+    .btn-hide:hover {
+      background-color: #e0a800;
+    }
+
+    .btn-show {
+      background-color: var(--success-green);
+      /* Màu xanh */
+    }
+
+    .btn-show:hover {
+      background-color: #33752f;
+    }
   </style>
 </head>
 
@@ -1125,20 +1170,30 @@
         </a>
         <div class="status-container-host">
           <span class="status-label-host">Trạng thái duyệt:</span>
-          <span class="status-badge-host"
-            th:classappend="|${post.approvalStatus != null ? post.approvalStatus.name() : ''}|"
-            th:text="|${post.approvalStatus != null ? post.approvalStatus.name() == 'APPROVED' ? 'Đã duyệt' : post.approvalStatus.name() == 'PENDING' ? 'Chờ duyệt' : 'Bị từ chối' : 'Chưa xác định'}|"></span>
+          <form th:if="${post.approvalStatus?.name() == 'REJECTED'}"
+            th:action="@{/chu-tro/{postId}/reset-approval(postId=${post.postId})}" method="post"
+            style="display: inline;">
+            <button type="submit" class="status-badge-host rejected-clickable" title="Nhấn để chuyển sang Chờ duyệt">
+              Bị từ chối
+            </button>
+          </form>
+          <span th:if="${post.approvalStatus?.name() != 'REJECTED'}" class="status-badge-host"
+            th:classappend="| ${post.approvalStatus?.name()} |"
+            th:text="|${post.approvalStatus?.name() == 'APPROVED' ? 'Đã duyệt' : post.approvalStatus?.name() == 'PENDING' ? 'Chờ duyệt' : 'Chưa xác định'}|">
+          </span>
         </div>
-        <form th:action="@{/chu-tro/cap-nhat-trang-thai}" method="post" class="form-status-update">
+        <form th:action="@{/chu-tro/cap-nhat-trang-thai}" method="post"
+          class="form-status-update d-flex align-items-center gap-3">
           <input type="hidden" name="postId" th:value="${post.postId}" />
-          <label for="statusSelect" class="form-label-host">Cập nhật trạng thái hiển thị:</label>
-          <select id="statusSelect" name="status" class="form-control-host"
-            th:classappend="${post.status == true} ? 'green' : 'red'">
-            <option th:value="true" th:selected="${post.status == true}">Hiển thị bài đăng</option>
-            <option th:value="false" th:selected="${post.status == false}">Ẩn bài đăng</option>
-          </select>
-          <button type="submit" class="btn-status-submit">Lưu</button>
+          <label class="form-label-host m-0">Trạng thái hiển thị:</label>
+
+          <input type="hidden" name="status" th:value="${!post.status}" />
+          <button type="submit"
+            th:classappend="${post.status} ? 'btn-toggle-status btn-hide' : 'btn-toggle-status btn-show'"
+            th:text="${post.status} ? 'ẨN BÀI ĐĂNG' : 'HIỂN THỊ BÀI ĐĂNG'">
+          </button>
         </form>
+
       </div>
     </div>
     <div class="toast-container-host" id="toastContainer">

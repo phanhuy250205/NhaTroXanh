@@ -306,4 +306,24 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
         List<Post> findByStatusTrueAndApprovalStatusOrderByCreatedAtDesc(ApprovalStatus approvalStatus);
 
+        Page<Post> findByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+        @Query("""
+                            SELECT p FROM Post p
+                            LEFT JOIN p.category c
+                            WHERE p.approvalStatus = :approvalStatus
+                            AND p.status = true
+                            AND (:type IS NULL OR c.name = :type)
+                            AND (
+                                :search IS NULL OR
+                                LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
+                                LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))
+                            )
+                        """)
+        Page<Post> findFilteredPosts(
+                        @Param("approvalStatus") ApprovalStatus approvalStatus,
+                        @Param("type") String type,
+                        @Param("search") String search,
+                        Pageable pageable);
+
 }
