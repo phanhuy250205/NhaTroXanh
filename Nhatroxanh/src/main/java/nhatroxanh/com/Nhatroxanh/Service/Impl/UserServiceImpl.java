@@ -11,7 +11,7 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
 import org.slf4j.Logger;
@@ -39,8 +39,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @Autowired
-    // private OtpService otpService;
+    @Autowired
+    private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;

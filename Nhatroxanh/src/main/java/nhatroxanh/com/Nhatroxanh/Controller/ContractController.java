@@ -457,7 +457,7 @@ public class ContractController {
             // Update room status
             logger.info("=== UPDATE ROOM STATUS ===");
             logger.info("Updating room status from {} to ACTIVE", room.getStatus());
-            room.setStatus(RoomStatus.active);
+            room.setStatus(Rooms.RoomStatus.ACTIVE);
             roomsService.save(room);
             logger.info("Room status updated successfully");
 
