@@ -164,8 +164,7 @@
         <div class="row mt-3">
             <!-- Form Column -->
             <div class="col-lg-7">
-                <form th:action="@{/api/contracts}" method="post" enctype="multipart/form-data"
-                      th:object="${contract}" novalidate id="contractForm">
+                <form th:action="${isEditMode} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}" method="post" enctype="multipart/form-data" th:object="${contract}" novalidate id="contractForm">
 
                     <!-- Basic Info Card -->
                     <div class="card nha-tro-card mb-3">
@@ -175,30 +174,26 @@
                                     <label class="form-label">
                                         Số điện thoại <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" placeholder="Số điện thoại người thuê"
-                                           id="tenant-phone" required pattern="[0-9]{10}" maxlength="10">
+                                    <input type="text" class="form-control" id="tenant-phone" th:field="*{tenant.phone}" required pattern="[0-9]{10}" maxlength="10" placeholder="Số điện thoại người thuê">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">
                                         Ngày lập hợp đồng <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" name="contractDate" id="contract-date"
-                                           required
-                                           th:value="${contract.contractDate != null} ? ${#temporals.format(contract.contractDate, 'yyyy-MM-dd')} : ''">
+                                    <input type="date" class="form-control" id="contract-date" th:field="*{contractDate}" required
+                                           th:value="${contract.contractDate != null ? #temporals.format(contract.contractDate, 'yyyy-MM-dd') : ''}">
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">
                                         Trạng thái <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" name="status" id="contract-status" required
-                                            th:value="${contract.status}">
+                                    <select class="form-select" id="contract-status" th:field="*{status}" required>
                                         <option value="">Trạng thái</option>
-                                        <option value="active" th:selected="${contract.status == 'active'}">Đang
-                                            hiệu lực</option>
-                                        <option value="expired" th:selected="${contract.status == 'expired'}">Hết
-                                            hiệu lực</option>
+                                        <option value="DRAFT" th:selected="${contract.status == 'DRAFT'}">Dự thảo</option>
+                                        <option value="active" th:selected="${contract.status == 'active'}">Đang hiệu lực</option>
+                                        <option value="expired" th:selected="${contract.status == 'expired'}">Hết hiệu lực</option>
                                     </select>
                                 </div>
                             </div>
@@ -248,15 +243,16 @@
                                     <label class="form-label">
                                         Họ và tên <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-name" th:field="*{tenant.fullName}" required
+                                    <input type="text" class="form-control" id="tenant-name" name="tenant.fullName" th:field="*{tenant.fullName}" required
                                            placeholder="Nhập họ và tên">
+
                                 </div>
 
                                 <div class="col-md-3">
                                     <label class="form-label">
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="tenant-dob" required
+                                    <input type="date" class="form-control" name="tenant.birthday" id="tenant-dob" required
                                             th:field="*{tenant.birthday}" max="2006-12-31">
                                 </div>
 
@@ -264,7 +260,7 @@
                                     <label class="form-label">
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-id" required
+                                    <input type="text" class="form-control" name="tenant.cccdNumber" id="tenant-id" required
                                            pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{tenant.cccdNumber}">
                                 </div>
 
@@ -272,14 +268,15 @@
                                     <label class="form-label">
                                         Ngày cấp <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="tenant-id-date" th:field="*{tenant.issueDate}" required>
+                                    <input type="date" class="form-control" id="tenant-id-date" name="tenant.issueDate" th:field="*{tenant.issueDate}" required>
+
                                 </div>
 
                                 <div class="col-md-7">
                                     <label class="form-label">
-                                        Nơi cấp <span class="text-danger" th:field="*{tenant.issuePlace}">*</span>
+                                        Nơi cấp <span class="text-danger"  name="tenant.issuePlace" >*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-id-place" required
+                                    <input type="text" class="form-control" id="tenant-id-place" th:field="*{tenant.issuePlace}" required
                                            placeholder="Nơi cấp CMND/CCCD">
                                 </div>
 
@@ -287,9 +284,12 @@
                                     <label class="form-label">
                                         Tỉnh/Thành phố <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="tenant-province">
+                                    <select class="form-select" id="tenant-province" th:field="*{tenant.province}" required>
                                         <option value="">Tỉnh/Thành phố</option>
+                                        <option th:each="province : ${provinces}" th:value="${province.code}" th:text="${province.name}" th:selected="${contract.tenant.province == province.code}"></option>
                                     </select>
+
+
                                 </div>
 
                                 <div class="col-md-4">
@@ -314,14 +314,14 @@
                                     <label class="form-label">
                                         Tên đường/Số nhà <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-street" required
+                                    <input type="text" class="form-control"  id="tenant-street" required
                                            placeholder="Số nhà, tên đường">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Email (nếu có)</label>
                                     <input type="email" class="form-control" id="tenant-email"
-                                           pattern=".*@gmail\.com$" placeholder="example@gmail.com">
+                                           pattern=".*@gmail\.com$" th:field="*{tenant.email}" placeholder="example@gmail.com">
                                 </div>
 
                                 <!-- CCCD Images -->
@@ -363,7 +363,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="owner-name"  th:field="*{owner.fullName}" required
+                                    <input type="text" class="form-control" id="owner-name" name="owner.fullName"  th:field="*{owner.fullName}" required
                                            placeholder="Nhập họ và tên">
                                 </div>
 
@@ -371,7 +371,7 @@
                                     <label class="form-label">
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
-                                    <input type="date" class="form-control" id="owner-dob" th:field="*{owner.birthday}" required>
+                                    <input type="date" class="form-control" id="owner-dob" name="owner.birthday" th:field="*{owner.birthday}" required>
                                 </div>
 
                                 <div class="col-md-3">
@@ -379,7 +379,7 @@
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" id="owner-id" required
-                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{owner.cccdNumber}">
+                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" name="owner.cccdNumber" th:field="*{owner.cccdNumber}">
                                 </div>
 
                                 <div class="col-md-3">
@@ -1239,6 +1239,122 @@
             }
         }
     });
+
+    document.getElementById('contractForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const formData = new FormData(this);
+        const isEditMode = [[${isEditMode}]] || false;
+        const contractId = formData.get('id') || [[${contractId}]];
+        const contractDto = {
+            id: contractId,
+            contractDate: formData.get('contractDate'),
+            status: formData.get('status'),
+            tenantType: formData.get('tenantType'),
+            terms: {
+                startDate: formData.get('terms.startDate'),
+                endDate: formData.get('terms.endDate'),
+                price: parseFloat(formData.get('terms.price')),
+                deposit: parseFloat(formData.get('terms.deposit')),
+                duration: parseInt(formData.get('terms.duration')),
+                terms: formData.get('terms.terms')
+            },
+            room: {
+                roomId: parseInt(formData.get('room.roomId')),
+                roomName: document.querySelector('#roomId option:checked').textContent
+            },
+            owner: {
+                fullName: formData.get('owner.fullName'),
+                phone: formData.get('owner.phone'),
+                cccdNumber: formData.get('owner.cccdNumber'),
+                birthday: formData.get('owner.birthday'),
+                issueDate: formData.get('owner.issueDate'),
+                issuePlace: formData.get('owner.issuePlace'),
+                street: formData.get('owner.street'),
+                ward: formData.get('owner.ward'),
+                district: formData.get('owner.district'),
+                province: formData.get('owner.province'),
+                email: formData.get('owner.email'),
+                bankAccount: formData.get('owner.bankAccount')
+            },
+            tenant: formData.get('tenantType') === 'REGISTERED' ? {
+                fullName: formData.get('tenant.fullName'),
+                phone: formData.get('tenant.phone'),
+                cccdNumber: formData.get('tenant.cccdNumber'),
+                birthday: formData.get('tenant.birthday'),
+                issueDate: formData.get('tenant.issueDate'),
+                issuePlace: formData.get('tenant.issuePlace'),
+                street: formData.get('tenant.street'),
+                ward: formData.get('tenant.ward'),
+                district: formData.get('tenant.district'),
+                province: formData.get('tenant.province'),
+                email: formData.get('tenant.email')
+            } : null,
+            unregisteredTenant: formData.get('tenantType') === 'UNREGISTERED' ? {
+                fullName: formData.get('unregisteredTenant.fullName'),
+                phone: formData.get('unregisteredTenant.phone'),
+                cccdNumber: formData.get('unregisteredTenant.cccdNumber'),
+                birthday: formData.get('unregisteredTenant.birthday'),
+                issueDate: formData.get('unregisteredTenant.issueDate'),
+                issuePlace: formData.get('unregisteredTenant.issuePlace'),
+                street: formData.get('unregisteredTenant.street'),
+                ward: formData.get('unregisteredTenant.ward'),
+                district: formData.get('unregisteredTenant.district'),
+                province: formData.get('unregisteredTenant.province'),
+                email: formData.get('unregisteredTenant.email')
+            } : null
+        };
+
+        try {
+            const url = isEditMode ? `/api/contracts/update/${contractId}` : '/api/contracts';
+            const method = isEditMode ? 'PUT' : 'POST';
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify(contractDto)
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showSuccessMessage(isEditMode ? 'Cập nhật hợp đồng thành công!' : 'Tạo hợp đồng thành công!');
+                window.location.href = '/chu-tro/DS-hop-dong-host';
+            } else {
+                showErrorMessage(result.message || 'Lỗi khi xử lý hợp đồng');
+            }
+        } catch (error) {
+            console.error('Error submitting contract:', error);
+            showErrorMessage('Có lỗi xảy ra khi xử lý hợp đồng: ' + error.message);
+        }
+    });
+
+    // Gắn sự kiện cho các nút sửa
+    document.addEventListener('DOMContentLoaded', function() {
+        // Lấy tất cả các nút sửa
+        const editButtons = document.querySelectorAll('.edit-contract-btn');
+
+        editButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Lấy ID hợp đồng từ thuộc tính data
+                const contractId = this.getAttribute('data-contract-id');
+
+                if (contractId) {
+                    handleEditContract(contractId);
+                }
+            });
+        });
+    });
+
+    // Hàm mở modal hoặc form chỉnh sửa (tùy thuộc vào UI của bạn)
+    function openEditContractModal() {
+        // Ví dụ nếu dùng Bootstrap modal
+        $('#editContractModal').modal('show');
+
+        // Hoặc hiển thị form chỉnh sửa
+        // document.getElementById('editContractForm').style.display = 'block';
+    }
+
 
 </script>
 

@@ -71,4 +71,6 @@ public interface ContractService {
     void updateStatus(Long contractId, String newStatus);
 
     Contracts getContractById(Long contractId);
+
+
 }

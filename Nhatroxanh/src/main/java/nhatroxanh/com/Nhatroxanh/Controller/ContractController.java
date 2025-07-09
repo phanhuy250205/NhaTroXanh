@@ -9,10 +9,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.ContractService;
-import nhatroxanh.com.Nhatroxanh.Service.HostelService;
-import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
-import nhatroxanh.com.Nhatroxanh.Service.UserService;
+import nhatroxanh.com.Nhatroxanh.Service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +46,9 @@ public class ContractController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private LocationService locationService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -652,8 +652,6 @@ public class ContractController {
         logger.info("Tenant CCCD: Number={}, Issue Date={}, Issue Place={}",
                 tenantDto.getCccdNumber(), tenantDto.getIssueDate(), tenantDto.getIssuePlace());
 
-        // Bỏ phần xử lý file upload
-
         userCccdRepository.save(tenantCccd);
         logger.info("Tenant CCCD saved successfully");
 
@@ -667,13 +665,34 @@ public class ContractController {
             return newAddress;
         });
         address.setStreet(tenantDto.getStreet());
-        logger.info("Tenant address: {}", tenantDto.getStreet());
+
+        // Xử lý Province
+        Province province = null;
+        if (tenantDto.getProvince() != null && !tenantDto.getProvince().trim().isEmpty()) {
+            province = locationService.findOrCreateProvince(tenantDto.getProvince());
+        }
+
+        // Xử lý District
+        District district = null;
+        if (province != null && tenantDto.getDistrict() != null && !tenantDto.getDistrict().trim().isEmpty()) {
+            district = locationService.findOrCreateDistrict(tenantDto.getDistrict(), province);
+        }
+
+        // Xử lý Ward
+        Ward ward = null;
+        if (district != null && tenantDto.getWard() != null && !tenantDto.getWard().trim().isEmpty()) {
+            ward = locationService.findOrCreateWard(tenantDto.getWard(), district);
+        }
+
+        address.setWard(ward);
         userService.saveAddress(address);
 
+        tenant.setAddressEntity(address);
         Users savedTenant = userService.saveUser(tenant);
         logger.info("Registered tenant updated successfully: ID={}", savedTenant.getUserId());
         return savedTenant;
     }
+
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private void validateContractData(ContractDto contract) {
         logger.info("=== VALIDATE CONTRACT DATA ===");
@@ -957,27 +976,38 @@ public class ContractController {
         return ResponseEntity.ok(result);
     }
 
-    @PutMapping("/{contractId}")
+    @PutMapping("/update/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateContract(
             @PathVariable Integer contractId,
-            @RequestBody Contracts updatedContract) {
-        logger.info("Received request to update contract with ID: {}", contractId);
+            @RequestBody ContractDto contractDto,
+            Authentication authentication
+    ) {
         try {
-            Contracts contract = contractService.updateContract(contractId, updatedContract);
-            logger.info("Contract updated successfully with ID: {}", contractId);
-            return ResponseEntity.ok(contract);
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid data for updating contract ID {}: {}", contractId, e.getMessage());
-            return ResponseEntity.badRequest().body("Dữ liệu không hợp lệ: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error updating contract ID {}: {}", contractId, e.getMessage(), e);
-            if (e.getMessage().contains("Hợp đồng không tồn tại")) {
-                return ResponseEntity.status(404).body("Hợp đồng không tồn tại!");
+            // Lấy thông tin chủ sở hữu
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+
+            // Xác định người thuê
+            Users tenant = null;
+            UnregisteredTenants unregisteredTenant = null;
+
+            if ("REGISTERED".equals(contractDto.getTenantType())) {
+                tenant = handleRegisteredTenant(contractDto.getTenant());
+            } else if ("UNREGISTERED".equals(contractDto.getTenantType())) {
+                unregisteredTenant = handleUnregisteredTenant(contractDto.getUnregisteredTenant(),
+                        userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null));
             }
-            return ResponseEntity.badRequest().body("Lỗi khi cập nhật hợp đồng. Vui lòng thử lại.");
+
+            // Gọi service để cập nhật
+            Contracts updatedContract = contractService.updateContract(contractId, contractDto);
+
+            return ResponseEntity.ok(updatedContract);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
         }
     }
+
 
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
@@ -1222,6 +1252,241 @@ public class ContractController {
         response.put("contractServiceAvailable", contractService != null);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/details/{contractId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Map<String, Object>> getContractDetails(@PathVariable Integer contractId, Authentication authentication) {
+        logger.info("Received request to get contract details for ID: {}", contractId);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            Optional<Contracts> contractOptional = contractService.findContractById(contractId);
+            if (!contractOptional.isPresent()) {
+                logger.warn("Contract with ID {} not found", contractId);
+                response.put("success", false);
+                response.put("message", "Không tìm thấy hợp đồng với ID: " + contractId);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Contracts contract = contractOptional.get();
+            if (!contract.getOwner().getUserId().equals(ownerId)) {
+                logger.error("User {} does not own contract {}", ownerId, contractId);
+                response.put("success", false);
+                response.put("message", "Bạn không có quyền truy cập hợp đồng này!");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            ContractDto contractDto = convertToContractDto(contract);
+            response.put("success", true);
+            response.put("contract", contractDto);
+            response.put("message", "Lấy thông tin hợp đồng thành công");
+            logger.info("Contract details retrieved successfully for ID: {}", contractId);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving contract details for ID {}: {}", contractId, e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi lấy thông tin hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+    @GetMapping("/edit/{contractId}")
+    public String editContractForm(
+            @PathVariable Integer contractId,
+            Model model,
+            Authentication authentication
+    ) {
+        logger.info("Preparing edit form for Contract ID: {}", contractId);
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            Optional<Contracts> contractOptional = contractService.findContractById(contractId);
+
+            if (contractOptional.isPresent()) {
+                Contracts contract = contractOptional.get();
+
+                // Kiểm tra quyền sở hữu
+                if (!contract.getOwner().getUserId().equals(ownerId)) {
+                    logger.error("User {} does not own contract {}", ownerId, contractId);
+                    model.addAttribute("error", "Bạn không có quyền chỉnh sửa hợp đồng này!");
+                    return "host/hop-dong-host";
+                }
+
+//                // Lấy dữ liệu địa phương
+//                model.addAttribute("provinces", locationService.getProvinces()); // Giả định phương thức
+//                String tenantProvince = contract.getTenant() != null && contract.getTenant().getAddressEntity() != null
+//                        ? contract.getTenant().getAddressEntity().getWard().getDistrict().getProvince().getName() : null;
+//                model.addAttribute("districts", locationService.getDistricts(tenantProvince)); // Giả định
+//                String tenantDistrict = contract.getTenant() != null && contract.getTenant().getAddressEntity() != null
+//                        ? contract.getTenant().getAddressEntity().getWard().getDistrict().getName() : null;
+//                model.addAttribute("wards", locationService.getWards(tenantDistrict)); // Giả định
+
+                // Chuyển đổi sang DTO
+                ContractDto contractDto = convertToContractDto(contract);
+                // IN RA CONSOLE ĐỂ KIỂM TRA
+                System.out.println("Contract DTO: " + contractDto);
+
+                // Log chi tiết DTO
+                logger.info("Contract DTO Details:");
+                logger.info("DTO ID: {}", contractDto.getId());
+                logger.info("DTO Contract Date: {}", contractDto.getContractDate());
+                logger.info("DTO Status: {}", contractDto.getStatus());
+
+                // Log Tenant DTO
+                if (contractDto.getTenant() != null) {
+                    logger.info("DTO Tenant Name: {}", contractDto.getTenant().getFullName());
+                    logger.info("DTO Tenant Phone: {}", contractDto.getTenant().getPhone());
+                    logger.info("DTO Tenant CCCD: {}", contractDto.getTenant().getCccdNumber());
+                    logger.info("DTO Tenant Birthday: {}", contractDto.getTenant().getBirthday());
+                    logger.info("DTO Tenant Issue Date: {}", contractDto.getTenant().getIssueDate());
+                    logger.info("DTO Tenant Issue Place: {}", contractDto.getTenant().getIssuePlace());
+                    logger.info("DTO Tenant Province: {}", contractDto.getTenant().getProvince());
+                    logger.info("DTO Tenant District: {}", contractDto.getTenant().getDistrict());
+                    logger.info("DTO Tenant Ward: {}", contractDto.getTenant().getWard());
+                    logger.info("DTO Tenant Street: {}", contractDto.getTenant().getStreet());
+                }
+
+                // Log Owner DTO
+                if (contractDto.getOwner() != null) {
+                    logger.info("DTO Owner Name: {}", contractDto.getOwner().getFullName());
+                    logger.info("DTO Owner Phone: {}", contractDto.getOwner().getPhone());
+                }
+
+                // Log Room DTO
+                if (contractDto.getRoom() != null) {
+                    logger.info("DTO Room Address: {}", contractDto.getRoom().getAddress());
+                }
+
+                model.addAttribute("contract", contractDto);
+                model.addAttribute("isEditMode", true);
+
+                logger.info("Model attributes added: contract, isEditMode");
+
+                return "host/hop-dong-host";
+            } else {
+                logger.error("Contract not found with ID: {}", contractId);
+                model.addAttribute("error", "Không tìm thấy hợp đồng");
+                return "host/hop-dong-host";
+            }
+        } catch (Exception e) {
+            logger.error("Error in edit contract form", e);
+            model.addAttribute("error", "Lỗi khi tải hợp đồng: " + e.getMessage());
+            return "host/hop-dong-host";
+        }
+    }
+    private ContractDto convertToContractDto(Contracts contract) {
+        ContractDto dto = new ContractDto();
+        dto.setId(contract.getContractId());
+//        dto.setContractDate(contract.getContractDate()); // Giữ java.sql.Date
+        if (contract.getContractDate() != null) {
+            dto.setContractDate(contract.getContractDate().toLocalDate());
+        }
+        dto.setStatus(String.valueOf(contract.getStatus()));
+
+        // Map tenant (là Users)
+        if (contract.getTenant() != null) {
+            ContractDto.Tenant tenant = new ContractDto.Tenant();
+            Users user = contract.getTenant(); // Tenant là Users
+            if (user != null) {
+                tenant.setFullName(user.getFullname());
+                tenant.setPhone(user.getPhone());
+                tenant.setEmail(user.getEmail());
+                tenant.setBirthday(user.getBirthday());
+                if (user.getAddressEntity() != null) {
+                    tenant.setStreet(user.getAddressEntity().getStreet());
+                    if (user.getAddressEntity().getWard() != null) {
+                        tenant.setWard(user.getAddressEntity().getWard().getName());
+                        if (user.getAddressEntity().getWard().getDistrict() != null) {
+                            tenant.setDistrict(user.getAddressEntity().getWard().getDistrict().getName());
+                            if (user.getAddressEntity().getWard().getDistrict().getProvince() != null) {
+                                tenant.setProvince(user.getAddressEntity().getWard().getDistrict().getProvince().getName());
+                            }
+                        }
+                    }
+                }
+            }
+            UserCccd cccd = user != null ? user.getUserCccd() : null;
+            logger.info("UserCccd for tenant with userId {}: {}", user != null ? user.getUserId() : "null", cccd);
+            if (cccd != null) {
+                logger.info("IssueDate from UserCccd: {}", cccd.getIssueDate());
+                tenant.setCccdNumber(cccd.getCccdNumber());
+                tenant.setIssueDate(cccd.getIssueDate());
+                tenant.setIssuePlace(cccd.getIssuePlace());
+            } else {
+                logger.warn("No UserCccd found for tenant with user ID: {}", user != null ? user.getUserId() : "N/A");
+            }
+            dto.setTenant(tenant);
+        }
+
+        // Map owner (cũng là Users)
+        if (contract.getOwner() != null) {
+            ContractDto.Owner owner = new ContractDto.Owner();
+            Users user = contract.getOwner(); // Owner là Users
+            if (user != null) {
+                owner.setFullName(user.getFullname());
+                owner.setPhone(user.getPhone());
+                owner.setEmail(user.getEmail());
+                owner.setBirthday(user.getBirthday());
+                if (user.getAddressEntity() != null) {
+                    owner.setStreet(user.getAddressEntity().getStreet());
+                    if (user.getAddressEntity().getWard() != null) {
+                        owner.setWard(user.getAddressEntity().getWard().getName());
+                        if (user.getAddressEntity().getWard().getDistrict() != null) {
+                            owner.setDistrict(user.getAddressEntity().getWard().getDistrict().getName());
+                            if (user.getAddressEntity().getWard().getDistrict().getProvince() != null) {
+                                owner.setProvince(user.getAddressEntity().getWard().getDistrict().getProvince().getName());
+                            }
+                        }
+                    }
+                }
+            }
+            UserCccd cccd = user != null ? user.getUserCccd() : null;
+            if (cccd != null) {
+                owner.setCccdNumber(cccd.getCccdNumber());
+                owner.setIssueDate(cccd.getIssueDate());
+                owner.setIssuePlace(cccd.getIssuePlace());
+            }
+            dto.setOwner(owner);
+        }
+
+        // Map room
+        if (contract.getRoom() != null) {
+            ContractDto.Room room = new ContractDto.Room();
+            room.setRoomId(contract.getRoom().getRoomId());
+            room.setRoomName(contract.getRoom().getNamerooms());
+            room.setArea(contract.getRoom().getAcreage());
+            room.setPrice(contract.getRoom().getPrice());
+//            room.setHostelId(contract.getRoom().getHostelId());
+//            if (contract.getRoom().getAddress() != null) {
+//                room.setAddress(contract.getRoom().getAddress().getStreet() != null ? contract.getRoom().getAddress().getStreet() : "");
+//            } else {
+//                room.setAddress("");
+//            }
+            dto.setRoom(room);
+        }
+
+        // Map terms
+        if (contract.getTerms() != null) {
+            ContractDto.Terms terms = new ContractDto.Terms();
+            if (contract.getStartDate() != null) {
+                terms.setStartDate(contract.getStartDate().toLocalDate());
+            }
+            if (contract.getEndDate() != null) {
+                terms.setEndDate(contract.getEndDate().toLocalDate());
+            }
+            terms.setPrice(Double.valueOf(contract.getPrice()));
+            terms.setDeposit(Double.valueOf(contract.getDeposit()));
+//            terms.setDuration(contract.getDuration());
+            terms.setTerms(contract.getTerms());
+            dto.setTerms(terms);
+        }
+
+        return dto;
     }
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")

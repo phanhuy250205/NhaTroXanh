@@ -49,15 +49,6 @@ window.NhaTroContract = {
                 this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố", "error")
             })
     },
-
-    safeEncodeURL(value) {
-        try {
-            return encodeURIComponent(value).replace(/%25/g, "%")
-        } catch (e) {
-            console.error("Error encoding URL component:", value, e)
-            return value
-        }
-    },
     normalizeName(name) {
         if (!name) return ""
         return name
@@ -1349,6 +1340,8 @@ window.NhaTroContract = {
     },
 
     // Các hàm hành động
+
+
     updateContract() {
         this.showNotification("Hợp đồng đã được cập nhật!", "success")
     },
@@ -1372,6 +1365,470 @@ window.NhaTroContract = {
         printWindow.document.close()
         printWindow.print()
     },
+
+    updateContract() {
+        // Lấy ID hợp đồng
+        const contractId = this.extractContractIdFromUrl();
+
+        if (!contractId) {
+            this.showNotification('Không tìm thấy ID hợp đồng', 'error');
+            return;
+        }
+
+        // Tạo đối tượng dữ liệu chi tiết
+        const contractData = this.prepareContractUpdateData(contractId);
+
+        // Log toàn bộ dữ liệu để kiểm tra
+        console.log("Contract Update Data:", JSON.stringify(contractData, null, 2));
+
+        // Gửi request update
+        this.sendContractUpdateRequest(contractId, contractData);
+    },
+
+    extractContractIdFromUrl() {
+        // Trích xuất ID từ URL hoặc input ẩn
+        const pathParts = window.location.pathname.split('/');
+        const urlId = pathParts[pathParts.length - 1];
+        const hiddenId = document.getElementById('contract-id')?.value;
+
+        return urlId || hiddenId;
+    },
+
+    prepareContractUpdateData(contractId) {
+        // Thu thập toàn bộ dữ liệu chi tiết
+        return {
+            contractId: contractId,
+
+            // Thông tin cơ bản hợp đồng
+            contractInfo: {
+                contractDate: this.getInputValue('contract-date'),
+                startDate: this.getInputValue('start-date'),
+                endDate: this.getInputValue('end-date'),
+                status: this.getInputValue('contract-status'),
+                duration: this.getInputValue('contract-duration')
+            },
+
+            // Thông tin người thuê
+            tenantInfo: this.prepareTenantData(),
+
+            // Thông tin chủ sở hữu
+            ownerInfo: this.prepareOwnerData(),
+
+            // Thông tin phòng
+            roomInfo: this.prepareRoomData(),
+
+            // Điều khoản hợp đồng
+            termsInfo: {
+                rentPrice: this.getInputValue('rent-price'),
+                depositMonths: this.getInputValue('deposit-months'),
+                depositAmount: this.getInputValue('terms-deposit'),
+                paymentMethod: this.getInputValue('payment-method'),
+                paymentDate: this.getInputValue('payment-date'),
+                additionalTerms: this.getInputValue('terms-conditions')
+            },
+
+            // Tiện ích
+            utilities: this.collectUtilities(),
+
+            // Người ở
+            residents: this.collectResidents()
+        };
+    },
+
+    prepareTenantData() {
+        const tenantType = document.getElementById('tenantType')?.value;
+
+        if (tenantType === 'REGISTERED') {
+            return {
+                type: 'REGISTERED',
+                fullName: this.getInputValue('tenant-name'),
+                phone: this.getInputValue('tenant-phone'),
+                email: this.getInputValue('tenant-email'),
+                dob: this.getInputValue('tenant-dob'),
+                cccdNumber: this.getInputValue('tenant-id'),
+                cccdIssueDate: this.getInputValue('tenant-id-date'),
+                cccdIssuePlace: this.getInputValue('tenant-id-place'),
+                address: {
+                    street: this.getInputValue('tenant-street'),
+                    ward: this.getSelectText('tenant-ward'),
+                    district: this.getSelectText('tenant-district'),
+                    province: this.getSelectText('tenant-province')
+                },
+                cccdFiles: this.collectCccdFiles('tenant')
+            };
+        } else {
+            return {
+                type: 'UNREGISTERED',
+                fullName: this.getInputValue('unregisteredTenantFullName'),
+                phone: this.getInputValue('unregisteredTenantPhone'),
+                cccdNumber: this.getInputValue('unregisteredTenantCccdNumber'),
+                dob: this.getInputValue('unregisteredTenantBirthday'),
+                cccdIssueDate: this.getInputValue('unregisteredTenantIssueDate'),
+                cccdIssuePlace: this.getInputValue('unregisteredTenantIssuePlace'),
+                address: {
+                    street: this.getInputValue('unregisteredTenantStreet'),
+                    ward: this.getSelectText('unregisteredTenantWard'),
+                    district: this.getSelectText('unregisteredTenantDistrict'),
+                    province: this.getSelectText('unregisteredTenantProvince')
+                },
+                cccdFiles: this.collectCccdFiles('unregistered-tenant')
+            };
+        }
+    },
+
+    prepareOwnerData() {
+        return {
+            fullName: this.getInputValue('owner-name'),
+            phone: this.getInputValue('owner-phone'),
+            email: this.getInputValue('owner-email'),
+            dob: this.getInputValue('owner-dob'),
+            cccdNumber: this.getInputValue('owner-id'),
+            cccdIssueDate: this.getInputValue('owner-id-date'),
+            cccdIssuePlace: this.getInputValue('owner-id-place'),
+            address: {
+                street: this.getInputValue('owner-street'),
+                ward: this.getSelectText('owner-ward'),
+                district: this.getSelectText('owner-district'),
+                province: this.getSelectText('owner-province')
+            },
+            cccdFiles: this.collectCccdFiles('owner')
+        };
+    },
+
+    prepareRoomData() {
+        return {
+            roomId: this.getInputValue('roomId'),
+            roomName: this.getInputValue('room-name'),
+            hostelId: this.getInputValue('hostelId'),
+            area: this.getInputValue('room-area'),
+            price: this.getInputValue('rent-price'),
+            address: {
+                street: this.getInputValue('room-street'),
+                ward: this.getSelectText('room-ward'),
+                district: this.getSelectText('room-district'),
+                province: this.getSelectText('room-province')
+            }
+        };
+    },
+
+    collectUtilities() {
+        const utilities = [];
+        document.querySelectorAll('#amenities-list-host input[type="checkbox"]:checked').forEach(checkbox => {
+            utilities.push(checkbox.id);
+        });
+        return utilities;
+    },
+
+    collectResidents() {
+        const residents = [];
+        document.querySelectorAll('#residents-list .nha-tro-resident-item').forEach(residentElement => {
+            residents.push({
+                name: residentElement.querySelector('h6')?.textContent,
+                birthYear: residentElement.querySelector('.text-muted')?.textContent.replace('Năm sinh: ', ''),
+                phone: residentElement.querySelector('.text-muted:nth-child(3)')?.textContent.replace('SĐT: ', ''),
+                id: residentElement.querySelector('.text-muted:nth-child(4)')?.textContent.replace('CCCD: ', '')
+            });
+        });
+        return residents;
+    },
+
+    collectCccdFiles(prefix) {
+        const files = {};
+
+        // Xử lý ảnh mặt trước
+        const frontInput = document.getElementById(`${prefix}-cccd-front`);
+        if (frontInput && frontInput.files.length > 0) {
+            files.front = frontInput.files[0];
+        }
+
+        // Xử lý ảnh mặt sau
+        const backInput = document.getElementById(`${prefix}-cccd-back`);
+        if (backInput && backInput.files.length > 0) {
+            files.back = backInput.files[0];
+        }
+
+        return files;
+    },
+
+    sendContractUpdateRequest(contractId, contractData) {
+        // Tạo FormData để gửi dữ liệu
+        const formData = new FormData();
+
+        // Thêm dữ liệu JSON
+        formData.append('contractData', JSON.stringify(contractData));
+
+        // Thêm file CCCD
+        this.appendCccdFiles(formData, contractData);
+
+        // Hiển thị loading
+        this.showLoadingIndicator();
+
+        // Gửi request
+        fetch(`/api/contracts/update/${contractId}`, {
+            method: 'PUT',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || '',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+        })
+            .then(response => {
+                this.hideLoadingIndicator();
+
+                if (!response.ok) {
+                    return response.text().then(errorText => {
+                        throw new Error(errorText || 'Lỗi khi cập nhật hợp đồng');
+                    });
+                }
+                return response.json();
+            })
+            .then(updatedContract => {
+                this.showNotification('Cập nhật hợp đồng thành công', 'success');
+                window.location.href = `/contracts/details/${contractId}`;
+            })
+            .catch(error => {
+                console.error('Lỗi cập nhật hợp đồng:', error);
+                this.showNotification(error.message, 'error');
+            });
+    },
+
+    appendCccdFiles(formData, contractData) {
+        // Thêm file CCCD người thuê
+        if (contractData.tenantInfo.cccdFiles.front) {
+            formData.append('tenantCccdFront', contractData.tenantInfo.cccdFiles.front);
+        }
+        if (contractData.tenantInfo.cccdFiles.back) {
+            formData.append('tenantCccdBack', contractData.tenantInfo.cccdFiles.back);
+        }
+
+        // Thêm file CCCD chủ trọ
+        if (contractData.ownerInfo.cccdFiles.front) {
+            formData.append('ownerCccdFront', contractData.ownerInfo.cccdFiles.front);
+        }
+        if (contractData.ownerInfo.cccdFiles.back) {
+            formData.append('ownerCccdBack', contractData.ownerInfo.cccdFiles.back);
+        }
+    },
+
+    getInputValue(id) {
+        const element = document.getElementById(id);
+        return element ? (element.value || '').trim() : '';
+    },
+
+    getSelectText(id) {
+        const select = document.getElementById(id);
+        return select && select.selectedIndex >= 0
+            ? select.options[select.selectedIndex].text
+            : '';
+    },
+
+    showLoadingIndicator() {
+        // Tạo và hiển thị loading spinner
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.id = 'contract-update-loading';
+        loadingIndicator.innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Đang cập nhật...</span>
+        </div>
+    `;
+        loadingIndicator.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 9999;
+    `;
+        document.body.appendChild(loadingIndicator);
+    },
+
+    hideLoadingIndicator() {
+        const loadingIndicator = document.getElementById('contract-update-loading');
+        if (loadingIndicator) {
+            loadingIndicator.remove();
+        }
+    },
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 400px;';
+        notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+        document.body.appendChild(notification);
+
+        // Tự động xóa thông báo sau 5 giây
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.remove();
+            }
+        }, 5000);
+    },
+
+// Phương thức thu thập dữ liệu từ form
+    collectContractData() {
+        // Thu thập dữ liệu cho hợp đồng
+        const contractData = {
+            // Thông tin chung của hợp đồng
+            contractDate: document.getElementById('contract-date')?.value || null,
+            startDate: document.getElementById('start-date')?.value || null,
+            endDate: document.getElementById('end-date')?.value || null,
+            status: document.getElementById('contract-status')?.value || null,
+
+            // Loại người thuê (nếu có radio button)
+            tenantType: document.querySelector('input[name="tenantType"]:checked')?.value || null,
+
+            // Thông tin người thuê
+            tenant: this.collectTenantData(),
+
+            // Thông tin chủ trọ
+            owner: this.collectOwnerData(),
+
+            // Thông tin phòng
+            room: {
+                roomId: document.getElementById('roomId')?.value || null,
+                roomName: document.getElementById('room-name')?.value || null,
+                roomNumber: document.getElementById('room-number')?.value || null,
+                area: document.getElementById('room-area')?.value || null,
+                hostelId: document.getElementById('hostelId')?.value || null,
+                province: document.getElementById('room-province')?.value || null,
+                district: document.getElementById('room-district')?.value || null,
+                ward: document.getElementById('room-ward')?.value || null,
+                street: document.getElementById('room-street')?.value || null,
+                notes: document.getElementById('room-notes')?.value || null
+            },
+
+            // Điều khoản hợp đồng
+            terms: {
+                price: document.getElementById('rent-price')?.value || null,
+                depositMonths: document.getElementById('deposit-months')?.value || null,
+                paymentMethod: document.getElementById('payment-method')?.value || null,
+                paymentDate: document.getElementById('payment-date')?.value || null,
+                duration: document.getElementById('contract-duration')?.value || null,
+                startDate: document.getElementById('start-date')?.value || null,
+                additionalTerms: document.getElementById('terms-conditions')?.value || null
+            },
+
+            // Tiện ích
+            utilities: this.collectUtilities(),
+
+            // Người ở
+            residents: this.collectResidents(),
+
+            // Ảnh CCCD
+            tenantCccdImages: this.collectCccdImages('tenant'),
+            ownerCccdImages: this.collectCccdImages('owner')
+        };
+
+        return contractData;
+    },
+
+// Phương thức thu thập thông tin người thuê
+    collectTenantData() {
+        return {
+            fullName: document.getElementById('tenant-name')?.value || null,
+            birthday: document.getElementById('tenant-dob')?.value || null,
+            cccdNumber: document.getElementById('tenant-id')?.value || null,
+            phone: document.getElementById('tenant-phone')?.value || null,
+            email: document.getElementById('tenant-email')?.value || null,
+            issueDate: document.getElementById('tenant-id-date')?.value || null,
+            issuePlace: document.getElementById('tenant-id-place')?.value || null,
+            province: document.getElementById('tenant-province')?.value || null,
+            district: document.getElementById('tenant-district')?.value || null,
+            ward: document.getElementById('tenant-ward')?.value || null,
+            street: document.getElementById('tenant-street')?.value || null
+        };
+    },
+
+// Phương thức thu thập thông tin chủ trọ
+    collectOwnerData() {
+        return {
+            fullName: document.getElementById('owner-name')?.value || null,
+            birthday: document.getElementById('owner-dob')?.value || null,
+            cccdNumber: document.getElementById('owner-id')?.value || null,
+            phone: document.getElementById('owner-phone')?.value || null,
+            email: document.getElementById('owner-email')?.value || null,
+            issueDate: document.getElementById('owner-id-date')?.value || null,
+            issuePlace: document.getElementById('owner-id-place')?.value || null,
+            province: document.getElementById('owner-province')?.value || null,
+            district: document.getElementById('owner-district')?.value || null,
+            ward: document.getElementById('owner-ward')?.value || null,
+            street: document.getElementById('owner-street')?.value || null
+        };
+    },
+
+// Phương thức thu thập tiện ích
+    collectUtilities() {
+        const utilities = [];
+        document.querySelectorAll('#amenities-list-host input[type="checkbox"]:checked').forEach(checkbox => {
+            utilities.push(checkbox.id);
+        });
+        return utilities;
+    },
+
+// Phương thức thu thập người ở
+    collectResidents() {
+        const residents = [];
+        const residentsList = document.getElementById('residents-list');
+
+        // Kiểm tra nếu có người ở được thêm
+        if (residentsList) {
+            residentsList.querySelectorAll('.resident-item').forEach(residentElement => {
+                residents.push({
+                    name: residentElement.querySelector('.resident-name')?.textContent || null,
+                    birthYear: residentElement.querySelector('.resident-birth-year')?.textContent || null,
+                    phone: residentElement.querySelector('.resident-phone')?.textContent || null,
+                    idNumber: residentElement.querySelector('.resident-id')?.textContent || null,
+                    notes: residentElement.querySelector('.resident-notes')?.textContent || null
+                });
+            });
+        }
+
+        return residents;
+    },
+
+// Phương thức thu thập ảnh CCCD
+    collectCccdImages(type) {
+        const frontImage = document.getElementById(`${type}-cccd-front`);
+        const backImage = document.getElementById(`${type}-cccd-back`);
+
+        return {
+            front: frontImage?.files[0] || null,
+            back: backImage?.files[0] || null
+        };
+    },
+
+
+// Thu thập thông tin người thuê đã đăng ký
+    collectTenantData() {
+        // Chỉ thu thập nếu là tenant registered
+        if (document.getElementById('tenant-type-registered').checked) {
+            return {
+                cccd: document.getElementById('tenant-cccd').value,
+                fullName: document.getElementById('tenant-name').value,
+                phone: document.getElementById('tenant-phone').value,
+                email: document.getElementById('tenant-email').value,
+                // Các thông tin khác
+            };
+        }
+        return null;
+    },
+
+// Thu thập thông tin người thuê chưa đăng ký
+    collectUnregisteredTenantData() {
+        // Chỉ thu thập nếu là tenant unregistered
+        if (document.getElementById('tenant-type-unregistered').checked) {
+            return {
+                fullName: document.getElementById('unregistered-tenant-name').value,
+                phone: document.getElementById('unregistered-tenant-phone').value,
+                cccd: document.getElementById('unregistered-tenant-cccd').value,
+                // Các thông tin khác
+            };
+        }
+        return null;
+    },
+
 
     saveContract() {
         try {
