@@ -2,6 +2,7 @@
 let currentPage = 0;
 let currentSearch = '';
 let currentStatus = '';
+let availableContracts = []; // Store contracts globally for access
 
 // Load specific page
 function loadPage(page) {
@@ -296,6 +297,48 @@ function markAsPaid() {
     });
 }
 
+// Delete invoice
+function deleteInvoice() {
+    const modal = document.getElementById('invoiceModal');
+    const paymentId = modal.getAttribute('data-payment-id');
+    
+    if (!paymentId) {
+        showToast('Không tìm thấy ID hóa đơn', 'error');
+        return;
+    }
+    
+    // Confirm deletion
+    if (!confirm('Bạn có chắc chắn muốn xóa hóa đơn này?')) {
+        return;
+    }
+    
+    fetch(`/api/payments/${paymentId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => {
+        if (response.ok) {
+            return response.json().catch(() => ({})); // Handle empty response
+        } else {
+            throw new Error('Failed to delete payment');
+        }
+    })
+    .then(data => {
+        showToast('Đã xóa hóa đơn thành công', 'success');
+        // Close modal
+        const bsModal = bootstrap.Modal.getInstance(modal);
+        bsModal.hide();
+        // Reload current page
+        loadPage(currentPage);
+    })
+    .catch(error => {
+        console.error('Error deleting payment:', error);
+        showToast('Có lỗi xảy ra khi xóa hóa đơn', 'error');
+    });
+}
+
 // Download invoice (placeholder function)
 function downloadInvoice() {
     showToast('Tính năng tải xuống đang được phát triển', 'info');
@@ -369,6 +412,7 @@ function loadAvailableContracts() {
     fetch('/api/payments/available-contracts')
         .then(response => response.json())
         .then(contracts => {
+            availableContracts = contracts; // Store contracts globally
             const select = document.getElementById('invoiceRoomSelect');
             if (select && contracts) {
                 select.innerHTML = '<option value="">Chọn phòng</option>';
@@ -379,9 +423,25 @@ function loadAvailableContracts() {
                     select.appendChild(option);
                 });
             }
+            // Add event listener to update room fee when a room is selected
+            select.addEventListener('change', function() {
+                const selectedContractId = select.value;
+                const roomFeeInput = document.getElementById('roomFeeInput');
+                if (roomFeeInput && selectedContractId) {
+                    const selectedContract = availableContracts.find(contract => contract.contractId == selectedContractId);
+                    if (selectedContract && selectedContract.roomPrice) {
+                        roomFeeInput.value = selectedContract.roomPrice;
+                    } else {
+                        roomFeeInput.value = ''; // Clear if no price is found
+                    }
+                } else {
+                    roomFeeInput.value = ''; // Clear if no room is selected
+                }
+            });
         })
         .catch(error => {
             console.error('Error loading contracts:', error);
+            showToast('Có lỗi khi tải danh sách hợp đồng', 'error');
         });
 }
 

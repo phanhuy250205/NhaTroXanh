@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="vi">
 
-
 <!-- <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head> -->
-
-
 <head>
     <!-- ICON -->
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
@@ -81,7 +78,7 @@
                     </p>
 
                     <form id="loginFormHost" th:action="@{/login-processing}" method="post">
-                        <!-- ĐÃ XÓA CSRF TOKEN VÌ ĐÃ TẮT CSRF TRONG CONFIG -->
+
 
                         <div class="form-group">
                             <label for="emailPhone">Email hoặc Số điện
@@ -128,10 +125,8 @@
             </section>
         </div>
 
-    </div>
+
     <script th:src="@{/js/login-host.js}"></script>
 
-</body>
-
-
+    </body>
 </html>

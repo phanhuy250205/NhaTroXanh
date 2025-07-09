@@ -65,8 +65,10 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Page<PaymentResponseDto> getPaymentsByOwnerIdAndStatusWithPagination(Integer ownerId, PaymentStatus status, Pageable pageable) {
-        Page<Payments> paymentsPage = paymentsRepository.findByOwnerIdAndStatusWithPagination(ownerId, status, pageable);
+    public Page<PaymentResponseDto> getPaymentsByOwnerIdAndStatusWithPagination(Integer ownerId, PaymentStatus status,
+            Pageable pageable) {
+        Page<Payments> paymentsPage = paymentsRepository.findByOwnerIdAndStatusWithPagination(ownerId, status,
+                pageable);
         List<PaymentResponseDto> paymentDtos = paymentsPage.getContent().stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
@@ -83,7 +85,8 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Page<PaymentResponseDto> searchPaymentsWithPagination(Integer ownerId, String keyword, Pageable pageable) {
-        Page<Payments> paymentsPage = paymentsRepository.searchPaymentsByKeywordWithPagination(ownerId, keyword, pageable);
+        Page<Payments> paymentsPage = paymentsRepository.searchPaymentsByKeywordWithPagination(ownerId, keyword,
+                pageable);
         List<PaymentResponseDto> paymentDtos = paymentsPage.getContent().stream()
                 .map(this::convertToResponseDto)
                 .collect(Collectors.toList());
@@ -117,9 +120,17 @@ public class PaymentServiceImpl implements PaymentService {
                 throw new RuntimeException("Payment already exists for this month");
             }
 
+            // Validate details
+            if (request.getDetails() == null || request.getDetails().isEmpty()) {
+                throw new RuntimeException("Payment details cannot be empty");
+            }
+
             // Tính tổng tiền
             Float totalAmount = 0f;
             for (PaymentRequestDto.PaymentDetailDto detail : request.getDetails()) {
+                if (detail.getAmount() == null || detail.getAmount() < 0) {
+                    throw new RuntimeException("Invalid amount for item: " + detail.getItemName());
+                }
                 totalAmount += detail.getAmount();
             }
 
@@ -129,7 +140,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .totalAmount(totalAmount)
                     .dueDate(request.getDueDate())
                     .paymentStatus(PaymentStatus.CHƯA_THANH_TOÁN)
-                    .paymentMethod(request.getPaymentMethod())
+                    .paymentMethod(request.getPaymentMethod()) // Không set mặc định, giữ nguyên giá trị từ request
                     .build();
 
             payment = paymentsRepository.save(payment);
@@ -146,7 +157,8 @@ public class PaymentServiceImpl implements PaymentService {
                 detailPaymentsRepository.save(detailPayment);
             }
 
-            log.info("Created payment with id: {} for contract: {}", payment.getId(), contract.getContractId());
+            log.info("Created payment with id: {} for contract: {} with payment method: {}",
+                    payment.getId(), contract.getContractId(), payment.getPaymentMethod());
             return convertToResponseDto(payment);
 
         } catch (Exception e) {
@@ -168,22 +180,22 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment = paymentsRepository.save(payment);
         log.info("Updated payment status to {} for payment id: {}", status, paymentId);
-        
+
         return convertToResponseDto(payment);
     }
 
     @Override
     public Map<String, Object> getPaymentStatistics(Integer ownerId) {
         Map<String, Object> stats = new HashMap<>();
-        
+
         long paidCount = paymentsRepository.countPaidPaymentsByOwnerId(ownerId);
         long unpaidCount = paymentsRepository.countUnpaidPaymentsByOwnerId(ownerId);
         Float totalRevenue = paymentsRepository.getTotalRevenueByOwnerId(ownerId);
-        
+
         stats.put("paidCount", paidCount);
         stats.put("unpaidCount", unpaidCount);
         stats.put("totalRevenue", totalRevenue != null ? totalRevenue : 0f);
-        
+
         return stats;
     }
 
@@ -192,24 +204,24 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             // Lấy tất cả contracts active của owner
             List<Contracts> contracts = contractRepository.findByOwnerId(ownerId);
-            
+
             // Lọc chỉ những contracts đang active
             List<Contracts> activeContracts = contracts.stream()
                     .filter(contract -> contract.getStatus() == Contracts.Status.ACTIVE)
                     .collect(Collectors.toList());
-            
+
             // Chuyển đổi thành format phù hợp cho frontend
             List<Map<String, Object>> result = new ArrayList<>();
-            
+
             for (Contracts contract : activeContracts) {
                 Map<String, Object> contractData = new HashMap<>();
-                
+
                 // Thông tin cơ bản
                 contractData.put("contractId", contract.getContractId());
                 contractData.put("roomCode", contract.getRoom().getNamerooms());
                 contractData.put("hostelName", contract.getRoom().getHostel().getName());
                 contractData.put("roomPrice", contract.getPrice());
-                
+
                 // Thông tin tenant
                 String tenantName = "";
                 if (contract.getTenant() != null) {
@@ -219,16 +231,16 @@ public class PaymentServiceImpl implements PaymentService {
                 }
                 contractData.put("tenantName", tenantName);
                 contractData.put("tenantPhone", contract.getTenantPhone());
-                
+
                 // Thêm thông tin phòng
                 contractData.put("roomId", contract.getRoom().getRoomId());
-                
+
                 result.add(contractData);
             }
-            
+
             log.info("Found {} available contracts for owner {}", result.size(), ownerId);
             return result;
-            
+
         } catch (Exception e) {
             log.error("Error getting available contracts for payment: ", e);
             return new ArrayList<>();
@@ -236,30 +248,31 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Map<String, Object> calculateUtilityCosts(Integer previousReading, Integer currentReading, String utilityType, Float unitPrice) {
+    public Map<String, Object> calculateUtilityCosts(Integer previousReading, Integer currentReading,
+            String utilityType, Float unitPrice) {
         Map<String, Object> result = new HashMap<>();
-        
+
         int usage = currentReading - previousReading;
         Float totalCost = usage * unitPrice;
-        
+
         result.put("usage", usage);
         result.put("unit", utilityType.equals("electricity") ? "kWh" : "m³");
         result.put("unitPrice", unitPrice);
         result.put("totalCost", totalCost);
         result.put("utilityType", utilityType);
-        
+
         return result;
     }
 
     private PaymentResponseDto convertToResponseDto(Payments payment) {
         Contracts contract = payment.getContract();
         Rooms room = contract.getRoom();
-        
+
         // Lấy tên tenant
         String tenantName = "";
         String tenantPhone = contract.getTenantPhone();
         if (contract.getTenant() != null) {
-            tenantName = contract.getTenant().getFullname(); // Sử dụng getFullname() thay vì getFullName()
+            tenantName = contract.getTenant().getFullname();
         } else if (contract.getUnregisteredTenant() != null) {
             tenantName = contract.getUnregisteredTenant().getFullName();
         }
@@ -287,8 +300,8 @@ public class PaymentServiceImpl implements PaymentService {
         return PaymentResponseDto.builder()
                 .paymentId(payment.getId())
                 .contractId(contract.getContractId())
-                .roomCode(room.getNamerooms()) // Sử dụng getNamerooms() thay vì getRoomCode()
-                .hostelName(room.getHostel().getName()) // Sử dụng getName() thay vì getHostelName()
+                .roomCode(room.getNamerooms())
+                .hostelName(room.getHostel().getName())
                 .tenantName(tenantName)
                 .tenantPhone(tenantPhone)
                 .month(month)
@@ -308,5 +321,23 @@ public class PaymentServiceImpl implements PaymentService {
             return detail.getQuantity() + " m³";
         }
         return detail.getQuantity() != null ? detail.getQuantity().toString() : "";
+    }
+
+    public void deletePayment(Integer paymentId) {
+        try {
+            Payments payment = paymentsRepository.findById(paymentId)
+                    .orElseThrow(() -> new RuntimeException("Payment not found with id: " + paymentId));
+
+            // Delete associated detail payments first
+            detailPaymentsRepository.deleteByPaymentId(paymentId);
+
+            // Delete the payment
+            paymentsRepository.delete(payment);
+
+            log.info("Deleted payment with id: {}", paymentId);
+        } catch (Exception e) {
+            log.error("Error deleting payment with id {}: ", paymentId, e);
+            throw new RuntimeException("Failed to delete payment: " + e.getMessage());
+        }
     }
 }

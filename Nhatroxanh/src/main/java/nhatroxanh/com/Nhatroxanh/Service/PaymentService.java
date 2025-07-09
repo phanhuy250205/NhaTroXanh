@@ -76,4 +76,5 @@ public interface PaymentService {
      * Tính toán chi phí utilities (điện, nước) với đơn giá từ frontend
      */
     Map<String, Object> calculateUtilityCosts(Integer previousReading, Integer currentReading, String utilityType, Float unitPrice);
+    void deletePayment(Integer paymentId);
 }

@@ -132,10 +132,6 @@ public class DemoController {
         return "host/gia-han-tra-phong-host";
     }
 
-    @GetMapping("/chu-tro/danh-gia")
-    public String danhgia() {
-        return "host/QL-danh-gia-host";
-    }
 
     @GetMapping("/chu-tro/quan-ly-tro")
     public String phongtro() {
@@ -176,4 +172,12 @@ public class DemoController {
     public String chiTietPhongThue() {
         return "guest/chitiet-phongthue";
     }
+    @GetMapping("/khach-thue/thanh-toan")
+    public String thanhToan() {
+        return "guest/thanh-toan";
+    }
+    // @GetMapping("/chu-tro/voucher")
+    // public String voucherHosst() {
+    //     return "host/voucher-host";
+    // }
 }

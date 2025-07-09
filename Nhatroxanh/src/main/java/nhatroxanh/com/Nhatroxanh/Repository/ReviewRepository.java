@@ -25,4 +25,19 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("SELECT r FROM Review r WHERE r.post.postId = :postId ORDER BY r.createdAt DESC")
     List<Review> findReviewsByPostId(@Param("postId") Integer postId);
+
+    // Lấy đánh giá theo bài viết của người dùng
+    @Query("SELECT r FROM Review r WHERE r.post.user.userId = :userId")
+    List<Review> findByPostUserId(@Param("userId") Integer userId);
+
+    // Lấy đánh giá theo chủ trọ của bài viết
+    @Query("SELECT r FROM Review r WHERE r.post.hostel.owner.userId = :ownerId")
+    List<Review> findByPostHostelOwnerId(@Param("ownerId") Integer ownerId);
+
+    // Lấy đánh giá của các bài viết hoặc phòng mà user là chủ
+    @Query("SELECT r FROM Review r WHERE r.post.user.userId = :userId OR r.room.hostel.owner.userId = :userId")
+    List<Review> findAllByUserOwnPostsOrRooms(@Param("userId") Integer userId);
+
+    @Query("SELECT r FROM Review r WHERE r.room.hostel.id = :hostelId")
+    List<Review> getReviewsByHostelId(@Param("hostelId") Integer hostelId);
 }

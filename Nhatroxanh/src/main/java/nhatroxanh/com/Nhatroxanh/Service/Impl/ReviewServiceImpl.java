@@ -38,4 +38,19 @@ public class ReviewServiceImpl implements ReviewService {
     public Optional<Review> findById(Integer reviewId) {
         return reviewRepository.findById(reviewId);
     }
+
+    @Override
+    public List<Review> getReviewsByOwnerId(Integer ownerId) {
+        return reviewRepository.findAllByUserOwnPostsOrRooms(ownerId);
+    }
+
+    @Override
+    public void deleteReviewById(Integer reviewId) {
+        reviewRepository.deleteById(reviewId);
+    }
+
+    @Override
+    public List<Review> getReviewsByHostelId(Integer hostelId) {
+        return reviewRepository.getReviewsByHostelId(hostelId);
+    }
 }
