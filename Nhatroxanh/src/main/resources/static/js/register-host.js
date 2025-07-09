@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const confirmPassword = document.getElementById("confirmPassword").value;
             const agreeTerms = document.getElementById("agreeTerms").checked;
             const birthDate = document.getElementById("birthDate") ? document.getElementById("birthDate").value : null;
+
+
             if (password !== confirmPassword) {
                 alert("Mật khẩu và xác nhận mật khẩu không khớp!");
                 return;
@@ -42,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (response.ok) {
                     // ---- PHẦN THAY ĐỔI ----
                     // 1. Thay đổi thông báo
-                  
+                    alert("Đăng ký thành công! Đang chuyển đến trang đăng nhập.");
                     // 2. Chuyển hướng thẳng đến trang đăng nhập của chủ trọ
                     window.location.href = '/dang-nhap-chu-tro'; 
                     // -----------------------

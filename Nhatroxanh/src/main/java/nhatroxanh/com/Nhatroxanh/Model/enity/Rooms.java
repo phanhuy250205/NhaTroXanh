@@ -45,7 +45,6 @@ public class Rooms {
 
     @Column(name = "description", columnDefinition = "NVARCHAR(200)")
     private String description;
-
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 
@@ -69,21 +68,4 @@ public class Rooms {
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
-
-    @Override
-    public String toString() {
-        return "Rooms{" +
-                "roomId=" + roomId +
-                ", category=" + category +
-                ", hostel=" + hostel +
-                ", description='" + description + '\'' +
-                ", namerooms='" + namerooms + '\'' +
-                ", status=" + status +
-                ", acreage=" + acreage +
-                ", max_tenants=" + max_tenants +
-                ", price=" + price +
-                ", utilities=" + utilities +
-                ", images=" + images +
-                '}';
-    }
 }

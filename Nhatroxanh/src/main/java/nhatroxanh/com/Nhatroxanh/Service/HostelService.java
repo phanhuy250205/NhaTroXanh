@@ -7,7 +7,7 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
-public interface    HostelService {
+public interface  HostelService {
 
     List<Hostel> getHostelsByOwnerId(Integer ownerId);
 
@@ -23,5 +23,5 @@ public interface    HostelService {
 
     int countByOwner(Users owner);
 
-
+    List<Hostel> searchHostelsByOwnerIdAndName(Integer ownerId, String keyword);
 }

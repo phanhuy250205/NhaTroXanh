@@ -4,152 +4,139 @@
         <div class="footer-container">
             <!-- Company Info Section -->
             <div class="footer-section footer-about">
-                <div class="footer-logo-section">
-                    <div class="footer-logo">
-                        <div class="logo-container">
-                            <img src="/images/logo/nhatroxanh(title).png" alt="Nhà Trọ Xanh Logo" class="footer-logo-img">
-                            <div class="logo-glow"></div>
-                        </div>
-                        <div class="brand-info">
-                            <h3 class="footer-brand-name">Nhà Trọ Xanh</h3>
-                            <span class="brand-tagline">Kết nối - Tin cậy - Hiệu quả</span>
-                        </div>
-                    </div>
-                    <p class="footer-description">
-                        Nền tảng quản lý thuê trọ hàng đầu Việt Nam. Kết nối chủ nhà và người thuê một cách dễ dàng,
-                        an toàn và hiệu quả. Tạo nên những trải nghiệm thuê trọ tuyệt vời.
-                    </p>
+                <div class="footer-logo">
+                    <img th:src="@{/images/logo/nhatroxanh(title).png}" alt="Nhà Trọ Xanh Logo" class="footer-logo-img">
+                    <h3 class="footer-brand-name">Nhà Trọ Xanh</h3>
                 </div>
-                
+                <p class="footer-description">
+                    Nền tảng quản lý thuê trọ hàng đầu Việt Nam. Kết nối chủ nhà và người thuê một cách dễ dàng,
+                    an toàn và hiệu quả. Tạo nên những trải nghiệm thuê trọ tuyệt vời.
+                </p>
                 <div class="footer-stats">
-                    <div class="stats-grid">
-                        <div class="footer-stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-home"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-number">10,000+</span>
-                                <span class="stat-label">Phòng trọ</span>
-                            </div>
-                        </div>
-                        <div class="footer-stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-number">5,000+</span>
-                                <span class="stat-label">Khách hàng</span>
-                            </div>
-                        </div>
-                        <div class="footer-stat-item">
-                            <div class="stat-icon">
-                                <i class="fas fa-map-marker-alt"></i>
-                            </div>
-                            <div class="stat-content">
-                                <span class="stat-number">50+</span>
-                                <span class="stat-label">Thành phố</span>
-                            </div>
-                        </div>
+                    <div class="footer-stat-item">
+                        <span class="stat-number">10,000+</span>
+                        <span class="stat-label">Phòng trọ</span>
+                    </div>
+                    <div class="footer-stat-item">
+                        <span class="stat-number">5,000+</span>
+                        <span class="stat-label">Khách hàng</span>
+                    </div>
+                    <div class="footer-stat-item">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Thành phố</span>
                     </div>
                 </div>
             </div>
 
             <!-- Quick Links Section -->
             <div class="footer-section footer-links">
-                <div class="section-header">
-                    <h4 class="footer-title">
-                        <i class="fas fa-link"></i>
-                        Liên kết nhanh
-                    </h4>
-                </div>
-                <div class="links-grid">
-                    <a href="/" class="footer-link">
-                        <div class="link-icon">
+                <h4 class="footer-title">
+                    <i class="fas fa-link"></i>
+                    Liên kết nhanh
+                </h4>
+                <ul class="footer-link-list">
+                    <li><a th:href="@{/}" class="footer-link">
                             <i class="fas fa-home"></i>
-                        </div>
-                        <span>Trang chủ</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                    <a href="/tim-phong" class="footer-link">
-                        <div class="link-icon">
+                            Trang chủ
+                        </a></li>
+                    <li><a th:href="@{/tim-phong}" class="footer-link">
                             <i class="fas fa-search"></i>
-                        </div>
-                        <span>Tìm phòng</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                    <a href="/dang-tin" class="footer-link">
-                        <div class="link-icon">
+                            Tìm phòng
+                        </a></li>
+                    <li><a th:href="@{/dang-tin}" class="footer-link">
                             <i class="fas fa-plus-circle"></i>
-                        </div>
-                        <span>Đăng tin</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                    <a href="/quan-ly" class="footer-link">
-                        <div class="link-icon">
+                            Đăng tin
+                        </a></li>
+                    <li><a th:href="@{/quan-ly}" class="footer-link">
                             <i class="fas fa-cog"></i>
-                        </div>
-                        <span>Quản lý</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                    <a href="/ho-tro" class="footer-link">
-                        <div class="link-icon">
+                            Quản lý
+                        </a></li>
+                    <li><a th:href="@{/ho-tro}" class="footer-link">
                             <i class="fas fa-question-circle"></i>
-                        </div>
-                        <span>Hỗ trợ</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                    <a href="/lien-he" class="footer-link">
-                        <div class="link-icon">
+                            Hỗ trợ
+                        </a></li>
+                    <li><a th:href="@{/lien-he}" class="footer-link">
                             <i class="fas fa-envelope"></i>
-                        </div>
-                        <span>Liên hệ</span>
-                        <i class="fas fa-arrow-right link-arrow"></i>
-                    </a>
-                </div>
+                            Liên hệ
+                        </a></li>
+                </ul>
+            </div>
+
+            <!-- Services Section -->
+            <div class="footer-section footer-services">
+                <h4 class="footer-title">
+                    <i class="fas fa-concierge-bell"></i>
+                    Dịch vụ
+                </h4>
+                <ul class="footer-link-list">
+                    <li><a th:href="@{/dich-vu/quan-ly-hop-dong}" class="footer-link">
+                            <i class="fas fa-file-contract"></i>
+                            Quản lý hợp đồng
+                        </a></li>
+                    <li><a th:href="@{/dich-vu/thanh-toan}" class="footer-link">
+                            <i class="fas fa-credit-card"></i>
+                            Thanh toán online
+                        </a></li>
+                    <li><a th:href="@{/dich-vu/bao-cao}" class="footer-link">
+                            <i class="fas fa-chart-bar"></i>
+                            Báo cáo thống kê
+                        </a></li>
+                    <li><a th:href="@{/dich-vu/ho-tro-phap-ly}" class="footer-link">
+                            <i class="fas fa-balance-scale"></i>
+                            Hỗ trợ pháp lý
+                        </a></li>
+                    <li><a th:href="@{/dich-vu/bao-hiem}" class="footer-link">
+                            <i class="fas fa-shield-alt"></i>
+                            Bảo hiểm thuê trọ
+                        </a></li>
+                    <li><a th:href="@{/dich-vu/marketing}" class="footer-link">
+                            <i class="fas fa-bullhorn"></i>
+                            Marketing phòng trọ
+                        </a></li>
+                </ul>
             </div>
 
             <!-- Contact Info Section -->
             <div class="footer-section footer-contact">
-                <div class="section-header">
-                    <h4 class="footer-title">
-                        <i class="fas fa-address-book"></i>
-                        Thông tin liên hệ
-                    </h4>
-                </div>
-                <div class="contact-cards">
-                    <div class="contact-card">
+                <h4 class="footer-title">
+                    <i class="fas fa-address-book"></i>
+                    Thông tin liên hệ
+                </h4>
+                <div class="footer-contact-info">
+                    <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
-                        <div class="contact-info">
-                            <span class="contact-label">Địa chỉ</span>
+                        <div class="contact-details">
+                            <span class="contact-label">Địa chỉ:</span>
                             <span class="contact-value">123 Nguyễn Huệ, Quận 1, TP.HCM</span>
                         </div>
                     </div>
-                    <div class="contact-card">
+                    <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
-                        <div class="contact-info">
-                            <span class="contact-label">Hotline</span>
+                        <div class="contact-details">
+                            <span class="contact-label">Hotline:</span>
                             <a href="tel:1900123456" class="contact-value contact-link">1900 123 456</a>
                         </div>
                     </div>
-                    <div class="contact-card">
+                    <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
-                        <div class="contact-info">
-                            <span class="contact-label">Email</span>
-                            <a href="mailto:support@nhatroxanh.vn" class="contact-value contact-link">support@nhatroxanh.vn</a>
+                        <div class="contact-details">
+                            <span class="contact-label">Email:</span>
+                            <a href="mailto:support@renteasy.vn"
+                                class="contact-value contact-link">support@renteasy.vn</a>
                         </div>
                     </div>
-                    <div class="contact-card">
+                    <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-clock"></i>
                         </div>
-                        <div class="contact-info">
-                            <span class="contact-label">Giờ làm việc</span>
+                        <div class="contact-details">
+                            <span class="contact-label">Giờ làm việc:</span>
                             <span class="contact-value">8:00 - 22:00 (T2-CN)</span>
                         </div>
                     </div>
@@ -159,109 +146,72 @@
                 <div class="footer-social">
                     <h5 class="social-title">Kết nối với chúng tôi</h5>
                     <div class="social-links">
-                        <a href="https://facebook.com/nhatroxanh" class="social-link facebook" target="_blank" rel="noopener">
+                        <a href="https://facebook.com/renteasy" class="social-link facebook" target="_blank"
+                            rel="noopener">
                             <i class="fab fa-facebook-f"></i>
-                            <span class="social-name">Facebook</span>
+                            <span class="social-tooltip">Facebook</span>
                         </a>
-                        <a href="https://zalo.me/nhatroxanh" class="social-link zalo" target="_blank" rel="noopener">
+                        <a href="https://zalo.me/renteasy" class="social-link zalo" target="_blank" rel="noopener">
                             <i class="fas fa-comment"></i>
-                            <span class="social-name">Zalo</span>
+                            <span class="social-tooltip">Zalo</span>
                         </a>
-                        <a href="https://youtube.com/nhatroxanh" class="social-link youtube" target="_blank" rel="noopener">
+                        <a href="https://youtube.com/renteasy" class="social-link youtube" target="_blank"
+                            rel="noopener">
                             <i class="fab fa-youtube"></i>
-                            <span class="social-name">YouTube</span>
+                            <span class="social-tooltip">YouTube</span>
                         </a>
-                        <a href="https://instagram.com/nhatroxanh" class="social-link instagram" target="_blank" rel="noopener">
+                        <a href="https://instagram.com/renteasy" class="social-link instagram" target="_blank"
+                            rel="noopener">
                             <i class="fab fa-instagram"></i>
-                            <span class="social-name">Instagram</span>
+                            <span class="social-tooltip">Instagram</span>
                         </a>
-                        <a href="https://tiktok.com/@nhatroxanh" class="social-link tiktok" target="_blank" rel="noopener">
+                        <a href="https://tiktok.com/@renteasy" class="social-link tiktok" target="_blank"
+                            rel="noopener">
                             <i class="fab fa-tiktok"></i>
-                            <span class="social-name">TikTok</span>
+                            <span class="social-tooltip">TikTok</span>
                         </a>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Newsletter & Trust Badges Section -->
-    <div class="footer-secondary">
-        <div class="footer-container">
-            <div class="secondary-content">
-                <!-- Newsletter Section -->
-                <div class="newsletter-section">
-                    <div class="section-header">
-                        <h4 class="footer-title">
-                            <i class="fas fa-bell"></i>
-                            Nhận thông báo mới
-                        </h4>
+            <!-- Newsletter Section -->
+            <div class="footer-section footer-newsletter">
+                <h4 class="footer-title">
+                    <i class="fas fa-bell"></i>
+                    Nhận thông báo mới
+                </h4>
+                <p class="newsletter-description">
+                    Đăng ký để nhận thông tin về phòng trọ mới, ưu đãi đặc biệt và tin tức bất động sản.
+                </p>
+                <form class="newsletter-form" th:action="@{/newsletter/subscribe}" method="post">
+                    <div class="newsletter-input-group">
+                        <input type="email" name="email" class="newsletter-input" placeholder="Nhập email của bạn..."
+                            required>
+                        <button type="submit" class="newsletter-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Đăng ký
+                        </button>
                     </div>
-                    <div class="newsletter-card">
-                        <p class="newsletter-description">
-                            Đăng ký để nhận thông tin về phòng trọ mới, ưu đãi đặc biệt và tin tức bất động sản.
-                        </p>
-                        <form class="newsletter-form" action="/newsletter/subscribe" method="post">
-                            <div class="newsletter-input-wrapper">
-                                <input type="email" name="email" class="newsletter-input" placeholder="Nhập email của bạn..." required>
-                                <button type="submit" class="newsletter-btn">
-                                    <span class="btn-text">NHẬN THÔNG BÁO</span>
-                                    <i class="fas fa-paper-plane"></i>
-                                </button>
-                            </div>
-                            <div class="newsletter-privacy">
-                                <label class="privacy-checkbox">
-                                    <input type="checkbox" name="privacy" required>
-                                    <span class="checkmark">
-                                        <i class="fas fa-check"></i>
-                                    </span>
-                                    <span class="privacy-text">
-                                        Tôi đồng ý với <a href="/chinh-sach-bao-mat" class="privacy-link">chính sách bảo mật</a>
-                                    </span>
-                                </label>
-                            </div>
-                        </form>
+                    <div class="newsletter-privacy">
+                        <label class="privacy-checkbox">
+                            <input type="checkbox" name="privacy" required>
+                            <span class="checkmark"></span>
+                            Tôi đồng ý với <a th:href="@{/chinh-sach-bao-mat}" class="privacy-link">chính sách bảo
+                                mật</a>
+                        </label>
                     </div>
-                </div>
+                </form>
 
-                <!-- Trust Badges Section -->
-                <div class="trust-badges-section">
-                    <div class="section-header">
-                        <h4 class="footer-title">
-                            <i class="fas fa-shield-check"></i>
-                            Cam kết chất lượng
-                        </h4>
-                    </div>
-                    <div class="trust-badges-card">
-                        <p class="trust-description">
-                            Chúng tôi cam kết mang đến dịch vụ tốt nhất với các tiêu chuẩn chất lượng cao.
-                        </p>
-                        <div class="trust-badges-grid">
-                            <div class="trust-badge">
-                                <div class="badge-icon">
-                                    <i class="fas fa-shield-alt"></i>
-                                </div>
-                                <span class="badge-text">Bảo mật SSL</span>
-                            </div>
-                            <div class="trust-badge">
-                                <div class="badge-icon">
-                                    <i class="fas fa-certificate"></i>
-                                </div>
-                                <span class="badge-text">Doanh nghiệp xác thực</span>
-                            </div>
-                            <div class="trust-badge">
-                                <div class="badge-icon">
-                                    <i class="fas fa-headset"></i>
-                                </div>
-                                <span class="badge-text">Hỗ trợ 24/7</span>
-                            </div>
-                            <div class="trust-badge">
-                                <div class="badge-icon">
-                                    <i class="fas fa-money-check-alt"></i>
-                                </div>
-                                <span class="badge-text">Đảm bảo hoàn tiền</span>
-                            </div>
-                        </div>
+                <!-- App Download -->
+                <div class="footer-app-download">
+                    <h5 class="app-title">Tải ứng dụng</h5>
+                    <div class="app-buttons">
+                        <a href="#" class="app-button app-store">
+                            <img th:src="@{/images/app-store.png}" alt="Download on App Store">
+                        </a>
+                        <a href="#" class="app-button google-play">
+                            <img th:src="@{/images/google-play.png}" alt="Get it on Google Play">
+                        </a>
                     </div>
                 </div>
             </div>
@@ -273,29 +223,49 @@
         <div class="footer-container">
             <div class="footer-bottom-content">
                 <div class="footer-copyright">
-                    <p>&copy; 2024 Nhà Trọ Xanh. Tất cả quyền được bảo lưu.</p>
-                    <p class="company-info">Công ty TNHH Công nghệ Nhà Trọ Xanh - GPKD: 0123456789</p>
+                    <p>&copy; <span th:text="${#dates.year(#dates.createNow())}">2024</span> RentEasy. Tất cả quyền được
+                        bảo lưu.</p>
+                    <p class="company-info">Công ty TNHH Công nghệ RentEasy - GPKD: 0123456789</p>
                 </div>
                 <div class="footer-legal-links">
-                    <a href="/dieu-khoan-su-dung" class="legal-link">Điều khoản sử dụng</a>
-                    <a href="/chinh-sach-bao-mat" class="legal-link">Chính sách bảo mật</a>
-                    <a href="/chinh-sach-cookie" class="legal-link">Chính sách Cookie</a>
-                    <a href="/sitemap" class="legal-link">Sơ đồ trang web</a>
+                    <a th:href="@{/dieu-khoan-su-dung}" class="legal-link">Điều khoản sử dụng</a>
+                    <span class="separator">|</span>
+                    <a th:href="@{/chinh-sach-bao-mat}" class="legal-link">Chính sách bảo mật</a>
+                    <span class="separator">|</span>
+                    <a th:href="@{/chinh-sach-cookie}" class="legal-link">Chính sách Cookie</a>
+                    <span class="separator">|</span>
+                    <a th:href="@{/sitemap}" class="legal-link">Sơ đồ trang web</a>
                 </div>
             </div>
+
+            <!-- Back to Top Button -->
+            <button class="back-to-top" id="backToTop" title="Về đầu trang">
+                <i class="fas fa-chevron-up"></i>
+            </button>
         </div>
     </div>
 
-    <!-- Back to Top Button -->
-    <button class="back-to-top" id="backToTop" title="Về đầu trang">
-        <i class="fas fa-chevron-up"></i>
-        <span class="back-to-top-text">Top</span>
-    </button>
-
-    <!-- Floating Elements -->
-    <div class="floating-elements">
-        <div class="floating-circle circle-1"></div>
-        <div class="floating-circle circle-2"></div>
-        <div class="floating-circle circle-3"></div>
+    <!-- Trust Badges -->
+    <div class="footer-trust-badges">
+        <div class="footer-container">
+            <div class="trust-badges-content">
+                <div class="trust-badge">
+                    <img th:src="@{/images/ssl-certificate.png}" alt="SSL Certificate">
+                    <span>Bảo mật SSL</span>
+                </div>
+                <div class="trust-badge">
+                    <img th:src="@{/images/verified-business.png}" alt="Verified Business">
+                    <span>Doanh nghiệp đã xác thực</span>
+                </div>
+                <div class="trust-badge">
+                    <img th:src="@{/images/customer-support.png}" alt="24/7 Support">
+                    <span>Hỗ trợ 24/7</span>
+                </div>
+                <div class="trust-badge">
+                    <img th:src="@{/images/money-back.png}" alt="Money Back Guarantee">
+                    <span>Đảm bảo hoàn tiền</span>
+                </div>
+            </div>
+        </div>
     </div>
 </footer>

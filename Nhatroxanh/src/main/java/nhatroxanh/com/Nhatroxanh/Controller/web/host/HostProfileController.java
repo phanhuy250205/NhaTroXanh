@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -26,7 +25,6 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
-import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 
 @Controller
 @RequestMapping("/chu-tro")
@@ -43,8 +41,6 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
-    @Autowired
-    private TenantService tenantService;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -62,7 +58,6 @@ public class HostProfileController {
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
         dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
-
         if (cccd != null) {
             dto.setIssueDate(cccd.getIssueDate());
             dto.setIssuePlace(cccd.getIssuePlace());
@@ -74,41 +69,42 @@ public class HostProfileController {
         return "host/profile-host";
     }
 
-   @PostMapping("/profile-host")
-public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
-        BindingResult bindingResult,
-        @AuthenticationPrincipal CustomUserDetails userDetails,
-        Model model,
-        RedirectAttributes redirectAttributes) {
+    @PostMapping("/profile-host")
+    public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-    Users user = usersRepository.findById(userDetails.getUser().getUserId())
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-    if (bindingResult.hasErrors()) {
-        model.addAttribute("user", user);
-        model.addAttribute("totalHostels", hostelService.countByOwner(user));
-        return "host/profile-host";
-    }
-
-    UserCccd cccd = userCccdRepository.findByUser(user);
-
-    MultipartFile avatarFile = dto.getAvatarFile();
-    if (avatarFile != null && !avatarFile.isEmpty()) {
-        try {
-            if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
-                fileUploadService.deleteFile(user.getAvatar());
-            }
-            String avatarPath = fileUploadService.uploadFile(avatarFile, "");
-            user.setAvatar(avatarPath);
-        } catch (IOException e) {
-            model.addAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
+        if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
             model.addAttribute("totalHostels", hostelService.countByOwner(user));
             return "host/profile-host";
         }
-    }
 
-    try {
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+
+
+        // Handle avatar upload
+        MultipartFile avatarFile = dto.getAvatarFile();
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            try {
+                if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                    fileUploadService.deleteFile(user.getAvatar());
+                }
+                String avatarPath = fileUploadService.uploadFile(avatarFile, "");
+                user.setAvatar(avatarPath);
+            } catch (IOException e) {
+                model.addAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                return "host/profile-host";
+            }
+        }
+
         // Update user info
         user.setFullname(dto.getFullname());
         user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
@@ -140,7 +136,6 @@ public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
             cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                     ? dto.getIssuePlace().trim()
                     : null);
-
             userCccdRepository.save(cccd);
         } else if (cccd != null) {
             userCccdRepository.delete(cccd);
@@ -148,27 +143,6 @@ public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
 
         usersRepository.save(user);
         redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
-    }
-
-    return "redirect:/chu-tro/profile-host";
-}
-    @PostMapping("/chi-tiet-khach-thue/update")
-    public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
-                                     @RequestParam("status") Boolean newStatus,
-                                     RedirectAttributes redirectAttributes) {
-        
-        try {
-            tenantService.updateContractStatus(contractId, newStatus);
-            // Gửi một thông báo thành công về trang chi tiết
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
-        } catch (Exception e) {
-            // Gửi một thông báo lỗi về trang chi tiết
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
-        }
-        return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
+        return "redirect:/chu-tro/profile-host";
     }
 }

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,13 +11,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
-
 <body class="management-body-staff">
     <div th:replace="~{/layouts/sidebar-staff}"></div>
     <div class="main-content-staff" id="main-content">
         <div class="page-header-staff">
             <h1 class="page-title-staff">Quản lý chủ trọ</h1>
-
             <!-- Tabs -->
             <div class="custom-tabs-staff">
                 <a href="#" class="custom-tab-staff active" onclick="switchTab(0, this)">QUẢN LÝ CHỦ TRỌ</a>
@@ -39,7 +36,6 @@
                             TÌM KIẾM
                         </button>
                     </div>
-
                     <!-- Filter Dropdown -->
                     <div class="filter-dropdown-staff">
                         <button class="filter-btn-staff" onclick="toggleFilterDropdown()">
@@ -440,5 +436,4 @@
     <script th:src="@{/js/QL-chu-tro.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
 </body>
-
 </html>

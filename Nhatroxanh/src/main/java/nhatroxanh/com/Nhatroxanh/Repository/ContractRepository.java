@@ -57,16 +57,4 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
     @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.id = :unregisteredTenantId")
     List<Contracts> findByUnregisteredTenantId(@Param("unregisteredTenantId") Integer unregisteredTenantId);
-
-    @Query("SELECT c FROM Contracts c ORDER BY c.contractDate DESC")
-    List<Contracts> findAllOrderByContractDateDesc();
-
-    @Query("SELECT c FROM Contracts c " +
-            "JOIN c.room r " +
-            "JOIN r.hostel h " +
-            "WHERE h.owner.userId = :ownerId " +
-            "ORDER BY c.contractDate DESC")
-    List<Contracts> findByOwnerUserIdOrderByContractDateDesc(@Param("ownerId") Integer ownerId);
-
-    
 }

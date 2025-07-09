@@ -1,7 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import java.sql.Date;
@@ -191,7 +190,7 @@ public class ContractDto {
 
     public static class Room {
 
-        @JsonProperty("roomId") // Đảm bảo tên trường khớp
+        @JsonProperty("roomId")
         private Integer roomId;
         private String roomName;
         private Float area;
@@ -201,14 +200,8 @@ public class ContractDto {
         private String hostelName;
         private String address;
 
-
-        @NotNull(message = "ID phòng không được để trống")
-        public Integer getRoomId() {
-            return roomId != null ? roomId : 0; // Tránh null tạm thời để debug
-        }
-
         // Getters and setters
-
+        public Integer getRoomId() { return roomId; }
         public void setRoomId(Integer roomId) { this.roomId = roomId; }
         public String getRoomName() { return roomName; }
         public void setRoomName(String roomName) { this.roomName = roomName; }
@@ -224,8 +217,6 @@ public class ContractDto {
         public void setHostelName(String hostelName) { this.hostelName = hostelName; }
         public String getAddress() { return address; }
         public void setAddress(String address) { this.address = address; }
-
-
     }
 
     public static class Terms {
@@ -240,41 +231,30 @@ public class ContractDto {
             this.startDate = LocalDate.now();
         }
 
-        @JsonProperty("price")
-        @NotNull(message = "Giá thuê không được để trống")
+        // Getters and setters
         public Double getPrice() { return price; }
         public void setPrice(Double price) { this.price = price; }
-        // Getters and setters
-        @JsonProperty("deposit")
-        @NotNull(message = "Tiền cọc không được để trống")
+
         public Double getDeposit() { return deposit; }
         public void setDeposit(Double deposit) { this.deposit = deposit; }
 
-        @JsonProperty("startDate")
-        @NotNull(message = "Ngày bắt đầu không được để trống")
         public LocalDate getStartDate() { return startDate; }
         public void setStartDate(LocalDate startDate) {
             this.startDate = startDate;
             calculateEndDate();
         }
-        @JsonProperty("endDate")
+
         public LocalDate getEndDate() { return endDate; }
         public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
 
-        @JsonProperty("terms")
         public String getTerms() { return terms; }
         public void setTerms(String terms) { this.terms = terms; }
 
-        @JsonProperty("duration")
-        @NotNull(message = "Thời hạn không được để trống")
-        @Min(value = 1, message = "Thời hạn phải lớn hơn 0!")
         public Integer getDuration() { return duration; }
         public void setDuration(Integer duration) {
             this.duration = duration;
             calculateEndDate();
         }
-
-
 
         // Helper method to calculate end date
         private void calculateEndDate() {

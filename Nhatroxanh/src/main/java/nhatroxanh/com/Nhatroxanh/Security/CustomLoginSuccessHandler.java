@@ -14,40 +14,28 @@ import java.util.Collection;
 @Component
 public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
-  @Override
-public void onAuthenticationSuccess(HttpServletRequest request,
-                                     HttpServletResponse response,
-                                     Authentication authentication) throws IOException, ServletException {
+    @Override
+    public void onAuthenticationSuccess(HttpServletRequest request,
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException, ServletException {
 
-    Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-    String redirectURL = null;
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-    for (GrantedAuthority authority : authorities) {
-        String role = authority.getAuthority();
+        String redirectURL = request.getContextPath();
 
-        if (role.equals("ROLE_OWNER")) {
-            redirectURL = "/chu-tro/tong-quan";
-            break;
-        } else if (role.equals("ROLE_STAFF")) {
-            redirectURL = "/nhan-vien/bai-dang";
-            break;
+        for (GrantedAuthority authority : authorities) {
+            String role = authority.getAuthority();
+            if (role.equals("ROLE_OWNER")) {
+                redirectURL += "/chu-tro/trang-chu";
+                break;
+            } else if (role.equals("ROLE_CUSTOMER")) {
+                redirectURL += "/trang-chu";
+                break;
+            }
         }
+
+        response.sendRedirect(redirectURL);
     }
-
-    response.setContentType("application/json");
-    response.setCharacterEncoding("UTF-8");
-
-    if (redirectURL != null) {
-        // ✅ Có quyền, trả URL để frontend redirect
-        response.getWriter().write("{\"redirectUrl\": \"" + redirectURL + "\"}");
-    } else {
-        // ❌ Không có quyền (ví dụ: CUSTOMER)
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
-        response.getWriter().write("{\"error\": \"Bạn không có quyền truy cập vào hệ thống này.\"}");
-    }
-}
-
-
 
 }
 

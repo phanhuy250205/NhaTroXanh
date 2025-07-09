@@ -26,12 +26,13 @@
 
             <!-- Search Section -->
             <div class="search-section-host">
-                <div class="search-container-host">
-                    <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
-                    <button class="btn-search-host" id="searchButtonHost">
+                <form action="#" method="get" class="search-container-host">
+                    <input type="text" class="search-input-host" name="keyword" placeholder="Tìm kiếm..."
+                        th:value="${keyword}">
+                    <button type="submit" class="btn-search-host">
                         TÌM KIẾM
                     </button>
-                </div>
+                </form>
             </div>
 
             <!-- Table Section -->
@@ -57,7 +58,7 @@
                             </td>
                             <td class="table-td-host">
                                 <div class="action-btns-host">
-                                    <a th:href="@{'/chu-tro/them-khu-tro?id=' + ${hostel.hostelId}}">
+                                    <a th:href="@{'/chu-tro/cap-nhat-khu-tro?id=' + ${hostel.hostelId}}">
                                         <button class="buttons-edit-host" title="Chỉnh sửa">
                                             <i class="fas fa-edit"></i>
                                         </button>

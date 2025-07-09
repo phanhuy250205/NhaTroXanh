@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -308,7 +307,6 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -636,6 +634,7 @@
             </div>
 
             <div class="status-section-staff">
+            
                 <span class="form-label-staff">Trạng thái :</span>
                 <span th:if="${user.enabled}" class="status-badge-staff status-active-staff">
                     <i class="fas fa-check-circle"></i>
@@ -711,5 +710,4 @@
 
     <script th:src="@{/js/sidebar.js}"></script>
 </body>
-
 </html>

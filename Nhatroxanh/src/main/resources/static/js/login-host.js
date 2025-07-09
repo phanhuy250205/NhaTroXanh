@@ -21,25 +21,24 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             // Gọi đến URL xử lý đăng nhập của Spring Security
             fetch("/login-processing", { 
-    method: "POST",
-    headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: formData,
-})
-.then(async response => {
-    if (response.ok) {
-        const data = await response.json(); // Lấy redirectUrl từ backend
-        window.location.href = data.redirectUrl; // Chuyển trang
-    } else {
-        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-    }
-})
-.catch(error => {
-    console.error("Lỗi đăng nhập:", error);
-    alert(error.message);
-});
-
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: formData,
+            })
+            .then(response => {
+                if (response.ok) { // Nếu status 200 -> thành công
+                    // Chuyển hướng đến trang dashboard
+                    window.location.href = "chu-tro/tong-quan";
+                } else { // Nếu status 401 -> thất bại
+                    throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi đăng nhập:", error);
+                alert(error.message);
+            });
         });
     }
 

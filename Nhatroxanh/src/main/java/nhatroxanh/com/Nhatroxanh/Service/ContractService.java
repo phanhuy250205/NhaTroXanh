@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
@@ -62,16 +61,4 @@ public interface ContractService {
     Float getTotalRevenueByOwnerId(Integer ownerId);
 
     List<Contracts> findContractsByOwnerCccd(String cccd);
-
-
-    // New methods for contract list
-    List<ContractListDto> getAllContractsForList();
-    List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
-
-    void updateStatus(Long contractId, String newStatus);
-
-    Contracts getContractById(Long contractId);
-
-
-    List<Contracts> getMyContracts();
 }

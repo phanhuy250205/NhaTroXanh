@@ -20,5 +20,4 @@ public interface RoomsService {
     Optional<Rooms> findById(Integer id);
     Rooms save(Rooms room);
 
-
 }
