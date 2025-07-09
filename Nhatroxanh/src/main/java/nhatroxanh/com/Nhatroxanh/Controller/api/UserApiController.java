@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Controller.api;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
@@ -31,15 +32,25 @@ public class UserApiController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
-        try {
-            userService.registerNewUser(userRequest);
-            return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+   @PostMapping("/register")
+public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userRequest, BindingResult bindingResult) {
+    // Nếu có lỗi validation
+    if (bindingResult.hasErrors()) {
+        // Duyệt qua các lỗi và trả về message đầu tiên (hoặc gom lại nếu muốn)
+        String errorMessage = bindingResult.getFieldErrors().stream()
+            .map(error -> error.getDefaultMessage())
+            .findFirst() // hoặc .collect(Collectors.joining("\n"))
+            .orElse("Dữ liệu không hợp lệ");
+        return ResponseEntity.badRequest().body(errorMessage);
     }
+
+    try {
+        userService.registerNewUser(userRequest);
+        return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
+}
 
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp) {

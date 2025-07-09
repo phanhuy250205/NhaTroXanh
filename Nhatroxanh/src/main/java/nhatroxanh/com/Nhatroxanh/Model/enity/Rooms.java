@@ -18,10 +18,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import jakarta.persistence.EnumType;
 
 @Data
@@ -39,6 +36,7 @@ public class Rooms {
 
     @ManyToOne
     @JoinColumn(name = "category_id")
+    @EqualsAndHashCode.Exclude
     private Category category;
 
     @ManyToOne
@@ -47,7 +45,6 @@ public class Rooms {
 
     @Column(name = "description", columnDefinition = "NVARCHAR(200)")
     private String description;
-    
     @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
     private String namerooms;
 

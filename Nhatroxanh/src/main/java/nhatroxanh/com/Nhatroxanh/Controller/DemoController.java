@@ -7,6 +7,32 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 
 
+
+import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
+import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
+import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import nhatroxanh.com.Nhatroxanh.Service.TenantService;
+import nhatroxanh.com.Nhatroxanh.Service.UserService;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Controller
 public class DemoController {
 
@@ -17,7 +43,6 @@ public class DemoController {
     public String chitiet() {
         return "guest/chi-tiet";
     }
-
 
     @GetMapping("/phong-tro-fe")
     public String danhmuc() {

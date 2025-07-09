@@ -430,7 +430,11 @@
                             <img th:unless="${images != null and !#lists.isEmpty(images)}"
                                 src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
-                                <button class="btn-favorite-large"><i class="fas fa-heart"></i></button>
+                                <button class="btn-favorite-large" 
+                                        th:attr="data-post-id=${post.postId}"
+                                        onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Thêm vào yêu thích">
+                                    <i class="far fa-heart"></i>
+                                </button>
                             </div>
                         </div>
                         <!-- Thumbnail Images -->
@@ -866,7 +870,7 @@
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite">
+                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}" >
                                                 <i class="far fa-heart"></i>
                                             </button>
                                         </div>

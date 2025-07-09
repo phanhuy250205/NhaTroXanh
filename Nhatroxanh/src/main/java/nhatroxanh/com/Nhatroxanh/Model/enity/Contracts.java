@@ -50,6 +50,8 @@ public class Contracts {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
+
+
     @Column(name = "price", nullable = false)
     private Float price;
 

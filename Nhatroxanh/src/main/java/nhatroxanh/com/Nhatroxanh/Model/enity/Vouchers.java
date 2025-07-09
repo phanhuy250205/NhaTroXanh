@@ -40,7 +40,9 @@ public class Vouchers {
     @JoinColumn(name = "room_id", nullable = true)
     private Rooms room;
     @ManyToOne
+
     @JoinColumn(name = "hostel_id", nullable = true)
+
     private Hostel hostel;
 
     @Column(name = "title", nullable = false, length = 255)
