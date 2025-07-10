@@ -3,7 +3,7 @@
             <div class="col-12 col-sm-auto mb-2 mb-sm-0">
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control" id="searchInput" placeholder="Bạn muốn tìm trọ ở đâu?" 
+                <input type="text" class="form-control-loc" id="searchInput" placeholder="Bạn muốn tìm trọ ở đâu?" 
                     th:value="${searchTerm != null ? searchTerm : ''}" onkeypress="if(event.key === 'Enter') applySearch()">
             </div>
         </div>

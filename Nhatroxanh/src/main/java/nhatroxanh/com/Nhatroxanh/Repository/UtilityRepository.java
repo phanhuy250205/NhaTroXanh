@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +19,8 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
             "AND p.approvalStatus = 'APPROVED' " +
             "ORDER BY u.name ASC")
     List<Utility> findUtilitiesWithActivePosts();
+
+    Set<Utility> findByUtilityIdIn(Set<Integer> utilityIds);
+
+    Optional<Utility> findByNameIgnoreCase(String name);
 }
