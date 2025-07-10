@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <title>Câp nhật Voucher</title>
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --secondary-color: #6c757d;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+        }
+
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: none;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #16a34a);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            color: white;
+        }
+
+        .notification-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-body {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+            color: white;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .search-input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-group .form-control {
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .search-input-group .btn {
+            border: none;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .filter-select {
+            border-radius: 50px;
+            border: 2px solid #e5e7eb;
+            padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+            font-size: 0.9rem;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .filter-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            z-index: 10;
+        }
+
+        /* Custom Tabs */
+        .custom-tabs {
+            border: none;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-tab {
+            border: none;
+            background: transparent;
+            color: var(--secondary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+
+        .custom-tab:hover {
+            background: rgba(62, 131, 204, 0.1);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .custom-tab.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        /* Voucher Cards */
+        .voucher-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            border: none;
+            position: relative;
+        }
+
+        .voucher-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #2563eb);
+        }
+
+        .voucher-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .voucher-card-body {
+            padding: 1.5rem;
+        }
+
+        .voucher-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .voucher-info {
+            margin-bottom: 0.75rem;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .voucher-info i {
+            width: 20px;
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+
+        .voucher-info-value {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-expired {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: 2px solid;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .action-btn-edit {
+            border-color: var(--info-color);
+            color: var(--info-color);
+        }
+
+        .action-btn-edit:hover {
+            background: var(--info-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-delete {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .action-btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-approve {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .action-btn-approve:hover {
+            background: var(--success-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-reject {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .action-btn-reject:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border: none;
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            background: var(--light-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        /* Status Toggle Button */
+        .status-toggle-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .status-toggle-active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-toggle-inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-toggle-expired {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-content {
+            padding: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .notification-container {
+                width: calc(100% - 2rem);
+                left: 1rem;
+                right: 1rem;
+            }
+
+            .page-header {
+                text-align: center;
+            }
+
+
+            .custom-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="container mt-4">
+        <h2 class="mb-4">Chỉnh sửa Voucher</h2>
+
+        <form th:action="@{'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id}}" th:object="${voucher}" method="post">
+            <div class="mb-3">
+                <label>Mã voucher</label>
+                <input type="text" class="form-control" th:field="*{code}" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Tiêu đề</label>
+                <input type="text" class="form-control" th:field="*{title}" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Mô tả</label>
+                <textarea class="form-control" th:field="*{description}"></textarea>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Loại giảm giá</label>
+                    <select class="form-select" th:field="*{discountType}">
+                        <option th:value="true">Phần trăm (%)</option>
+                        <option th:value="false">Số tiền (VNĐ)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label>Giá trị giảm</label>
+                    <input type="number" class="form-control" th:field="*{discountValue}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Ngày bắt đầu</label>
+                    <input type="date" class="form-control" th:field="*{startDate}">
+                </div>
+                <div class="col-md-6">
+                    <label>Ngày kết thúc</label>
+                    <input type="date" class="form-control" th:field="*{endDate}">
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label>Đơn tối thiểu</label>
+                    <input type="number" class="form-control" th:field="*{minAmount}">
+                </div>
+                <div class="col-md-6">
+                    <label>Số lượng</label>
+                    <input type="number" class="form-control" th:field="*{quantity}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Trạng thái</label>
+                <select class="form-select" th:field="*{status}">
+                    <option th:value="true">Đang áp dụng</option>
+                    <option th:value="false">Ngừng áp dụng</option>
+                </select>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <button type="submit" class="btn btn-primary">Cập nhật</button>
+                <a th:href="@{/nhan-vien/khuyen-mai}" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
