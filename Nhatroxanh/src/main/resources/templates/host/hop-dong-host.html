@@ -229,7 +229,7 @@
                     <!-- Tab Content -->
                     <div class="tab-content card p-4 nha-tro-tab-content" style="border-radius: 0px;">
                         <!-- Tenant Info Tab -->
-                        <div class="tab-pane fade show active" id="tenantInfo">
+                        <div class="tab-pane fade show active" id="tenantInfo" th:if="${contract.tenantType == 'REGISTERED'}">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h6 class="mb-0">Thông tin người thuê</h6>
                                 <button type="button"
@@ -288,6 +288,8 @@
                                     </label>
                                     <select class="form-select" id="tenant-province" th:field="*{tenant.province}" required>
                                         <option value="">Tỉnh/Thành phố</option>
+                                        <option th:value="${contract.tenant.province}" th:text="${contract.tenant.province}" th:if="${contract.tenant.province != null}"></option>
+                                        <!-- Options sẽ được điền động bằng JavaScript -->
                                     </select>
                                 </div>
 
@@ -297,6 +299,7 @@
                                     </label>
                                     <select class="form-select" id="tenant-district" th:field="*{tenant.district}" required>
                                         <option value="">Quận/Huyện</option>
+                                        <option th:value="${contract.tenant.district}" th:text="${contract.tenant.district}" th:if="${contract.tenant.district != null}"></option>
                                     </select>
                                 </div>
 
@@ -306,6 +309,7 @@
                                     </label>
                                     <select class="form-select" id="tenant-ward" th:field="*{tenant.ward}" required>
                                         <option value="">Phường/Xã</option>
+                                        <option th:value="${contract.tenant.ward}" th:text="${contract.tenant.ward}" th:if="${contract.tenant.ward != null}"></option>
                                     </select>
                                 </div>
 
@@ -313,8 +317,7 @@
                                     <label class="form-label">
                                         Tên đường/Số nhà <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control" id="tenant-street" required
-                                           placeholder="Số nhà, tên đường">
+                                    <input type="text" class="form-control" id="tenant-street" th:field="*{tenant.street}" required placeholder="Số nhà, tên đường" />
                                 </div>
 
                                 <div class="col-md-6">

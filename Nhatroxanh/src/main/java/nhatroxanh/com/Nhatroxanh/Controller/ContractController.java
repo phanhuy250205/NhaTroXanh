@@ -973,32 +973,50 @@ public class ContractController {
         Map<String, String> addressParts = new HashMap<>();
 
         if (addressString == null || addressString.trim().isEmpty()) {
+            logger.warn("Address string is null or empty");
             return addressParts;
         }
 
-        String[] parts = addressString.split(", ");
+        // Loại bỏ dấu phẩy thừa ở đầu hoặc cuối
+        String cleanedAddress = addressString.replaceAll("^,\\s*|\\s*,$", "").trim();
+        String[] parts = cleanedAddress.split(",\\s*");
+        logger.info("Address parts after cleaning: {}", Arrays.toString(parts));
 
         switch (parts.length) {
             case 4:
-                addressParts.put("province", parts[3]);
-                addressParts.put("district", parts[2]);
-                addressParts.put("ward", parts[1]);
-                addressParts.put("street", parts[0]);
+                addressParts.put("province", parts[3].trim());
+                addressParts.put("district", parts[2].trim());
+                addressParts.put("ward", parts[1].trim());
+                addressParts.put("street", parts[0].trim());
                 break;
             case 3:
-                addressParts.put("province", parts[2]);
-                addressParts.put("district", parts[1]);
-                addressParts.put("street", parts[0]);
+                addressParts.put("province", parts[2].trim());
+                addressParts.put("district", parts[1].trim());
+                addressParts.put("ward", parts[0].trim());
+                addressParts.put("street", "");
                 break;
             case 2:
-                addressParts.put("province", parts[1]);
-                addressParts.put("street", parts[0]);
+                addressParts.put("province", parts[1].trim());
+                addressParts.put("district", parts[0].trim());
+                addressParts.put("ward", "");
+                addressParts.put("street", "");
                 break;
             case 1:
-                addressParts.put("street", parts[0]);
+                addressParts.put("province", parts[0].trim());
+                addressParts.put("district", "");
+                addressParts.put("ward", "");
+                addressParts.put("street", "");
+                break;
+            default:
+                logger.warn("Unexpected address format with {} parts: {}", parts.length, cleanedAddress);
+                addressParts.put("street", cleanedAddress.trim());
+                addressParts.put("ward", "");
+                addressParts.put("district", "");
+                addressParts.put("province", "");
                 break;
         }
 
+        logger.info("Parsed address parts: {}", addressParts);
         return addressParts;
     }
 
@@ -1449,6 +1467,12 @@ public class ContractController {
             }
 
             ContractDto contractDto = convertToContractDto(contract);
+            logger.info("Tenant address in DTO: street={}, ward={}, district={}, province={}",
+                    contractDto.getTenant() != null ? contractDto.getTenant().getStreet() : "null",
+                    contractDto.getTenant() != null ? contractDto.getTenant().getWard() : "null",
+                    contractDto.getTenant() != null ? contractDto.getTenant().getDistrict() : "null",
+                    contractDto.getTenant() != null ? contractDto.getTenant().getProvince() : "null");
+
             response.put("success", true);
             response.put("contract", contractDto);
             response.put("message", "Lấy thông tin hợp đồng thành công");
@@ -1467,201 +1491,279 @@ public class ContractController {
             Model model,
             Authentication authentication
     ) {
+        System.out.println("🔍 === EDIT CONTRACT FORM CALLED ===");
+        System.out.println("📝 Contract ID: " + contractId);
+
         logger.info("Preparing edit form for Contract ID: {}", contractId);
 
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
 
+            System.out.println("👤 Owner ID: " + ownerId);
+
             Optional<Contracts> contractOptional = contractService.findContractById(contractId);
+            System.out.println("📋 Contract found: " + contractOptional.isPresent());
 
             if (contractOptional.isPresent()) {
                 Contracts contract = contractOptional.get();
+                System.out.println("📋 Contract details: " + contract.getContractId());
+                System.out.println("👤 Contract Owner ID: " + contract.getOwner().getUserId());
 
                 // Kiểm tra quyền sở hữu
                 if (!contract.getOwner().getUserId().equals(ownerId)) {
+                    System.out.println("❌ OWNER MISMATCH!");
                     logger.error("User {} does not own contract {}", ownerId, contractId);
                     model.addAttribute("error", "Bạn không có quyền chỉnh sửa hợp đồng này!");
                     return "host/hop-dong-host";
                 }
 
-
                 // Chuyển đổi sang DTO
                 ContractDto contractDto = convertToContractDto(contract);
-                // IN RA CONSOLE ĐỂ KIỂM TRA
-                System.out.println("Contract DTO: " + contractDto);
+                System.out.println("📋 DTO Created: " + (contractDto != null));
+                System.out.println("📋 DTO ID: " + contractDto.getId());
+                System.out.println("📋 DTO Contract Date: " + contractDto.getContractDate());
 
-                // Log chi tiết DTO
-                logger.info("Contract DTO Details:");
-                logger.info("DTO ID: {}", contractDto.getId());
-                logger.info("DTO Contract Date: {}", contractDto.getContractDate());
-                logger.info("DTO Status: {}", contractDto.getStatus());
-
-                // Log Tenant DTO
-                if (contractDto.getTenant() != null) {
-                    logger.info("DTO Tenant Name: {}", contractDto.getTenant().getFullName());
-                    logger.info("DTO Tenant Phone: {}", contractDto.getTenant().getPhone());
-                    logger.info("DTO Tenant CCCD: {}", contractDto.getTenant().getCccdNumber());
-                    logger.info("DTO Tenant Birthday: {}", contractDto.getTenant().getBirthday());
-                    logger.info("DTO Tenant Issue Date: {}", contractDto.getTenant().getIssueDate());
-                    logger.info("DTO Tenant Issue Place: {}", contractDto.getTenant().getIssuePlace());
-                    logger.info("DTO Tenant Province: {}", contractDto.getTenant().getProvince());
-                    logger.info("DTO Tenant District: {}", contractDto.getTenant().getDistrict());
-                    logger.info("DTO Tenant Ward: {}", contractDto.getTenant().getWard());
-                    logger.info("DTO Tenant Street: {}", contractDto.getTenant().getStreet());
-                }
-
-                // Log Owner DTO
+                // THÊM: Log chi tiết owner
                 if (contractDto.getOwner() != null) {
-                    logger.info("DTO Owner Name: {}", contractDto.getOwner().getFullName());
-                    logger.info("DTO Owner Phone: {}", contractDto.getOwner().getPhone());
+                    System.out.println("👤 DTO Owner Name: " + contractDto.getOwner().getFullName());
+                    System.out.println("👤 DTO Owner Phone: " + contractDto.getOwner().getPhone());
                 }
 
-                // Log Room DTO
-                if (contractDto.getRoom() != null) {
-                    logger.info("DTO Room Address: {}", contractDto.getRoom().getAddress());
+                // THÊM: Log chi tiết tenant
+                if (contractDto.getTenant() != null) {
+                    System.out.println("🏠 DTO Tenant Name: " + contractDto.getTenant().getFullName());
+                    System.out.println("🏠 DTO Tenant Phone: " + contractDto.getTenant().getPhone());
                 }
 
                 model.addAttribute("contract", contractDto);
                 model.addAttribute("isEditMode", true);
+                model.addAttribute("contractId", contractId);
 
-                logger.info("Model attributes added: contract, isEditMode");
+                // ✅ THÊM: Load hostels và rooms
+                List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
+                model.addAttribute("hostels", hostels);
+                System.out.println("🏢 Hostels loaded: " + hostels.size());
 
+                // Load rooms cho hostel hiện tại
+                if (contractDto.getRoom() != null && contractDto.getRoom().getHostelId() != null) {
+                    List<ContractDto.Room> rooms = roomsService.getRoomsByHostelId(contractDto.getRoom().getHostelId());
+                    model.addAttribute("rooms", rooms);
+                    System.out.println("🏠 Rooms loaded: " + rooms.size());
+                } else {
+                    model.addAttribute("rooms", new ArrayList<>());
+                    System.out.println("🏠 No rooms loaded");
+                }
+
+                System.out.println("✅ EDIT FORM LOADED SUCCESSFULLY");
                 return "host/hop-dong-host";
+
             } else {
+                System.out.println("❌ CONTRACT NOT FOUND!");
                 logger.error("Contract not found with ID: {}", contractId);
                 model.addAttribute("error", "Không tìm thấy hợp đồng");
-                return "host/hop-dong-host";
+                return "redirect:/chu-tro/DS-hop-dong-host";
             }
         } catch (Exception e) {
+            System.out.println("❌ ERROR: " + e.getMessage());
             logger.error("Error in edit contract form", e);
             model.addAttribute("error", "Lỗi khi tải hợp đồng: " + e.getMessage());
-            return "host/hop-dong-host";
+            return "redirect:/chu-tro/DS-hop-dong-host";
         }
     }
+
     private ContractDto convertToContractDto(Contracts contract) {
         ContractDto dto = new ContractDto();
         dto.setId(contract.getContractId());
-//        dto.setContractDate(contract.getContractDate()); // Giữ java.sql.Date
+
         if (contract.getContractDate() != null) {
             dto.setContractDate(contract.getContractDate().toLocalDate());
         }
         dto.setStatus(String.valueOf(contract.getStatus()));
 
-        // Map tenant (là Users)
+
+        // Map tenant (người thuê đã đăng ký - Users)
         if (contract.getTenant() != null) {
             ContractDto.Tenant tenant = new ContractDto.Tenant();
-            Users user = contract.getTenant(); // Tenant là Users
+            Users user = contract.getTenant();
+
             if (user != null) {
                 tenant.setFullName(user.getFullname());
                 tenant.setPhone(user.getPhone());
-                tenant.setEmail(user.getEmail());
+                tenant.setEmail(user.getEmail() != null ? user.getEmail() : "");
                 tenant.setBirthday(user.getBirthday());
-                tenant.setStreet(user.getAddress()); // Truy xuất trực tiếp từ cột address
-                logger.info("Address for owner with userId {}: {}", user.getUserId(), user.getAddress());
-//                if (user.getAddressEntity() != null) {
-//                    tenant.setStreet(user.getAddressEntity().getStreet());
-//                    if (user.getAddressEntity().getWard() != null) {
-//                        tenant.setWard(user.getAddressEntity().getWard().getName());
-//                        if (user.getAddressEntity().getWard().getDistrict() != null) {
-//                            tenant.setDistrict(user.getAddressEntity().getWard().getDistrict().getName());
-//                            if (user.getAddressEntity().getWard().getDistrict().getProvince() != null) {
-//                                tenant.setProvince(user.getAddressEntity().getWard().getDistrict().getProvince().getName());
-//                            }
-//                        }
-//                    }
-//                }
+
+                // Lấy và tách địa chỉ từ cột address của Users
+                String address = user.getAddress();
+                logger.info("Tenant address for userId {}: {}", user.getUserId(), address);
+
+                if (StringUtils.hasText(address)) {
+                    Map<String, String> addressParts = parseAddress(address);
+                    tenant.setStreet(addressParts.getOrDefault("street", ""));
+                    tenant.setWard(addressParts.getOrDefault("ward", ""));
+                    tenant.setDistrict(addressParts.getOrDefault("district", ""));
+                    tenant.setProvince(addressParts.getOrDefault("province", ""));
+                    logger.info("Parsed tenant address: street={}, ward={}, district={}, province={}",
+                            addressParts.get("street"), addressParts.get("ward"),
+                            addressParts.get("district"), addressParts.get("province"));
+                } else {
+                    logger.warn("No address found for tenant with userId: {}", user.getUserId());
+                    tenant.setStreet("");
+                    tenant.setWard("");
+                    tenant.setDistrict("");
+                    tenant.setProvince("");
+                }
+
+                // Map thông tin CCCD
+                UserCccd cccd = user.getUserCccd();
+                if (cccd != null) {
+                    tenant.setCccdNumber(cccd.getCccdNumber());
+                    tenant.setIssueDate(cccd.getIssueDate());
+                    tenant.setIssuePlace(cccd.getIssuePlace() != null ? cccd.getIssuePlace() : "");
+                } else {
+                    tenant.setCccdNumber("");
+                    tenant.setIssueDate(null);
+                    tenant.setIssuePlace("");
+                }
+
+                dto.setTenant(tenant);
+                dto.setTenantType("REGISTERED");
             }
-            UserCccd cccd = user != null ? user.getUserCccd() : null;
-            logger.info("UserCccd for tenant with userId {}: {}", user != null ? user.getUserId() : "null", cccd);
-            if (cccd != null) {
-                logger.info("IssueDate from UserCccd: {}", cccd.getIssueDate());
-                tenant.setCccdNumber(cccd.getCccdNumber());
-                tenant.setIssueDate(cccd.getIssueDate());
-                tenant.setIssuePlace(cccd.getIssuePlace());
+        }
+
+// Map unregistered tenant
+        if (contract.getUnregisteredTenant() != null) {
+            ContractDto.UnregisteredTenant unregTenant = new ContractDto.UnregisteredTenant();
+            UnregisteredTenants unregUser = contract.getUnregisteredTenant();
+
+            unregTenant.setFullName(unregUser.getFullName());
+            unregTenant.setPhone(unregUser.getPhone());
+            unregTenant.setCccdNumber(unregUser.getCccdNumber());
+            unregTenant.setIssueDate(unregUser.getIssueDate());
+            unregTenant.setIssuePlace(unregUser.getIssuePlace());
+            unregTenant.setBirthday(unregUser.getBirthday());
+
+            // Lấy địa chỉ từ cột address của UnregisteredTenants
+            String address = unregUser.getAddress();
+            logger.info("Address for unregistered tenant with ID {}: {}", unregUser.getId(), address);
+
+            if (StringUtils.hasText(address)) {
+                Map<String, String> addressParts = parseAddress(address);
+                unregTenant.setStreet(addressParts.getOrDefault("street", ""));
+                unregTenant.setWard(addressParts.getOrDefault("ward", ""));
+                unregTenant.setDistrict(addressParts.getOrDefault("district", ""));
+                unregTenant.setProvince(addressParts.getOrDefault("province", ""));
             } else {
-                logger.warn("No UserCccd found for tenant with user ID: {}", user != null ? user.getUserId() : "N/A");
+                logger.warn("No address found for unregistered tenant with ID: {}", unregUser.getId());
+                unregTenant.setStreet("");
+                unregTenant.setWard("");
+                unregTenant.setDistrict("");
+                unregTenant.setProvince("");
             }
-            dto.setTenant(tenant);
+
+            dto.setUnregisteredTenant(unregTenant);
+            dto.setTenantType("UNREGISTERED");
         }
 
         // Map owner (cũng là Users)
         if (contract.getOwner() != null) {
             ContractDto.Owner owner = new ContractDto.Owner();
-            Users user = contract.getOwner(); // Owner là Users
+            Users user = contract.getOwner();
+
             if (user != null) {
                 owner.setFullName(user.getFullname());
                 owner.setPhone(user.getPhone());
                 owner.setEmail(user.getEmail());
                 owner.setBirthday(user.getBirthday());
-                // SỬA: Sử dụng trực tiếp cột address từ bảng user
-                owner.setStreet(user.getAddress());
-                logger.info("Address for owner with userId {}: {}", user.getUserId(), user.getAddress());
-//                if (user.getAddressEntity() != null) {
-//                    owner.setStreet(user.getAddressEntity().getStreet());
-//                    if (user.getAddressEntity().getWard() != null) {
-//                        owner.setWard(user.getAddressEntity().getWard().getName());
-//                        if (user.getAddressEntity().getWard().getDistrict() != null) {
-//                            owner.setDistrict(user.getAddressEntity().getWard().getDistrict().getName());
-//                            if (user.getAddressEntity().getWard().getDistrict().getProvince() != null) {
-//                                owner.setProvince(user.getAddressEntity().getWard().getDistrict().getProvince().getName());
-//                            }
-//                        }
-//                    }
-//                }
-            }
-            String address = user.getAddress();
-            if (StringUtils.hasText(address)) {
-                Map<String, String> addressParts = parseAddress(address);
-                owner.setStreet(addressParts.getOrDefault("street", ""));
-                owner.setWard(addressParts.getOrDefault("ward", ""));
-                owner.setDistrict(addressParts.getOrDefault("district", ""));
-                owner.setProvince(addressParts.getOrDefault("province", ""));
+                owner.setBankAccount(user.getBankAccount());
+
+                // Lấy địa chỉ từ cột address của Users
+                String address = user.getAddress();
+                logger.info("Address for owner with userId {}: {}", user.getUserId(), address);
+
+                if (StringUtils.hasText(address)) {
+                    Map<String, String> addressParts = parseAddress(address);
+                    owner.setStreet(addressParts.getOrDefault("street", ""));
+                    owner.setWard(addressParts.getOrDefault("ward", ""));
+                    owner.setDistrict(addressParts.getOrDefault("district", ""));
+                    owner.setProvince(addressParts.getOrDefault("province", ""));
+                } else {
+                    logger.warn("No address found for owner with userId: {}", user.getUserId());
+                    owner.setStreet("");
+                    owner.setWard("");
+                    owner.setDistrict("");
+                    owner.setProvince("");
+                }
             }
 
+            // Map CCCD information
             UserCccd cccd = user != null ? user.getUserCccd() : null;
             if (cccd != null) {
                 owner.setCccdNumber(cccd.getCccdNumber());
                 owner.setIssueDate(cccd.getIssueDate());
                 owner.setIssuePlace(cccd.getIssuePlace());
             }
+
             dto.setOwner(owner);
         }
 
         // Map room
         if (contract.getRoom() != null) {
             ContractDto.Room room = new ContractDto.Room();
-            room.setRoomId(contract.getRoom().getRoomId());
-            room.setRoomName(contract.getRoom().getNamerooms());
-            room.setArea(contract.getRoom().getAcreage());
-            room.setPrice(contract.getRoom().getPrice());
-//            room.setHostelId(contract.getRoom().getHostelId());
-//            if (contract.getRoom().getAddress() != null) {
-//                room.setAddress(contract.getRoom().getAddress().getStreet() != null ? contract.getRoom().getAddress().getStreet() : "");
+            Rooms roomEntity = contract.getRoom();
+
+            room.setRoomId(roomEntity.getRoomId());
+            room.setRoomName(roomEntity.getNamerooms());
+            room.setArea(roomEntity.getAcreage());
+            room.setPrice(roomEntity.getPrice());
+            room.setStatus(roomEntity.getStatus().name());
+
+//            // Lấy địa chỉ từ cột address của Rooms
+//            String roomAddress = roomEntity.getAddress();
+//            logger.info("Address for room with roomId {}: {}", roomEntity.getRoomId(), roomAddress);
+//
+//            if (StringUtils.hasText(roomAddress)) {
+//                // Nếu form cần các trường địa chỉ riêng lẻ, phân tách bằng parseAddress
+//                Map<String, String> addressParts = parseAddress(roomAddress);
+//                room.setStreet(addressParts.getOrDefault("street", ""));
+//                room.setWard(addressParts.getOrDefault("ward", ""));
+//                room.setDistrict(addressParts.getOrDefault("district", ""));
+//                room.setProvince(addressParts.getOrDefault("province", ""));
+//                room.setAddress(roomAddress); // Gán toàn bộ chuỗi địa chỉ
 //            } else {
+//                logger.warn("No address found for room with roomId: {}", roomEntity.getRoomId());
+//                room.setStreet("");
+//                room.setWard("");
+//                room.setDistrict("");
+//                room.setProvince("");
 //                room.setAddress("");
 //            }
+
+            // Thêm thông tin khu trọ (nếu cần)
+            if (roomEntity.getHostel() != null) {
+                room.setHostelId(roomEntity.getHostel().getHostelId());
+                room.setHostelName(roomEntity.getHostel().getName());
+            }
+
             dto.setRoom(room);
         }
 
         // Map terms
-        if (contract.getTerms() != null) {
-            ContractDto.Terms terms = new ContractDto.Terms();
-            if (contract.getStartDate() != null) {
-                terms.setStartDate(contract.getStartDate().toLocalDate());
-            }
-            if (contract.getEndDate() != null) {
-                terms.setEndDate(contract.getEndDate().toLocalDate());
-            }
-            terms.setPrice(Double.valueOf(contract.getPrice()));
-            terms.setDeposit(Double.valueOf(contract.getDeposit()));
-//            terms.setDuration(contract.getDuration());
-            terms.setTerms(contract.getTerms());
-            dto.setTerms(terms);
+        ContractDto.Terms terms = new ContractDto.Terms();
+        if (contract.getStartDate() != null) {
+            terms.setStartDate(contract.getStartDate().toLocalDate());
         }
+        if (contract.getEndDate() != null) {
+            terms.setEndDate(contract.getEndDate().toLocalDate());
+        }
+        terms.setPrice(contract.getPrice() != null ? Double.valueOf(contract.getPrice()) : 0.0);
+        terms.setDeposit(contract.getDeposit() != null ? Double.valueOf(contract.getDeposit()) : 0.0);
+        terms.setTerms(contract.getTerms());
+        dto.setTerms(terms);
 
         return dto;
     }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> findContractById(@PathVariable Integer id) {
