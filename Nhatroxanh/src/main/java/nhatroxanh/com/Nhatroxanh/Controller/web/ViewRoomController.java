@@ -297,4 +297,132 @@ public class ViewRoomController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+    // New method to handle all posts
+    @GetMapping("/tat-ca-phong-tro")
+    public String showAllPosts(
+            @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
+        try {
+            System.out.println("Request: Sort: " + sort + ", Page: " + page);
+            long startTime = System.currentTimeMillis();
+
+            // Load utilities for filter
+            List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
+            if (utilities == null) {
+                utilities = new ArrayList<>();
+                System.out.println("Warning: No utilities found in database");
+            }
+
+            model.addAttribute("utilities", utilities);
+
+            Page<Post> postPage;
+            int pageSize = 10;
+
+            // Create Pageable object
+            Sort pageSort;
+            switch (sort.toLowerCase()) {
+                case "price_asc":
+                    pageSort = Sort.by(Sort.Direction.ASC, "price");
+                    break;
+                case "price_desc":
+                    pageSort = Sort.by(Sort.Direction.DESC, "price");
+                    break;
+                case "latest":
+                default:
+                    pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
+                    break;
+            }
+
+            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+
+            // Fetch all approved posts with pagination
+            postPage = postRepository.findByStatusAndApprovalStatus(true, ApprovalStatus.APPROVED, pageable);
+
+            System.out.println("Posts fetched: " + postPage.getTotalElements() +
+                    ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
+
+            model.addAttribute("posts", postPage.getContent());
+            model.addAttribute("totalPosts", postPage.getTotalElements());
+            model.addAttribute("currentPage", postPage.getNumber());
+            model.addAttribute("totalPages", postPage.getTotalPages());
+            model.addAttribute("pageSize", pageSize);
+            model.addAttribute("selectedSort", sort);
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu: " + e.getMessage());
+            model.addAttribute("posts", new ArrayList<>());
+            model.addAttribute("totalPosts", 0);
+            model.addAttribute("currentPage", 0);
+            model.addAttribute("totalPages", 0);
+            model.addAttribute("pageSize", 10);
+            System.out.println("Exception in showAllPosts: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return "guest/tat-ca-phong";
+    }
+
+    // Updated API for filtering all posts
+    @GetMapping("/api/filter-all-posts")
+    @ResponseBody
+    public ResponseEntity<?> filterAllPosts(
+            @RequestParam(value = "utilities", required = false) List<Integer> utilityIds,
+            @RequestParam(value = "minArea", required = false) Float minArea,
+            @RequestParam(value = "maxArea", required = false) Float maxArea,
+            @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
+            @RequestParam(value = "page", defaultValue = "0") int page) {
+
+        try {
+            System.out.println("=== Filter All Posts Request ===");
+            System.out.println("UtilityIds: " + utilityIds);
+            System.out.println("MinArea: " + minArea + ", MaxArea: " + maxArea);
+            System.out.println("Sort: " + sort + ", Page: " + page);
+
+            Page<Post> postPage;
+            int pageSize = 10;
+
+            // Create Pageable object
+            Sort pageSort;
+            switch (sort.toLowerCase()) {
+                case "price_asc":
+                    pageSort = Sort.by(Sort.Direction.ASC, "price");
+                    break;
+                case "price_desc":
+                    pageSort = Sort.by(Sort.Direction.DESC, "price");
+                    break;
+                case "latest":
+                default:
+                    pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
+                    break;
+            }
+
+            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+
+            // Fetch posts based on filters
+            if (utilityIds != null && !utilityIds.isEmpty()) {
+                postPage = postRepository.findActivePostsWithUtilityFilterPaginated(utilityIds, minArea, maxArea, pageable);
+            } else {
+                postPage = postRepository.findActivePostsWithAreaFilterPaginated(minArea, maxArea, pageable);
+            }
+
+            System.out.println("Filtered posts count: " + postPage.getTotalElements());
+
+            List<PostDTO> postDTOs = postMapper.toDTOList(postPage.getContent());
+
+            // Prepare paginated response
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", postDTOs);
+            response.put("number", postPage.getNumber());
+            response.put("totalPages", postPage.getTotalPages());
+            response.put("totalElements", postPage.getTotalElements());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("Error filtering all posts: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: " + e.getMessage());
+        }
+    }
 }

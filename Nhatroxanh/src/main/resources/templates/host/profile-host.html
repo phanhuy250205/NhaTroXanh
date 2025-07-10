@@ -551,7 +551,9 @@
                             <h6><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
                             <div class="row g-2">
                                 <div class="col-12">
-                                    <p class="mb-2"><strong>Ngày tham gia:</strong> 01/06/2025</p>
+                                    <p class="mb-2"><strong>Ngày tham gia:</strong>
+                                        <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
                                     <p class="mb-2"><strong>Tổng số khu trọ:</strong>
@@ -642,7 +644,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" readonly>
                                 <div class="invalid-feedback" id="emailError" style="display: none;"></div>
                                 <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
                             </div>
@@ -757,7 +759,7 @@
             constructor() {
                 this.formElements = [
                     "fullname", "email", "phone", "birthday", "cccdNumber",
-                    "issueDate", "issuePlace", "street"
+                    "issueDate", "issuePlace", "street", "province", "district", "ward"
                 ];
                 this.init();
             }
@@ -867,7 +869,14 @@
                         break;
 
                     case "cccdNumber":
-                        if (value) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Số CCCD không được để trống";
+                            const cccdInfo = document.getElementById("cccdInfo");
+                            if (cccdInfo) {
+                                cccdInfo.style.display = "none";
+                            }
+                        } else {
                             const cccdValidation = this.validateCCCDNumber(value);
                             if (!cccdValidation.isValid) {
                                 isValid = false;
@@ -916,25 +925,41 @@
                         break;
 
                     case "issuePlace":
-                        if (value && value.length < 2) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp không được để trống";
+                        } else if (value.length < 2) {
                             isValid = false;
                             errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Nơi cấp hợp lệ";
                         }
                         break;
 
                     case "street":
-                        if (value && value.length < 5) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ không được để trống";
+                        } else if (value.length < 5) {
                             isValid = false;
                             errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                    case "province":
+                    case "district":
+                    case "ward":
+                        if (this.isEditMode && !value) {
+                            isValid = false;
+                            errorMessage = `Vui lòng chọn ${fieldId === "province" ? "Tỉnh/Thành phố" : fieldId === "district" ? "Quận/Huyện" : "Phường/Xã"}`;
+                        } else if (value) {
+                            successMessage = "Đã chọn hợp lệ";
                         }
                         break;
                 }
 
-                // Update UI
+                // Cập nhật giao diện
                 this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
                 return isValid;
             }
@@ -976,7 +1001,7 @@
             // Validate CCCD number
             validateCCCDNumber(cccdNumber) {
                 if (!cccdNumber) {
-                    return { isValid: true, message: "" };
+                    return { isValid: false, message: "CCCD không được để trống!" };
                 }
 
                 const cleanCCCD = cccdNumber.replace(/\s/g, "");
@@ -1049,20 +1074,20 @@
 
                 if (!element) return;
 
-                // Clear previous states
+                // Xóa trạng thái cũ
                 element.classList.remove("is-invalid", "is-valid");
 
+                // Ẩn thông báo cũ
                 if (errorElement) {
                     errorElement.style.display = "none";
                     errorElement.textContent = "";
                 }
-
                 if (successElement) {
                     successElement.style.display = "none";
                     successElement.textContent = "";
                 }
 
-                // Apply new state
+                // Cập nhật trạng thái mới
                 if (isValid && successMessage) {
                     element.classList.add("is-valid");
                     if (successElement) {
@@ -1077,7 +1102,6 @@
                     }
                 }
             }
-
             // Validate existing data on page load
             validateExistingData() {
                 const phoneElement = document.getElementById("phone");
