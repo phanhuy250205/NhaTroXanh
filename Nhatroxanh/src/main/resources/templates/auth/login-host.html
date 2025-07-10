@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
 
-
 <!-- <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head> -->
@@ -15,10 +14,12 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/login-host.css}">
+    <link rel="stylesheet" th:href="@{/css/quenmk-modal.css}">
 </head>
 
 
 <body>
+    <div th:replace="~{/layouts/modal_quen_MK}"></div>
     <div class="login-page-wrapper">
         <div class="login-card shadow-sm">
             <section class="login-left">
@@ -128,8 +129,11 @@
             </section>
         </div>
 
-
+    </div>
     <script th:src="@{/js/login-host.js}"></script>
+    <script th:src="@{/js/quenmk-modal.js}"></script>
 
-    </body>
+</body>
+
+
 </html>

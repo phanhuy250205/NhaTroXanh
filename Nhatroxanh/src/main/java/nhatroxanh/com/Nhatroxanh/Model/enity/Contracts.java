@@ -19,7 +19,7 @@ public class Contracts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contract_id")
-    private Integer contractId; // Giữ Integer để phù hợp với database hiện tại
+    private Integer contractId; // Đổi sang Long để thống nhất
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -54,6 +54,10 @@ public class Contracts {
 
     @Column(name = "deposit", nullable = false)
     private Float deposit;
+
+    @Column(name = "duration", nullable = false)
+    private Float duration;
+
 
     @Column(name = "terms", length = 1000) // Tăng giới hạn để khớp với ContractServiceImpl
     private String terms;

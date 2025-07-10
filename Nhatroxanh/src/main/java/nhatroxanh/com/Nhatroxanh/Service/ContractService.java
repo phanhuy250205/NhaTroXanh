@@ -20,7 +20,7 @@ public interface ContractService {
     Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
-            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
+            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant , Integer duration) throws Exception;
 
     @Transactional
     Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;

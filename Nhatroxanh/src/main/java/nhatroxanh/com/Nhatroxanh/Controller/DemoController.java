@@ -25,40 +25,13 @@ import java.util.Optional;
 public class DemoController {
 
     @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private FavoritePostService favoritePostService;
-    
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
     private PaymentService paymentService;
 
     @Autowired
     private RoomsService roomsService;
-
-    @GetMapping("/tro-da-luu")
-    public String savedPosts(Model model, Authentication authentication) {
-        if (authentication != null && authentication.isAuthenticated() && 
-            !authentication.getPrincipal().equals("anonymousUser")) {
-            try {
-                CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-                Optional<Users> userOpt = userRepository.findById(userDetails.getUserId());
-                
-                if (userOpt.isPresent()) {
-                    List<Post> favoritePosts = favoritePostService.getFavoritePostsByUser(userOpt.get());
-                    model.addAttribute("favoritePosts", favoritePosts);
-                }
-            } catch (Exception e) {
-                // Log error and continue with empty favorites
-                System.err.println("Error loading favorite posts: " + e.getMessage());
-            }
-        }
-        return "guest/tro-da-luu";
-    }
-
+     @Autowired
+     private UserService userService;
+     
     @GetMapping("/chi-tiet")
     public String chitiet() {
         return "guest/chi-tiet";
@@ -68,6 +41,16 @@ public class DemoController {
     public String danhmuc() {
         return "guest/phong-tro";
     }
+
+    // @GetMapping("/nhan-vien/thong-tin-tro")
+    // public String thongtintro() {
+    //     return "staff/thong-tin-tro-staff";
+    // }
+
+    // @GetMapping("nhan-vien/chi-tiet-thong-tin-tro")
+    // public String detailthongtintro() {
+    //     return "staff/detail-thong-tin-tro-staff";
+    // }
 
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {
@@ -141,22 +124,41 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
-    @GetMapping("/profile-khach-thue")
-    public String profileKhachThue() {
-        return "guest/profile";
-    }
+    // @GetMapping("/chu-tro/dang-tin")
+    // public String dangtin() {
+    //     return "host/bai-dang-host";
+    // }
+
+    // @GetMapping("/chu-tro/bai-dang")
+    // public String quanlyhopdong() {
+    //     return "host/quan-ly-bai-dang";
+    // }
+
+     @GetMapping("/chu-tro/Qlthue-tra")
+     public String chitietbaidang() {
+         return "guest/quan-ly-thue-tra";
+     }
+
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
-
     @GetMapping("/khach-thue/quan-ly-thue-tra")
     public String quanLyThueTra() {
         return "guest/quan-ly-thue-tra";
     }
-
     @GetMapping("/khach-thue/chitiet-phongthue")
     public String chiTietPhongThue() {
         return "guest/chitiet-phongthue";
     }
+
+    @GetMapping("/chu-tro/quan-ly-su-co")
+    public String quanLySuCoCT() {
+        return "host/quan-ly-su-co";
+    }    
+    
+    // @GetMapping("/profile-khach-thue")
+    // public String profileKhachThue() {
+    //     return "guest/profile";
+    // }  
 }

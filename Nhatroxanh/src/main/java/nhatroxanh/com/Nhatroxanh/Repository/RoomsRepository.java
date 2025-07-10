@@ -102,4 +102,8 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
     // Truy vấn với JOIN FETCH để lấy phòng trọ cùng thông tin khu trọ và tiện ích
     @Query("SELECT r FROM Rooms r LEFT JOIN FETCH r.hostel h LEFT JOIN FETCH r.utilities u WHERE r.hostel.hostelId = :hostelId")
     List<Rooms> findRoomsWithDetailsByHostelId(@Param("hostelId") Integer hostelId);
+
+    Optional<Rooms> findFirstByHostel(Hostel hostel);
+
+   
 }

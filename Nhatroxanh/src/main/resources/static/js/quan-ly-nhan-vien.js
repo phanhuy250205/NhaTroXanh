@@ -136,6 +136,7 @@ function viewEmployee(row) {
 }
 
 // Delete employee
+<<<<<<< HEAD
 function deleteEmployee(row, employeeName) {
     if (confirm(`Bạn có chắc chắn muốn xóa nhân viên "${employeeName}"?\n\nHành động này không thể hoàn tác.`)) {
         row.style.transition = 'all 0.3s ease';
@@ -148,6 +149,20 @@ function deleteEmployee(row, employeeName) {
         }, 300);
     }
 }
+=======
+// function deleteEmployee(row, employeeName) {
+//     if (confirm(`Bạn có chắc chắn muốn xóa nhân viên "${employeeName}"?\n\nHành động này không thể hoàn tác.`)) {
+//         row.style.transition = 'all 0.3s ease';
+//         row.style.opacity = '0';
+//         row.style.transform = 'translateX(100px)';
+//         setTimeout(() => {
+//             row.remove();
+//             updateStats();
+//             showNotification('Đã xóa nhân viên thành công!', 'success');
+//         }, 300);
+//     }
+// }
+>>>>>>> 99e235f6d995ab267efe7651a2abbd145a67a4dd
 
 // Extract employee data from table row
 function extractEmployeeData(row) {

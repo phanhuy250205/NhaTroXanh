@@ -1,0 +1,2594 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/layouts/head}">
+    <title>Hồ Sơ Khách Thuê - Nhà Trọ Xanh</title>
+</head>
+
+<style>
+    /* Enhanced Toast Notifications */
+    .toast-container-guest {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        min-width: 350px;
+        transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .alert-guest {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        margin-bottom: 12px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        position: relative;
+        animation: slideIn-guest 0.5s ease-out;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    @keyframes slideIn-guest {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    .alert-guest.success {
+        background: linear-gradient(135deg, #d1e7dd, #a3d9a5);
+        color: #0f5132;
+        border-left: 5px solid #198754;
+    }
+
+    .alert-guest.danger {
+        background: linear-gradient(135deg, #f8d7da, #f1aeb5);
+        color: #842029;
+        border-left: 5px solid #dc3545;
+    }
+
+    .alert-guest.warning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        color: #664d03;
+        border-left: 5px solid #ffc107;
+    }
+
+    .alert-icon-guest {
+        margin-right: 12px;
+        font-size: 1.3rem;
+    }
+
+    .alert-message-guest {
+        flex-grow: 1;
+        line-height: 1.4;
+    }
+
+    .btn-close-guest {
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        font-weight: bold;
+        cursor: pointer;
+        color: inherit;
+        margin-left: 15px;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-close-guest:hover {
+        opacity: 1;
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    /* Enhanced Profile Styles */
+    .main-content-guest {
+        padding: 2rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        min-height: 100vh;
+    }
+
+    .guest-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .guest-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .guest-profile-img {
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 5px solid #007bff;
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .guest-profile-img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 12px 35px rgba(0, 123, 255, 0.4);
+    }
+
+    .guest-profile-img::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .guest-profile-img:hover::after {
+        opacity: 1;
+    }
+
+    .guest-verified {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .guest-inactive {
+        background: linear-gradient(135deg, #dc3545, #e74c3c);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.85em;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .guest-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        animation: pulse-guest 2s infinite;
+    }
+
+    @keyframes pulse-guest {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.05);
+        }
+    }
+
+    .guest-section {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .guest-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+
+    .guest-section h6 {
+        color: #007bff;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e9ecef;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .guest-section h6 i {
+        font-size: 1.1rem;
+    }
+
+    .guest-rating {
+        color: #ffc107;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    /* Enhanced Form Styles */
+    .form-control-guest,
+    .form-select-guest {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 12px 15px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    .form-control-guest:focus,
+    .form-select-guest:focus {
+        border-color: #28a745;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+        background: white;
+        transform: translateY(-1px);
+    }
+
+    .form-control-guest.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+        animation: shake-guest 0.5s ease-in-out;
+    }
+
+    .form-control-guest.is-valid {
+        border-color: #28a745;
+        box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
+    }
+
+    @keyframes shake-guest {
+
+        0%,
+        100% {
+            transform: translateX(0);
+        }
+
+        25% {
+            transform: translateX(-5px);
+        }
+
+        75% {
+            transform: translateX(5px);
+        }
+    }
+
+    .form-label-guest {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .invalid-feedback-guest {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(220, 53, 69, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #dc3545;
+        color: #dc3545;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .invalid-feedback-guest::before {
+        content: "\f071";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+    }
+
+    .valid-feedback-guest {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(40, 167, 69, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #28a745;
+        color: #28a745;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .valid-feedback-guest::before {
+        content: "\f00c";
+        font-family: "Font Awesome 6 Free";
+        font-weight: 900;
+    }
+
+    .field-info-guest {
+        margin-top: 8px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .field-info-guest.text-success {
+        color: #28a745;
+        background: rgba(40, 167, 69, 0.1);
+    }
+
+    .field-info-guest.text-info {
+        color: #17a2b8;
+        background: rgba(23, 162, 184, 0.1);
+    }
+
+    .field-info-guest.text-warning {
+        color: #ffc107;
+        background: rgba(255, 193, 7, 0.1);
+    }
+
+    /* Password Input Container */
+    .password-input-container-guest {
+        position: relative;
+    }
+
+    .password-toggle-guest {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .password-toggle-guest:hover {
+        color: #495057;
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .password-toggle-guest:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    /* Enhanced Button Styles */
+    .btn-guest {
+        border-radius: 10px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-guest::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn-guest:hover::before {
+        left: 100%;
+    }
+
+    .btn-outline-primary-guest {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-outline-primary-guest:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
+        color: white;
+    }
+
+    .btn-warning-guest {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #212529;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-warning-guest:hover {
+        background: linear-gradient(135deg, #e0a800, #d39e00);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        color: #212529;
+    }
+
+    /* Password strength indicator */
+    .password-strength-guest {
+        margin-top: 8px;
+        height: 4px;
+        border-radius: 2px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    .password-strength-bar-guest {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .password-strength-guest.weak .password-strength-bar-guest {
+        width: 33%;
+        background: #dc3545;
+    }
+
+    .password-strength-guest.medium .password-strength-bar-guest {
+        width: 66%;
+        background: #ffc107;
+    }
+
+    .password-strength-guest.strong .password-strength-bar-guest {
+        width: 100%;
+        background: #28a745;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay-guest {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .loading-spinner-guest {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .loading-spinner-guest i {
+        font-size: 2rem;
+        color: #28a745;
+        margin-bottom: 1rem;
+    }
+
+    /* Modal Báo Cáo Sự Cố Styles - ẨN THANH CUỘN */
+    .report-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+    }
+
+    .report-modal-container {
+        background: white;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 90vh;
+        /* ẨN THANH CUỘN NHƯNG VẪN CUỘN ĐƯỢC */
+        overflow-y: auto;
+        scrollbar-width: none; /* Firefox */
+        -ms-overflow-style: none; /* IE and Edge */
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease-out;
+    }
+
+    /* ẨN THANH CUỘN CHO WEBKIT (Chrome, Safari) */
+    .report-modal-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .report-modal-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid #e9ecef;
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .report-modal-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .report-modal-title i {
+        font-size: 1.5rem;
+        color: #ffc107;
+    }
+
+    .report-modal-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .report-modal-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: rotate(90deg);
+    }
+
+    .report-modal-body {
+        padding: 2rem;
+    }
+
+    .report-form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .report-form-label {
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+
+    .report-form-label i {
+        color: #007bff;
+        width: 20px;
+    }
+
+    .report-form-control {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .report-form-control:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
+        background: white;
+    }
+
+    .report-form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
+    }
+
+    .report-invalid-feedback {
+        display: none;
+        margin-top: 8px;
+        padding: 8px 12px;
+        background: rgba(220, 53, 69, 0.1);
+        border-radius: 8px;
+        border-left: 3px solid #dc3545;
+        color: #dc3545;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .report-invalid-feedback.show {
+        display: block;
+    }
+
+    /* Upload Area Styles - HỖ TRỢ NHIỀU ẢNH */
+    .report-upload-area {
+        border: 2px dashed #007bff;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(0, 123, 255, 0.05);
+        position: relative;
+    }
+
+    .report-upload-area:hover {
+        border-color: #0056b3;
+        background: rgba(0, 123, 255, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .report-upload-content i {
+        font-size: 3rem;
+        color: #007bff;
+        margin-bottom: 1rem;
+    }
+
+    .report-upload-content p {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .report-upload-content small {
+        color: #6c757d;
+    }
+
+    /* CONTAINER CHO NHIỀU ẢNH */
+    .report-images-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .report-image-preview {
+        position: relative;
+        display: inline-block;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .report-image-preview:hover {
+        transform: scale(1.05);
+    }
+
+    .report-image-preview img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px;
+    }
+
+    .report-remove-image {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+    }
+
+    .report-remove-image:hover {
+        background: #c82333;
+        transform: scale(1.1);
+    }
+
+    /* COUNTER CHO SỐ LƯỢNG ẢNH */
+    .report-image-counter {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 4px 8px;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Modal Footer */
+    .report-modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+        background: #f8f9fa;
+        border-radius: 0 0 20px 20px;
+    }
+
+    .btn-report-cancel {
+        padding: 12px 24px;
+        border: 2px solid #6c757d;
+        background: white;
+        color: #6c757d;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-report-cancel:hover {
+        background: #6c757d;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-report-submit {
+        padding: 12px 24px;
+        border: none;
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-report-submit:hover {
+        background: linear-gradient(135deg, #218838, #1e7e34);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    .btn-report-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .main-content-guest {
+            padding: 1rem;
+        }
+
+        .guest-card {
+            padding: 1.5rem;
+        }
+
+        .guest-profile-img {
+            width: 120px;
+            height: 120px;
+        }
+
+        .guest-section {
+            padding: 1rem;
+        }
+
+        .toast-container-guest {
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+        }
+
+        .report-modal-container {
+            width: 95%;
+            margin: 1rem;
+        }
+        
+        .report-modal-header,
+        .report-modal-body,
+        .report-modal-footer {
+            padding: 1rem;
+        }
+        
+        .report-modal-footer {
+            flex-direction: column;
+        }
+        
+        .btn-report-cancel,
+        .btn-report-submit {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .report-images-container {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .report-image-preview img {
+            height: 100px;
+        }
+    }
+
+    /* Animation Classes */
+    .animate-fade-in-guest {
+        animation: fadeIn-guest 0.8s ease-out;
+    }
+
+    .animate-slide-up-guest {
+        animation: slideUp-guest 0.6s ease-out;
+    }
+
+    @keyframes fadeIn-guest {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideUp-guest {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <div class="main-content-guest">
+        <!-- Enhanced Toast Container -->
+        <div class="toast-container-guest" id="toastContainer">
+            <!-- Thông báo cho cập nhật thông tin -->
+            <div th:if="${profileSuccess}" class="alert-guest success animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-check-circle"></i>
+                <span class="alert-message-guest" th:text="${profileSuccess}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+            
+            <!-- Thông báo cho đổi mật khẩu -->
+            <div th:if="${passwordSuccess}" class="alert-guest success animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-check-circle"></i>
+                <span class="alert-message-guest" th:text="${passwordSuccess}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+            
+            <div th:if="${passwordError}" class="alert-guest danger animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-exclamation-circle"></i>
+                <span class="alert-message-guest" th:text="${passwordError}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+
+            <!-- Thông báo cho báo cáo sự cố -->
+            <div th:if="${reportSuccess}" class="alert-guest success animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-check-circle"></i>
+                <span class="alert-message-guest" th:text="${reportSuccess}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+
+            <div th:if="${reportError}" class="alert-guest danger animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-exclamation-circle"></i>
+                <span class="alert-message-guest" th:text="${reportError}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+            
+            <!-- Thông báo lỗi chung -->
+            <div th:if="${error}" class="alert-guest danger animate-fade-in-guest" role="alert">
+                <i class="alert-icon-guest fas fa-exclamation-circle"></i>
+                <span class="alert-message-guest" th:text="${error}"></span>
+                <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+            </div>
+        </div>
+
+        <div class="animate-fade-in-guest">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <h4 style="color: #3E83CC; font-weight: 700; margin: 0;">
+                    <i class="fas fa-user-circle me-2"></i>Thông tin tài khoản
+                </h4>
+                <button type="button" 
+                        style="background-color: #3E83CC; color: white; border: none; padding: 8px 16px; border-radius: 50px; cursor: pointer; transition: all 0.3s ease;"
+                        onclick="openReportModal()"
+                        onmouseover="this.style.backgroundColor='#2c5aa0'"
+                        onmouseout="this.style.backgroundColor='#3E83CC'">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Báo cáo sự cố
+                </button>
+            </div>
+            <hr style="border: 1px solid #3E83CC; border-radius: 2px;">
+        </div>
+
+        <div class="row g-4 animate-slide-up-guest">
+            <!-- Cột trái - Profile Card -->
+            <div class="col-12 col-lg-4 text-center text-lg-start">
+                <div class="guest-card text-center">
+                    <!-- FORM CẬP NHẬT THÔNG TIN CÁ NHÂN -->
+                    <form th:action="@{/khach-thue/profile-khach-thue}" th:object="${guestInfo}" method="post" 
+                          enctype="multipart/form-data" id="guestProfileForm">
+                        
+                        <input type="file" id="avatarInput" name="avatarFile" class="d-none" accept="image/*">
+
+                        <div class="position-relative d-inline-block mb-3">
+                            <img th:src="${user.avatar != null and user.avatar.startsWith('/uploads/') 
+                                  ? user.avatar 
+                                  : '/uploads/' + user.avatar}" class="guest-profile-img" alt="Avatar"
+                                id="avatarPreview" onclick="document.getElementById('avatarInput').click()" />
+
+                            <div class="position-absolute bottom-0 end-0 bg-success text-white rounded-circle p-2"
+                                style="cursor: pointer; box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3); padding: 6px 10px !important;"
+                                onclick="document.getElementById('avatarInput').click()">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+
+                        <h5 th:text="${user.fullname != null ? user.fullname : 'Chưa có tên'}"
+                            style="color: #495057; font-weight: 700;">Nguyễn Văn A</h5>
+
+                        <div class="mb-3">
+                            <span th:if="${user.enabled}" class="guest-badge guest-verified">
+                                <i class="fas fa-check-circle"></i> Đang hoạt động
+                            </span>
+                            <span th:if="${!user.enabled}" class="guest-badge guest-inactive">
+                                <i class="fas fa-times-circle"></i> Chưa kích hoạt
+                            </span>
+                        </div>
+
+                        <div class="mb-4">
+                            <button type="submit" class="btn btn-guest btn-outline-primary-guest" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>Cập nhật thông tin
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- FORM ĐỔI MẬT KHẨU - TÁCH RIÊNG HOÀN TOÀN -->
+                    <div class="guest-section text-start">
+                        <h6><i class="fas fa-key me-2"></i>Đổi mật khẩu</h6>
+                        <form th:action="@{/khach-thue/change-password}" method="post" id="changePasswordForm">
+                            <div class="mb-3">
+                                <label class="form-label-guest">Mật khẩu hiện tại *</label>
+                                <div class="password-input-container-guest">
+                                    <input type="password" class="form-control form-control-guest" id="currentPassword" name="currentPassword" required>
+                                    <button type="button" class="password-toggle-guest" onclick="togglePassword('currentPassword')">
+                                        <i class="fas fa-eye" id="currentPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback-guest" id="currentPasswordError" style="display: none;"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-guest">Mật khẩu mới *</label>
+                                <div class="password-input-container-guest">
+                                    <input type="password" class="form-control form-control-guest" id="newPassword" name="newPassword" required>
+                                    <button type="button" class="password-toggle-guest" onclick="togglePassword('newPassword')">
+                                        <i class="fas fa-eye" id="newPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength-guest" id="passwordStrength" style="display: none;">
+                                    <div class="password-strength-bar-guest"></div>
+                                </div>
+                                <div class="invalid-feedback-guest" id="newPasswordError" style="display: none;"></div>
+                                <div class="field-info-guest text-info" style="display: flex;">
+                                    <i class="fas fa-info-circle"></i> Mật khẩu phải có ít nhất 6 ký tự
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-guest">Xác nhận mật khẩu mới *</label>
+                                <div class="password-input-container-guest">
+                                    <input type="password" class="form-control form-control-guest" id="confirmPassword" name="confirmPassword" required>
+                                    <button type="button" class="password-toggle-guest" onclick="togglePassword('confirmPassword')">
+                                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback-guest" id="confirmPasswordError" style="display: none;"></div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-guest btn-warning-guest w-100" id="changePasswordBtn">
+                                <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải - Form Information -->
+            <div class="col-12 col-lg-8">
+                <!-- Thông tin cá nhân -->
+                <div class="guest-section">
+                    <h6><i class="fas fa-user me-2"></i>Thông tin cá nhân</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Họ và tên *</label>
+                            <input type="text" class="form-control form-control-guest" id="fullname" th:field="*{guestInfo.fullname}" 
+                                   form="guestProfileForm" required>
+                            <div class="invalid-feedback-guest" id="fullnameError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="fullnameSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Ngày sinh</label>
+                            <input type="date" class="form-control form-control-guest" id="birthday" th:field="*{guestInfo.birthday}"
+                                   form="guestProfileForm">
+                            <div class="invalid-feedback-guest" id="birthdayError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="birthdaySuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Số CMND/CCCD</label>
+                            <input type="text" class="form-control form-control-guest" id="cccdNumber" th:field="*{guestInfo.cccdNumber}"
+                                   maxlength="12" form="guestProfileForm">
+                            <div class="invalid-feedback-guest" id="cccdNumberError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="cccdNumberSuccess" style="display: none;"></div>
+                            <div class="field-info-guest" id="cccdInfo" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Ngày cấp</label>
+                            <input type="date" class="form-control form-control-guest" id="issueDate" th:field="*{guestInfo.issueDate}"
+                                   form="guestProfileForm">
+                            <div class="invalid-feedback-guest" id="issueDateError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="issueDateSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Nơi cấp</label>
+                            <input type="text" class="form-control form-control-guest" id="issuePlace" th:field="*{guestInfo.issuePlace}"
+                                   form="guestProfileForm">
+                            <div class="invalid-feedback-guest" id="issuePlaceError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="issuePlaceSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest d-block">Giới tính</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNam"
+                                    value="true" th:checked="${guestInfo.gender} == true" form="guestProfileForm">
+                                <label class="form-check-label" for="genderNam">Nam</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNu"
+                                    value="false" th:checked="${guestInfo.gender} == false" form="guestProfileForm">
+                                <label class="form-check-label" for="genderNu">Nữ</label>
+                            </div>
+                            <div class="invalid-feedback-guest" id="genderError" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Thông tin liên hệ -->
+                <div class="guest-section">
+                    <h6><i class="fas fa-envelope me-2"></i>Thông tin liên hệ</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Email *</label>
+                            <input type="email" class="form-control form-control-guest" id="email" th:field="*{guestInfo.email}" 
+                                   form="guestProfileForm" required>
+                            <div class="invalid-feedback-guest" id="emailError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="emailSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-guest">Số điện thoại *</label>
+                            <input type="tel" class="form-control form-control-guest" id="phone" th:field="*{guestInfo.phone}" 
+                                   form="guestProfileForm" required>
+                            <div class="invalid-feedback-guest" id="phoneError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="phoneSuccess" style="display: none;"></div>
+                            <div class="field-info-guest" id="phoneInfo" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-guest">Tỉnh/Thành phố</label>
+                            <select class="form-select form-select-guest" id="province" name="province">
+                                <option value="">Chọn Tỉnh/TP</option>
+                            </select>
+                            <div class="invalid-feedback-guest" id="provinceError" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-guest">Quận/Huyện</label>
+                            <select class="form-select form-select-guest" id="district" name="district">
+                                <option value="">Chọn Quận/Huyện</option>
+                            </select>
+                            <div class="invalid-feedback-guest" id="districtError" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-guest">Phường/Xã</label>
+                            <select class="form-select form-select-guest" id="ward" name="ward">
+                                <option value="">Chọn Phường/Xã</option>
+                            </select>
+                            <div class="invalid-feedback-guest" id="wardError" style="display: none;"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label-guest">Tên đường/Số nhà</label>
+                            <input type="text" class="form-control form-control-guest" id="street" name="street">
+                            <div class="invalid-feedback-guest" id="streetError" style="display: none;"></div>
+                            <div class="valid-feedback-guest" id="streetSuccess" style="display: none;"></div>
+                        </div>
+
+                        <!-- Hidden chứa địa chỉ đầy đủ -->
+                        <input type="hidden" name="address" th:field="*{guestInfo.address}" id="fullAddress" form="guestProfileForm">
+                        <input type="hidden" id="savedAddress" th:value="*{guestInfo.address}" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay-guest">
+        <div class="loading-spinner-guest">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Đang xử lý...</p>
+        </div>
+    </div>
+
+    <!-- Modal Báo Cáo Sự Cố - HỖ TRỢ NHIỀU ẢNH -->
+    <div id="reportModal" class="report-modal-overlay" style="display: none;">
+        <div class="report-modal-container">
+            <div class="report-modal-header">
+                <div class="report-modal-title">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    <span>Báo Cáo Sự Cố</span>
+                </div>
+                <button type="button" class="report-modal-close" onclick="closeReportModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <form th:action="@{/khach-thue/report-issue}" method="post" enctype="multipart/form-data" id="reportForm">
+                <div class="report-modal-body">
+                    <!-- Tiêu đề sự cố -->
+                    <div class="report-form-group">
+                        <label class="report-form-label">
+                            <i class="fas fa-heading me-2"></i>Tiêu đề sự cố
+                        </label>
+                        <input type="text" 
+                               class="report-form-control" 
+                               name="issueTitle" 
+                               id="issueTitle"
+                               placeholder="Nhập tiêu đề ngắn gọn về sự cố..." 
+                               required>
+                        <div class="report-invalid-feedback" id="issueTitleError"></div>
+                    </div>
+
+                    <!-- Mức độ ưu tiên -->
+                    <div class="report-form-group">
+                        <label class="report-form-label">
+                            <i class="fas fa-flag me-2"></i>Mức độ ưu tiên
+                        </label>
+                        <select class="report-form-control" name="priority" id="priority" required>
+                            <option value="">Chọn mức độ ưu tiên</option>
+                            <option value="low">Thấp - Không ảnh hưởng nhiều</option>
+                            <option value="medium">Trung bình - Cần xử lý sớm</option>
+                            <option value="high">Cao - Cần xử lý ngay</option>
+                            <option value="urgent">Khẩn cấp - Xử lý lập tức</option>
+                        </select>
+                        <div class="report-invalid-feedback" id="priorityError"></div>
+                    </div>
+
+                    <!-- Mô tả chi tiết -->
+                    <div class="report-form-group">
+                        <label class="report-form-label">
+                            <i class="fas fa-align-left me-2"></i>Mô tả chi tiết
+                        </label>
+                        <textarea class="report-form-control" 
+                                  name="description" 
+                                  id="description"
+                                  rows="4" 
+                                  placeholder="Mô tả chi tiết về sự cố, vị trí, thời gian xảy ra..." 
+                                  required></textarea>
+                        <div class="report-invalid-feedback" id="descriptionError"></div>
+                    </div>
+
+                    <!-- Upload nhiều ảnh -->
+                    <div class="report-form-group">
+                        <label class="report-form-label">
+                            <i class="fas fa-camera me-2"></i>Hình ảnh minh họa (tùy chọn)
+                            <span class="report-image-counter" id="imageCounter" style="position: relative; top: 0; right: 0; margin-left: 10px;">0/5 ảnh</span>
+                        </label>
+                        <div class="report-upload-area" onclick="document.getElementById('issueImageInput').click()">
+                            <input type="file" 
+                                   id="issueImageInput" 
+                                   name="issueImages" 
+                                   accept="image/*" 
+                                   multiple
+                                   style="display: none;"
+                                   onchange="handleMultipleImageUpload(this)">
+                            <div class="report-upload-content" id="uploadContent">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Nhấp để chọn ảnh hoặc kéo thả ảnh vào đây</p>
+                                <small>Hỗ trợ: JPG, PNG, GIF (tối đa 5MB mỗi ảnh, tối đa 5 ảnh)</small>
+                            </div>
+                        </div>
+                        
+                        <!-- Container hiển thị nhiều ảnh -->
+                        <div class="report-images-container" id="imagesContainer" style="display: none;"></div>
+                        
+                        <div class="report-invalid-feedback" id="imageError"></div>
+                    </div>
+                </div>
+
+                <div class="report-modal-footer">
+                    <button type="button" class="btn-report-cancel" onclick="closeReportModal()">
+                        <i class="fas fa-times me-2"></i>Hủy bỏ
+                    </button>
+                    <button type="submit" class="btn-report-submit" id="submitReportBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Gửi báo cáo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Enhanced JavaScript with Multiple Images Support -->
+    <script>
+        // Global variables for multiple images
+        let selectedImages = [];
+        const MAX_IMAGES = 5;
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+        // Password Toggle Function
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(fieldId + 'Icon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // Modal Functions
+        function openReportModal() {
+            document.getElementById('reportModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            
+            // Reset form
+            document.getElementById('reportForm').reset();
+            clearValidationErrors();
+            removeAllImages();
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // MULTIPLE IMAGE UPLOAD HANDLER
+        function handleMultipleImageUpload(input) {
+            const files = Array.from(input.files);
+            
+            if (files.length === 0) return;
+
+            // Check total images limit
+            if (selectedImages.length + files.length > MAX_IMAGES) {
+                showImageError(`Chỉ được chọn tối đa ${MAX_IMAGES} ảnh. Hiện tại đã có ${selectedImages.length} ảnh.`);
+                input.value = '';
+                return;
+            }
+
+            let validFiles = [];
+            let hasError = false;
+
+            files.forEach(file => {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showImageError('Chỉ được chọn file ảnh (JPG, PNG, GIF)');
+                    hasError = true;
+                    return;
+                }
+
+                // Validate file size
+                if (file.size > MAX_FILE_SIZE) {
+                    showImageError(`File "${file.name}" vượt quá 5MB`);
+                    hasError = true;
+                    return;
+                }
+
+                validFiles.push(file);
+            });
+
+            if (hasError) {
+                input.value = '';
+                return;
+            }
+
+            // Add valid files to selectedImages - SỬA LỖI: dùng string ID
+            validFiles.forEach(file => {
+                const imageId = 'img_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                selectedImages.push({
+                    id: imageId,
+                    file: file,
+                    url: URL.createObjectURL(file)
+                });
+            });
+
+            updateImageDisplay();
+            clearImageError();
+            input.value = ''; // Reset input để có thể chọn lại
+        }
+
+        // UPDATE IMAGE DISPLAY - SỬA LỖI
+        function updateImageDisplay() {
+            const container = document.getElementById('imagesContainer');
+            const uploadContent = document.getElementById('uploadContent');
+            const counter = document.getElementById('imageCounter');
+
+            // Update counter
+            counter.textContent = `${selectedImages.length}/${MAX_IMAGES} ảnh`;
+
+            if (selectedImages.length === 0) {
+                container.style.display = 'none';
+                uploadContent.style.display = 'block';
+                return;
+            }
+
+            // Show images container
+            container.style.display = 'grid';
+            uploadContent.style.display = 'none';
+
+            // Clear and rebuild container
+            container.innerHTML = '';
+
+            selectedImages.forEach(image => {
+                const imageDiv = document.createElement('div');
+                imageDiv.className = 'report-image-preview';
+                // SỬA LỖI: dùng onclick thay vì template literal trong HTML
+                imageDiv.innerHTML = `
+                    <img src="${image.url}" alt="Preview">
+                    <button type="button" class="report-remove-image" data-image-id="${image.id}">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                // SỬA LỖI: thêm event listener trực tiếp
+                const removeBtn = imageDiv.querySelector('.report-remove-image');
+                removeBtn.addEventListener('click', function() {
+                    removeImage(image.id);
+                });
+                
+                container.appendChild(imageDiv);
+            });
+
+            // Show upload area again if not at limit
+            if (selectedImages.length < MAX_IMAGES) {
+                const addMoreDiv = document.createElement('div');
+                addMoreDiv.className = 'report-upload-area';
+                addMoreDiv.style.minHeight = '120px';
+                addMoreDiv.style.display = 'flex';
+                addMoreDiv.style.alignItems = 'center';
+                addMoreDiv.style.justifyContent = 'center';
+                addMoreDiv.style.cursor = 'pointer';
+                addMoreDiv.onclick = () => document.getElementById('issueImageInput').click();
+                addMoreDiv.innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-plus" style="font-size: 2rem; color: #007bff; margin-bottom: 0.5rem;"></i>
+                        <p style="margin: 0; font-size: 0.9rem; color: #495057;">Thêm ảnh</p>
+                    </div>
+                `;
+                container.appendChild(addMoreDiv);
+            }
+        }
+
+        // REMOVE SINGLE IMAGE - SỬA LỖI
+        function removeImage(imageId) {
+            console.log('Removing image with ID:', imageId); // Debug log
+            
+            // Tìm và xóa ảnh khỏi mảng
+            const imageIndex = selectedImages.findIndex(img => img.id === imageId);
+            
+            if (imageIndex !== -1) {
+                // Giải phóng URL object
+                URL.revokeObjectURL(selectedImages[imageIndex].url);
+                
+                // Xóa khỏi mảng
+                selectedImages.splice(imageIndex, 1);
+                
+                console.log('Image removed. Remaining images:', selectedImages.length); // Debug log
+                
+                // Cập nhật hiển thị
+                updateImageDisplay();
+                
+                if (selectedImages.length === 0) {
+                    clearImageError();
+                }
+            } else {
+                console.error('Image not found with ID:', imageId); // Debug log
+            }
+        }
+
+        function removeAllImages() {
+            selectedImages.forEach(image => {
+                URL.revokeObjectURL(image.url);
+            });
+            selectedImages = [];
+            updateImageDisplay();
+        }
+
+        // Validation Functions
+        function validateReportForm() {
+            let isValid = true;
+            
+            // Validate title
+            const title = document.getElementById('issueTitle').value.trim();
+            if (!title) {
+                showFieldError('issueTitle', 'Vui lòng nhập tiêu đề sự cố');
+                isValid = false;
+            } else if (title.length < 5) {
+                showFieldError('issueTitle', 'Tiêu đề phải có ít nhất 5 ký tự');
+                isValid = false;
+            } else {
+                clearFieldError('issueTitle');
+            }
+            
+            // Validate priority
+            const priority = document.getElementById('priority').value;
+            if (!priority) {
+                showFieldError('priority', 'Vui lòng chọn mức độ ưu tiên');
+                isValid = false;
+            } else {
+                clearFieldError('priority');
+            }
+            
+            // Validate description
+            const description = document.getElementById('description').value.trim();
+            if (!description) {
+                showFieldError('description', 'Vui lòng mô tả chi tiết sự cố');
+                isValid = false;
+            } else if (description.length < 10) {
+                showFieldError('description', 'Mô tả phải có ít nhất 10 ký tự');
+                isValid = false;
+            } else {
+                clearFieldError('description');
+            }
+            
+            return isValid;
+        }
+
+        function showFieldError(fieldId, message) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            
+            field.classList.add('is-invalid');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function clearFieldError(fieldId) {
+            const field = document.getElementById(fieldId);
+            const errorDiv = document.getElementById(fieldId + 'Error');
+            
+            field.classList.remove('is-invalid');
+            errorDiv.classList.remove('show');
+        }
+
+        function showImageError(message) {
+            const errorDiv = document.getElementById('imageError');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        function clearImageError() {
+            const errorDiv = document.getElementById('imageError');
+            errorDiv.classList.remove('show');
+        }
+
+        function clearValidationErrors() {
+            ['issueTitle', 'priority', 'description'].forEach(fieldId => {
+                clearFieldError(fieldId);
+            });
+            clearImageError();
+        }
+
+        // FORM SUBMISSION WITH MULTIPLE IMAGES
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateReportForm()) {
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = document.getElementById('submitReportBtn');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang gửi...';
+            submitBtn.disabled = true;
+            
+            // Create FormData with multiple images
+            const formData = new FormData();
+            formData.append('issueTitle', document.getElementById('issueTitle').value);
+            formData.append('priority', document.getElementById('priority').value);
+            formData.append('description', document.getElementById('description').value);
+            
+            // Add all selected images
+            selectedImages.forEach((image, index) => {
+                formData.append('issueImages', image.file);
+            });
+            
+            // Submit with fetch API
+            fetch('/khach-thue/report-issue', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                // Success - reload page to show success message
+                window.location.reload();
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi gửi báo cáo. Vui lòng thử lại!');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+
+        // Real-time validation
+        document.getElementById('issueTitle').addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldError('issueTitle');
+            }
+        });
+
+        document.getElementById('priority').addEventListener('change', function() {
+            if (this.value) {
+                clearFieldError('priority');
+            }
+        });
+
+        document.getElementById('description').addEventListener('input', function() {
+            if (this.value.trim()) {
+                clearFieldError('description');
+            }
+        });
+
+        // Close modal when clicking outside
+        document.getElementById('reportModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReportModal();
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && document.getElementById('reportModal').style.display === 'flex') {
+                closeReportModal();
+            }
+        });
+
+        // CCCD Province Codes - Mã tỉnh CCCD Việt Nam
+        const CCCD_PROVINCE_CODES = {
+            // Miền Bắc
+            "001": "Hà Nội", "002": "Hà Giang", "004": "Cao Bằng", "006": "Bắc Kạn",
+            "008": "Tuyên Quang", "010": "Lào Cai", "011": "Điện Biên", "012": "Lai Châu",
+            "014": "Sơn La", "015": "Yên Bái", "017": "Hoà Bình", "019": "Thái Nguyên",
+            "020": "Lạng Sơn", "022": "Quảng Ninh", "024": "Bắc Giang", "025": "Phú Thọ",
+            "026": "Vĩnh Phúc", "027": "Bắc Ninh", "030": "Hải Dương", "031": "Hải Phòng",
+            "033": "Hưng Yên", "034": "Thái Bình", "035": "Hà Nam", "036": "Nam Định",
+            "037": "Ninh Bình",
+
+            // Miền Trung
+            "038": "Thanh Hóa", "040": "Nghệ An", "042": "Hà Tĩnh", "044": "Quảng Bình",
+            "045": "Quảng Trị", "046": "Thừa Thiên Huế", "048": "Đà Nẵng", "049": "Quảng Nam",
+            "051": "Quảng Ngãi", "052": "Bình Định", "054": "Phú Yên", "056": "Khánh Hòa",
+            "058": "Ninh Thuận", "060": "Bình Thuận", "062": "Kon Tum", "064": "Gia Lai",
+            "066": "Đắk Lắk", "067": "Đắk Nông", "068": "Lâm Đồng",
+
+            // Miền Nam
+            "070": "Bình Phước", "072": "Tây Ninh", "074": "Bình Dương", "075": "Đồng Nai",
+            "077": "Bà Rịa - Vũng Tàu", "079": "Hồ Chí Minh", "080": "Long An", "082": "Tiền Giang",
+            "083": "Bến Tre", "084": "Trà Vinh", "086": "Vĩnh Long", "087": "Đồng Tháp",
+            "089": "An Giang", "091": "Kiên Giang", "092": "Cần Thơ", "093": "Hậu Giang",
+            "094": "Sóc Trăng", "095": "Bạc Liêu", "096": "Cà Mau"
+        };
+
+        // Phone Network Codes - Mã nhà mạng Việt Nam
+        const PHONE_NETWORK_CODES = {
+            // Viettel
+            "032": "Viettel", "033": "Viettel", "034": "Viettel",
+            "035": "Viettel", "036": "Viettel", "037": "Viettel",
+            "038": "Viettel", "039": "Viettel", "096": "Viettel",
+            "097": "Viettel", "098": "Viettel",
+
+            // Vinaphone
+            "081": "Vinaphone", "082": "Vinaphone", "083": "Vinaphone",
+            "084": "Vinaphone", "085": "Vinaphone", "091": "Vinaphone",
+            "094": "Vinaphone",
+
+            // Mobifone
+            "070": "Mobifone", "076": "Mobifone", "077": "Mobifone",
+            "078": "Mobifone", "079": "Mobifone", "090": "Mobifone",
+            "093": "Mobifone",
+
+            // Vietnamobile
+            "056": "Vietnamobile", "058": "Vietnamobile", "092": "Vietnamobile",
+
+            // Gmobile
+            "059": "Gmobile", "099": "Gmobile"
+        };
+
+        // Enhanced Guest Profile Manager
+        class EnhancedGuestProfileManager {
+            constructor() {
+                this.formElements = [
+                    "fullname", "email", "phone", "birthday", "cccdNumber",
+                    "issueDate", "issuePlace", "street"
+                ];
+                this.passwordElements = [
+                    "currentPassword", "newPassword", "confirmPassword"
+                ];
+                this.init();
+            }
+
+            async init() {
+                try {
+                    // Setup event listeners
+                    this.setupEventListeners();
+
+                    // Initialize form validation
+                    this.initializeValidation();
+
+                    // Show existing data validation
+                    this.validateExistingData();
+
+                    // Initialize animations
+                    this.initializeAnimations();
+                } catch (error) {
+                    console.error("Error initializing guest profile:", error);
+                    this.showNotification("Có lỗi xảy ra khi khởi tạo trang", "error");
+                }
+            }
+
+            setupEventListeners() {
+                // Avatar upload
+                const avatarInput = document.getElementById("avatarInput");
+                if (avatarInput) {
+                    avatarInput.addEventListener("change", (e) => this.handleAvatarChange(e));
+                }
+
+                // Form validation
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                        element.addEventListener("blur", () => this.validateField(id));
+                    }
+                });
+
+                // Password validation - TÁCH RIÊNG
+                this.passwordElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validatePasswordField(id));
+                        element.addEventListener("blur", () => this.validatePasswordField(id));
+                    }
+                });
+
+                // Phone and CCCD formatting
+                const phoneInput = document.getElementById("phone");
+                const cccdInput = document.getElementById("cccdNumber");
+
+                if (phoneInput) {
+                    phoneInput.addEventListener("input", (e) => this.formatPhone(e));
+                }
+
+                if (cccdInput) {
+                    cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
+                }
+
+                // Form submission - TÁCH RIÊNG
+                const profileForm = document.getElementById("guestProfileForm");
+                if (profileForm) {
+                    profileForm.addEventListener("submit", (e) => this.handleProfileFormSubmit(e));
+                }
+
+                // Password form submission - TÁCH RIÊNG
+                const passwordForm = document.getElementById("changePasswordForm");
+                if (passwordForm) {
+                    passwordForm.addEventListener("submit", (e) => this.handlePasswordFormSubmit(e));
+                }
+            }
+
+            // TÁCH RIÊNG - Xử lý form cập nhật thông tin
+            async handleProfileFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validateProfileForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin cá nhân", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting profile form:", error);
+                    this.showNotification("Có lỗi xảy ra khi cập nhật thông tin", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // TÁCH RIÊNG - Xử lý form đổi mật khẩu
+            async handlePasswordFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validatePasswordForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin mật khẩu", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting password form:", error);
+                    this.showNotification("Có lỗi xảy ra khi đổi mật khẩu", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // TÁCH RIÊNG - Validate form thông tin cá nhân
+            validateProfileForm() {
+                let isValid = true;
+
+                this.formElements.forEach((fieldId) => {
+                    if (!this.validateField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // TÁCH RIÊNG - Validate form đổi mật khẩu
+            validatePasswordForm() {
+                let isValid = true;
+
+                this.passwordElements.forEach((fieldId) => {
+                    if (!this.validatePasswordField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Enhanced password validation
+            validatePasswordField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                const value = element.value;
+
+                switch (fieldId) {
+                    case "currentPassword":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng nhập mật khẩu hiện tại";
+                        }
+                        break;
+
+                    case "newPassword":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng nhập mật khẩu mới";
+                        } else if (value.length < 6) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
+                        } else {
+                            this.updatePasswordStrength(value);
+                        }
+                        
+                        // Validate confirm password if it has value
+                        const confirmPassword = document.getElementById("confirmPassword");
+                        if (confirmPassword && confirmPassword.value) {
+                            this.validatePasswordField("confirmPassword");
+                        }
+                        break;
+
+                    case "confirmPassword":
+                        const newPassword = document.getElementById("newPassword").value;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng xác nhận mật khẩu mới";
+                        } else if (value !== newPassword) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu xác nhận không khớp";
+                        }
+                        break;
+                }
+
+                // Update UI
+                this.updateValidationUI(fieldId, isValid, errorMessage, "");
+                return isValid;
+            }
+
+            // Update password strength indicator
+            updatePasswordStrength(password) {
+                const strengthElement = document.getElementById("passwordStrength");
+                if (!strengthElement) return;
+
+                let strength = 0;
+                
+                // Length check
+                if (password.length >= 6) strength++;
+                if (password.length >= 8) strength++;
+                
+                // Character variety checks
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                strengthElement.style.display = "block";
+                strengthElement.className = "password-strength-guest";
+
+                if (strength <= 2) {
+                    strengthElement.classList.add("weak");
+                } else if (strength <= 4) {
+                    strengthElement.classList.add("medium");
+                } else {
+                    strengthElement.classList.add("strong");
+                }
+            }
+
+            // Enhanced form validation
+            validateField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                let successMessage = "";
+                const value = element.value.trim();
+
+                switch (fieldId) {
+                    case "fullname":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được để trống";
+                        } else if (value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Họ tên phải có ít nhất 2 ký tự";
+                        } else if (value.length > 100) {
+                            isValid = false;
+                            errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                        } else {
+                            successMessage = "Họ tên hợp lệ";
+                        }
+                        break;
+
+                    case "email":
+                        const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Email không được để trống";
+                        } else if (!emailRegex.test(value)) {
+                            isValid = false;
+                            errorMessage = "Email không đúng định dạng";
+                        } else {
+                            successMessage = "Email hợp lệ";
+                        }
+                        break;
+
+                    case "phone":
+                        const phoneValidation = this.validatePhoneNumber(value);
+                        if (!phoneValidation.isValid) {
+                            isValid = false;
+                            errorMessage = phoneValidation.message;
+                        } else {
+                            successMessage = "Số điện thoại hợp lệ";
+                            this.showPhoneNetworkInfo(value);
+                        }
+                        break;
+
+                    case "cccdNumber":
+                        if (value) {
+                            const cccdValidation = this.validateCCCDNumber(value);
+                            if (!cccdValidation.isValid) {
+                                isValid = false;
+                                errorMessage = cccdValidation.message;
+                            } else {
+                                successMessage = "CCCD hợp lệ";
+                                this.showCCCDProvinceInfo(value);
+                            }
+                        }
+                        break;
+
+                    case "birthday":
+                        if (value) {
+                            const birthDate = new Date(value);
+                            const today = new Date();
+                            const age = today.getFullYear() - birthDate.getFullYear();
+
+                            if (age < 18) {
+                                isValid = false;
+                                errorMessage = "Khách thuê phải từ 18 tuổi trở lên";
+                            } else if (age > 100) {
+                                isValid = false;
+                                errorMessage = "Tuổi không được vượt quá 100";
+                            } else {
+                                successMessage = `Tuổi: ${age} (hợp lệ)`;
+                            }
+                        }
+                        break;
+
+                    case "issueDate":
+                        if (value) {
+                            const issueDate = new Date(value);
+                            const birthDate = new Date(document.getElementById("birthday").value);
+                            const today = new Date();
+
+                            if (birthDate && issueDate <= birthDate) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD phải sau ngày sinh";
+                            } else if (issueDate > today) {
+                                isValid = false;
+                                errorMessage = "Ngày cấp CCCD không được là tương lai";
+                            } else {
+                                successMessage = "Ngày cấp hợp lệ";
+                            }
+                        }
+                        break;
+
+                    case "issuePlace":
+                        if (value && value.length < 2) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
+                        } else if (value) {
+                            successMessage = "Nơi cấp hợp lệ";
+                        }
+                        break;
+
+                    case "street":
+                        if (value && value.length < 5) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
+                        } else if (value) {
+                            successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                }
+
+                // Update UI
+                this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                return isValid;
+            }
+
+            // Validate Vietnamese phone number
+            validatePhoneNumber(phoneNumber) {
+                if (!phoneNumber) {
+                    return { isValid: false, message: "Số điện thoại không được để trống" };
+                }
+
+                const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+
+                if (!cleanPhone.startsWith("0")) {
+                    return { isValid: false, message: "Số điện thoại phải bắt đầu bằng số 0" };
+                }
+
+                if (!/^0[0-9]{9}$/.test(cleanPhone)) {
+                    return { isValid: false, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0" };
+                }
+
+                const networkCode = cleanPhone.substring(0, 3);
+                const validNetworks = Object.keys(PHONE_NETWORK_CODES);
+
+                let isValidNetwork = false;
+                for (const validCode of validNetworks) {
+                    if (networkCode.startsWith(validCode.substring(0, 2))) {
+                        isValidNetwork = true;
+                        break;
+                    }
+                }
+
+                if (!isValidNetwork) {
+                    return { isValid: false, message: "Số điện thoại không đúng định dạng nhà mạng Việt Nam" };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Validate CCCD number - ĐÃ SỬA LỖI
+            validateCCCDNumber(cccdNumber) {
+                if (!cccdNumber) {
+                    return { isValid: true, message: "" };
+                }
+
+                const cleanCCCD = cccdNumber.replace(/\s/g, "");
+
+                if (!/^[0-9]{12}$/.test(cleanCCCD)) {
+                    return { isValid: false, message: "CCCD phải có đúng 12 chữ số" };
+                }
+
+                const provinceCode = cleanCCCD.substring(0, 3);
+
+                if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                    return {
+                        isValid: false,
+                        message: `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                    };
+                }
+
+                return { isValid: true, message: "" };
+            }
+
+            // Show phone network information
+            showPhoneNetworkInfo(phoneNumber) {
+                const networkInfo = this.getNetworkFromPhone(phoneNumber);
+                const phoneInfo = document.getElementById("phoneInfo");
+
+                if (networkInfo && phoneInfo) {
+                    phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
+                    phoneInfo.className = "field-info-guest text-success";
+                    phoneInfo.style.display = "flex";
+                }
+            }
+
+            // Show CCCD province information
+            showCCCDProvinceInfo(cccdNumber) {
+                const provinceInfo = this.getProvinceFromCCCD(cccdNumber);
+                const cccdInfo = document.getElementById("cccdInfo");
+
+                if (provinceInfo && cccdInfo) {
+                    cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
+                    cccdInfo.className = "field-info-guest text-info";
+                    cccdInfo.style.display = "flex";
+                }
+            }
+
+            // Get network from phone number
+            getNetworkFromPhone(phoneNumber) {
+                if (!phoneNumber || !phoneNumber.startsWith("0") || phoneNumber.length !== 10) {
+                    return null;
+                }
+
+                const networkCode = phoneNumber.substring(0, 3);
+                return PHONE_NETWORK_CODES[networkCode] || null;
+            }
+
+            // Get province from CCCD
+            getProvinceFromCCCD(cccdNumber) {
+                if (!cccdNumber || cccdNumber.length < 3) {
+                    return null;
+                }
+
+                const provinceCode = cccdNumber.substring(0, 3);
+                return CCCD_PROVINCE_CODES[provinceCode] || null;
+            }
+
+            // Update validation UI
+            updateValidationUI(fieldId, isValid, errorMessage, successMessage) {
+                const element = document.getElementById(fieldId);
+                const errorElement = document.getElementById(fieldId + "Error");
+                const successElement = document.getElementById(fieldId + "Success");
+
+                if (!element) return;
+
+                // Clear previous states
+                element.classList.remove("is-invalid", "is-valid");
+
+                if (errorElement) {
+                    errorElement.style.display = "none";
+                    errorElement.textContent = "";
+                }
+
+                if (successElement) {
+                    successElement.style.display = "none";
+                    successElement.textContent = "";
+                }
+
+                // Apply new state
+                if (isValid && successMessage) {
+                    element.classList.add("is-valid");
+                    if (successElement) {
+                        successElement.textContent = successMessage;
+                        successElement.style.display = "flex";
+                    }
+                } else if (!isValid && errorMessage) {
+                    element.classList.add("is-invalid");
+                    if (errorElement) {
+                        errorElement.textContent = errorMessage;
+                        errorElement.style.display = "flex";
+                    }
+                }
+            }
+
+            // Validate existing data on page load
+            validateExistingData() {
+                const phoneElement = document.getElementById("phone");
+                if (phoneElement && phoneElement.value) {
+                    this.showPhoneNetworkInfo(phoneElement.value);
+                }
+
+                const cccdElement = document.getElementById("cccdNumber");
+                if (cccdElement && cccdElement.value) {
+                    this.showCCCDProvinceInfo(cccdElement.value);
+                }
+            }
+
+            // Format phone input
+            formatPhone(event) {
+                let value = event.target.value;
+
+                if (value && !value.startsWith("0")) {
+                    value = "0" + value.replace(/\D/g, "");
+                } else {
+                    value = value.replace(/[^\d]/g, "");
+                }
+
+                if (value.length > 10) {
+                    value = value.substring(0, 10);
+                }
+
+                event.target.value = value;
+                this.validateField("phone");
+            }
+
+            // Format CCCD input
+            formatCCCD(event) {
+                let value = event.target.value.replace(/\D/g, "");
+
+                if (value.length > 12) {
+                    value = value.substring(0, 12);
+                }
+
+                event.target.value = value;
+                this.validateField("cccdNumber");
+            }
+
+            // Handle avatar change
+            handleAvatarChange(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Chỉ được chọn file ảnh (JPG, PNG, GIF)", "error");
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Kích thước file không được vượt quá 5MB", "error");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById("avatarPreview").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                this.showNotification("Ảnh đại diện đã được chọn", "success");
+            }
+
+            // Utility functions
+            showLoading(show) {
+                const overlay = document.getElementById("loadingOverlay");
+                if (overlay) {
+                    overlay.style.display = show ? "flex" : "none";
+                }
+            }
+
+            showNotification(message, type = "info") {
+                const container = document.getElementById("toastContainer");
+                if (!container) return;
+
+                const notification = document.createElement("div");
+                notification.className = `alert-guest ${type} animate-fade-in-guest`;
+                notification.innerHTML = `
+                    <i class="alert-icon-guest fas fa-${this.getNotificationIcon(type)}"></i>
+                    <span class="alert-message-guest">${message}</span>
+                    <button type="button" class="btn-close-guest" aria-label="Đóng thông báo">×</button>
+                `;
+
+                container.appendChild(notification);
+
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.style.opacity = '0';
+                        notification.style.transform = 'translateX(100%)';
+                        setTimeout(() => notification.remove(), 500);
+                    }
+                }, 5000);
+
+                // Close button
+                const closeBtn = notification.querySelector(".btn-close-guest");
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => notification.remove());
+                }
+            }
+
+            getNotificationIcon(type) {
+                const icons = {
+                    success: "check-circle",
+                    error: "exclamation-circle",
+                    warning: "exclamation-triangle",
+                    info: "info-circle"
+                };
+                return icons[type] || "info-circle";
+            }
+
+            initializeAnimations() {
+                const sections = document.querySelectorAll(".guest-section");
+                sections.forEach((section, index) => {
+                    section.style.animationDelay = `${index * 0.1}s`;
+                    section.classList.add("animate-slide-up-guest");
+                });
+            }
+
+            initializeValidation() {
+                this.formElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validateField(id));
+                    }
+                });
+            }
+        }
+
+        // ===== CẬP NHẬT: SỬ DỤNG API https://provinces.open-api.vn/api =====
+        class VietnamAddressAPI {
+            constructor() {
+                this.provinceSelect = document.getElementById('province');
+                this.districtSelect = document.getElementById('district');
+                this.wardSelect = document.getElementById('ward');
+                this.streetInput = document.getElementById('street');
+                this.fullAddress = document.getElementById('fullAddress');
+                this.baseURL = 'https://provinces.open-api.vn/api';
+                this.provinces = [];
+                this.districts = [];
+                this.wards = [];
+            }
+
+            async init(savedAddress = "") {
+                try {
+                    console.log('🚀 Khởi tạo Vietnam Address API...');
+                    await this.loadProvinces();
+                    this.addListeners();
+                    if (savedAddress) {
+                        await this.setInitialAddress(savedAddress);
+                    }
+                    console.log('✅ Khởi tạo thành công!');
+                } catch (error) {
+                    console.error('❌ Lỗi khởi tạo:', error);
+                    this.showError('Không thể tải dữ liệu địa chỉ. Vui lòng thử lại sau.');
+                }
+            }
+
+            async loadProvinces() {
+                try {
+                    console.log('📡 Đang tải danh sách tỉnh thành...');
+                    const response = await fetch(`${this.baseURL}/p/`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    this.provinces = await response.json();
+                    console.log(`✅ Đã tải ${this.provinces.length} tỉnh thành`);
+                    
+                    this.populateProvinces();
+                } catch (error) {
+                    console.error('❌ Lỗi tải tỉnh thành:', error);
+                    throw error;
+                }
+            }
+
+            async loadDistricts(provinceCode) {
+                try {
+                    console.log(`📡 Đang tải quận/huyện của tỉnh ${provinceCode}...`);
+                    const response = await fetch(`${this.baseURL}/p/${provinceCode}?depth=2`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const provinceData = await response.json();
+                    this.districts = provinceData.districts || [];
+                    console.log(`✅ Đã tải ${this.districts.length} quận/huyện`);
+                    
+                    this.populateDistricts();
+                } catch (error) {
+                    console.error('❌ Lỗi tải quận/huyện:', error);
+                    this.showError('Không thể tải danh sách quận/huyện');
+                }
+            }
+
+            async loadWards(districtCode) {
+                try {
+                    console.log(`📡 Đang tải phường/xã của quận/huyện ${districtCode}...`);
+                    const response = await fetch(`${this.baseURL}/d/${districtCode}?depth=2`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const districtData = await response.json();
+                    this.wards = districtData.wards || [];
+                    console.log(`✅ Đã tải ${this.wards.length} phường/xã`);
+                    
+                    this.populateWards();
+                } catch (error) {
+                    console.error('❌ Lỗi tải phường/xã:', error);
+                    this.showError('Không thể tải danh sách phường/xã');
+                }
+            }
+
+            populateProvinces() {
+                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+                this.provinces.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.code;
+                    option.textContent = province.name;
+                    this.provinceSelect.appendChild(option);
+                });
+            }
+
+            populateDistricts() {
+                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                this.districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.code;
+                    option.textContent = district.name;
+                    this.districtSelect.appendChild(option);
+                });
+                
+                // Reset ward select
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                this.wards = [];
+            }
+
+            populateWards() {
+                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                this.wards.forEach(ward => {
+                    const option = document.createElement('option');
+                    option.value = ward.code;
+                    option.textContent = ward.name;
+                    this.wardSelect.appendChild(option);
+                });
+            }
+
+            addListeners() {
+                this.provinceSelect.addEventListener("change", async (e) => {
+                    const provinceCode = e.target.value;
+                    if (provinceCode) {
+                        await this.loadDistricts(provinceCode);
+                    } else {
+                        this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                        this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        this.districts = [];
+                        this.wards = [];
+                    }
+                    this.updateFullAddress();
+                });
+
+                this.districtSelect.addEventListener("change", async (e) => {
+                    const districtCode = e.target.value;
+                    if (districtCode) {
+                        await this.loadWards(districtCode);
+                    } else {
+                        this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        this.wards = [];
+                    }
+                    this.updateFullAddress();
+                });
+
+                this.wardSelect.addEventListener("change", () => {
+                    this.updateFullAddress();
+                });
+
+                this.streetInput.addEventListener("input", () => {
+                    this.updateFullAddress();
+                });
+            }
+
+            updateFullAddress() {
+                const street = this.streetInput.value.trim();
+                const wardText = this.wardSelect.selectedOptions[0]?.text || '';
+                const districtText = this.districtSelect.selectedOptions[0]?.text || '';
+                const provinceText = this.provinceSelect.selectedOptions[0]?.text || '';
+
+                const parts = [street, wardText, districtText, provinceText]
+                    .filter(part => part && !part.includes("Chọn"));
+                
+                const fullAddressValue = parts.join(", ");
+                this.fullAddress.value = fullAddressValue;
+                
+                console.log('📍 Địa chỉ đầy đủ:', fullAddressValue);
+            }
+
+            async setInitialAddress(fullAddress) {
+                try {
+                    console.log('🔄 Đang thiết lập địa chỉ ban đầu:', fullAddress);
+                    
+                    const parts = fullAddress.split(",").map(p => p.trim());
+                    if (parts.length < 3) {
+                        console.log('⚠️ Địa chỉ không đủ thông tin để phân tích');
+                        return;
+                    }
+
+                    // Tách các phần: [street, ward, district, province]
+                    const [street, wardName, districtName, provinceName] = parts;
+                    
+                    if (street) {
+                        this.streetInput.value = street;
+                    }
+
+                    // Tìm và chọn tỉnh
+                    const province = this.provinces.find(p => 
+                        this.normalizeText(p.name).includes(this.normalizeText(provinceName)) ||
+                        this.normalizeText(provinceName).includes(this.normalizeText(p.name))
+                    );
+                    
+                    if (province) {
+                        console.log('✅ Tìm thấy tỉnh:', province.name);
+                        this.provinceSelect.value = province.code;
+                        await this.loadDistricts(province.code);
+
+                        // Tìm và chọn quận/huyện
+                        const district = this.districts.find(d => 
+                            this.normalizeText(d.name).includes(this.normalizeText(districtName)) ||
+                            this.normalizeText(districtName).includes(this.normalizeText(d.name))
+                        );
+                        
+                        if (district) {
+                            console.log('✅ Tìm thấy quận/huyện:', district.name);
+                            this.districtSelect.value = district.code;
+                            await this.loadWards(district.code);
+
+                            // Tìm và chọn phường/xã
+                            const ward = this.wards.find(w => 
+                                this.normalizeText(w.name).includes(this.normalizeText(wardName)) ||
+                                this.normalizeText(wardName).includes(this.normalizeText(w.name))
+                            );
+                            
+                            if (ward) {
+                                console.log('✅ Tìm thấy phường/xã:', ward.name);
+                                this.wardSelect.value = ward.code;
+                            } else {
+                                console.log('⚠️ Không tìm thấy phường/xã:', wardName);
+                            }
+                        } else {
+                            console.log('⚠️ Không tìm thấy quận/huyện:', districtName);
+                        }
+                    } else {
+                        console.log('⚠️ Không tìm thấy tỉnh:', provinceName);
+                    }
+
+                    this.updateFullAddress();
+                    console.log('✅ Hoàn thành thiết lập địa chỉ ban đầu');
+                    
+                } catch (error) {
+                    console.error('❌ Lỗi thiết lập địa chỉ ban đầu:', error);
+                }
+            }
+
+            // Chuẩn hóa text để so sánh (bỏ dấu, chuyển thường)
+            normalizeText(text) {
+                if (!text) return '';
+                return text.toLowerCase()
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .replace(/đ/g, 'd')
+                    .replace(/Đ/g, 'D');
+            }
+
+            showError(message) {
+                console.error('🚨 Lỗi:', message);
+                // Có thể hiển thị thông báo lỗi cho người dùng ở đây
+                const notification = document.createElement('div');
+                notification.className = 'alert-guest danger animate-fade-in-guest';
+                notification.innerHTML = `
+                    <i class="alert-icon-guest fas fa-exclamation-circle"></i>
+                    <span class="alert-message-guest">${message}</span>
+                    <button type="button" class="btn-close-guest" onclick="this.parentElement.remove()">×</button>
+                `;
+                
+                const container = document.getElementById('toastContainer');
+                if (container) {
+                    container.appendChild(notification);
+                    setTimeout(() => notification.remove(), 5000);
+                }
+            }
+        }
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', async () => {
+            console.log('🎯 DOM loaded - Khởi tạo ứng dụng...');
+            
+            // Initialize enhanced profile manager
+            window.guestProfileManager = new EnhancedGuestProfileManager();
+
+            // Initialize Vietnam Address API với API mới
+            const addressAPI = new VietnamAddressAPI();
+            const savedAddress = document.getElementById('savedAddress')?.value;
+            await addressAPI.init(savedAddress);
+
+            // Handle existing alerts
+            const alerts = document.querySelectorAll(".alert-guest");
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateX(100%)';
+                    setTimeout(() => alert.remove(), 500);
+                }, 3000);
+
+                const closeBtn = alert.querySelector(".btn-close-guest");
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => alert.remove());
+                }
+            });
+            
+            console.log('🎉 Khởi tạo ứng dụng hoàn tất!');
+        });
+    </script>
+</body>
+
+</html>
