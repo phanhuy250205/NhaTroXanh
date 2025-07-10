@@ -484,7 +484,7 @@ public class ContractServiceImpl implements ContractService {
             unregisteredTenantUpdate.setStatus(UnregisteredTenants.Status.ACTIVE);
             Address address = new Address();
             address.setStreet(contractDto.getUnregisteredTenant().getStreet());
-            unregisteredTenantUpdate.setAddress(address);
+//            unregisteredTenantUpdate.setAddress(address);
             unregisteredTenantsRepository.save(unregisteredTenantUpdate);
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
             contract.setTenant(null);
@@ -867,6 +867,7 @@ public class ContractServiceImpl implements ContractService {
                     LocalDate endDate = calculateEndDate(contract);
                     dto.setEndDate(endDate);
 
+
                     // Số điện thoại
                     dto.setTenantPhone(getTenantPhone(contract));
 
@@ -875,10 +876,14 @@ public class ContractServiceImpl implements ContractService {
                             .map(Enum::toString)
                             .orElse("UNKNOWN"));
 
+
+
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
+
 
     private LocalDate calculateEndDate(Contracts contract) {
         if (contract.getEndDate() != null) {

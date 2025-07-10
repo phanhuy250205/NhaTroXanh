@@ -286,17 +286,14 @@
                                     </label>
                                     <select class="form-select" id="tenant-province" th:field="*{tenant.province}" required>
                                         <option value="">Tỉnh/Thành phố</option>
-                                        <option th:each="province : ${provinces}" th:value="${province.code}" th:text="${province.name}" th:selected="${contract.tenant.province == province.code}"></option>
                                     </select>
-
-
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">
                                         Quận/Huyện <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="tenant-district">
+                                    <select class="form-select" id="tenant-district" th:field="*{tenant.district}" required>
                                         <option value="">Quận/Huyện</option>
                                     </select>
                                 </div>
@@ -305,7 +302,7 @@
                                     <label class="form-label">
                                         Phường/Xã <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="tenant-ward">
+                                    <select class="form-select" id="tenant-ward" th:field="*{tenant.ward}" required>
                                         <option value="">Phường/Xã</option>
                                     </select>
                                 </div>
@@ -314,14 +311,14 @@
                                     <label class="form-label">
                                         Tên đường/Số nhà <span class="text-danger">*</span>
                                     </label>
-                                    <input type="text" class="form-control"  id="tenant-street" required
+                                    <input type="text" class="form-control" id="tenant-street" required
                                            placeholder="Số nhà, tên đường">
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Email (nếu có)</label>
                                     <input type="email" class="form-control" id="tenant-email"
-                                           pattern=".*@gmail\.com$" th:field="*{tenant.email}" placeholder="example@gmail.com">
+                                           pattern=".*@gmail\.com$" placeholder="example@gmail.com">
                                 </div>
 
                                 <!-- CCCD Images -->
