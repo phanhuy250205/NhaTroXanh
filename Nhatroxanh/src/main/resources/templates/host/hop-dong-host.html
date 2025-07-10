@@ -164,7 +164,9 @@
         <div class="row mt-3">
             <!-- Form Column -->
             <div class="col-lg-7">
+
                 <form th:action="${isEditMode} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}" method="post" enctype="multipart/form-data" th:object="${contract}" novalidate id="contractForm">
+
 
                     <!-- Basic Info Card -->
                     <div class="card nha-tro-card mb-3">
