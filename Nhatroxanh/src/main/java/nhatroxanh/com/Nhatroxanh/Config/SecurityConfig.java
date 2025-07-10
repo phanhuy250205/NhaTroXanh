@@ -56,10 +56,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/users/**","/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
+                        .requestMatchers("/api/users/**", "/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
+                                "/fonts/**",
                                 "/uploads/**")
                         .permitAll()
-                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher")
+                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher",
+                                "/tat-ca-phong-tro")
                         .permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
@@ -67,17 +70,17 @@ public class SecurityConfig {
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
-    .loginPage("/dang-nhap-chu-tro")
-    .loginProcessingUrl("/login-processing")
-    .usernameParameter("username")
-    .passwordParameter("password")
-    .successHandler(customLoginSuccessHandler) // CHỈ DÙNG handler này thôi
-    .failureHandler((request, response, exception) -> {
-        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        response.setContentType("text/plain; charset=UTF-8");
-        response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
-    })
-    .permitAll())
+                        .loginPage("/dang-nhap-chu-tro")
+                        .loginProcessingUrl("/login-processing")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .successHandler(customLoginSuccessHandler) // CHỈ DÙNG handler này thôi
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("text/plain; charset=UTF-8");
+                            response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                        })
+                        .permitAll())
                 .logout(logout -> logout
                         .logoutUrl("/perform_logout")
                         .logoutSuccessUrl("/?logout=true")

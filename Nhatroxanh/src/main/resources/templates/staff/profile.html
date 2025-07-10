@@ -1288,7 +1288,14 @@
                         break;
 
                     case "cccdNumber":
-                        if (value) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Số CCCD không được để trống";
+                            const cccdInfo = document.getElementById("cccdInfo");
+                            if (cccdInfo) {
+                                cccdInfo.style.display = "none";
+                            }
+                        } else {
                             const cccdValidation = this.validateCCCDNumber(value);
                             if (!cccdValidation.isValid) {
                                 isValid = false;
@@ -1337,20 +1344,36 @@
                         break;
 
                     case "issuePlace":
-                        if (value && value.length < 2) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp không được để trống";
+                        } else if (value.length < 2) {
                             isValid = false;
                             errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Nơi cấp hợp lệ";
                         }
                         break;
 
                     case "street":
-                        if (value && value.length < 5) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ không được để trống";
+                        } else if (value.length < 5) {
                             isValid = false;
                             errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                    case "province":
+                    case "district":
+                    case "ward":
+                        if (this.isEditMode && !value) {
+                            isValid = false;
+                            errorMessage = `Vui lòng chọn ${fieldId === "province" ? "Tỉnh/Thành phố" : fieldId === "district" ? "Quận/Huyện" : "Phường/Xã"}`;
+                        } else if (value) {
+                            successMessage = "Đã chọn hợp lệ";
                         }
                         break;
                 }
@@ -1401,7 +1424,7 @@
             // Validate CCCD number
             validateCCCDNumber(cccdNumber) {
                 if (!cccdNumber) {
-                    return { isValid: true, message: "" }; // CCCD is optional
+                    return { isValid: true, message: "Số CCCD không được để trống" }; // CCCD is optional
                 }
 
                 // Remove spaces

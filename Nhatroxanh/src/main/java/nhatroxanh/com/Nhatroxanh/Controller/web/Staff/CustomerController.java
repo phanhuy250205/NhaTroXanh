@@ -55,12 +55,10 @@ public class CustomerController {
         Users customer = userOpt.get();
         UserCccd cccd = customer.getUserCccd();
         customer.setUserCccd(cccd);
-        Contracts latestContract = contractRepository
-                .findTopByTenantOrderByStartDateDesc(customer)
-                .orElse(null);
+        List<Contracts> contracts = contractRepository.findByTenantOrderByStartDateDesc(customer);
 
         model.addAttribute("customer", customer);
-        model.addAttribute("contract", latestContract);
+        model.addAttribute("contracts", contracts);
 
         return "Staff/chi-tiet-khach-thue";
     }
