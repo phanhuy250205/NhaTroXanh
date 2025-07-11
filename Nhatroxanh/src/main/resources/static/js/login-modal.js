@@ -68,19 +68,19 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             // 3. Gọi đến cổng xử lý đăng nhập chung của Spring Security
             fetch('/login-processing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        // 4. THÀNH CÔNG: Tải lại trang để cập nhật thanh điều hướng
-                        window.location.reload();
-                    } else {
-                        // 5. THẤT BẠI: Hiển thị lỗi
-                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                    }
-                })
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: formData
+})
+.then(async response => {
+    if (response.ok) {
+        const data = await response.json();
+        window.location.href = data.redirectUrl;
+    } else {
+        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+    }
+})
+
                 .catch(error => {
                     if (errorMessageDiv) {
                         errorMessageDiv.textContent = error.message;

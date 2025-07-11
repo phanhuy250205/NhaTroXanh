@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 
@@ -47,7 +50,8 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AddressRepository addressRepository;
-
+    @Autowired
+    private FileUploadService fileUploadService;
     @Override
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
@@ -110,7 +114,7 @@ public class UserServiceImpl implements UserService {
         }
 
         newUser.setRole(Users.Role.OWNER);
-        newUser.setEnabled(true);
+        newUser.setEnabled(false);
 
         // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
@@ -250,4 +254,36 @@ public class UserServiceImpl implements UserService {
     public Optional<Users> findByEmail(String email) {
          return userRepository.findByEmail(email);
     }
+
+   @Override
+@Transactional
+public void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage) {
+    Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Người dùng không hợp lệ!"));
+
+    // 2. Tải ảnh CCCD lên và lấy URL
+    try {
+        String frontImageUrl = fileUploadService.uploadFile(frontImage, "cccd-images/");
+        String backImageUrl = fileUploadService.uploadFile(backImage, "cccd-images/");
+
+        // 3. Tạo mới và điền thông tin UserCccd
+        UserCccd cccd = new UserCccd();
+        cccd.setCccdNumber(cccdNumber);
+        cccd.setIssueDate(Date.valueOf(issueDate));
+        cccd.setIssuePlace(issuePlace);
+        cccd.setFrontImageUrl(frontImageUrl);
+        cccd.setBackImageUrl(backImageUrl);
+        cccd.setUser(user);
+
+        // 4. Cập nhật thông tin còn thiếu cho User
+        user.setGender(gender);
+        user.setAddress(address); // Giả sử address là một chuỗi
+        user.setUserCccd(cccd);
+
+        // 5. Lưu lại, user.enabled vẫn là false
+        userRepository.save(user);
+    } catch (IOException e) {
+        throw new RuntimeException("Lỗi khi tải ảnh lên: " + e.getMessage());
+    }
+}
 }

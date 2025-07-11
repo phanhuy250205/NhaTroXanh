@@ -61,6 +61,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher")
                         .permitAll()
+                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")

@@ -13,6 +13,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -75,4 +76,6 @@ public interface UserService {
     Page<Users> getStaffUsers(int page, int size);
 
     Users getById(Integer id);
+    void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage);
+    
 }
