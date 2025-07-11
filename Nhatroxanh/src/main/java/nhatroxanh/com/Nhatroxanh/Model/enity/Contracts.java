@@ -19,7 +19,7 @@ public class Contracts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contract_id")
-    private Integer contractId; // Giữ Integer để phù hợp với database hiện tại
+    private Integer contractId; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -48,8 +48,6 @@ public class Contracts {
 
     @Column(name = "end_date", nullable = false)
     private Date endDate;
-
-
 
     @Column(name = "price", nullable = false)
     private Float price;

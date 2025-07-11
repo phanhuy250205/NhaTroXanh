@@ -194,6 +194,7 @@ public class ContractDto {
         private Integer roomId;
         private String roomName;
         private Float area;
+        private Integer max_tenants; 
         private Float price;
         private String status;
         private Integer hostelId;
@@ -201,6 +202,9 @@ public class ContractDto {
         private String address;
 
         // Getters and setters
+        // getter setter max_tenants
+        public Integer getMaxTenants() { return max_tenants; }
+        public void setMaxTenants(Integer maxTenants) { this.max_tenants = maxTenants; }
         public Integer getRoomId() { return roomId; }
         public void setRoomId(Integer roomId) { this.roomId = roomId; }
         public String getRoomName() { return roomName; }

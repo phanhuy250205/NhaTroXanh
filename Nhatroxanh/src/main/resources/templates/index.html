@@ -37,7 +37,7 @@
                                     <p class="slide-description">Khám phá hàng ngàn phòng trọ chất lượng với giá cả phải
                                         chăng</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-search me-2" ></i> Tìm kiếm ngay
+                                        <i class="fas fa-search me-2"></i> Tìm kiếm ngay
                                     </button>
                                 </div>
                             </div>
@@ -111,7 +111,7 @@
                                 alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
 
                             <div class="card-overlay">
-                               
+
                                 <div class="card-badges">
                                     <span class="badge badge-featured" th:if="${post.approvalStatus == 'APPROVED'}">Nổi
                                         bật</span>
@@ -169,15 +169,20 @@
             <!-- View More Button -->
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <button class="btn btn-view-more">
-                        <i class="fas fa-plus"></i> Xem thêm
-                    </button>
+                    <a th:href="@{/tat-ca-phong-tro}">
+                        <button class="btn btn-view-more">
+                            <i class="fas fa-plus"></i> Xem thêm
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
     <div th:replace="~{/layouts/footer}"></div>
+
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

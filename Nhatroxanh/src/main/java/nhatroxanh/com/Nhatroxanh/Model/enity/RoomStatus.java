@@ -1,7 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 public enum RoomStatus {
-    active,
-    unactive,
-    repair
+    active, // Đã thuê
+    unactive, // Trống
+    repair // Bảo trì
 }
