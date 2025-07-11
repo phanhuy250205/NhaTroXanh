@@ -486,7 +486,7 @@ public class ContractServiceImpl implements ContractService {
             unregisteredTenantUpdate.setStatus(UnregisteredTenants.Status.ACTIVE);
             Address address = new Address();
             address.setStreet(contractDto.getUnregisteredTenant().getStreet());
-            unregisteredTenantUpdate.setAddress(address);
+//            unregisteredTenantUpdate.setAddress(address);
             unregisteredTenantsRepository.save(unregisteredTenantUpdate);
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
             contract.setTenant(null);
@@ -844,69 +844,61 @@ public class ContractServiceImpl implements ContractService {
     }
 
     private List<ContractListDto> convertToContractListDto(List<Contracts> contracts) {
-        logger.debug("Converting {} contracts to ContractListDto", contracts.size());
+        return contracts.stream()
+                .map(contract -> {
+                    ContractListDto dto = new ContractListDto();
 
-        return contracts.stream().map(contract -> {
-                    try {
-                        ContractListDto dto = new ContractListDto();
+                    // ID hợp đồng
+                    dto.setContractId(contract.getContractId() != null
+                            ? contract.getContractId().longValue()
+                            : null);
 
-                        // Mã số hợp đồng
-                        if (contract.getContractId() != null) {
-                            dto.setContractId(contract.getContractId().longValue());
-                        }
+                    // Ngày bắt đầu
+                    dto.setStartDate(contract.getStartDate() != null
+                            ? contract.getStartDate().toLocalDate()
+                            : null);
 
-                        // Ngày bắt đầu
-                        if (contract.getStartDate() != null) {
-                            dto.setStartDate(contract.getStartDate().toLocalDate());
-                        }
-                        //tên Khách thuê
-                        if (contract.getTenant() != null) {
-                            dto.setTenantName(contract.getTenant().getFullname());
-                        } else if (contract.getUnregisteredTenant() != null) {
-                            dto.setTenantName(contract.getUnregisteredTenant().getFullName());
-                        } else {
-                            dto.setTenantName("Chưa xác định");
-                        }
+                    // Tên khách thuê
+                    dto.setTenantName(Optional.ofNullable(contract.getTenant())
+                            .map(Users::getFullname)
+                            .orElse(Optional.ofNullable(contract.getUnregisteredTenant())
+                                    .map(UnregisteredTenants::getFullName)
+                                    .orElse("Chưa xác định")));
+
+                    // Ngày kết thúc
+                    LocalDate endDate = calculateEndDate(contract);
+                    dto.setEndDate(endDate);
 
 
-                        // Ngày kết thúc - Tính từ startDate + duration (tháng)
-                        if (contract.getStartDate() != null && contract.getDuration() != null && contract.getDuration() > 0) {
-                            LocalDate startDate = contract.getStartDate().toLocalDate();
+                    // Số điện thoại
+                    dto.setTenantPhone(getTenantPhone(contract));
 
-                            // Xử lý duration an toàn hơn
-                            int durationMonths = contract.getDuration().intValue();
-                            LocalDate endDate = startDate.plusMonths(durationMonths);
+                    // Trạng thái
+                    dto.setStatus(Optional.ofNullable(contract.getStatus())
+                            .map(Enum::toString)
+                            .orElse("UNKNOWN"));
 
-                            dto.setEndDate(endDate);
-                            logger.debug("Calculated end date for contract {}: {} + {} months = {}",
-                                    contract.getContractId(), startDate, durationMonths, endDate);
-                        }
-                        else if (contract.getEndDate() != null) {
-                            // Fallback: nếu có sẵn endDate trong database
-                            dto.setEndDate(contract.getEndDate().toLocalDate());
-                            logger.debug("Using existing end date for contract {}: {}",
-                                    contract.getContractId(), contract.getEndDate().toLocalDate());
-                        }
 
-                        // Số điện thoại người thuê
-                        String tenantPhone = getTenantPhone(contract);
-                        dto.setTenantPhone(tenantPhone);
 
-                        // Trạng thái
-                        dto.setStatus(contract.getStatus() != null ? contract.getStatus().toString() : "UNKNOWN");
-
-                        return dto;
-
-                    } catch (Exception e) {
-                        logger.error("Error converting contract {} to DTO: {}",
-                                contract.getContractId(), e.getMessage(), e);
-                        return null;
-                    }
+                    return dto;
                 })
-                .filter(dto -> dto != null) // Loại bỏ các DTO null
                 .collect(Collectors.toList());
     }
 
+
+
+    private LocalDate calculateEndDate(Contracts contract) {
+        if (contract.getEndDate() != null) {
+            return contract.getEndDate().toLocalDate();
+        }
+
+        if (contract.getStartDate() != null && contract.getDuration() != null && contract.getDuration() > 0) {
+            return contract.getStartDate().toLocalDate()
+                    .plusMonths(contract.getDuration().intValue());
+        }
+
+        return null;
+    }
 
 
     private String getTenantPhone(Contracts contract) {
@@ -929,6 +921,7 @@ public class ContractServiceImpl implements ContractService {
             return "";
         }
     }
+
 
 
     @Override

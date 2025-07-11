@@ -37,6 +37,7 @@ import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,25 @@ public class DemoController {
     @GetMapping("/chu-tro/hop-dong")
     public String hopdong() {
         return "redirect:/api/contracts/form";
+    }
+    @GetMapping("/chu-tro/hop-dong/edit/{contractId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public String editContract(
+            @PathVariable Integer contractId,
+            Authentication authentication,
+            Model model
+    ) {
+        try {
+            // Có thể thêm logic kiểm tra quyền nếu cần
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+            // Chuyển hướng đến endpoint edit của ContractController
+            return "redirect:/api/contracts/edit/" + contractId;
+        } catch (Exception e) {
+            // Xử lý lỗi nếu cần
+            model.addAttribute("error", "Không thể mở hợp đồng: " + e.getMessage());
+            return "redirect:/chu-tro/DS-hop-dong-host"; // Quay lại trang danh sách nếu lỗi
+        }
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")

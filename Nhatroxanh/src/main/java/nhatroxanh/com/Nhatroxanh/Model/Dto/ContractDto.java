@@ -3,10 +3,11 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import java.sql.Date;
 import java.time.LocalDate;
-
+@Data
 public class ContractDto {
     private Long id;
     private LocalDate contractDate;
@@ -17,6 +18,9 @@ public class ContractDto {
     private String tenantType;
     private Room room;
     private Terms terms;
+    // Thêm trường địa chỉ cho chủ trọ và người thuê
+    private String ownerAddress;
+    private String tenantAddress;
 
     public ContractDto() {
         this.owner = new Owner();
@@ -26,6 +30,25 @@ public class ContractDto {
         this.contractDate = LocalDate.now();
         this.status = "DRAFT";
         this.tenantType = "REGISTERED";
+        this.unregisteredTenant = new UnregisteredTenant();
+        this.tenantAddress = ""; // Khởi tạo địa chỉ người thuê
+        this.ownerAddress = ""; // Khởi tạo địa chỉ chủ trọ
+    }
+
+    public String getOwnerAddress() {
+        return this.ownerAddress;
+    }
+
+    public void setOwnerAddress(String ownerAddress) {
+        this.ownerAddress = ownerAddress;
+    }
+
+    public String getTenantAddress() {
+        return tenantAddress;
+    }
+
+    public void setTenantAddress(String tenantAddress) {
+        this.tenantAddress = tenantAddress;
     }
 
     // Getters and setters
@@ -99,6 +122,10 @@ public class ContractDto {
         public void setWard(String ward) { this.ward = ward; }
         public String getStreet() { return street; }
         public void setStreet(String street) { this.street = street; }
+        public static String getFullAddress(ContractDto contractDto) {
+            return contractDto.getOwnerAddress();
+        }
+
     }
 
     public static class UnregisteredTenant {
@@ -143,6 +170,10 @@ public class ContractDto {
         public void setCccdFrontUrl(String cccdFrontUrl) { this.cccdFrontUrl = cccdFrontUrl; }
         public String getCccdBackUrl() { return cccdBackUrl; }
         public void setCccdBackUrl(String cccdBackUrl) { this.cccdBackUrl = cccdBackUrl; }
+        public static String getFullAddress(ContractDto contractDto) {
+            return contractDto.getTenantAddress();
+        }
+
     }
 
     public static class Tenant {
@@ -187,6 +218,9 @@ public class ContractDto {
         public void setCccdFrontUrl(String cccdFrontUrl) { this.cccdFrontUrl = cccdFrontUrl; }
         public String getCccdBackUrl() { return cccdBackUrl; }
         public void setCccdBackUrl(String cccdBackUrl) { this.cccdBackUrl = cccdBackUrl; }
+        public static String getFullAddress(ContractDto contractDto) {
+            return contractDto.getTenantAddress();
+        }
     }
 
     public static class Room {
@@ -283,4 +317,8 @@ public class ContractDto {
             }
         }
     }
+
+
 }
+
+
