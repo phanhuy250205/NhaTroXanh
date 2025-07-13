@@ -1,197 +1,346 @@
-// Sample report data
-const reportData = {
-  BC001: {
-    id: "BC001",
-    title: "Điều hòa không hoạt động",
-    description:
-      "Điều hòa không thể bật, có thể do hỏng remote hoặc máy lạnh. Đã thử thay pin remote nhưng vẫn không hoạt động. Phòng rất nóng và không thoải mái.",
-    priority: "high",
-    priorityText: "Cao",
-    status: "pending",
-    statusText: "Chưa xử lý",
-    date: "16/12/2024",
-    response: null,
-  },
-  BC002: {
-    id: "BC002",
-    title: "Vòi nước bị rỉ",
-    description: "Vòi nước trong phòng tắm bị rỉ nhỏ giọt liên tục, gây lãng phí nước và tiếng ồn khó chịu.",
-    priority: "medium",
-    priorityText: "Trung bình",
-    status: "resolved",
-    statusText: "Đã giải quyết",
-    date: "15/12/2024",
-    response: "Đã thay thế vòi nước mới. Vấn đề đã được khắc phục hoàn toàn. Cảm ơn bạn đã báo cáo.",
-  },
-  BC003: {
-    id: "BC003",
-    title: "Thiếu khăn tắm",
-    description: "Phòng chỉ có 1 khăn tắm, cần bổ sung thêm cho 2 khách. Cần thêm khăn mặt và khăn tắm.",
-    priority: "low",
-    priorityText: "Thấp",
-    status: "resolved",
-    statusText: "Đã giải quyết",
-    date: "15/12/2024",
-    response: "Đã bổ sung thêm khăn tắm và các vật dụng cần thiết. Xin lỗi vì sự bất tiện này.",
-  },
-}
-
-// Store uploaded images
 let uploadedImages = []
 
-// Rating system variables
-let ratings = {
-  overall: 0,
-  cleanliness: 0,
-  service: 0,
-  amenities: 0,
-  price: 0,
-}
-
-const ratingTexts = {
-  1: "Rất không hài lòng",
-  2: "Không hài lòng",
-  3: "Bình thường",
-  4: "Hài lòng",
-  5: "Rất hài lòng",
-}
-
-// Navigation functions
 function goBack() {
   window.history.back()
 }
 
-// Contract functions
-function viewContractDetail() {
-  const modal = document.getElementById("contractDetailModal")
-  modal.classList.add("active")
-  document.body.style.overflow = "hidden"
+function openContractDetailModal(contractId) {
+  const modal = document.getElementById("contractDetailModal");
+  if (!modal) {
+    console.error("Không tìm thấy contractDetailModal");
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể mở chi tiết hợp đồng. Vui lòng thử lại!',
+    });
+    return;
+  }
+  if (!contractId) {
+    console.error("contractId không hợp lệ:", contractId);
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể tải thông tin hợp đồng. Vui lòng thử lại!',
+    });
+    return;
+  }
+  modal.classList.add("active");
+  document.body.style.overflow = "hidden";
 }
 
+// Hàm đóng modal chi tiết hợp đồng
 function closeContractDetailModal() {
-  const modal = document.getElementById("contractDetailModal")
-  modal.classList.remove("active")
-  document.body.style.overflow = "auto"
-}
-
-function downloadContract() {
-  // Simulate contract download
-  console.log("Downloading contract PDF...")
-  alert("Đang tải xuống hợp đồng PDF. Vui lòng chờ trong giây lát...")
-
-  // In a real application, this would trigger a file download
-  // window.open('/api/contract/download/HD2024001', '_blank')
-}
-
-// Image Upload Functions
-function handleImageUpload(event) {
-  const files = event.target.files
-
-  if (!files || files.length === 0) {
-    return
+  const modal = document.getElementById("contractDetailModal");
+  if (!modal) {
+    console.error("Không tìm thấy contractDetailModal");
+    return;
   }
 
-  const container = document.getElementById("imagePreviewContainer")
+  modal.classList.remove("active");
+  document.body.style.overflow = "auto";
+}
+
+function printContract(position) {
+  console.log("In hợp đồng từ vị trí:", position);
+  const modalContent = document.querySelector(".contract-full-content-guest");
+  if (!modalContent) {
+    console.error("Không tìm thấy contract-full-content-guest");
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể in hợp đồng. Vui lòng thử lại!',
+    });
+    return;
+  }
+
+  const actionsHeader = modalContent.querySelector(".contract-actions-header-guest");
+  if (actionsHeader) actionsHeader.style.display = "none";
+
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>In Hợp Đồng</title>
+        <style>
+          @page { size: A4; margin: 10mm; }
+          body { 
+            font-family: 'Times New Roman', serif; 
+            margin: 0; 
+            padding: 20mm; 
+            font-size: 12px; 
+            color: #333; 
+            line-height: 1.6;
+          }
+          .contract-full-content-guest { 
+            max-width: 210mm; 
+            margin: 0 auto; 
+            border: none; 
+            background-color: #fff;
+          }
+          .contract-national-title { text-align: center; }
+          .contract-national-title h1 { 
+            font-size: 24px; 
+            font-weight: bold; 
+            color: #d32f2f; 
+            margin: 0 0 5mm 0;
+          }
+          .contract-national-title p { 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #333; 
+            margin: 2mm 0;
+          }
+          hr { border: 1px solid #d32f2f; margin-bottom: 10mm; }
+          .contract-detail-header-guest, .contract-actions-header-guest { display: none; }
+          .contract-section { 
+            margin-bottom: 10mm; 
+            padding: 5mm; 
+            border: 1px solid #ddd; 
+            border-radius: 0; 
+            background-color: #fff; 
+            page-break-inside: avoid;
+          }
+          .contract-section-blue { background-color: #e3f2fd; border-color: #bbdefb; }
+          .contract-section-title { 
+            font-size: 16px; 
+            font-weight: 600; 
+            color: #2c3e50; 
+            margin-bottom: 5mm;
+          }
+          .contract-info-row { display: flex; margin-bottom: 3mm; }
+          .contract-info-label { font-weight: bold; width: 70mm; color: #555; }
+          .contract-info-value { flex: 1; }
+          .contract-utilities-list li { margin-bottom: 2mm; }
+          .contract-terms-box { 
+            white-space: pre-wrap; 
+            font-family: 'Times New Roman', serif; 
+            padding: 5mm; 
+            border: 1px solid #ddd; 
+            border-radius: 0; 
+            color: #333; 
+            line-height: 1.5; 
+            font-size: 12px; 
+            page-break-inside: avoid;
+          }
+          .contract-signature-section { margin-top: 10mm; }
+          .contract-signature-info { display: flex; justify-content: space-between; gap: 10mm; }
+          .contract-signature-party { flex: 1; text-align: center; }
+          .contract-signature-title { font-size: 14px; font-weight: bold; color: #2c3e50; margin-bottom: 3mm; }
+          .contract-signature-area { margin-top: 5mm; border-top: 1px dashed #ddd; padding-top: 5mm; }
+          .contract-footer-note { text-align: center; font-size: 10px; color: #666; margin-top: 10mm; padding: 5mm; border-top: 1px solid #ddd; }
+          @media print {
+            body { -webkit-print-color-adjust: exact; }
+            .contract-full-content-guest { break-inside: avoid; }
+          }
+        </style>
+      </head>
+      <body>
+        ${modalContent.outerHTML}
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+
+  if (actionsHeader) actionsHeader.style.display = "flex";
+}
+
+// Hàm tải xuống hợp đồng dưới dạng PDF
+function downloadContractAsPDF() {
+  const modal = document.getElementById("contractDetailModal");
+  if (!modal) {
+    console.error("Không tìm thấy contractDetailModal");
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể tải hợp đồng. Vui lòng thử lại!',
+    });
+    return;
+  }
+
+  // Mở modal để đảm bảo nội dung được render
+  modal.classList.add("active");
+  document.body.style.overflow = "hidden";
+  window.scrollTo(0, 0); // Đảm bảo nội dung ở đầu trang
+
+  const modalContent = document.querySelector(".contract-full-content-guest");
+  if (!modalContent) {
+    console.error("Không tìm thấy contract-full-content-guest");
+    closeContractDetailModal();
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể tải hợp đồng. Vui lòng thử lại!',
+    });
+    return;
+  }
+
+  // Ẩn các nút hành động trước khi tạo PDF
+  const actionsHeader = modalContent.querySelector(".contract-actions-header-guest");
+  if (actionsHeader) actionsHeader.style.display = "none";
+
+  // Log nội dung để debug
+  console.log("Nội dung trước khi tạo PDF:", modalContent.innerHTML);
+
+  const opt = {
+    margin: [5, 5, 5, 5], // Giảm lề để chứa nhiều nội dung hơn
+    filename: `HopDong_CT${modalContent.querySelector(".contract-id-badge-guest span").textContent.replace("Mã hợp đồng: #CT", "")}.pdf`,
+    image: { type: 'jpeg', quality: 0.95 },
+    html2canvas: { scale: 1.5, useCORS: true, windowWidth: document.documentElement.scrollWidth },
+    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+    pagebreak: { mode: ['css', 'legacy'], avoid: ['.contract-section-guest', '.contract-terms-box'] }
+  };
+
+  html2pdf().from(modalContent).set(opt).toPdf().get('pdf').then((pdf) => {
+    const totalPages = pdf.internal.getNumberOfPages();
+    for (let i = 1; i <= totalPages; i++) {
+      pdf.setPage(i);
+      pdf.setFontSize(10);
+      pdf.text(`Trang ${i} / ${totalPages}`, 190, 285); // Thêm số trang
+    }
+    pdf.save();
+  }).then(() => {
+    if (actionsHeader) actionsHeader.style.display = "flex";
+    closeContractDetailModal();
+    Swal.fire({
+      icon: 'success',
+      title: 'Thành công',
+      text: 'Hợp đồng đã được tải xuống dưới dạng PDF!',
+    });
+  }).catch((error) => {
+    if (actionsHeader) actionsHeader.style.display = "flex";
+    closeContractDetailModal();
+    console.error("Lỗi khi tạo PDF:", error);
+    Swal.fire({
+      icon: 'error',
+      title: 'Lỗi',
+      text: 'Không thể tạo PDF. Vui lòng thử lại!',
+    });
+  });
+}
+
+function handleImageUpload(event) {
+  const files = event.target.files
+  if (!files || files.length === 0) return
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i]
 
-    // Validate file size (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       alert(`Ảnh "${file.name}" quá lớn. Vui lòng chọn ảnh nhỏ hơn 5MB.`)
       continue
     }
 
-    // Validate file type
     if (!file.type.startsWith("image/")) {
       alert(`"${file.name}" không phải là file ảnh hợp lệ.`)
       continue
     }
 
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      const imageData = {
-        file: file,
-        url: e.target.result,
-        name: file.name,
-      }
-
-      uploadedImages.push(imageData)
-      addImagePreview(imageData, uploadedImages.length - 1)
-    }
-    reader.readAsDataURL(file)
+    uploadedImages.push(file)
   }
 
-  // Clear the input to allow selecting the same files again if needed
-  event.target.value = ""
-}
-
-function addImagePreview(imageData, index) {
-  const container = document.getElementById("imagePreviewContainer")
-
-  const previewItem = document.createElement("div")
-  previewItem.className = "image-preview-item-guest"
-  previewItem.innerHTML = `
-        <img src="${imageData.url}" alt="${imageData.name}" class="image-preview-img-guest">
-        <button type="button" class="image-preview-remove-guest" onclick="removeImage(${index})">
-            <i class="fas fa-times"></i>
-        </button>
-    `
-
-  container.appendChild(previewItem)
-}
-
-function removeImage(index) {
-  uploadedImages.splice(index, 1)
   refreshImagePreviews()
+  event.target.value = "" // Cho phép chọn lại cùng 1 ảnh sau khi xóa
 }
 
 function refreshImagePreviews() {
   const container = document.getElementById("imagePreviewContainer")
   container.innerHTML = ""
 
-  uploadedImages.forEach((imageData, index) => {
-    addImagePreview(imageData, index)
+  uploadedImages.forEach((file, index) => {
+    const url = URL.createObjectURL(file)
+
+    const previewItem = document.createElement("div")
+    previewItem.className = "image-preview-item-guest"
+    previewItem.innerHTML = `
+            <img src="${url}" alt="${file.name}" class="image-preview-img-guest">
+            <button type="button" class="image-preview-remove-guest" onclick="removeImage(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        `
+    container.appendChild(previewItem)
   })
 }
 
-// Initialize upload area event listeners
+function removeImage(index) {
+  uploadedImages.splice(index, 1)
+  refreshImagePreviews()
+}
+function deleteOldImage(imageId) {
+  fetch('/khach-thue/xoa-anh', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: new URLSearchParams({ imageId })
+  })
+    .then(response => {
+      if (!response.ok) return response.text().then(err => { throw new Error(err) })
+      return response.text()
+    })
+    .then(msg => {
+      const imgDiv = document.getElementById('img-' + imageId)
+      if (imgDiv) imgDiv.remove()
+    })
+    .catch(err => {
+      alert("Lỗi khi xóa ảnh: " + err.message)
+    })
+}
+
+
+let uploadAreaInitialized = false;
+
 function initializeImageUpload() {
-  const uploadArea = document.getElementById("imageUploadArea")
-  const fileInput = document.getElementById("imageInput")
+  if (uploadAreaInitialized) return; // Ngăn gắn sự kiện nhiều lần
+  uploadAreaInitialized = true;
 
-  if (!uploadArea || !fileInput) return
+  const uploadArea = document.getElementById("imageUploadArea");
+  const fileInput = document.getElementById("imageInput");
 
-  // Handle click on upload area
+  if (!uploadArea || !fileInput) return;
+
   uploadArea.addEventListener("click", () => {
-    fileInput.click()
-  })
+    fileInput.click();
+  });
 
-  // Handle file input change
-  fileInput.addEventListener("change", handleImageUpload)
+  fileInput.addEventListener("change", handleImageUpload);
 
-  // Drag and drop functionality
   uploadArea.addEventListener("dragover", function (e) {
-    e.preventDefault()
-    this.classList.add("dragover")
-  })
+    e.preventDefault();
+    this.classList.add("dragover");
+  });
 
   uploadArea.addEventListener("dragleave", function (e) {
-    e.preventDefault()
-    this.classList.remove("dragover")
-  })
+    e.preventDefault();
+    this.classList.remove("dragover");
+  });
 
   uploadArea.addEventListener("drop", function (e) {
-    e.preventDefault()
-    this.classList.remove("dragover")
-
-    const files = e.dataTransfer.files
+    e.preventDefault();
+    this.classList.remove("dragover");
+    const files = e.dataTransfer.files;
     if (files.length > 0) {
-      // Manually trigger the handleImageUpload function with the dropped files
-      handleImageUpload({ target: { files: files, value: "" } })
+      handleImageUpload({ target: { files: files, value: "" } });
     }
-  })
+  });
 }
+
+
+// ✅ Gắn lại file vào input trước khi submit form
+document.getElementById("reportForm").addEventListener("submit", function () {
+  const fileInput = document.getElementById("imageInput")
+
+  if (uploadedImages.length > 0) {
+    const dataTransfer = new DataTransfer()
+    uploadedImages.forEach(file => dataTransfer.items.add(file))
+    fileInput.files = dataTransfer.files
+  }
+})
+
+document.addEventListener("DOMContentLoaded", initializeImageUpload)
 
 // Report Detail Modal Functions
 function viewReportDetail(reportId) {
@@ -243,9 +392,8 @@ function viewReportDetail(reportId) {
                 ${report.description}
             </div>
         </div>
-        ${
-          report.response
-            ? `
+        ${report.response
+      ? `
             <div class="report-response-section-guest">
                 <div class="report-response-title-guest">
                     <i class="fas fa-reply"></i>
@@ -256,8 +404,8 @@ function viewReportDetail(reportId) {
                 </div>
             </div>
         `
-            : ""
-        }
+      : ""
+    }
     `
 
   // Show edit/delete buttons only for pending reports
@@ -393,289 +541,7 @@ function submitReport() {
 
   // Close modal
   closeReportModal()
-
-  // Optionally refresh the reports table
   // location.reload();
-}
-
-// Extend Modal Functions
-function openExtendModal() {
-  const modal = document.getElementById("extendModal")
-  const today = new Date()
-  const currentExpiry = new Date("2024-12-20")
-  const minDate = new Date(Math.max(today, currentExpiry))
-  minDate.setDate(minDate.getDate() + 1)
-
-  // Set minimum date for custom date input
-  document.getElementById("customExtendDate").min = minDate.toISOString().split("T")[0]
-
-  modal.classList.add("active")
-  document.body.style.overflow = "hidden"
-}
-
-function closeExtendModal() {
-  const modal = document.getElementById("extendModal")
-  modal.classList.remove("active")
-  document.body.style.overflow = "auto"
-
-  // Reset form
-  document.getElementById("extendForm").reset()
-  document.getElementById("customDateContainer").style.display = "none"
-  document.getElementById("newExpiryDisplay").style.display = "none"
-}
-
-function handleExtendPeriodChange() {
-  const select = document.getElementById("extendPeriod")
-  const customContainer = document.getElementById("customDateContainer")
-  const newExpiryDisplay = document.getElementById("newExpiryDisplay")
-
-  if (select.value === "custom") {
-    customContainer.style.display = "block"
-    newExpiryDisplay.style.display = "none"
-  } else if (select.value !== "") {
-    customContainer.style.display = "none"
-    calculateNewExpiryDate(Number.parseInt(select.value))
-    newExpiryDisplay.style.display = "block"
-  } else {
-    customContainer.style.display = "none"
-    newExpiryDisplay.style.display = "none"
-  }
-}
-
-function calculateNewExpiryDate(months) {
-  const currentExpiry = new Date("2024-12-20")
-  const newExpiry = new Date(currentExpiry)
-  newExpiry.setMonth(newExpiry.getMonth() + months)
-
-  const formattedDate = newExpiry.toLocaleDateString("vi-VN")
-  document.getElementById("newExpiryDate").textContent = formattedDate
-}
-
-function updateNewExpiryDate() {
-  const customDate = document.getElementById("customExtendDate").value
-  const newExpiryDisplay = document.getElementById("newExpiryDisplay")
-
-  if (customDate) {
-    const date = new Date(customDate)
-    const formattedDate = date.toLocaleDateString("vi-VN")
-    document.getElementById("newExpiryDate").textContent = formattedDate
-    newExpiryDisplay.style.display = "block"
-  } else {
-    newExpiryDisplay.style.display = "none"
-  }
-}
-
-function submitExtend() {
-  const extendPeriod = document.getElementById("extendPeriod").value
-  const customDate = document.getElementById("customExtendDate").value
-  const message = document.getElementById("extendMessage").value
-
-  if (!extendPeriod) {
-    alert("Vui lòng chọn thời gian gia hạn!")
-    return
-  }
-
-  if (extendPeriod === "custom" && !customDate) {
-    alert("Vui lòng chọn ngày hết hạn mới!")
-    return
-  }
-
-  let newExpiryDate
-  if (extendPeriod === "custom") {
-    newExpiryDate = customDate
-  } else {
-    const currentExpiry = new Date("2024-12-20")
-    const newExpiry = new Date(currentExpiry)
-    newExpiry.setMonth(newExpiry.getMonth() + Number.parseInt(extendPeriod))
-    newExpiryDate = newExpiry.toISOString().split("T")[0]
-  }
-
-  // Simulate API call
-  console.log("Gửi yêu cầu gia hạn:", {
-    room: "A101 - Deluxe",
-    extendPeriod: extendPeriod === "custom" ? "Tùy chỉnh" : `${extendPeriod} tháng`,
-    newExpiryDate: newExpiryDate,
-    message: message,
-    currentExpiry: "2024-12-20",
-  })
-
-  // Show success message
-  const displayDate = new Date(newExpiryDate).toLocaleDateString("vi-VN")
-  alert(
-    `Yêu cầu gia hạn đã được gửi thành công!\n\nThông tin yêu cầu:\n- Gia hạn đến: ${displayDate}\n- Chủ nhà sẽ nhận được thông báo và phản hồi sớm nhất có thể.`,
-  )
-
-  // Close modal
-  closeExtendModal()
-}
-
-// Return Modal Functions
-function openReturnModal() {
-  const modal = document.getElementById("returnModal")
-  const today = new Date().toISOString().split("T")[0]
-  document.getElementById("returnDate").value = today
-  document.getElementById("returnDate").min = today
-
-  modal.classList.add("active")
-  document.body.style.overflow = "hidden"
-}
-
-function closeReturnModal() {
-  const modal = document.getElementById("returnModal")
-  modal.classList.remove("active")
-  document.body.style.overflow = "auto"
-
-  // Reset form
-  document.getElementById("returnForm").reset()
-}
-
-function submitReturn() {
-  const returnDate = document.getElementById("returnDate").value
-  const returnReason = document.getElementById("returnReason").value
-
-  if (!returnDate) {
-    alert("Vui lòng chọn ngày trả phòng!")
-    return
-  }
-
-  // Hiển thị thông báo xác nhận
-  const confirmMessage = `
-        Xác nhận trả phòng A101 - Deluxe
-        
-        Ngày trả: ${new Date(returnDate).toLocaleDateString("vi-VN")}
-        ${returnReason ? `Lý do: ${returnReason}` : ""}
-        
-        Bạn có chắc chắn muốn thực hiện?
-    `
-
-  if (confirm(confirmMessage)) {
-    // Simulate API call
-    console.log("Trả phòng:", {
-      room: "A101 - Deluxe",
-      returnDate: returnDate,
-      reason: returnReason,
-    })
-
-    // Show success message
-    alert("Trả phòng thành công! Phòng đã được cập nhật trạng thái.")
-
-    // Close return modal
-    closeReturnModal()
-
-    // Open rating modal after successful return
-    setTimeout(() => {
-      openRatingModal()
-    }, 500)
-  }
-}
-
-// Rating Modal Functions
-function openRatingModal() {
-  const modal = document.getElementById("ratingModal")
-  modal.classList.add("active")
-  document.body.style.overflow = "hidden"
-
-  // Initialize rating system
-  initializeRatingSystem()
-}
-
-function closeRatingModal() {
-  const modal = document.getElementById("ratingModal")
-  modal.classList.remove("active")
-  document.body.style.overflow = "auto"
-
-  // Reset ratings
-  resetRatings()
-}
-
-function initializeRatingSystem() {
-  // Overall rating
-  const overallStars = document.querySelectorAll("#overallRating .star")
-  overallStars.forEach((star, index) => {
-    star.addEventListener("click", () => setOverallRating(index + 1))
-    star.addEventListener("mouseover", () => highlightStars(overallStars, index + 1))
-    star.addEventListener("mouseout", () => highlightStars(overallStars, ratings.overall))
-  })
-
-  // Category ratings
-  const categories = ["cleanliness", "service", "amenities", "price"]
-  categories.forEach((category) => {
-    const categoryStars = document.querySelectorAll(`[data-category="${category}"] .star`)
-    categoryStars.forEach((star, index) => {
-      star.addEventListener("click", () => setCategoryRating(category, index + 1))
-      star.addEventListener("mouseover", () => highlightStars(categoryStars, index + 1))
-      star.addEventListener("mouseout", () => highlightStars(categoryStars, ratings[category]))
-    })
-  })
-}
-
-function setOverallRating(rating) {
-  ratings.overall = rating
-  const overallStars = document.querySelectorAll("#overallRating .star")
-  highlightStars(overallStars, rating)
-  document.getElementById("overallRatingText").textContent = ratingTexts[rating]
-}
-
-function setCategoryRating(category, rating) {
-  ratings[category] = rating
-  const categoryStars = document.querySelectorAll(`[data-category="${category}"] .star`)
-  highlightStars(categoryStars, rating)
-}
-
-function highlightStars(stars, rating) {
-  stars.forEach((star, index) => {
-    if (index < rating) {
-      star.classList.add("active")
-    } else {
-      star.classList.remove("active")
-    }
-  })
-}
-
-function resetRatings() {
-  ratings = {
-    overall: 0,
-    cleanliness: 0,
-    service: 0,
-    amenities: 0,
-    price: 0,
-  }
-
-  // Reset all stars
-  document.querySelectorAll(".star").forEach((star) => {
-    star.classList.remove("active")
-  })
-
-  // Reset overall rating text
-  document.getElementById("overallRatingText").textContent = "Chọn số sao để đánh giá"
-
-  // Reset comment
-  document.getElementById("ratingComment").value = ""
-}
-
-function submitRating() {
-  if (ratings.overall === 0) {
-    alert("Vui lòng chọn đánh giá tổng thể!")
-    return
-  }
-
-  const comment = document.getElementById("ratingComment").value
-
-  // Simulate API call
-  console.log("Gửi đánh giá:", {
-    room: "A101 - Deluxe",
-    ratings: ratings,
-    comment: comment,
-  })
-
-  alert("Cảm ơn bạn đã đánh giá! Phản hồi của bạn rất quan trọng với chúng tôi.")
-  closeRatingModal()
-}
-
-function skipRating() {
-  if (confirm("Bạn có chắc chắn muốn bỏ qua đánh giá không?")) {
-    closeRatingModal()
-  }
 }
 
 // Event Listeners and Initialization

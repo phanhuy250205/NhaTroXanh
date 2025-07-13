@@ -49,7 +49,6 @@ public class Contracts {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
-
     @Column(name = "price", nullable = false)
     private Float price;
 
@@ -59,7 +58,6 @@ public class Contracts {
     @Column(name = "duration", nullable = false)
     private Float duration;
 
-
     @Column(name = "terms", length = 1000) // Tăng giới hạn để khớp với ContractServiceImpl
     private String terms;
 
@@ -67,6 +65,9 @@ public class Contracts {
     @Column(name = "status", nullable = false)
     private Status status;
 
+    @Column(name = "return_reason", length = 1000) // Thêm trường để lưu lý do trả phòng
+    private String returnReason;
+    
     @Column(name = "tenant_phone", nullable = false)
     private String tenantPhone;
 

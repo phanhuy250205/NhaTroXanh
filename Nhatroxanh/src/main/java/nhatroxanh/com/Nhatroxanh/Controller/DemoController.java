@@ -181,10 +181,7 @@ public String showRentalHistory(
         return "host/QL-thanh-toan-host";
     }
 
-    @GetMapping("/chu-tro/gia-hang-tra-phong")
-    public String giahangtraphong() {
-        return "host/gia-han-tra-phong-host";
-    }
+    
 
 
     @GetMapping("/chu-tro/quan-ly-tro")
@@ -236,25 +233,25 @@ public String showTenantManagementPage(
     //     return "host/quan-ly-bai-dang";
     // }
 
-     @GetMapping("/chu-tro/Qlthue-tra")
-     public String chitietbaidang() {
-         return "guest/quan-ly-thue-tra";
-     }
+    //  @GetMapping("/chu-tro/Qlthue-tra")
+    //  public String chitietbaidang() {
+    //      return "guest/quan-ly-thue-tra";
+    //  }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
 
-    @GetMapping("/khach-thue/quan-ly-thue-tra")
-    public String quanLyThueTra() {
-        return "guest/quan-ly-thue-tra";
-    }
+    // @GetMapping("/khach-thue/quan-ly-thue-tra")
+    // public String quanLyThueTra() {
+    //     return "guest/quan-ly-thue-tra";
+    // }
 
-    @GetMapping("/khach-thue/chitiet-phongthue")
-    public String chiTietPhongThue() {
-        return "guest/chitiet-phongthue";
-    }
+    // @GetMapping("/khach-thue/chitiet-phongthue")
+    // public String chiTietPhongThue() {
+    //     return "guest/chitiet-phongthue";
+    // }
     @GetMapping("/khach-thue/thanh-toan")
     public String thanhToan() {
         return "guest/thanh-toan";
