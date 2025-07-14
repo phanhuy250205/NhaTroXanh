@@ -1171,6 +1171,70 @@
                 transform: translateX(0);
             }
         }
+
+        .status-badge-guest {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-transform: capitalize;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-draft-guest {
+            background-color: #9e9e9e;
+            /* xám */
+        }
+
+        .status-active-guest {
+            background-color: #28a745;
+            /* xanh lá */
+        }
+
+        .status-terminated-guest {
+            background-color: #dc3545;
+            /* đỏ */
+        }
+
+        .status-completed-guest {
+            background-color: #007bff;
+            /* xanh dương */
+        }
+
+        .status-badge-guest i {
+            font-size: 14px;
+        }
+
+        .status-pending-expiration-guest {
+            background-color: #ffc107;
+            /* Màu vàng Bootstrap */
+            color: #000;
+            /* Chữ đen để dễ đọc */
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-expired-guest {
+            background-color: #ffc107;
+            /* vàng */
+            color: #212529;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -1327,7 +1391,7 @@
                             <th>Ngày trả</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody>
@@ -1348,24 +1412,24 @@
                             </td>
                             <td>
                                 <span class="status-badge-guest" th:classappend="
-        ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
+        ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
         (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
         (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))">
 
                                     <i th:class="
-        ${contract.status.name() == 'DRAFT'} ? 'fas fa-pencil-alt' :
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
         (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
         (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
 
                                     <span th:text="
-        ${contract.status.name() == 'DRAFT'} ? 'Chưa xác nhận' :
+        ${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' :
         (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
         (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' : 'Đã hoàn thành'))">
                                         Đã hoàn thành
                                     </span>
                                 </span>
                             </td>
-                            <td>
+                            <!-- <td>
                                 <button class="action-btn-guest"
                                     th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
                                     <i class="fas fa-eye"></i> Xem
@@ -1374,7 +1438,7 @@
                                     th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
                                     <i class="fas fa-download"></i> Tải
                                 </button>
-                            </td>
+                            </td> -->
                         </tr>
                         <tr th:if="${contractHistory.size() == 0}">
                             <td colspan="7" class="text-center">Không có hợp đồng nào.</td>
@@ -1388,8 +1452,21 @@
                 <div th:each="contract, iter : ${contractHistory}" class="rental-card-mobile">
                     <div class="rental-card-header">
                         <div th:text="'#' + ${iter.index + 1 + currentPage * size}">#1</div>
-                        <div th:text="${contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Đã hoàn thành'}">Đã hoàn
-                            thành</div>
+                        <div class="status-badge-guest" th:classappend="
+    ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
+    (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+    (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))"
+                            th:switch="${contract.status.name()}">
+                            <i th:class="
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
+
+                            <span th:case="'EXPIRED'">Sắp hết hạn</span>
+                            <span th:case="'ACTIVE'">Đang thuê</span>
+                            <span th:case="'TERMINATED'">Đã trả phòng</span>
+                            <span th:case="*">Không xác định</span>
+                        </div>
                     </div>
                     <div class="rental-card-body">
                         <div class="rental-card-room">
@@ -1413,7 +1490,7 @@
                                     VNĐ</span>
                             </div>
                         </div>
-                        <div class="rental-card-actions">
+                        <!-- <div class="rental-card-actions">
                             <button class="action-btn-guest"
                                 th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
                                 <i class="fas fa-eye"></i> Xem
@@ -1422,48 +1499,36 @@
                                 th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
                                 <i class="fas fa-download"></i> Tải
                             </button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
 
             <!-- Pagination -->
-            <div class="pagination-guest" th:if="${totalPages > 1}">
+            <div class="pagination-guest">
                 <div class="pagination-info-guest">
                     <span th:text="'Hiển thị ' + ${totalItems} + ' kết quả'">Hiển thị 0 kết quả</span>
                 </div>
-                <div class="pagination-controls-guest">
-                    <!-- Previous -->
-                    <a th:if="${currentPage > 0}" th:href="@{/quan-ly-thue-tra(page=${currentPage - 1}, size=${size})}"
-                        class="page-btn-guest">Trước</a>
-                    <span th:if="${currentPage == 0}" class="page-btn-guest disabled">Trước</span>
-
-                    <!-- Page Numbers -->
+                <div class="pagination-controls-guest" th:if="${totalItems > 0}">
+                    <a th:if="${currentPage > 0}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage - 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang trước">Trước</a>
+                    <span th:if="${currentPage == 0}" class="page-btn-guest disabled" aria-disabled="true">Trước</span>
                     <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                        th:href="@{/quan-ly-thue-tra(page=${i}, size=${size})}" th:text="${i + 1}"
-                        th:classappend="${i == currentPage} ? ' active' : ''" class="page-btn-guest">1</a>
-
-                    <!-- Next -->
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${i}, size=${size})}" th:text="${i + 1}"
+                        th:classappend="${i == currentPage} ? 'active' : ''" class="page-btn-guest"
+                        th:attr="aria-label='Trang ' + ${i + 1}"></a>
                     <a th:if="${currentPage < totalPages - 1}"
-                        th:href="@{/quan-ly-thue-tra(page=${currentPage + 1}, size=${size})}"
-                        class="page-btn-guest">Sau</a>
-                    <span th:if="${currentPage == totalPages - 1}" class="page-btn-guest disabled">Sau</span>
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage + 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang sau">Sau</a>
+                    <span th:if="${currentPage == totalPages - 1}" class="page-btn-guest disabled"
+                        aria-disabled="true">Sau</span>
                 </div>
             </div>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        let currentRating = 0;
-
-        const ratingTexts = {
-            1: 'Rất không hài lòng',
-            2: 'Không hài lòng',
-            3: 'Bình thường',
-            4: 'Hài lòng',
-            5: 'Rất hài lòng'
-        };
-
         function formatDate(dateStr) {
             if (!dateStr) return 'N/A';
             const date = new Date(dateStr);

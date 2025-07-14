@@ -5,11 +5,17 @@ import lombok.RequiredArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests.RequestStatus;
+import nhatroxanh.com.Nhatroxanh.Model.enity.RoomStatus;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ExtensionRequestRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,11 +35,52 @@ public class ContracExtensionController {
     private final EmailService emailService;
 
     @GetMapping
-    public String listExtensionRequests(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        Integer ownerId = userDetails.getUser().getUserId();
-        List<ExtensionRequests> requests = extensionRequestRepository.findAllByOwnerId(ownerId);
-        model.addAttribute("requests", requests);
-        return "host/gia-han-tra-phong-host";
+    public String listRequestsByTab(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "extension") String tab,
+            Model model) {
+        try {
+            if (page < 0)
+                page = 0;
+            if (size <= 0)
+                size = 6;
+
+            Integer ownerId = userDetails.getUser().getUserId();
+            Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+            if (tab.equals("return")) {
+                Page<Contracts> returnPage = keyword.trim().isEmpty()
+                        ? contractsRepository.findReturnRequestsByOwner(ownerId, pageable)
+                        : contractsRepository.findReturnRequestsByOwnerAndKeyword(ownerId, keyword.trim(), pageable);
+
+                model.addAttribute("returnRequests", returnPage.getContent());
+                model.addAttribute("totalItems", returnPage.getTotalElements());
+                model.addAttribute("totalPages", returnPage.getTotalPages());
+            } else {
+                Page<ExtensionRequests> extensionPage = keyword.trim().isEmpty()
+                        ? extensionRequestRepository.findAllByOwner(ownerId, pageable)
+                        : extensionRequestRepository.findByOwnerIdAndKeyword(ownerId, keyword.trim(), pageable);
+
+                model.addAttribute("requests", extensionPage.getContent());
+                model.addAttribute("totalItems", extensionPage.getTotalElements());
+                model.addAttribute("totalPages", extensionPage.getTotalPages());
+            }
+
+            model.addAttribute("currentPage", page);
+            model.addAttribute("size", size);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("tab", tab);
+            model.addAttribute("RequestStatus", ExtensionRequests.RequestStatus.class);
+            model.addAttribute("ReturnStatus", Contracts.ReturnStatus.class);
+
+            return "host/gia-han-tra-phong-host";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Lỗi khi tải danh sách yêu cầu.");
+            return "host/gia-han-tra-phong-host";
+        }
     }
 
     @PostMapping("/duyet")
@@ -94,6 +141,78 @@ public class ContracExtensionController {
             redirectAttributes.addFlashAttribute("errorMessage", "Đã xảy ra lỗi khi từ chối.");
         }
         return "redirect:/chu-tro/gia-hang-tra-phong";
+    }
+
+    @PostMapping("/duyet-tra-phong/{id}")
+    public String approveReturnRoom(@PathVariable("id") Integer contractId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Contracts contract = contractsRepository.findById(contractId)
+                    .orElseThrow(() -> new RuntimeException("Hợp đồng không tồn tại"));
+
+            if (!contract.getOwner().getUserId().equals(userDetails.getUser().getUserId())) {
+                throw new RuntimeException("Không có quyền duyệt hợp đồng này.");
+            }
+
+            contract.setStatus(Contracts.Status.TERMINATED);
+            contract.setReturnStatus(Contracts.ReturnStatus.APPROVED);
+
+            if (contract.getRoom() != null) {
+                contract.getRoom().setStatus(RoomStatus.unactive);
+            }
+
+            contractsRepository.save(contract);
+
+            // Gửi email thông báo duyệt
+            Users tenant = contract.getTenant();
+            if (tenant != null) {
+                String to = tenant.getEmail();
+                String fullname = tenant.getFullname();
+                String contractCode = "#CTR" + contract.getContractId();
+                Date endDate = contract.getEndDate();
+                emailService.sendReturnApprovalEmail(to, fullname, contractCode, endDate);
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã duyệt trả phòng và gửi email thông báo.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi duyệt trả phòng: " + e.getMessage());
+        }
+
+        return "redirect:/chu-tro/gia-hang-tra-phong?tab=return";
+    }
+
+    @PostMapping("/tu-choi-tra-phong/{id}")
+    public String rejectReturnRoom(@PathVariable("id") Integer contractId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Contracts contract = contractsRepository.findById(contractId)
+                    .orElseThrow(() -> new RuntimeException("Hợp đồng không tồn tại"));
+
+            if (!contract.getOwner().getUserId().equals(userDetails.getUser().getUserId())) {
+                throw new RuntimeException("Không có quyền từ chối hợp đồng này.");
+            }
+
+            contract.setReturnStatus(Contracts.ReturnStatus.REJECTED);
+            contractsRepository.save(contract);
+
+            // Gửi email thông báo từ chối
+            Users tenant = contract.getTenant();
+            if (tenant != null) {
+                String to = tenant.getEmail();
+                String fullname = tenant.getFullname();
+                String contractCode = "#CTR" + contract.getContractId();
+                String reason = "Yêu cầu không hợp lệ hoặc chưa đủ điều kiện trả phòng.";
+                emailService.sendReturnRejectionEmail(to, fullname, contractCode, reason);
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối trả phòng và gửi email thông báo.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi từ chối trả phòng: " + e.getMessage());
+        }
+
+        return "redirect:/chu-tro/gia-hang-tra-phong?tab=return";
     }
 
 }

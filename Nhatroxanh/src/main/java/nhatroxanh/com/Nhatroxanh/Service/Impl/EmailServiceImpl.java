@@ -13,7 +13,8 @@ import java.sql.Date;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired private JavaMailSender mailSender;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @Override
     public void sendExtensionApprovalEmail(String to, String fullname, String contractCode, Date newEndDate) {
@@ -53,6 +54,7 @@ public class EmailServiceImpl implements EmailService {
             throw new RuntimeException("Không thể gửi email: " + e.getMessage());
         }
     }
+
     @Override
     public void sendExpirationWarningEmail(String to, String fullname, String contractCode, Date endDate) {
         String subject = "Cảnh báo: Hợp đồng thuê sắp hết hạn";
@@ -63,4 +65,37 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlMail(to, subject, content);
     }
+
+    @Override
+    public void sendReturnApprovalEmail(String to, String fullname, String contractCode, Date endDate) {
+        String subject = "Yêu cầu trả phòng đã được duyệt";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Yêu cầu trả phòng của bạn cho hợp đồng <b>" + contractCode + "</b> đã được <b>phê duyệt</b>.</p>" +
+                "<p>Ngày kết thúc hợp đồng: <b>" + endDate + "</b></p>" +
+                "<p>Chúng tôi hy vọng bạn hài lòng với dịch vụ của Nhà Trọ Xanh.</p>";
+
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendReturnRejectionEmail(String to, String fullname, String contractCode, String reason) {
+        String subject = "Yêu cầu trả phòng bị từ chối";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Rất tiếc! Yêu cầu trả phòng cho hợp đồng <b>" + contractCode + "</b> đã bị từ chối.</p>" +
+                "<p>Lý do: <i>" + reason + "</i></p>" +
+                "<p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ với quản lý khu trọ.</p>";
+
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendContractTerminatedEmail(String to, String fullname, String contractCode, Date endDate) {
+        String subject = "Hợp đồng thuê đã kết thúc";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Hợp đồng <b>" + contractCode + "</b> của bạn đã kết thúc vào ngày <b>" + endDate + "</b>.</p>" +
+                "<p>Cảm ơn bạn đã sử dụng dịch vụ Nhà Trọ Xanh. Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ chúng tôi.</p>";
+
+        sendHtmlMail(to, subject, content);
+    }
+
 }

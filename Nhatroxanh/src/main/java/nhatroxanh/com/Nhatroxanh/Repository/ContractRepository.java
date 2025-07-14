@@ -74,7 +74,8 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
                         "ORDER BY c.contractDate DESC")
         List<Contracts> findByOwnerUserIdOrderByContractDateDesc(@Param("ownerId") Integer ownerId);
 
-        List<Contracts> findByTenantAndStatus(Users tenant, Contracts.Status status);
+        List<Contracts> findByTenantAndStatusIn(Users tenant, List<Contracts.Status> statuses);
+
 
         List<Contracts> findByTenant(Users tenant);
 

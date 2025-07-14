@@ -18,7 +18,7 @@ public interface ReviewService {
 
     List<Review> getReviewsByOwnerId(Integer ownerId);
 
-    void deleteReviewById(Integer reviewId);
+    void deleteReviewById(Integer reviewId, Integer ownerId);
 
     List<Review> getReviewsByHostelId(Integer hostelId);
 }

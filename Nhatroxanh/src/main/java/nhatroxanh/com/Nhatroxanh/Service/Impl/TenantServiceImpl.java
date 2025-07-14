@@ -176,9 +176,11 @@ public class TenantServiceImpl implements TenantService {
     }
 
     public List<Contracts> getActiveContracts() {
-        Users tenant = getCurrentUser();
-        return contractRepository.findByTenantAndStatus(tenant, Contracts.Status.ACTIVE);
-    }
+    Users tenant = getCurrentUser();
+    List<Contracts.Status> statuses = List.of(Contracts.Status.ACTIVE, Contracts.Status.EXPIRED);
+    return contractRepository.findByTenantAndStatusIn(tenant, statuses);
+}
+
 
     @Override
     public Page<Contracts> getContractHistory(Pageable pageable) {
@@ -248,12 +250,8 @@ public class TenantServiceImpl implements TenantService {
         }
 
         contract.setEndDate(returnDate);
-        contract.setStatus(Contracts.Status.TERMINATED);
         contract.setReturnReason(reason);
-
-        if (contract.getRoom() != null) {
-            contract.getRoom().setStatus(RoomStatus.unactive);
-        }
+        contract.setReturnStatus(Contracts.ReturnStatus.PENDING);
 
         contractRepository.save(contract);
     }
@@ -444,7 +442,8 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
-    public void createExtensionRequest(Integer contractId, LocalDate requestedExtendDate, String message, Users tenant) {
+    public void createExtensionRequest(Integer contractId, LocalDate requestedExtendDate, String message,
+            Users tenant) {
         Contracts contract = getContractById(contractId);
 
         if (contract.getTenant() == null || !contract.getTenant().getUserId().equals(tenant.getUserId())) {

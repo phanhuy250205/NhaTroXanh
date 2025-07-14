@@ -377,6 +377,220 @@
                 transform: translateX(0);
             }
         }
+
+        /* Thêm vào phần style trong head */
+        #roomDetailModal .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        #roomDetailModal .modal-header {
+            background: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #roomDetailModal .modal-title {
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+
+        #roomDetailModal .modal-body {
+            padding: 1.5rem;
+        }
+
+        #roomDetailModal .modal-footer {
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            padding: 1rem 1.5rem;
+        }
+
+        /* Carousel styling */
+        #roomImageCarousel {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        #roomImageCarousel .carousel-item img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            background-color: rgba(0, 0, 0, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.8;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Thumbnails styling */
+        #roomThumbnails {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        #roomThumbnails img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #roomThumbnails img:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-blue);
+        }
+
+        #roomThumbnails img.active {
+            border-color: var(--primary-blue);
+            transform: scale(1.05);
+        }
+
+        /* Room info styling */
+        #roomDetailModal .room-info {
+            padding: 0 1rem;
+        }
+
+        #roomDetailModal .room-info p {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            display: flex;
+        }
+
+        #roomDetailModal .room-info strong {
+            min-width: 120px;
+            color: var(--dark-blue);
+            font-weight: 600;
+        }
+
+        #roomDetailModal .room-info span {
+            color: #4a5568;
+        }
+
+        #roomDetailPrice {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        #roomDetailStatus {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        #roomDetailStatus.text-success {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        #roomDetailStatus.text-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        #roomDetailStatus.text-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        #roomDetailDescription {
+            display: block;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* Utilities list */
+        #roomDetailUtilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        #roomDetailUtilities li {
+            background: #f0f8ff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+        }
+
+        #roomDetailUtilities i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            #roomImageCarousel .carousel-item img {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #roomDetailModal .modal-dialog {
+                margin: 1rem auto;
+            }
+
+            #roomDetailModal .modal-body {
+                flex-direction: column;
+            }
+
+            #roomImageCarousel .carousel-item img {
+                height: 250px;
+            }
+
+            #roomDetailModal .room-info p {
+                flex-direction: column;
+            }
+
+            #roomDetailModal .room-info strong {
+                margin-bottom: 0.25rem;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #roomImageCarousel .carousel-item img {
+                height: 200px;
+            }
+
+            #roomThumbnails img {
+                width: 60px;
+                height: 45px;
+            }
+
+            #roomDetailModal .modal-title {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 
@@ -392,7 +606,7 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
-    
+
     <!-- Breadcrumb -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -432,9 +646,9 @@
                             <img th:unless="${images != null and !#lists.isEmpty(images)}"
                                 src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
-                                <button class="btn-favorite-large" 
-                                        th:attr="data-post-id=${post.postId}"
-                                        onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Thêm vào yêu thích">
+                                <button class="btn-favorite-large" th:attr="data-post-id=${post.postId}"
+                                    onclick="toggleFavorite(this.getAttribute('data-post-id'))"
+                                    title="Thêm vào yêu thích">
                                     <i class="far fa-heart"></i>
                                 </button>
                             </div>
@@ -609,8 +823,7 @@
                                 <div class="overview-content">
                                     <h3>Giới thiệu</h3>
                                     <p
-                                        th:utext="${post != null && post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
-                                        Mô tả bài đăng
+                                        th:utext="${post?.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
                                     </p>
                                 </div>
                             </div>
@@ -872,7 +1085,7 @@
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}" >
+                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}">
                                                 <i class="far fa-heart"></i>
                                             </button>
                                         </div>
@@ -1049,7 +1262,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
- 
+
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1538,7 +1751,7 @@
         // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- Include favorite handler -->
     <script src="/js/favorite-handler.js"></script>
 </body>
