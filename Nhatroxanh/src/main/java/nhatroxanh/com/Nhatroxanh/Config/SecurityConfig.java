@@ -56,14 +56,15 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/infor-chutro").permitAll()
                         .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
                                 "/uploads/**")
                         .permitAll()
-                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/notifications")
+                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/khach-thue/lichsu-thanhtoan", "/voucher", "/notifications")
                         .permitAll()
                         .requestMatchers("/api/contracts/public/hop-dong").permitAll() // Thêm đường dẫn mới
-                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
-                        .requestMatchers("/chu-tro/**").hasRole("OWNER")
+                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro").permitAll()
+                        // .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .anyRequest().authenticated())
                 .formLogin(form -> form

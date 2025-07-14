@@ -111,6 +111,10 @@ public class DemoController {
     public String thanhToan() {
         return "guest/thanh-toan";
     }
+    @GetMapping("/khach-thue/lichsu-thanhtoan")
+    public String líchuThanhToan() {
+        return "guest/lichsu-thanhtoan";
+    }
     @GetMapping("/voucher")
     public String voucherHosst() {
         return "host/voucher-host";
@@ -118,5 +122,9 @@ public class DemoController {
     @GetMapping("/notifications")
     public String notifications() {
         return "guest/chitiet-thongbao";
+    }
+    @GetMapping("/infor-chutro")
+    public String chutro() {
+        return "host/infor-chutro";
     }
 }
