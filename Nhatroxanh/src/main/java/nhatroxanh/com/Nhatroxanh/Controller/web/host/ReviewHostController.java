@@ -166,13 +166,19 @@ public class ReviewHostController {
 
     @PostMapping("/delete/{id}")
     public String deleteReview(@PathVariable("id") Integer reviewId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
-            reviewService.deleteReviewById(reviewId);
-            redirectAttributes.addFlashAttribute("success", "Xóa đánh giá thành công!");
+            // Kiểm tra quyền (tùy chọn)
+            reviewService.deleteReviewById(reviewId, userDetails.getUser().getUserId());
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa đánh giá thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (SecurityException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đánh giá này.");
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Không thể xóa đánh giá. Có lỗi xảy ra.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa đánh giá. Có lỗi xảy ra.");
         }
         return "redirect:/chu-tro/danh-gia";
     }

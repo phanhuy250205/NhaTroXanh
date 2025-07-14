@@ -53,98 +53,269 @@ function printContract(position) {
     return;
   }
 
-  const actionsHeader = modalContent.querySelector(".contract-actions-header-guest");
-  if (actionsHeader) actionsHeader.style.display = "none";
+  // Clone nội dung để không ảnh hưởng đến giao diện hiện tại
+  const contentToPrint = modalContent.cloneNode(true);
+
+  // Ẩn các phần tử không cần in
+  const elementsToHide = contentToPrint.querySelectorAll(
+    ".contract-detail-header-guest, .contract-actions-header-guest, .contract-action-btn-guest"
+  );
+  elementsToHide.forEach(el => el.style.display = "none");
+
+  // Thêm lớp in cho các phần tử cần điều chỉnh khi in
+  contentToPrint.querySelectorAll(".contract-section-blue-guest").forEach(el => {
+    el.classList.add("print-section-highlight");
+  });
 
   const printWindow = window.open('', '_blank');
   printWindow.document.write(`
+    <!DOCTYPE html>
     <html>
       <head>
-        <title>In Hợp Đồng</title>
+        <title>Hợp Đồng Thuê Nhà Trọ</title>
+        <meta charset="UTF-8">
         <style>
-          @page { size: A4; margin: 10mm; }
-          body { 
-            font-family: 'Times New Roman', serif; 
-            margin: 0; 
-            padding: 20mm; 
-            font-size: 12px; 
-            color: #333; 
+          /* Reset và căn lề */
+          @page {
+            size: A4;
+            margin: 15mm 20mm;
+          }
+          
+          body {
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 13pt;
             line-height: 1.6;
+            color: #000;
+            padding: 0;
+            margin: 0;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
-          .contract-full-content-guest { 
-            max-width: 210mm; 
-            margin: 0 auto; 
-            border: none; 
-            background-color: #fff;
+          
+          /* Tiêu đề hợp đồng */
+          .contract-national-title {
+            text-align: center;
+            margin-bottom: 20px;
           }
-          .contract-national-title { text-align: center; }
-          .contract-national-title h1 { 
-            font-size: 24px; 
-            font-weight: bold; 
-            color: #d32f2f; 
-            margin: 0 0 5mm 0;
+          
+          .contract-national-title h1 {
+            font-size: 20pt;
+            font-weight: bold;
+            color: #cc0000;
+            text-transform: uppercase;
+            margin-bottom: 10px;
           }
-          .contract-national-title p { 
-            font-size: 18px; 
-            font-weight: bold; 
-            color: #333; 
-            margin: 2mm 0;
+          
+          .contract-national-title p {
+            font-size: 14pt;
+            font-weight: bold;
+            margin: 5px 0;
           }
-          hr { border: 1px solid #d32f2f; margin-bottom: 10mm; }
-          .contract-detail-header-guest, .contract-actions-header-guest { display: none; }
-          .contract-section { 
-            margin-bottom: 10mm; 
-            padding: 5mm; 
-            border: 1px solid #ddd; 
-            border-radius: 0; 
-            background-color: #fff; 
+          
+          /* Đường kẻ ngang */
+          .contract-divider {
+            border: none;
+            height: 1px;
+            background-color: #cc0000;
+            margin: 15px 0;
+          }
+          
+          /* Các section chính */
+          .contract-section {
+            margin-bottom: 15px;
             page-break-inside: avoid;
           }
-          .contract-section-blue { background-color: #e3f2fd; border-color: #bbdefb; }
-          .contract-section-title { 
-            font-size: 16px; 
-            font-weight: 600; 
-            color: #2c3e50; 
-            margin-bottom: 5mm;
+          
+          .print-section-highlight {
+            background-color: #f0f7ff !important;
+            border-left: 4px solid #4a90e2 !important;
+            padding: 12px 15px !important;
+            margin-bottom: 20px !important;
           }
-          .contract-info-row { display: flex; margin-bottom: 3mm; }
-          .contract-info-label { font-weight: bold; width: 70mm; color: #555; }
-          .contract-info-value { flex: 1; }
-          .contract-utilities-list li { margin-bottom: 2mm; }
-          .contract-terms-box { 
-            white-space: pre-wrap; 
-            font-family: 'Times New Roman', serif; 
-            padding: 5mm; 
-            border: 1px solid #ddd; 
-            border-radius: 0; 
-            color: #333; 
-            line-height: 1.5; 
-            font-size: 12px; 
+          
+          /* Tiêu đề section */
+          .contract-section-title {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+          }
+          
+          /* Thông tin tài chính */
+          .contract-financial-grid-guest {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+          }
+          
+          .contract-financial-card-guest {
+            flex: 1;
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+          }
+          
+          .contract-rental-card-guest {
+            background-color: #f8f9fa;
+            border-left: 4px solid #28a745;
+          }
+          
+          .contract-deposit-card-guest {
+            background-color: #f8f9fa;
+            border-left: 4px solid #ffc107;
+          }
+          
+          .contract-financial-label-guest {
+            font-size: 11pt;
+            color: #555;
+            margin-bottom: 5px;
+          }
+          
+          .contract-financial-amount-guest {
+            font-size: 14pt;
+            font-weight: bold;
+            color: #2c3e50;
+          }
+          
+          .contract-financial-note-guest {
+            font-size: 10pt;
+            color: #777;
+            margin-top: 5px;
+          }
+          
+          /* Thông tin các bên */
+          .contract-parties-section-guest {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+          }
+          
+          .contract-party-card-guest {
+            flex: 1;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+          }
+          
+          .contract-party-title-guest {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+          }
+          
+          .contract-party-field-guest {
+            margin-bottom: 8px;
+          }
+          
+          .contract-party-label-guest {
+            display: inline-block;
+            width: 100px;
+            font-weight: bold;
+            color: #555;
+          }
+          
+          /* Điều khoản */
+          .contract-terms-box {
+            white-space: pre-wrap;
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 12pt;
+            line-height: 1.6;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+          }
+          
+          /* Chữ ký */
+          .contract-signature-section-guest {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
             page-break-inside: avoid;
           }
-          .contract-signature-section { margin-top: 10mm; }
-          .contract-signature-info { display: flex; justify-content: space-between; gap: 10mm; }
-          .contract-signature-party { flex: 1; text-align: center; }
-          .contract-signature-title { font-size: 14px; font-weight: bold; color: #2c3e50; margin-bottom: 3mm; }
-          .contract-signature-area { margin-top: 5mm; border-top: 1px dashed #ddd; padding-top: 5mm; }
-          .contract-footer-note { text-align: center; font-size: 10px; color: #666; margin-top: 10mm; padding: 5mm; border-top: 1px solid #ddd; }
+          
+          .contract-signature-card-guest {
+            flex: 1;
+            text-align: center;
+            max-width: 45%;
+          }
+          
+          .contract-signature-title-guest {
+            font-size: 12pt;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+          }
+          
+          .contract-signature-date-guest {
+            margin-bottom: 10px;
+          }
+          
+          .contract-signature-name-guest {
+            font-weight: bold;
+            margin-bottom: 30px;
+          }
+          
+          .contract-signature-area-guest {
+            margin-top: 50px;
+            border-top: 1px dashed #000;
+            padding-top: 5px;
+          }
+          
+          /* Footer */
+          .contract-footer-note-guest {
+            text-align: center;
+            font-size: 10pt;
+            color: #666;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+          }
+          
+          /* Utility classes */
+          .text-center { text-align: center; }
+          .text-uppercase { text-transform: uppercase; }
+          .font-bold { font-weight: bold; }
+          
           @media print {
-            body { -webkit-print-color-adjust: exact; }
-            .contract-full-content-guest { break-inside: avoid; }
+            body { 
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .no-print { display: none !important; }
+            .page-break { page-break-after: always; }
+            .avoid-break { page-break-inside: avoid; }
           }
         </style>
       </head>
       <body>
-        ${modalContent.outerHTML}
+        <!-- Thêm tiêu đề trang trọng -->
+        <div class="contract-national-title">
+          <h1>Cộng hòa xã hội chủ nghĩa việt nam</h1>
+          <p>Độc lập - Tự do - Hạnh phúc</p>
+          <hr class="contract-divider">
+          <h2 style="font-size: 16pt; margin-top: 20px;">HỢP ĐỒNG THUÊ NHÀ TRỌ</h2>
+        </div>
+        
+        ${contentToPrint.outerHTML}
       </body>
     </html>
   `);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
 
-  if (actionsHeader) actionsHeader.style.display = "flex";
+  printWindow.document.close();
+
+  // Đợi nội dung tải xong trước khi in
+  printWindow.onload = function () {
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  };
 }
 
 // Hàm tải xuống hợp đồng dưới dạng PDF

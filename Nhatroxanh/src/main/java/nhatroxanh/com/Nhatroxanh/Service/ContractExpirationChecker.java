@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractRepository;
-import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -24,22 +23,27 @@ public class ContractExpirationChecker {
         this.emailService = emailService;
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?") // Chạy mỗi ngày lúc 0h
     @Transactional
     public void checkExpiringContracts() {
         LocalDate today = LocalDate.now();
         LocalDate fiveDaysFromNow = today.plusDays(5);
+
         List<Contracts> activeContracts = contractRepository.findByStatus(Contracts.Status.ACTIVE);
 
         for (Contracts contract : activeContracts) {
             LocalDate endDate = contract.getEndDate().toLocalDate();
+            String to = contract.getTenant().getEmail();
+            String fullname = contract.getTenant().getFullname();
+            String contractCode = "HD" + contract.getContractId();
+
             if (endDate.equals(fiveDaysFromNow)) {
-                contract.setStatus(Contracts.Status.EXPIRED);
-                contractRepository.save(contract);
-                String to = contract.getTenant().getEmail();
-                String fullname = contract.getTenant().getFullname();
-                String contractCode = "HD" + contract.getContractId();
                 emailService.sendExpirationWarningEmail(to, fullname, contractCode, contract.getEndDate());
+            }
+            if (endDate.isBefore(today)) {
+                contract.setStatus(Contracts.Status.TERMINATED);
+                contractRepository.save(contract);
+                emailService.sendContractTerminatedEmail(to, fullname, contractCode, contract.getEndDate());
             }
         }
     }

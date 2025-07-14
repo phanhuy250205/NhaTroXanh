@@ -257,6 +257,46 @@
             line-height: 1.6;
             font-size: 15px;
         }
+
+        .status-draft-guest {
+            background-color: #ffc107;
+            /* vàng */
+            color: #212529;
+        }
+
+        .status-active-guest {
+            background-color: #28a745;
+            /* xanh lá */
+            color: white;
+        }
+
+        .status-terminated-guest {
+            background-color: #dc3545;
+            /* đỏ */
+            color: white;
+        }
+
+        .status-pending-expiration-guest {
+            background-color: #fd7e14;
+            /* cam */
+            color: white;
+        }
+
+        .status-completed-guest {
+            background-color: #6c757d;
+            /* xám */
+            color: white;
+        }
+
+        .status-badge-guest {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
 
@@ -315,11 +355,28 @@
                             th:text="${#numbers.formatInteger(contract.price, 0, 'COMMA')} + ' VNĐ/tháng'">
                             1,200,000 VNĐ/tháng</div>
                     </div>
-                    <div class="room-status-badge-guest">
-                        <i class="fas fa-circle"></i>
-                        <span th:text="${contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Đã hoàn thành'}">Đang
-                            thuê</span>
+                    <div class="">
+                        <span class="status-badge-guest" th:classappend="
+        ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
+        (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+        (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' :
+        (${contract.status.name() == 'EXPIRED'} ? ' status-pending-expiration-guest' : ' status-completed-guest')))">
 
+                            <i th:class="
+        ${contract.status.name() == 'DRAFT'} ? 'fas fa-pencil-alt' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' :
+        (${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle')))">
+                            </i>
+
+                            <span th:text="
+        ${contract.status.name() == 'DRAFT'} ? 'Chưa xác nhận' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' :
+        (${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' : 'Đã hoàn thành')))">
+                                Trạng thái
+                            </span>
+                        </span>
                     </div>
                 </div>
 
@@ -420,10 +477,29 @@
                             Hợp đồng #HD2024001</h3>
                         <p class="contract-type-guest">Hợp đồng thuê phòng trọ</p>
                     </div>
-                    <div class="contract-status-badge-guest contract-active-guest">
-                        <i class="fas fa-check-circle"></i>
-                        <span th:text="${contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Đã hoàn thành'}">Đang
-                            thuê</span>
+                    <div class="">
+                        <span class="status-badge-guest" th:classappend="
+        ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
+        (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+        (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' :
+        (${contract.status.name() == 'EXPIRED'} ? ' status-pending-expiration-guest' : ' status-completed-guest')))">
+
+                            <i th:class="
+        ${contract.status.name() == 'DRAFT'} ? 'fas fa-pencil-alt' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' :
+        (${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle')))">
+                            </i>
+
+                            <span th:text="
+        ${contract.status.name() == 'DRAFT'} ? 'Chưa xác nhận' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' :
+        (${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' : 'Đã hoàn thành')))">
+                                Trạng thái
+                            </span>
+                        </span>
+
                     </div>
                 </div>
 
@@ -454,11 +530,14 @@
                                 <div class="contract-compact-expiry-guest">
                                     <span class="contract-compact-value-guest"
                                         th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">2024-12-31</span>
-                                    <!-- <span th:if="${#temporals.dayDifference(#temporals.today(), contract.endDate) >= 0}"
-                                        th:text="'Còn ' + ${#temporals.dayDifference(#temporals.today(), contract.endDate)} + ' ngày'"></span>
-                                    <span
-                                        th:unless="${#temporals.dayDifference(#temporals.today(), contract.endDate) >= 0}"
-                                        th:text="'Đã quá hạn ' + ${-#temporals.dayDifference(#temporals.today(), contract.endDate)} + ' ngày'"></span> -->
+
+                                    <span th:if="${contract.endDate.toLocalDate() >= T(java.time.LocalDate).now()}"
+                                        th:text="'Còn ' + ${T(java.time.temporal.ChronoUnit).DAYS.between(T(java.time.LocalDate).now(), contract.endDate.toLocalDate())} + ' ngày'">
+                                    </span>
+
+                                    <span th:unless="${contract.endDate.toLocalDate() >= T(java.time.LocalDate).now()}"
+                                        th:text="'Đã quá hạn ' + ${T(java.time.temporal.ChronoUnit).DAYS.between(contract.endDate.toLocalDate(), T(java.time.LocalDate).now())} + ' ngày'">
+                                    </span>
                                 </div>
                             </div>
                         </div>

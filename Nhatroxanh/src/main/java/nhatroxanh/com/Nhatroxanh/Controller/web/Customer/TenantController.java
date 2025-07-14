@@ -71,7 +71,7 @@ public class TenantController {
     @GetMapping("/quan-ly-thue-tra")
     public String showRentalManagementPage(Model model,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "3") int size) {
+            @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("endDate").descending());
         Page<Contracts> contractHistoryPage = tenantService.getContractHistory(pageable);
 
@@ -274,10 +274,10 @@ public class TenantController {
             }
 
             tenantService.returnRoom(contractId, Date.valueOf(returnDate), returnReason);
-            redirectAttributes.addFlashAttribute("successMessage", "Trả phòng thành công.");
+            redirectAttributes.addFlashAttribute("successMessage", "Gửi yêu cầu trả phòng thành công.");
             return "redirect:/khach-thue/quan-ly-thue-tra";
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Trả phòng thất bại: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Gửi yêu cầu trả phòng thất bại: " + e.getMessage());
             return "redirect:/khach-thue/tra-phong/" + contractId;
         }
     }
