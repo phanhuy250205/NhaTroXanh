@@ -329,7 +329,7 @@
                                         Ngày sinh <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" class="form-control" name="tenant.birthday" id="tenant-dob" required
-                                            th:field="*{tenant.birthday}" max="2006-12-31">
+                                           th:field="*{tenant.birthday}" max="2006-12-31">
                                 </div>
 
                                 <div class="col-md-3">
@@ -548,11 +548,9 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">
-
-                                        <i class="fa fa-building me-1"></i>Chọn khu trọ <span
-                                            class="text-danger">*</span>
+                                        <i class="fa fa-building me-1"></i>Chọn khu trọ <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="hostelId" onchange="NhaTroContract.filterRooms()" required>
+                                    <select class="form-select" id="hostelSelect" name="hostelId" required>
                                         <option value="">-- Chọn khu trọ --</option>
                                         <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
                                                 th:text="${hostel.name}"
@@ -561,19 +559,20 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label class="form-label" th:fragment="roomSelect">
-                                        <i class="fa fa-door-open me-1"></i>Chọn phòng trọ <span
-                                            class="text-danger">*</span>
+                                    <label class="form-label">
+                                        <i class="fa fa-door-open me-1"></i>Chọn phòng trọ <span class="text-danger">*</span>
                                     </label>
-                                    <select class="form-select" id="roomId" name="room.roomId"
-                                            th:class="${#fields.hasErrors('room.roomId')} ? 'form-control is-invalid' : 'form-control'"
-                                            required>
+                                    <select class="form-select" id="roomSelect" name="room.roomId" required>
                                         <option value="">-- Chọn phòng trọ --</option>
-                                        <option th:each="room : ${rooms}" th:value="${room.roomId}"
-                                                th:text="${room.roomName} + ' (' + room.address + ')'"
-                                                th:data-hostel-id="${room.hostelId}"></option>
+                                        <!-- ✅ Options sẽ được load bằng AJAX -->
                                     </select>
+                                    <div class="invalid-feedback">Vui lòng chọn phòng trọ</div>
                                 </div>
+
+                                <!-- ✅ THÊM HIDDEN INPUTS ĐỂ JAVASCRIPT BIẾT EDIT MODE -->
+                                <input type="hidden" name="isEditMode" th:value="${isEditMode}" id="isEditMode">
+                                <input type="hidden" name="currentRoomId" th:value="${contract?.room?.roomId}" id="currentRoomId">
+                                <input type="hidden" name="currentHostelId" th:value="${contract?.room?.hostelId}" id="currentHostelId">
 
                                 <div class="col-md-4">
                                     <label class="form-label">Tỉnh/Thành phố</label>
@@ -1162,6 +1161,7 @@
     </div>
 </div>
 
+<<<<<<< HEAD
 <script th:inline="javascript">
     // CCCD Province Codes Mapping - Move this OUTSIDE the class
     const CCCD_PROVINCE_CODES = {
@@ -1246,69 +1246,79 @@
     // Handle housing area selection change (xóa lặp)
     housingAreaSelect.addEventListener('change', function() {
         const selectedArea = this.value;
+=======
+<!-- ✅ JQUERY FIRST -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
 
-        // Clear room selection
-        roomSelectionSelect.innerHTML = '<option value="">-- Chọn phòng trọ --</option>';
+<!-- ✅ MAIN CONTRACT SCRIPT -->
+<script>
+    console.log('🚀 Contract form loading...');
 
-        if (selectedArea && roomData[selectedArea]) {
-            // Enable room selection
-            roomSelectionSelect.disabled = false;
+    // ✅ GLOBAL VARIABLES
+    // ✅ GLOBAL VARIABLES (sửa tên để rõ, tránh duplicate)
+    let isEditMode = $('#isEditMode').val() === 'true';
+    let currentRoomId = $('#currentRoomId').val();  // Giữ nguyên, từ hidden input (e.g., '11')
+    let currentHostelId = $('#currentHostelId').val();
+    let isLoading = false; // Flag để tránh loop
 
-            // Populate room options
-            roomData[selectedArea].forEach(room => {
-                const option = document.createElement('option');
-                option.value = room.value;
-                option.textContent = room.text;
-                roomSelectionSelect.appendChild(option);
-            });
-        } else {
-            // Disable room selection if no area selected
-            roomSelectionSelect.disabled = true;
-            // Clear form fields
-            document.getElementById('room-number').value = '';
-            document.getElementById('room-area').value = '';
-            document.getElementById('rent-price').value = '';
+    let globalCurrentRoomId = currentRoomId || null;  // ✅ Đổi tên & set từ currentRoomId (nếu edit mode)
 
-            // Update preview
-            if (window.NhaTroContract) {
-                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-            }
-        }
-    });
+    // ✅ Hàm load rooms (filter unactive + current room nếu active)
+    // ✅ Hàm load rooms (dùng globalCurrentRoomId)
+    function loadRoomsByHostel(hostelId, callback) {
+        if (!hostelId) return;
+        $.ajax({
+            url: `/api/rooms/by-hostel/${hostelId}`,
+            method: 'GET',
+            success: function(rooms) {
+                console.log('🔍 Raw rooms from API:', rooms);  // Debug
+                let roomOptions = '<option value="">-- Chọn phòng trọ --</option>';
+                if (rooms && rooms.length > 0) {
+                    // Filter: Giữ unactive + current room nếu active
+                    let filteredRooms = rooms.filter(room => room.status === 'unactive');
+                    if (globalCurrentRoomId) {
+                        const currentRoom = rooms.find(room => room.roomId == globalCurrentRoomId);  // == cho number/string
+                        if (currentRoom && !filteredRooms.some(r => r.roomId == globalCurrentRoomId)) {
+                            filteredRooms.push(currentRoom);  // Add current dù active
+                        }
+                    }
+                    console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
+>>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
 
-    // Handle room selection change
-    roomSelectionSelect.addEventListener('change', function() {
-        const selectedArea = housingAreaSelect.value;
-        const selectedRoomValue = this.value;
-
-        if (selectedArea && selectedRoomValue && roomData[selectedArea]) {
-            // Find the selected room data
-            const selectedRoom = roomData[selectedArea].find(room => room.value === selectedRoomValue);
-
-            if (selectedRoom) {
-                // Auto-fill room information
-                document.getElementById('room-number').value = selectedRoom.number;
-                document.getElementById('room-area').value = selectedRoom.area;
-                document.getElementById('rent-price').value = selectedRoom.price;
-
-                // Update contract preview using the existing NhaTroContract methods
-                if (window.NhaTroContract) {
-                    // Update preview fields with highlight effect
-                    window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                    window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                    window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-
-                    // Recalculate deposit based on new rent price
-                    window.NhaTroContract.calculateDeposit();
-
-                    // Show notification
-                    window.NhaTroContract.showNotification(
-                        `Đã chọn ${selectedRoom.number} - Diện tích: ${selectedRoom.area}m² - Giá: ${new Intl.NumberFormat('vi-VN').format(selectedRoom.price)} VNĐ/tháng`,
-                        'success'
-                    );
+                    if (filteredRooms.length === 0) {
+                        roomOptions += '<option value="">Không có phòng unactive</option>';
+                    } else {
+                        filteredRooms.forEach(room => {
+                            const province = room.province ? (room.province.includes('Đà Nẵng') ? 'Đà Nẵng' : room.province) : 'Đà Nẵng';
+                            const fullAddress = [room.street || 'Chưa cập nhật đường', room.ward ? `Phường ${room.ward}` : '', room.district ? `Quận ${room.district}` : '', province].filter(Boolean).join(', ');
+                            const price = room.price ? room.price.toLocaleString('vi-VN') : '0';
+                            const roomDisplayName = room.roomName || (room.roomNumber ? room.roomNumber : 'không tên');
+                            const displayPrefix = roomDisplayName.startsWith('Phòng ') ? '' : 'Phòng ';
+                            roomOptions += `
+                            <option value="${room.roomId || ''}"
+                                data-street="${room.street || ''}"
+                                data-ward="${room.ward || ''}"
+                                data-district="${room.district || ''}"
+                                data-province="${province}"
+                                data-area="${room.area || ''}"
+                                data-price="${room.price || ''}"
+                                data-room-name="${room.roomName || ''}"
+                                data-room-number="${room.roomNumber || ''}"
+                                data-max-tenants="${room.maxTenants || ''}"
+                                data-hostel-id="${hostelId}"
+                                data-status="${room.status || ''}"
+                            >
+                                ${displayPrefix}${roomDisplayName} - ${fullAddress} - ${price}đ
+                            </option>
+                        `;
+                        });
+                    }
+                    $('#roomSelect').html(roomOptions).prop('disabled', false);
+                } else {
+                    $('#roomSelect').html('<option value="">Không có phòng</option>').prop('disabled', true);
                 }
+<<<<<<< HEAD
             }
         } else {
             // Clear fields if no room selected
@@ -1343,109 +1353,137 @@
                 deposit: parseFloat(formData.get('terms.deposit')),
                 duration: parseInt(formData.get('terms.duration')),
                 terms: formData.get('terms.terms')
+=======
+                if (callback) callback();
+>>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
             },
-            room: {
-                roomId: parseInt(formData.get('room.roomId')),
-                roomName: document.querySelector('#roomId option:checked').textContent
-            },
-            owner: {
-                fullName: formData.get('owner.fullName'),
-                phone: formData.get('owner.phone'),
-                cccdNumber: formData.get('owner.cccdNumber'),
-                birthday: formData.get('owner.birthday'),
-                issueDate: formData.get('owner.issueDate'),
-                issuePlace: formData.get('owner.issuePlace'),
-                street: formData.get('owner.street'),
-                ward: formData.get('owner.ward'),
-                district: formData.get('owner.district'),
-                province: formData.get('owner.province'),
-                email: formData.get('owner.email'),
-                bankAccount: formData.get('owner.bankAccount')
-            },
-            tenant: formData.get('tenantType') === 'REGISTERED' ? {
-                fullName: formData.get('tenant.fullName'),
-                phone: formData.get('tenant.phone'),
-                cccdNumber: formData.get('tenant.cccdNumber'),
-                birthday: formData.get('tenant.birthday'),
-                issueDate: formData.get('tenant.issueDate'),
-                issuePlace: formData.get('tenant.issuePlace'),
-                street: formData.get('tenant.street'),
-                ward: formData.get('tenant.ward'),
-                district: formData.get('tenant.district'),
-                province: formData.get('tenant.province'),
-                email: formData.get('tenant.email')
-            } : null,
-            unregisteredTenant: formData.get('tenantType') === 'UNREGISTERED' ? {
-                fullName: formData.get('unregisteredTenant.fullName'),
-                phone: formData.get('unregisteredTenant.phone'),
-                cccdNumber: formData.get('unregisteredTenant.cccdNumber'),
-                birthday: formData.get('unregisteredTenant.birthday'),
-                issueDate: formData.get('unregisteredTenant.issueDate'),
-                issuePlace: formData.get('unregisteredTenant.issuePlace'),
-                street: formData.get('unregisteredTenant.street'),
-                ward: formData.get('unregisteredTenant.ward'),
-                district: formData.get('unregisteredTenant.district'),
-                province: formData.get('unregisteredTenant.province'),
-                email: formData.get('unregisteredTenant.email')
-            } : null
-        };
-
-        try {
-            const url = isEditMode ? `/api/contracts/update/${contractId}` : '/api/contracts';
-            const method = isEditMode ? 'PUT' : 'POST';
-            const response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify(contractDto)
-            });
-
-            const result = await response.json();
-            if (result.success) {
-                showSuccessMessage(isEditMode ? 'Cập nhật hợp đồng thành công!' : 'Tạo hợp đồng thành công!');
-                window.location.href = '/chu-tro/DS-hop-dong-host';
-            } else {
-                showErrorMessage(result.message || 'Lỗi khi xử lý hợp đồng');
+            error: function(xhr, status, error) {
+                console.error('Lỗi tải phòng:', error);
+                $('#roomSelect').html('<option value="">Lỗi tải phòng</option>').prop('disabled', true);
+                alert('Không thể tải danh sách phòng. Vui lòng thử lại sau.');
             }
-        } catch (error) {
-            console.error('Error submitting contract:', error);
-            showErrorMessage('Có lỗi xảy ra khi xử lý hợp đồng: ' + error.message);
-        }
-    });
-
-    // Gắn sự kiện cho các nút sửa
-    document.addEventListener('DOMContentLoaded', function() {
-        // Lấy tất cả các nút sửa
-        const editButtons = document.querySelectorAll('.edit-contract-btn');
-
-        editButtons.forEach(button => {
-            button.addEventListener('click', function() {
-                // Lấy ID hợp đồng từ thuộc tính data
-                const contractId = this.getAttribute('data-contract-id');
-
-                if (contractId) {
-                    handleEditContract(contractId);
-                }
-            });
         });
-    });
-
-    // Hàm mở modal hoặc form chỉnh sửa (tùy thuộc vào UI của bạn)
-    function openEditContractModal() {
-        // Ví dụ nếu dùng Bootstrap modal
-        $('#editContractModal').modal('show');
-
-        // Hoặc hiển thị form chỉnh sửa
-        // document.getElementById('editContractForm').style.display = 'block';
     }
 
 
+    function updateRoomDetails() {
+        const $select = $('#roomSelect');
+        const $selectedOption = $select.find('option:selected');
+        if (!$selectedOption.val()) return;
+
+        // Ưu tiên data-room-name (room.roomName từ backend)
+        let roomNumber = $selectedOption.data('room-name') || '';
+
+        // Nếu không, parse từ text
+        if (!roomNumber) {
+            const selectedText = $selectedOption.text();
+            const roomNumberMatch = selectedText.match(/Phòng\s*([a-zA-Z0-9_\u00C0-\u1EF9\s]+)/i); // Hỗ trợ unicode và space
+            roomNumber = roomNumberMatch ? roomNumberMatch[1].trim() : 'Chưa đặt tên';
+        }
+
+        // Fallback nếu là fallback backend
+        if (roomNumber === 'không tên') {
+            roomNumber = 'Phòng ' + $selectedOption.val(); // Sử dụng roomId
+        }
+
+        console.log('🔍 Parsed Room Number:', roomNumber);
+
+        $('#room-number').val(roomNumber);
+
+        // ✅ THÊM DEBUG ĐÂY: Check raw data-area từ option (in console để xem backend gửi gì)
+        console.log('🔍 Data area raw from option:', $selectedOption.data('area'));
+
+        // Cập nhật các trường khác
+        const roomData = {
+            street: $selectedOption.data('street') || '',
+            ward: $selectedOption.data('ward') || '',
+            district: $selectedOption.data('district') || '',
+            province: $selectedOption.data('province') || 'Đà Nẵng',
+            area: parseFloat($selectedOption.data('area')) || 0,  // ✅ THÊM parseFloat để chuyển string '45.0' thành 45 (number), fallback 0 nếu null
+            price: $selectedOption.data('price') || '0',
+            roomName: $selectedOption.data('room-name') || ''
+        };
+
+        console.log('🔍 Updating Room Details:', roomData);
+
+        $('#room-street').val(roomData.street);
+        $('#room-area').val(roomData.area);  // Bây giờ val() sẽ set number đúng (không '0')
+        $('#rent-price').val(roomData.price);
+
+        updateAddressDropdowns(roomData);
+    }
+
+    // ✅ Hàm cập nhật dropdown địa chỉ
+    function updateAddressDropdowns(addressData) {
+        const updateDropdown = (selectId, value) => {
+            if (!value) return;
+            const $select = $(`#${selectId}`);
+            const $matchedOption = $select.find('option').filter(function() { return $(this).text().toLowerCase().includes(value.toLowerCase()); });
+            if ($matchedOption.length) {
+                $select.val($matchedOption.first().val());
+            } else {
+                $select.append(`<option value="${value}">${value}</option>`);
+                $select.val(value);
+            }
+        };
+        updateDropdown('room-province', addressData.province);
+        updateDropdown('room-district', addressData.district);
+        updateDropdown('room-ward', addressData.ward);
+    }
+
+    // ✅ Hàm auto load ở edit mode (sử dụng flag để tránh loop)
+    function autoLoadRoomAndHostel() {
+        if (isLoading) return; // Tránh gọi lặp
+        isLoading = true;
+        console.log('🔄 Auto-loading for edit mode');
+        $('#hostelSelect').val(currentHostelId).trigger('change');
+        setTimeout(() => {
+            $('#roomSelect').val(currentRoomId).trigger('change');
+            isLoading = false;
+        }, 500); // Tăng timeout để đảm bảo rooms load xong
+    }
+
+    // ✅ MAIN READY FUNCTION (hợp nhất tất cả)
+    $(document).ready(function() {
+        console.log('🚀 Contract form initialized');
+
+        // HOSTEL CHANGE EVENT
+        $('#hostelSelect').on('change', function() {
+            const hostelId = $(this).val();
+            console.log('🏢 Hostel changed to:', hostelId);
+            if (hostelId) {
+                loadRoomsByHostel(hostelId);
+            } else {
+                $('#roomSelect').html('<option value="">-- Chọn phòng trọ --</option>').prop('disabled', true);
+            }
+        });
+
+        // ROOM CHANGE EVENT
+        $('#roomSelect').on('change', function() {
+            console.log('🏠 Room changed to:', $(this).val());
+            updateRoomDetails();
+        });
+
+        // AUTO LOAD FOR EDIT MODE (gọi ở ngoài, không trong callback)
+        if (isEditMode && currentHostelId && currentRoomId) {
+            autoLoadRoomAndHostel();
+        }
+
+        // FORM VALIDATION (giữ nguyên)
+        $('#contractForm').on('submit', function(e) {
+            const hostelId = $('#hostelSelect').val();
+            const roomId = $('#roomSelect').val();
+            if (!hostelId || !roomId) {
+                e.preventDefault();
+                alert('Vui lòng chọn khu trọ và phòng trọ');
+            }
+        });
+    });
 </script>
 
-<script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/js/contract.js}"></script>
+<!-- ✅ LOAD CONTRACT.JS IF EXISTS -->
+<script th:src="@{/js/contract.js}" onerror="console.log('⚠️ contract.js not found - using inline script')"></script>
+
 </body>
 
 </html>

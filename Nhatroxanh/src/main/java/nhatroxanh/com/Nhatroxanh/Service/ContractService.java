@@ -9,6 +9,7 @@ import java.util.Optional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import org.springframework.transaction.annotation.Transactional;
@@ -71,7 +72,8 @@ public interface ContractService {
     void updateStatus(Long contractId, String newStatus);
 
     Contracts getContractById(Long contractId);
-
+    // Thêm method mới để lấy phòng theo tenant ID
+    Rooms findRoomByTenantId(Long tenantId);
 
 
 
