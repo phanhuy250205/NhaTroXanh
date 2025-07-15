@@ -49,6 +49,7 @@ public class Payments {
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
+    private String appTransId;
      @Column(name = "notification_attempts_today", nullable = false)
     private Integer notificationAttemptsToday = 0;
 
@@ -59,6 +60,10 @@ public class Payments {
     }
 
     public enum PaymentMethod {
-        TIỀN_MẶT, CHUYỂN_KHOẢN_NGÂN_HÀNG, MOMO
+        TIỀN_MẶT,
+        BANK,
+        VNPAY,
+        ZALOPAY,
+        MOMO
     }
 }

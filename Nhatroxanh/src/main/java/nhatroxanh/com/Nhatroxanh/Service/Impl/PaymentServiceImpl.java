@@ -20,7 +20,6 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 
-
 import java.sql.Date;
 import java.text.NumberFormat;
 import java.time.LocalDate;
@@ -299,39 +298,43 @@ public class PaymentServiceImpl implements PaymentService {
             try {
                 // Retrieve payment entity to check and update notification attempts
                 Payments paymentEntity = paymentsRepository.findById(payment.getPaymentId())
-                        .orElseThrow(() -> new IllegalArgumentException("Payment not found for ID: " + payment.getPaymentId()));
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Payment not found for ID: " + payment.getPaymentId()));
 
                 // Check and reset notification attempts if it's a new day
                 if (paymentEntity.getLastNotificationDate() == null ||
                         !paymentEntity.getLastNotificationDate().toLocalDate().equals(today)) {
                     paymentEntity.setNotificationAttemptsToday(0);
                     paymentEntity.setLastNotificationDate(Date.valueOf(today));
-                    log.info("Reset notification attempts for invoice {} to 0 for new day: {}", 
+                    log.info("Reset notification attempts for invoice {} to 0 for new day: {}",
                             payment.getPaymentId(), today);
                 }
 
                 // Check daily notification limit
                 if (paymentEntity.getNotificationAttemptsToday() >= MAX_NOTIFICATION_ATTEMPTS_PER_DAY) {
-                    log.warn("Daily notification limit reached for invoice {} (attempts: {}). Skipping.", 
+                    log.warn("Daily notification limit reached for invoice {} (attempts: {}). Skipping.",
                             payment.getPaymentId(), paymentEntity.getNotificationAttemptsToday());
                     continue;
                 }
 
                 // Retrieve contract associated with the payment
                 Contracts contract = contractsRepository.findById(payment.getContractId())
-                        .orElseThrow(() -> new IllegalArgumentException("Contract not found for payment ID: " + payment.getPaymentId()));
+                        .orElseThrow(() -> new IllegalArgumentException(
+                                "Contract not found for payment ID: " + payment.getPaymentId()));
 
                 // Retrieve tenant (user) associated with the contract
                 Users tenant = null;
                 if (contract.getTenant() != null) {
                     tenant = userRepository.findById(contract.getTenant().getUserId())
-                            .orElseThrow(() -> new IllegalArgumentException("Tenant not found for contract ID: " + contract.getContractId()));
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Tenant not found for contract ID: " + contract.getContractId()));
                 } else if (contract.getUnregisteredTenant() != null) {
-                    log.warn("Unregistered tenant for contract ID: {} for payment ID: {}. Email and notification skipped.", 
+                    log.warn(
+                            "Unregistered tenant for contract ID: {} for payment ID: {}. Email and notification skipped.",
                             contract.getContractId(), payment.getPaymentId());
                     continue;
                 } else {
-                    log.warn("No tenant found for contract ID: {} for payment ID: {}", 
+                    log.warn("No tenant found for contract ID: {} for payment ID: {}",
                             contract.getContractId(), payment.getPaymentId());
                     continue;
                 }
@@ -340,9 +343,10 @@ public class PaymentServiceImpl implements PaymentService {
                 try {
                     createPaymentNotification(tenant, payment);
                     notificationCreated = true;
-                    log.info("Notification created for invoice {} for tenant {}", payment.getPaymentId(), tenant.getUserId());
+                    log.info("Notification created for invoice {} for tenant {}", payment.getPaymentId(),
+                            tenant.getUserId());
                 } catch (Exception e) {
-                    log.error("Failed to create notification for invoice {} for tenant {}: {}", 
+                    log.error("Failed to create notification for invoice {} for tenant {}: {}",
                             payment.getPaymentId(), tenant.getUserId(), e.getMessage());
                 }
 
@@ -353,17 +357,18 @@ public class PaymentServiceImpl implements PaymentService {
                         String body = buildEmailBody(payment);
                         sendEmail(tenant.getEmail(), subject, body);
                         emailSent = true;
-                        log.info("Email sent for invoice {} to tenant {} (email: {})", 
+                        log.info("Email sent for invoice {} to tenant {} (email: {})",
                                 payment.getPaymentId(), tenant.getUserId(), tenant.getEmail());
                     } catch (MailAuthenticationException e) {
-                        log.error("Email authentication failed for invoice {} to tenant {}: {}", 
+                        log.error("Email authentication failed for invoice {} to tenant {}: {}",
                                 payment.getPaymentId(), tenant.getUserId(), e.getMessage());
                     } catch (Exception e) {
-                        log.error("Failed to send email for invoice {} to tenant {}: {}", 
+                        log.error("Failed to send email for invoice {} to tenant {}: {}",
                                 payment.getPaymentId(), tenant.getUserId(), e.getMessage());
                     }
                 } else {
-                    log.warn("No email found for tenant ID: {} for payment ID: {}", tenant.getUserId(), payment.getPaymentId());
+                    log.warn("No email found for tenant ID: {} for payment ID: {}", tenant.getUserId(),
+                            payment.getPaymentId());
                 }
 
                 // Update notification attempts if either email or notification was successful
@@ -372,10 +377,12 @@ public class PaymentServiceImpl implements PaymentService {
                     paymentEntity.setLastNotificationDate(Date.valueOf(today));
                     paymentsRepository.save(paymentEntity);
                     sentCount++;
-                    log.info("Successfully processed invoice {} for tenant {} (email: {}, notification: {}, attempts today: {})", 
-                            payment.getPaymentId(), tenant.getUserId(), emailSent, notificationCreated, paymentEntity.getNotificationAttemptsToday());
+                    log.info(
+                            "Successfully processed invoice {} for tenant {} (email: {}, notification: {}, attempts today: {})",
+                            payment.getPaymentId(), tenant.getUserId(), emailSent, notificationCreated,
+                            paymentEntity.getNotificationAttemptsToday());
                 } else {
-                    log.warn("No actions (email or notification) completed for invoice {} for tenant {}", 
+                    log.warn("No actions (email or notification) completed for invoice {} for tenant {}",
                             payment.getPaymentId(), tenant.getUserId());
                 }
 
@@ -390,46 +397,48 @@ public class PaymentServiceImpl implements PaymentService {
 
     /**
      * Builds a styled HTML email body for the invoice.
+     * 
      * @param payment Payment details
      * @return HTML email body
      */
     private String buildEmailBody(PaymentResponseDto payment) {
         StringBuilder body = new StringBuilder();
         body.append("<!DOCTYPE html>")
-            .append("<html>")
-            .append("<head>")
-            .append("<meta charset='UTF-8'>")
-            .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
-            .append("<style>")
-            .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; }")
-            .append(".container { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #f9f9f9; }")
-            .append("h2 { color: #2c3e50; text-align: center; font-size: 24px; margin: 0 0 20px; }")
-            .append(".header { background-color: #3498db; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }")
-            .append("table { width: 100%; border-collapse: collapse; margin: 20px 0; }")
-            .append("th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }")
-            .append("th { background-color: #ecf0f1; font-weight: bold; }")
-            .append(".total { font-weight: bold; font-size: 16px; text-align: right; }")
-            .append(".footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }")
-            .append(".payment-button { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 20px 0; }")
-            .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }")
-            .append(".status-paid { background-color: #d4edda; color: #155724; }")
-            .append(".status-pending { background-color: #fff3cd; color: #856404; }")
-            .append(".status-overdue { background-color: #f8d7da; color: #721c24; }")
-            .append("@media (max-width: 600px) { .container { padding: 10px; } th, td { font-size: 12px; padding: 8px; } }")
-            .append("</style>")
-            .append("</head>")
-            .append("<body>")
-            .append("<div class='container'>")
-            .append("<div class='header'>")
-            .append("<h2>Hóa Đơn Thanh Toán</h2>")
-            .append("</div>")
-            .append("<p><strong>Mã hóa đơn:</strong> ").append(payment.getPaymentId()).append("</p>")
-            .append("<p><strong>Tháng:</strong> ").append(payment.getMonth()).append("</p>")
-            .append("<p><strong>Hạn thanh toán:</strong> ").append(payment.getDueDate()).append("</p>")
-            .append("<p><strong>Trạng thái:</strong> <span class='status-badge ");
+                .append("<html>")
+                .append("<head>")
+                .append("<meta charset='UTF-8'>")
+                .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+                .append("<style>")
+                .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; }")
+                .append(".container { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #f9f9f9; }")
+                .append("h2 { color: #2c3e50; text-align: center; font-size: 24px; margin: 0 0 20px; }")
+                .append(".header { background-color: #3498db; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }")
+                .append("table { width: 100%; border-collapse: collapse; margin: 20px 0; }")
+                .append("th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }")
+                .append("th { background-color: #ecf0f1; font-weight: bold; }")
+                .append(".total { font-weight: bold; font-size: 16px; text-align: right; }")
+                .append(".footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }")
+                .append(".payment-button { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 20px 0; }")
+                .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }")
+                .append(".status-paid { background-color: #d4edda; color: #155724; }")
+                .append(".status-pending { background-color: #fff3cd; color: #856404; }")
+                .append(".status-overdue { background-color: #f8d7da; color: #721c24; }")
+                .append("@media (max-width: 600px) { .container { padding: 10px; } th, td { font-size: 12px; padding: 8px; } }")
+                .append("</style>")
+                .append("</head>")
+                .append("<body>")
+                .append("<div class='container'>")
+                .append("<div class='header'>")
+                .append("<h2>Hóa Đơn Thanh Toán</h2>")
+                .append("</div>")
+                .append("<p><strong>Mã hóa đơn:</strong> ").append(payment.getPaymentId()).append("</p>")
+                .append("<p><strong>Tháng:</strong> ").append(payment.getMonth()).append("</p>")
+                .append("<p><strong>Hạn thanh toán:</strong> ").append(payment.getDueDate()).append("</p>")
+                .append("<p><strong>Trạng thái:</strong> <span class='status-badge ");
 
         // Handle payment status safely
-        String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase() : "unknown";
+        String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase()
+                : "unknown";
         if (status.contains("đã_thanh_toán")) {
             body.append("status-paid'>Đã thanh toán");
         } else if (status.contains("quá_hạn_thanh_toán")) {
@@ -438,37 +447,41 @@ public class PaymentServiceImpl implements PaymentService {
             body.append("status-pending'>Chưa thanh toán");
         }
         body.append("</span></p>")
-            .append("<table>")
-            .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
+                .append("<table>")
+                .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
 
         for (PaymentResponseDto.PaymentDetailResponseDto detail : payment.getDetails()) {
             body.append("<tr>")
-                .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText()).append(")</td>")
-                .append("<td>").append(detail.getQuantity()).append("</td>")
-                .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
-                .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
-                .append("</tr>");
+                    .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText())
+                    .append(")</td>")
+                    .append("<td>").append(detail.getQuantity()).append("</td>")
+                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
+                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
+                    .append("</tr>");
         }
 
         body.append("</table>")
-            .append("<p class='total'>Tổng cộng: ").append(CURRENCY_FORMAT.format(payment.getTotalAmount())).append(" VNĐ</p>")
-            .append("<a href='/tenant/payments/").append(payment.getPaymentId()).append("' class='payment-button'>Thanh toán ngay</a>")
-            .append("<p>Vui lòng thanh toán trước ngày đến hạn. Liên hệ chủ trọ nếu có thắc mắc.</p>")
-            .append("<div class='footer'>")
-            .append("Nhà Trọ Xanh - Hỗ trợ: <a href='mailto:support@nhatroxanh.com'>support@nhatroxanh.com</a>")
-            .append("</div>")
-            .append("</div>")
-            .append("</body>")
-            .append("</html>");
+                .append("<p class='total'>Tổng cộng: ").append(CURRENCY_FORMAT.format(payment.getTotalAmount()))
+                .append(" VNĐ</p>")
+                .append("<a href='/tenant/payments/").append(payment.getPaymentId())
+                .append("' class='payment-button'>Thanh toán ngay</a>")
+                .append("<p>Vui lòng thanh toán trước ngày đến hạn. Liên hệ chủ trọ nếu có thắc mắc.</p>")
+                .append("<div class='footer'>")
+                .append("Nhà Trọ Xanh - Hỗ trợ: <a href='mailto:support@nhatroxanh.com'>support@nhatroxanh.com</a>")
+                .append("</div>")
+                .append("</div>")
+                .append("</body>")
+                .append("</html>");
 
         return body.toString();
     }
 
     /**
      * Sends an email with the specified subject and HTML body.
-     * @param to Recipient email address
+     * 
+     * @param to      Recipient email address
      * @param subject Email subject
-     * @param body HTML email body
+     * @param body    HTML email body
      */
     private void sendEmail(String to, String subject, String body) throws Exception {
         MimeMessage message = mailSender.createMimeMessage();
@@ -484,24 +497,32 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Creates an in-app notification for a payment reminder with detailed invoice information.
-     * @param tenant Tenant user
+     * Creates an in-app notification for a payment reminder with detailed invoice
+     * information.
+     * 
+     * @param tenant  Tenant user
      * @param payment Payment details
      */
     private void createPaymentNotification(Users tenant, PaymentResponseDto payment) {
         StringBuilder message = new StringBuilder();
         message.append("Hóa đơn #").append(payment.getPaymentId())
-               .append(" cho tháng ").append(payment.getMonth())
-               .append(" (Tổng: ").append(CURRENCY_FORMAT.format(payment.getTotalAmount())).append(" VNĐ).")
-               .append(" Hạn thanh toán: ").append(payment.getDueDate()).append(". Chi tiết: ");
+                .append(" cho tháng ").append(payment.getMonth())
+                .append(" (Tổng: ").append(CURRENCY_FORMAT.format(payment.getTotalAmount())).append(" VNĐ).")
+                .append(" Hạn thanh toán: ").append(payment.getDueDate()).append(". Chi tiết: ");
 
         List<String> detailStrings = payment.getDetails().stream()
-                .map(detail -> String.format("%s: %s VNĐ (%s)", 
+                .map(detail -> String.format("%s: %s VNĐ (%s)",
                         detail.getItemName(), CURRENCY_FORMAT.format(detail.getAmount()), detail.getDisplayText()))
                 .collect(Collectors.toList());
         message.append(String.join(", ", detailStrings)).append(".");
 
         String finalMessage = message.length() > 2000 ? message.substring(0, 1997) + "..." : message.toString();
+
+        // Lấy Contracts để gán room
+        Contracts contract = contractsRepository.findById(payment.getContractId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Contract not found for payment ID: " + payment.getPaymentId()));
+        Rooms room = contract.getRoom();
 
         Notification notification = Notification.builder()
                 .user(tenant)
@@ -510,10 +531,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .type(Notification.NotificationType.PAYMENT)
                 .isRead(false)
                 .createAt(Date.valueOf(LocalDate.now()))
+                .room(room) // Gán room từ Contracts
                 .build();
 
         notificationRepository.save(notification);
-        log.info("Created notification for user {} for payment {}: {}", tenant.getUserId(), payment.getPaymentId(), finalMessage);
+        log.info("Created notification for user {} for payment {} with room_id {}: {}",
+                tenant.getUserId(), payment.getPaymentId(), room.getRoomId(), finalMessage);
     }
 
     private PaymentResponseDto convertToResponseDto(Payments payment) {

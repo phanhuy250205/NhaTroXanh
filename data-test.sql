@@ -20,3 +20,14 @@ VALUES
     (2, 4000000.00, '2025-08-10', NULL, 'CHƯA_THANH_TOÁN', NULL);
 UPDATE rooms SET status = 'ACTIVE' WHERE status = '1' OR status = 1;
 UPDATE rooms SET status = 'INACTIVE' WHERE status = '0' OR status = 0;
+UPDATE notifications SET room_id = 7 WHERE notification_id = 23;
+
+
+SELECT * FROM payments WHERE payment_id = 12;
+SELECT * FROM contracts WHERE contract_id = (SELECT contract_id FROM payments WHERE payment_id = 11);
+SELECT * FROM rooms WHERE room_id = (SELECT room_id FROM contracts WHERE contract_id = (SELECT contract_id FROM payments WHERE payment_id = 11));
+SELECT * FROM hostels WHERE hostel_id = (SELECT hostel_id FROM rooms WHERE room_id = (SELECT room_id FROM contracts WHERE contract_id = (SELECT contract_id FROM payments WHERE payment_id = 11)));
+SELECT * FROM address WHERE id = (SELECT address_id FROM hostels WHERE hostel_id = (SELECT hostel_id FROM rooms WHERE room_id = (SELECT room_id FROM contracts WHERE contract_id = (SELECT contract_id FROM payments WHERE payment_id = 11))));
+SELECT * FROM ward WHERE id = (SELECT ward_id FROM address WHERE id = <address_id>);
+SELECT * FROM district WHERE id = (SELECT district_id FROM ward WHERE id = <ward_id>);
+SELECT * FROM province WHERE id = (SELECT province_id FROM district WHERE id = <district_id>);

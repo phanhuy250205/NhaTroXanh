@@ -37,6 +37,11 @@ public class Notification {
     @Column(name = "create_at", nullable = false)
     private Date createAt;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "room_id")
+    @JsonIgnore
+    private Rooms room;
+
     public enum NotificationType {
         PAYMENT, CONTRACT, SYSTEM, REPORT
     }

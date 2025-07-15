@@ -305,12 +305,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Generate href based on notification type
     function getNotificationHref(notification) {
-        if (notification.type === 'PAYMENT') {
-            const match = notification.message.match(/#(\d+)/);
-            if (match) {
-                return `/tenant/payments/${match[1]}`;
-            }
+        if (notification.type === 'PAYMENT' && notification.paymentId) {
+            return `/tenant/payments?paymentId=${notification.paymentId}`;
         }
+        console.warn(`No valid paymentId for PAYMENT notification: ${notification.notificationId}`);
         return '#';
     }
 

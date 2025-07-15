@@ -123,4 +123,10 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
     // Tính tổng doanh thu của owner
     @Query("SELECT SUM(p.totalAmount) FROM Payments p WHERE p.contract.room.hostel.owner.userId = :ownerId AND p.paymentStatus = 'ĐÃ_THANH_TOÁN'")
     Float getTotalRevenueByOwnerId(@Param("ownerId") Integer ownerId);
+
+    // Đã sửa: Lấy danh sách payments theo contractId
+    @Query("SELECT p FROM Payments p WHERE p.contract.contractId = :contractId ORDER BY p.dueDate DESC")
+    List<Payments> findByContractId(@Param("contractId") Integer contractId);
+
+       Optional<Payments> findByAppTransId(String appTransId);
 }

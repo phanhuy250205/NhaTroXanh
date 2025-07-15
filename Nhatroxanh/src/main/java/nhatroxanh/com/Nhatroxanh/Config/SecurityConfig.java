@@ -10,7 +10,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -24,15 +23,16 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private CustomLoginSuccessHandler customLoginSuccessHandler;
+
     @Autowired
     private DataSource dataSource;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-        // return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
@@ -53,38 +53,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints like ZaloPay
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
-                                "/uploads/**")
+                        // Publicly accessible endpoints
+                        .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/Uploads/**")
                         .permitAll()
-                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher")
+                        .requestMatchers("/zalopay/**") // Allow ZaloPay endpoints (create-order, callback)
                         .permitAll()
-                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
+                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", 
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher")
+                        .permitAll()
+                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro")
+                        .permitAll()
+                        // Role-based access
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/dang-nhap-chu-tro")
-                        // <<< SỬA: Đổi URL để tường minh và khớp với file JS
                         .loginProcessingUrl("/login-processing")
-                        // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
                         .usernameParameter("username")
-                        // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
                         .passwordParameter("password")
                         .successHandler(customLoginSuccessHandler)
                         .successHandler((request, response, authentication) -> {
-                            // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển
-                            // hướng.
                             response.setStatus(HttpServletResponse.SC_OK);
                         })
                         .failureHandler((request, response, exception) -> {
-                            // Khi thất bại, trả về status 401 Unauthorized và thông báo lỗi
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
-                            // <<< SỬA: Rút gọn thông báo lỗi cho phù hợp với cả hai luồng đăng nhập
                             response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
                         })
                         .permitAll())
