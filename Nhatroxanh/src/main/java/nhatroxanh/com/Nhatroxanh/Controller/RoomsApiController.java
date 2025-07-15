@@ -36,12 +36,14 @@ public class RoomsApiController {
     private ContractService contractService;
 
     @GetMapping("/by-hostel/{hostelId}")
-    public ResponseEntity<List<ContractDto.Room>> getRoomsByHostel(@PathVariable Long hostelId) {
+    public ResponseEntity<List<ContractDto.Room>> getRoomsByHostel(@PathVariable Long hostelId , @RequestParam(required = false) String status) {
         try {
             logger.info("🏢 API: Getting rooms for hostel ID: {}", hostelId);
 
             List<Rooms> roomEntities = roomsService.findByHostelId(Math.toIntExact(hostelId));  // Giả sử service trả entity
-
+//            if (status != null) {
+//                roomEntities = roomEntities.stream().filter(r -> r.getStatus().name().equalsIgnoreCase(status)).collect(Collectors.toList());
+//            }
             // Convert và parse address
             List<ContractDto.Room> rooms = roomEntities.stream()
                     .map(room -> {

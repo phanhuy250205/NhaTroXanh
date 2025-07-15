@@ -1096,46 +1096,63 @@
     console.log('🚀 Contract form loading...');
 
     // ✅ GLOBAL VARIABLES
+    // ✅ GLOBAL VARIABLES (sửa tên để rõ, tránh duplicate)
     let isEditMode = $('#isEditMode').val() === 'true';
-    let currentRoomId = $('#currentRoomId').val();
+    let currentRoomId = $('#currentRoomId').val();  // Giữ nguyên, từ hidden input (e.g., '11')
     let currentHostelId = $('#currentHostelId').val();
     let isLoading = false; // Flag để tránh loop
 
-    // ✅ Hàm load rooms (cập nhật để sử dụng room.roomNumber nếu có)
-    // ✅ Hàm load rooms (sửa data-area dùng room.area thay acreage)
+    let globalCurrentRoomId = currentRoomId || null;  // ✅ Đổi tên & set từ currentRoomId (nếu edit mode)
+
+    // ✅ Hàm load rooms (filter unactive + current room nếu active)
+    // ✅ Hàm load rooms (dùng globalCurrentRoomId)
     function loadRoomsByHostel(hostelId, callback) {
         if (!hostelId) return;
         $.ajax({
             url: `/api/rooms/by-hostel/${hostelId}`,
             method: 'GET',
             success: function(rooms) {
+                console.log('🔍 Raw rooms from API:', rooms);  // Debug
                 let roomOptions = '<option value="">-- Chọn phòng trọ --</option>';
                 if (rooms && rooms.length > 0) {
-                    rooms.forEach(room => {
-                        const province = room.province ? (room.province.includes('Đà Nẵng') ? 'Đà Nẵng' : room.province) : 'Đà Nẵng';
-                        const fullAddress = [room.street || 'Chưa cập nhật đường', room.ward ? `Phường ${room.ward}` : '', room.district ? `Quận ${room.district}` : '', province].filter(Boolean).join(', ');
-                        const price = room.price ? room.price.toLocaleString('vi-VN') : '0';
-                        // Sử dụng room.roomName nếu có, fallback nếu null
-                        const roomDisplayName = room.roomName || (room.roomNumber ? room.roomNumber : 'không tên');
-                        // Không thêm 'Phòng ' nếu roomDisplayName đã có 'Phòng '
-                        const displayPrefix = roomDisplayName.startsWith('Phòng ') ? '' : 'Phòng ';
-                        roomOptions += `
-                        <option value="${room.roomId || ''}"
-                            data-street="${room.street || ''}"
-                            data-ward="${room.ward || ''}"
-                            data-district="${room.district || ''}"
-                            data-province="${province}"
-                            data-area="${room.area || ''}"  // ✅ Sửa: room.area (từ DTO backend), không phải acreage
-                            data-price="${room.price || ''}"
-                            data-room-name="${room.roomName || ''}"
-                            data-room-number="${room.roomNumber || ''}"
-                            data-max-tenants="${room.maxTenants || ''}"
-                            data-hostel-id="${hostelId}"
-                        >
-                            ${displayPrefix}${roomDisplayName} - ${fullAddress} - ${price}đ
-                        </option>
-                    `;
-                    });
+                    // Filter: Giữ unactive + current room nếu active
+                    let filteredRooms = rooms.filter(room => room.status === 'unactive');
+                    if (globalCurrentRoomId) {
+                        const currentRoom = rooms.find(room => room.roomId == globalCurrentRoomId);  // == cho number/string
+                        if (currentRoom && !filteredRooms.some(r => r.roomId == globalCurrentRoomId)) {
+                            filteredRooms.push(currentRoom);  // Add current dù active
+                        }
+                    }
+                    console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
+
+                    if (filteredRooms.length === 0) {
+                        roomOptions += '<option value="">Không có phòng unactive</option>';
+                    } else {
+                        filteredRooms.forEach(room => {
+                            const province = room.province ? (room.province.includes('Đà Nẵng') ? 'Đà Nẵng' : room.province) : 'Đà Nẵng';
+                            const fullAddress = [room.street || 'Chưa cập nhật đường', room.ward ? `Phường ${room.ward}` : '', room.district ? `Quận ${room.district}` : '', province].filter(Boolean).join(', ');
+                            const price = room.price ? room.price.toLocaleString('vi-VN') : '0';
+                            const roomDisplayName = room.roomName || (room.roomNumber ? room.roomNumber : 'không tên');
+                            const displayPrefix = roomDisplayName.startsWith('Phòng ') ? '' : 'Phòng ';
+                            roomOptions += `
+                            <option value="${room.roomId || ''}"
+                                data-street="${room.street || ''}"
+                                data-ward="${room.ward || ''}"
+                                data-district="${room.district || ''}"
+                                data-province="${province}"
+                                data-area="${room.area || ''}"
+                                data-price="${room.price || ''}"
+                                data-room-name="${room.roomName || ''}"
+                                data-room-number="${room.roomNumber || ''}"
+                                data-max-tenants="${room.maxTenants || ''}"
+                                data-hostel-id="${hostelId}"
+                                data-status="${room.status || ''}"
+                            >
+                                ${displayPrefix}${roomDisplayName} - ${fullAddress} - ${price}đ
+                            </option>
+                        `;
+                        });
+                    }
                     $('#roomSelect').html(roomOptions).prop('disabled', false);
                 } else {
                     $('#roomSelect').html('<option value="">Không có phòng</option>').prop('disabled', true);
