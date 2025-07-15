@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head th:replace="~{/layouts/head}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<head>
+    <title>Thanh Toán Thành Công - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/css/success-thanhtoan.css}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+    <div class="payment-success-container-guest">
+        <!-- Success Header -->
+        <div class="payment-success-header-guest">
+            <div class="payment-success-icon-wrapper-guest">
+                <i class="fas fa-check-circle payment-success-icon-guest"></i>
+            </div>
+            <h1 class="payment-success-title-guest">Thanh Toán Thành Công!</h1>
+            <p class="payment-success-subtitle-guest">Cảm ơn bạn đã thanh toán đúng hạn. Giao dịch đã được xử lý thành công.</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="payment-content-wrapper-guest">
+            <!-- Transaction Summary -->
+            <div class="payment-transaction-summary-guest">
+                <div class="payment-summary-header-guest">
+                    <h2 class="payment-summary-title-guest">
+                        <i class="fas fa-receipt"></i>
+                        Thông Tin Giao Dịch
+                    </h2>
+                </div>
+                
+                <div class="payment-transaction-info-guest">
+                    <div class="payment-info-grid-guest">
+                        <!-- <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-transaction-icon-guest">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Mã giao dịch</span>
+                                <span class="payment-info-value-guest">TXN-20241205-001</span>
+                            </div>
+                        </div> -->
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-date-icon-guest">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Ngày thanh toán</span>
+                                <span class="payment-info-value-guest">05/12/2024</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-time-icon-guest">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Thời gian</span>
+                                <span class="payment-info-value-guest">10:30 AM</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-method-icon-guest">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Phương thức</span>
+                                <span class="payment-info-value-guest">VNPay</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-room-icon-guest">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Phòng</span>
+                                <span class="payment-info-value-guest">A101</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest payment-period-icon-guest">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="payment-info-content-guest">
+                                <span class="payment-info-label-guest">Kỳ thanh toán</span>
+                                <span class="payment-info-value-guest">Tháng 12/2024</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Amount Display -->
+                    <div class="payment-total-amount-section-guest">
+                        <div class="payment-total-wrapper-guest">
+                            <span class="payment-total-label-guest">Tổng số tiền đã thanh toán</span>
+                            <span class="payment-total-amount-guest">3,930,000 VNĐ</span>
+                        </div>
+                        <div class="payment-status-badge-guest">
+                            <i class="fas fa-check-circle"></i>
+                            Đã thanh toán
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Breakdown -->
+            <div class="payment-breakdown-guest">
+                <div class="payment-breakdown-header-guest">
+                    <h3 class="payment-breakdown-title-guest">
+                        <i class="fas fa-list-alt"></i>
+                        Chi Tiết Thanh Toán
+                    </h3>
+                </div>
+
+                <div class="payment-breakdown-content-guest">
+                    <div class="payment-breakdown-item-guest">
+                        <div class="payment-item-info-guest">
+                            <div class="payment-item-icon-guest payment-room-fee-icon-guest">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="payment-item-details-guest">
+                                <h4 class="payment-item-name-guest">Tiền phòng</h4>
+                                <p class="payment-item-description-guest">Phòng A101 - Tháng 12/2024</p>
+                            </div>
+                        </div>
+                        <div class="payment-item-amount-guest">3,500,000 VNĐ</div>
+                    </div>
+
+                    <div class="payment-breakdown-item-guest">
+                        <div class="payment-item-info-guest">
+                            <div class="payment-item-icon-guest payment-electric-icon-guest">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="payment-item-details-guest">
+                                <h4 class="payment-item-name-guest">Tiền điện</h4>
+                                <p class="payment-item-description-guest">71.4 kWh (1245 → 1316)</p>
+                            </div>
+                        </div>
+                        <div class="payment-item-amount-guest">250,000 VNĐ</div>
+                    </div>
+
+                    <div class="payment-breakdown-item-guest">
+                        <div class="payment-item-info-guest">
+                            <div class="payment-item-icon-guest payment-water-icon-guest">
+                                <i class="fas fa-tint"></i>
+                            </div>
+                            <div class="payment-item-details-guest">
+                                <h4 class="payment-item-name-guest">Tiền nước</h4>
+                                <p class="payment-item-description-guest">4 m³ (156 → 160)</p>
+                            </div>
+                        </div>
+                        <div class="payment-item-amount-guest">80,000 VNĐ</div>
+                    </div>
+
+                    <div class="payment-breakdown-item-guest">
+                        <div class="payment-item-info-guest">
+                            <div class="payment-item-icon-guest payment-service-icon-guest">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div class="payment-item-details-guest">
+                                <h4 class="payment-item-name-guest">Phí dịch vụ</h4>
+                                <p class="payment-item-description-guest">Phí quản lý, vệ sinh chung</p>
+                            </div>
+                        </div>
+                        <div class="payment-item-amount-guest">100,000 VNĐ</div>
+                    </div>
+
+                    <div class="payment-breakdown-total-guest">
+                        <div class="payment-total-row-guest">
+                            <span class="payment-total-text-guest">Tổng cộng</span>
+                            <span class="payment-total-value-guest">3,930,000 VNĐ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="payment-action-section-guest">
+                <button class="payment-btn-guest payment-btn-primary-guest" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i>
+                    Quay lại Trang chủ
+                </button>
+                <button class="payment-btn-guest payment-btn-secondary-guest" onclick="downloadInvoice()">
+                    <i class="fas fa-download"></i>
+                    Tải Hóa Đơn PDF
+                </button>
+                <!-- <button class="payment-btn-guest payment-btn-outline-guest" onclick="printInvoice()">
+                    <i class="fas fa-print"></i>
+                    In Hóa Đơn
+                </button> -->
+            </div>
+
+            <!-- Additional Info -->
+            <div class="payment-additional-info-guest">
+                <div class="payment-info-card-guest">
+                    <div class="payment-card-icon-guest">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="payment-card-content-guest">
+                        <h4>Bảo mật cao</h4>
+                        <p>Giao dịch được bảo mật bằng SSL 256-bit</p>
+                    </div>
+                </div>
+
+                <div class="payment-info-card-guest">
+                    <div class="payment-card-icon-guest">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="payment-card-content-guest">
+                        <h4>Email xác nhận</h4>
+                        <p>Hóa đơn đã được gửi qua email của bạn</p>
+                    </div>
+                </div>
+
+                <div class="payment-info-card-guest">
+                    <div class="payment-card-icon-guest">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="payment-card-content-guest">
+                        <h4>Hỗ trợ 24/7</h4>
+                        <p>Liên hệ: 0123.456.789 nếu cần hỗ trợ</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <script>
+        // Functions for buttons
+        function downloadInvoice() {
+            alert('Chức năng tải hóa đơn PDF đang được phát triển!');
+        }
+
+        // function printInvoice() {
+        //     window.print();
+        // }
+
+        // Initialize animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add entrance animations
+            const elements = document.querySelectorAll('.payment-info-item-guest, .payment-breakdown-item-guest');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = (index * 0.1) + 's';
+                el.classList.add('payment-fade-in-up-guest');
+            });
+        });
+    </script>
+</body>
+</html>

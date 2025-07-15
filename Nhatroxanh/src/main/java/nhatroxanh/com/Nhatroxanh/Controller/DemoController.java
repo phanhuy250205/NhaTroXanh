@@ -115,6 +115,10 @@ public class DemoController {
     public String líchuThanhToan() {
         return "guest/lichsu-thanhtoan";
     }
+    @GetMapping("/khach-thue/success-thanhtoan")
+    public String successThanhToan() {
+        return "guest/success-thanhtoan";
+    }
     @GetMapping("/voucher")
     public String voucherHosst() {
         return "host/voucher-host";
