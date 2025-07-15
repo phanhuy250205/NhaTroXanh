@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,4 +46,24 @@ public interface VoucherService {
     // Sinh mã code tự động
     String generateUniqueVoucherCode();
 
+    void createVoucherHost(Vouchers voucher, Integer ownerId);
+
+    List<Vouchers> getVouchersByOwnerId(Integer ownerId);
+
+    Page<Vouchers> getVouchersByOwnerIdWithFilters(Integer ownerId, String searchQuery, String statusFilter,
+            Pageable pageable);
+
+    void deleteVoucherByIdHost(Integer voucherId, Integer ownerId);
+
+    Vouchers getVoucherByIdAndHost(Integer voucherId, Integer hostId);
+
+    void updateVoucherHost(Integer voucherId, Integer hostId, String title, String code,
+            Integer hostelId, Float discountValue, Integer quantity, Float minAmount,
+            Date startDate, Date endDate, String description, Boolean status);
+
+    boolean existsByCode(String code);
+
+    boolean existsByCodeAndNotId(String code, Integer id);
+
+    void checkAndDeactivateVouchersIfNeeded();
 }

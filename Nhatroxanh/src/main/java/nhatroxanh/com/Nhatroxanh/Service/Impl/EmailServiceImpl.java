@@ -98,4 +98,17 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlMail(to, subject, content);
     }
 
+    @Override
+    public void sendVoucherDeactivatedEmail(String to, String fullname, String voucherTitle, String reason) {
+        String subject = "Voucher đã ngừng hoạt động";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Voucher <strong>" + voucherTitle +
+                "</strong> của bạn đã được chuyển sang trạng thái <b>ngừng hoạt động</b>.</p>" +
+                "<p>Lý do: <i>" + reason + "</i></p>" +
+                "<p>Vui lòng kiểm tra lại hệ thống nếu cần kích hoạt lại hoặc tạo voucher mới.</p>" +
+                "<p>Trân trọng,<br>Nhà Trọ Xanh</p>";
+
+        sendHtmlMail(to, subject, content);
+    }
+
 }
