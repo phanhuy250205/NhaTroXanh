@@ -53,6 +53,9 @@ public class Rooms {
     @Column(name = "status", nullable = false)
     private RoomStatus status;
 
+    @Column(name = "address", nullable = true)
+    private String address; // Đảm bảo cột này được ánh xạ
+
     @Column(name = "acreage")
     private Float acreage;
 
@@ -79,6 +82,7 @@ public class Rooms {
                 ", description='" + description + '\'' +
                 ", namerooms='" + namerooms + '\'' +
                 ", status=" + status +
+                ", address='" + address + '\'' +
                 ", acreage=" + acreage +
                 ", max_tenants=" + max_tenants +
                 ", price=" + price +

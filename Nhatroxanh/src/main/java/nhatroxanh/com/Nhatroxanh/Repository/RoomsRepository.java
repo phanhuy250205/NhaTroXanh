@@ -105,4 +105,8 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
 
     Optional<Rooms> findFirstByHostel(Hostel hostel);
 
+    List<Rooms> findByHostel_HostelId(Integer hostelId);
+
+
+
 }

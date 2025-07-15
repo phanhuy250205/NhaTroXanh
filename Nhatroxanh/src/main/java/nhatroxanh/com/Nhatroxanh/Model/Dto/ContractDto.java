@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import java.sql.Date;
 import java.time.LocalDate;
@@ -83,6 +84,7 @@ public class ContractDto {
     public void setTerms(Terms terms) { this.terms = terms; }
 
     public static class Owner {
+        private  Long userId; // ✅ THÊM FIELD NÀY
         private String fullName;
         private String phone;
         private String cccdNumber;
@@ -97,6 +99,16 @@ public class ContractDto {
         private String street;
 
         // Getters and setters
+
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
@@ -176,6 +188,7 @@ public class ContractDto {
     }
 
     public static class Tenant {
+        private Long userId;  // ✅ THÊM FIELD NÀY
         private String fullName;
         private String phone;
         private String cccdNumber;
@@ -191,6 +204,16 @@ public class ContractDto {
         private String cccdBackUrl;
 
         // Getters and setters
+
+
+        public Long getUserId() {
+            return userId;
+        }
+
+        public void setUserId(Long userId) {
+            this.userId = userId;
+        }
+
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
@@ -233,6 +256,24 @@ public class ContractDto {
         private Integer hostelId;
         private String hostelName;
         private String address;
+        private String street;    // Thêm trường street
+        private String ward;     // Thêm trường ward
+        private String district; // Thêm trường district
+        private String province; // Thêm trường province
+        @JsonProperty("isCurrent")  // ✅ THÊM ANNOTATION
+        private Boolean isCurrent = false;
+
+        // ✅ SỬA GETTER/SETTER
+        public Boolean getIsCurrent() {  // ✅ TÊN ĐÚNG
+            return isCurrent;
+        }
+
+
+
+        public void setIsCurrent(Boolean isCurrent) {  // ✅ TÊN ĐÚNG
+            this.isCurrent = isCurrent;
+        }
+
 
 
         @NotNull(message = "ID phòng không được để trống")
@@ -241,6 +282,47 @@ public class ContractDto {
         }
 
         // Getters and setters
+
+
+//        public Boolean getCurrent() {
+//            return isCurrent;
+//        }
+//
+//        public void setCurrent(Boolean current) {
+//            isCurrent = current;
+//        }
+
+        public String getProvince() {
+            return province;
+        }
+
+        public void setProvince(String province) {
+            this.province = province;
+        }
+
+        public String getDistrict() {
+            return district;
+        }
+
+        public void setDistrict(String district) {
+            this.district = district;
+        }
+
+        public String getWard() {
+            return ward;
+        }
+
+        public void setWard(String ward) {
+            this.ward = ward;
+        }
+
+        public String getStreet() {
+            return street;
+        }
+
+        public void setStreet(String street) {
+            this.street = street;
+        }
 
         public void setRoomId(Integer roomId) { this.roomId = roomId; }
         public String getRoomName() { return roomName; }

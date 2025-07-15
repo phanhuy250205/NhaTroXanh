@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -92,5 +93,7 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
     Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
 
 
-
+    // Tìm hợp đồng theo tenant ID
+    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
+    Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
 }
