@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentRequestDto {
-    private Integer contractId;
+    private Long contractId;
     private String month; // Format: "MM/yyyy"
     private Date dueDate;
     private PaymentMethod paymentMethod;

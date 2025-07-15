@@ -14,6 +14,6 @@ public interface TenantService {
     Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId, Contracts.Status status, Pageable pageable);
     List<Hostel> getHostelsForOwner(Integer ownerId);
     Page<TenantInfoDTO> findAllForTesting(Pageable pageable);
-    void updateContractStatus(Integer contractId, Boolean newStatus);
-    TenantDetailDTO getTenantDetailByContractId(Integer contractId);
+    void updateContractStatus(Long contractId, Boolean newStatus);
+    TenantDetailDTO getTenantDetailByContractId(Long contractId);
 }

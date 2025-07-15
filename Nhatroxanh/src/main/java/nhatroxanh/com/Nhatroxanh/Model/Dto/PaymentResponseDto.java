@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PaymentResponseDto {
     private Integer paymentId;
-    private Integer contractId;
+    private Long contractId;
     private String roomCode;
     private String hostelName;
     private String tenantName;

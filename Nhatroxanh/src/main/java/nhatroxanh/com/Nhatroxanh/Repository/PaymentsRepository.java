@@ -110,7 +110,7 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
     
     // Tìm payment theo contract và tháng
     @Query("SELECT p FROM Payments p WHERE p.contract.contractId = :contractId AND FUNCTION('MONTH', p.dueDate) = :month AND FUNCTION('YEAR', p.dueDate) = :year")
-    Optional<Payments> findByContractIdAndMonth(@Param("contractId") Integer contractId, @Param("month") int month, @Param("year") int year);
+    Optional<Payments> findByContractIdAndMonth(@Param("contractId") Long contractId, @Param("month") int month, @Param("year") int year);
     
     // Đếm số payments đã thanh toán của owner
     @Query("SELECT COUNT(p) FROM Payments p WHERE p.contract.room.hostel.owner.userId = :ownerId AND p.paymentStatus = 'ĐÃ_THANH_TOÁN'")

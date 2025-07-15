@@ -23,7 +23,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Repository
-public interface ContractsRepository extends JpaRepository<Contracts, Integer> { 
+public interface ContractsRepository extends JpaRepository<Contracts, Long> { 
     @Query("SELECT c FROM Contracts c " +
            "WHERE c.owner.userId = :ownerId " +
            "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) " +

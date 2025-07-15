@@ -321,7 +321,7 @@ public class PaymentController {
      */
     @PostMapping("/create-form")
     public String createPaymentFromForm(
-            @RequestParam("contractId") Integer contractId,
+            @RequestParam("contractId") Long contractId,
             @RequestParam("month") String month,
             @RequestParam("roomFee") Float roomFee,
             @RequestParam("wifiFee") Float wifiFee,

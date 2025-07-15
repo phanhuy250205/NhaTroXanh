@@ -14,7 +14,7 @@ import java.sql.Date;
 public class TenantDetailDTO {
 
     // Thông tin Hợp đồng
-    private Integer contractId;
+    private Long contractId;
     private Date startDate;
     private Date endDate;
     private String terms; // Ghi chú hợp đồng

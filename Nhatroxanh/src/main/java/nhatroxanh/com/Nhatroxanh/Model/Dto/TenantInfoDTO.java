@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TenantInfoDTO {
-    private Integer contractId; 
+    private Long contractId; 
     private Integer userId; 
     private String fullName;
     private String phone;

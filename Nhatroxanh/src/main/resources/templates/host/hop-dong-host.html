@@ -5,7 +5,6 @@
     <!-- ICON -->
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon">
     <!-- Font Awesome -->
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
@@ -1163,7 +1162,7 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
     // CCCD Province Codes Mapping - Move this OUTSIDE the class
     const CCCD_PROVINCE_CODES = {
         "Hà Nội": ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012"],
@@ -1231,13 +1230,20 @@
         "Yên Bái": ["015"]
     };
 
-    // Sample room data for each housing area
+    // Sample room data for each housing area (thay bằng data thực từ backend nếu cần)
+    const roomData = {
+        'khu1': [ // Ví dụ cho hostelId = 'khu1'
+            { value: 'room1', text: 'Phòng 101', number: '101', area: 20, price: 2000000 },
+            { value: 'room2', text: 'Phòng 102', number: '102', area: 25, price: 2500000 }
+        ],
+        // Thêm các khu khác tương tự
+    };
 
-    // Handle housing area selection change
-    housingAreaSelect.addEventListener('change', function() {
-        const selectedArea = this.value;
-    });
-    // Handle housing area selection change
+    // Định nghĩa biến (sửa lỗi reference)
+    const housingAreaSelect = document.getElementById('hostelId');
+    const roomSelectionSelect = document.getElementById('roomId');
+
+    // Handle housing area selection change (xóa lặp)
     housingAreaSelect.addEventListener('change', function() {
         const selectedArea = this.value;
 
@@ -1323,8 +1329,8 @@
     document.getElementById('contractForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         const formData = new FormData(this);
-        const isEditMode = [[${isEditMode}]] || false;
-        const contractId = formData.get('id') || [[${contractId}]];
+        const isEditMode = /*[[${isEditMode}]]*/ false;  // Thymeleaf sẽ thay bằng giá trị thực
+        const contractId = formData.get('id') || /*[[${contractId}]]*/ null;  // Thymeleaf sẽ thay
         const contractDto = {
             id: contractId,
             contractDate: formData.get('contractDate'),

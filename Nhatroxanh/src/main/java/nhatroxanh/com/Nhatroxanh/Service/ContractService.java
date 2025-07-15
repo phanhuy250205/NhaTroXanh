@@ -26,14 +26,14 @@ public interface ContractService {
     @Transactional
     Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
 
-    Contracts updateContract(Integer contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
+    Contracts updateContract(Long contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
 
     @Transactional
-    Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception;
+    Contracts updateContract(Long contractId, ContractDto contractDto) throws Exception;
 
-    void deleteContract(Integer contractId) throws Exception;
+    void deleteContract(Long contractId) throws Exception;
 
-    Optional<Contracts> findContractById(Integer contractId);
+    Optional<Contracts> findContractById(Long contractId);
 
     List<Contracts> findContractsByRoomId(Integer roomId);
 

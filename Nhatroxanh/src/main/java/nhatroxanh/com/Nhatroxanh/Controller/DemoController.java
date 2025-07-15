@@ -288,7 +288,7 @@ public String showTenantManagementPage(
         return "host/voucher-host";
     }
      @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
-    public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+    public String chitietkhachthue(@PathVariable("id") Long contractId, Model model) {
         try {
             TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
             model.addAttribute("tenant", tenantDetail);

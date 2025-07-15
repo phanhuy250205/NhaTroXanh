@@ -1166,7 +1166,7 @@ public class ContractController {
     @PutMapping("/update/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateContract(
-            @PathVariable Integer contractId,
+            @PathVariable Long contractId,
             @RequestBody ContractDto contractDto,
             Authentication authentication
     ) {
@@ -1198,7 +1198,7 @@ public class ContractController {
 
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<?> deleteContract(@PathVariable Integer contractId) {
+    public ResponseEntity<?> deleteContract(@PathVariable Long contractId) {
         logger.info("Received request to delete contract with ID: {}", contractId);
         try {
             contractService.deleteContract(contractId);
@@ -1403,7 +1403,7 @@ public class ContractController {
 
         try {
             // Tìm contract
-            Optional<Contracts> contractOpt = contractsRepository.findById(Math.toIntExact(contractId));
+            Optional<Contracts> contractOpt = contractsRepository.findById(contractId);
 
             if (contractOpt.isPresent()) {
                 Contracts contract = contractOpt.get();
@@ -1443,7 +1443,7 @@ public class ContractController {
 
     @GetMapping("/details/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Map<String, Object>> getContractDetails(@PathVariable Integer contractId, Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getContractDetails(@PathVariable Long contractId, Authentication authentication) {
         logger.info("Received request to get contract details for ID: {}", contractId);
         Map<String, Object> response = new HashMap<>();
 
@@ -1488,7 +1488,7 @@ public class ContractController {
     }
     @GetMapping("/edit/{contractId}")
     public String editContractForm(
-            @PathVariable Integer contractId,
+            @PathVariable Long contractId,
             Model model,
             Authentication authentication
     ) {
@@ -1767,7 +1767,7 @@ public class ContractController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<?> findContractById(@PathVariable Integer id) {
+    public ResponseEntity<?> findContractById(@PathVariable Long id) {
         logger.info("Received request to find contract by ID: {}", id);
         try {
             Optional<Contracts> contract = contractService.findContractById(id);

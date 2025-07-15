@@ -157,7 +157,7 @@ public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
     return "redirect:/chu-tro/profile-host";
 }
     @PostMapping("/chi-tiet-khach-thue/update")
-    public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
+    public String updateTenantStatus(@RequestParam("contractId") Long contractId,
                                      @RequestParam("status") Boolean newStatus,
                                      RedirectAttributes redirectAttributes) {
         

@@ -278,7 +278,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public Contracts updateContract(Integer contractId, Contracts updatedContract) throws Exception {
+    public Contracts updateContract(Long contractId, Contracts updatedContract) throws Exception {
         logger.info("=== START UPDATE CONTRACT ===");
         logger.info("Updating contract with ID: {}", contractId);
         logger.info("Updated contract data: {}", updatedContract);
@@ -409,7 +409,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception {
+    public Contracts updateContract(Long contractId, ContractDto contractDto) throws Exception {
         logger.info("=== START UPDATE CONTRACT FROM DTO ===");
         logger.info("Updating contract with ID: {} from DTO with tenant type: {}", contractId, contractDto.getTenantType());
         logger.info("Contract DTO received: {}", contractDto);
@@ -512,7 +512,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public void deleteContract(Integer contractId) throws Exception {
+    public void deleteContract(Long contractId) throws Exception {
         logger.info("=== START DELETE CONTRACT ===");
         logger.info("Deleting contract with ID: {}", contractId);
 
@@ -534,7 +534,7 @@ public class ContractServiceImpl implements ContractService {
     }
 
     @Override
-    public Optional<Contracts> findContractById(Integer contractId) {
+    public Optional<Contracts> findContractById(Long contractId) {
         logger.info("Finding contract by ID: {}", contractId);
         return contractRepository.findById(contractId);
     }
@@ -702,7 +702,7 @@ public class ContractServiceImpl implements ContractService {
 
             // 🔍 TÌM HỢP ĐỒNG
             logger.info("🔍 Tìm hợp đồng với ID: {}", contractId);
-            Optional<Contracts> contractOpt = contractRepository.findById(Math.toIntExact(contractId));
+            Optional<Contracts> contractOpt = contractRepository.findById(contractId);
 
             if (contractOpt.isEmpty()) {
                 logger.error("❌ Không tìm thấy hợp đồng với ID: {}", contractId);
@@ -737,7 +737,7 @@ public class ContractServiceImpl implements ContractService {
     @Transactional(readOnly = true)
     public Contracts getContractById(Long contractId) {
         logger.info("🔍 Service: Tìm hợp đồng với ID: {}", contractId);
-        return contractRepository.findById(Math.toIntExact(contractId))
+        return contractRepository.findById(contractId)
                 .orElseThrow(() -> {
                     logger.warn("⚠️ Không tìm thấy hợp đồng với ID: {}", contractId);
                     return new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId);

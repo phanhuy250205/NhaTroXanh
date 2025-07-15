@@ -41,7 +41,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional(readOnly = true)
-    public TenantDetailDTO getTenantDetailByContractId(Integer contractId) {
+    public TenantDetailDTO getTenantDetailByContractId(Long contractId) {
         Contracts contract = contractsRepository.findById(contractId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
 
@@ -72,7 +72,7 @@ public class TenantServiceImpl implements TenantService {
 
     @Override
     @Transactional
-    public void updateContractStatus(Integer contractId, Boolean newStatus) {
+    public void updateContractStatus(Long contractId, Boolean newStatus) {
         Contracts contract = contractsRepository.findById(contractId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
                 if (!newStatus) {
