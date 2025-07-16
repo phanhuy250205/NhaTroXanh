@@ -313,7 +313,7 @@ public class ContractController {
     @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public ResponseEntity<?> createContract(
-            @Valid @ModelAttribute ContractDto contract,  // ← SỬA: @RequestBody thay vì @ModelAttribute
+            @Valid @RequestBody ContractDto contract,  // ← SỬA: @RequestBody thay vì @ModelAttribute
             Authentication authentication) {
 
         logger.info("=== START CREATE CONTRACT ===");
@@ -1808,7 +1808,7 @@ public class ContractController {
         System.out.println("🔄 Converting contract to DTO - ID: " + contract.getContractId());
 
         ContractDto dto = new ContractDto();
-        dto.setId(contract.getContractId());
+        dto.setId(Long.valueOf(contract.getContractId()));
 
         // ✅ Contract basic info
         if (contract.getContractDate() != null) {
