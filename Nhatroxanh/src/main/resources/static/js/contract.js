@@ -502,6 +502,29 @@ window.NhaTroContract = {
             })
         })
 
+        // ✅ EVENT CHO NÚT UPDATE (giữ cái này, xóa duplicate bên dưới)
+        const updateBtn = document.getElementById("btn-update");
+        if (updateBtn) {
+            updateBtn.addEventListener("click", (e) => {
+                e.preventDefault()
+                const contractId = updateBtn.dataset.contractId || window.location.pathname.split('/').pop();  // Lấy từ URL nếu dataset rỗng
+                console.log("Raw contractId:", contractId); // Debug log
+                if (!contractId) {
+                    this.showNotification("Không tìm thấy ID hợp đồng để cập nhật!", "error");
+                    return;
+                }
+                const parsedId = parseInt(contractId, 10);
+                console.log("Parsed contractId:", parsedId); // Debug log
+                console.log("Is NaN:", isNaN(parsedId)); // Kiểm tra NaN
+                if (isNaN(parsedId)) {  // Thêm check an toàn
+                    this.showNotification("ID hợp đồng không hợp lệ!", "error");
+                    return;
+                }
+                console.log("Updating contract with ID:", parsedId);
+                this.editContract(parsedId);  // Gọi hàm edit
+            });
+        }
+
         // Sự kiện cho các nút điều hướng
         document.getElementById("btn-next-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
         document.getElementById("btn-prev-tenant")?.addEventListener("click", () => this.showTab("tenantInfo"))
@@ -511,7 +534,7 @@ window.NhaTroContract = {
         document.getElementById("btn-prev-room")?.addEventListener("click", () => this.showTab("roomInfo"))
 
         // Sự kiện cho các nút hành động
-        document.getElementById("btn-update")?.addEventListener("click", () => this.updateContract())
+        // Xóa duplicate btn-update ở đây (đã chuyển lên trên)
         document.getElementById("btn-print")?.addEventListener("click", () => this.printContract())
         document.getElementById("btn-save")?.addEventListener("click", (e) => {
             e.preventDefault()
@@ -566,6 +589,60 @@ window.NhaTroContract = {
         this.setupPreviewListeners()
         this.setupLocationListeners()
     },
+
+    editContract(contractId) {
+        console.log("=== EDIT CONTRACT ===");
+        console.log("ID:", contractId);
+
+        const parsedId = parseInt(contractId, 10);
+        if (isNaN(parsedId) || parsedId <= 0) {
+            this.showNotification("ID hợp đồng không hợp lệ!", "error");
+            return;
+        }
+
+        const roomSelect = document.getElementById('roomSelect');
+        const roomIdValue = roomSelect?.value;
+        const roomIdNumber = parseInt(roomIdValue, 10);
+
+        // Chỉ validate room nếu user chọn thay đổi
+        if (roomIdValue && (isNaN(roomIdNumber) || roomIdNumber <= 0)) {
+            this.showNotification("Vui lòng chọn phòng trọ hợp lệ!", "error");
+            return;
+        }
+
+        const contractData = this.buildContractData(roomIdNumber, roomSelect);
+        contractData.id = parsedId;
+
+        console.log("Data gửi:", JSON.stringify(contractData, null, 2));
+
+        fetch(`/api/contracts/update/${parsedId}`, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
+            },
+            body: JSON.stringify(contractData)
+        })
+            .then(response => {
+                console.log("Response:", response.status);
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    this.showNotification("Cập nhật thành công!", "success");
+                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
+                } else {
+                    this.showNotification(data.message || "Lỗi cập nhật!", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                this.showNotification("Lỗi kết nối: " + error.message, "error");
+            });
+    },
+
+
 
     // Hàm xử lý khu trọ và phòng trọ
     filterRooms() {
@@ -721,6 +798,17 @@ window.NhaTroContract = {
                             provinceSelect.value = province // Fallback với tên
                             this.showNotification(`Không ánh xạ được mã cho ${province}`, "warning")
                         }
+                    }
+
+                    function autoLoadRoomAndHostel() {
+                        if (isLoading) return;
+                        isLoading = true;
+                        console.log('Auto-load edit mode');
+                        $('#hostelSelect').val(currentHostelId).trigger('change');
+                        setTimeout(() => {
+                            $('#roomSelect').val(currentRoomId).trigger('change');
+                            isLoading = false;
+                        }, 1000);  // Tăng lên 1000ms
                     }
 
                     // Điền vào dropdown Quận/Huyện
@@ -1682,93 +1770,121 @@ window.NhaTroContract = {
 
 
     buildContractData(roomIdNumber, roomSelect) {
-        // Lấy thông tin từ selected option
-        const selectedOption = roomSelect.options[roomSelect.selectedIndex]
-        const roomData = {
-            roomId: roomIdNumber,
-            roomName: selectedOption.dataset.roomName || `Phòng ${roomIdNumber}`,
-            price: parseFloat(selectedOption.dataset.price) || 0,
-            area: parseFloat(selectedOption.dataset.area) || 0,
-            status: selectedOption.dataset.status || "unactive"
-        }
+        const contractData = {};
 
-        // 🔥 LẤY THÔNG TIN TỪ FORM (ID ĐÚNG VỚI HTML)
-        const tenantPhone = document.getElementById("tenant-phone")?.value?.trim() || ""
-        const tenantFullname = document.getElementById("tenant-name")?.value?.trim() || ""
-        const tenantCccd = document.getElementById("tenant-id")?.value?.trim() || ""
-
-        // Lấy thông tin khác từ form
-        const contractDate = document.getElementById("contract-date")?.value || new Date().toISOString().split('T')[0]
-        const contractStatus = document.getElementById("contract-status")?.value || "DRAFT"
-        const startDate = document.getElementById("start-date")?.value || new Date().toISOString().split('T')[0]
-        const duration = parseInt(document.getElementById("contract-duration")?.value) || 12
-        const rentPrice = parseFloat(document.getElementById("rent-price")?.value) || roomData.price
-        const depositMonths = parseFloat(document.getElementById("deposit-months")?.value) || 2
-
-        // 🚨 VALIDATION - KIỂM TRA DỮ LIỆU BẮT BUỘC
-        if (!tenantPhone) {
-            throw new Error("Vui lòng nhập số điện thoại người thuê!")
-        }
-        if (!tenantFullname) {
-            throw new Error("Vui lòng nhập họ tên người thuê!")
-        }
-        if (!tenantCccd) {
-            throw new Error("Vui lòng nhập CCCD/CMND người thuê!")
-        }
-        if (!rentPrice || rentPrice <= 0) {
-            throw new Error("Vui lòng nhập giá thuê hợp lệ!")
-        }
-
-        // 📊 DEBUG LOG
-        console.log("=== BUILDING CONTRACT DATA ===")
-        console.log("Tenant Phone:", tenantPhone)
-        console.log("Tenant Name:", tenantFullname)
-        console.log("Tenant CCCD:", tenantCccd)
-        console.log("Rent Price:", rentPrice)
-        console.log("Duration:", duration)
-
-        const tenantType = "REGISTERED" // Mặc định là REGISTERED
-
-        // 🎯 CẤU TRÚC JSON ĐÚNG THEO BACKEND
-        const contractData = {
-            // Room information
-            room: {
+        // Room (chỉ gửi nếu người dùng chọn phòng mới)
+        if (roomIdNumber && roomSelect && roomSelect.selectedIndex >= 0) {
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            contractData.room = {
                 roomId: roomIdNumber,
-                roomName: roomData.roomName,
-                price: roomData.price,
-                area: roomData.area,
-                status: roomData.status
-            },
-
-            // Contract basic info
-            contractDate: contractDate,
-            status: contractStatus,
-            tenantType: tenantType,
-
-            // Terms information
-            terms: {
-                startDate: startDate,
-                duration: duration,
-                price: rentPrice,
-                deposit: depositMonths * rentPrice, // deposit = số tháng * giá thuê
-                terms: this.getContractTermsText ? this.getContractTermsText() : "Điều khoản hợp đồng chuẩn"
-            },
-
-            // Owner information (backend sẽ tự động fill)
-            owner: {},
-
-            // 🔥 TENANT INFORMATION - ĐÃ CÓ DỮ LIỆU
-            tenant: {
-                phone: tenantPhone,
-                fullname: tenantFullname,
-                cccd: tenantCccd
-            }
+                roomName: selectedOption.dataset.roomName || `Phòng ${roomIdNumber}`,
+                price: parseFloat(selectedOption.dataset.price) || undefined,
+                area: parseFloat(selectedOption.dataset.area) || undefined,
+                status: selectedOption.dataset.status || undefined
+            };
         }
 
-        console.log("=== FINAL CONTRACT DATA ===")
-        console.log(JSON.stringify(contractData, null, 2))
+        // Contract basic info
+        const contractDate = document.getElementById("contract-date")?.value?.trim();
+        if (contractDate) contractData.contractDate = contractDate;
 
-        return contractData
+        const contractStatus = document.getElementById("contract-status")?.value?.trim();
+        if (contractStatus) contractData.status = contractStatus;
+
+        // Terms
+        const terms = {};
+        const startDate = document.getElementById("start-date")?.value?.trim();
+        if (startDate) terms.startDate = startDate;
+
+        const duration = parseInt(document.getElementById("contract-duration")?.value);
+        if (!isNaN(duration) && duration > 0) terms.duration = duration;
+
+        const rentPrice = parseFloat(document.getElementById("rent-price")?.value);
+        if (!isNaN(rentPrice) && rentPrice > 0) terms.price = rentPrice;
+
+        const depositMonths = parseFloat(document.getElementById("deposit-months")?.value);
+        if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
+            terms.deposit = depositMonths * rentPrice;
+        }
+
+        const termsText = this.getContractTermsText ? this.getContractTermsText() : undefined;
+        if (termsText) terms.terms = termsText;
+
+        if (Object.keys(terms).length > 0) contractData.terms = terms;
+
+        // Tenant
+        const tenantType = document.getElementById("tenantType")?.value?.trim() || "REGISTERED";
+        contractData.tenantType = tenantType;
+
+        if (tenantType === "REGISTERED") {
+            const tenant = {};
+            const tenantPhone = document.getElementById("tenant-phone")?.value?.trim();
+            if (tenantPhone) tenant.phone = tenantPhone;
+
+            const tenantFullName = document.getElementById("tenant-name")?.value?.trim();
+            if (tenantFullName) tenant.fullName = tenantFullName;
+
+            const tenantCccd = document.getElementById("tenant-id")?.value?.trim();
+            if (tenantCccd) tenant.cccdNumber = tenantCccd;
+
+            const tenantBirthday = document.getElementById("tenant-dob")?.value?.trim();
+            if (tenantBirthday) tenant.birthday = tenantBirthday;
+
+            const tenantEmail = document.getElementById("tenant-email")?.value?.trim();
+            if (tenantEmail) tenant.email = tenantEmail;
+
+            const tenantStreet = document.getElementById("tenant-street")?.value?.trim();
+            if (tenantStreet) tenant.street = tenantStreet;
+
+            const tenantWard = document.getElementById("tenant-ward")?.options[document.getElementById("tenant-ward")?.selectedIndex]?.text?.trim();
+            if (tenantWard) tenant.ward = tenantWard;
+
+            const tenantDistrict = document.getElementById("tenant-district")?.options[document.getElementById("tenant-district")?.selectedIndex]?.text?.trim();
+            if (tenantDistrict) tenant.district = tenantDistrict;
+
+            const tenantProvince = document.getElementById("tenant-province")?.options[document.getElementById("tenant-province")?.selectedIndex]?.text?.trim();
+            if (tenantProvince) tenant.province = tenantProvince;
+
+            if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
+        } else if (tenantType === "UNREGISTERED") {
+            const unregisteredTenant = {};
+            const tenantPhone = document.getElementById("unregisteredTenantPhone")?.value?.trim();
+            if (tenantPhone) unregisteredTenant.phone = tenantPhone;
+
+            const tenantFullName = document.getElementById("unregisteredTenantFullName")?.value?.trim();
+            if (tenantFullName) unregisteredTenant.fullName = tenantFullName;
+
+            const tenantCccd = document.getElementById("unregisteredTenantCccdNumber")?.value?.trim();
+            if (tenantCccd) unregisteredTenant.cccdNumber = tenantCccd;
+
+            const tenantBirthday = document.getElementById("unregisteredTenantBirthday")?.value?.trim();
+            if (tenantBirthday) unregisteredTenant.birthday = tenantBirthday;
+
+            const tenantIssueDate = document.getElementById("unregisteredTenantIssueDate")?.value?.trim();
+            if (tenantIssueDate) unregisteredTenant.issueDate = tenantIssueDate;
+
+            const tenantIssuePlace = document.getElementById("unregisteredTenantIssuePlace")?.value?.trim();
+            if (tenantIssuePlace) unregisteredTenant.issuePlace = tenantIssuePlace;
+
+            if (Object.keys(unregisteredTenant).length > 0) contractData.unregisteredTenant = unregisteredTenant;
+        }
+
+        // Owner
+        const owner = {};
+        const ownerFullName = document.getElementById("owner-name")?.value?.trim();
+        if (ownerFullName) owner.fullName = ownerFullName;
+
+        const ownerPhone = document.getElementById("owner-phone")?.value?.trim();
+        if (ownerPhone) owner.phone = ownerPhone;
+
+        const ownerCccd = document.getElementById("owner-id")?.value?.trim();
+        if (ownerCccd) owner.cccdNumber = ownerCccd;
+
+        if (Object.keys(owner).length > 0) contractData.owner = owner;
+
+        console.log("=== FINAL CONTRACT DATA ===");
+        console.log(JSON.stringify(contractData, null, 2));
+        return contractData;
     },
 
 

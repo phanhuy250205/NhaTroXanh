@@ -167,7 +167,9 @@
 
                 <form th:action="${isEditMode} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}" method="post" enctype="multipart/form-data" th:object="${contract}" novalidate id="contractForm">
 
-
+                    <th:if test="${isEditMode}">
+                        <input type="hidden" name="_method" value="PUT"/>
+                    </th:if>
                     <!-- Basic Info Card -->
                     <div class="card nha-tro-card mb-3">
                         <div class="card-body">
@@ -688,7 +690,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
-                        <button type="button" class="btn btn-outline-info flex-fill" id="btn-update">
+                        <button type="button" class="btn btn-outline-info flex-fill" id="btn-update" th:attr="data-contract-id=${contract != null ? contract.id : ''}">
                             <i class="fa fa-pen-to-square me-1"></i> Cập nhật hợp đồng
                         </button>
 

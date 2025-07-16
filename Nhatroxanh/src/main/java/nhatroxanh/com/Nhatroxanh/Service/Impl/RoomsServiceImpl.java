@@ -95,6 +95,9 @@ public class RoomsServiceImpl implements RoomsService {
         }
         return roomsRepository.findById(id);
     }
+    public Rooms findRoomById(Integer roomId) {
+        return roomsRepository.findById(roomId).orElse(null);
+    }
     private ContractDto.Room convertToRoomDto(Rooms room) {
         ContractDto.Room roomDto = new ContractDto.Room();
         roomDto.setRoomId(room.getRoomId());
