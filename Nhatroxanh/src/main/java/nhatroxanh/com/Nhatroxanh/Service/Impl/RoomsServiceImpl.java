@@ -7,6 +7,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
 import nhatroxanh.com.Nhatroxanh.Model.enity.District;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
@@ -16,8 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -79,7 +82,17 @@ public class RoomsServiceImpl implements RoomsService {
             logger.warn("Room ID is null");
             return Optional.empty();
         }
-        return roomsRepository.findById(id);
+        return roomsRepository.findByIdWithUtilities(id);
+    }
+
+    @Override
+    public Set<Utility> getUtilitiesByRoomId(Integer roomId) {
+        logger.info("Fetching utilities for roomId: {}", roomId);
+        if (roomId == null) {
+            logger.warn("Room ID is null");
+            return new HashSet<>();
+        }
+        return roomsRepository.findUtilitiesByRoomId(roomId);
     }
 
     private ContractDto.Room convertToRoomDto(Rooms room) {
@@ -91,7 +104,7 @@ public class RoomsServiceImpl implements RoomsService {
         roomDto.setStatus(room.getStatus() != null ? room.getStatus().name() : null);
         roomDto.setHostelId(room.getHostel() != null ? room.getHostel().getHostelId() : null);
         roomDto.setHostelName(room.getHostel() != null ? room.getHostel().getName() : null);
-
+        roomDto.setMaxTenants(room.getMax_tenants());
         // Xử lý địa chỉ đầy đủ
         if (room.getHostel() != null && room.getHostel().getAddress() != null) {
             Address address = room.getHostel().getAddress();

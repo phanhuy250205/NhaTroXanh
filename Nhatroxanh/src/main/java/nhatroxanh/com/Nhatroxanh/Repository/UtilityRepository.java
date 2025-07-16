@@ -18,9 +18,12 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
             "WHERE p.status = true " +
             "AND p.approvalStatus = 'APPROVED' " +
             "ORDER BY u.name ASC")
+            
     List<Utility> findUtilitiesWithActivePosts();
 
     Set<Utility> findByUtilityIdIn(Set<Integer> utilityIds);
 
     Optional<Utility> findByNameIgnoreCase(String name);
+
+    Optional<Utility> findByName(String name);
 }

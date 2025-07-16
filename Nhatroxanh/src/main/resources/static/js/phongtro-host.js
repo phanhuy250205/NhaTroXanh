@@ -23,7 +23,6 @@ const RoomManagementUI = (function() {
         
         isInitialized = true;
     }
-
     // Initialize tabs functionality
     function initializeTabs() {
         const tabLinks = document.querySelectorAll(".tab-link-host");

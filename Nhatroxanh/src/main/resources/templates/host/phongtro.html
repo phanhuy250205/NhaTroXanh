@@ -4,22 +4,22 @@
     <title>Nhà Trọ Xanh</title>
 </head>
 <body class="phongtro">
-    <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
     <div class="main-content-host" id="mainContentHost">
         <div class="content-container-host">
-            <!-- Header Section -->
             <div class="page-header-host">
                 <h1 class="page-title-host">QUẢN LÝ PHÒNG TRỌ</h1>
             </div>
 
-            <!-- Error Message -->
             <div th:if="${error}" class="alert alert-danger" role="alert">
                 <span th:text="${error}"></span>
             </div>
 
-            <!-- Tabs Navigation -->
+            <div th:if="${success}" class="alert alert-success" role="alert">
+                <span th:text="${success}"></span>
+            </div>
+
             <div class="tabs-container-host">
                 <ul class="nav nav-tabs tabs-nav-host" id="roomTabsHost" role="tablist">
                     <li class="nav-item tab-item-host" role="presentation">
@@ -35,7 +35,7 @@
                             data-bs-target="#add-room-host" type="button" role="tab" aria-controls="add-room-host"
                             aria-selected="false">
                             <i class="fas fa-plus me-2"></i>
-                            Thêm phòng mới
+                            <span id="addRoomTabText">Thêm phòng mới</span>
                         </button>
                     </li>
                     <li class="nav-item tab-item-host" role="presentation">
@@ -49,20 +49,16 @@
                 </ul>
             </div>
 
-            <!-- Tab Content -->
             <div class="tab-content tabs-content-host" id="roomTabContentHost">
-                <!-- Tab 1: Danh sách phòng trọ -->
                 <div class="tab-pane fade show active" id="room-list-host" role="tabpanel"
                     aria-labelledby="room-list-tab-host" tabindex="0">
-
-                    <!-- Hostel Selection Dropdown -->
                     <div class="hostel-selection-section">
                         <div class="row g-3">
                             <div class="col-md-12">
                                 <div class="form-group-modern">
                                     <label for="hostelSelect" class="form-label-modern">Chọn khu trọ</label>
-                                    <select class="form-select-modern" id="hostelSelect" onchange="window.location.href='/chu-tro/phong-tro?hostelId=' + this.value">
-                                        <option value="">Chọn khu trọ...</option>
+                                    <select class="form-select-modern" id="hostelSelect" onchange="window.location.href='/chu-tro/quan-ly-tro?hostelId=' + this.value">
+                                        <option value="">Chọn khu trọ</option>
                                         <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}" th:text="${hostel.name}" th:selected="${hostel.hostelId == hostelId}"></option>
                                     </select>
                                 </div>
@@ -70,7 +66,6 @@
                         </div>
                     </div>
 
-                    <!-- Search and Filter Section -->
                     <div class="search-filter-section-host">
                         <div class="row g-3">
                             <div class="col-md-8">
@@ -93,7 +88,6 @@
                         </div>
                     </div>
 
-                    <!-- Room List Table -->
                     <div class="table-container-host">
                         <div class="table-responsive">
                             <table class="table room-table-host" id="roomTableHost">
@@ -112,8 +106,9 @@
                                         <td class="table-td-host room-name-host" th:text="${room.namerooms}"></td>
                                         <td class="table-td-host-price price-host" th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
                                         <td class="table-td-host">
-                                            <span th:class="'status-badge-host' + ${room.status == 'unactive' ? ' status-available-host' : room.status == 'active' ? ' status-occupied-host' : ' status-maintenance-host'}"
-                                                  th:text="${room.status == 'unactive' ? 'Trống' : room.status == 'active' ? 'Đã thuê' : 'Bảo trì'}"></span>
+                                            <span th:class="'status-badge-host ' + (${room.status.name()} == 'unactive' ? 'status-available-host' : (${room.status.name()} == 'active' ? 'status-occupied-host' : 'status-maintenance-host'))"
+                                                th:text="${room.status.name()} == 'unactive' ? 'Trống' : (${room.status.name()} == 'active' ? 'Đã thuê' : 'Bảo trì')">
+                                            </span>
                                         </td>
                                         <td class="table-td-host" th:text="${room.acreage} + ' m²'"></td>
                                         <td class="table-td-host" th:text="${room.max_tenants} + ' người'"></td>
@@ -136,16 +131,16 @@
                     </div>
                 </div>
 
-                <!-- Tab 2: Thêm phòng mới -->
                 <div class="tab-pane fade" id="add-room-host" role="tabpanel" aria-labelledby="add-room-tab-host" tabindex="0">
                     <div class="add-room-container-modern">
-                        <form id="addRoomFormHost" class="add-room-form-modern">
+                        <form id="addRoomFormHost" class="add-room-form-modern" th:action="@{/chu-tro/them-phong}" method="post">
+                            <input type="hidden" id="roomIdHost" name="roomId">
                             <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomAreaSelectHost" class="form-label-modern">
                                         Khu trọ <span class="required-star">*</span>
                                     </label>
-                                    <select class="form-select-modern" id="roomAreaSelectHost" required>
+                                    <select class="form-select-modern" id="roomAreaSelectHost" name="hostelId" required>
                                         <option value="">Chọn khu trọ</option>
                                         <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}" th:text="${hostel.name}"></option>
                                     </select>
@@ -154,7 +149,7 @@
                                     <label for="roomNameHost" class="form-label-modern">
                                         Tên phòng <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomNameHost"
+                                    <input type="text" class="form-input-modern" id="roomNameHost" name="namerooms"
                                         placeholder="Nhập tên phòng (VD: A101)" required>
                                 </div>
                             </div>
@@ -163,15 +158,14 @@
                                     <label for="roomPriceHost" class="form-label-modern">
                                         Giá thuê (VNĐ) <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomPriceHost"
+                                    <input type="text" class="form-input-modern" id="roomPriceHost" name="price"
                                         placeholder="Nhập giá thuê phòng" required>
                                 </div>
                                 <div class="form-group-modern">
                                     <label for="roomStatusHost" class="form-label-modern">
                                         Trạng thái <span class="required-star">*</span>
                                     </label>
-                                    <select class="form-select-modern" id="roomStatusHost" required>
-                                        <option value="">Chọn trạng thái</option>
+                                    <select class="form-select-modern" id="roomStatusHost" name="status" required>
                                         <option value="unactive">Trống</option>
                                         <option value="active">Đã thuê</option>
                                         <option value="repair">Bảo trì</option>
@@ -183,74 +177,45 @@
                                     <label for="roomAreaHost" class="form-label-modern">
                                         Diện tích (m²) <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomAreaHost"
+                                    <input type="text" class="form-input-modern" id="roomAreaHost" name="acreage"
                                         placeholder="Nhập diện tích phòng" required>
                                 </div>
                                 <div class="form-group-modern">
                                     <label for="roomCapacityHost" class="form-label-modern">
                                         Số người tối đa <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomCapacityHost"
+                                    <input type="text" class="form-input-modern" id="roomCapacityHost" name="maxTenants"
                                         placeholder="Số người thuê phòng tối đa" required>
                                 </div>
                             </div>
                             <div class="form-group-modern full-width">
                                 <label class="form-label-modern">Tiện ích phòng</label>
-                                <div class="amenities-grid">
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="wifi" name="amenities" value="wifi" class="amenity-checkbox">
-                                        <label for="wifi" class="amenity-label">
-                                            <i class="fas fa-wifi"></i>
-                                            <span>WiFi</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="ac" name="amenities" value="ac" class="amenity-checkbox">
-                                        <label for="ac" class="amenity-label">
-                                            <i class="fas fa-snowflake"></i>
-                                            <span>Điều hòa</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="fridge" name="amenities" value="fridge" class="amenity-checkbox">
-                                        <label for="fridge" class="amenity-label">
-                                            <i class="fas fa-cube"></i>
-                                            <span>Tủ lạnh</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="washing-machine" name="amenities" value="washing-machine" class="amenity-checkbox">
-                                        <label for="washing-machine" class="amenity-label">
-                                            <i class="fas fa-tshirt"></i>
-                                            <span>Máy giặt</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="water-heater" name="amenities" value="water-heater" class="amenity-checkbox">
-                                        <label for="water-heater" class="amenity-label">
-                                            <i class="fas fa-fire"></i>
-                                            <span>Nước nóng</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="kitchen" name="amenities" value="kitchen" class="amenity-checkbox">
-                                        <label for="kitchen" class="amenity-label">
-                                            <i class="fas fa-utensils"></i>
-                                            <span>Bếp riêng</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="bathroom" name="amenities" value="bathroom" class="amenity-checkbox">
-                                        <label for="bathroom" class="amenity-label">
-                                            <i class="fas fa-bath"></i>
-                                            <span>WC riêng</span>
-                                        </label>
-                                    </div>
+                                <div class="amenities-grid" th:unless="${utilities == null or #lists.isEmpty(utilities)}">
+                                    <div class="amenity-item" th:each="utility : ${utilities}">
+                                    <input type="checkbox" th:id="'utility-' + ${utility.utilityId}" name="amenities"
+                                        th:value="${utility.name}" class="amenity-checkbox">
+                                    <label th:for="'utility-' + ${utility.utilityId}" class="amenity-label">
+                                        <i th:switch="${utility.name}">
+                                            <i th:case="'WiFi'" class="fas fa-wifi"></i>
+                                            <i th:case="'Điều hòa'" class="fas fa-snowflake"></i>
+                                            <i th:case="'Tủ lạnh'" class="fas fa-cube"></i>
+                                            <i th:case="'Máy giặt'" class="fas fa-tshirt"></i>
+                                            <i th:case="'Nước nóng'" class="fas fa-fire"></i>
+                                            <i th:case="'Bếp riêng'" class="fas fa-utensils"></i>
+                                            <i th:case="'WC riêng'" class="fas fa-bath"></i>
+                                            <i th:case="*" class="fas fa-circle"></i> <!-- Default case -->
+                                        </i>
+                                        <span th:text="${utility.name}"></span>
+                                    </label>
+                                </div>
+                                </div>
+                                <div th:if="${utilities == null or #lists.isEmpty(utilities)}" class="alert alert-warning">
+                                    Không có tiện ích nào để hiển thị. Vui lòng thêm tiện ích trong hệ thống.
                                 </div>
                             </div>
                             <div class="form-group-modern full-width">
                                 <label for="roomDescriptionHost" class="form-label-modern">Mô tả chi tiết</label>
-                                <textarea class="form-textarea-modern" id="roomDescriptionHost"
+                                <textarea class="form-textarea-modern" id="roomDescriptionHost" name="description"
                                     placeholder="Mô tả chi tiết về phòng, vị trí, môi trường xung quanh..." rows="4"></textarea>
                             </div>
                             <div class="image-upload-section">
@@ -277,7 +242,7 @@
                                 <div class="image-preview-container" id="imagePreviewContainer"></div>
                             </div>
                             <div class="form-actions-modern">
-                                <button type="button" class="btn-cancel-modern">
+                                <button type="button" class="btn-cancel-modern" onclick="resetForm()">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
@@ -285,20 +250,19 @@
                                     </svg>
                                     Hủy bỏ
                                 </button>
-                                <button type="submit" class="btn-submit-modern">
+                                <button type="submit" class="btn-submit-modern" id="submitRoomBtn">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    Thêm phòng
+                                    <span id="submitBtnText">Thêm phòng</span>
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
 
-                <!-- Tab 3: Quản lý trạng thái -->
                 <div class="tab-pane fade" id="status-management-host" role="tabpanel"
                     aria-labelledby="status-management-tab-host" tabindex="0">
                     <div class="status-management-modern">
@@ -454,5 +418,91 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function resetForm() {
+            const form = document.getElementById("addRoomFormHost");
+            form.reset();
+            form.action = "/chu-tro/them-phong";
+            document.getElementById("submitBtnText").textContent = "Thêm phòng";
+            document.getElementById("addRoomTabText").textContent = "Thêm phòng mới";
+            document.getElementById("roomIdHost").value = "";
+            window.imageUploader.clearAll();
+            RoomManagementUI.showNotification("Đã đặt lại form", "info");
+        }
+
+        document.getElementById("addRoomFormHost").addEventListener("submit", function (e) {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append("roomId", document.getElementById("roomIdHost").value);
+            formData.append("namerooms", document.getElementById("roomNameHost").value);
+            formData.append("price", document.getElementById("roomPriceHost").value.replace(/[^\d]/g, ''));
+            formData.append("acreage", document.getElementById("roomAreaHost").value);
+            formData.append("status", document.getElementById("roomStatusHost").value);
+            formData.append("maxTenants", document.getElementById("roomCapacityHost").value);
+            formData.append("hostelId", document.getElementById("roomAreaSelectHost").value);
+            formData.append("description", document.getElementById("roomDescriptionHost").value);
+
+            const amenities = [];
+            document.querySelectorAll("input[name='amenities']:checked").forEach(item => {
+                amenities.push(item.value);
+            });
+            amenities.forEach(item => formData.append("amenities", item));
+
+            const actionUrl = formData.get("roomId") ? "/chu-tro/cap-nhat-phong" : "/chu-tro/them-phong";
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    RoomManagementUI.showNotification("Có lỗi xảy ra!", "error");
+                }
+            });
+        });
+
+        document.addEventListener("click", function(e) {
+            if (e.target.closest(".btn-edit-host")) {
+                e.preventDefault();
+                const roomId = e.target.closest(".btn-edit-host").getAttribute("data-room-id");
+                fetch(`/chu-tro/cap-nhat-phong/${roomId}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Không thể tải thông tin phòng");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Data from API:", data); // Log dữ liệu để kiểm tra
+                    const form = document.getElementById("addRoomFormHost");
+                    form.action = "/chu-tro/cap-nhat-phong";
+                    document.getElementById("submitBtnText").textContent = "Cập nhật phòng";
+                    document.getElementById("addRoomTabText").textContent = "Chỉnh sửa phòng";
+                    document.getElementById("roomIdHost").value = data.roomId;
+                    document.getElementById("roomNameHost").value = data.namerooms;
+                    document.getElementById("roomPriceHost").value = data.price.toLocaleString("vi-VN");
+                    document.getElementById("roomAreaHost").value = data.acreage;
+                    document.getElementById("roomStatusHost").value = data.status;
+                    document.getElementById("roomCapacityHost").value = data.maxTenants;
+                    document.getElementById("roomAreaSelectHost").value = data.hostelId;
+                    document.getElementById("roomDescriptionHost").value = data.description || "";
+
+                    document.querySelectorAll("input[name='amenities']").forEach(checkbox => {
+                        checkbox.checked = data.amenities.includes(checkbox.value);
+                    });
+
+                    RoomManagementUI.switchToTab("add-room-tab-host");
+                })
+                .catch(error => {
+                    RoomManagementUI.showNotification("Không thể tải thông tin phòng: " + error.message, "error");
+                    console.error("Error:", error);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
