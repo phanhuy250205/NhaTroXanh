@@ -1,3 +1,29 @@
+.auth-modal-close-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    width: 40px;
+    height: 40px;
+}
+
+.auth-modal-close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: #333;
+    transform: scale(1.1);
+}
+
+.auth-modal-close-btn:active {
+    transform: scale(0.95);
+}
+
+
 /* Verification Modal Styles */
 .verification-modal-overlay {
     position: fixed;

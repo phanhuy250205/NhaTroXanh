@@ -75,17 +75,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // })
 
     // View more button functionality
-    const viewMoreButton = document.querySelector(".btn-view-more")
-    if (viewMoreButton) {
-        viewMoreButton.addEventListener("click", function (e) {
-            e.preventDefault()
-            createRipple(e, this)
+    // const viewMoreButton = document.querySelector(".btn-view-more")
+    // if (viewMoreButton) {
+    //     viewMoreButton.addEventListener("click", function (e) {
+    //         e.preventDefault()
+    //         createRipple(e, this)
 
-            setTimeout(() => {
-                alert("Đang tải thêm nhà trọ...\nChức năng đang được phát triển")
-            }, 200)
-        })
-    }
+    //         setTimeout(() => {
+    //             alert("Đang tải thêm nhà trọ...\nChức năng đang được phát triển")
+    //         }, 200)
+    //     })
+    // }
 
     // Card hover effects
     const propertyCards = document.querySelectorAll(".property-card")

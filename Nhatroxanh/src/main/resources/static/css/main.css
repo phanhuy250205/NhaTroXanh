@@ -200,7 +200,7 @@ html {
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #f8f9fa;
+  background-color: #ffffff;
 }
 
 .badge-active {
@@ -396,3 +396,11 @@ table thead {
 }
 
 
+.form-control-loc{
+      border: 1px solid #d1d5db !important;
+   border-radius: 8px ; 
+    padding: 7px 16px 7px 16px !important;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    background: white;
+}
