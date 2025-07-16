@@ -103,7 +103,7 @@ public class RoomsApiController {
     @GetMapping("/contract/{contractId}/edit")
     public ResponseEntity<?> getContractEditForm(@PathVariable Long contractId) {
         // Lấy phòng hiện tại của hợp đồng
-        Rooms currentRoom = contractService.findContractById(Math.toIntExact(contractId))
+        Rooms currentRoom = contractService.findContractById(contractId)
                 .orElseThrow(() -> new ResourceNotFoundException("Contract not found with ID: " + contractId))
                 .getRoom();
 

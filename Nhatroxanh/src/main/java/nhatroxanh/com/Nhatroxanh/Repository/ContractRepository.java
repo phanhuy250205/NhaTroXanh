@@ -93,13 +93,9 @@ List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
     Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
 
 
-<<<<<<< HEAD
 
-
-    
-=======
     // Tìm hợp đồng theo tenant ID
     @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
     Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
->>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
+
 }

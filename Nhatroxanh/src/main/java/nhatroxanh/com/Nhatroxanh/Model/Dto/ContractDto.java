@@ -3,11 +3,9 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-<<<<<<< HEAD
-import lombok.Data;
-=======
+
 import lombok.Builder;
->>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
+import lombok.Data;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import java.sql.Date;
 import java.time.LocalDate;

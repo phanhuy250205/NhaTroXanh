@@ -1161,92 +1161,7 @@
     </div>
 </div>
 
-<<<<<<< HEAD
-<script th:inline="javascript">
-    // CCCD Province Codes Mapping - Move this OUTSIDE the class
-    const CCCD_PROVINCE_CODES = {
-        "Hà Nội": ["001", "002", "003", "004", "005", "006", "007", "008", "009", "010", "011", "012"],
-        "TP. Hồ Chí Minh": ["079", "080", "081", "082", "083", "084", "085", "086", "087", "088", "089", "090"],
-        "Hải Phòng": ["031", "032", "033", "034", "035"],
-        "Đà Nẵng": ["048", "049"],
-        "Cần Thơ": ["065", "066", "067"],
-        "An Giang": ["089", "090"],
-        "Bà Rịa - Vũng Tàu": ["077", "078"],
-        "Bắc Giang": ["024", "025"],
-        "Bắc Kạn": ["006"],
-        "Bạc Liêu": ["095"],
-        "Bắc Ninh": ["027"],
-        "Bến Tre": ["075"],
-        "Bình Định": ["052"],
-        "Bình Dương": ["074"],
-        "Bình Phước": ["070"],
-        "Bình Thuận": ["060"],
-        "Cà Mau": ["096"],
-        "Cao Bằng": ["004"],
-        "Đắk Lắk": ["062"],
-        "Đắk Nông": ["067"],
-        "Điện Biên": ["011"],
-        "Đồng Nai": ["075"],
-        "Đồng Tháp": ["087"],
-        "Gia Lai": ["064"],
-        "Hà Giang": ["002"],
-        "Hà Nam": ["035"],
-        "Hà Tĩnh": ["042"],
-        "Hải Dương": ["030"],
-        "Hậu Giang": ["093"],
-        "Hòa Bình": ["017"],
-        "Hưng Yên": ["033"],
-        "Khánh Hòa": ["058"],
-        "Kiên Giang": ["091"],
-        "Kon Tum": ["066"],
-        "Lai Châu": ["012"],
-        "Lâm Đồng": ["068"],
-        "Lạng Sơn": ["009"],
-        "Lào Cai": ["010"],
-        "Long An": ["080"],
-        "Nam Định": ["036"],
-        "Nghệ An": ["040"],
-        "Ninh Bình": ["037"],
-        "Ninh Thuận": ["059"],
-        "Phú Thọ": ["025"],
-        "Phú Yên": ["054"],
-        "Quảng Bình": ["044"],
-        "Quảng Nam": ["049"],
-        "Quảng Ngãi": ["051"],
-        "Quảng Ninh": ["022"],
-        "Quảng Trị": ["045"],
-        "Sóc Trăng": ["094"],
-        "Sơn La": ["014"],
-        "Tây Ninh": ["072"],
-        "Thái Bình": ["034"],
-        "Thái Nguyên": ["019"],
-        "Thanh Hóa": ["038"],
-        "Thừa Thiên Huế": ["046"],
-        "Tiền Giang": ["082"],
-        "Trà Vinh": ["084"],
-        "Tuyên Quang": ["008"],
-        "Vĩnh Long": ["086"],
-        "Vĩnh Phúc": ["026"],
-        "Yên Bái": ["015"]
-    };
 
-    // Sample room data for each housing area (thay bằng data thực từ backend nếu cần)
-    const roomData = {
-        'khu1': [ // Ví dụ cho hostelId = 'khu1'
-            { value: 'room1', text: 'Phòng 101', number: '101', area: 20, price: 2000000 },
-            { value: 'room2', text: 'Phòng 102', number: '102', area: 25, price: 2500000 }
-        ],
-        // Thêm các khu khác tương tự
-    };
-
-    // Định nghĩa biến (sửa lỗi reference)
-    const housingAreaSelect = document.getElementById('hostelId');
-    const roomSelectionSelect = document.getElementById('roomId');
-
-    // Handle housing area selection change (xóa lặp)
-    housingAreaSelect.addEventListener('change', function() {
-        const selectedArea = this.value;
-=======
 <!-- ✅ JQUERY FIRST -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -1284,7 +1199,7 @@
                         }
                     }
                     console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
->>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
+
 
                     if (filteredRooms.length === 0) {
                         roomOptions += '<option value="">Không có phòng unactive</option>';
@@ -1318,44 +1233,9 @@
                 } else {
                     $('#roomSelect').html('<option value="">Không có phòng</option>').prop('disabled', true);
                 }
-<<<<<<< HEAD
-            }
-        } else {
-            // Clear fields if no room selected
-            document.getElementById('room-number').value = '';
-            document.getElementById('room-area').value = '';
-            document.getElementById('rent-price').value = '';
 
-            // Update preview
-            if (window.NhaTroContract) {
-                window.NhaTroContract.updatePreviewField('room-number', 'preview-room-number');
-                window.NhaTroContract.updatePreviewField('room-area', 'preview-room-area');
-                window.NhaTroContract.updatePreviewField('rent-price', 'preview-rent');
-                window.NhaTroContract.calculateDeposit();
-            }
-        }
-    });
-
-    document.getElementById('contractForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        const formData = new FormData(this);
-        const isEditMode = /*[[${isEditMode}]]*/ false;  // Thymeleaf sẽ thay bằng giá trị thực
-        const contractId = formData.get('id') || /*[[${contractId}]]*/ null;  // Thymeleaf sẽ thay
-        const contractDto = {
-            id: contractId,
-            contractDate: formData.get('contractDate'),
-            status: formData.get('status'),
-            tenantType: formData.get('tenantType'),
-            terms: {
-                startDate: formData.get('terms.startDate'),
-                endDate: formData.get('terms.endDate'),
-                price: parseFloat(formData.get('terms.price')),
-                deposit: parseFloat(formData.get('terms.deposit')),
-                duration: parseInt(formData.get('terms.duration')),
-                terms: formData.get('terms.terms')
-=======
                 if (callback) callback();
->>>>>>> 4155a40e56b210d62e769270294e6ea0673d45e1
+
             },
             error: function(xhr, status, error) {
                 console.error('Lỗi tải phòng:', error);

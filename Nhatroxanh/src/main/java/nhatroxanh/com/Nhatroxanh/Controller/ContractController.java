@@ -205,28 +205,23 @@ public class ContractController {
             @RequestParam Integer hostelId,
             Authentication authentication) {
         logger.info("Getting rooms for hostelId: {}", hostelId);
-
         Map<String, Object> response = new HashMap<>();
         try {
             // Kiểm tra quyền sở hữu khu trọ
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-
             // Lấy danh sách khu trọ của owner để verify ownership
             List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
             boolean isOwner = hostels.stream()
                     .anyMatch(hostel -> hostel.getHostelId().equals(hostelId));
-
             if (!isOwner) {
                 logger.error("User {} does not own hostel {}", ownerId, hostelId);
                 response.put("success", false);
                 response.put("message", "Bạn không có quyền truy cập khu trọ này!");
                 return ResponseEntity.status(403).body(response);
             }
-
             // Lấy danh sách phòng
             List<ContractDto.Room> rooms = roomsService.getRoomsByHostelId(hostelId);
-
             if (rooms.isEmpty()) {
                 logger.warn("No rooms found for hostelId: {}", hostelId);
                 response.put("success", true);
@@ -234,20 +229,16 @@ public class ContractController {
                 response.put("message", "Không có phòng nào trong khu trọ này.");
             } else {
                 logger.info("Found {} rooms for hostelId: {}", rooms.size(), hostelId);
-
                 // Chỉ lấy những phòng trống (AVAILABLE)
                 List<ContractDto.Room> availableRooms = rooms.stream()
                         .filter(room -> "unactive".equals(room.getStatus()))
                         .collect(Collectors.toList());
-
                 response.put("success", true);
                 response.put("rooms", availableRooms);
                 response.put("totalRooms", rooms.size());
                 response.put("availableRooms", availableRooms.size());
             }
-
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             logger.error("Error getting rooms for hostelId {}: {}", hostelId, e.getMessage(), e);
             response.put("success", false);
@@ -255,7 +246,6 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
     // Cũng có thể thêm endpoint để lấy thông tin chi tiết phòng
     @GetMapping("/get-room-details")
     @PreAuthorize("hasRole('OWNER')")
