@@ -22,20 +22,20 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<Users, Integer> {
-        Optional<Users> findByEmail(String email);
+    Optional<Users> findByEmail(String email);
 
-        Optional<Users> findByPhone(String phone);
+    Optional<Users> findByPhone(String phone);
 
-        List<Users> findByRole(Users.Role role);
+    List<Users> findByRole(Users.Role role);
 
-        @Query("SELECT u FROM Users u LEFT JOIN u.userCccd uc WHERE (uc.cccdNumber = :cccd OR u.phone = :phone) AND u.role = :role")
-        Optional<Users> findByCccdOrPhoneAndRole(
-                        @Param("cccd") String cccd,
-                        @Param("phone") String phone,
-                        @Param("role") Users.Role role);
+    @Query("SELECT u FROM Users u LEFT JOIN u.userCccd uc WHERE (uc.cccdNumber = :cccd OR u.phone = :phone) AND u.role = :role")
+    Optional<Users> findByCccdOrPhoneAndRole(
+            @Param("cccd") String cccd,
+            @Param("phone") String phone,
+            @Param("role") Users.Role role);
 
-        @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
-        Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
+    @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
+    Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
 
         @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
         String findAddressByUserId(@Param("userId") Integer userId);
@@ -44,30 +44,55 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
         @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
         Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
 
-        @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
-        Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
+    @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
+    Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
 
-        @Query("""
-                            SELECT DISTINCT u FROM Users u
-                            LEFT JOIN FETCH u.userCccd
-                            LEFT JOIN FETCH u.rentedContracts c
-                            LEFT JOIN FETCH c.room r
-                            LEFT JOIN FETCH r.hostel h
-                            WHERE u.userId IN :userIds
-                        """)
-        List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
+    @Query("""
+                SELECT DISTINCT u FROM Users u
+                LEFT JOIN FETCH u.userCccd
+                LEFT JOIN FETCH u.rentedContracts c
+                LEFT JOIN FETCH c.room r
+                LEFT JOIN FETCH r.hostel h
+                WHERE u.userId IN :userIds
+            """)
+    List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
 
-        @Query("SELECT u FROM Users u WHERE u.role = :role "
-                        + "AND (:keyword IS NULL OR u.fullname LIKE %:keyword% OR u.email LIKE %:keyword% OR u.phone LIKE %:keyword%) "
-                        + "AND (:enabled IS NULL OR u.enabled = :enabled)")
-        Page<Users> searchOwners(
-                        @Param("role") Users.Role role,
-                        @Param("keyword") String keyword,
-                        @Param("enabled") Boolean enabled,
-                        Pageable pageable);
+    @Query("SELECT u FROM Users u WHERE u.role = :role "
+            + "AND (:keyword IS NULL OR u.fullname LIKE %:keyword% OR u.email LIKE %:keyword% OR u.phone LIKE %:keyword%) "
+            + "AND (:enabled IS NULL OR u.enabled = :enabled)")
+    Page<Users> searchOwners(
+            @Param("role") Users.Role role,
+            @Param("keyword") String keyword,
+            @Param("enabled") Boolean enabled,
+            Pageable pageable);
 
-        boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
 
-        boolean existsByPhone(String phone);
+    boolean existsByPhone(String phone);
+
+    long countByRole(Users.Role role);
+
+    long countByRoleAndEnabled(Users.Role role, boolean enabled);
+
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND " +
+            "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Users> findByRoleAndKeyword(@Param("role") Users.Role role,
+            @Param("keyword") String keyword,
+            Pageable pageable);
+
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND " +
+            "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Users> findByRoleAndEnabledAndKeyword(@Param("role") Users.Role role,
+            @Param("enabled") boolean enabled,
+            @Param("keyword") String keyword,
+            Pageable pageable);
+
+    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.email = :email AND u.userId <> :userId")
+    boolean existsByEmailAndNotUserId(@Param("email") String email, @Param("userId") Integer userId);
+
+    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.phone = :phone AND u.userId <> :userId")
+    boolean existsByPhoneAndNotUserId(@Param("phone") String phone, @Param("userId") Integer userId);
 
 }

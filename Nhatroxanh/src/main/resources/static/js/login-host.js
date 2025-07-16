@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show/hide password toggle - xử lý tất cả password toggles
     const passwordToggles = document.querySelectorAll(".password-toggle-host")
     const loginForm = document.getElementById("loginFormHost");
-    
+
     if (loginForm) {
         // Lắng nghe sự kiện submit của form
         loginForm.addEventListener("submit", function (event) {
@@ -15,34 +15,35 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new URLSearchParams();
             formData.append("username", usernameOrEmail); // Tên param phải khớp với SecurityConfig
             formData.append("password", password);
-             if (rememberMe) {
+            if (rememberMe) {
                 // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
             // Gọi đến URL xử lý đăng nhập của Spring Security
-            fetch("/login-processing", { 
+            fetch("/login-processing", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: formData,
             })
-            .then(response => {
-                if (response.ok) { // Nếu status 200 -> thành công
-                    // Chuyển hướng đến trang dashboard
-                    window.location.href = "chu-tro/tong-quan";
-                } else { // Nếu status 401 -> thất bại
-                    throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi đăng nhập:", error);
-                alert(error.message);
-            });
+                .then(async response => {
+                    if (response.ok) {
+                        const data = await response.json(); // Lấy redirectUrl từ backend
+                        window.location.href = data.redirectUrl; // Chuyển trang
+                    } else {
+                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi đăng nhập:", error);
+                    alert(error.message);
+                });
+
         });
     }
 
-     passwordToggles.forEach((toggle) => {
+    passwordToggles.forEach((toggle) => {
         toggle.addEventListener("click", function () {
             const passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"]')
 

@@ -1,5 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -7,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 
 public interface IncidentReportsRepository extends JpaRepository<IncidentReports, Integer> {
     @Query("SELECT r FROM IncidentReports r " +
@@ -21,5 +24,7 @@ public interface IncidentReportsRepository extends JpaRepository<IncidentReports
 
     @Query("SELECT r FROM IncidentReports r ORDER BY r.reportedAt DESC")
     Page<IncidentReports> findAllPaged(Pageable pageable);
+
+    List<IncidentReports> findByRoom(Rooms room);
 
 }

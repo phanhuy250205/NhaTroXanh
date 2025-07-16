@@ -141,6 +141,81 @@
                 font-size: 0.9em;
             }
         }
+
+        /* Terms list styles */
+        .terms-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 0.75rem;
+            background-color: #f8f9fa;
+        }
+
+        .term-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 0.25rem;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: all 0.2s ease;
+        }
+
+        .term-item:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+        }
+
+        .term-content {
+            flex: 1;
+            margin-right: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .term-number {
+            font-weight: 600;
+            color: #007bff;
+            margin-right: 0.5rem;
+        }
+
+        .term-text {
+            color: #495057;
+        }
+
+        .term-actions {
+            display: flex;
+            gap: 0.25rem;
+        }
+
+        .btn-term-action {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 0.25rem;
+        }
+
+        .empty-terms {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        /* Input group for adding terms */
+        .add-term-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .add-term-input {
+            resize: vertical;
+            min-height: 80px;
+        }
     </style>
 </head>
 

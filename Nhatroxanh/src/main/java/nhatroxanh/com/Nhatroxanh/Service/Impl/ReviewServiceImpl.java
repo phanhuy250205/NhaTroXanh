@@ -38,4 +38,29 @@ public class ReviewServiceImpl implements ReviewService {
     public Optional<Review> findById(Integer reviewId) {
         return reviewRepository.findById(reviewId);
     }
+
+    @Override
+    public List<Review> getReviewsByOwnerId(Integer ownerId) {
+        return reviewRepository.findAllByUserOwnPostsOrRooms(ownerId);
+    }
+
+    public void deleteReviewById(Integer reviewId, Integer ownerId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new IllegalArgumentException("Đánh giá không tồn tại."));
+
+        // Kiểm tra quyền
+        if (review.getRoom() != null && review.getRoom().getHostel() != null &&
+                !review.getRoom().getHostel().getOwner().getUserId().equals(ownerId) ||
+                review.getPost() != null && review.getPost().getHostel() != null &&
+                        !review.getPost().getHostel().getOwner().getUserId().equals(ownerId)) {
+            throw new SecurityException("Bạn không có quyền xóa đánh giá này.");
+        }
+
+        reviewRepository.deleteById(reviewId);
+    }
+
+    @Override
+    public List<Review> getReviewsByHostelId(Integer hostelId) {
+        return reviewRepository.getReviewsByHostelId(hostelId);
+    }
 }

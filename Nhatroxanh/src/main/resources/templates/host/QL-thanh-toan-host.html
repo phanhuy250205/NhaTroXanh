@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head th:replace="~{/layouts/head}" />
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Quản Lý Thanh Toán - Nhà Trọ Xanh</title>
-  
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  
+
   <style>
     :root {
       --primary-color: #3498db;
@@ -26,14 +28,13 @@
       --border-radius: 12px;
     }
 
-
-
     .header-section {
       background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
       color: white;
       padding: 2rem;
       position: relative;
       overflow: hidden;
+      border-radius: 15px;
     }
 
     .header-section::before {
@@ -129,6 +130,40 @@
     .btn-search:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4);
+      color: white;
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--warning-color) 0%, #d97706 100%);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+      color: white;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--danger-color) 0%, #dc2626 100%);
+      border: none;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      color: white;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
       color: white;
     }
 
@@ -230,6 +265,10 @@
       background: rgba(79, 70, 229, 0.1);
       color: var(--primary-hover);
       transform: translateY(-1px);
+    }
+
+    .modal-backdrop {
+      z-index: 1040 !important;
     }
 
     .modal-content {
@@ -388,264 +427,377 @@
       margin: 0;
     }
 
+    /* Pagination Styles */
+    .pagination-section {
+      padding: 1.5rem;
+      background: var(--light-bg);
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .pagination-info {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .pagination-custom {
+      gap: 0.25rem;
+    }
+
+    .pagination-custom .page-link {
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--primary-color);
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin: 0 2px;
+    }
+
+    .pagination-custom .page-link:hover {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .pagination-custom .page-item.active .page-link {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .pagination-custom .page-item.disabled .page-link {
+      color: #94a3b8;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+    .pagination-custom .page-item.disabled span {
+      color: #94a3b8;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 0 2px;
+    }
+
     @media (max-width: 768px) {
       .main-container {
         margin: 0 10px;
       }
-      
+
       .header-section {
         padding: 1.5rem;
       }
-      
+
       .content-section {
         padding: 1rem;
       }
-      
+
       .search-filter-section {
         padding: 1rem;
       }
-      
+
       .header-title {
         font-size: 1.5rem;
+      }
+
+      .pagination-section {
+        padding: 1rem;
+      }
+
+      .pagination-info {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+      }
+
+      .pagination-custom .page-link {
+        padding: 6px 10px;
+        font-size: 0.85rem;
       }
     }
   </style>
 </head>
 
 <body>
-   <div th:replace="~{/layouts/sidebar-host}"></div>
-   <div class="main-content">
-  <!-- Toast Container -->
-  <div class="toast-container">
-    <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-check-circle me-2"></i>
-        <span class="toast-message">Thao tác thành công!</span>
+  <div th:replace="~{/layouts/sidebar-host}" style="z-index: 1020;"></div>
+  <div class="main-content">
+    <!-- Toast Container -->
+    <div class="toast-container">
+      <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-check-circle me-2"></i>
+          <span class="toast-message">Thao tác thành công!</span>
+        </div>
+      </div>
+
+      <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span class="toast-message">Có lỗi xảy ra!</span>
+        </div>
+      </div>
+
+      <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-info-circle me-2"></i>
+          <span class="toast-message">Thông tin!</span>
+        </div>
       </div>
     </div>
-    
-    <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span class="toast-message">Có lỗi xảy ra!</span>
-      </div>
-    </div>
-    
-    <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-info-circle me-2"></i>
-        <span class="toast-message">Thông tin!</span>
+
+    <div class="container-fluid">
+      <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+          <h1 class="header-title">
+            <i class="fas fa-credit-card me-3"></i>
+            Quản Lý Thanh Toán
+          </h1>
+          <p class="header-subtitle">Theo dõi và quản lý các khoản thanh toán của khách thuê</p>
+        </div>
+
+        <!-- Content Section -->
+        <div class="content-section">
+          <!-- Stats Cards -->
+          <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+              <div class="stats-card">
+                <div class="stats-icon stats-icon-success">
+                  <i class="fas fa-check"></i>
+                </div>
+                <h3 class="stats-number text-success" id="paidCount" th:text="${paymentStats?.paidCount ?: 0}">0</h3>
+                <p class="stats-label">Đã thanh toán</p>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="stats-card">
+                <div class="stats-icon stats-icon-danger">
+                  <i class="fas fa-clock"></i>
+                </div>
+                <h3 class="stats-number text-danger" id="unpaidCount" th:text="${paymentStats?.unpaidCount ?: 0}">0</h3>
+                <p class="stats-label">Chưa thanh toán</p>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="stats-card">
+                <div class="stats-icon stats-icon-info">
+                  <i class="fas fa-calculator"></i>
+                </div>
+                <h3 class="stats-number text-info" id="totalRevenue"
+                  th:text="${#numbers.formatDecimal(paymentStats?.totalRevenue ?: 0, 0, 'COMMA', 0, 'POINT')}">0</h3>
+                <p class="stats-label">Tổng doanh thu (VNĐ)</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Search and Filter Section -->
+          <div class="search-filter-section">
+            <div class="row g-3">
+              <!-- Search Input -->
+              <div class="col-12 col-lg-5">
+                <div class="search-input-group">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" class="search-input" placeholder="Tìm kiếm theo tên, phòng..." id="searchInput">
+                </div>
+              </div>
+
+              <!-- Filter and Actions -->
+              <div class="col-12 col-lg-7">
+                <div class="row g-2 align-items-center">
+                  <!-- Filter Icon -->
+                  <div class="col-auto d-none d-md-block">
+                    <i class="fas fa-filter filter-icon"></i>
+                  </div>
+
+                  <!-- Status Filter -->
+                  <div class="col-12 col-sm-6 col-md-3 col-lg">
+                    <select class="form-select filter-select" id="statusFilter">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="paid">Đã thanh toán</option>
+                      <option value="unpaid">Chưa thanh toán</option>
+                    </select>
+                  </div>
+
+                  <!-- Search Button -->
+                  <div class="col-6 col-sm-3 col-md-auto">
+                    <button class="btn btn-search w-100" onclick="performSearch()">
+                      <i class="fas fa-search d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-md-inline">Tìm kiếm</span>
+                    </button>
+                  </div>
+
+                  <!-- Create Invoice Button -->
+                  <div class="col-6 col-sm-3 col-md-auto">
+                    <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#createInvoiceModal">
+                      <i class="fas fa-plus-circle d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-md-inline">Tạo mới</span>
+                    </button>
+                  </div>
+
+                  <!-- Send Invoice Button -->
+                  <div class="col-12 col-sm-6 col-md-auto">
+                    <button class="btn btn-warning w-100" onclick="sendUnpaidInvoices()">
+                      <i class="fas fa-paper-plane d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-sm-inline">Gửi hóa đơn</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- Table Section -->
+          <div class="table-container">
+            <div class="table-responsive">
+              <table class="table custom-table" id="paymentsTable">
+                <thead>
+                  <tr>
+                    <th>
+                      <i class="fas fa-building me-2"></i>Khu trọ
+                    </th>
+                    <th>
+                      <i class="fas fa-door-open me-2"></i>Phòng
+                    </th>
+                    <th>
+                      <i class="fas fa-user me-2"></i>Người thuê
+                    </th>
+                    <th>
+                      <i class="fas fa-calendar me-2"></i>Tháng
+                    </th>
+                    <th>
+                      <i class="fas fa-info-circle me-2"></i>Trạng thái
+                    </th>
+                    <th>
+                      <i class="fas fa-cogs me-2"></i>Hành động
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="paymentsTableBody">
+                  <!-- Dữ liệu sẽ được load từ server -->
+                  <tr th:each="payment : ${payments}" th:if="${payments != null}">
+                    <td><strong th:text="${payment.hostelName}">Khu A</strong></td>
+                    <td>
+                      <span class="badge bg-primary" th:text="${payment.roomCode}">PB01</span>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2"
+                          style="width: 35px; height: 35px;">
+                          <i class="fas fa-user text-white"></i>
+                        </div>
+                        <strong th:text="${payment.tenantName}">Nguyễn Văn A</strong>
+                      </div>
+                    </td>
+                    <td>
+                      <i class="fas fa-calendar-alt me-1 text-muted"></i>
+                      <span th:text="${payment.month}">06/2025</span>
+                    </td>
+                    <td>
+                      <span
+                        th:class="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'status-badge status-paid' : 'status-badge status-unpaid'">
+                        <i
+                          th:class="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'fas fa-check me-1' : 'fas fa-exclamation-triangle me-1'"></i>
+                        <span
+                          th:text="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'Đã thanh toán' : 'Chưa thanh toán'">Chưa
+                          thanh toán</span>
+                      </span>
+                    </td>
+                    <td>
+                      <a href="#" class="action-link" th:onclick="'showInvoiceModalById(' + ${payment.paymentId} + ')'">
+                        <i class="fas fa-eye"></i>
+                        Xem chi tiết
+                      </a>
+                    </td>
+                  </tr>
+                  <!-- Fallback static data nếu không có dữ liệu từ server -->
+                  <tr th:if="${payments == null or #lists.isEmpty(payments)}">
+                    <td colspan="6" class="text-center text-muted">
+                      <i class="fas fa-info-circle me-2"></i>
+                      Chưa có dữ liệu thanh toán
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination Section -->
+            <div class="pagination-section" th:if="${totalPages != null and totalPages > 1}">
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <!-- Pagination Info -->
+                <div class="pagination-info">
+                  <span class="text-muted">
+                    Hiển thị <span th:text="${#lists.size(payments)}">8</span> trong tổng số
+                    <span th:text="${totalPayments ?: 0}">0</span> thanh toán
+                  </span>
+                </div>
+
+                <!-- Pagination Controls -->
+                <nav aria-label="Phân trang thanh toán">
+                  <ul class="pagination pagination-custom mb-0">
+                    <!-- Previous Button -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                      <a class="page-link" href="#" onclick="loadPage(0)" th:if="${currentPage > 0}">
+                        <i class="fas fa-angle-double-left"></i>
+                      </a>
+                      <span class="page-link" th:if="${currentPage == 0}">
+                        <i class="fas fa-angle-double-left"></i>
+                      </span>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled' : ''">
+                      <a class="page-link" href="#" th:onclick="'loadPage(' + ${currentPage - 1} + ')'"
+                        th:if="${currentPage > 0}">
+                        <i class="fas fa-angle-left"></i>
+                      </a>
+                      <span class="page-link" th:if="${currentPage == 0}">
+                        <i class="fas fa-angle-left"></i>
+                      </span>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    <li class="page-item" th:each="pageNum : ${#numbers.sequence(0, totalPages - 1)}"
+                      th:if="${pageNum >= (currentPage - 2) and pageNum <= (currentPage + 2)}"
+                      th:classappend="${pageNum == currentPage} ? 'active' : ''">
+                      <a class="page-link" href="#" th:onclick="'loadPage(' + ${pageNum} + ')'"
+                        th:if="${pageNum != currentPage}" th:text="${pageNum + 1}">1</a>
+                      <span class="page-link" th:if="${pageNum == currentPage}" th:text="${pageNum + 1}">1</span>
+                    </li>
+
+                    <!-- Next Button -->
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''">
+                      <a class="page-link" href="#" th:onclick="'loadPage(' + ${currentPage + 1} + ')'"
+                        th:if="${currentPage < totalPages - 1}">
+                        <i class="fas fa-angle-right"></i>
+                      </a>
+                      <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                        <i class="fas fa-angle-right"></i>
+                      </span>
+                    </li>
+
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''">
+                      <a class="page-link" href="#" th:onclick="'loadPage(' + ${totalPages - 1} + ')'"
+                        th:if="${currentPage < totalPages - 1}">
+                        <i class="fas fa-angle-double-right"></i>
+                      </a>
+                      <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                        <i class="fas fa-angle-double-right"></i>
+                      </span>
+                    </li>
+                  </ul>
+                </nav>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-
-  <div class="container-fluid">
-    <div class="main-container">
-      <!-- Header Section -->
-      <div class="header-section">
-        <h1 class="header-title">
-          <i class="fas fa-credit-card me-3"></i>
-          Quản Lý Thanh Toán
-        </h1>
-        <p class="header-subtitle">Theo dõi và quản lý các khoản thanh toán của khách thuê</p>
-      </div>
-
-      <!-- Content Section -->
-      <div class="content-section">
-        <!-- Stats Cards -->
-        <div class="row mb-4">
-          <div class="col-md-4 mb-3">
-            <div class="stats-card">
-              <div class="stats-icon stats-icon-success">
-                <i class="fas fa-check"></i>
-              </div>
-              <h3 class="stats-number text-success">1</h3>
-              <p class="stats-label">Đã thanh toán</p>
-            </div>
-          </div>
-          <div class="col-md-4 mb-3">
-            <div class="stats-card">
-              <div class="stats-icon stats-icon-danger">
-                <i class="fas fa-clock"></i>
-              </div>
-              <h3 class="stats-number text-danger">2</h3>
-              <p class="stats-label">Chưa thanh toán</p>
-            </div>
-          </div>
-          <div class="col-md-4 mb-3">
-            <div class="stats-card">
-              <div class="stats-icon stats-icon-info">
-                <i class="fas fa-calculator"></i>
-              </div>
-              <h3 class="stats-number text-info">6,760,000</h3>
-              <p class="stats-label">Tổng doanh thu (VNĐ)</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Search and Filter Section -->
-        <div class="search-filter-section">
-          <div class="row align-items-center">
-            <div class="col-lg-6 mb-3 mb-lg-0">
-              <div class="search-input-group">
-                <i class="fas fa-search search-icon"></i>
-                <input type="text" class="form-control search-input" placeholder="Tìm kiếm theo tên, phòng..." id="searchInput">
-              </div>
-            </div>
-            <div class="col-lg-6">
-              <div class="row align-items-center">
-                <div class="col-auto">
-                  <i class="fas fa-filter filter-icon"></i>
-                </div>
-                <div class="col">
-                  <select class="form-select filter-select" id="statusFilter">
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="paid">Đã thanh toán</option>
-                    <option value="unpaid">Chưa thanh toán</option>
-                  </select>
-                </div>
-                <div class="col">
-                  <select class="form-select filter-select" id="roomTypeFilter">
-                    <option value="">Tất cả loại phòng</option>
-                    <option value="single">Phòng đơn</option>
-                    <option value="double">Phòng đôi</option>
-                  </select>
-                </div>
-                <div class="col-auto">
-                  <button class="btn btn-search" onclick="performSearch()">
-                    <i class="fas fa-search me-2"></i>Tìm kiếm
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Table Section -->
-        <div class="table-container">
-          <div class="table-responsive">
-            <table class="table custom-table" id="paymentsTable">
-              <thead>
-                <tr>
-                  <th>
-                    <i class="fas fa-building me-2"></i>Khu trọ
-                  </th>
-                  <th>
-                    <i class="fas fa-door-open me-2"></i>Phòng
-                  </th>
-                  <th>
-                    <i class="fas fa-user me-2"></i>Người thuê
-                  </th>
-                  <th>
-                    <i class="fas fa-calendar me-2"></i>Tháng
-                  </th>
-                  <th>
-                    <i class="fas fa-info-circle me-2"></i>Trạng thái
-                  </th>
-                  <th>
-                    <i class="fas fa-cogs me-2"></i>Hành động
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Khu A</strong></td>
-                  <td>
-                    <span class="badge bg-primary">PB01</span>
-                  </td>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                        <i class="fas fa-user text-white"></i>
-                      </div>
-                      <strong>Nguyễn Văn A</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
-                    06/2025
-                  </td>
-                  <td>
-                    <span class="status-badge status-unpaid">
-                      <i class="fas fa-exclamation-triangle me-1"></i>
-                      Chưa thanh toán
-                    </span>
-                  </td>
-                  <td>
-                    <a href="#" class="action-link" onclick="showInvoiceModal('PB01', 'Nguyễn Văn A', '06/2025', 'unpaid')">
-                      <i class="fas fa-eye"></i>
-                      Xem chi tiết
-                    </a>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Khu C</strong></td>
-                  <td>
-                    <span class="badge bg-primary">PB05</span>
-                  </td>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                        <i class="fas fa-user text-white"></i>
-                      </div>
-                      <strong>Hồ Bá B</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
-                    06/2025
-                  </td>
-                  <td>
-                    <span class="status-badge status-unpaid">
-                      <i class="fas fa-exclamation-triangle me-1"></i>
-                      Chưa thanh toán
-                    </span>
-                  </td>
-                  <td>
-                    <a href="#" class="action-link" onclick="showInvoiceModal('PB05', 'Hồ Bá B', '06/2025', 'unpaid')">
-                      <i class="fas fa-eye"></i>
-                      Xem chi tiết
-                    </a>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Khu A</strong></td>
-                  <td>
-                    <span class="badge bg-primary">PB03</span>
-                  </td>
-                  <td>
-                    <div class="d-flex align-items-center">
-                      <div class="bg-success rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 35px; height: 35px;">
-                        <i class="fas fa-user text-white"></i>
-                      </div>
-                      <strong>Trần Thị L</strong>
-                    </div>
-                  </td>
-                  <td>
-                    <i class="fas fa-calendar-alt me-1 text-muted"></i>
-                    06/2025
-                  </td>
-                  <td>
-                    <span class="status-badge status-paid">
-                      <i class="fas fa-check me-1"></i>
-                      Đã thanh toán
-                    </span>
-                  </td>
-                  <td>
-                    <a href="#" class="action-link" onclick="showInvoiceModal('PB03', 'Trần Thị L', '06/2025', 'paid')">
-                      <i class="fas fa-eye"></i>
-                      Xem chi tiết
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
   <!-- Invoice Modal -->
   <div class="modal fade" id="invoiceModal" tabindex="-1" aria-labelledby="invoiceModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -761,14 +913,111 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-            <i class="fas fa-times me-2"></i>Đóng
-          </button>
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
-          <button type="button" class="btn btn-success" onclick="downloadInvoice()">
-            <i class="fas fa-download me-2"></i>Tải xuống
+           <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
+            <i class="fas fa-trash me-2"></i>Xóa
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+            onclick="document.querySelector('.modal-backdrop').remove();">
+            <i class="fas fa-times me-2"></i>Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Invoice Modal -->
+  <div class="modal fade" id="createInvoiceModal" tabindex="-1" aria-labelledby="createInvoiceModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createInvoiceModalLabel">
+            <i class="fas fa-file-invoice-dollar"></i>
+            Tạo hóa đơn mới
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createInvoiceForm" th:action="@{/api/payments/create-form}" method="post">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="invoiceRoomSelect" class="form-label">Phòng</label>
+                <select class="form-select" id="invoiceRoomSelect" name="contractId" required>
+                  <option value="">Chọn phòng</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="invoiceMonthInput" class="form-label">Tháng/Năm</label>
+                <input type="month" class="form-control" id="invoiceMonthInput" name="month" value="2025-06" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="roomFeeInput" class="form-label">Tiền phòng (VNĐ)</label>
+                <input type="number" class="form-control" id="roomFeeInput" name="roomFee" required>
+              </div>
+              <div class="col-md-6">
+                <label for="wifiFeeInput" class="form-label">Tiền Wifi (VNĐ)</label>
+                <input type="number" class="form-control" id="wifiFeeInput" name="wifiFee" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="electricityPrevInput" class="form-label">Chỉ số điện cũ (kWh)</label>
+                <input type="number" class="form-control" id="electricityPrevInput" name="electricityPrev" required>
+              </div>
+              <div class="col-md-6">
+                <label for="electricityCurrInput" class="form-label">Chỉ số điện mới (kWh)</label>
+                <input type="number" class="form-control" id="electricityCurrInput" name="electricityCurr" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="electricityUnitPriceInput" class="form-label">Đơn giá điện (VNĐ/kWh)</label>
+                <input type="number" class="form-control" id="electricityUnitPriceInput" name="electricityUnitPrice"
+                  required>
+              </div>
+              <div class="col-md-6">
+                <label for="waterUnitPriceInput" class="form-label">Đơn giá nước (VNĐ/m³)</label>
+                <input type="number" class="form-control" id="waterUnitPriceInput" name="waterUnitPrice" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="waterPrevInput" class="form-label">Chỉ số nước cũ (m³)</label>
+                <input type="number" class="form-control" id="waterPrevInput" name="waterPrev" required>
+              </div>
+              <div class="col-md-6">
+                <label for="waterCurrInput" class="form-label">Chỉ số nước mới (m³)</label>
+                <input type="number" class="form-control" id="waterCurrInput" name="waterCurr" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="trashFeeInput" class="form-label">Tiền rác (VNĐ)</label>
+                <input type="number" class="form-control" id="trashFeeInput" name="trashFee" required>
+              </div>
+              <div class="col-md-6">
+                <label for="otherFeeInput" class="form-label">Phí khác (VNĐ)</label>
+                <input type="number" class="form-control" id="otherFeeInput" name="otherFee">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="notesInput" class="form-label">Ghi chú</label>
+              <textarea class="form-control" id="notesInput" name="notes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          
+          <button type="button" class="btn btn-primary" onclick="createNewInvoice()">
+            <i class="fas fa-plus me-2"></i>Tạo hóa đơn
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="removeModalBackdrop()">
+            <i class="fas fa-times me-2"></i>Hủy
           </button>
         </div>
       </div>
@@ -777,127 +1026,7 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-  
-  <script>
-    // Toast functions
-    function showToast(type, message) {
-      const toastElement = document.getElementById(type + 'Toast');
-      const messageElement = toastElement.querySelector('.toast-message');
-      messageElement.textContent = message;
-      
-      const toast = new bootstrap.Toast(toastElement, {
-        delay: 3000
-      });
-      toast.show();
-    }
-
-    // Search functionality
-    function performSearch() {
-      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-      const statusFilter = document.getElementById('statusFilter').value;
-      const roomTypeFilter = document.getElementById('roomTypeFilter').value;
-      const table = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
-      const rows = table.getElementsByTagName('tr');
-      let visibleRows = 0;
-
-      for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        const area = cells[0].textContent.toLowerCase();
-        const room = cells[1].textContent.toLowerCase();
-        const tenant = cells[2].textContent.toLowerCase();
-        const month = cells[3].textContent.toLowerCase();
-        const status = cells[4].textContent.toLowerCase();
-
-        const matchesSearch = searchTerm === '' || area.includes(searchTerm) || room.includes(searchTerm) || tenant.includes(searchTerm) || month.includes(searchTerm);
-        const matchesStatus = statusFilter === '' || (statusFilter === 'paid' && status.includes('đã thanh toán')) || (statusFilter === 'unpaid' && status.includes('chưa thanh toán'));
-        const matchesRoomType = roomTypeFilter === '' || (roomTypeFilter === 'single' && room.includes('PB0')) || (roomTypeFilter === 'double' && room.includes('PB1'));
-
-        if (matchesSearch && matchesStatus && matchesRoomType) {
-          rows[i].style.display = '';
-          visibleRows++;
-        } else {
-          rows[i].style.display = 'none';
-        }
-      }
-
-      
-    }
-
-    // Show Invoice Modal
-    function showInvoiceModal(room, tenant, month, status) {
-      document.getElementById('invoiceRoom').textContent = room;
-      document.getElementById('invoiceTenant').textContent = tenant;
-      document.getElementById('invoiceMonth').textContent = month;
-      document.getElementById('invoiceStatus').innerHTML = status === 'paid' 
-        ? `<span class="status-badge status-paid"><i class="fas fa-check me-1"></i>Đã thanh toán</span>` 
-        : `<span class="status-badge status-unpaid"><i class="fas fa-exclamation-triangle me-1"></i>Chưa thanh toán</span>`;
-      document.getElementById('dueDate').textContent = '10/06/2025'; // Static for now, can be dynamic
-
-      // Load invoice data (static for now, replace with API call in production)
-      const invoiceData = {
-        'PB01': { roomFee: '2,500,000 VNĐ', electricityUsage: '50kWh', electricityFee: '750,000 VNĐ', waterUsage: '10 m³', waterFee: '100,000 VNĐ', trashFee: '30,000 VNĐ', wifiFee: '0 VNĐ', total: '3,380,000 VNĐ' },
-        'PB03': { roomFee: '2,500,000 VNĐ', electricityUsage: '40kWh', electricityFee: '600,000 VNĐ', waterUsage: '8 m³', waterFee: '80,000 VNĐ', trashFee: '30,000 VNĐ', wifiFee: '0 VNĐ', total: '3,210,000 VNĐ' },
-        'PB05': { roomFee: '2,800,000 VNĐ', electricityUsage: '60kWh', electricityFee: '900,000 VNĐ', waterUsage: '12 m³', waterFee: '120,000 VNĐ', trashFee: '30,000 VNĐ', wifiFee: '0 VNĐ', total: '3,850,000 VNĐ' }
-      };
-
-      const data = invoiceData[room] || invoiceData['PB01'];
-      document.getElementById('roomFee').textContent = data.roomFee;
-      document.getElementById('electricityUsage').textContent = `(${data.electricityUsage})`;
-      document.getElementById('electricityFee').textContent = data.electricityFee;
-      document.getElementById('waterUsage').textContent = `(${data.waterUsage})`;
-      document.getElementById('waterFee').textContent = data.waterFee;
-      document.getElementById('trashFee').textContent = data.trashFee;
-      document.getElementById('wifiFee').textContent = data.wifiFee;
-      document.getElementById('totalAmount').textContent = data.total;
-
-      const modal = new bootstrap.Modal(document.getElementById('invoiceModal'));
-      modal.show();
-
-      // Disable "Đánh dấu đã thanh toán" button if already paid
-      const markPaidBtn = document.querySelector('.modal-footer .btn-primary');
-      markPaidBtn.disabled = status === 'paid';
-    }
-
-    // Mark as Paid
-    function markAsPaid() {
-      const room = document.getElementById('invoiceRoom').textContent;
-      const statusElement = document.getElementById('invoiceStatus');
-      const table = document.getElementById('paymentsTable').getElementsByTagName('tbody')[0];
-      const rows = table.getElementsByTagName('tr');
-      const modal = bootstrap.Modal.getInstance(document.getElementById('invoiceModal'));
-      const markPaidBtn = document.querySelector('.modal-footer .btn-primary');
-
-      statusElement.innerHTML = `<span class="status-badge status-paid"><i class="fas fa-check me-1"></i>Đã thanh toán</span>`;
-      markPaidBtn.disabled = true;
-
-      // Update table row
-      for (let i = 0; i < rows.length; i++) {
-        const cells = rows[i].getElementsByTagName('td');
-        if (cells[1].textContent.includes(room)) {
-          cells[4].innerHTML = `<span class="status-badge status-paid"><i class="fas fa-check me-1"></i>Đã thanh toán</span>`;
-        }
-      }
-
-      // Update stats cards
-      let paidCount = parseInt(document.querySelector('.stats-number.text-success').textContent);
-      let unpaidCount = parseInt(document.querySelector('.stats-number.text-danger').textContent);
-      document.querySelector('.stats-number.text-success').textContent = paidCount + 1;
-      document.querySelector('.stats-number.text-danger').textContent = unpaidCount - 1;
-
-      showToast('success', 'Đã đánh dấu thanh toán thành công!');
-      modal.hide();
-    }
-
-    // Download Invoice (Placeholder)
-    function downloadInvoice() {
-      showToast('info', 'Tính năng tải xuống đang được phát triển!');
-      // In production, implement PDF generation using jsPDF or similar
-    }
-
-    // Event Listeners
-    document.getElementById('searchInput').addEventListener('input', performSearch);
-    document.getElementById('statusFilter').addEventListener('change', performSearch);
-    document.getElementById('roomTypeFilter').addEventListener('change', performSearch);
-  </script>
+  <script th:src="@{/js/payment-management.js}"></script>
 </body>
+
 </html>

@@ -256,11 +256,11 @@ function initializeFavoriteButton() {
         if (icon.classList.contains('fas')) {
             // Remove from favorites
             icon.className = 'far fa-heart';
-            showNotification('Đã bỏ khỏi danh sách yêu thích', 'info');
+          
         } else {
             // Add to favorites
             icon.className = 'fas fa-heart';
-            showNotification('Đã thêm vào danh sách yêu thích', 'success');
+           
         }
     });
 }

@@ -139,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
       '/chu-tro/danh-gia': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/profile-host': { sidebar: '.nav-sidebar:has(.fa-user-circle)' },
       '/chu-tro/hop-dong': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
+      '/api/contracts/form': { sidebar: '.nav-sidebar:has(.fa-file-signature)' },
       '/chu-tro/chi-tiet-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
       '/chu-tro/sua-bai-dang': { sidebar: '.nav-sidebar:has(.fa-file-alt)' },
 

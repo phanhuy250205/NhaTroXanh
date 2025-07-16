@@ -137,12 +137,17 @@ document.addEventListener("DOMContentLoaded", () => {
                         verificationModal.dataset.email = emailValue; // Lưu email để dùng cho việc gửi lại OTP
                     }
                 } else {
-                    // THẤT BẠI: Đọc và hiển thị lỗi từ server
-                    return response.text().then(text => {
-                        // Ném lỗi để khối .catch() có thể bắt được
-                        throw new Error(text || "Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
-                    });
-                }
+    return response.text().then(text => {
+        let message = "Có lỗi xảy ra";
+        try {
+            const json = JSON.parse(text);
+            message = Object.values(json).join('\n');
+        } catch (e) {
+            message = text;
+        }
+        throw new Error(message);
+    });
+}
             })
             .catch(error => {
                 // Hiển thị thông báo lỗi cho người dùng

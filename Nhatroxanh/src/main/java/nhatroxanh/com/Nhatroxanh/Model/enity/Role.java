@@ -1,7 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 public enum Role {
-    ACTIVE,
+    ADMIN,
     STAFF,
     OWNER,
     CUSTOMER

@@ -71,10 +71,10 @@ public class RoomsServiceImpl implements RoomsService {
         return result;
     }
 
-    @Override
-    public List<Rooms> findByHostelId(Integer hostelId) {
-        return roomsRepository.findByHostel_HostelId(hostelId);
-    }
+    // @Override
+    // public List<Rooms> findByHostelId(Integer hostelId) {
+    //     return roomsRepository.findByHostel_HostelId(hostelId);
+    // }
 
     @Override
     public Rooms save(Rooms room) {
@@ -130,6 +130,11 @@ public class RoomsServiceImpl implements RoomsService {
 
         logger.info("Mapped room: {}", roomDto);
         return roomDto;
+    }
+
+    @Override
+    public List<Rooms> findByHostelId(Integer hostelId) {
+         return roomsRepository.findByHostel_HostelId(hostelId);
     }
 
 

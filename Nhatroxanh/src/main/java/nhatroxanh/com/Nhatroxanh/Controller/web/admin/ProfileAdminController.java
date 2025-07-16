@@ -20,14 +20,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import jakarta.validation.Valid;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.HostInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/admin/profile")
@@ -44,14 +44,28 @@ public class ProfileAdminController {
     @Autowired
     private FileUploadService fileUploadService;
 
+    @Autowired
+    private RoomsRepository roomsRepository;
+
     @GetMapping
     public String showProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         Users user = usersRepository.findById(currentUser.getUserId()).orElse(null);
+        if (user == null) {
+            return "redirect:/login?error";
+        }
+
+        long roomCount = roomsRepository.count(); // tổng số phòng trọ
+        long tenantCount = usersRepository.countByRole(Users.Role.CUSTOMER); // tổng số khách thuê
+
         model.addAttribute("user", user);
+        model.addAttribute("roomCount", roomCount);
+        model.addAttribute("tenantCount", tenantCount);
+
         return "admin/profile";
     }
 
     @PostMapping("/update")
+    @Transactional
     public String updateProfile(
             @RequestParam("fullname") String fullname,
             @RequestParam("email") String email,
@@ -71,39 +85,43 @@ public class ProfileAdminController {
             Users user = usersRepository.findById(currentUser.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+            // Lưu bản sao dữ liệu gốc để sử dụng khi có lỗi
+            Users originalUser = usersRepository.findById(currentUser.getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
             // Validation
             if (fullname == null || fullname.trim().isEmpty()) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Họ tên không được để trống");
                 return "admin/profile";
             }
             if (fullname.length() < 2 || fullname.length() > 100) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Họ tên phải từ 2 đến 100 ký tự");
                 return "admin/profile";
             }
             if (email == null || email.trim().isEmpty()) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Email không được để trống");
                 return "admin/profile";
             }
             if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Email không đúng định dạng");
                 return "admin/profile";
             }
             if (phone == null || phone.trim().isEmpty()) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Số điện thoại không được để trống");
                 return "admin/profile";
             }
             if (!phone.matches("^0[0-9]{9}$")) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0");
                 return "admin/profile";
             }
             if (cccdNumber != null && !cccdNumber.trim().isEmpty() && !cccdNumber.matches("^[0-9]{12}$")) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "CCCD phải có đúng 12 chữ số");
                 return "admin/profile";
             }
@@ -111,25 +129,45 @@ public class ProfileAdminController {
                 LocalDate today = LocalDate.now();
                 int age = today.getYear() - birthday.getYear();
                 if (age < 18 || age > 65) {
-                    model.addAttribute("user", user);
+                    model.addAttribute("user", originalUser);
                     model.addAttribute("errorMessage", "Tuổi phải từ 18 đến 65");
                     return "admin/profile";
                 }
             }
             if (issueDate != null && birthday != null && issueDate.isBefore(birthday)) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Ngày cấp CCCD phải sau ngày sinh");
                 return "admin/profile";
             }
             if (issueDate != null && issueDate.isAfter(LocalDate.now())) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Ngày cấp CCCD không được là tương lai");
                 return "admin/profile";
             }
             if (issuePlace != null && !issuePlace.trim().isEmpty() && issuePlace.trim().length() < 2) {
-                model.addAttribute("user", user);
+                model.addAttribute("user", originalUser);
                 model.addAttribute("errorMessage", "Nơi cấp CCCD phải có ít nhất 2 ký tự");
                 return "admin/profile";
+            }
+
+            // Kiểm tra trùng email
+            if (email != null && !email.trim().isEmpty()) {
+                Optional<Users> existingEmailUser = usersRepository.findByEmail(email.trim());
+                if (existingEmailUser.isPresent() && !existingEmailUser.get().getUserId().equals(user.getUserId())) {
+                    model.addAttribute("user", originalUser);
+                    model.addAttribute("errorMessage", "Email đã được sử dụng bởi tài khoản khác.");
+                    return "admin/profile";
+                }
+            }
+
+            // Kiểm tra trùng số điện thoại
+            if (phone != null && !phone.trim().isEmpty()) {
+                Optional<Users> existingPhoneUser = usersRepository.findByPhone(phone.trim());
+                if (existingPhoneUser.isPresent() && !existingPhoneUser.get().getUserId().equals(user.getUserId())) {
+                    model.addAttribute("user", originalUser);
+                    model.addAttribute("errorMessage", "Số điện thoại đã được sử dụng bởi tài khoản khác.");
+                    return "admin/profile";
+                }
             }
 
             // Xử lý upload avatar
@@ -138,13 +176,13 @@ public class ProfileAdminController {
                     String contentType = avatarFile.getContentType();
                     if (contentType == null || !contentType.startsWith("image/")) {
                         model.addAttribute("errorMessage", "Chỉ được upload file ảnh");
-                        model.addAttribute("user", user);
+                        model.addAttribute("user", originalUser);
                         return "admin/profile";
                     }
 
                     if (avatarFile.getSize() > 5 * 1024 * 1024) {
                         model.addAttribute("errorMessage", "Kích thước file không được vượt quá 5MB");
-                        model.addAttribute("user", user);
+                        model.addAttribute("user", originalUser);
                         return "admin/profile";
                     }
 
@@ -159,7 +197,7 @@ public class ProfileAdminController {
 
                 } catch (IOException e) {
                     model.addAttribute("errorMessage", "Không thể upload ảnh đại diện: " + e.getMessage());
-                    model.addAttribute("user", user);
+                    model.addAttribute("user", originalUser);
                     return "admin/profile";
                 }
             }
@@ -180,7 +218,7 @@ public class ProfileAdminController {
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
-                        model.addAttribute("user", user);
+                        model.addAttribute("user", originalUser);
                         model.addAttribute("errorMessage", "Số CCCD đã được sử dụng bởi tài khoản khác.");
                         return "admin/profile";
                     }

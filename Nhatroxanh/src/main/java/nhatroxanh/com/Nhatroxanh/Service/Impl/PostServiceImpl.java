@@ -420,4 +420,22 @@ public class PostServiceImpl implements PostService {
         post.setStatus(false);
         postRepository.save(post);
     }
+
+    @Override
+    public Page<Post> getFilteredPostsByApprovalStatus(
+            ApprovalStatus approvalStatus,
+            String type,
+            String search,
+            Pageable pageable) {
+
+        if (type != null && type.trim().isEmpty()) {
+            type = null;
+        }
+        if (search != null && search.trim().isEmpty()) {
+            search = null;
+        }
+
+        return postRepository.findFilteredPosts(approvalStatus, type, search, pageable);
+    }
+
 }

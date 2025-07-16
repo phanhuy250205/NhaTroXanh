@@ -380,6 +380,118 @@
         margin-left: 0;
       }
     }
+
+    .custom-toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1055;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .custom-toast {
+      display: flex;
+      align-items: center;
+      background-color: #e6f7f0;
+      color: #1a2e05;
+      padding: 12px 16px;
+      border-left: 5px solid #10b981;
+      border-radius: 10px;
+      min-width: 320px;
+      max-width: 400px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      font-size: 15px;
+      position: relative;
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .custom-toast.error {
+      background-color: #fff0f0;
+      border-left-color: #ef4444;
+      color: #7f1d1d;
+    }
+
+    .toast-icon {
+      margin-right: 10px;
+      font-size: 18px;
+      color: #10b981;
+    }
+
+    .custom-toast.error .toast-icon {
+      color: #ef4444;
+    }
+
+    .toast-message {
+      flex: 1;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      font-size: 18px;
+      color: #999;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .toast-close:hover {
+      color: #333;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .custom-tab {
+      border-bottom: none;
+      display: flex;
+      gap: 1rem;
+      background: #f4f8ff;
+      padding: 10px 15px;
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      justify-content: start;
+    }
+
+    .custom-tab .nav-link {
+      border: none;
+      padding: 10px 20px;
+      font-weight: 500;
+      color: #555;
+      background-color: transparent;
+      border-radius: 20px;
+      transition: all 0.2s ease;
+    }
+
+    .custom-tab .nav-link:hover {
+      background-color: #e0ebff;
+      color: #0056b3;
+    }
+
+    .custom-tab .nav-link.active {
+      background-color: #0d6efd;
+      color: #fff;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    @media (max-width: 576px) {
+      .custom-tab {
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+    }
   </style>
 </head>
 
@@ -393,7 +505,18 @@
         Quản lý đánh giá theo khu trọ
       </h1>
     </div>
-
+    <div class="custom-toast-container">
+      <div th:if="${successMessage}" class="custom-toast success">
+        <i class="toast-icon fas fa-check-circle"></i>
+        <span class="toast-message" th:text="${successMessage}"></span>
+        <button class="toast-close" aria-label="Đóng">×</button>
+      </div>
+      <div th:if="${errorMessage}" class="custom-toast error">
+        <i class="toast-icon fas fa-exclamation-circle"></i>
+        <span class="toast-message" th:text="${errorMessage}"></span>
+        <button class="toast-close" aria-label="Đóng">×</button>
+      </div>
+    </div>
     <!-- Statistics Cards -->
     <div class="row mb-4">
       <div class="col-md-3 mb-3">
@@ -401,7 +524,7 @@
           <div class="stats-icon" style="background: linear-gradient(135deg, var(--primary-color), #3b82f6);">
             <i class="fas fa-building"></i>
           </div>
-          <div class="stats-number">8</div>
+          <div class="stats-number" th:text="${totalHostels}">8</div>
           <div class="stats-label">Khu trọ</div>
         </div>
       </div>
@@ -410,7 +533,7 @@
           <div class="stats-icon" style="background: linear-gradient(135deg, var(--success-color), #22c55e);">
             <i class="fas fa-comments"></i>
           </div>
-          <div class="stats-number">47</div>
+          <div class="stats-number" th:text="${totalReviews}">47</div>
           <div class="stats-label">Tổng đánh giá</div>
         </div>
       </div>
@@ -419,7 +542,7 @@
           <div class="stats-icon" style="background: linear-gradient(135deg, var(--warning-color), #fbbf24);">
             <i class="fas fa-star"></i>
           </div>
-          <div class="stats-number">4.6</div>
+          <div class="stats-number" th:text="${#numbers.formatDecimal(averageRating, 1, 1)}">4.6</div>
           <div class="stats-label">Điểm trung bình</div>
         </div>
       </div>
@@ -428,231 +551,197 @@
           <div class="stats-icon" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
             <i class="fas fa-trophy"></i>
           </div>
-          <div class="stats-number">23</div>
+          <div class="stats-number" th:text="${fiveStarCount}">23</div>
           <div class="stats-label">5 sao</div>
         </div>
       </div>
     </div>
+    <form method="get" th:action="@{/chu-tro/danh-gia}" class="d-flex gap-3 mb-3">
+      <input type="text" name="keyword" class="form-control w-25" placeholder="🔍 Tìm khu trọ..."
+        th:value="${keyword}" />
 
-    <!-- Filter Section -->
-    <div class="filter-section">
-      <div class="filter-title">
-        <i class="fas fa-filter"></i>
-        Bộ lọc tìm kiếm
-      </div>
-      <div class="d-flex gap-3">
-        <div class="w-25">
-          <input type="text" class="form-control" placeholder="🔍 Tìm khu trọ...">
-        </div>
-        <div class="w-25">
-          <select class="form-select">
-            <option>⭐ Tất cả số sao</option>
-            <option>⭐⭐⭐⭐⭐ 5 sao</option>
-            <option>⭐⭐⭐⭐ 4 sao</option>
-            <option>⭐⭐⭐ 3 sao</option>
-            <option>⭐⭐ 2 sao</option>
-            <option>⭐ 1 sao</option>
-          </select>
-        </div>
-        <div class="w-25">
-          <select class="form-select">
-            <option>📅 Tất cả thời gian</option>
-            <option>Tuần này</option>
-            <option>Tháng này</option>
-            <option>3 tháng gần đây</option>
-          </select>
-        </div>
-        <div class="w-25">
-          <button class="btn btn-primary w-100">
-            <i class="fas fa-search me-2"></i>Tìm kiếm
-          </button>
-        </div>
-      </div>
-    </div>
+      <!-- <select name="time" class="form-select w-25">
+        <option th:value="">📅 Mặc định</option>
+        <option th:value="newest" th:selected="${time == 'newest'}">Mới nhất</option>
+        <option th:value="oldest" th:selected="${time == 'oldest'}">Cũ nhất</option>
+      </select> -->
 
-    <!-- Accordion khu trọ -->
-    <div class="accordion" id="hostReviewAccordion">
-      <!-- Khu trọ A2 -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingA2">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseA2">
-            <i class="fas fa-building me-3"></i>
-            <div>
-              <strong>Khu trọ A2</strong>
-              <div class="text-muted" style="font-size: 0.9rem;">12 đánh giá • ⭐ 4.8/5</div>
-            </div>
-          </button>
-        </h2>
-        <div id="collapseA2" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
-          <div class="accordion-body">
-            <!-- Review Item 1 -->
-            <div class="review-item">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">A</div>
-                <div>
-                  <h6 class="reviewer-name">Nguyễn Văn A</h6>
-                  <small class="text-muted">Phòng A2-105 • 2 ngày trước</small>
+      <button type="submit" class="btn btn-primary w-25">
+        <i class="fas fa-search me-1"></i> Tìm kiếm
+      </button>
+    </form>
+
+    <div class="container mt-4">
+      <!-- Tabs -->
+      <ul class="nav custom-tab" id="reviewTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="room-tab" data-bs-toggle="tab" data-bs-target="#roomReviews" type="button"
+            role="tab">Đánh giá phòng</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="post-tab" data-bs-toggle="tab" data-bs-target="#postReviews" type="button"
+            role="tab">Đánh giá bài đăng</button>
+        </li>
+      </ul>
+
+      <div class="tab-content mt-3">
+        <!-- Tab 1: Đánh giá phòng -->
+        <div class="tab-pane fade show active" id="roomReviews" role="tabpanel">
+          <div class="accordion" id="hostReviewAccordion1">
+            <div th:each="hostel : ${hostels}" class="accordion-item">
+              <h2 class="accordion-header" th:id="'headingRoom' + ${hostel.hostelId}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  th:data-bs-target="'#collapseRoom' + ${hostel.hostelId}">
+                  <i class="fas fa-building me-3"></i>
+                  <div>
+                    <strong th:text="${hostel.name}">Khu trọ</strong>
+                    <div class="text-muted" style="font-size: 0.9rem;">
+                      <span th:text="${hostelRoomReviewCountMap[hostel.hostelId]}">0</span> đánh giá •
+                      ⭐ <span
+                        th:text="${#numbers.formatDecimal(hostelRoomAvgRatingMap[hostel.hostelId], 1, 1)}">0.0</span>/5
+                    </div>
+                  </div>
+                </button>
+              </h2>
+              <div th:id="'collapseRoom' + ${hostel.hostelId}" class="accordion-collapse collapse"
+                data-bs-parent="#hostReviewAccordion1">
+                <div class="accordion-body">
+                  <div th:if="${#lists.isEmpty(hostelRoomReviewsMap[hostel.hostelId])}">
+                    <div class="empty-state">
+                      <i class="fas fa-comments"></i>
+                      <h5>Chưa có đánh giá nào</h5>
+                      <p>Khu trọ này chưa có đánh giá phòng.</p>
+                    </div>
+                  </div>
+
+                  <!-- List đánh giá phòng -->
+                  <div th:each="review, stat : ${hostelRoomReviewsMap[hostel.hostelId]}"
+                    th:id="'reviewItemRoom' + ${hostel.hostelId} + '_' + ${stat.index}" class="review-item mb-3">
+                    <div class="reviewer-info d-flex align-items-start gap-3">
+                      <div class="reviewer-avatar rounded-circle bg-primary text-white text-center fw-bold"
+                        style="width: 40px; height: 40px; line-height: 40px;"
+                        th:text="${review.user.fullname.substring(0,1)}">A</div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-0" th:text="${review.user.fullname}">Nguyễn Văn A</h6>
+                        <small class="text-muted"
+                          th:text="'Phòng ' + ${review.room.namerooms} + ' • ' + ${#dates.format(review.createdAt, 'dd/MM/yyyy')}">Phòng
+                          A1 • 01/01/2024</small>
+                        <div class="review-rating mt-1" th:utext="${'⭐'.repeat(review.rating)}">⭐⭐⭐⭐</div>
+                      </div>
+                    </div>
+                    <div class="review-content mt-2 ps-5" th:text="${review.comment}">Nội dung đánh giá...</div>
+                    <div class="review-actions ps-5 mt-2">
+                      <button type="button" class="btn btn-outline-primary btn-sm btn-view-review"
+                        data-bs-toggle="modal" data-bs-target="#reviewDetailModal" th:attr="data-reviewer=${review.user.fullname},
+                             data-room=${'Phòng ' + review.room.namerooms + ', ' + hostel.name},
+                             data-rating=${review.rating},
+                             data-time=${#dates.format(review.createdAt, 'dd/MM/yyyy HH:mm')},
+                             data-comment=${review.comment}">
+                        <i class="fas fa-eye me-1"></i>Xem
+                      </button>
+                      <!-- Nút xóa trong danh sách đánh giá -->
+                      <form th:id="'deleteForm-' + ${review.reviewId}"
+                        th:action="@{/chu-tro/danh-gia/delete/{id}(id=${review.reviewId})}" method="post">
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                          th:onclick="'confirmDelete(' + ${review.reviewId} + ')'">
+                          <i class="fas fa-trash me-1"></i>Xóa
+                        </button>
+                      </form>
+
+                    </div>
+                  </div>
+
+                  <!-- Nút xem thêm -->
+                  <div class="ps-5 mt-3">
+                    <button type="button" class="btn btn-link btn-sm toggle-reviews-btn"
+                      th:data-hostel-id="${hostel.hostelId}" data-type="room">Xem thêm</button>
+                  </div>
                 </div>
-                <div class="review-rating">⭐⭐⭐⭐⭐</div>
-              </div>
-              <div class="review-content">
-                "Phòng sạch sẽ, chủ thân thiện, khu vực yên tĩnh. Tiện ích đầy đủ, giá cả hợp lý. Rất hài lòng với chất
-                lượng dịch vụ."
-              </div>
-              <div class="review-actions">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewDetailModal">
-                  <i class="fas fa-eye me-1"></i>Xem
-                </button>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
-              </div>
-            </div>
-
-            <!-- Review Item 2 -->
-            <div class="review-item">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">B</div>
-                <div>
-                  <h6 class="reviewer-name">Trần Thị B</h6>
-                  <small class="text-muted">Phòng A2-203 • 5 ngày trước</small>
-                </div>
-                <div class="review-rating">⭐⭐⭐⭐</div>
-              </div>
-              <div class="review-content">
-                "Vị trí thuận tiện, gần trường học. Phòng thoáng mát nhưng wifi hơi yếu. Nhìn chung ok."
-              </div>
-              <div class="review-actions">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewDetailModal">
-                  <i class="fas fa-eye me-1"></i>Xem
-                </button>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
-              </div>
-            </div>
-
-            <!-- Review Item 3 -->
-            <div class="review-item">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">C</div>
-                <div>
-                  <h6 class="reviewer-name">Lê Văn C</h6>
-                  <small class="text-muted">Phòng A2-101 • 1 tuần trước</small>
-                </div>
-                <div class="review-rating">⭐⭐⭐⭐⭐</div>
-              </div>
-              <div class="review-content">
-                "Tuyệt vời! Chủ rất chu đáo, phòng mới, sạch sẽ. An ninh tốt, có bảo vệ 24/7. Sẽ ở lâu dài."
-              </div>
-              <div class="review-actions">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewDetailModal">
-                  <i class="fas fa-eye me-1"></i>Xem
-                </button>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Khu trọ B1 -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingB1">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseB1">
-            <i class="fas fa-building me-3"></i>
-            <div>
-              <strong>Khu trọ B1</strong>
-              <div class="text-muted" style="font-size: 0.9rem;">8 đánh giá • ⭐ 4.3/5</div>
-            </div>
-          </button>
-        </h2>
-        <div id="collapseB1" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
-          <div class="accordion-body">
-            <!-- Review Item 1 -->
-            <div class="review-item">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">D</div>
-                <div>
-                  <h6 class="reviewer-name">Phạm Văn D</h6>
-                  <small class="text-muted">Phòng B1-301 • 3 ngày trước</small>
-                </div>
-                <div class="review-rating">⭐⭐⭐⭐</div>
-              </div>
-              <div class="review-content">
-                "Phòng ổn, giá hợp lý. Khu vực có nhiều tiện ích xung quanh. Chỉ có điều hơi ồn vào buổi tối."
-              </div>
-              <div class="review-actions">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewDetailModal">
-                  <i class="fas fa-eye me-1"></i>Xem
+        <!-- Tab 2: Đánh giá bài đăng -->
+        <div class="tab-pane fade" id="postReviews" role="tabpanel">
+          <div class="accordion" id="hostReviewAccordion2">
+            <div th:each="hostel : ${hostels}" class="accordion-item">
+              <h2 class="accordion-header" th:id="'headingPost' + ${hostel.hostelId}">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                  th:data-bs-target="'#collapsePost' + ${hostel.hostelId}">
+                  <i class="fas fa-building me-3"></i>
+                  <div>
+                    <strong th:text="${hostel.name}">Khu trọ</strong>
+                    <div class="text-muted" style="font-size: 0.9rem;">
+                      <span th:text="${hostelPostReviewCountMap[hostel.hostelId]}">0</span> đánh giá •
+                      ⭐ <span
+                        th:text="${#numbers.formatDecimal(hostelPostAvgRatingMap[hostel.hostelId], 1, 1)}">0.0</span>/5
+                    </div>
+                  </div>
                 </button>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
-              </div>
-            </div>
+              </h2>
+              <div th:id="'collapsePost' + ${hostel.hostelId}" class="accordion-collapse collapse"
+                data-bs-parent="#hostReviewAccordion2">
+                <div class="accordion-body">
+                  <div th:if="${#lists.isEmpty(hostelPostReviewsMap[hostel.hostelId])}">
+                    <div class="empty-state">
+                      <i class="fas fa-comments"></i>
+                      <h5>Chưa có đánh giá nào</h5>
+                      <p>Khu trọ này chưa có đánh giá bài đăng.</p>
+                    </div>
+                  </div>
 
-            <!-- Review Item 2 -->
-            <div class="review-item">
-              <div class="reviewer-info">
-                <div class="reviewer-avatar">E</div>
-                <div>
-                  <h6 class="reviewer-name">Nguyễn Thị E</h6>
-                  <small class="text-muted">Phòng B1-205 • 1 tuần trước</small>
+                  <!-- List đánh giá bài đăng -->
+                  <div th:each="review, stat : ${hostelPostReviewsMap[hostel.hostelId]}"
+                    th:id="'reviewItemPost' + ${hostel.hostelId} + '_' + ${stat.index}" class="review-item mb-3">
+                    <div class="reviewer-info d-flex align-items-start gap-3">
+                      <div class="reviewer-avatar rounded-circle bg-primary text-white text-center fw-bold"
+                        style="width: 40px; height: 40px; line-height: 40px;"
+                        th:text="${review.user.fullname.substring(0,1)}">A</div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-0" th:text="${review.user.fullname}">Nguyễn Văn A</h6>
+                        <small class="text-muted"
+                          th:text="'Bài đăng: ' + ${review.post.title} + ' • ' + ${#dates.format(review.createdAt, 'dd/MM/yyyy')}">Bài
+                          A • 01/01/2024</small>
+                        <div class="review-rating mt-1" th:utext="${'⭐'.repeat(review.rating)}">⭐⭐⭐⭐</div>
+                      </div>
+                    </div>
+                    <div class="review-content mt-2 ps-5" th:text="${review.comment}">Nội dung đánh giá...</div>
+                    <div class="review-actions ps-5 mt-2">
+                      <button type="button" class="btn btn-outline-primary btn-sm btn-view-review"
+                        data-bs-toggle="modal" data-bs-target="#reviewDetailModal" th:attr="data-reviewer=${review.user.fullname},
+                             data-room=${'Bài đăng: ' + review.post.title + ', ' + hostel.name},
+                             data-rating=${review.rating},
+                             data-time=${#dates.format(review.createdAt, 'dd/MM/yyyy HH:mm')},
+                             data-comment=${review.comment}">
+                        <i class="fas fa-eye me-1"></i>Xem
+                      </button>
+                      <!-- Nút xóa trong danh sách đánh giá -->
+                      <form th:id="'deleteForm-' + ${review.reviewId}"
+                        th:action="@{/chu-tro/danh-gia/delete/{id}(id=${review.reviewId})}" method="post">
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                          th:onclick="'confirmDelete(' + ${review.reviewId} + ')'">
+                          <i class="fas fa-trash me-1"></i>Xóa
+                        </button>
+                      </form>
+
+                    </div>
+                  </div>
+
+                  <!-- Nút xem thêm -->
+                  <div class="ps-5 mt-3">
+                    <button type="button" class="btn btn-link btn-sm toggle-reviews-btn"
+                      th:data-hostel-id="${hostel.hostelId}" data-type="post">Xem thêm</button>
+                  </div>
                 </div>
-                <div class="review-rating">⭐⭐⭐⭐⭐</div>
-              </div>
-              <div class="review-content">
-                "Rất hài lòng! Chủ nhiệt tình, phòng đẹp, đầy đủ tiện nghi. Giá cả phải chăng."
-              </div>
-              <div class="review-actions">
-                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
-                  data-bs-target="#reviewDetailModal">
-                  <i class="fas fa-eye me-1"></i>Xem
-                </button>
-                <button class="btn btn-outline-danger btn-sm">
-                  <i class="fas fa-trash me-1"></i>Xóa
-                </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Khu trọ C3 -->
-      <div class="accordion-item">
-        <h2 class="accordion-header" id="headingC3">
-          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseC3">
-            <i class="fas fa-building me-3"></i>
-            <div>
-              <strong>Khu trọ C3</strong>
-              <div class="text-muted" style="font-size: 0.9rem;">15 đánh giá • ⭐ 4.7/5</div>
-            </div>
-          </button>
-        </h2>
-        <div id="collapseC3" class="accordion-collapse collapse" data-bs-parent="#hostReviewAccordion">
-          <div class="accordion-body">
-            <div class="empty-state">
-              <i class="fas fa-comments"></i>
-              <h5>Chưa có đánh giá nào</h5>
-              <p>Khu trọ này chưa có đánh giá từ khách thuê.</p>
-            </div>
-          </div>
-        </div>
+        </div> <!-- End Post Tab -->
       </div>
     </div>
   </div>
 
-  <!-- Modal xem chi tiết -->
   <div class="modal fade" id="reviewDetailModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -695,8 +784,113 @@
       </div>
     </div>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const modal = document.getElementById("reviewDetailModal");
+
+      const reviewerEl = modal.querySelectorAll(".modal-info-value")[0];
+      const roomEl = modal.querySelectorAll(".modal-info-value")[1];
+      const ratingEl = modal.querySelectorAll(".modal-info-value")[2];
+      const timeEl = modal.querySelectorAll(".modal-info-value")[3];
+      const contentEl = modal.querySelectorAll(".modal-info-value")[4];
+
+      document.querySelectorAll(".btn-view-review").forEach(btn => {
+        btn.addEventListener("click", function () {
+          const reviewer = this.getAttribute("data-reviewer");
+          const room = this.getAttribute("data-room");
+          const rating = parseInt(this.getAttribute("data-rating"));
+          const time = this.getAttribute("data-time");
+          const comment = this.getAttribute("data-comment");
+
+          reviewerEl.textContent = reviewer;
+          roomEl.textContent = room;
+          ratingEl.innerHTML = '⭐'.repeat(rating) + ` (${rating}/5)`;
+          timeEl.textContent = time;
+          contentEl.textContent = comment;
+        });
+      });
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('.toast-close').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const toast = btn.closest('.custom-toast');
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 300);
+        });
+      });
+      setTimeout(() => {
+        document.querySelectorAll('.custom-toast').forEach(toast => {
+          toast.style.opacity = '0';
+          setTimeout(() => toast.remove(), 300);
+        });
+      }, 3000);
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const limit = 5;
+
+      ['room', 'post'].forEach(type => {
+        const prefix = type === 'room' ? 'reviewItemRoom' : 'reviewItemPost';
+        const items = document.querySelectorAll(`[id^="${prefix}"]`);
+        const groups = {};
+
+        items.forEach(item => {
+          const match = item.id.match(/^reviewItem(Room|Post)(\d+)_([\d]+)$/);
+          if (!match) return;
+          const hostelId = match[2];
+          const index = parseInt(match[3]);
+          const groupKey = `${type}_${hostelId}`;
+          if (!groups[groupKey]) groups[groupKey] = [];
+          groups[groupKey].push({ item, index });
+        });
+
+        for (const group in groups) {
+          groups[group].forEach(({ item, index }) => {
+            if (index >= limit) {
+              item.style.display = 'none';
+            }
+          });
+        }
+      });
+
+      document.querySelectorAll(".toggle-reviews-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const hostelId = button.getAttribute("data-hostel-id");
+          const type = button.getAttribute("data-type");
+          const prefix = type === 'room' ? 'reviewItemRoom' : 'reviewItemPost';
+
+          const reviewItems = Array.from(document.querySelectorAll(`[id^="${prefix}${hostelId}_"]`));
+          const isExpanded = button.dataset.expanded === 'true';
+
+          reviewItems.forEach((item, i) => {
+            item.style.display = (isExpanded && i >= limit) ? 'none' : 'block';
+          });
+
+          button.textContent = isExpanded ? 'Xem thêm' : 'Thu gọn';
+          button.dataset.expanded = (!isExpanded).toString();
+        });
+      });
+    });
+    function confirmDelete(reviewId) {
+      Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        text: "Xóa đánh giá này không thể hoàn tác!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById('deleteForm-' + reviewId).submit();
+        }
+      });
+    }
+  </script>
+
 </body>
 
 </html>

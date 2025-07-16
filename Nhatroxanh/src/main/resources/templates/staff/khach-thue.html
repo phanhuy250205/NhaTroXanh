@@ -561,21 +561,39 @@
                                 <td>
                                     <span class="area-badge-staff">
                                         <i class="fas fa-map-marker-alt"></i>
-                                        <span th:text="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
-            ? customer.rentedContracts[0].room.hostel.name + ' - Phòng ' + customer.rentedContracts[0].room.namerooms 
-            : 'Chưa phân phòng'}"></span>
+                                    </span>
+                                    <ul th:if="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty()}"
+                                        th:each="contract : ${customer.rentedContracts}"
+                                        class="list-unstyled ms-3 mb-0">
+                                        <li>
+                                            <i class="fas fa-bed text-muted me-1"></i>
+                                            <span
+                                                th:text="${contract.room.hostel.name + ' - Phòng ' + contract.room.namerooms}"></span>
+                                        </li>
+                                    </ul>
+                                    <span
+                                        th:if="${customer.rentedContracts == null or customer.rentedContracts.isEmpty()}">
+                                        Chưa phân phòng
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge-staff" th:classappend="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
-            ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'badge-success-staff' : 'badge-danger-staff') 
-            : 'badge-warning-staff'}">
-                                        <i class="fas" th:classappend="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
-                ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-exclamation-triangle') 
-                : 'fa-clock'}"></i>
-                                        <span th:text="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty() 
-            ? (customer.rentedContracts[0].status.name() == 'ACTIVE' ? 'Đang thuê' : 'Ngừng thuê') 
-            : 'Chưa thuê'}"></span>
+                                    <ul th:if="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty()}"
+                                        class="list-unstyled mb-0">
+                                        <li th:each="contract : ${customer.rentedContracts}">
+                                            <span class="badge-staff"
+                                                th:classappend="${contract.status.name() == 'ACTIVE' ? 'badge-success-staff' : 'badge-danger-staff'}">
+                                                <i class="fas"
+                                                    th:classappend="${contract.status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                                                <span
+                                                    th:text="${contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Ngừng thuê'}"></span>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                    <span
+                                        th:if="${customer.rentedContracts == null or customer.rentedContracts.isEmpty()}">
+                                        <span class="badge-staff badge-warning-staff">
+                                            <i class="fas fa-clock"></i> Chưa thuê
+                                        </span>
                                     </span>
                                 </td>
                                 <td>

@@ -3,12 +3,22 @@ package nhatroxanh.com.Nhatroxanh.Model.enity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
-@Setter
+
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -25,6 +35,8 @@ import java.util.Objects;
 })
 // ✅ SỬA: Chỉ dùng userId làm key cho equals/hashCode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Data
+
 public class Users {
 
     @Id
@@ -72,6 +84,9 @@ public class Users {
     @Column(name = "address", length = 255)
     private String address;
 
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne
     @JoinColumn(name = "address_id")
     private Address addressEntity;
@@ -79,6 +94,7 @@ public class Users {
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
+
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
@@ -92,6 +108,8 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Vouchers> vouchers;
 
+
+    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }
