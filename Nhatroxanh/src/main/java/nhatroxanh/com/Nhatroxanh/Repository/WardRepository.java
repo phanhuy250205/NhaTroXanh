@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import nhatroxanh.com.Nhatroxanh.Model.enity.District;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,4 +14,8 @@ public interface WardRepository extends JpaRepository<Ward, Integer> {
     Optional<Ward> findByIdWithDetails(@Param("id") Integer id);
     List<Ward> findByDistrictId(Integer districtId);
     Optional<Ward> findByCode(String code);
+
+    Optional<Ward> findByName(String name);
+
+    Optional<Ward> findByNameAndDistrict(String name, District district);
 }
