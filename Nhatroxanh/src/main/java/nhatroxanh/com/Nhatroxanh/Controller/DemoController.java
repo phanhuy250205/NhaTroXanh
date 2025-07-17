@@ -131,4 +131,8 @@ public class DemoController {
     public String chutro() {
         return "host/infor-chutro";
     }
+    @GetMapping("/nap-tien")
+    public String napTien() {
+        return "host/nap-tien";
+    }
 }

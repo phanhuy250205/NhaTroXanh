@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/infor-chutro").permitAll()
+                        .requestMatchers("/nap-tien").permitAll()
                         .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
                                 "/uploads/**")
                         .permitAll()
