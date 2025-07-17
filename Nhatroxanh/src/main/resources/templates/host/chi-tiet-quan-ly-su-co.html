@@ -557,17 +557,6 @@
                                     th:text="${incident.description}" rows="6" disabled></textarea>
                             </div>
                         </div>
-                        <!-- <div class="row mt-4">
-                            <div class="col-12 text-end">
-                                <button type="submit" class="btn btn-success me-3">
-                                    <i class="fas fa-save me-2"></i>Lưu thay đổi
-                                </button>
-                                <a th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${page})}"
-                                    class="btn btn-secondary">
-                                    <i class="fas fa-times me-2"></i>Hủy bỏ
-                                </a>
-                            </div>
-                        </div> -->
                     </form>
                 </div>
             </div>
@@ -580,13 +569,27 @@
                 <div class="images-content-host">
                     <div class="d-flex flex-wrap">
                         <div th:each="img : ${incident.images}" class="image-placeholder-host">
-                            <span th:text="${img.title}">Ảnh khiếu nại</span>
-                            <img th:src="@{${img.url}}" th:alt="${img.title}" style="width: 150px; height: 100px;" />
+                            <span>Ảnh khiếu nại</span>
+                            <img th:src="@{${img.url}}" alt="" style="width: 150px; height: 100px;"
+                                th:attr="onclick=|openModalImage('${img.url}')|" />
                             <small style="margin-top: 0.5rem; opacity: 0.7;">Nhấn để xem</small>
                         </div>
-
                         <div th:if="${#lists.isEmpty(incident.images)}" class="text-center w-100">
                             Không có hình ảnh đính kèm.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal xem ảnh -->
+            <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalTitle">Xem ảnh</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" alt="" class="img-fluid rounded">
                         </div>
                     </div>
                 </div>
@@ -611,6 +614,11 @@
                 });
             }, 3000);
         });
+        function openModalImage(url) {
+            document.getElementById('modalImage').src = url;
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show();
+        }
     </script>
 </body>
 
