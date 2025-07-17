@@ -49,6 +49,9 @@ public class DashboardAdminService {
                 private long totalUsers; // Tổng số người dùng
                 private long totalContracts; // Tổng số hợp đồng
                 private long totalIncidents; // Tổng số khiếu nại/sự cố
+                private long activeContracts;
+                private long expiredContracts;
+                private long terminatedContracts;
                 private Map<String, Object> revenueChart; // Dữ liệu biểu đồ doanh thu
                 private Map<String, Long> occupancyChart; // Dữ liệu tỷ lệ lấp đầy phòng
                 private Map<String, Long> userGrowthChart; // Dữ liệu tăng trưởng người dùng
@@ -158,6 +161,30 @@ public class DashboardAdminService {
                 public void setComplaintsChart(Map<String, Long> complaintsChart) {
                         this.complaintsChart = complaintsChart;
                 }
+
+                public long getActiveContracts() {
+                        return activeContracts;
+                }
+
+                public void setActiveContracts(long activeContracts) {
+                        this.activeContracts = activeContracts;
+                }
+
+                public long getExpiredContracts() {
+                        return expiredContracts;
+                }
+
+                public void setExpiredContracts(long expiredContracts) {
+                        this.expiredContracts = expiredContracts;
+                }
+
+                public long getTerminatedContracts() {
+                        return terminatedContracts;
+                }
+
+                public void setTerminatedContracts(long terminatedContracts) {
+                        this.terminatedContracts = terminatedContracts;
+                }
         }
 
         // Lấy thống kê tổng quan
@@ -176,8 +203,16 @@ public class DashboardAdminService {
                 // 3. Tổng số người dùng
                 stats.setTotalUsers(usersRepository.count());
 
-                // 4. Tổng số hợp đồng
-                stats.setTotalContracts(contractsRepository.countByStatus(Contracts.Status.ACTIVE));
+                // 4. Hợp đồng theo từng trạng thái
+                stats.setActiveContracts(contractsRepository.countByStatus(Contracts.Status.ACTIVE));
+                stats.setExpiredContracts(contractsRepository.countByStatus(Contracts.Status.EXPIRED));
+                stats.setTerminatedContracts(contractsRepository.countByStatus(Contracts.Status.TERMINATED));
+
+                // Tổng số hợp đồng = tổng 3 trạng thái
+                stats.setTotalContracts(
+                                stats.getActiveContracts() +
+                                                stats.getExpiredContracts() +
+                                                stats.getTerminatedContracts());
 
                 // 5. Tổng số khiếu nại/sự cố
                 stats.setTotalIncidents(incidentReportsRepository.count());

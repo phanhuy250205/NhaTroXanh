@@ -116,6 +116,9 @@ public class HomeController {
             // 7. Tăng lượt xem
             postRepository.incrementViewCount(postId);
 
+            System.out.println(post.getDescription());
+
+
             return "guest/chi-tiet";
         } catch (Exception e) {
             log.error("Lỗi khi lấy chi tiết bài đăng {}: {}", postId, e.getMessage(), e);

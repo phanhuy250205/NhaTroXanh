@@ -29,7 +29,7 @@ public class Vouchers {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "code")
+    @Column(name = "code", unique = true, nullable = false)
     private String code;
 
     @ManyToOne

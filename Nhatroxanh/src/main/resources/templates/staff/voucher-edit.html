@@ -4,533 +4,456 @@
 <head th:replace="~{/layouts/head}" />
 
 <head>
-    <title>Câp nhật Voucher</title>
+    <title>Cập nhật Voucher</title>
     <style>
         :root {
-            --primary-color: #3e83cc;
-            --secondary-color: #6c757d;
-            --success-color: #22c55e;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --info-color: #3b82f6;
-            --light-color: #f8fafc;
-            --dark-color: #1e293b;
+            --primary: #6d28d9;
+            --primary-light: #8b5cf6;
+            --secondary: #94a3b8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            width: 350px;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-        .notification {
-            margin-bottom: 10px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            overflow: hidden;
-            border: none;
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, var(--success-color), #16a34a);
-            color: white;
-        }
-
-        .notification.error {
-            background: linear-gradient(135deg, var(--danger-color), #dc2626);
-            color: white;
-        }
-
-        .notification.warning {
-            background: linear-gradient(135deg, var(--warning-color), #d97706);
-            color: white;
-        }
-
-        .notification.info {
-            background: linear-gradient(135deg, var(--info-color), #2563eb);
-            color: white;
-        }
-
-        .notification-header {
-            padding: 1rem 1.25rem 0.5rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .notification-body {
-            padding: 0 1.25rem 1rem;
-            font-size: 0.9rem;
-            opacity: 0.95;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-
-        .notification-close:hover {
-            opacity: 1;
-        }
-
-        .page-header {
-            background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-        }
-
-        .page-title {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.75rem;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+            color: var(--text-primary);
+            min-height: 100vh;
             margin: 0;
+            padding: 0;
         }
 
-        .btn-create {
-            background: linear-gradient(135deg, var(--primary-color), #2563eb);
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            color: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
-        }
-
-        .btn-create:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
-            color: white;
-        }
-
-        /* Search and Filter Section */
-        .search-filter-section {
-            background: white;
-            border-radius: 16px;
-            padding: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-            margin-bottom: 2rem;
-        }
-
-        .search-input-group {
-            border-radius: 50px;
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-xl);
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
         }
 
-        .search-input-group .form-control {
-            border: none;
-            padding: 0.75rem 1.25rem;
-            font-size: 0.95rem;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
         }
 
-        .search-input-group .btn {
-            border: none;
-            padding: 0.75rem 1.5rem;
-            background: var(--primary-color);
-            color: white;
-            font-weight: 600;
-        }
-
-        .filter-select {
-            border-radius: 50px;
-            border: 2px solid #e5e7eb;
-            padding: 0.5rem 2.5rem 0.5rem 2.5rem;
-            font-size: 0.9rem;
-            background: white;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .filter-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
-        }
-
-        .filter-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--secondary-color);
-            z-index: 10;
-        }
-
-        /* Custom Tabs */
-        .custom-tabs {
-            border: none;
-            margin-bottom: 2rem;
-            background: white;
-            border-radius: 16px;
-            padding: 0.5rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-        .custom-tab {
-            border: none;
-            background: transparent;
-            color: var(--secondary-color);
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            margin-right: 0.5rem;
-        }
-
-        .custom-tab:hover {
-            background: rgba(62, 131, 204, 0.1);
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .custom-tab.active {
-            background: var(--primary-color);
-            color: white;
-            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
-        }
-
-        /* Voucher Cards */
-        .voucher-card {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
-            transition: all 0.4s ease;
-            overflow: hidden;
-            border: none;
+        /* Header Section */
+        .form-header {
+            text-align: center;
+            margin-bottom: 3rem;
             position: relative;
         }
 
-        .voucher-card:before {
+        .form-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .form-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .form-header::after {
             content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
+            display: block;
+            width: 80px;
             height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), #2563eb);
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            border-radius: 2px;
+            margin: 1.5rem auto 0;
         }
 
-        .voucher-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        /* Form Layout */
+        .form-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
         }
 
-        .voucher-card-body {
-            padding: 1.5rem;
+        @media (min-width: 1024px) {
+            .form-container {
+            }
         }
 
-        .voucher-title {
-            color: var(--primary-color);
-            font-weight: 700;
-            font-size: 1.25rem;
-            margin-bottom: 1rem;
+        /* Form Card */
+        .form-card {
+            padding: 2.5rem;
         }
 
-        .voucher-info {
-            margin-bottom: 0.75rem;
-            color: var(--secondary-color);
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
+        .form-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
-        .voucher-info i {
-            width: 20px;
-            color: var(--primary-color);
-            margin-right: 0.75rem;
-        }
-
-        .voucher-info-value {
-            color: var(--dark-color);
-            font-weight: 600;
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .status-active {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
-        }
-
-        .status-pending {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
-        }
-
-        .status-expired {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--secondary-color);
-        }
-
-        .status-inactive {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-        }
-
-        /* Action Buttons */
-        .action-btn {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            border: 2px solid;
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .action-btn-edit {
-            border-color: var(--info-color);
-            color: var(--info-color);
-        }
-
-        .action-btn-edit:hover {
-            background: var(--info-color);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .action-btn-delete {
-            border-color: var(--danger-color);
-            color: var(--danger-color);
-        }
-
-        .action-btn-delete:hover {
-            background: var(--danger-color);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .action-btn-approve {
-            border-color: var(--success-color);
-            color: var(--success-color);
-        }
-
-        .action-btn-approve:hover {
-            background: var(--success-color);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        .action-btn-reject {
-            border-color: var(--secondary-color);
-            color: var(--secondary-color);
-        }
-
-        .action-btn-reject:hover {
-            background: var(--secondary-color);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        /* Modal Styles */
-        .modal-content {
-            border: none;
-            border-radius: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-header {
-            border: none;
-            padding: 1.5rem 1.5rem 0;
-        }
-
-        .modal-title {
-            color: var(--primary-color);
-            font-weight: 700;
-        }
-
-        .modal-body {
-            padding: 1.5rem;
-        }
-
-        .form-section {
-            background: var(--light-color);
-            border-radius: 16px;
-            padding: 1.5rem;
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 2rem;
+            position: relative;
         }
 
         .form-label {
+            display: block;
             font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            transition: var(--transition);
         }
 
         .form-control,
         .form-select {
-            border: 2px solid #e5e7eb;
+            width: 100%;
+            padding: 1rem 1.25rem;
+            border: 2px solid #e2e8f0;
             border-radius: 12px;
-            transition: all 0.3s ease;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: white;
+            box-shadow: var(--shadow-sm);
         }
 
         .form-control:focus,
         .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(109, 40, 217, 0.1);
+            outline: none;
         }
 
-        /* Status Toggle Button */
-        .status-toggle-btn {
-            border: none;
-            border-radius: 12px;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
+        .form-control::placeholder {
+            color: #94a3b8;
+            opacity: 1;
+        }
+
+        textarea.form-control {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        /* Floating Labels */
+        .float-label-group {
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .float-label {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: var(--transition);
+            background: white;
+            padding: 0 0.5rem;
+            transform-origin: left center;
+        }
+
+        .form-control:focus+.float-label,
+        .form-control:not(:placeholder-shown)+.float-label {
+            transform: translateY(-1.75rem) scale(0.85);
+            color: var(--primary);
+        }
+
+        /* Date Range Picker */
+        .date-range-picker {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .date-picker {
+            flex: 1;
+            position: relative;
+        }
+
+        .date-picker-icon {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary);
+            pointer-events: none;
+        }
+
+        /* Status Toggle */
+        .status-toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .status-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+        }
+
+        .status-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .status-slider {
+            position: absolute;
             cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e2e8f0;
+            transition: var(--transition);
+            border-radius: 32px;
         }
 
-        .status-toggle-active {
-            background: var(--success-color);
+        .status-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: var(--transition);
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+        }
+
+        input:checked+.status-slider {
+            background-color: var(--success);
+        }
+
+        input:checked+.status-slider:before {
+            transform: translateX(28px);
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Action Buttons */
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1.5rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: white;
+            box-shadow: 0 4px 6px rgba(109, 40, 217, 0.2);
         }
 
-        .status-toggle-inactive {
-            background: var(--danger-color);
-            color: white;
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(109, 40, 217, 0.3);
         }
 
-        .status-toggle-expired {
-            background: var(--secondary-color);
-            color: white;
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
         }
 
-        .tab-content {
-            padding: 0;
+        .btn-outline:hover {
+            background: rgba(109, 40, 217, 0.05);
+            transform: translateY(-2px);
         }
 
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-content {
-                padding: 1rem;
-            }
-
-            .notification-container {
-                width: calc(100% - 2rem);
-                left: 1rem;
-                right: 1rem;
-            }
-
-            .page-header {
-                text-align: center;
-            }
-
-
-            .custom-tabs {
-                overflow-x: auto;
-                white-space: nowrap;
-            }
+        /* Form Validation */
+        .is-invalid {
+            border-color: var(--danger) !important;
         }
 
-        /* Loading Animation */
-        .loading-spinner {
+        .invalid-feedback {
+            color: var(--danger);
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Loading State */
+        .btn-loading .spinner {
             width: 20px;
             height: 20px;
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid var(--primary-color);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
+            to {
                 transform: rotate(360deg);
             }
         }
 
-        .custom-toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1055;
+        /* Preview Card */
+        .voucher-preview {
+            padding: 2rem;
+            background: linear-gradient(135deg, #7c3aed, #6d28d9);
+            color: white;
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            justify-content: center;
         }
 
-        .custom-toast {
+        .voucher-preview-header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            background-color: #e6f7f0;
-            color: #1a2e05;
-            padding: 12px 16px;
-            border-left: 5px solid #10b981;
-            border-radius: 10px;
-            min-width: 320px;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            font-size: 15px;
-            position: relative;
-            animation: slideIn 0.3s ease-out;
+            margin-bottom: 1.5rem;
         }
 
-        .custom-toast.error {
-            background-color: #fff0f0;
-            border-left-color: #ef4444;
-            color: #7f1d1d;
+        .voucher-code {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
         }
 
-        .toast-icon {
-            margin-right: 10px;
-            font-size: 18px;
-            color: #10b981;
+        .voucher-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.2);
         }
 
-        .custom-toast.error .toast-icon {
-            color: #ef4444;
+        .voucher-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.3;
         }
 
-        .toast-message {
-            flex: 1;
+        .voucher-description {
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            line-height: 1.6;
         }
 
-        .toast-close {
-            background: none;
-            border: none;
-            font-size: 18px;
-            color: #999;
-            cursor: pointer;
-            transition: color 0.2s;
+        .voucher-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
-        .toast-close:hover {
-            color: #333;
+        .voucher-detail {
+            display: flex;
+            flex-direction: column;
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(50px);
+        .detail-label {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-bottom: 0.25rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .voucher-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .discount-badge {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .valid-date {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem;
             }
 
-            to {
-                opacity: 1;
-                transform: translateX(0);
+            .form-header h2 {
+                font-size: 2rem;
+            }
+
+            .form-card {
+                padding: 1.75rem;
+            }
+
+            .date-range-picker {
+                flex-direction: column;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .voucher-details {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -538,65 +461,163 @@
 
 <body>
     <div th:replace="~{/layouts/sidebar-staff}"></div>
-    <div class="container mt-4">
-        <h2 class="mb-4">Chỉnh sửa Voucher</h2>
 
-        <form th:action="@{'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id}}" th:object="${voucher}" method="post">
-            <div class="mb-3">
-                <label>Mã voucher</label>
-                <input type="text" class="form-control" th:field="*{code}" required>
-            </div>
+    <div class="container">
+        <div class="form-header">
+            <h2>Cập nhật Voucher</h2>
+            <p>Chỉnh sửa thông tin khuyến mãi để thu hút khách hàng</p>
+        </div>
 
-            <div class="mb-3">
-                <label>Tiêu đề</label>
-                <input type="text" class="form-control" th:field="*{title}" required>
-            </div>
-
-            <div class="mb-3">
-                <label>Mô tả</label>
-                <textarea class="form-control" th:field="*{description}"></textarea>
-            </div>
-            <div class="mb-3">
-                <label>Giá trị giảm</label>
-                <input type="number" class="form-control" th:field="*{discountValue}">
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label>Ngày bắt đầu</label>
-                    <input type="date" class="form-control" th:field="*{startDate}">
+        <div class="form-container">
+            <form class="glass-card form-card" th:action="@{'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id}}"
+                th:object="${voucher}" method="post">
+                <div class="form-group float-label-group">
+                    <input type="text" class="form-control" id="code" th:field="*{code}" placeholder=" " required>
+                    <label class="float-label" for="code">Mã voucher</label>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('code')}" th:errors="*{code}">
+                        <i class="fas fa-exclamation-circle"></i> Vui lòng nhập mã voucher
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label>Ngày kết thúc</label>
-                    <input type="date" class="form-control" th:field="*{endDate}">
-                </div>
-            </div>
 
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label>Đơn tối thiểu</label>
-                    <input type="number" class="form-control" th:field="*{minAmount}">
+                <div class="form-group float-label-group">
+                    <input type="text" class="form-control" id="title" th:field="*{title}" placeholder=" " required>
+                    <label class="float-label" for="title">Tiêu đề</label>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}">
+                        <i class="fas fa-exclamation-circle"></i> Vui lòng nhập tiêu đề
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label>Số lượng</label>
-                    <input type="number" class="form-control" th:field="*{quantity}">
+
+                <div class="form-group">
+                    <label class="form-label" for="description">Mô tả voucher</label>
+                    <textarea class="form-control" id="description" th:field="*{description}" rows="4"
+                        placeholder="Nhập mô tả chi tiết về voucher..."></textarea>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <label>Trạng thái</label>
-                <select class="form-select" th:field="*{status}">
-                    <option th:value="true">Đang áp dụng</option>
-                    <option th:value="false">Ngừng áp dụng</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label class="form-label">Giá trị khuyến mãi</label>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="float-label-group">
+                            <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}"
+                                placeholder=" " min="0">
+                            <label class="float-label" for="discountValue">Giảm giá (%)</label>
+                        </div>
+                        <div class="float-label-group">
+                            <input type="number" class="form-control" id="minAmount" th:field="*{minAmount}"
+                                placeholder=" " min="0">
+                            <label class="float-label" for="minAmount">Đơn tối thiểu</label>
+                        </div>
+                        <div class="float-label-group">
+                            <input type="number" class="form-control" id="quantity" th:field="*{quantity}"
+                                placeholder=" " min="1">
+                            <label class="float-label" for="quantity">Số lượng</label>
+                        </div>
+                    </div>
+                </div>
 
-            <div class="d-flex justify-content-end gap-2">
-                <button type="submit" class="btn btn-primary">Cập nhật</button>
-                <a th:href="@{/nhan-vien/khuyen-mai}" class="btn btn-secondary">Hủy</a>
-            </div>
-        </form>
+                <div class="form-group">
+                    <label class="form-label">Thời gian áp dụng</label>
+                    <div class="date-range-picker">
+                        <div class="date-picker float-label-group">
+                            <input type="date" class="form-control" id="startDate" th:field="*{startDate}"
+                                placeholder=" ">
+                            <label class="float-label" for="startDate">Ngày bắt đầu</label>
+                            <i class="fas fa-calendar-alt date-picker-icon"></i>
+                        </div>
+                        <div class="date-picker float-label-group">
+                            <input type="date" class="form-control" id="endDate" th:field="*{endDate}" placeholder=" ">
+                            <label class="float-label" for="endDate">Ngày kết thúc</label>
+                            <i class="fas fa-calendar-alt date-picker-icon"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Trạng thái</label>
+                    <div class="status-toggle-container">
+                        <label class="status-toggle">
+                            <input type="checkbox" th:checked="*{status}">
+                            <span class="status-slider"></span>
+                        </label>
+                        <span class="status-label" th:text="*{status} ? 'Đang hoạt động' : 'Tạm ngưng'"></span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-outline" onclick="window.history.back()">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu thay đổi
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Font Awesome for icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <script>
+        // Update preview in real-time
+        document.querySelectorAll('input, textarea, select').forEach(element => {
+            element.addEventListener('input', updatePreview);
+        });
+
+        function updatePreview() {
+            const form = document.querySelector('form');
+            const preview = document.querySelector('.voucher-preview');
+
+            // Update code
+            if (form.querySelector('#code').value) {
+                preview.querySelector('.voucher-code').textContent = form.querySelector('#code').value;
+            }
+
+            // Update title
+            if (form.querySelector('#title').value) {
+                preview.querySelector('.voucher-title').textContent = form.querySelector('#title').value;
+            }
+
+            // Update description
+            preview.querySelector('.voucher-description').textContent =
+                form.querySelector('#description').value || 'Không có mô tả';
+
+            // Update discount
+            if (form.querySelector('#discountValue').value) {
+                const discount = form.querySelector('#discountValue').value;
+                preview.querySelector('.detail-value:nth-child(1)').textContent = discount + '%';
+                preview.querySelector('.discount-badge').textContent = discount + '%';
+            }
+
+            // Update min amount
+            if (form.querySelector('#minAmount').value) {
+                const minAmount = parseInt(form.querySelector('#minAmount').value).toLocaleString();
+                preview.querySelector('.detail-value:nth-child(2)').textContent = '₫' + minAmount;
+            }
+
+            // Update quantity
+            if (form.querySelector('#quantity').value) {
+                preview.querySelector('.detail-value:nth-child(3)').textContent = form.querySelector('#quantity').value;
+            }
+
+            // Update dates
+            if (form.querySelector('#startDate').value) {
+                const startDate = new Date(form.querySelector('#startDate').value);
+                preview.querySelector('.valid-date div:first-child').textContent =
+                    'Từ ' + startDate.toLocaleDateString('vi-VN');
+            }
+
+            if (form.querySelector('#endDate').value) {
+                const endDate = new Date(form.querySelector('#endDate').value);
+                preview.querySelector('.valid-date div:last-child').textContent =
+                    'Đến ' + endDate.toLocaleDateString('vi-VN');
+            }
+
+            // Update status
+            const statusToggle = form.querySelector('input[type="checkbox"]');
+            preview.querySelector('.voucher-status').textContent =
+                statusToggle.checked ? 'ACTIVE' : 'INACTIVE';
+        }
+    </script>
 </body>
 
 </html>

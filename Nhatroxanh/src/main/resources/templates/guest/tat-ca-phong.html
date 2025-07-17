@@ -215,18 +215,11 @@
             const noResults = document.getElementById('noResults');
             const debugInfo = document.getElementById('debugInfo');
 
-            // Null checks for DOM elements
             if (!loading || !postsContainer || !noResults || !debugInfo) {
-                console.error('One or more DOM elements not found:', {
-                    loading: !!loading,
-                    postsContainer: !!postsContainer,
-                    noResults: !!noResults,
-                    debugInfo: !!debugInfo
-                });
+                console.error('Missing DOM elements');
                 return;
             }
 
-            // Show loading
             loading.style.display = 'block';
             postsContainer.style.display = 'none';
             noResults.style.display = 'none';
@@ -238,7 +231,6 @@
             const selectedArea = document.querySelector('input[name="area"]:checked')?.value;
             let minArea = null;
             let maxArea = null;
-
             if (selectedArea && selectedArea !== 'all') {
                 if (selectedArea.includes('-')) {
                     const parts = selectedArea.split('-');
@@ -251,29 +243,42 @@
                 }
             }
 
+            // Lấy giá trị từ input lọc giá tiền
+            const minPrice = document.getElementById('minPrice')?.value;
+            const maxPrice = document.getElementById('maxPrice')?.value;
+
+            // Lấy giá trị từ select lọc địa chỉ
+            const provinceCode = document.getElementById('province')?.value;
+            const districtCode = document.getElementById('district')?.value;
+            const wardCode = document.getElementById('ward')?.value;
+
+            // Lấy giá trị từ input tìm kiếm (searchTerm)
+            const searchTerm = document.getElementById('searchInput')?.value?.trim();
+
             const sort = document.getElementById('sortBy')?.value || 'latest';
 
             const params = new URLSearchParams();
+
             selectedUtilities.forEach(utilityId => {
                 params.append('utilities', utilityId);
             });
+
             if (minArea !== null) params.append('minArea', minArea);
             if (maxArea !== null) params.append('maxArea', maxArea);
+            if (minPrice) params.append('minPrice', minPrice);
+            if (maxPrice) params.append('maxPrice', maxPrice);
+            if (provinceCode) params.append('provinceCode', provinceCode);
+            if (districtCode) params.append('districtCode', districtCode);
+            if (wardCode) params.append('wardCode', wardCode);
+            if (searchTerm) params.append('searchTerm', searchTerm);
+
             params.append('sort', sort);
             params.append('page', page);
 
-            console.log('Filter request:', {
-                selectedUtilities,
-                minArea,
-                maxArea,
-                sort,
-                page,
-                url: `/api/filter-all-posts?${params.toString()}`
-            });
+            console.log('Filter request:', `/api/filter-all-posts?${params.toString()}`);
 
             fetch(`/api/filter-all-posts?${params.toString()}`)
                 .then(response => {
-                    console.log('API response status:', response.status);
                     if (!response.ok) {
                         return response.text().then(text => {
                             throw new Error(`HTTP ${response.status}: ${text}`);
@@ -282,7 +287,6 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Received data:', data);
                     if (!data || !data.content) {
                         throw new Error('Invalid API response: content missing');
                     }
@@ -297,9 +301,11 @@
                     debugInfo.style.display = 'block';
                     debugInfo.className = 'alert alert-danger';
                     debugInfo.innerHTML = `Lỗi: ${error.message}`;
-                    showError('Có lỗi xảy ra khi tải dữ liệu: ' + error.message);
+                    postsContainer.style.display = 'none';
                 });
         }
+
+
 
         function displayPosts(posts) {
             const postsContainer = document.getElementById('postsContainer');

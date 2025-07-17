@@ -607,7 +607,9 @@
             <div class="form-row-staff">
                 <div class="form-group-staff">
                     <label class="form-label-staff">CCCD/CMND</label>
-                    <input type="text" class="form-input-staff" th:value="${cccd.cccdNumber}" disabled>
+                    <input type="text" class="form-input-staff" th:value="${cccd.cccdNumber != null && cccd.cccdNumber.length() >= 4} ?
+                 ${cccd.cccdNumber.substring(0, 2) + '********' + cccd.cccdNumber.substring(cccd.cccdNumber.length() - 2)} :
+                 ${cccd.cccdNumber}" disabled>
                 </div>
                 <div class="form-group-staff">
                     <label class="form-label-staff">Nơi cấp</label>

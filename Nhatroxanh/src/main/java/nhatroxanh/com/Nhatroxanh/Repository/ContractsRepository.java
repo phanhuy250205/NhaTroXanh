@@ -50,7 +50,7 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
 
         // Đếm số hợp đồng sắp hết hạn trong 30 ngày tới
         @Query("SELECT COUNT(c) FROM Contracts c " +
-                        "WHERE c.room.hostel.owner.userId = :ownerId AND c.status = 'ACTIVE' " +
+                        "WHERE c.room.hostel.owner.userId = :ownerId AND c.status = 'EXPIRED' " +
                         "AND c.endDate BETWEEN :currentDate AND :futureDate")
         long countExpiringContractsByOwnerId(Integer ownerId, Date currentDate, Date futureDate);
 

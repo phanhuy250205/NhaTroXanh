@@ -34,7 +34,6 @@ public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         @Query("SELECT v FROM Vouchers v WHERE v.hostel.id = :hostelId AND v.status = true")
         List<Vouchers> findActiveVouchersByHostelId(@Param("hostelId") Integer hostelId);
 
-
         // 8. Tìm các voucher đã hết hạn
         @Query("SELECT v FROM Vouchers v WHERE v.endDate < CURRENT_DATE")
         List<Vouchers> findExpiredVouchers();
@@ -54,5 +53,22 @@ public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         Page<Vouchers> searchVouchers(
                         @Param("keyword") String keyword,
                         Pageable pageable);
+
+        List<Vouchers> findByUserUserId(Integer userId);
+
+        @Query("SELECT v FROM Vouchers v WHERE v.user.userId = :userId " +
+                        "AND (:searchQuery IS NULL OR LOWER(v.title) LIKE :searchQuery OR LOWER(v.code) LIKE :searchQuery) "
+                        +
+                        "AND (:status IS NULL OR v.status = :status)")
+        Page<Vouchers> findByUserUserIdWithFilters(
+                        @Param("userId") Integer userId,
+                        @Param("searchQuery") String searchQuery,
+                        @Param("status") Boolean status,
+                        Pageable pageable);
+
+        @Query("SELECT COUNT(v) > 0 FROM Vouchers v WHERE LOWER(TRIM(v.code)) = LOWER(TRIM(:code)) AND v.id != :id")
+        boolean existsByCodeAndNotId(@Param("code") String code, @Param("id") Integer id);
         
+        List<Vouchers> findByStatus(boolean status);
+
 }

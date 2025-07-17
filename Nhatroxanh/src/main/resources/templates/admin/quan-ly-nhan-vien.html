@@ -699,6 +699,56 @@
                 transform: translateX(0);
             }
         }
+
+        .btn-disable-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            font-weight: 500;
+            border: none;
+            border-radius: 6px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Trạng thái vô hiệu hóa (màu đỏ) */
+        .btn-disable-staff.btn-danger {
+            background-color: #dc3545;
+            color: #fff;
+        }
+
+        .btn-disable-staff.btn-danger:hover {
+            background-color: #bd2130;
+            color: #fff;
+        }
+
+        /* Trạng thái mở khóa (màu xanh) */
+        .btn-disable-staff.btn-primary {
+            background-color: #007bff;
+            color: #fff;
+        }
+
+        .btn-disable-staff.btn-primary:hover {
+            background-color: #0069d9;
+            color: #fff;
+        }
+
+        /* Icon trong nút */
+        .btn-disable-staff i {
+            font-size: 1rem;
+        }
+
+        /* Responsive nhỏ: chỉnh nhỏ nút */
+        @media (max-width: 576px) {
+            .btn-disable-staff {
+                padding: 4px 10px;
+                font-size: 14px;
+            }
+
+            .btn-disable-staff i {
+                font-size: 0.9rem;
+            }
+        }
     </style>
 
 </head>

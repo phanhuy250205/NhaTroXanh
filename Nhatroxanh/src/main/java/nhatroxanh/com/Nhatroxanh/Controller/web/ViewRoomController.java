@@ -47,141 +47,82 @@ public class ViewRoomController {
     private UtilityRepository utilityRepository;
 
     @GetMapping("/danh-muc/{id}")
-    public String showPostsByCategory(@PathVariable("id") Integer id,
+    public String showPostsByCategory(
+            @PathVariable("id") Integer id,
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
-            @RequestParam(value = "province", required = false) Integer provinceId,
+            @RequestParam(value = "provinceCode", required = false) String provinceCode,
+            @RequestParam(value = "districtCode", required = false) String districtCode,
+            @RequestParam(value = "wardCode", required = false) String wardCode,
             @RequestParam(value = "priceRange", required = false) String priceRange,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
+
         try {
-            System.out.println("Request: Category ID: " + id + ", Sort: " + sort + ", Province ID: " + provinceId +
-                    ", Price Range: " + priceRange + ", Search Term: " + searchTerm + ", Page: " + page);
             long startTime = System.currentTimeMillis();
-
-            // Load provinces and utilities for filter
             List<Province> provinces = provinceRepository.findAll();
-            if (provinces == null) {
-                provinces = new ArrayList<>();
-                System.out.println("Warning: No provinces found in database");
-            }
-
             List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
-            if (utilities == null) {
-                utilities = new ArrayList<>();
-            }
-
-            model.addAttribute("provinces", provinces);
-            model.addAttribute("utilities", utilities);
+            model.addAttribute("provinces", provinces != null ? provinces : new ArrayList<>());
+            model.addAttribute("utilities", utilities != null ? utilities : new ArrayList<>());
             model.addAttribute("categoryId", id);
 
             Category category = categoryRepository.findById(id).orElse(null);
-            Page<Post> postPage;
             int pageSize = 10;
-
             Float minPrice = null;
             Float maxPrice = null;
 
-            // Process price range
+            // Parse price range
             if (priceRange != null && !priceRange.isEmpty()) {
-                if (priceRange.startsWith("custom_")) {
-                    String[] customRange = priceRange.replace("custom_", "").split("_");
-                    if (customRange.length > 0 && !customRange[0].isEmpty()) {
-                        minPrice = Float.parseFloat(customRange[0]);
+                switch (priceRange.toLowerCase()) {
+                    case "under_1m" -> maxPrice = 1_000_000f;
+                    case "1_2m" -> {
+                        minPrice = 1_000_000f;
+                        maxPrice = 2_000_000f;
                     }
-                    if (customRange.length > 1 && !customRange[1].isEmpty()) {
-                        maxPrice = Float.parseFloat(customRange[1]);
+                    case "2_3m" -> {
+                        minPrice = 2_000_000f;
+                        maxPrice = 3_000_000f;
                     }
-                } else {
-                    switch (priceRange.toLowerCase()) {
-                        case "under_1m":
-                            maxPrice = 1_000_000f;
-                            break;
-                        case "1_2m":
-                            minPrice = 1_000_000f;
-                            maxPrice = 2_000_000f;
-                            break;
-                        case "2_3m":
-                            minPrice = 2_000_000f;
-                            maxPrice = 3_000_000f;
-                            break;
-                        case "3_5m":
-                            minPrice = 3_000_000f;
-                            maxPrice = 5_000_000f;
-                            break;
-                        case "over_5m":
-                            minPrice = 5_000_000f;
-                            break;
-                        default:
-                            System.out.println("Invalid priceRange: " + priceRange);
+                    case "3_5m" -> {
+                        minPrice = 3_000_000f;
+                        maxPrice = 5_000_000f;
                     }
+                    case "over_5m" -> minPrice = 5_000_000f;
+                    default -> System.out.println("Invalid priceRange: " + priceRange);
                 }
             }
 
-            if (category != null) {
-                // Create Pageable object
-                Sort pageSort;
-                switch (sort.toLowerCase()) {
-                    case "price_asc":
-                        pageSort = Sort.by(Sort.Direction.ASC, "price");
-                        break;
-                    case "price_desc":
-                        pageSort = Sort.by(Sort.Direction.DESC, "price");
-                        break;
-                    case "latest":
-                    default:
-                        pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
-                        break;
-                }
+            Sort pageSort = switch (sort.toLowerCase()) {
+                case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+                case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
+            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
 
-                Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+            Page<Post> postPage = postRepository.filterPostsWithAllConditions(
+                    id, provinceCode, districtCode, wardCode,
+                    null, // utilities chưa lọc ở giao diện này
+                    null, null, // minArea, maxArea
+                    minPrice, maxPrice,
+                    searchTerm,
+                    pageable);
 
-                // Check if any filters are applied
-                boolean hasFilters = (provinceId != null || priceRange != null ||
-                        (searchTerm != null && !searchTerm.trim().isEmpty()));
+            model.addAttribute("category", category);
+            model.addAttribute("posts", postPage.getContent());
+            model.addAttribute("totalPosts", postPage.getTotalElements());
+            model.addAttribute("currentPage", postPage.getNumber());
+            model.addAttribute("totalPages", postPage.getTotalPages());
+            model.addAttribute("pageSize", pageSize);
+            model.addAttribute("selectedProvinceCode", provinceCode);
+            model.addAttribute("selectedDistrictCode", districtCode);
+            model.addAttribute("selectedWardCode", wardCode);
+            model.addAttribute("selectedPriceRange", priceRange);
+            model.addAttribute("searchTerm", searchTerm);
+            model.addAttribute("selectedSort", sort);
 
-                if (hasFilters) {
-                    // Use filtered search with pagination
-                    postPage = postRepository.findByCategoryAndProvinceAndPriceRangeAndSearchTerm(
-                            id, provinceId, minPrice, maxPrice, searchTerm, pageable);
-                } else {
-                    // Simple search with ApprovalStatus and pagination
-                    postPage = postRepository.findByCategoryIdAndStatusAndApprovalStatus(
-                            id, true, ApprovalStatus.APPROVED, pageable);
-                }
+            System.out.println("Posts fetched: " + postPage.getTotalElements() +
+                    ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
 
-                System.out.println("Posts fetched: " + postPage.getTotalElements() +
-                        ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
-
-                model.addAttribute("category", category);
-                model.addAttribute("posts", postPage.getContent());
-                model.addAttribute("totalPosts", postPage.getTotalElements());
-                model.addAttribute("currentPage", postPage.getNumber());
-                model.addAttribute("totalPages", postPage.getTotalPages());
-                model.addAttribute("pageSize", pageSize);
-                model.addAttribute("selectedProvince", provinceId);
-                model.addAttribute("selectedPriceRange", priceRange);
-                model.addAttribute("searchTerm", searchTerm);
-                model.addAttribute("selectedSort", sort);
-
-                System.out.println("Category: " + category.getName() + ", Posts: " + postPage.getTotalElements());
-            } else {
-                model.addAttribute("category", null);
-                model.addAttribute("posts", new ArrayList<>());
-                model.addAttribute("totalPosts", 0);
-                model.addAttribute("currentPage", 0);
-                model.addAttribute("totalPages", 0);
-                model.addAttribute("pageSize", pageSize);
-                model.addAttribute("error", "Danh mục không tồn tại");
-            }
-        } catch (NumberFormatException e) {
-            model.addAttribute("error", "Khoảng giá không hợp lệ: " + e.getMessage());
-            model.addAttribute("posts", new ArrayList<>());
-            model.addAttribute("totalPosts", 0);
-            model.addAttribute("currentPage", 0);
-            model.addAttribute("totalPages", 0);
-            model.addAttribute("pageSize", 10);
-            System.out.println("NumberFormatException in showPostsByCategory: " + e.getMessage());
         } catch (Exception e) {
             model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu: " + e.getMessage());
             model.addAttribute("posts", new ArrayList<>());
@@ -189,7 +130,6 @@ public class ViewRoomController {
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", 0);
             model.addAttribute("pageSize", 10);
-            System.out.println("Exception in showPostsByCategory: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -297,120 +237,141 @@ public class ViewRoomController {
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
     // New method to handle all posts
     @GetMapping("/tat-ca-phong-tro")
     public String showAllPosts(
+            @RequestParam(value = "provinceCode", required = false) String provinceCode,
+            @RequestParam(value = "districtCode", required = false) String districtCode,
+            @RequestParam(value = "wardCode", required = false) String wardCode,
+            @RequestParam(value = "utilities", required = false) List<Integer> utilityIds,
+            @RequestParam(value = "minArea", required = false) Float minArea,
+            @RequestParam(value = "maxArea", required = false) Float maxArea,
+            @RequestParam(value = "priceRange", required = false) String priceRange,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
         try {
-            System.out.println("Request: Sort: " + sort + ", Page: " + page);
             long startTime = System.currentTimeMillis();
 
-            // Load utilities for filter
             List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
-            if (utilities == null) {
+            List<Province> provinces = provinceRepository.findAll();
+            if (utilities == null)
                 utilities = new ArrayList<>();
-                System.out.println("Warning: No utilities found in database");
-            }
+            if (provinces == null)
+                provinces = new ArrayList<>();
 
             model.addAttribute("utilities", utilities);
+            model.addAttribute("provinces", provinces);
 
-            Page<Post> postPage;
-            int pageSize = 10;
-
-            // Create Pageable object
-            Sort pageSort;
-            switch (sort.toLowerCase()) {
-                case "price_asc":
-                    pageSort = Sort.by(Sort.Direction.ASC, "price");
-                    break;
-                case "price_desc":
-                    pageSort = Sort.by(Sort.Direction.DESC, "price");
-                    break;
-                case "latest":
-                default:
-                    pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
-                    break;
+            Float minPrice = null;
+            Float maxPrice = null;
+            if (priceRange != null && !priceRange.isEmpty()) {
+                switch (priceRange.toLowerCase()) {
+                    case "under_1m" -> maxPrice = 1_000_000f;
+                    case "1_2m" -> {
+                        minPrice = 1_000_000f;
+                        maxPrice = 2_000_000f;
+                    }
+                    case "2_3m" -> {
+                        minPrice = 2_000_000f;
+                        maxPrice = 3_000_000f;
+                    }
+                    case "3_5m" -> {
+                        minPrice = 3_000_000f;
+                        maxPrice = 5_000_000f;
+                    }
+                    case "over_5m" -> minPrice = 5_000_000f;
+                }
             }
 
-            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+            Sort pageSort = switch (sort.toLowerCase()) {
+                case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+                case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
+            Pageable pageable = PageRequest.of(page, 10, pageSort);
 
-            // Fetch all approved posts with pagination
-            postPage = postRepository.findByStatusAndApprovalStatus(true, ApprovalStatus.APPROVED, pageable);
-
-            System.out.println("Posts fetched: " + postPage.getTotalElements() +
-                    ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
+            Page<Post> postPage = postRepository.filterPostsWithAllConditions(
+                    null, provinceCode, districtCode, wardCode,
+                    utilityIds, minArea, maxArea,
+                    minPrice, maxPrice,
+                    searchTerm,
+                    pageable);
 
             model.addAttribute("posts", postPage.getContent());
             model.addAttribute("totalPosts", postPage.getTotalElements());
             model.addAttribute("currentPage", postPage.getNumber());
             model.addAttribute("totalPages", postPage.getTotalPages());
-            model.addAttribute("pageSize", pageSize);
+            model.addAttribute("pageSize", 10);
+
+            // Gửi dữ liệu lọc lại về view
+            model.addAttribute("selectedProvinceCode", provinceCode);
+            model.addAttribute("selectedDistrictCode", districtCode);
+            model.addAttribute("selectedWardCode", wardCode);
+            model.addAttribute("selectedPriceRange", priceRange);
             model.addAttribute("selectedSort", sort);
+            model.addAttribute("searchTerm", searchTerm);
+            model.addAttribute("minArea", minArea);
+            model.addAttribute("maxArea", maxArea);
+            model.addAttribute("selectedUtilityIds", utilityIds);
+
+            System.out.println("Fetched all posts: " + postPage.getTotalElements() + " in "
+                    + (System.currentTimeMillis() - startTime) + "ms");
 
         } catch (Exception e) {
-            model.addAttribute("error", "Có lỗi xảy ra khi tải dữ liệu: " + e.getMessage());
+            model.addAttribute("error", "Lỗi khi tải dữ liệu: " + e.getMessage());
             model.addAttribute("posts", new ArrayList<>());
             model.addAttribute("totalPosts", 0);
             model.addAttribute("currentPage", 0);
             model.addAttribute("totalPages", 0);
             model.addAttribute("pageSize", 10);
-            System.out.println("Exception in showAllPosts: " + e.getMessage());
             e.printStackTrace();
         }
 
         return "guest/tat-ca-phong";
     }
 
-    // Updated API for filtering all posts
     @GetMapping("/api/filter-all-posts")
     @ResponseBody
     public ResponseEntity<?> filterAllPosts(
             @RequestParam(value = "utilities", required = false) List<Integer> utilityIds,
             @RequestParam(value = "minArea", required = false) Float minArea,
             @RequestParam(value = "maxArea", required = false) Float maxArea,
-            @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
+            @RequestParam(value = "minPrice", required = false) Double minPrice,
+            @RequestParam(value = "maxPrice", required = false) Double maxPrice,
+            @RequestParam(value = "provinceCode", required = false) String provinceCode,
+            @RequestParam(value = "districtCode", required = false) String districtCode,
+            @RequestParam(value = "wardCode", required = false) String wardCode,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "sort", defaultValue = "latest") String sort,
             @RequestParam(value = "page", defaultValue = "0") int page) {
 
         try {
-            System.out.println("=== Filter All Posts Request ===");
-            System.out.println("UtilityIds: " + utilityIds);
-            System.out.println("MinArea: " + minArea + ", MaxArea: " + maxArea);
-            System.out.println("Sort: " + sort + ", Page: " + page);
-
-            Page<Post> postPage;
             int pageSize = 10;
 
-            // Create Pageable object
-            Sort pageSort;
-            switch (sort.toLowerCase()) {
-                case "price_asc":
-                    pageSort = Sort.by(Sort.Direction.ASC, "price");
-                    break;
-                case "price_desc":
-                    pageSort = Sort.by(Sort.Direction.DESC, "price");
-                    break;
-                case "latest":
-                default:
-                    pageSort = Sort.by(Sort.Direction.DESC, "createdAt");
-                    break;
-            }
+            Sort pageSort = switch (sort.toLowerCase()) {
+                case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+                case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
 
             Pageable pageable = PageRequest.of(page, pageSize, pageSort);
 
-            // Fetch posts based on filters
+            Page<Post> postPage;
             if (utilityIds != null && !utilityIds.isEmpty()) {
-                postPage = postRepository.findActivePostsWithUtilityFilterPaginated(utilityIds, minArea, maxArea, pageable);
+                postPage = postRepository.filterPostsWithUtilitiesByCode(
+                        utilityIds, minArea, maxArea, minPrice, maxPrice,
+                        provinceCode, districtCode, wardCode, searchTerm, pageable); // ✅ thêm searchTerm
             } else {
-                postPage = postRepository.findActivePostsWithAreaFilterPaginated(minArea, maxArea, pageable);
+                postPage = postRepository.filterPostsWithoutUtilitiesByCode(
+                        minArea, maxArea, minPrice, maxPrice,
+                        provinceCode, districtCode, wardCode, searchTerm, pageable); // ✅ thêm searchTerm
             }
-
-            System.out.println("Filtered posts count: " + postPage.getTotalElements());
 
             List<PostDTO> postDTOs = postMapper.toDTOList(postPage.getContent());
 
-            // Prepare paginated response
             Map<String, Object> response = new HashMap<>();
             response.put("content", postDTOs);
             response.put("number", postPage.getNumber());
@@ -420,9 +381,91 @@ public class ViewRoomController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            System.out.println("Error filtering all posts: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Lỗi: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/api/filter-posts")
+    @ResponseBody
+    public ResponseEntity<?> filterPosts(
+            @RequestParam(value = "categoryId", required = false) Integer categoryId,
+            @RequestParam(value = "provinceCode", required = false) String provinceCode,
+            @RequestParam(value = "districtCode", required = false) String districtCode,
+            @RequestParam(value = "wardCode", required = false) String wardCode,
+            @RequestParam(value = "utilityIds", required = false) List<Integer> utilityIds,
+            @RequestParam(value = "minArea", required = false) Float minArea,
+            @RequestParam(value = "maxArea", required = false) Float maxArea,
+            @RequestParam(value = "priceRange", required = false) String priceRange,
+            @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "sort", defaultValue = "latest") String sort,
+            @RequestParam(value = "page", defaultValue = "0") int page) {
+
+        try {
+            System.out.println("=== Filter Posts Request ===");
+            System.out.println("CategoryId: " + categoryId);
+            System.out.println(
+                    "ProvinceCode: " + provinceCode + ", DistrictCode: " + districtCode + ", WardCode: " + wardCode);
+            System.out.println("UtilityIds: " + utilityIds);
+            System.out.println("MinArea: " + minArea + ", MaxArea: " + maxArea);
+            System.out.println("PriceRange: " + priceRange + ", SearchTerm: " + searchTerm + ", Sort: " + sort
+                    + ", Page: " + page);
+
+            // Xử lý phân trang và sắp xếp
+            int pageSize = 10;
+            Sort pageSort = switch (sort.toLowerCase()) {
+                case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
+                case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+                default -> Sort.by(Sort.Direction.DESC, "createdAt");
+            };
+            Pageable pageable = PageRequest.of(page, pageSize, pageSort);
+
+            // Xử lý khoảng giá
+            Float minPrice = null;
+            Float maxPrice = null;
+            if (priceRange != null && !priceRange.isEmpty()) {
+                switch (priceRange.toLowerCase()) {
+                    case "under_1m" -> maxPrice = 1_000_000f;
+                    case "1_2m" -> {
+                        minPrice = 1_000_000f;
+                        maxPrice = 2_000_000f;
+                    }
+                    case "2_3m" -> {
+                        minPrice = 2_000_000f;
+                        maxPrice = 3_000_000f;
+                    }
+                    case "3_5m" -> {
+                        minPrice = 3_000_000f;
+                        maxPrice = 5_000_000f;
+                    }
+                    case "over_5m" -> minPrice = 5_000_000f;
+                    default -> System.out.println("Invalid priceRange: " + priceRange);
+                }
+            }
+
+            // Gọi truy vấn duy nhất
+            Page<Post> postPage = postRepository.filterPostsWithAllConditions(
+                    categoryId, provinceCode, districtCode, wardCode,
+                    utilityIds, minArea, maxArea,
+                    minPrice, maxPrice, searchTerm, pageable);
+
+            System.out.println("Filtered posts count: " + postPage.getTotalElements());
+
+            List<PostDTO> postDTOs = postMapper.toDTOList(postPage.getContent());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("content", postDTOs);
+            response.put("number", postPage.getNumber());
+            response.put("totalPages", postPage.getTotalPages());
+            response.put("totalElements", postPage.getTotalElements());
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.out.println("Error filtering posts: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: " + e.getMessage());
         }
     }
+
 }

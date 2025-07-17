@@ -27,4 +27,12 @@ public interface IncidentReportsRepository extends JpaRepository<IncidentReports
 
     List<IncidentReports> findByRoom(Rooms room);
 
+    @Query("SELECT i FROM IncidentReports i WHERE i.room.hostel.owner.userId = :hostId")
+    Page<IncidentReports> findByHostId(Integer hostId, Pageable pageable);
+
+    @Query("SELECT i FROM IncidentReports i WHERE i.room.hostel.owner.userId = :hostId " +
+           "AND (LOWER(i.incidentType) LIKE :search OR LOWER(i.user.fullname) LIKE :search " +
+           "OR LOWER(i.room.hostel.name) LIKE :search)")
+    Page<IncidentReports> findByHostIdAndSearch(Integer hostId, String search, Pageable pageable);
+
 }

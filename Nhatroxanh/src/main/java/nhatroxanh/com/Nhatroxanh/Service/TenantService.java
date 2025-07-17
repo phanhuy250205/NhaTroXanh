@@ -24,6 +24,8 @@ public interface TenantService {
                         Contracts.Status status,
                         Pageable pageable);
 
+        Map<String, Long> getContractStatusStats(Integer ownerId);
+
         List<Hostel> getHostelsForOwner(Integer ownerId);
 
         Page<TenantInfoDTO> findAllForTesting(Pageable pageable);

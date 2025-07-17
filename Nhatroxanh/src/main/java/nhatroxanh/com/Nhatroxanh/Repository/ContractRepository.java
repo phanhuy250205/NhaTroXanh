@@ -80,35 +80,34 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         List<Contracts> findByTenantAndStatusIn(Users tenant, List<Contracts.Status> statuses);
 
-
         List<Contracts> findByTenant(Users tenant);
 
         Page<Contracts> findByTenant(Users tenant, Pageable pageable);
 
-   
+        @Query("SELECT c.status, COUNT(c) FROM Contracts c WHERE c.room.hostel.owner.userId = :ownerId GROUP BY c.status")
+        List<Object[]> countContractsByStatus(@Param("ownerId") Integer ownerId);
 
-    // Thay thế method updateContract bằng @Query
-    @Modifying
-    @Transactional
-    @Query("UPDATE Contracts c SET " +
-            "c.contractDate = :#{#contractDto.contractDate}, " +
-            "c.startDate = :#{#contractDto.terms.startDate}, " +
-            "c.endDate = :#{#contractDto.terms.endDate}, " +
-            "c.price = :#{#contractDto.terms.price}, " +
-            "c.deposit = :#{#contractDto.terms.deposit}, " +
-            "c.status = :#{#contractDto.status} " +
-            "WHERE c.contractId = :contractId")
-    int updateContract(
-            @Param("contractId") Integer contractId,
-            @Param("contractDto") ContractDto contractDto
-    );
+        // Thay thế method updateContract bằng @Query
+        @Modifying
+        @Transactional
+        @Query("UPDATE Contracts c SET " +
+                        "c.contractDate = :#{#contractDto.contractDate}, " +
+                        "c.startDate = :#{#contractDto.terms.startDate}, " +
+                        "c.endDate = :#{#contractDto.terms.endDate}, " +
+                        "c.price = :#{#contractDto.terms.price}, " +
+                        "c.deposit = :#{#contractDto.terms.deposit}, " +
+                        "c.status = :#{#contractDto.status} " +
+                        "WHERE c.contractId = :contractId")
+        int updateContract(
+                        @Param("contractId") Integer contractId,
+                        @Param("contractDto") ContractDto contractDto);
 
-    // Hoặc nếu muốn trả về đối tượng Contracts
-    @Query("SELECT c FROM Contracts c WHERE c.contractId = :contractId")
-    Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
+        // Hoặc nếu muốn trả về đối tượng Contracts
+        @Query("SELECT c FROM Contracts c WHERE c.contractId = :contractId")
+        Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
 
+        // Tìm hợp đồng theo tenant ID
+        @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
+        Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
 
-    // Tìm hợp đồng theo tenant ID
-    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
-    Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
 }

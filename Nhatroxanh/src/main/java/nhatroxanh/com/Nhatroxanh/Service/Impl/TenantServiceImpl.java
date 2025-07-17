@@ -91,6 +91,24 @@ public class TenantServiceImpl implements TenantService {
     }
 
     @Override
+    public Map<String, Long> getContractStatusStats(Integer ownerId) {
+        List<Object[]> results = contractRepository.countContractsByStatus(ownerId);
+        Map<String, Long> stats = new HashMap<>();
+
+        for (Object[] row : results) {
+            Contracts.Status status = (Contracts.Status) row[0];
+            Long count = (Long) row[1];
+            stats.put(status.name(), count);
+        }
+
+        for (Contracts.Status s : Contracts.Status.values()) {
+            stats.putIfAbsent(s.name(), 0L);
+        }
+
+        return stats;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Hostel> getHostelsForOwner(Integer ownerId) {
         return hostelRepository.findByOwnerUserId(ownerId);
@@ -159,7 +177,7 @@ public class TenantServiceImpl implements TenantService {
                 room.getNamerooms(),
                 contract.getStartDate(),
                 contract.getEndDate(),
-                contract.getStatus() == Contracts.Status.ACTIVE);
+                contract.getStatus());
     }
 
     private String maskCccd(String cccd) {
@@ -176,11 +194,10 @@ public class TenantServiceImpl implements TenantService {
     }
 
     public List<Contracts> getActiveContracts() {
-    Users tenant = getCurrentUser();
-    List<Contracts.Status> statuses = List.of(Contracts.Status.ACTIVE, Contracts.Status.EXPIRED);
-    return contractRepository.findByTenantAndStatusIn(tenant, statuses);
-}
-
+        Users tenant = getCurrentUser();
+        List<Contracts.Status> statuses = List.of(Contracts.Status.ACTIVE, Contracts.Status.EXPIRED);
+        return contractRepository.findByTenantAndStatusIn(tenant, statuses);
+    }
 
     @Override
     public Page<Contracts> getContractHistory(Pageable pageable) {
