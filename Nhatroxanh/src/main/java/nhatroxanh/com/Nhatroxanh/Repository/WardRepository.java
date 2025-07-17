@@ -13,4 +13,5 @@ public interface WardRepository extends JpaRepository<Ward, Integer> {
     Optional<Ward> findByIdWithDetails(@Param("id") Integer id);
     List<Ward> findByDistrictId(Integer districtId);
     Optional<Ward> findByCode(String code);
+    List<Ward> findByDistrictCode(String districtCode);
 }

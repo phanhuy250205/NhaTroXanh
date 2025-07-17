@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -9,6 +10,7 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 
 @Service
 public class EmailServiceImpl implements EmailService {
@@ -108,6 +110,25 @@ public class EmailServiceImpl implements EmailService {
                 "<p>Vui lòng kiểm tra lại hệ thống nếu cần kích hoạt lại hoặc tạo voucher mới.</p>" +
                 "<p>Trân trọng,<br>Nhà Trọ Xanh</p>";
 
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendIncidentProcessingEmail(String to, IncidentReports incident) {
+        String subject = "Sự cố đang được xử lý";
+        String content = String.format(
+                "Xin chào,\n\nSự cố \"%s\" của bạn đã được tiếp nhận và đang được xử lý.\nThời gian xử lý: %s\n\nTrân trọng.",
+                incident.getIncidentType(),
+                new SimpleDateFormat("dd/MM/yyyy HH:mm").format(incident.getResolvedAt()));
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendIncidentResolvedEmail(String to, IncidentReports incident) {
+        String subject = "Sự cố đã được xử lý";
+        String content = String.format(
+                "Xin chào,\n\nSự cố \"%s\" của bạn đã được xử lý thành công.\n\nTrân trọng.",
+                incident.getIncidentType());
         sendHtmlMail(to, subject, content);
     }
 

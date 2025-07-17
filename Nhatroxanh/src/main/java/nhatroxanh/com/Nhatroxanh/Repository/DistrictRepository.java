@@ -12,5 +12,6 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.District;
 public interface DistrictRepository extends JpaRepository<District, Integer> {
     List<District> findByProvinceId(Integer provinceId);
     Optional<District> findByCode(String code);
+    List<District> findByProvinceCode(String provinceCode);
 }
 

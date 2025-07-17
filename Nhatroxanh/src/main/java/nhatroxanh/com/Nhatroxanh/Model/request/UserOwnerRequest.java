@@ -25,12 +25,7 @@ public class UserOwnerRequest {
     private String phoneNumber;
 
     @NotBlank(message = "Ngày sinh không được để trống.")
-    @Pattern(
-        regexp = "^\\d{4}-\\d{2}-\\d{2}$",
-        message = "Ngày sinh phải đúng định dạng yyyy-MM-dd."
-    )
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Ngày sinh phải đúng định dạng yyyy-MM-dd.")
     private String birthDate;
-
-   
 
 }

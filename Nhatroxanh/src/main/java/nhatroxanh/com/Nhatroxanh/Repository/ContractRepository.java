@@ -76,9 +76,11 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         List<Contracts> findByTenantAndStatusIn(Users tenant, List<Contracts.Status> statuses);
 
-
         List<Contracts> findByTenant(Users tenant);
 
         Page<Contracts> findByTenant(Users tenant, Pageable pageable);
+
+        @Query("SELECT c.status, COUNT(c) FROM Contracts c WHERE c.room.hostel.owner.userId = :ownerId GROUP BY c.status")
+        List<Object[]> countContractsByStatus(@Param("ownerId") Integer ownerId);
 
 }

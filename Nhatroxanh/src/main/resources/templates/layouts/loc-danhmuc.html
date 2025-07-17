@@ -1,99 +1,110 @@
- <div class="container-fluid px-0">
-        <div class="row search-bar mx-0">
-            <div class="col-12 col-sm-auto mb-2 mb-sm-0">
+<div class="container-fluid px-0">
+    <div class="row search-bar mx-0">
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0">
             <div class="input-group">
                 <span class="input-group-text"><i class="fas fa-search"></i></span>
-                <input type="text" class="form-control-loc" id="searchInput" placeholder="Bạn muốn tìm trọ ở đâu?" 
-                    th:value="${searchTerm != null ? searchTerm : ''}" onkeypress="if(event.key === 'Enter') applySearch()">
+                <input type="text" class="form-control-loc" id="searchInput" placeholder="Bạn muốn tìm trọ ở đâu?"
+                    th:value="${searchTerm != null ? searchTerm : ''}"
+                    onkeypress="if(event.key === 'Enter') applySearch()">
             </div>
         </div>
-           <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
-                <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownDiaDiem')">
-                    <i class="fas fa-map-marker-alt text-primary"></i> Địa điểm <i class="fas fa-caret-down"></i>
-                </button>
-                <div class="dropdown-modal d-none" id="dropdownDiaDiem">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <strong class="text-primary"><i class="fas fa-map-marker-alt"></i> Địa điểm</strong>
-                        <button class="btn btn-sm" onclick="document.getElementById('dropdownDiaDiem').classList.add('d-none')">×</button>
-                    </div>
-                    <!-- Hiển thị danh sách tỉnh động bằng Thymeleaf -->
-                    <div th:each="province : ${provinces}" class="form-check">
-                        <input class="form-check-input province-checkbox" type="radio" name="province" 
-                               th:id="'province' + ${province.id}" 
-                               th:value="${province.id}" 
-                               th:checked="${selectedProvince != null and selectedProvince == province.id}"/>
-                        <label class="form-check-label" th:for="'province' + ${province.id}" th:text="${province.name}"></label>
-                    </div>
-                    <div class="d-flex justify-content-between pt-3">
-                        <button class="btn btn-outline-secondary btn-sm" onclick="resetProvinceFilter()">
-                            <i class="fas fa-sync-alt me-1"></i> Đặt lại
-                        </button>
-                        <button class="btn btn-primary btn-sm" onclick="applyProvinceFilter()">Tìm ngay</button>
-                    </div>
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+            <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownDiaDiem')">
+                <i class="fas fa-map-marker-alt text-primary"></i> Địa điểm <i class="fas fa-caret-down"></i>
+            </button>
+            <div class="dropdown-modal d-none" id="dropdownDiaDiem">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-primary"><i class="fas fa-map-marker-alt"></i> Địa điểm</strong>
+                    <button class="btn btn-sm"
+                        onclick="document.getElementById('dropdownDiaDiem').classList.add('d-none')">×</button>
                 </div>
-            </div>
+                <!-- Dropdown Tỉnh -->
+                <div class="mb-2">
+                    <label class="filter-label">Tỉnh/Thành phố</label>
+                    <select id="provinceSelect" class="form-select form-select-sm" onchange="loadDistricts()">
+                        <option value="">Chọn tỉnh</option>
+                    </select>
+                </div>
 
-           <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
-                <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownMucGia')">
-                    <i class="fas fa-dollar-sign text-info"></i> Mức giá <i class="fas fa-caret-down"></i>
-                </button>
-                <div class="dropdown-modal d-none p-3" id="dropdownMucGia"
-                    style="background:#fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 300px;">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <strong class="text-info"><i class="fas fa-dollar-sign"></i> Mức giá</strong>
-                        <button class="btn btn-sm" id="close-muc-gia">×</button>
-                    </div>
-                    <div class="mb-2 d-flex justify-content-between align-items-center">
-                        <input type="number" class="form-control form-control-sm me-2" id="minPrice" placeholder="Từ">
-                        <span>→</span>
-                        <input type="number" class="form-control form-control-sm ms-2" id="maxPrice" placeholder="Đến">
-                    </div>
-                    <div class="my-2">
-                        <label>Giá: <span id="priceRangeValue">0 - 10 triệu</span></label>
-                        <input type="range" class="form-range" id="priceRangeSlider" min="0" max="10000000" step="100000">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-all" value=""
-                            th:checked="${selectedPriceRange == null or selectedPriceRange == ''}" data-min="0" data-max="10000000"/>
-                        <label class="form-check-label" for="price-all">Tất cả mức giá</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-under-1m" value="under_1m"
-                            th:checked="${selectedPriceRange == 'under_1m'}" data-min="0" data-max="1000000"/>
-                        <label class="form-check-label" for="price-under-1m">Dưới 1 triệu</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-1-2m" value="1_2m"
-                            th:checked="${selectedPriceRange == '1_2m'}" data-min="1000000" data-max="2000000"/>
-                        <label class="form-check-label" for="price-1-2m">1 - 2 triệu</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-2-3m" value="2_3m"
-                            th:checked="${selectedPriceRange == '2_3m'}" data-min="2000000" data-max="3000000"/>
-                        <label class="form-check-label" for="price-2-3m">2 - 3 triệu</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-3-5m" value="3_5m"
-                            th:checked="${selectedPriceRange == '3_5m'}" data-min="3000000" data-max="5000000"/>
-                        <label class="form-check-label" for="price-3-5m">3 - 5 triệu</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="radio" name="price" id="price-over-5m" value="over_5m"
-                            th:checked="${selectedPriceRange == 'over_5m'}" data-min="5000000" data-max="10000000"/>
-                        <label class="form-check-label" for="price-over-5m">Trên 5 triệu</label>
-                    </div>
-                    <div class="d-flex justify-content-between pt-3">
-                        <button class="btn btn-outline-secondary btn-sm" id="reset-price-filter" onclick="resetPriceFilter()">
-                            <i class="fas fa-sync-alt me-1"></i> Đặt lại
-                        </button>
-                        <button class="btn btn-danger btn-sm" id="apply-price-filter" onclick="applyPriceFilter()">Áp dụng</button>
-                    </div>
+                <!-- Dropdown Huyện -->
+                <div class="mb-2">
+                    <label class="filter-label">Quận/Huyện</label>
+                    <select id="districtSelect" class="form-select form-select-sm" onchange="loadWards()">
+                        <option value="">Chọn huyện</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown Xã -->
+                <div class="mb-2">
+                    <label class="filter-label">Phường/Xã</label>
+                    <select id="wardSelect" class="form-select form-select-sm">
+                        <option value="">Chọn xã</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between pt-3">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="resetLocationFilter()">
+                        <i class="fas fa-sync-alt me-1"></i> Đặt lại
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="applyLocationFilter()">Tìm ngay</button>
                 </div>
             </div>
-            <div class="col-12 col-sm-auto">
-                <button class="btn btn-search w-100 w-sm-auto">
-                    <i class="fas fa-search me-1"></i> Tìm kiếm
-                </button>
+        </div>
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+            <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownMucGia')">
+                <i class="fas fa-dollar-sign text-info"></i> Mức giá <i class="fas fa-caret-down"></i>
+            </button>
+            <div class="dropdown-modal d-none p-3" id="dropdownMucGia"
+                style="background:#fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 300px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong class="text-info"><i class="fas fa-dollar-sign"></i> Mức giá</strong>
+                    <button class="btn btn-sm" id="close-muc-gia">×</button>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-all" value=""
+                        th:checked="${selectedPriceRange == null or selectedPriceRange == ''}" data-min="0"
+                        data-max="10000000" />
+                    <label class="form-check-label" for="price-all">Tất cả mức giá</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-under-1m" value="under_1m"
+                        th:checked="${selectedPriceRange == 'under_1m'}" data-min="0" data-max="1000000" />
+                    <label class="form-check-label" for="price-under-1m">Dưới 1 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-1-2m" value="1_2m"
+                        th:checked="${selectedPriceRange == '1_2m'}" data-min="1000000" data-max="2000000" />
+                    <label class="form-check-label" for="price-1-2m">1 - 2 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-2-3m" value="2_3m"
+                        th:checked="${selectedPriceRange == '2_3m'}" data-min="2000000" data-max="3000000" />
+                    <label class="form-check-label" for="price-2-3m">2 - 3 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-3-5m" value="3_5m"
+                        th:checked="${selectedPriceRange == '3_5m'}" data-min="3000000" data-max="5000000" />
+                    <label class="form-check-label" for="price-3-5m">3 - 5 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-over-5m" value="over_5m"
+                        th:checked="${selectedPriceRange == 'over_5m'}" data-min="5000000" data-max="10000000" />
+                    <label class="form-check-label" for="price-over-5m">Trên 5 triệu</label>
+                </div>
+                <div class="d-flex justify-content-between pt-3">
+                    <button class="btn btn-outline-secondary btn-sm" id="reset-price-filter"
+                        onclick="resetPriceFilter()">
+                        <i class="fas fa-sync-alt me-1"></i> Đặt lại
+                    </button>
+                    <button class="btn btn-danger btn-sm" id="apply-price-filter" onclick="applyPriceFilter()">Áp
+                        dụng</button>
+                </div>
             </div>
+        </div>
+        <div class="col-12 col-sm-auto">
+            <button class="btn btn-search w-100 w-sm-auto" onclick="applySearch()">
+                <i class="fas fa-search me-1"></i> Tìm kiếm
+            </button>
         </div>
     </div>
+</div>
