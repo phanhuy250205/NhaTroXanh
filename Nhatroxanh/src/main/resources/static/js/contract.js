@@ -3,7 +3,8 @@ window.NhaTroContract = {
     currentTab: "tenantInfo",
     zoomLevel: 1,
     residents: [],
-    contractTerms: [], // New array to store individual terms
+    contractTerms: [],
+     guardianInfo: null, // New array to store individual terms
 
     init() {
         // Kiểm tra các phần tử select cần thiết
@@ -13,6 +14,7 @@ window.NhaTroContract = {
             console.error("Missing select elements in DOM:", missingSelects)
             this.showNotification("Không tìm thấy một số trường tỉnh/thành phố trong giao diện", "error")
         }
+        
 
         this.setupEventListeners()
         this.setupTermsManagement() // New setup for terms management
@@ -22,6 +24,7 @@ window.NhaTroContract = {
         this.setupCustomerModal()
         this.setupResidentModal()
         this.initializePreviewUpdates()
+        this.setupGuardianDisplayButtons();
         return this.loadProvinces()
             .then(() => {
                 console.log("Provinces loaded")
@@ -52,6 +55,64 @@ window.NhaTroContract = {
                 console.error("Error loading provinces:", error)
                 this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố", "error")
             })
+    },
+    setupGuardianDisplayButtons() {
+        // Tìm và gắn sự kiện cho các nút Sửa/Xóa sẽ được hiển thị
+        document.getElementById('btn-edit-guardian')?.addEventListener('click', () => {
+            this.editGuardian();
+        });
+
+        document.getElementById('btn-delete-guardian')?.addEventListener('click', () => {
+            if (confirm('Bạn có chắc chắn muốn xóa thông tin người bảo hộ này?')) {
+                this.clearGuardianDisplay();
+            }
+        });
+    },
+
+    // ✅ HÀM MỚI 2: Hiển thị thông tin người bảo hộ ra form chính
+    updateGuardianDisplay() {
+        const container = document.getElementById('guardian-display-container');
+        const nameEl = document.getElementById('guardian-display-name');
+        const phoneEl = document.getElementById('guardian-display-phone');
+        const addButton = document.getElementById('btn-add-customer-host');
+
+        if (this.guardianInfo && container && nameEl && phoneEl && addButton) {
+            nameEl.textContent = this.guardianInfo.name;
+            phoneEl.textContent = `SĐT: ${this.guardianInfo.phone || 'Chưa có'}`;
+            container.style.display = 'block'; // Hiện khu vực thông tin tạm
+            addButton.style.display = 'none';  // Ẩn nút "Thêm người bảo hộ" đi
+        }
+    },
+
+    // ✅ HÀM MỚI 3: Xóa thông tin người bảo hộ khỏi giao diện
+    clearGuardianDisplay() {
+        this.guardianInfo = null; // Xóa dữ liệu trong biến tạm
+        const container = document.getElementById('guardian-display-container');
+        const addButton = document.getElementById('btn-add-customer-host');
+        if (container) container.style.display = 'none'; // Ẩn khu vực thông tin tạm
+        if (addButton) addButton.style.display = 'block';  // Hiện lại nút "Thêm"
+        this.showNotification('Đã xóa thông tin người bảo hộ.', 'info');
+    },
+    
+    // ✅ HÀM MỚI 4: Mở modal để sửa thông tin
+    editGuardian() {
+        if (!this.guardianInfo) return;
+
+        // Điền thông tin cũ vào lại các ô trong modal
+        document.getElementById('newCustomer-name').value = this.guardianInfo.name || '';
+        document.getElementById('newCustomer-dob').value = this.guardianInfo.dob || '';
+        document.getElementById('newCustomer-id').value = this.guardianInfo.id || '';
+        document.getElementById('newCustomer-id-date').value = this.guardianInfo.idDate || '';
+        document.getElementById('newCustomer-id-place').value = this.guardianInfo.idPlace || '';
+        document.getElementById('newCustomer-phone').value = this.guardianInfo.phone || '';
+        document.getElementById('newCustomer-email').value = this.guardianInfo.email || '';
+        document.getElementById('newCustomer-street').value = this.guardianInfo.street || '';
+        // (Bạn có thể thêm logic fill lại Tỉnh/Huyện/Xã nếu muốn)
+
+        // Mở lại modal
+        const modalElement = document.getElementById('addCustomerModal-host');
+        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+        modal.show();
     },
 
     // New method to setup terms management
@@ -1646,39 +1707,61 @@ window.NhaTroContract = {
         printWindow.print()
     },
 
-    saveContract() {
-        // ✅ Debug roomId chi tiết
-        const roomSelect = document.getElementById('roomSelect')
-        const roomIdValue = roomSelect?.value
+saveContract() {
+    console.log("Bắt đầu lưu hợp đồng cuối cùng...");
+    const form = document.getElementById('contractForm');
+    const formData = new FormData(form);
 
-        console.log("=== ROOM DEBUG ===")
-        console.log("Room select element:", roomSelect)
-        console.log("Room ID value:", roomIdValue)
-        console.log("Room ID type:", typeof roomIdValue)
+    const roomSelect = document.getElementById("roomSelect");
+    const roomId = roomSelect ? roomSelect.value : null;
+    if (!roomId) {
+        alert("Lỗi: Vui lòng chọn một phòng trọ trước khi lưu!");
+        return;
+    }
+    formData.set('room.roomId', roomId);
 
-        // ✅ Validation
-        if (!roomIdValue || roomIdValue.trim() === "" || roomIdValue === "null" || roomIdValue === "undefined") {
-            this.showNotification("Vui lòng chọn phòng trọ!", "error")
-            return
+    // ✅ QUAN TRỌNG: Đính kèm dữ liệu người bảo hộ với key là "unregisteredTenant"
+    // Biến tạm this.guardianInfo vẫn giữ nguyên tên cho dễ hiểu
+    if (this.guardianInfo) { 
+        console.log("Đang thêm dữ liệu người bảo hộ vào FormData...");
+        
+        // Key ở đây phải khớp với tên đối tượng trong ContractDto
+        // Sửa từ "guardian.fullName" thành "unregisteredTenant.fullName"
+        formData.append('unregisteredTenant.fullName', this.guardianInfo.name);
+        formData.append('unregisteredTenant.phone', this.guardianInfo.phone);
+        formData.append('unregisteredTenant.birthday', this.guardianInfo.dob);
+        formData.append('unregisteredTenant.cccdNumber', this.guardianInfo.id);
+        formData.append('unregisteredTenant.issueDate', this.guardianInfo.idDate);
+        formData.append('unregisteredTenant.issuePlace', this.guardianInfo.idPlace);
+        formData.append('unregisteredTenant.email', this.guardianInfo.email);
+        formData.append('unregisteredTenant.street', this.guardianInfo.street);
+        formData.append('unregisteredTenant.ward', this.guardianInfo.ward);
+        formData.append('unregisteredTenant.district', this.guardianInfo.district);
+        formData.append('unregisteredTenant.province', this.guardianInfo.province);
+    }
+
+    // 5. Gửi request đến backend
+     fetch('/api/contracts', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
         }
-
-        const roomIdNumber = parseInt(roomIdValue, 10)
-        console.log("Room ID as number:", roomIdNumber)
-
-        if (isNaN(roomIdNumber) || roomIdNumber <= 0) {
-            this.showNotification("ID phòng không hợp lệ!", "error")
-            return
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Hợp đồng đã được tạo thành công!');
+            window.location.href = '/chu-tro/DS-hop-dong-host';
+        } else {
+            alert('Lỗi từ máy chủ: ' + (data.message || 'Vui lòng kiểm tra lại dữ liệu.'));
         }
-
-        // 🔥 TẠO ĐÚNG CẤU TRÚC JSON THEO BACKEND
-        const contractData = this.buildContractData(roomIdNumber, roomSelect)
-
-        console.log("=== SENDING CONTRACT DATA ===")
-        console.log(JSON.stringify(contractData, null, 2))
-
-        this.sendContractData(contractData)
-    },
-
+    })
+    .catch(error => {
+        console.error("Lỗi khi lưu hợp đồng:", error);
+        alert('Lỗi hệ thống khi gửi dữ liệu. Vui lòng xem console (F12).');
+    });
+},
 
 
     buildContractData(roomIdNumber, roomSelect) {
@@ -2228,69 +2311,44 @@ window.NhaTroContract = {
         })
     },
 
-    saveNewCustomer() {
-        const formData = new FormData()
-        formData.append("name", document.getElementById("newCustomer-name").value || "")
-        formData.append("dob", document.getElementById("newCustomer-dob").value || "")
-        formData.append("id", document.getElementById("newCustomer-id").value || "")
-        formData.append("id-date", document.getElementById("newCustomer-id-date").value || "")
-        formData.append("id-place", document.getElementById("newCustomer-id-place").value || "")
-        formData.append("phone", document.getElementById("newCustomer-phone").value || "")
-        formData.append("email", document.getElementById("newCustomer-email").value || "")
-        formData.append("street", document.getElementById("newCustomer-street").value || "")
-        formData.append("ward", this.getSelectText("newCustomer-ward") || "")
-        formData.append("district", this.getSelectText("newCustomer-district") || "")
-        formData.append("province", this.getSelectText("newCustomer-province") || "")
-        formData.append("cccd-front", document.getElementById("newCustomer-cccd-front").files[0] || null)
-        formData.append("cccd-back", document.getElementById("newCustomer-cccd-back").files[0] || null)
+    // ✅ SỬA LẠI HÀM NÀY BẰNG PHIÊN BẢN HOÀN CHỈNH
+saveNewCustomer() {
+    console.log("Bắt đầu lưu tạm thông tin người bảo hộ ở frontend...");
 
-        fetch("/api/contracts/add-unregistered-tenant", {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    document.getElementById("unregisteredTenantFullName").value = data.tenant.fullName || ""
-                    document.getElementById("unregisteredTenantPhone").value = data.tenant.phone || ""
-                    document.getElementById("unregisteredTenantCccdNumber").value = data.tenant.cccdNumber || ""
-                    document.getElementById("unregisteredTenantBirthday").value = data.tenant.birthday || ""
-                    document.getElementById("unregisteredTenantIssueDate").value = data.tenant.issueDate || ""
-                    document.getElementById("unregisteredTenantIssuePlace").value = data.tenant.issuePlace || ""
-                    document.getElementById("unregisteredTenantStreet").value = data.tenant.street || ""
-                    document.getElementById("unregisteredTenantProvince").value = data.tenant.province || ""
-                    this.loadDistricts(data.tenant.province, "unregisteredTenantDistrict", "unregisteredTenantWard")
-                    setTimeout(() => {
-                        document.getElementById("unregisteredTenantDistrict").value = data.tenant.district || ""
-                        this.loadWards(data.tenant.district, "unregisteredTenantWard")
-                        setTimeout(() => {
-                            document.getElementById("unregisteredTenantWard").value = data.tenant.ward || ""
-                            this.updateAddress("tenant")
-                        }, 200)
-                    }, 200)
+    // 1. Thu thập dữ liệu từ modal vào biến tạm this.guardianInfo
+    this.guardianInfo = {
+        name: document.getElementById('newCustomer-name').value || '',
+        dob: document.getElementById('newCustomer-dob').value || '',
+        id: document.getElementById('newCustomer-id').value || '',
+        idDate: document.getElementById('newCustomer-id-date').value || '',
+        idPlace: document.getElementById('newCustomer-id-place').value || '',
+        phone: document.getElementById('newCustomer-phone').value || '',
+        email: document.getElementById('newCustomer-email').value || '',
+        street: document.getElementById('newCustomer-street').value || '',
+        ward: this.getSelectText('newCustomer-ward') || '',
+        district: this.getSelectText('newCustomer-district') || '',
+        province: this.getSelectText('newCustomer-province') || '',
+    };
 
-                    const modalElement = document.getElementById("addCustomerModal-host")
-                    const modal = bootstrap.Modal.getInstance(modalElement)
-                    if (modal) {
-                        modal.hide()
-                    }
-                    // Đảm bảo cleanup sau khi đóng
-                    setTimeout(() => {
-                        this.cleanupModalBackdrop()
-                    }, 300)
+    if (!this.guardianInfo.name || !this.guardianInfo.phone) {
+        this.showNotification('Vui lòng nhập ít nhất Họ tên và Số điện thoại.', 'warning');
+        this.guardianInfo = null;
+        return;
+    }
 
-                    document.getElementById("tenantType").value = "UNREGISTERED"
-                    this.toggleTenantFields()
-                    this.showNotification("Đã thêm thông tin người thuê thành công!", "success")
-                } else {
-                    this.showNotification(data.message || "Lỗi khi thêm người thuê!", "error")
-                }
-            })
-            .catch((error) => {
-                console.error("Error saving unregistered tenant:", error)
-                this.showNotification("Lỗi khi thêm người thuê: " + error.message, "error")
-            })
-    },
+    // 2. ✅ GỌI HÀM CẬP NHẬT GIAO DIỆN
+    this.updateGuardianDisplay();
+
+    // 3. ✅ GỌI LỆNH ĐÓNG MODAL
+    const modalElement = document.getElementById('addCustomerModal-host');
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
+    
+    this.showNotification('Đã thêm thông tin người bảo hộ (tạm thời).', 'success');
+    console.log("Đã lưu tạm dữ liệu người bảo hộ vào biến guardianInfo:", this.guardianInfo);
+},
 
     previewCustomerImage(event, previewId) {
         const file = event.target.files[0]

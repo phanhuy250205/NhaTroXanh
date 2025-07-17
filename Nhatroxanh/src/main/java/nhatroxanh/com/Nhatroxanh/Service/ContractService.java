@@ -78,4 +78,5 @@ public interface ContractService {
 
 
     List<Contracts> getMyContracts();
+    Contracts createContractFinal(ContractDto contractDto, Users owner, Users tenant, UnregisteredTenants guardian);
 }

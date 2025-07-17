@@ -65,9 +65,9 @@ public class ContractServiceImpl implements ContractService {
         logger.info("Tenant phone validated: {}", tenantPhone);
 
         if (roomId == null || roomId <= 0) {
-            logger.error("Invalid room ID: {}", roomId);
-            throw new IllegalArgumentException("ID phòng không hợp lệ!");
-        }
+    logger.error("Invalid room ID: {}", roomId);
+    throw new IllegalArgumentException("ID phòng không hợp lệ!");
+}
         logger.info("Room ID validated: {}", roomId);
 
         if (contractDate == null) {
@@ -942,5 +942,50 @@ public class ContractServiceImpl implements ContractService {
 
         // Lấy danh sách hợp đồng của chủ trọ
        return contractRepository.findByOwnerId(user.getUserId());
+    }
+
+ @Override
+    @Transactional
+    public Contracts createContractFinal(ContractDto contractDto, Users owner, Users tenant, UnregisteredTenants guardian) {
+        logger.info("SERVICE: Bắt đầu tạo và liên kết hợp đồng.");
+
+        // 1. Tìm phòng trọ từ DTO và kiểm tra
+        Rooms room = roomRepository.findById(contractDto.getRoom().getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException("Phòng trọ không tồn tại!"));
+        
+        if (room.getStatus() != RoomStatus.unactive) {
+            throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
+        }
+
+        // 2. Tạo đối tượng hợp đồng và gán các thông tin
+        Contracts contract = new Contracts();
+        contract.setOwner(owner);
+        contract.setRoom(room);
+        contract.setTenant(tenant);         // Gán người thuê chính (User)
+        contract.setUnregisteredTenant(guardian);     // Gán người bảo hộ (dữ liệu từ bảng unregistered_tenants)
+
+        // Lấy thông tin từ DTO để điền vào hợp đồng
+        contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
+        contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
+        contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
+        contract.setPrice(contractDto.getTerms().getPrice().floatValue());
+        contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
+        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+        contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+        contract.setTerms(contractDto.getTerms().getTerms());
+        contract.setCreatedAt(new java.sql.Date(System.currentTimeMillis()));
+        // Lấy SĐT từ người thuê chính
+        contract.setTenantPhone(tenant.getPhone());
+
+
+        // 3. Lưu hợp đồng vào database
+        Contracts savedContract = contractRepository.save(contract);
+        
+        // 4. Cập nhật trạng thái phòng
+        room.setStatus(RoomStatus.active);
+        roomRepository.save(room);
+
+        logger.info("SERVICE: Đã tạo và liên kết hợp đồng ID {} thành công.", savedContract.getContractId());
+        return savedContract;
     }
 }

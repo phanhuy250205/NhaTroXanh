@@ -301,204 +301,58 @@ public class ContractController {
         }
     }
     @PostMapping
-    @PreAuthorize("hasRole('OWNER')")
-    @Transactional
-    public ResponseEntity<?> createContract(
-            @Valid @ModelAttribute ContractDto contract,  // ← SỬA: @RequestBody thay vì @ModelAttribute
-            Authentication authentication) {
+@PreAuthorize("hasRole('OWNER')")
+@Transactional
+public ResponseEntity<?> createContract(
+        @Valid @ModelAttribute ContractDto contractDto,
+        Authentication authentication) {
 
-        logger.info("=== START CREATE CONTRACT ===");
-        logger.info("Authentication: {}", authentication.getName());
-        logger.info("Contract data received: {}", contract);
-        logger.info("Binding result has errors: false"); // Không có BindingResult với @RequestBody
+    logger.info("--- BẮT ĐẦU TẠO HỢP ĐỒNG (Logic cuối cùng) ---");
+    Map<String, Object> response = new HashMap<>();
 
-        Map<String, Object> response = new HashMap<>();
+    try {
+        // 1. Lấy thông tin CHỦ TRỌ (Owner)
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Users owner = userService.findOwnerByCccdOrPhone(authentication, userDetails.getCccd(), null);
+        if (owner == null) throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
 
-        try {
-            // Bỏ validation check với BindingResult vì @RequestBody tự động validate
+        // 2. Lấy thông tin NGƯỜI THUÊ CHÍNH (Tenant - Luôn là User đã đăng ký)
+        // Dùng hàm có sẵn của bạn để tìm User bằng SĐT từ DTO
+        Users tenant = handleRegisteredTenant(contractDto.getTenant());
+        logger.info("Người thuê chính đã được xác định: {}", tenant.getFullname());
 
-            // Contract null check
-            logger.info("=== CONTRACT DATA CHECK ===");
-            if (contract == null) {
-                logger.error("Contract is null!");
-                throw new IllegalArgumentException("Dữ liệu hợp đồng không được để trống!");
-            }
-            logger.info("Contract is not null");
-
-            // Room data logging
-            logger.info("=== ROOM DATA CHECK ===");
-            logger.info("Contract.getRoom(): {}", contract.getRoom());
-            if (contract.getRoom() != null) {
-                logger.info("Room ID: {}", contract.getRoom().getRoomId());
-                logger.info("Room Name: {}", contract.getRoom().getRoomName());
-                logger.info("Room Price: {}", contract.getRoom().getPrice());
-                logger.info("Room Status: {}", contract.getRoom().getStatus());
-            } else {
-                logger.error("Room data is null!");
-            }
-
-            // Validate room data
-            if (contract.getRoom() == null) {
-                logger.error("Room information is null - throwing exception");
-                throw new IllegalArgumentException("Thông tin phòng không được để trống!");
-            }
-
-            Integer roomId = contract.getRoom().getRoomId();
-            logger.info("Extracted Room ID: {}", roomId);
-            if (roomId == null || roomId <= 0) {
-                logger.error("Room ID is null or invalid: {}", roomId);
-                throw new IllegalArgumentException("ID phòng không được để trống hoặc không hợp lệ!");
-            }
-            logger.info("Room ID validation passed: {}", roomId);
-
-            // Contract data validation
-            logger.info("=== CONTRACT DATA VALIDATION ===");
-            validateContractData(contract);
-            logger.info("Contract data validation passed");
-
-            // Date calculation
-            logger.info("=== DATE CALCULATION ===");
-            if (contract.getTerms().getDuration() != null && contract.getTerms().getDuration() > 0) {
-                LocalDate startDate = contract.getTerms().getStartDate();
-                LocalDate calculatedEndDate = startDate.plusMonths(contract.getTerms().getDuration());
-                logger.info("Start date: {}", startDate);
-                logger.info("Duration: {} months", contract.getTerms().getDuration());
-                logger.info("Calculated end date: {}", calculatedEndDate);
-                contract.getTerms().setEndDate(calculatedEndDate);
-            }
-
-            // Owner information
-            logger.info("=== OWNER INFORMATION ===");
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            String ownerCccd = userDetails.getCccd();
-            logger.info("Owner CCCD from authentication: {}", ownerCccd);
-
-            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
-            if (owner == null) {
-                logger.error("Owner not found with CCCD: {}", ownerCccd);
-                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
-            }
-            logger.info("Owner found: ID={}, Name={}", owner.getUserId(), owner.getFullname());
-
-            // Update owner information - SỬA: Không có file upload
-            logger.info("=== UPDATE OWNER INFORMATION ===");
-            updateOwnerInformation(owner, contract.getOwner());
-            logger.info("Owner information updated successfully");
-
-            // Handle tenant information - SỬA: Không có file upload
-            logger.info("=== TENANT HANDLING ===");
-            Users tenant = null;
-            UnregisteredTenants unregisteredTenant = null;
-            String tenantPhone;
-
-            logger.info("Tenant type: {}", contract.getTenantType());
-
-            if ("UNREGISTERED".equals(contract.getTenantType())) {
-                logger.info("Processing unregistered tenant");
-                logger.info("Unregistered tenant data: {}", contract.getUnregisteredTenant());
-                unregisteredTenant = handleUnregisteredTenant(contract.getUnregisteredTenant(), owner);
-                tenantPhone = contract.getUnregisteredTenant().getPhone();
-                logger.info("Unregistered tenant processed: ID={}, Phone={}",
-                        unregisteredTenant.getId(), tenantPhone);
-            } else {
-                logger.info("Processing registered tenant");
-                logger.info("Registered tenant data: {}", contract.getTenant());
-                tenant = handleRegisteredTenant(contract.getTenant());
-                tenantPhone = contract.getTenant().getPhone();
-                logger.info("Registered tenant processed: ID={}, Phone={}",
-                        tenant.getUserId(), tenantPhone);
-            }
-
-            // Validate and get room
-            logger.info("=== ROOM VALIDATION ===");
-            logger.info("Validating room with ID: {}", roomId);
-            Rooms room = validateAndGetRoom(roomId);
-            logger.info("Room validation passed: ID={}, Name={}, Status={}",
-                    room.getRoomId(), room.getNamerooms(), room.getStatus());
-
-            // Create contract
-            logger.info("=== CREATE CONTRACT ===");
-            logger.info("Creating contract with parameters:");
-            logger.info("- Tenant Phone: {}", tenantPhone);
-            logger.info("- Room ID: {}", roomId);
-            logger.info("- Contract Date: {}", contract.getContractDate());
-            logger.info("- Start Date: {}", contract.getTerms().getStartDate());
-            logger.info("- End Date: {}", contract.getTerms().getEndDate());
-            logger.info("- Price: {}", contract.getTerms().getPrice());
-            logger.info("- Deposit: {}", contract.getTerms().getDeposit());
-            logger.info("- Status: {}", contract.getStatus());
-            logger.info("- Owner CCCD: {}", ownerCccd);
-            logger.info("- Duration: {}", contract.getTerms().getDuration());
-
-            // Convert BigDecimal to Float safely
-            Float priceFloat = null;
-            Float depositFloat = null;
-
-            if (contract.getTerms().getPrice() != null) {
-                priceFloat = contract.getTerms().getPrice().floatValue();
-                logger.info("Converted price from {} to {}", contract.getTerms().getPrice(), priceFloat);
-            }
-
-            if (contract.getTerms().getDeposit() != null) {
-                depositFloat = contract.getTerms().getDeposit().floatValue();
-                logger.info("Converted deposit from {} to {}", contract.getTerms().getDeposit(), depositFloat);
-            }
-
-            Contracts savedContract = contractService.createContract(
-                    tenantPhone,
-                    roomId,
-                    Date.valueOf(contract.getContractDate()),
-                    Date.valueOf(contract.getTerms().getStartDate()),
-                    Date.valueOf(contract.getTerms().getEndDate()),
-                    priceFloat,
-                    depositFloat,
-                    contract.getTerms().getTerms(),
-                    Contracts.Status.valueOf(contract.getStatus().toUpperCase()),
-                    ownerCccd,
-                    tenant,
-                    unregisteredTenant,
-                    contract.getTerms().getDuration()
-            );
-
-            logger.info("Contract created successfully: ID={}", savedContract.getContractId());
-
-            // Update room status
-            logger.info("=== UPDATE ROOM STATUS ===");
-            logger.info("Updating room status from {} to ACTIVE", room.getStatus());
-            room.setStatus(RoomStatus.active);
-            roomsService.save(room);
-            logger.info("Room status updated successfully");
-
-            // Success response
-            logger.info("=== SUCCESS RESPONSE ===");
-            response.put("success", true);
-            response.put("message", "Hợp đồng đã được tạo thành công!");
-            response.put("contractId", savedContract.getContractId());
-
-            logger.info("Contract creation completed successfully. Contract ID: {}", savedContract.getContractId());
-            logger.info("=== END CREATE CONTRACT SUCCESS ===");
-
-            return ResponseEntity.ok(response);
-
-        } catch (IllegalArgumentException e) {
-            logger.error("=== ILLEGAL ARGUMENT EXCEPTION ===");
-            logger.error("Error message: {}", e.getMessage());
-            logger.error("Stack trace: ", e);
-            response.put("success", false);
-            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body("Dữ liệu không hợp lệ: " + e.getMessage());
-        } catch (Exception e) {
-            logger.error("=== GENERAL EXCEPTION ===");
-            logger.error("Error message: {}", e.getMessage());
-            logger.error("Exception type: {}", e.getClass().getSimpleName());
-            logger.error("Full stack trace: ", e);
-            response.put("success", false);
-            response.put("message", "Lỗi khi tạo hợp đồng: " + e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body("Dữ liệu không hợp lệ: " + e.getMessage());
+        // 3. Xử lý NGƯỜI BẢO HỘ (dữ liệu được lưu vào bảng unregistered_tenants)
+        UnregisteredTenants unregisteredTenantForGuardian = null; // Khai báo biến để chứa người bảo hộ
+        
+        // Kiểm tra xem frontend có gửi dữ liệu người bảo hộ không
+        if (contractDto.getUnregisteredTenant() != null && StringUtils.hasText(contractDto.getUnregisteredTenant().getPhone())) {
+            logger.info("Controller nhận thấy có dữ liệu người bảo hộ, đang xử lý...");
+            // Gọi hàm helper để tạo và lưu người bảo hộ vào bảng `unregistered_tenants`
+            unregisteredTenantForGuardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner);
+            logger.info("Đã tạo bản ghi cho người bảo hộ: {}", unregisteredTenantForGuardian.getFullName());
         }
+
+        // 4. Gọi Service để tạo hợp đồng cuối cùng
+        Contracts savedContract = contractService.createContractFinal(
+            contractDto,
+            owner,
+            tenant,                     // Người thuê chính
+            unregisteredTenantForGuardian // Người bảo hộ (có thể là null)
+        );
+
+        // 5. Trả về kết quả thành công
+        response.put("success", true);
+        response.put("message", "Hợp đồng đã được tạo thành công!");
+        response.put("contractId", savedContract.getContractId());
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        logger.error("Lỗi khi tạo hợp đồng: {}", e.getMessage(), e);
+        response.put("success", false);
+        response.put("message", "Lỗi: " + e.getMessage());
+        return ResponseEntity.badRequest().body(response);
     }
+}
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private Rooms validateAndGetRoom(Integer roomId) {
         logger.info("=== VALIDATE AND GET ROOM ===");

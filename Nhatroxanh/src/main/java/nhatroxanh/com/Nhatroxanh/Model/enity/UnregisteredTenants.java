@@ -25,8 +25,8 @@ public class UnregisteredTenants {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user; // Liên kết với bảng Users (chủ trọ)
 
-    @Column(name = "address") // Thay đổi từ @OneToOne sang @Column
-    private String address;   // Thay đổi từ Address sang String
+    @Column(name = "address")
+    private String address;
 
     @Column(name = "full_name", length = 100, nullable = false)
     private String fullName;
@@ -59,8 +59,7 @@ public class UnregisteredTenants {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-
-
+    
     public enum Status {
         ACTIVE, INACTIVE
     }
