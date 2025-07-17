@@ -23,15 +23,26 @@ import lombok.ToString;
 @AllArgsConstructor
 @Builder
 @Entity
-@ToString(exclude = { "notifications", "userCccd", "ownedContracts", "rentedContracts", "vouchers" })
+@Table(name = "users")
+// ✅ SỬA: Thêm addressEntity vào exclude
+@ToString(exclude = {
+        "notifications",
+        "userCccd",
+        "ownedContracts",
+        "rentedContracts",
+        "vouchers",
+        "addressEntity"  // ✅ THÊM DÒNG NÀY
+})
+// ✅ SỬA: Chỉ dùng userId làm key cho equals/hashCode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Data
-@Table(name = "Users")
+
 public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_id") // Đảm bảo tên cột khớp với database
+    @Column(name = "user_id")
+    @EqualsAndHashCode.Include  // ✅ THÊM annotation này
     private Integer userId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
@@ -107,12 +118,9 @@ public class Users {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, fullname, phone, email); // Không bao gồm userCccd
-    }
-   @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    // ✅ XÓA method hashCode() tự viết vì đã có @EqualsAndHashCode
+    // @Override
+    // public int hashCode() {
+    //     return Objects.hash(userId, fullname, phone, email);
+    // }
 }

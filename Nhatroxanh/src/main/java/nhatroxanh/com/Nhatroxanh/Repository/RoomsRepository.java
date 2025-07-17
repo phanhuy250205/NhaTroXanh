@@ -107,4 +107,5 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
         Optional<Rooms> findFirstByHostel(Hostel hostel);
 
         Long countByStatus(RoomStatus status);
+        List<Rooms> findByHostel_HostelId(Integer hostelId);
 }

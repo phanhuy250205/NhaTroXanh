@@ -1,6 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
+import jakarta.transaction.Transactional;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -82,5 +86,28 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         @Query("SELECT c.status, COUNT(c) FROM Contracts c WHERE c.room.hostel.owner.userId = :ownerId GROUP BY c.status")
         List<Object[]> countContractsByStatus(@Param("ownerId") Integer ownerId);
+
+        // Thay thế method updateContract bằng @Query
+        @Modifying
+        @Transactional
+        @Query("UPDATE Contracts c SET " +
+                        "c.contractDate = :#{#contractDto.contractDate}, " +
+                        "c.startDate = :#{#contractDto.terms.startDate}, " +
+                        "c.endDate = :#{#contractDto.terms.endDate}, " +
+                        "c.price = :#{#contractDto.terms.price}, " +
+                        "c.deposit = :#{#contractDto.terms.deposit}, " +
+                        "c.status = :#{#contractDto.status} " +
+                        "WHERE c.contractId = :contractId")
+        int updateContract(
+                        @Param("contractId") Integer contractId,
+                        @Param("contractDto") ContractDto contractDto);
+
+        // Hoặc nếu muốn trả về đối tượng Contracts
+        @Query("SELECT c FROM Contracts c WHERE c.contractId = :contractId")
+        Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
+
+        // Tìm hợp đồng theo tenant ID
+        @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
+        Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
 
 }

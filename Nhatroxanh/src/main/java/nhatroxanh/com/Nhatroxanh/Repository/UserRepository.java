@@ -37,8 +37,12 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
     Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT a FROM Address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE a.id = (SELECT u.addressEntity.id FROM Users u WHERE u.userId = :userId)")
-    Optional<Address> findAddressByUserId(@Param("userId") Integer userId);
+        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+        String findAddressByUserId(@Param("userId") Integer userId);
+
+        // Hoặc nếu bạn muốn join trực tiếp từ Users
+        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+        Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
 
     @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
     Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
