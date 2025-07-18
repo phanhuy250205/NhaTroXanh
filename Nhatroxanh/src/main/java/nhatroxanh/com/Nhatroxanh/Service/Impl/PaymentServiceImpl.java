@@ -21,8 +21,11 @@ import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -530,7 +533,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .message(finalMessage)
                 .type(Notification.NotificationType.PAYMENT)
                 .isRead(false)
-                .createAt(Date.valueOf(LocalDate.now()))
+                .createAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))))
                 .room(room) // Gán room từ Contracts
                 .build();
 

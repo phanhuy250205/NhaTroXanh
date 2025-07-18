@@ -31,3 +31,5 @@ SELECT * FROM address WHERE id = (SELECT address_id FROM hostels WHERE hostel_id
 SELECT * FROM ward WHERE id = (SELECT ward_id FROM address WHERE id = <address_id>);
 SELECT * FROM district WHERE id = (SELECT district_id FROM ward WHERE id = <ward_id>);
 SELECT * FROM province WHERE id = (SELECT province_id FROM district WHERE id = <district_id>);
+
+SELECT * FROM payments WHERE app_trans_id = '250717_9561' OR id = 17;

@@ -63,7 +63,6 @@ public class Payments {
         TIỀN_MẶT,
         BANK,
         VNPAY,
-        ZALOPAY,
         MOMO
     }
 }

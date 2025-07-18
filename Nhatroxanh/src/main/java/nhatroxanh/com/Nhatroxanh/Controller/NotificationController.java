@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Notification;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     private final NotificationRepository notificationRepository;
+    private final PaymentsRepository paymentsRepository;
+    private final NotificationService notificationService;
 
     @GetMapping
     @ResponseBody
@@ -41,6 +45,16 @@ public class NotificationController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer userId = userDetails.getUserId();
             log.info("Fetching notifications for user ID: {}", userId);
+
+            // Clean up obsolete payment notifications before fetching
+            try {
+                int cleanedUp = notificationService.cleanupObsoletePaymentNotifications(userId);
+                if (cleanedUp > 0) {
+                    log.info("Cleaned up {} obsolete payment notifications for user {}", cleanedUp, userId);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to cleanup obsolete notifications for user {}: {}", userId, e.getMessage());
+            }
 
             List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
             List<Map<String, Object>> enrichedNotifications = notifications.stream()
@@ -147,6 +161,16 @@ public class NotificationController {
             Integer userId = userDetails.getUserId();
             log.info("Rendering notifications view for user ID: {}", userId);
 
+            // Clean up obsolete payment notifications before fetching
+            try {
+                int cleanedUp = notificationService.cleanupObsoletePaymentNotifications(userId);
+                if (cleanedUp > 0) {
+                    log.info("Cleaned up {} obsolete payment notifications for user {}", cleanedUp, userId);
+                }
+            } catch (Exception e) {
+                log.warn("Failed to cleanup obsolete notifications for user {}: {}", userId, e.getMessage());
+            }
+
             List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
             if (notifications == null) {
                 notifications = Collections.emptyList();
@@ -250,6 +274,33 @@ public class NotificationController {
         } catch (Exception e) {
             log.error("Error parsing payment notification: {}", message, e);
             return null;
+        }
+    }
+
+    @PostMapping("/cleanup")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> cleanupObsoleteNotifications(Authentication authentication) {
+        try {
+            if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+                log.warn("Unauthenticated attempt to cleanup notifications");
+                return ResponseEntity.status(403).body(Map.of("error", "Unauthorized access"));
+            }
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer userId = userDetails.getUserId();
+            log.info("Manual cleanup request for user ID: {}", userId);
+
+            int cleanedUp = notificationService.cleanupObsoletePaymentNotifications(userId);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Cleanup completed successfully",
+                    "cleanedUp", cleanedUp
+            ));
+        } catch (Exception e) {
+            log.error("Error during manual cleanup: ", e);
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to cleanup notifications: " + e.getMessage()));
         }
     }
 }

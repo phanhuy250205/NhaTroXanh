@@ -46,13 +46,28 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Fetch and render notifications
+    // Check if server-side data is available
     function loadNotifications() {
+        // Try to use server-side data first
+        if (window.serverNotifications && Array.isArray(window.serverNotifications) && window.serverNotifications.length > 0) {
+            console.log('Using server-side notifications data');
+            renderNotifications(window.serverNotifications);
+            return;
+        }
+
+        // Show server error if available
+        if (window.serverError) {
+            showAlert('danger', window.serverError);
+            return;
+        }
+
+        // Fallback to AJAX loading
+        console.log('Falling back to AJAX loading');
         fetch('/api/notifications', {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': `Bearer ${localStorage.getItem('token') || ''}` // Thêm token nếu cần
+                'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
             }
         })
             .then(response => {
@@ -82,70 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     return;
                 }
 
-                // Clear existing notifications
-                const containers = {
-                    all: document.getElementById('all-notifications-list'),
-                    lodging: document.getElementById('lodging-notifications-list'),
-                    finance: document.getElementById('finance-notifications-list'),
-                    deals: document.getElementById('deals-notifications-list'),
-                    profile: document.getElementById('profile-notifications-list')
-                };
-
-                Object.values(containers).forEach(container => {
-                    if (!container) {
-                        console.error('Container not found:', container);
-                        return;
-                    }
-                    container.innerHTML = '';
-                });
-
-                // Map NotificationType to tabs
-                const typeToTab = {
-                    'PAYMENT': 'finance-notifications-list',
-                    'CONTRACT': 'lodging-notifications-list',
-                    'SYSTEM': 'profile-notifications-list',
-                    'REPORT': 'deals-notifications-list'
-                };
-
-                // Render notifications
-                data.notifications.forEach(notification => {
-                    if (!notification) {
-                        console.warn('Invalid notification:', notification);
-                        return;
-                    }
-                    const tabId = typeToTab[notification.type] || 'all-notifications-list';
-                    const container = document.getElementById(tabId);
-                    const allContainer = document.getElementById('all-notifications-list');
-
-                    if (!container || !allContainer) {
-                        console.error('Tab container not found for tabId:', tabId);
-                        return;
-                    }
-
-                    [container, allContainer].forEach(cont => {
-                        if (cont && cont !== container) return; // Skip duplicate rendering in all tab
-                        const card = createNotificationCard(notification);
-                        if (card) cont.appendChild(card);
-                    });
-
-                    // Mark as read on click
-                    const cardHeader = container.querySelector(`[data-notification-id="${notification.notificationId}"]`);
-                    if (cardHeader && !notification.isRead) {
-                        cardHeader.addEventListener('click', () => {
-                            markNotificationAsRead(notification.notificationId, cardHeader);
-                        }, { once: true });
-                    }
-                });
-
-                // Add empty state if no notifications
-                Object.entries(containers).forEach(([key, container]) => {
-                    if (container && container.children.length === 0) {
-                        const emptyItem = document.createElement('div');
-                        emptyItem.className = 'notification-card-item';
-                        emptyItem.innerHTML = '<div class="notification-card-body text-center">Không có thông báo</div>';
-                        container.appendChild(emptyItem);
-                    }
-                });
+                renderNotifications(data.notifications);
             })
             .catch(error => {
                 console.error('Error loading notifications:', error);
@@ -153,8 +105,90 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     }
 
+    // Render notifications from data
+    function renderNotifications(notificationsData) {
+        // Clear existing notifications
+        const containers = {
+            all: document.getElementById('all-notifications-list'),
+            lodging: document.getElementById('lodging-notifications-list'),
+            finance: document.getElementById('finance-notifications-list'),
+            deals: document.getElementById('deals-notifications-list'),
+            profile: document.getElementById('profile-notifications-list')
+        };
+
+        Object.values(containers).forEach(container => {
+            if (container) container.innerHTML = '';
+        });
+
+        // Map NotificationType to tabs
+        const typeToTab = {
+            'PAYMENT': 'finance-notifications-list',
+            'CONTRACT': 'lodging-notifications-list',
+            'SYSTEM': 'profile-notifications-list',
+            'REPORT': 'deals-notifications-list'
+        };
+
+        // Process notifications data (handle both server-side and AJAX formats)
+        notificationsData.forEach(notificationData => {
+            if (!notificationData) {
+                console.warn('Invalid notification:', notificationData);
+                return;
+            }
+
+            // Handle server-side format (wrapped in notification object)
+            const notification = notificationData.notification || notificationData;
+            const room = notificationData.room || notification.room;
+            const paymentDetails = notificationData.paymentDetails;
+
+            if (!notification) {
+                console.warn('No notification object found:', notificationData);
+                return;
+            }
+
+            const tabId = typeToTab[notification.type] || 'all-notifications-list';
+            const container = document.getElementById(tabId);
+            const allContainer = document.getElementById('all-notifications-list');
+
+            if (!container || !allContainer) {
+                console.error('Tab container not found for tabId:', tabId);
+                return;
+            }
+
+            // Create and add card to both specific tab and all tab
+            const specificCard = createNotificationCard(notification, room, paymentDetails);
+            const allCard = createNotificationCard(notification, room, paymentDetails);
+            
+            if (specificCard && container !== allContainer) {
+                container.appendChild(specificCard);
+            }
+            if (allCard) {
+                allContainer.appendChild(allCard);
+            }
+
+            // Mark as read on click
+            [container, allContainer].forEach(cont => {
+                const cardHeader = cont.querySelector(`[data-notification-id="${notification.notificationId}"]`);
+                if (cardHeader && !notification.isRead) {
+                    cardHeader.addEventListener('click', () => {
+                        markNotificationAsRead(notification.notificationId, cardHeader);
+                    }, { once: true });
+                }
+            });
+        });
+
+        // Add empty state if no notifications
+        Object.entries(containers).forEach(([key, container]) => {
+            if (container && container.children.length === 0) {
+                const emptyItem = document.createElement('div');
+                emptyItem.className = 'notification-card-item';
+                emptyItem.innerHTML = '<div class="notification-card-body text-center">Không có thông báo</div>';
+                container.appendChild(emptyItem);
+            }
+        });
+    }
+
     // Create notification card
-    function createNotificationCard(notification) {
+    function createNotificationCard(notification, room, paymentDetails) {
         if (!notification) {
             console.error('Invalid notification data:', notification);
             return null;
@@ -165,12 +199,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const cardId = `notif-card-${notification.notificationId}`;
         const toggleId = `toggle-card-${notification.notificationId}`;
 
-        let paymentDetails = null;
-        if (notification.type === 'PAYMENT' && notification.message) {
+        // Parse payment details if not provided and it's a PAYMENT notification
+        if (!paymentDetails && notification.type === 'PAYMENT' && notification.message) {
             paymentDetails = parsePaymentNotification(notification);
-            console.log(`Payment details for notification ${notification.notificationId}:`, paymentDetails);
-        } else {
-            console.log(`No payment details for notification ${notification.notificationId}, type: ${notification.type}`);
         }
 
         card.innerHTML = `
@@ -193,21 +224,21 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="notification-card-content" id="${cardId}">
                 <div class="notification-card-body">
-                    ${notification.type === 'PAYMENT' && paymentDetails ? renderPaymentNotification(paymentDetails, notification.room) :
+                    ${notification.type === 'PAYMENT' && paymentDetails ? renderPaymentNotification(paymentDetails, room) :
                 `<div class="message-body-notifications">
                             <h4><i class="fas fa-info-circle" style="color: #3e83cc;"></i> Thông tin chi tiết</h4>
                             <p>${notification.message || 'Không có nội dung'}</p>
-                            ${notification.room ? `
+                            ${room ? `
                                 <div class="data-block-notifications">
                                     <div class="data-title-notifications">
                                         <i class="fas fa-home"></i>
                                         Thông tin phòng
                                     </div>
                                     <div class="data-content-notifications">
-                                        <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
-                                        <strong>Loại phòng:</strong> ${notification.room.category?.name || 'Không xác định'}<br>
-                                        <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
-                                        <strong>Giá phòng:</strong> ${notification.room.price || '0'} VNĐ
+                                        <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
+                                        <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                                        <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
+                                        <strong>Giá phòng:</strong> ${room.price || '0'} VNĐ
                                     </div>
                                 </div>
                             ` : '<p>Không có thông tin phòng liên quan.</p>'}
@@ -222,21 +253,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // Parse PAYMENT notification message
     function parsePaymentNotification(notification) {
         try {
-            const match = notification.message.match(/Hóa đơn #(\d+) cho tháng ([\d/]+) \(Tổng: ([^\)]+)\)\.? Hạn thanh toán: ([^\.]+)\.?/i);
-            if (!match) {
-                console.warn('No match for payment notification:', notification.message);
-                return null;
+            const message = notification.message;
+            
+            // Check if this is a success notification
+            if (message.includes('thanh toán thành công') || message.includes('Bạn đã thanh toán thành công')) {
+                // Parse success notification
+                const successMatch = message.match(/Bạn đã thanh toán thành công hóa đơn #(\d+) cho phòng ([^\s]+) tại ([^.]+)\. Tháng: ([^.]+)\. Số tiền: ([^.]+)\. Phương thức: ([^.]+)\./);
+                
+                if (successMatch) {
+                    return {
+                        invoiceId: successMatch[1],
+                        month: successMatch[4],
+                        total: successMatch[5],
+                        roomName: successMatch[2],
+                        hostelName: successMatch[3],
+                        paymentMethod: successMatch[6],
+                        status: 'SUCCESS',
+                        details: []
+                    };
+                }
+                
+                // Fallback for success messages that don't match the pattern
+                const fallbackMatch = message.match(/hóa đơn #(\d+)/);
+                if (fallbackMatch) {
+                    return {
+                        invoiceId: fallbackMatch[1],
+                        status: 'SUCCESS',
+                        details: []
+                    };
+                }
+            } else {
+                // Parse payment reminder notification
+                const match = message.match(/Hóa đơn #(\d+) cho tháng ([\d/]+) \(Tổng: ([^\)]+)\)\.? Hạn thanh toán: ([^\.]+)\.?/i);
+                if (match) {
+                    return {
+                        invoiceId: match[1],
+                        month: match[2],
+                        total: match[3],
+                        dueDate: match[4],
+                        status: 'PENDING',
+                        details: []
+                    };
+                }
             }
-
-            const [, invoiceId, month, total, dueDate] = match;
-            return {
-                invoiceId,
-                month,
-                total,
-                dueDate,
-                details: [], // Mặc định rỗng nếu không có chi tiết
-                status: 'PENDING'
-            };
+            
+            console.warn('No match for payment notification:', message);
+            return null;
         } catch (e) {
             console.error('Error parsing PAYMENT notification:', e, notification.message);
             return null;

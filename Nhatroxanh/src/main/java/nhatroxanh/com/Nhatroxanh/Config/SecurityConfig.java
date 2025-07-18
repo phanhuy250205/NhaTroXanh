@@ -53,16 +53,16 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints like ZaloPay
+                .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         // Publicly accessible endpoints
                         .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/Uploads/**")
                         .permitAll()
-                        .requestMatchers("/zalopay/**") // Allow ZaloPay endpoints (create-order, callback)
+                        .requestMatchers("/momo/**","/vnpay/**") 
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", 
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher")
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/guest/**")
                         .permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro")
                         .permitAll()

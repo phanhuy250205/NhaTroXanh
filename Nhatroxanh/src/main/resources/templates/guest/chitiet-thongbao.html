@@ -778,10 +778,10 @@
                                         Thông tin phòng
                                     </div>
                                     <div class="data-content-notifications">
-                                        <strong>Phòng:</strong> ${paymentDetails.roomName || room?.namerooms || 'Không có thông tin phòng'}<br>
-                                        <strong>Nhà trọ:</strong> ${paymentDetails.hostelName || 'Không xác định'}<br>
-                                        <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
-                                        <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²
+                                        <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
+                                    <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
+                                    <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
+                                    <strong>Giá phòng:</strong> ${room?.price || '0'} VNĐ
                                     </div>
                                 </div>
                                 <div class="data-block-notifications">
@@ -791,7 +791,7 @@
                                     </div>
                                     <div class="data-content-notifications">
                                         <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
-                                        <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'ZaloPay'}<br>
+                                        <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
                                         <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
                                     </div>
                                 </div>
@@ -804,7 +804,7 @@
                             </div>
                             <div class="payment-info-notifications">
                                 <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
-                                <div><strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'ZaloPay'}</div>
+                                <div><strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'VNPay'}</div>
                                 <div><strong>Trạng thái:</strong> <span style="color: #10b981; font-weight: bold;">Đã thanh toán thành công</span></div>
                             </div>
                         </div>

@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.sql.Date;
+import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @AllArgsConstructor
@@ -35,7 +35,7 @@ public class Notification {
     private Boolean isRead;
 
     @Column(name = "create_at", nullable = false)
-    private Date createAt;
+    private Timestamp createAt;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "room_id")

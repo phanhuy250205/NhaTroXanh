@@ -129,4 +129,26 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
     List<Payments> findByContractId(@Param("contractId") Integer contractId);
 
        Optional<Payments> findByAppTransId(String appTransId);
+       
+    // Check if payment exists and get its status
+    @Query("SELECT p.paymentStatus FROM Payments p WHERE p.id = :paymentId")
+    Optional<PaymentStatus> findPaymentStatusById(@Param("paymentId") Integer paymentId);
+    
+    // Check if payment exists
+    @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Payments p WHERE p.id = :paymentId")
+    boolean existsByPaymentId(@Param("paymentId") Integer paymentId);
+    
+    // === SCHEDULER QUERIES FOR OVERDUE PAYMENTS ===
+    
+    // Tìm tất cả payments chưa thanh toán và đã quá hạn
+    @Query("SELECT p FROM Payments p WHERE p.paymentStatus = 'CHƯA_THANH_TOÁN' AND p.dueDate < :currentDate")
+    List<Payments> findUnpaidPaymentsPastDueDate(@Param("currentDate") Date currentDate);
+    
+    // Đếm số payments theo trạng thái
+    @Query("SELECT COUNT(p) FROM Payments p WHERE p.paymentStatus = :status")
+    long countByPaymentStatus(@Param("status") PaymentStatus status);
+    
+    // Đếm số payments mới quá hạn kể từ ngày cụ thể
+    @Query("SELECT COUNT(p) FROM Payments p WHERE p.paymentStatus = 'QUÁ_HẠN_THANH_TOÁN' AND p.dueDate >= :sinceDate")
+    long countNewOverduePaymentsSince(@Param("sinceDate") Date sinceDate);
 }
