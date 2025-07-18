@@ -1098,6 +1098,17 @@
                 e.preventDefault();
             }
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("postForm");
+            if (form) {
+                form.addEventListener("submit", function (e) {
+                    const descTextarea = document.querySelector('textarea[name="description"]');
+                    if (descTextarea) {
+                        descTextarea.value = descTextarea.value.replace(/\n/g, '<br>');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

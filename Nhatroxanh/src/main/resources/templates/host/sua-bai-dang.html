@@ -1016,6 +1016,17 @@
 
             displayFullAddress.value = addressParts.join(", ");
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("postForm");
+            if (form) {
+                form.addEventListener("submit", function () {
+                    const textarea = form.querySelector('textarea[name="description"]');
+                    if (textarea) {
+                        textarea.value = textarea.value.replace(/\n/g, '<br>');
+                    }
+                });
+            }
+        });
     </script>
 </body>
 

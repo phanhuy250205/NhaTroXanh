@@ -482,12 +482,9 @@
             <div class="staff-description-section">
                 <h2 class="staff-section-title">Mô tả chi tiết</h2>
                 <p class="staff-description-text"
-                    th:text="${post.description != null ? post.description : 'Chưa có mô tả'}">
-                    Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm
-                    uất.
-                    Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi
-                    cho người thuê.
+                    th:utext="${post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
                 </p>
+
                 <div class="staff-details-grid">
                     <div class="staff-details-card">
                         <h3 class="staff-details-card-title">
