@@ -1,0 +1,217 @@
+/* Favorite button styles */
+.btn-favorite, .btn-favorite-large {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.btn-favorite-large {
+    width: 45px;
+    height: 45px;
+}
+
+.btn-favorite:hover, .btn-favorite-large:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-favorite i, .btn-favorite-large i {
+    font-size: 18px;
+    color: #dc3545;
+    transition: all 0.3s ease;
+}
+
+.btn-favorite-large i {
+    font-size: 20px;
+}
+
+/* Favorited state */
+.btn-favorite.favorited, .btn-favorite-large.favorited {
+    background: rgba(220, 53, 69, 0.1);
+}
+
+.btn-favorite.favorited i, .btn-favorite-large.favorited i {
+    color: #dc3545;
+    animation: heartBeat 0.6s ease-in-out;
+}
+
+/* Loading state */
+.btn-favorite:disabled, .btn-favorite-large:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.btn-favorite:disabled i, .btn-favorite-large:disabled i {
+    animation: spin 1s linear infinite;
+}
+
+/* Heart beat animation */
+@keyframes heartBeat {
+    0% {
+        transform: scale(1);
+    }
+    14% {
+        transform: scale(1.3);
+    }
+    28% {
+        transform: scale(1);
+    }
+    42% {
+        transform: scale(1.3);
+    }
+    70% {
+        transform: scale(1);
+    }
+}
+
+/* Spin animation for loading */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Card overlay styles */
+.card-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+}
+
+.card-overlay .btn-favorite {
+    pointer-events: all;
+    opacity: 1;
+}
+
+.property-card:hover .card-overlay {
+    opacity: 1;
+}
+
+.post-card:hover .btn-favorite {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+/* Image overlay styles */
+.image-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    background: transparent;
+    pointer-events: none;
+}
+
+.image-overlay .btn-favorite-large {
+    pointer-events: all;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .btn-favorite, .btn-favorite-large {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .btn-favorite i, .btn-favorite-large i {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    .btn-favorite, .btn-favorite-large {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .btn-favorite i, .btn-favorite-large i {
+        font-size: 14px;
+    }
+}
+
+/* Notification styles for favorite actions */
+.favorite-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #28a745;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease;
+}
+
+.favorite-notification.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.favorite-notification.error {
+    background: #dc3545;
+}
+
+.favorite-notification.warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+/* Favorite count badge */
+.favorite-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+/* Favorite status indicator */
+.favorite-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.favorite-indicator.favorited {
+    color: #dc3545;
+}
+
+.favorite-indicator i {
+    font-size: 16px;
+}
