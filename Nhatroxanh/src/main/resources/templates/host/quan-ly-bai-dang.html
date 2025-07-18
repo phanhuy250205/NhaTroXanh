@@ -278,10 +278,12 @@
               </span>
             </p>
             <p><strong>Mô tả:</strong>
-              <span th:text="${#strings.length(post.description) > 100} ?
+              <span th:with="desc=${#strings.length(post.description) > 100} ?
                           ${#strings.substring(post.description, 0, 100)} + '...' :
-                          ${post.description}"></span>
+                          ${post.description}" th:utext="${#strings.replace(desc, '\n', '<br/>')}">
+              </span>
             </p>
+
           </div>
           <div class="listing-footer">
             <a class="btn-edit-host text-decoration-none" th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}">

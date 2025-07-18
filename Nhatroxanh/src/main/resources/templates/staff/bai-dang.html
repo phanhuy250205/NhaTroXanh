@@ -627,9 +627,11 @@
                                 <div class="post-info">
                                     <i class="fas fa-info-circle"></i>
                                     <span
-                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">Phòng
-                                        mới, đầy đủ tiện nghi</span>
+                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">
+                                        Phòng mới, đầy đủ tiện nghi
+                                    </span>
                                 </div>
+
                                 <div class="action-buttons d-flex gap-2">
                                     <!-- Nút DUYỆT -->
                                     <form th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}"
@@ -714,8 +716,10 @@
                                 <div class="post-info">
                                     <i class="fas fa-info-circle"></i>
                                     <span
-                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">Đầy
-                                        đủ nội thất</span>
+                                        th:utext="${#strings.length(post.description) > 150 ? #strings.replace(post.description.substring(0, 150) + '...', '\n', '<br/>') : #strings.replace(post.description, '\n', '<br/>')}">
+                                        Đầy đủ nội thất
+                                    </span>
+
                                 </div>
                                 <div class="action-buttons">
                                     <form th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post"

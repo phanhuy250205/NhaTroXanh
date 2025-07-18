@@ -52,45 +52,28 @@ document.addEventListener("DOMContentLoaded", () => {
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            const errorMessageDiv = document.getElementById("login-error-message");
-            errorMessageDiv.style.display = 'none'; 
-
-            // 1. Lấy dữ liệu từ form trong modal
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
             const rememberMe = document.getElementById("rememberMe").checked;
+
             const formData = new URLSearchParams();
-            formData.append('username', username); 
+            formData.append('username', username);
             formData.append('password', password);
             if (rememberMe) {
-                // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
-            // 3. Gọi đến cổng xử lý đăng nhập chung của Spring Security
+
             fetch('/login-processing', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData
-            })
-                .then(response => {
-                    if (response.ok) {
-                        // 4. THÀNH CÔNG: Tải lại trang để cập nhật thanh điều hướng
-                        window.location.reload();
-                    } else {
-                        // 5. THẤT BẠI: Hiển thị lỗi
-                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                    }
-                })
-                .catch(error => {
-                    if (errorMessageDiv) {
-                        errorMessageDiv.textContent = error.message;
-                        errorMessageDiv.style.display = 'block';
-                    } else {
-                        alert(error.message);
-                    }
-                });
+            }).finally(() => {
+                // Reload lại trang bất kể đăng nhập thành công hay thất bại
+                window.location.reload();
+            });
         });
     }
+
 });
 
 
