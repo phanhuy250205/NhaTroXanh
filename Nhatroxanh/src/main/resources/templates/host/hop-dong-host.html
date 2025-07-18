@@ -317,7 +317,25 @@
                             </div>
                             <hr class="mb-4">
 
-                            <div class="row g-3">
+    <div id="guardian-display-container" class="alert alert-info" style="display: none;">
+        <div class="d-flex justify-content-between align-items-center">
+            
+            <div>
+                <strong>Người bảo hộ: </strong>
+                <span id="guardian-display-name" class="fw-bold"></span>
+            </div>
+
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="btn-edit-guardian" title="Sửa thông tin người bảo hộ">
+                    <i class="fa fa-edit"></i> Sửa
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" id="btn-delete-guardian" title="Xóa người bảo hộ">
+                    <i class="fa fa-trash"></i> Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">
                                         Họ và tên <span class="text-danger">*</span>

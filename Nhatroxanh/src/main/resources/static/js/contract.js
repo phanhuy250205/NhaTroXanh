@@ -7,6 +7,7 @@ window.NhaTroContract = {
      guardianInfo: null, // New array to store individual terms
 
     init() {
+        
         // Kiểm tra các phần tử select cần thiết
         const requiredSelects = ["tenant-province", "owner-province", "room-province", "newCustomer-province"]
         const missingSelects = requiredSelects.filter((id) => !document.getElementById(id))
@@ -14,6 +15,7 @@ window.NhaTroContract = {
             console.error("Missing select elements in DOM:", missingSelects)
             this.showNotification("Không tìm thấy một số trường tỉnh/thành phố trong giao diện", "error")
         }
+        
         
 
         this.setupEventListeners()
@@ -25,6 +27,7 @@ window.NhaTroContract = {
         this.setupResidentModal()
         this.initializePreviewUpdates()
         this.setupGuardianDisplayButtons();
+        
         return this.loadProvinces()
             .then(() => {
                 console.log("Provinces loaded")
@@ -57,6 +60,80 @@ window.NhaTroContract = {
             })
     },
     setupGuardianDisplayButtons() {
+        // Gán sự kiện cho nút Sửa/Xóa (chỉ chạy 1 lần khi trang được tải)
+        document.getElementById('btn-edit-guardian')?.addEventListener('click', () => {
+            this.editGuardian();
+        });
+
+        document.getElementById('btn-delete-guardian')?.addEventListener('click', () => {
+            if (confirm('Bạn có chắc chắn muốn xóa thông tin người bảo hộ này?')) {
+                this.clearGuardianDisplay();
+            }
+        });
+    },
+    setupGuardianDisplayButtons() {
+    // Gán sự kiện cho nút Sửa/Xóa (chỉ chạy 1 lần khi trang được tải)
+    document.getElementById('btn-edit-guardian')?.addEventListener('click', () => {
+        this.editGuardian();
+    });
+
+    document.getElementById('btn-delete-guardian')?.addEventListener('click', () => {
+        if (confirm('Bạn có chắc chắn muốn xóa thông tin người bảo hộ này?')) {
+            this.clearGuardianDisplay();
+        }
+    });
+},
+
+updateGuardianDisplay() {
+    // Hàm này có nhiệm vụ hiển thị thông tin người bảo hộ ra form
+    const container = document.getElementById('guardian-display-container');
+    const nameEl = document.getElementById('guardian-display-name');
+    const addButton = document.getElementById('btn-add-customer-host');
+
+    if (this.guardianInfo && container && nameEl && addButton) {
+        nameEl.textContent = this.guardianInfo.name; // Chỉ hiện tên (khớp với HTML của bạn)
+        container.style.display = 'block'; // Hiện khối thông tin
+        addButton.style.display = 'none';  // Ẩn nút "Thêm người bảo hộ"
+    }
+},
+
+clearGuardianDisplay() {
+    // Hàm này để xóa thông tin người bảo hộ
+    this.guardianInfo = null; // Xóa dữ liệu trong biến tạm
+    const container = document.getElementById('guardian-display-container');
+    const addButton = document.getElementById('btn-add-customer-host');
+    if (container) container.style.display = 'none'; // Ẩn khối thông tin
+    if (addButton) addButton.style.display = 'block';  // Hiện lại nút "Thêm"
+    this.showNotification('Đã xóa thông tin người bảo hộ.', 'info');
+},
+
+editGuardian() {
+    // Hàm này mở lại modal để sửa thông tin
+    if (!this.guardianInfo) return;
+
+    // Điền thông tin cũ vào lại các ô trong modal
+    document.getElementById('newCustomer-name').value = this.guardianInfo.name || '';
+    document.getElementById('newCustomer-dob').value = this.guardianInfo.dob || '';
+    document.getElementById('newCustomer-id').value = this.guardianInfo.id || '';
+    document.getElementById('newCustomer-id-date').value = this.guardianInfo.idDate || '';
+    document.getElementById('newCustomer-id-place').value = this.guardianInfo.idPlace || '';
+    document.getElementById('newCustomer-phone').value = this.guardianInfo.phone || '';
+    document.getElementById('newCustomer-email').value = this.guardianInfo.email || '';
+    document.getElementById('newCustomer-street').value = this.guardianInfo.street || '';
+    // (Bạn có thể thêm logic fill lại Tỉnh/Huyện/Xã nếu muốn)
+
+    // Mở lại modal
+    const modalElement = document.getElementById('addCustomerModal-host');
+    const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+    modal.show();
+},
+
+   
+    
+   
+    
+    
+    setupGuardianDisplayButtons() {
         // Tìm và gắn sự kiện cho các nút Sửa/Xóa sẽ được hiển thị
         document.getElementById('btn-edit-guardian')?.addEventListener('click', () => {
             this.editGuardian();
@@ -70,50 +147,12 @@ window.NhaTroContract = {
     },
 
     // ✅ HÀM MỚI 2: Hiển thị thông tin người bảo hộ ra form chính
-    updateGuardianDisplay() {
-        const container = document.getElementById('guardian-display-container');
-        const nameEl = document.getElementById('guardian-display-name');
-        const phoneEl = document.getElementById('guardian-display-phone');
-        const addButton = document.getElementById('btn-add-customer-host');
 
-        if (this.guardianInfo && container && nameEl && phoneEl && addButton) {
-            nameEl.textContent = this.guardianInfo.name;
-            phoneEl.textContent = `SĐT: ${this.guardianInfo.phone || 'Chưa có'}`;
-            container.style.display = 'block'; // Hiện khu vực thông tin tạm
-            addButton.style.display = 'none';  // Ẩn nút "Thêm người bảo hộ" đi
-        }
-    },
 
     // ✅ HÀM MỚI 3: Xóa thông tin người bảo hộ khỏi giao diện
-    clearGuardianDisplay() {
-        this.guardianInfo = null; // Xóa dữ liệu trong biến tạm
-        const container = document.getElementById('guardian-display-container');
-        const addButton = document.getElementById('btn-add-customer-host');
-        if (container) container.style.display = 'none'; // Ẩn khu vực thông tin tạm
-        if (addButton) addButton.style.display = 'block';  // Hiện lại nút "Thêm"
-        this.showNotification('Đã xóa thông tin người bảo hộ.', 'info');
-    },
+   
     
     // ✅ HÀM MỚI 4: Mở modal để sửa thông tin
-    editGuardian() {
-        if (!this.guardianInfo) return;
-
-        // Điền thông tin cũ vào lại các ô trong modal
-        document.getElementById('newCustomer-name').value = this.guardianInfo.name || '';
-        document.getElementById('newCustomer-dob').value = this.guardianInfo.dob || '';
-        document.getElementById('newCustomer-id').value = this.guardianInfo.id || '';
-        document.getElementById('newCustomer-id-date').value = this.guardianInfo.idDate || '';
-        document.getElementById('newCustomer-id-place').value = this.guardianInfo.idPlace || '';
-        document.getElementById('newCustomer-phone').value = this.guardianInfo.phone || '';
-        document.getElementById('newCustomer-email').value = this.guardianInfo.email || '';
-        document.getElementById('newCustomer-street').value = this.guardianInfo.street || '';
-        // (Bạn có thể thêm logic fill lại Tỉnh/Huyện/Xã nếu muốn)
-
-        // Mở lại modal
-        const modalElement = document.getElementById('addCustomerModal-host');
-        const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
-        modal.show();
-    },
 
     // New method to setup terms management
     setupTermsManagement() {
@@ -2314,7 +2353,7 @@ saveContract() {
     // ✅ SỬA LẠI HÀM NÀY BẰNG PHIÊN BẢN HOÀN CHỈNH
 saveNewCustomer() {
     console.log("Bắt đầu lưu tạm thông tin người bảo hộ ở frontend...");
-
+    
     // 1. Thu thập dữ liệu từ modal vào biến tạm this.guardianInfo
     this.guardianInfo = {
         name: document.getElementById('newCustomer-name').value || '',
@@ -2338,7 +2377,7 @@ saveNewCustomer() {
 
     // 2. ✅ GỌI HÀM CẬP NHẬT GIAO DIỆN
     this.updateGuardianDisplay();
-
+    
     // 3. ✅ GỌI LỆNH ĐÓNG MODAL
     const modalElement = document.getElementById('addCustomerModal-host');
     const modal = bootstrap.Modal.getInstance(modalElement);
