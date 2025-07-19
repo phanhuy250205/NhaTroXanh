@@ -1,16 +1,23 @@
 package nhatroxanh.com.Nhatroxanh.Config;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("classpath:/static/uploads/")
-                .setCachePeriod(3600);
-        System.out.println("Resource handler registered for /uploads/** to classpath:/static/uploads/");
-    }
+               .addResourceLocations("classpath:/static/uploads/")
+               .setCachePeriod(3600);
+      System.out.println("Resource handler registered for /uploads/** to classpath:/static/uploads/");
+   }
 }
