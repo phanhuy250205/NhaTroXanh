@@ -377,6 +377,220 @@
                 transform: translateX(0);
             }
         }
+
+        /* Thêm vào phần style trong head */
+        #roomDetailModal .modal-content {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: none;
+        }
+
+        #roomDetailModal .modal-header {
+            background: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #roomDetailModal .modal-title {
+            font-weight: 600;
+            font-size: 1.4rem;
+        }
+
+        #roomDetailModal .modal-body {
+            padding: 1.5rem;
+        }
+
+        #roomDetailModal .modal-footer {
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+            padding: 1rem 1.5rem;
+        }
+
+        /* Carousel styling */
+        #roomImageCarousel {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        #roomImageCarousel .carousel-item img {
+            width: 100%;
+            height: 350px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            background-color: rgba(0, 0, 0, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.8;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Thumbnails styling */
+        #roomThumbnails {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        #roomThumbnails img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #roomThumbnails img:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-blue);
+        }
+
+        #roomThumbnails img.active {
+            border-color: var(--primary-blue);
+            transform: scale(1.05);
+        }
+
+        /* Room info styling */
+        #roomDetailModal .room-info {
+            padding: 0 1rem;
+        }
+
+        #roomDetailModal .room-info p {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            display: flex;
+        }
+
+        #roomDetailModal .room-info strong {
+            min-width: 120px;
+            color: var(--dark-blue);
+            font-weight: 600;
+        }
+
+        #roomDetailModal .room-info span {
+            color: #4a5568;
+        }
+
+        #roomDetailPrice {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        #roomDetailStatus {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        #roomDetailStatus.text-success {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        #roomDetailStatus.text-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+
+        #roomDetailStatus.text-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        #roomDetailDescription {
+            display: block;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* Utilities list */
+        #roomDetailUtilities {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        #roomDetailUtilities li {
+            background: #f0f8ff;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--primary-blue);
+            display: flex;
+            align-items: center;
+        }
+
+        #roomDetailUtilities i {
+            margin-right: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            #roomImageCarousel .carousel-item img {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            #roomDetailModal .modal-dialog {
+                margin: 1rem auto;
+            }
+
+            #roomDetailModal .modal-body {
+                flex-direction: column;
+            }
+
+            #roomImageCarousel .carousel-item img {
+                height: 250px;
+            }
+
+            #roomDetailModal .room-info p {
+                flex-direction: column;
+            }
+
+            #roomDetailModal .room-info strong {
+                margin-bottom: 0.25rem;
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #roomImageCarousel .carousel-item img {
+                height: 200px;
+            }
+
+            #roomThumbnails img {
+                width: 60px;
+                height: 45px;
+            }
+
+            #roomDetailModal .modal-title {
+                font-size: 1.2rem;
+            }
+        }
     </style>
 </head>
 
@@ -392,7 +606,7 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
-    
+
     <!-- Breadcrumb -->
     <div class="container mt-3">
         <nav aria-label="breadcrumb">
@@ -432,9 +646,9 @@
                             <img th:unless="${images != null and !#lists.isEmpty(images)}"
                                 src="/images/cards/default.jpg" alt="Hình ảnh chính" class="main-image" id="mainImage">
                             <div class="image-overlay">
-                                <button class="btn-favorite-large" 
-                                        th:attr="data-post-id=${post.postId}"
-                                        onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Thêm vào yêu thích">
+                                <button class="btn-favorite-large" th:attr="data-post-id=${post.postId}"
+                                    onclick="toggleFavorite(this.getAttribute('data-post-id'))"
+                                    title="Thêm vào yêu thích">
                                     <i class="far fa-heart"></i>
                                 </button>
                             </div>
@@ -506,7 +720,7 @@
                                 <i class="fas fa-bookmark"></i>
                                 <span>Lưu tin</span>
                             </button>
-                            <button class="btn btn-outline-secondary btn-sm me-2" th:attr="data-post-id=${post.postId}"
+                            <button class="btn btn-outline-secondary me-2" th:attr="data-post-id=${post.postId}"
                                 onclick="shareProperty(event)">
                                 <i class="fas fa-share-alt"></i>
                                 <span>Chia sẻ</span>
@@ -609,8 +823,7 @@
                                 <div class="overview-content">
                                     <h3>Giới thiệu</h3>
                                     <p
-                                        th:utext="${post != null && post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
-                                        Mô tả bài đăng
+                                        th:utext="${post?.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
                                     </p>
                                 </div>
                             </div>
@@ -655,9 +868,13 @@
                                             </span>
                                         </p>
                                         <div class="map-container">
-                                            <div id="map"
-                                                style="height: 400px; background-color: #f8f9fa; border: 1px solid #dee2e6; display: flex; align-items: center; justify-content: center;">
-                                                <span class="text-muted">Bản đồ sẽ hiển thị tại đây</span>
+                                            <div
+                                                th:with="fullAddress=${post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name}">
+                                                <iframe
+                                                    th:src="'https://www.google.com/maps?q=' + ${#strings.replace(fullAddress, ' ', '+')} + '&output=embed'"
+                                                    width="100%" height="500" style="border:0;" allowfullscreen
+                                                    loading="lazy">
+                                                </iframe>
                                             </div>
                                         </div>
                                     </div>
@@ -872,7 +1089,7 @@
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
                                         <div class="card-overlay">
-                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}" >
+                                            <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}">
                                                 <i class="far fa-heart"></i>
                                             </button>
                                         </div>
@@ -1049,7 +1266,7 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
- 
+
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1400,64 +1617,6 @@
             alert('Chức năng báo cáo đang được phát triển!');
         }
 
-        let map;
-        function initMap() {
-            const defaultLatLng = { lat: 16.068, lng: 108.212 };
-            const address = document.querySelector('.location-info p span[th:text]')?.textContent?.trim();
-            map = new google.maps.Map(document.getElementById('map'), { center: defaultLatLng, zoom: 13 });
-            const geocoder = new google.maps.Geocoder();
-
-            if (!address) {
-                new google.maps.Marker({ position: defaultLatLng, map, title: "Trung tâm TP. Đà Nẵng" });
-                return;
-            }
-
-            geocoder.geocode({ address: address }, (results, status) => {
-                if (status === 'OK') {
-                    const location = results[0].geometry.location;
-                    map.setCenter(location);
-                    map.setZoom(15);
-                    new google.maps.Marker({ map, position: location, title: address });
-                } else {
-                    console.warn('Không tìm thấy địa chỉ: ' + status);
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const mapScript = document.createElement('script');
-            mapScript.src = 'https://maps.googleapis.com/maps/api/js?key=AIzaSyAW7YMulhdUYW1RwiUNjijM3Mv222fLrWc&callback=initMap';
-            mapScript.async = true;
-            mapScript.defer = true;
-            document.body.appendChild(mapScript);
-
-            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tabEl => {
-                tabEl.addEventListener('shown.bs.tab', function (event) {
-                    if (event.target.getAttribute('data-bs-target') === '#location') {
-                        setTimeout(() => initMap(), 300);
-                    }
-                });
-            });
-
-            const loadMoreBtn = document.getElementById('loadMoreBtn');
-            const hiddenReviews = document.querySelectorAll('.hidden-review');
-            let visibleCount = 5;
-            const step = 5;
-
-            loadMoreBtn?.addEventListener('click', () => {
-                const nextHidden = Array.from(hiddenReviews).slice(visibleCount - 5, visibleCount + step);
-                nextHidden.forEach(item => item.classList.remove('hidden-review'));
-                visibleCount += step;
-
-                if (visibleCount >= hiddenReviews.length + 5) {
-                    loadMoreBtn.style.display = 'none';
-                }
-            });
-
-            if (hiddenReviews.length === 0) {
-                loadMoreBtn.style.display = 'none';
-            }
-        });
         function showEditForm(reviewId) {
             document.getElementById('edit-form-' + reviewId).style.display = 'block';
         }
@@ -1596,7 +1755,7 @@
         // });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
     <!-- Include favorite handler -->
     <script src="/js/favorite-handler.js"></script>
 </body>

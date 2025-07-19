@@ -116,6 +116,9 @@ public class HomeController {
             // 7. Tăng lượt xem
             postRepository.incrementViewCount(postId);
 
+            System.out.println(post.getDescription());
+
+
             return "guest/chi-tiet";
         } catch (Exception e) {
             log.error("Lỗi khi lấy chi tiết bài đăng {}: {}", postId, e.getMessage(), e);
@@ -138,9 +141,9 @@ public class HomeController {
             roomData.put("acreage", room.getAcreage());
             roomData.put("maxTenants", room.getMax_tenants());
             roomData.put("status", room.getStatus() != null ? switch (room.getStatus()) {
-                case ACTIVE -> "Đã thuê";
-                case INACTIVE-> "Trống";
-                case MAINTENANCE -> "Bảo trì";
+                case active -> "Đã thuê";
+                case unactive-> "Trống";
+                case repair -> "Bảo trì";
             } : "Không xác định");
             roomData.put("category", room.getCategory() != null ? room.getCategory().getName() : "Chưa xác định");
             roomData.put("description", room.getDescription() != null ? room.getDescription() : "Chưa có mô tả");

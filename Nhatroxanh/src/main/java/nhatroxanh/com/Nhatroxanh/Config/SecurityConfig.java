@@ -56,17 +56,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        // Publicly accessible endpoints
-                        .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/Uploads/**")
+                        .requestMatchers("/api/users/**", "/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
+                                "/fonts/**",
+                                "/uploads/**")
                         .permitAll()
-                        .requestMatchers("/momo/**","/vnpay/**") 
+                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/momo/**","/vnpay/**",
+                                "/tat-ca-phong-tro")
                         .permitAll()
-                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", 
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/guest/**")
-                        .permitAll()
-                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro")
-                        .permitAll()
-                        // Role-based access
+                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
+                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .requestMatchers("/admin/**").hasRole("ADMIN")

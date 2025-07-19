@@ -2,281 +2,284 @@
 <html lang="en">
 
 <head th:replace="~{/layouts/head}" />
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lịch sử thuê trả - Nhà Trọ Xanh</title>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <style>
-    :root {
-      --primary-color: #3498db;
-      --primary-light: #5dade2;
-      --success-color: #10b981;
-      --danger-color: #ef4444;
-      --warning-color: #f59e0b;
-      --dark-color: #1f2937;
-      --light-bg: #f8fafc;
-      --border-color: #e5e7eb;
-    }
+<!-- <head> -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lịch sử thuê trả - Nhà Trọ Xanh</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  :root {
+    --primary-color: #3498db;
+    --primary-light: #5dade2;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --dark-color: #1f2937;
+    --light-bg: #f8fafc;
+    --border-color: #e5e7eb;
+  }
 
 
-    .page-title {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
+  .page-title {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .search-container {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .search-input {
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: var(--light-bg);
+  }
+
+  .search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+    background: white;
+  }
+
+  .btn-search {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    color: white;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+  }
+
+  .btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
+    color: white;
+  }
+
+  .filter-select {
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 0.5rem 0.75rem;
+    background: white;
+    transition: all 0.3s ease;
+    min-width: 120px;
+  }
+
+  .filter-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
+  }
+
+  .filter-icon {
+    color: var(--primary-color);
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+  }
+
+  .modern-table {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: none;
+  }
+
+  .modern-table thead {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    color: white;
+  }
+
+  .modern-table thead th {
+    border: none;
+    padding: 1.2rem 1rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+  }
+
+  .modern-table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modern-table tbody tr:hover {
+    background: rgba(52, 152, 219, 0.05);
+    transform: scale(1.01);
+  }
+
+  .modern-table tbody td {
+    padding: 1.2rem 1rem;
+    border: none;
+    vertical-align: middle;
+    font-weight: 500;
+    text-align: center;
+  }
+
+  .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .status-active {
+    background: linear-gradient(135deg, var(--success-color), #34d399);
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+  }
+
+  .status-completed {
+    background: linear-gradient(135deg, var(--danger-color), #f87171);
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  }
+
+  .room-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+  }
+
+  .room-icon {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.3rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+  }
+
+  .tenant-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tenant-avatar {
+    width: 35px;
+    height: 35px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .date-info {
+    font-family: 'Monaco', 'Menlo', monospace;
+    font-size: 0.9rem;
+    color: var(--dark-color);
+  }
+
+  .stats-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .stats-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .stats-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #6b7280;
+  }
+
+  .empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #d1d5db;
+  }
+
+  @media (max-width: 768px) {
+    .main-content {
+      margin: 1rem;
+      padding: 1rem;
     }
 
     .search-container {
-      background: white;
-      border-radius: 15px;
-      padding: 1.5rem;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      margin-bottom: 2rem;
-      border: 1px solid var(--border-color);
+      padding: 1rem;
     }
 
-    .search-input {
-      border: 2px solid var(--border-color);
-      border-radius: 12px;
-      padding: 0.75rem 1rem;
-      font-size: 0.95rem;
-      transition: all 0.3s ease;
-      background: var(--light-bg);
-    }
-
-    .search-input:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
-      background: white;
-    }
-
-    .btn-search {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      border: none;
-      border-radius: 12px;
-      padding: 0.75rem 1.5rem;
-      font-weight: 600;
-      color: white;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-    }
-
-    .btn-search:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(52, 152, 219, 0.4);
-      color: white;
+    .filter-controls {
+      flex-wrap: wrap;
+      gap: 0.5rem;
     }
 
     .filter-select {
-      border: 2px solid var(--border-color);
-      border-radius: 10px;
-      padding: 0.5rem 0.75rem;
-      background: white;
-      transition: all 0.3s ease;
-      min-width: 120px;
+      min-width: 100px;
     }
+  }
 
-    .filter-select:focus {
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.15);
-    }
-
-    .filter-icon {
-      color: var(--primary-color);
-      font-size: 1.2rem;
-      margin-right: 0.5rem;
-    }
-
-    .modern-table {
-      background: white;
-      border-radius: 15px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      border: none;
-    }
-
-    .modern-table thead {
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      color: white;
-    }
-
-    .modern-table thead th {
-      border: none;
-      padding: 1.2rem 1rem;
-      font-weight: 600;
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      
-    }
-
-    .modern-table tbody tr {
-      transition: all 0.3s ease;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .modern-table tbody tr:hover {
-      background: rgba(52, 152, 219, 0.05);
-      transform: scale(1.01);
-    }
-
-    .modern-table tbody td {
-      padding: 1.2rem 1rem;
-      border: none;
-      vertical-align: middle;
-      font-weight: 500;
-      text-align: center;
-    }
-
-    .status-badge {
-      padding: 0.5rem 1rem;
-      border-radius: 25px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-    }
-
-    .status-active {
-      background: linear-gradient(135deg, var(--success-color), #34d399);
-      color: white;
-      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-    }
-
-    .status-completed {
-      background: linear-gradient(135deg, var(--danger-color), #f87171);
-      color: white;
-      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
-    }
-
-    .room-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-    }
-
-    .room-icon {
-      background: var(--primary-color);
-      color: white;
-      padding: 0.3rem;
-      border-radius: 8px;
-      font-size: 0.8rem;
-    }
-
-    .tenant-info {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .tenant-avatar {
-      width: 35px;
-      height: 35px;
-      background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 600;
-      font-size: 0.9rem;
-    }
-
-    .date-info {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.9rem;
-      color: var(--dark-color);
-    }
-
-    .stats-card {
-      background: white;
-      border-radius: 15px;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-      transition: all 0.3s ease;
-      border: 1px solid var(--border-color);
-    }
-
-    .stats-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-    }
-
-    .stats-icon {
-      font-size: 2rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .stats-number {
-      font-size: 1.8rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-    }
-
-    .empty-state {
-      text-align: center;
-      padding: 3rem;
-      color: #6b7280;
-    }
-
-    .empty-state i {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-      color: #d1d5db;
-    }
-
-    @media (max-width: 768px) {
-      .main-content {
-        margin: 1rem;
-        padding: 1rem;
-      }
-      
-      .search-container {
-        padding: 1rem;
-      }
-      
-      .filter-controls {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
-      
-      .filter-select {
-        min-width: 100px;
-      }
-    }
-    /* Căn giữa nội dung trong tất cả các ô của bảng */
-.modern-table td,
-.modern-table th {
+  /* Căn giữa nội dung trong tất cả các ô của bảng */
+  .modern-table td,
+  .modern-table th {
     text-align: center;
-}
+  }
 
-.room-info,
-.tenant-info {
+  .room-info,
+  .tenant-info {
     justify-content: center;
     width: 100%;
-}
-.date-info {
+  }
+
+  .date-info {
     margin: 0 auto;
     display: inline-block;
-}
-.status-badge {
+  }
+
+  .status-badge {
     margin: 0 auto;
     display: inline-block;
-}
-  </style>
+  }
+</style>
 </head>
 
 <body>
@@ -287,183 +290,124 @@
       <i class="fas fa-history"></i>
       Lịch sử thuê trả
     </div>
-    
+
     <!-- Stats Cards -->
-    <div class="row mb-4">
+    <div class="row mb-4 justify-content-center">
       <div class="col-md-3 col-sm-6 mb-3">
         <div class="stats-card">
           <div class="stats-icon text-success">
             <i class="fas fa-users"></i>
           </div>
-          <div class="stats-number text-success">1</div>
+          <div class="stats-number text-success" th:text="${contractStats['ACTIVE']}">0</div>
           <div class="text-muted">Đang thuê</div>
         </div>
       </div>
+
       <div class="col-md-3 col-sm-6 mb-3">
         <div class="stats-card">
           <div class="stats-icon text-danger">
             <i class="fas fa-sign-out-alt"></i>
           </div>
-          <div class="stats-number text-danger">2</div>
+          <div class="stats-number text-danger" th:text="${contractStats['TERMINATED']}">0</div>
           <div class="text-muted">Đã trả phòng</div>
         </div>
       </div>
+
       <div class="col-md-3 col-sm-6 mb-3">
         <div class="stats-card">
           <div class="stats-icon text-primary">
             <i class="fas fa-building"></i>
           </div>
-          <div class="stats-number text-primary">3</div>
-          <div class="text-muted">Tổng giao dịch</div>
-        </div>
-      </div>
-      <div class="col-md-3 col-sm-6 mb-3">
-        <div class="stats-card">
-          <div class="stats-icon text-warning">
-            <i class="fas fa-calendar-alt"></i>
-          </div>
-          <div class="stats-number text-warning">6</div>
-          <div class="text-muted">Tháng hoạt động</div>
+          <div class="stats-number text-primary" th:text="${contractStats['EXPIRED']}">0</div>
+          <div class="text-muted">Sắp hết hạn</div>
         </div>
       </div>
     </div>
+
 
     <!-- Search and Filters -->
-    <div class="search-container">
-      <div class="row align-items-center">
-        <div class="col-lg-6 mb-3 mb-lg-0">
-          <div class="input-group">
-            <span class="input-group-text bg-transparent border-end-0">
-              <i class="fas fa-search text-muted"></i>
-            </span>
-            <input type="text" class="form-control search-input border-start-0" 
-                   placeholder="Tìm kiếm theo tên, phòng, khu trọ...">
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="d-flex justify-content-lg-end align-items-center gap-3 filter-controls">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-filter filter-icon"></i>
-              <span class="text-muted me-2">Lọc:</span>
+    <form method="get" th:action="@{/chu-tro/lich-su-thue}">
+      <div class="search-container">
+        <div class="row align-items-center">
+          <div class="col-lg-6 mb-3 mb-lg-0">
+            <div class="input-group">
+              <span class="input-group-text bg-transparent border-end-0">
+                <i class="fas fa-search text-muted"></i>
+              </span>
+              <input type="text" name="keyword" class="form-control search-input border-start-0"
+                placeholder="Tìm kiếm theo tên, phòng, khu trọ..." th:value="${keyword}">
             </div>
-            <select class="form-select filter-select">
-              <option selected>
-                <i class="fas fa-toggle-on"></i> Trạng thái
-              </option>
-              <option value="active">Đang thuê</option>
-              <option value="completed">Đã trả phòng</option>
-            </select>
-            <select class="form-select filter-select">
-              <option selected>Loại phòng</option>
-              <option value="single">Phòng đơn</option>
-              <option value="double">Phòng đôi</option>
-            </select>
-            <select class="form-select filter-select">
-              <option selected>Sắp xếp</option>
-              <option value="newest">Mới nhất</option>
-              <option value="oldest">Cũ nhất</option>
-            </select>
-            <button class="btn btn-search">
-              <i class="fas fa-search me-1"></i>
-            </button>
+          </div>
+          <div class="col-lg-6">
+            <div class="d-flex justify-content-lg-end align-items-center gap-3 filter-controls">
+              <div class="d-flex align-items-center">
+                <i class="fas fa-filter filter-icon"></i>
+                <span class="text-muted me-2">Lọc:</span>
+              </div>
+
+              <!-- Lọc theo khu trọ -->
+              <select class="form-select filter-select" name="hostelId">
+                <option value="">Tất cả khu trọ</option>
+                <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
+                  th:selected="${hostel.hostelId == selectedHostelId}" th:text="${hostel.name}">Khu trọ</option>
+              </select>
+              <!-- Lọc theo trạng thái -->
+              <select class="form-select filter-select" name="status">
+                <option value="">Tất cả trạng thái</option>
+                <option th:value="'ACTIVE'" th:selected="${selectedStatus == 'ACTIVE'}">Đang thuê</option>
+                <option th:value="'TERMINATED'" th:selected="${selectedStatus == 'TERMINATED'}">Đã trả phòng</option>
+                <option th:value="'EXPIRED'" th:selected="${selectedStatus == 'EXPIRED'}">Sắp hết hạn</option>
+              </select>
+              <button class="btn btn-search" type="submit">
+                <i class="fas fa-search me-1"></i> Tìm
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </form>
+
 
     <!-- Table -->
-   <div class="table-responsive">
-    <table class="table modern-table">
+    <div class="table-responsive">
+      <table class="table modern-table">
         <thead>
-            <tr>
-                <th><i class="fas fa-map-marker-alt me-1"></i> Khu trọ</th>
-                <th><i class="fas fa-door-open me-1"></i> Phòng</th>
-                <th><i class="fas fa-user me-1"></i> Người thuê</th>
-                <th><i class="fas fa-calendar-plus me-1"></i> Ngày thuê</th>
-                <th><i class="fas fa-calendar-minus me-1"></i> Ngày trả</th>
-                <th><i class="fas fa-info-circle me-1"></i> Trạng thái</th>
-            </tr>
+          <tr>
+            <th><i class="fas fa-map-marker-alt me-1"></i> Khu trọ</th>
+            <th><i class="fas fa-door-open me-1"></i> Phòng</th>
+            <th><i class="fas fa-user me-1"></i> Người thuê</th>
+            <th><i class="fas fa-calendar-plus me-1"></i> Ngày thuê</th>
+            <th><i class="fas fa-calendar-minus me-1"></i> Ngày trả</th>
+            <th><i class="fas fa-info-circle me-1"></i> Trạng thái</th>
+          </tr>
         </thead>
         <tbody>
-            <tr>
-                <td><div class="d-flex align-items-center"><i class="fas fa-building text-primary me-2"></i><strong>Thái Hoàng Lợi</strong></div></td>
-                <td><div class="room-info"><span class="room-icon"><i class="fas fa-bed"></i></span> PB01</div></td>
-                <td><div class="tenant-info"><div class="tenant-avatar">NA</div><div><strong>Nguyễn Văn A</strong><br><small class="text-muted"><i class="fas fa-phone me-1"></i> 0123.456.789</small></div></div></td>
-                <td><div class="date-info"><i class="fas fa-calendar me-1 text-success"></i> 25/05/2024</div></td>
-                <td><div class="date-info"><i class="fas fa-calendar me-1 text-danger"></i> 16/08/2024</div></td>
-                <td><span class="status-badge status-completed"><i class="fas fa-check-circle"></i> Đã trả phòng</span></td>
-            </tr>
-          <tr>
-            <td>
-              <div class="d-flex align-items-center">
-                <i class="fas fa-building text-primary me-2"></i>
-                <strong>Khu C</strong>
-              </div>
-            </td>
-            <td>
-              <div class="room-info">
-                <span class="room-icon">
-                  <i class="fas fa-bed"></i>
-                </span>
-                PB05
-              </div>
-            </td>
-            <td>
-              <div class="tenant-info">
-                <div class="tenant-avatar">HB</div>
-                <div>
-                  <strong>Hồ Bá B</strong>
-                  <br>
-                  <small class="text-muted">
-                    <i class="fas fa-phone me-1"></i>
-                    0987.654.321
-                  </small>
-                </div>
-              </div>
-            </td>
-            <td>
-              <div class="date-info">
-                <i class="fas fa-calendar me-1 text-success"></i>
-                17/09/2024
-              </div>
-            </td>
-            <td>
-              <div class="date-info">
-                <i class="fas fa-calendar me-1 text-danger"></i>
-                06/02/2025
-              </div>
-            </td>
-            <td>
-              <span class="status-badge status-completed">
-                <i class="fas fa-check-circle"></i>
-                Đã trả phòng
-              </span>
+          <tr th:if="${#lists.isEmpty(tenants)}">
+            <td colspan="6" class="text-center empty-state">
+              <i class="fas fa-box-open"></i>
+              <p>Không có dữ liệu lịch sử thuê trả.</p>
             </td>
           </tr>
-          <tr>
+
+          <tr th:each="tenant : ${tenants}">
             <td>
-              <div class="d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center">
                 <i class="fas fa-building text-primary me-2"></i>
-                <strong>Khu A</strong>
+                <strong th:text="${tenant.hostelName}">Tên khu trọ</strong>
               </div>
             </td>
             <td>
               <div class="room-info">
-                <span class="room-icon">
-                  <i class="fas fa-bed"></i>
-                </span>
-                PB03
+                <span class="room-icon"><i class="fas fa-bed"></i></span>
+                <span th:text="${tenant.roomName}">Tên phòng</span>
               </div>
             </td>
             <td>
               <div class="tenant-info">
-                <div class="tenant-avatar">TL</div>
                 <div>
-                  <strong>Trần Thị L</strong>
-                  <br>
+                  <strong th:text="${tenant.fullName}">Tên khách</strong><br>
                   <small class="text-muted">
-                    <i class="fas fa-phone me-1"></i>
-                    0555.666.777
+                    <i class="fas fa-phone me-1"></i> <span th:text="${tenant.phone}">SĐT</span>
                   </small>
                 </div>
               </div>
@@ -471,21 +415,41 @@
             <td>
               <div class="date-info">
                 <i class="fas fa-calendar me-1 text-success"></i>
-                19/10/2024
+                <span th:text="${#dates.format(tenant.moveInDate, 'dd/MM/yyyy')}">Ngày thuê</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="date-info" th:if="${tenant.endDate != null}">
+                <i class="fas fa-calendar me-1 text-danger"></i>
+                <span th:text="${#dates.format(tenant.endDate, 'dd/MM/yyyy')}">Ngày trả</span>
+              </div>
+              <div class="text-muted" th:if="${tenant.endDate == null}">
+                Chưa cập nhật
               </div>
             </td>
             <td>
-              <div class="text-muted">
-                <i class="fas fa-hourglass-half me-1"></i>
-                Chưa trả
-              </div>
-            </td>
-            <td>
-              <span class="status-badge status-active">
-                <i class="fas fa-play-circle"></i>
-                Đang thuê
+              <span class="status-badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill fw-semibold"
+                th:classappend="
+          ${tenant.contractStatus.name() == 'ACTIVE'} ? ' bg-success text-white' :
+          (${tenant.contractStatus.name() == 'EXPIRED'} ? ' bg-warning text-dark' :
+          (${tenant.contractStatus.name() == 'TERMINATED'} ? ' bg-danger text-white' : ' bg-secondary'))">
+
+                <i th:class="
+      ${tenant.contractStatus.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+      (${tenant.contractStatus.name() == 'EXPIRED'} ? 'fas fa-clock' :
+      (${tenant.contractStatus.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-question-circle'))">
+                </i>
+
+                <span th:switch="${tenant.contractStatus.name()}">
+                  <span th:case="'ACTIVE'">Đang thuê</span>
+                  <span th:case="'EXPIRED'">Sắp hết hạn</span>
+                  <span th:case="'TERMINATED'">Ngừng thuê</span>
+                  <span th:case="*">Không xác định</span>
+                </span>
               </span>
             </td>
+
           </tr>
         </tbody>
       </table>
@@ -519,13 +483,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
     // Add search functionality
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       const searchInput = document.querySelector('.search-input');
       const tableRows = document.querySelectorAll('tbody tr');
-      
-      searchInput.addEventListener('input', function() {
+
+      searchInput.addEventListener('input', function () {
         const searchTerm = this.value.toLowerCase();
-        
+
         tableRows.forEach(row => {
           const text = row.textContent.toLowerCase();
           if (text.includes(searchTerm)) {
@@ -539,7 +503,7 @@
       // Add filter functionality
       const filterSelects = document.querySelectorAll('.filter-select');
       filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
+        select.addEventListener('change', function () {
           // Add your filter logic here
           console.log('Filter changed:', this.value);
         });
@@ -548,11 +512,11 @@
       // Add hover effects
       const statsCards = document.querySelectorAll('.stats-card');
       statsCards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
+        card.addEventListener('mouseenter', function () {
           this.style.transform = 'translateY(-8px) scale(1.02)';
         });
-        
-        card.addEventListener('mouseleave', function() {
+
+        card.addEventListener('mouseleave', function () {
           this.style.transform = 'translateY(0) scale(1)';
         });
       });

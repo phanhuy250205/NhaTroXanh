@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 public class VoucherDTO {
@@ -31,9 +32,7 @@ public class VoucherDTO {
 
     private Double minAmount;
     
-    private Integer hostelId;
-
-    private Integer roomId;
+    private List<Integer> hostelIds;
 
     private Boolean status;
 }

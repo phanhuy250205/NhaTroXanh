@@ -13,6 +13,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -66,6 +67,7 @@ public interface UserService {
     // List<Users> getAllCustomers();
 
     Page<Users> getAllCustomers(int page, int size);
+    Optional<Users> findByEmail(String email);
 
     Page<Users> getAllOwner(int page, int size);
 
@@ -74,4 +76,6 @@ public interface UserService {
     Page<Users> getStaffUsers(int page, int size);
 
     Users getById(Integer id);
+
+    Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status);
 }

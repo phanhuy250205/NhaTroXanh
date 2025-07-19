@@ -142,41 +142,42 @@
     }
   }
 
-  // 🎨 HÀM HIỂN THỊ DANH SÁCH HỢP ĐỒNG
   function displayContracts(contracts) {
     const tbody = document.getElementById('contracts-tbody');
 
     if (!contracts || contracts.length === 0) {
       tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="text-muted">
-            <i class="fa fa-inbox"></i><br>
-            Không có hợp đồng nào
-          </td>
-        </tr>
-      `;
+            <tr>
+                <td colspan="7" class="text-muted">
+                    <i class="fa fa-inbox"></i><br>
+                    Không có hợp đồng nào
+                </td>
+            </tr>
+        `;
       return;
     }
 
     tbody.innerHTML = contracts.map(contract => `
-      <tr>
-        <td><strong>${contract.contractId}</strong></td>
-        <td>${contract.tenantName || 'N/A'}</td>
-        <td>${formatDate(contract.startDate)}</td>
-        <td>${formatDate(contract.endDate)}</td>
-        <td>${contract.tenantPhone || 'N/A'}</td>
-        <td>${getStatusSelect(contract.contractId, contract.status)}</td>
-        <td>
-          <i class="fa fa-pen text-success cursor-pointer"
-             onclick="editContract(${contract.contractId})"
-             title="Chỉnh sửa"></i>
-        </td>
-      </tr>
+        <tr>
+            <td><strong>${contract.contractId}</strong></td>
+            <td>${contract.tenantName || 'N/A'}</td>
+            <td>${formatDate(contract.startDate)}</td>
+            <td>${formatDate(contract.endDate)}</td>
+            <td>${contract.tenantPhone || 'N/A'}</td>
+            <td>${getStatusSelect(contract.contractId, contract.status)}</td>
+            <td>
+                <button
+                    class="btn btn-sm btn-outline-primary"
+                    onclick="editContract(${contract.contractId})"
+                    title="Chỉnh sửa">
+                    <i class="fa fa-pen"></i>
+                </button>
+            </td>
+        </tr>
     `).join('');
 
     document.getElementById('contracts-table').style.display = 'block';
   }
-
   // 🏷️ TẠO SELECT TRẠNG THÁI
   function getStatusSelect(contractId, currentStatus) {
     const statusOptions = [
@@ -332,10 +333,11 @@
     document.getElementById('contracts-table').style.display = 'none';
   }
 
-  // ✏️ CHỈNH SỬA HỢP ĐỒNG
   function editContract(contractId) {
-    window.location.href = '/chu-tro/hop-dong/edit/' + contractId;
+    console.log('🔍 Attempting to edit contract with ID:', contractId);
+    window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
   }
+
 
   // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
   function showSuccessMessage(message) {

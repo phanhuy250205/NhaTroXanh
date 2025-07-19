@@ -6,8 +6,7 @@ VALUES
 
 INSERT INTO contracts (room_id, user_id, owner_id, unregistered_tenant_id, contract_date, created_at, start_date, end_date, price, deposit, duration, terms, status, tenant_phone)
 VALUES 
-    (7, 209, 207, NULL, '2025-07-08', '2025-07-08', '2025-07-08', '2025-12-31', 3500000.00, 7000000.00, 6.0, 'Hợp đồng thuê phòng 6 tháng, thanh toán hàng tháng', 1, '0901234567');
-   
+    (7, 209, 207, NULL, '2025-07-08', '2025-07-08', '2025-07-08', '2025-12-31', 3500000.00, 7000000.00, 6.0, 'Hợp đồng thuê phòng 6 tháng, thanh toán hàng tháng', 1, '0901234567')
    
     (2, 1, 207, NULL, '2025-07-08', '2025-07-08', '2025-07-08', '2025-12-31', 4500000.00, 9000000.00, 6.0, 'Hợp đồng thuê phòng 6 tháng, thanh toán hàng tháng', 1, '0901234568'),
     (3, 1, 207, NULL, '2025-07-08', '2025-07-08', '2025-07-08', '2025-12-31', 2800000.00, 5600000.00, 6.0, 'Hợp đồng thuê phòng 6 tháng, thanh toán hàng tháng', 1, '0901234569');
@@ -33,3 +32,10 @@ SELECT * FROM district WHERE id = (SELECT district_id FROM ward WHERE id = <ward
 SELECT * FROM province WHERE id = (SELECT province_id FROM district WHERE id = <district_id>);
 
 SELECT * FROM payments WHERE app_trans_id = '250717_9561' OR id = 17;
+
+
+ALTER TABLE table_name ADD COLUMN created_at DATETIME;
+
+DESCRIBE posts;
+
+ALTER TABLE posts ADD COLUMN created_at DATE;

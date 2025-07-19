@@ -1,434 +1,939 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tạo Voucher - Hệ Thống Quản Lý Phòng Trọ</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link rel="stylesheet" th:href="@{/css/voucher-host.css}">
-    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <title>Quản lý Voucher - Nhà Trọ Xanh</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --card-hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .main-content {
+            padding: 30px;
+            transition: var(--transition);
+        }
+
+        .page-header {
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), #6a8eff);
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 1.8rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .page-title i {
+            background: linear-gradient(135deg, var(--primary-color), #6a8eff);
+            color: white;
+            padding: 0.75rem;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(74, 107, 255, 0.3);
+        }
+
+        .form-container {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            margin-bottom: 2rem;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .form-container:hover {
+            box-shadow: var(--card-hover-shadow);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 1px solid #e0e6ed;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            height: calc(2.5em + 0.75rem + 2px);
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(74, 107, 255, 0.15);
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-color);
+        }
+
+        .invalid-feedback {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), #6a8eff);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #3a56e6, var(--primary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(74, 107, 255, 0.4);
+        }
+
+        .btn-outline-secondary {
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #f8f9fa;
+        }
+
+        .nav-tabs {
+            border-bottom: 2px solid #e0e6ed;
+            margin-bottom: 2rem;
+        }
+
+        .nav-tabs .nav-link {
+            border: none;
+            color: #6c757d;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            margin-right: 0.5rem;
+            border-radius: 8px 8px 0 0;
+            transition: var(--transition);
+        }
+
+        .nav-tabs .nav-link:hover {
+            color: var(--primary-color);
+            background-color: rgba(74, 107, 255, 0.05);
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            background-color: transparent;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            padding: 0;
+            background: transparent;
+            border: none;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #f0faf7;
+            color: #0d3624;
+            padding: 16px 20px;
+            border-left: 4px solid var(--success-color);
+            border-radius: 8px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff5f5;
+            border-left-color: var(--danger-color);
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 12px;
+            font-size: 20px;
+            color: var(--success-color);
+        }
+
+        .custom-toast.error .toast-icon {
+            color: var(--danger-color);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+            margin-left: auto;
+            padding: 0;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .voucher-card {
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            background-color: white;
+        }
+
+        .voucher-card:hover {
+            box-shadow: var(--card-hover-shadow);
+            transform: translateY(-2px);
+        }
+
+        .voucher-card .card-header {
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+            padding: 1rem 1.5rem;
+        }
+
+        .voucher-card .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .voucher-card .card-body {
+            padding: 1.5rem;
+        }
+
+        .voucher-card .card-text {
+            font-size: 0.95rem;
+            color: #495057;
+        }
+
+        .voucher-card .card-text strong {
+            color: #2c3e50;
+        }
+
+        .voucher-card .card-footer {
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .pagination .page-link {
+            border-radius: 6px;
+            margin: 0 5px;
+            color: var(--primary-color);
+            border: 1px solid #e0e6ed;
+            transition: var(--transition);
+        }
+
+        .pagination .page-link:hover {
+            background-color: rgba(74, 107, 255, 0.1);
+            border-color: var(--primary-color);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .search-filter-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .search-filter-container .form-control,
+        .search-filter-container .form-select {
+            max-width: 300px;
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .page-title i {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+
+            .custom-toast {
+                min-width: 280px;
+                padding: 12px 16px;
+            }
+
+            .nav-tabs .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .voucher-card .card-title {
+                font-size: 1.1rem;
+            }
+
+            .voucher-card .card-text {
+                font-size: 0.9rem;
+            }
+
+            .voucher-card .card-header,
+            .voucher-card .card-body,
+            .voucher-card .card-footer {
+                padding: 1rem;
+            }
+
+            .search-filter-container .form-control,
+            .search-filter-container .form-select {
+                max-width: 100%;
+            }
+        }
+
+        .btn-delete-voucher {
+            border: none;
+            background-color: #f44336;
+            color: white;
+            padding: 12px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-delete-voucher:hover {
+            background-color: #d32f2f;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn-delete-voucher i {
+            font-size: 16px;
+        }
+    </style>
 </head>
+
 <body>
     <div th:replace="~{/layouts/sidebar-host}"></div>
-    <!-- Main Container -->
-    <div class="main-container-voucher">
-        <!-- Navigation Tabs -->
-        <nav class="main-nav">
-            <div class="container-fluid">
-                <div class="nav-tabs-container">
-                    <div class="nav-tabs">
-                        <button class="nav-tab active" onclick="showSection('create')" data-section="create">
-                            <i class="fas fa-plus-circle"></i>
-                            <span>Tạo Voucher</span>
-                        </button>
-                        <button class="voucher-tab-button" onclick="switchVoucherSection('list')" data-voucher-section="list">
-                            <i class="fas fa-list"></i>
-                            <span>Danh Sách</span>
-                        </button>
-                    </div>
-                </div>
+    <div class="main-content container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="fas fa-ticket-alt"></i>
+                Quản lý Voucher
+            </h1>
+            <p class="text-muted mt-2 mb-0">Tạo và quản lý voucher giảm giá cho khu trọ của bạn</p>
+        </div>
+        <button class="btn btn-outline-primary" onclick="history.back()">
+            <i class="fas fa-arrow-left me-1"></i> Quay lại
+        </button>
+
+
+        <!-- Toast Container -->
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <main class="voucher-main-content">
-            <div class="voucher-content-container">
-                <!-- Create Voucher Section -->
-                <section class="voucher-content-panel voucher-panel-active" id="voucherCreatePanel">
-                    <div class="voucher-section-header">
-                        <h2>Tạo Voucher Mới</h2>
-                        <p>Nhập thông tin để tạo voucher giảm giá</p>
-                    </div>
-
-                    <div class="voucher-form-wrapper">
-                        <form id="voucherCreationForm" method="POST" action="/vouchers/create">
-                            <div class="voucher-form-container">
-                                <!-- Thông tin cơ bản -->
-                                <div class="voucher-form-block">
-                                    <h3><i class="fas fa-info-circle"></i> Thông tin cơ bản</h3>
-                                    
-                                    <div class="voucher-input-row">
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Tên voucher</label>
-                                            <input type="text" class="voucher-input-control" name="voucherName" id="voucherNameInput" required placeholder="Nhập tên voucher...">
-                                            <div class="voucher-error-message">Vui lòng nhập tên voucher</div>
-                                        </div>
-
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Mã voucher</label>
-                                            <div class="voucher-input-group">
-                                                <input type="text" class="voucher-input-control" name="voucherCode" id="voucherCodeInput" required placeholder="Nhập mã voucher...">
-                                                <button type="button" class="voucher-generate-button" onclick="generateVoucherCode()">
-                                                    <i class="fas fa-magic"></i>
-                                                    Tạo mã
-                                                </button>
-                                            </div>
-                                            <div class="voucher-error-message">Vui lòng nhập mã voucher</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="voucher-field-group">
-                                        <label class="voucher-field-label">Mô tả voucher</label>
-                                        <textarea class="voucher-input-control" name="voucherDescription" id="voucherDescriptionInput" rows="3" placeholder="Mô tả chi tiết về voucher..."></textarea>
-                                    </div>
-
-                                    <div class="voucher-input-row">
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Trạng thái</label>
-                                            <select class="voucher-input-control" name="voucherStatus" id="voucherStatusSelect" required>
-                                                <option value="active">Kích hoạt ngay</option>
-                                                <option value="scheduled">Lên lịch</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thiết lập giảm giá -->
-                                <div class="voucher-form-block">
-                                    <h3><i class="fas fa-percentage"></i> Thiết lập giảm giá</h3>
-                                    
-                                    <div class="voucher-input-row">
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Số tiền giảm</label>
-                                            <div class="voucher-currency-wrapper">
-                                                <input type="number" class="voucher-input-control" name="discountValue" id="voucherDiscountInput" required min="1000" step="1000" placeholder="0">
-                                                <div class="voucher-currency-suffix">VNĐ</div>
-                                            </div>
-                                            <div class="voucher-help-text">Số tiền giảm tối thiểu là 1,000 VNĐ</div>
-                                            <div class="voucher-error-message">Vui lòng nhập số tiền giảm hợp lệ</div>
-                                        </div>
-
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label">Giảm tối đa (tùy chọn)</label>
-                                            <div class="voucher-currency-wrapper">
-                                                <input type="number" class="voucher-input-control" name="maxDiscount" id="voucherMaxDiscountInput" min="0" step="1000" placeholder="Không giới hạn">
-                                                <div class="voucher-currency-suffix">VNĐ</div>
-                                            </div>
-                                            <div class="voucher-help-text">Để trống nếu không giới hạn</div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Thời gian áp dụng -->
-                                <div class="voucher-form-block">
-                                    <h3><i class="fas fa-calendar-alt"></i> Thời gian áp dụng</h3>
-                                    
-                                    <div class="voucher-input-row">
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Ngày bắt đầu</label>
-                                            <input type="datetime-local" class="voucher-input-control" name="startDate" id="voucherStartDateInput" required>
-                                            <div class="voucher-error-message">Vui lòng chọn ngày bắt đầu</div>
-                                        </div>
-
-                                        <div class="voucher-field-group">
-                                            <label class="voucher-field-label voucher-required-field">Ngày kết thúc</label>
-                                            <input type="datetime-local" class="voucher-input-control" name="endDate" id="voucherEndDateInput" required>
-                                            <div class="voucher-error-message">Vui lòng chọn ngày kết thúc</div>
-                                        </div>
-                                    </div>
-
-                                    <div class="voucher-field-group">
-                                        <label class="voucher-field-label">Giới hạn số lần sử dụng</label>
-                                        <input type="number" class="voucher-input-control" name="totalUsageLimit" id="voucherUsageLimitInput" min="1" placeholder="Không giới hạn">
-                                        <div class="voucher-help-text">Để trống nếu không giới hạn số lần sử dụng</div>
-                                    </div>
-                                </div>
-
-                                <!-- Phạm vi áp dụng -->
-                                <div class="voucher-form-block">
-                                    <h3><i class="fas fa-building"></i> Phạm vi áp dụng</h3>
-                                    
-                                    <div class="voucher-scope-selection">
-                                        <div class="voucher-scope-options">
-                                            <div class="voucher-scope-item">
-                                                <input type="radio" name="hostelScope" value="all" id="voucherScopeAll" checked onchange="toggleVoucherHostelSection()">
-                                                <label for="voucherScopeAll" class="voucher-scope-card">
-                                                    <i class="fas fa-globe"></i>
-                                                    <span>Tất cả khu trọ</span>
-                                                </label>
-                                            </div>
-
-                                            <div class="voucher-scope-item">
-                                                <input type="radio" name="hostelScope" value="specific" id="voucherScopeSpecific" onchange="toggleVoucherHostelSection()">
-                                                <label for="voucherScopeSpecific" class="voucher-scope-card">
-                                                    <i class="fas fa-map-marker-alt"></i>
-                                                    <span>Khu trọ cụ thể</span>
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <div class="voucher-hostel-selection" id="voucherHostelSelectionPanel" style="display: none;">
-                                            <h4>Chọn khu trọ áp dụng</h4>
-                                            <div class="voucher-hostel-list">
-                                                <div class="voucher-hostel-item">
-                                                    <input type="checkbox" name="selectedHostels" value="1" id="voucherHostel1">
-                                                    <label for="voucherHostel1" class="voucher-hostel-card">
-                                                        <div class="voucher-hostel-info">
-                                                            <h5>Khu trọ Xanh - Quận 1</h5>
-                                                            <p>123 Nguyễn Huệ, Quận 1, TP.HCM</p>
-                                                            <span class="voucher-hostel-rooms">50 phòng</span>
-                                                        </div>
-                                                    </label>
-                                                </div>
-
-                                                <div class="voucher-hostel-item">
-                                                    <input type="checkbox" name="selectedHostels" value="2" id="voucherHostel2">
-                                                    <label for="voucherHostel2" class="voucher-hostel-card">
-                                                        <div class="voucher-hostel-info">
-                                                            <h5>Khu trọ Hạnh Phúc - Quận 3</h5>
-                                                            <p>456 Võ Văn Tần, Quận 3, TP.HCM</p>
-                                                            <span class="voucher-hostel-rooms">30 phòng</span>
-                                                        </div>
-                                                    </label>
-                                                </div>
-
-                                                <div class="voucher-hostel-item">
-                                                    <input type="checkbox" name="selectedHostels" value="3" id="voucherHostel3">
-                                                    <label for="voucherHostel3" class="voucher-hostel-card">
-                                                        <div class="voucher-hostel-info">
-                                                            <h5>Khu trọ An Khang - Quận 7</h5>
-                                                            <p>789 Nguyễn Thị Thập, Quận 7, TP.HCM</p>
-                                                            <span class="voucher-hostel-rooms">40 phòng</span>
-                                                        </div>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Form Actions -->
-                                <div class="voucher-form-actions">
-                                    <button type="button" class="voucher-button voucher-button-secondary" onclick="resetVoucherForm()">
-                                        <i class="fas fa-refresh"></i>
-                                        Làm mới
-                                    </button>
-                                    <button type="submit" class="voucher-button voucher-button-primary">
-                                        <i class="fas fa-save"></i>
-                                        Tạo voucher
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- Voucher List Section -->
-                <section class="voucher-content-panel" id="voucherListPanel">
-                    <div class="voucher-section-header">
-                        <h2>Danh sách voucher</h2>
-                        <p>Quản lý tất cả voucher trong hệ thống</p>
-                    </div>
-
-                    <div class="voucher-list-container">
-                        <!-- Sample voucher items - Backend sẽ render -->
-                        <div class="voucher-list-item">
-                            <div class="voucher-item-info">
-                                <div class="voucher-item-header">
-                                    <h4>Voucher Giảm Giá Tháng 12</h4>
-                                    <span class="voucher-status-badge voucher-status-active">Kích hoạt</span>
-                                </div>
-                                <div class="voucher-item-details">
-                                    <p><strong>Mã:</strong> VC123456</p>
-                                    <p><strong>Giảm:</strong> 50,000 VNĐ</p>
-                                    <p><strong>Thời gian:</strong> 01/12/2024 - 31/12/2024</p>
-                                    <p><strong>Sử dụng:</strong> 25/100 lượt</p>
-                                </div>
-                            </div>
-                            <div class="voucher-item-actions">
-                                <button class="voucher-action-button voucher-action-edit" onclick="editVoucherItem(1)" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-delete" onclick="deleteVoucherItem(1)" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-toggle" onclick="toggleVoucherItem(1)" title="Bật/Tắt">
-                                    <i class="fas fa-power-off"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="voucher-list-item">
-                            <div class="voucher-item-info">
-                                <div class="voucher-item-header">
-                                    <h4>Voucher Khách Hàng Mới</h4>
-                                    <span class="voucher-status-badge voucher-status-scheduled">Lên lịch</span>
-                                </div>
-                                <div class="voucher-item-details">
-                                    <p><strong>Mã:</strong> VC789012</p>
-                                    <p><strong>Giảm:</strong> 100,000 VNĐ</p>
-                                    <p><strong>Thời gian:</strong> 15/12/2024 - 15/01/2025</p>
-                                    <p><strong>Sử dụng:</strong> 0/50 lượt</p>
-                                </div>
-                            </div>
-                            <div class="voucher-item-actions">
-                                <button class="voucher-action-button voucher-action-edit" onclick="editVoucherItem(2)" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-delete" onclick="deleteVoucherItem(2)" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-toggle" onclick="toggleVoucherItem(2)" title="Bật/Tắt">
-                                    <i class="fas fa-power-off"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="voucher-list-item">
-                            <div class="voucher-item-info">
-                                <div class="voucher-item-header">
-                                    <h4>Voucher Sinh Nhật</h4>
-                                    <span class="voucher-status-badge voucher-status-disabled">Vô hiệu hóa</span>
-                                </div>
-                                <div class="voucher-item-details">
-                                    <p><strong>Mã:</strong> VC345678</p>
-                                    <p><strong>Giảm:</strong> 75,000 VNĐ</p>
-                                    <p><strong>Thời gian:</strong> 01/11/2024 - 30/11/2024</p>
-                                    <p><strong>Sử dụng:</strong> 45/100 lượt</p>
-                                </div>
-                            </div>
-                            <div class="voucher-item-actions">
-                                <button class="voucher-action-button voucher-action-edit" onclick="editVoucherItem(3)" title="Chỉnh sửa">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-delete" onclick="deleteVoucherItem(3)" title="Xóa">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                                <button class="voucher-action-button voucher-action-toggle" onclick="toggleVoucherItem(3)" title="Bật/Tắt">
-                                    <i class="fas fa-power-off"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </section>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
             </div>
-        </main>
-    </div>
+        </div>
 
-    <!-- Edit Voucher Modal -->
-    <div class="voucher-modal-overlay" id="voucherEditModal" tabindex="-1" aria-hidden="true">
-        <div class="voucher-modal-dialog">
-            <div class="voucher-modal-content">
-                <div class="voucher-modal-header">
-                    <h5 class="voucher-modal-title">
-                        <i class="fas fa-edit"></i>
-                        Chỉnh sửa voucher
-                    </h5>
-                    <button type="button" class="voucher-modal-close" onclick="closeVoucherModal()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="voucher-modal-body">
-                    <form id="voucherEditForm" method="POST" action="/vouchers/update">
-                        <input type="hidden" name="voucherId" id="editVoucherIdInput">
-                        
-                        <div class="voucher-input-row">
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Tên voucher</label>
-                                <input type="text" class="voucher-input-control" name="voucherName" id="editVoucherNameInput" required>
+        <ul class="nav nav-tabs" id="voucherTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="create-tab" data-bs-toggle="tab" data-bs-target="#create-tab-pane"
+                    type="button" role="tab">
+                    <i class="fas fa-plus-circle me-2"></i>
+                    <span th:text="${editVoucher != null} ? 'Chỉnh sửa Voucher' : 'Tạo Voucher'"></span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="list-tab" data-bs-toggle="tab" data-bs-target="#list-tab-pane"
+                    type="button" role="tab">
+                    <i class="fas fa-list me-2"></i>Danh sách Voucher
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="voucherTabsContent">
+            <!-- Tab 1: Tạo/Chỉnh sửa Voucher -->
+            <div class="tab-pane fade show active" id="create-tab-pane" role="tabpanel" aria-labelledby="create-tab">
+                <div class="form-container">
+                    <form
+                        th:action="${editVoucher != null} ? @{/chu-tro/voucher/edit/{id}(id=${editVoucher.id})} : @{/chu-tro/voucher/create}"
+                        method="post" id="voucherForm">
+                        <input type="hidden" name="voucherId" id="voucherId" th:value="${editVoucher?.id}">
+                        <div class="row">
+                            <!-- Tiêu đề -->
+                            <div class="col-md-6 mb-3">
+                                <label for="title" class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                    th:value="${editVoucher?.title}"
+                                    placeholder="Nhập tiêu đề voucher (VD: Giảm giá 10%)">
+                                <div class="invalid-feedback">Tiêu đề không được để trống.</div>
                             </div>
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Mã voucher</label>
-                                <input type="text" class="voucher-input-control" name="voucherCode" id="editVoucherCodeInput" required>
-                            </div>
-                        </div>
-                        
-                        <div class="voucher-field-group">
-                            <label class="voucher-field-label">Mô tả</label>
-                            <textarea class="voucher-input-control" name="voucherDescription" id="editVoucherDescriptionInput" rows="3"></textarea>
-                        </div>
-                        
-                        <div class="voucher-input-row">
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Số tiền giảm</label>
-                                <div class="voucher-currency-wrapper">
-                                    <input type="number" class="voucher-input-control" name="discountValue" id="editVoucherDiscountInput" required min="1000" step="1000">
-                                    <div class="voucher-currency-suffix">VNĐ</div>
+                            <!-- Mã voucher -->
+                            <div class="col-md-6 mb-3">
+                                <label for="code" class="form-label">Mã voucher <span
+                                        class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="code" name="code"
+                                        th:value="${editVoucher?.code}" placeholder="Nhập mã voucher (VD: SALE10)">
+                                    <button class="btn btn-outline-secondary" type="button" id="generateCode">
+                                        <i class="fas fa-random"></i>
+                                    </button>
+                                    <div class="invalid-feedback">Mã voucher không được để trống hoặc đã tồn tại.</div>
                                 </div>
                             </div>
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label">Giảm tối đa</label>
-                                <div class="voucher-currency-wrapper">
-                                    <input type="number" class="voucher-input-control" name="maxDiscount" id="editVoucherMaxDiscountInput" min="0" step="1000">
-                                    <div class="voucher-currency-suffix">VNĐ</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="voucher-input-row">
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Ngày bắt đầu</label>
-                                <input type="datetime-local" class="voucher-input-control" name="startDate" id="editVoucherStartDateInput" required>
-                            </div>
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Ngày kết thúc</label>
-                                <input type="datetime-local" class="voucher-input-control" name="endDate" id="editVoucherEndDateInput" required>
-                            </div>
-                        </div>
-                        
-                        <div class="voucher-input-row">
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label">Giới hạn sử dụng</label>
-                                <input type="number" class="voucher-input-control" name="totalUsageLimit" id="editVoucherUsageLimitInput" min="1">
-                            </div>
-                            <div class="voucher-field-group">
-                                <label class="voucher-field-label voucher-required-field">Trạng thái</label>
-                                <select class="voucher-input-control" name="voucherStatus" id="editVoucherStatusSelect" required>
-                                    <option value="active">Kích hoạt</option>
-                                    <option value="scheduled">Lên lịch</option>
-                                    <option value="disabled">Vô hiệu hóa</option>
+                            <!-- Khu trọ -->
+                            <div class="col-md-6 mb-3">
+                                <label for="hostelId" class="form-label">Khu trọ <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="hostelId" name="hostelId">
+                                    <option value="" disabled th:unless="${editVoucher != null}" selected>Chọn khu trọ
+                                    </option>
+                                    <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
+                                        th:text="${hostel.name}"
+                                        th:selected="${editVoucher != null and hostel.hostelId == editVoucher.hostel.hostelId}">
+                                    </option>
                                 </select>
+                                <div class="invalid-feedback">Vui lòng chọn khu trọ.</div>
                             </div>
+                            <!-- Giá trị giảm giá -->
+                            <div class="col-md-6 mb-3">
+                                <label for="discountValue" class="form-label">Giá trị giảm giá (VNĐ) <span
+                                        class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="discountValue" name="discountValue"
+                                        step="1000" th:value="${editVoucher?.discountValue}"
+                                        placeholder="Nhập số tiền giảm (VD: 150000)">
+                                    <span class="input-group-text">VNĐ</span>
+                                    <div class="invalid-feedback">Giá trị giảm giá không được để trống.</div>
+                                </div>
+                            </div>
+                            <!-- Số lượng -->
+                            <div class="col-md-6 mb-3">
+                                <label for="quantity" class="form-label">Số lượng <span
+                                        class="text-danger">*</span></label>
+                                <input type="number" class="form-control" id="quantity" name="quantity"
+                                    th:value="${editVoucher?.quantity}" placeholder="Nhập số lượng voucher">
+                                <div class="invalid-feedback">Số lượng phải lớn hơn 0.</div>
+                            </div>
+                            <!-- Giá trị tối thiểu -->
+                            <div class="col-md-6 mb-3">
+                                <label for="minAmount" class="form-label">Giá trị tối thiểu (VNĐ)</label>
+                                <div class="input-group">
+                                    <input type="number" class="form-control" id="minAmount" name="minAmount"
+                                        th:value="${editVoucher?.minAmount}"
+                                        placeholder="Nhập giá trị tối thiểu để áp dụng (VD: 1000000)">
+                                    <span class="input-group-text">VNĐ</span>
+                                    <div class="invalid-feedback">Giá trị tối thiểu không được âm.</div>
+                                </div>
+                            </div>
+                            <!-- Ngày bắt đầu -->
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">Ngày bắt đầu <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="startDate" name="startDate"
+                                    th:value="${editVoucher != null} ? ${#dates.format(editVoucher.startDate, 'yyyy-MM-dd')} : ''">
+                                <div class="invalid-feedback">Ngày bắt đầu không được để trống.</div>
+                            </div>
+                            <!-- Trạng thái -->
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Trạng thái <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="true"
+                                        th:selected="${editVoucher == null or editVoucher.status == true}">Đang hoạt
+                                        động</option>
+                                    <option value="false"
+                                        th:selected="${editVoucher != null and editVoucher.status == false}">Ngừng hoạt
+                                        động</option>
+                                </select>
+                                <div class="invalid-feedback">Vui lòng chọn trạng thái.</div>
+                            </div>
+                            <!-- Ngày kết thúc -->
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">Ngày kết thúc <span
+                                        class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="endDate" name="endDate"
+                                    th:value="${editVoucher != null} ? ${#dates.format(editVoucher.endDate, 'yyyy-MM-dd')} : ''">
+                                <div class="invalid-feedback">Ngày kết thúc không được để trống.</div>
+                            </div>
+                            <!-- Mô tả -->
+                            <div class="col-12 mb-3">
+                                <label for="description" class="form-label">Mô tả</label>
+                                <textarea class="form-control" id="description" name="description" rows="4"
+                                    th:text="${editVoucher?.description}"
+                                    placeholder="Nhập mô tả voucher (VD: Áp dụng cho hợp đồng từ 6 tháng trở lên)">
+                                </textarea>
+                                <div class="invalid-feedback">Mô tả không được để trống.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end gap-3 mt-4">
+                            <button type="button" class="btn btn-outline-secondary px-4" id="resetFormButton">
+                                <i class="fas fa-undo me-2"></i> Đặt lại
+                            </button>
+                            <button type="submit" class="btn btn-primary px-4" id="submitButton">
+                                <i class="fas fa-save me-2"></i>
+                                <span th:text="${editVoucher != null} ? 'Cập nhật Voucher' : 'Tạo Voucher'"></span>
+                            </button>
                         </div>
                     </form>
                 </div>
-                <div class="voucher-modal-footer">
-                    <button type="button" class="voucher-button voucher-button-secondary" onclick="closeVoucherModal()">Hủy</button>
-                    <button type="submit" class="voucher-button voucher-button-primary" form="voucherEditForm">
-                        <i class="fas fa-save"></i>
-                        Lưu thay đổi
-                    </button>
+            </div>
+
+            <!-- Tab 2: Danh sách Voucher -->
+            <div class="tab-pane fade" id="list-tab-pane" role="tabpanel" aria-labelledby="list-tab">
+                <div class="form-container">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h4 class="mb-0">Danh sách Voucher</h4>
+                        <div class="text-muted">
+                            <i class="fas fa-info-circle me-2"></i>Tổng: <span th:text="${totalVouchers}">0</span>
+                            voucher
+                        </div>
+                    </div>
+
+                    <!-- Search and Filter Controls -->
+                    <form th:action="@{/chu-tro/voucher}" method="get" id="searchFilterForm">
+                        <div class="search-filter-container">
+                            <div>
+                                <label for="searchQuery" class="form-label">Tìm kiếm</label>
+                                <input type="text" class="form-control" id="searchQuery" name="searchQuery"
+                                    th:value="${param.searchQuery}" placeholder="Tìm theo tiêu đề hoặc mã voucher">
+                            </div>
+                            <div>
+                                <label for="statusFilter" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="statusFilter" name="statusFilter">
+                                    <option value="" th:selected="${param.statusFilter == null}">Tất cả</option>
+                                    <option value="active" th:selected="${param.statusFilter == 'active'}">Đang hoạt
+                                        động</option>
+                                    <option value="expired" th:selected="${param.statusFilter == 'expired'}">Hết hạn
+                                    </option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary align-self-end">
+                                <i class="fas fa-search me-2"></i>Tìm
+                            </button>
+                            <div class="align-self-end">
+                                <a th:href="@{/chu-tro/voucher}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-rotate-left me-1"></i>Reset
+                                </a>
+                            </div>
+                        </div>
+                        <input type="hidden" name="page" id="pageInput" th:value="${currentPage}">
+                    </form>
+
+                    <div th:if="${#lists.isEmpty(vouchers)}" class="text-center py-5">
+                        <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có voucher nào được tạo.</p>
+                        <a href="#create-tab" class="btn btn-primary mt-3" data-bs-toggle="tab">
+                            <i class="fas fa-plus me-2"></i>Tạo voucher đầu tiên
+                        </a>
+                    </div>
+
+                    <div th:if="${not #lists.isEmpty(vouchers)}" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                        <div th:each="voucher : ${vouchers}" class="col">
+                            <div class="card h-100 shadow-sm voucher-card">
+                                <div
+                                    class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                                    <h5 class="card-title mb-0" th:text="${voucher.title}">Tiêu đề</h5>
+                                    <span class="badge bg-light text-dark" th:text="${voucher.code}">Mã</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="card-text mb-2">
+                                        <strong>Khu trọ:</strong> <span th:text="${voucher.hostel.name}">Tên trọ</span>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong>Giá trị giảm:</strong>
+                                        <span class="fw-bold text-success"
+                                            th:text="${#numbers.formatDecimal(voucher.discountValue, 0, 'COMMA', 0, 'POINT')}+' VNĐ'">
+                                        </span>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong>Đơn tối thiểu</strong>
+                                        <span class="fw-bold text-success"
+                                            th:text="${#numbers.formatDecimal(voucher.minAmount, 0, 'COMMA', 0, 'POINT')}+' VNĐ'">
+                                        </span>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong>Số lượng:</strong> <span th:text="${voucher.quantity}">10</span>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong>Hiệu lực:</strong><br>
+                                        <small class="text-muted">Từ: <span
+                                                th:text="${#dates.format(voucher.startDate, 'dd/MM/yyyy')}"></span></small><br>
+                                        <small class="text-muted">Đến: <span
+                                                th:text="${#dates.format(voucher.endDate, 'dd/MM/yyyy')}"></span></small>
+                                    </p>
+                                    <p class="card-text mb-2">
+                                        <strong>Trạng thái:</strong>
+                                        <span th:if="${voucher.status}" class="badge bg-success">Đang hoạt động</span>
+                                        <span th:if="${!voucher.status}" class="badge bg-secondary">Hết hạn</span>
+                                    </p>
+                                </div>
+                                <div class="card-footer bg-light d-flex justify-content-end gap-2">
+                                    <button type="button"
+                                        class="btn btn-primary btn-sm d-flex align-items-center gap-1 edit-voucher-btn"
+                                        th:attr="data-voucher-id=${voucher.id}, 
+                                                 data-title=${voucher.title}, 
+                                                 data-code=${voucher.code}, 
+                                                 data-hostel-id=${voucher.hostel.hostelId}, 
+                                                 data-discount-value=${voucher.discountValue}, 
+                                                 data-quantity=${voucher.quantity}, 
+                                                 data-min-amount=${voucher.minAmount}, 
+                                                 data-start-date=${#dates.format(voucher.startDate, 'yyyy-MM-dd')}, 
+                                                 data-end-date=${#dates.format(voucher.endDate, 'yyyy-MM-dd')}, 
+                                                 data-status=${voucher.status}, 
+                                                 data-description=${voucher.description}">
+                                        <i class="fas fa-edit"></i> Chỉnh sửa
+                                    </button>
+                                    <form th:id="'deleteVoucherForm-' + ${voucher.id}"
+                                        th:action="@{/chu-tro/voucher/delete/{id}(id=${voucher.id})}" method="post">
+                                        <button type="button" class="btn-delete-voucher"
+                                            th:onclick="'confirmDeleteVoucher(' + ${voucher.id} + ')'">
+                                            <i class="fas fa-trash-alt"></i> Xóa
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pagination -->
+                    <nav th:if="${not #lists.isEmpty(vouchers)}" aria-label="Voucher pagination">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/chu-tro/voucher(page=${currentPage - 1}, searchQuery=${param.searchQuery}, statusFilter=${param.statusFilter})}">Trước</a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}" class="page-item"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link"
+                                    th:href="@{/chu-tro/voucher(page=${i}, searchQuery=${param.searchQuery}, statusFilter=${param.statusFilter})}"
+                                    th:text="${i + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/chu-tro/voucher(page=${currentPage + 1}, searchQuery=${param.searchQuery}, statusFilter=${param.statusFilter})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast Notifications -->
-    <div class="voucher-toast-container">
-        <div class="voucher-toast voucher-toast-success" id="voucherSuccessToast">
-            <div class="voucher-toast-content">
-                <div class="voucher-toast-icon">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="voucher-toast-text">
-                    <div class="voucher-toast-title">Thành công!</div>
-                    <div class="voucher-toast-message" id="voucherSuccessMessage">Thao tác đã được thực hiện thành công.</div>
-                </div>
-            </div>
-            <button class="voucher-toast-close" onclick="hideVoucherToast('voucherSuccessToast')">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="voucher-toast voucher-toast-error" id="voucherErrorToast">
-            <div class="voucher-toast-content">
-                <div class="voucher-toast-icon">
-                    <i class="fas fa-exclamation-circle"></i>
-                </div>
-                <div class="voucher-toast-text">
-                    <div class="voucher-toast-title">Lỗi!</div>
-                    <div class="voucher-toast-message" id="voucherErrorMessage">Có lỗi xảy ra, vui lòng thử lại.</div>
-                </div>
-            </div>
-            <button class="voucher-toast-close" onclick="hideVoucherToast('voucherErrorToast')">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Xử lý toast
+            const toasts = document.querySelectorAll('.custom-toast');
+            toasts.forEach(toast => {
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/voucher-host.js}"></script>
-    <script th:src="@{/js/sidebar.js}"></script>
+                toast.querySelector('.toast-close').addEventListener('click', () => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+
+            // Tạo mã voucher ngẫu nhiên
+            document.getElementById('generateCode').addEventListener('click', function () {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let result = '';
+                for (let i = 0; i < 8; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                const codeInput = document.getElementById('code');
+                codeInput.value = result;
+                codeInput.classList.remove('is-invalid');
+                checkCodeAvailability(codeInput);
+            });
+
+            // Kiểm tra mã voucher theo thời gian thực (không hiển thị lỗi)
+            document.getElementById('code').addEventListener('blur', function () {
+                checkCodeAvailability(this);
+            });
+
+            function checkCodeAvailability(input) {
+                const code = input.value.trim();
+                const voucherId = document.getElementById('voucherId') ? document.getElementById('voucherId').value : '';
+                if (code) {
+                    fetch(`/chu-tro/voucher/check-code?code=${encodeURIComponent(code)}&voucherId=${voucherId || ''}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            input.classList.toggle('is-invalid', data.exists); // Chỉ đánh dấu, không hiển thị SweetAlert
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi kiểm tra mã:', error);
+                        });
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+
+            // Xử lý form submit (gửi trực tiếp, không validation client-side)
+            const form = document.getElementById('voucherForm');
+            const submitButton = document.getElementById('submitButton');
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                if (!validateFormFields()) return;
+                const isEditMode = document.getElementById('voucherId') ? document.getElementById('voucherId').value !== '' : false;
+                Swal.fire({
+                    title: isEditMode ? 'Xác nhận cập nhật voucher' : 'Xác nhận tạo voucher',
+                    html: `<p>Bạn có chắc chắn muốn ${isEditMode ? 'cập nhật' : 'tạo'} voucher này?</p>
+                       <div class="text-start mt-3">
+                           <p><strong>Tiêu đề:</strong> ${document.getElementById('title').value.trim()}</p>
+                           <p><strong>Mã:</strong> ${document.getElementById('code').value.trim()}</p>
+                           <p><strong>Giảm giá:</strong> ${document.getElementById('discountValue').value || '0'} VNĐ</p>
+                       </div>`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#4a6bff',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: `<i class="fas fa-check me-2"></i>Xác nhận`,
+                    cancelButtonText: '<i class="fas fa-times me-2"></i>Hủy',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+
+            // Đặt ngày mặc định
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('endDate').min = today;
+
+            // Xử lý nút chỉnh sửa
+            // Xử lý nút chỉnh sửa
+            document.querySelectorAll('.edit-voucher-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const voucherId = this.getAttribute('data-voucher-id');
+                    const title = this.getAttribute('data-title');
+                    const code = this.getAttribute('data-code');
+                    const hostelId = this.getAttribute('data-hostel-id');
+                    const discountValue = this.getAttribute('data-discount-value');
+                    const quantity = this.getAttribute('data-quantity');
+                    const minAmount = this.getAttribute('data-min-amount');
+                    const startDate = this.getAttribute('data-start-date');
+                    const endDate = this.getAttribute('data-end-date');
+                    const status = this.getAttribute('data-status');
+                    const description = this.getAttribute('data-description');
+
+                    // Điền dữ liệu vào form
+                    document.getElementById('voucherId').value = voucherId || '';
+                    document.getElementById('title').value = title || '';
+                    document.getElementById('code').value = code || '';
+                    document.getElementById('code').classList.remove('is-invalid');
+                    document.getElementById('hostelId').value = hostelId || '';
+                    document.getElementById('discountValue').value = discountValue || '';
+                    document.getElementById('quantity').value = quantity || '';
+                    document.getElementById('minAmount').value = minAmount || '';
+                    document.getElementById('startDate').value = startDate || '';
+                    document.getElementById('endDate').value = endDate || '';
+                    document.getElementById('status').value = status || 'true';
+                    document.getElementById('description').value = description || '';
+
+                    // Cập nhật form action cho đúng
+                    document.getElementById('voucherForm').setAttribute('action', `/chu-tro/voucher/edit/${voucherId}`);
+
+                    // Cập nhật tiêu đề tab và nút submit
+                    const createTab = document.querySelector('#create-tab span');
+                    createTab.textContent = 'Chỉnh sửa Voucher';
+                    const submitButton = document.getElementById('submitButton');
+                    submitButton.querySelector('span').textContent = 'Cập nhật Voucher';
+
+                    // Chuyển sang tab Tạo/Chỉnh sửa
+                    const tab = new bootstrap.Tab(document.querySelector('#create-tab'));
+                    tab.show();
+                });
+            });
+
+
+            // Xử lý nút Đặt lại
+            document.getElementById('resetFormButton').addEventListener('click', function () {
+                form.reset();
+                document.getElementById('voucherId').value = '';
+                document.getElementById('code').classList.remove('is-invalid');
+                document.querySelectorAll('.form-control, .form-select').forEach(input => {
+                    input.classList.remove('is-invalid');
+                });
+                const createTab = document.querySelector('#create-tab span');
+                createTab.textContent = 'Tạo Voucher';
+                submitButton.querySelector('span').textContent = 'Tạo Voucher';
+            });
+
+            // Chuyển tab nếu có thông báo
+            if (document.querySelector('.custom-toast.success')) {
+                const tab = new bootstrap.Tab(document.querySelector('#list-tab'));
+                tab.show();
+            }
+
+            // Xử lý submit tìm kiếm và lọc
+            const searchFilterForm = document.getElementById('searchFilterForm');
+            searchFilterForm.addEventListener('submit', function (event) {
+                document.getElementById('pageInput').value = 0; // Reset to first page on new search/filter
+            });
+
+            // Xử lý click phân trang
+            document.querySelectorAll('.page-link').forEach(link => {
+                link.addEventListener('click', function (event) {
+                    if (this.parentElement.classList.contains('disabled')) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        });
+
+        function confirmDeleteVoucher(voucherId) {
+            Swal.fire({
+                title: 'Xác nhận xóa voucher',
+                text: 'Bạn có chắc chắn muốn xóa voucher này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteVoucherForm-' + voucherId).submit();
+                }
+            });
+        }
+        function validateFormFields() {
+            let valid = true;
+            const requiredFields = ['title', 'code', 'hostelId', 'discountValue','minAmount', 'quantity', 'startDate', 'endDate', 'status','description'];
+
+            requiredFields.forEach(id => {
+                const field = document.getElementById(id);
+                if (!field.value || (field.type === 'number' && parseFloat(field.value) <= 0)) {
+                    field.classList.add('is-invalid');
+                    valid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            return valid;
+        }
+
+    </script>
 </body>
+
 </html>

@@ -53,8 +53,11 @@
         @Column(name = "status", nullable = false)
         private RoomStatus status;
 
-        @Column(name = "acreage")
-        private Float acreage;
+    @Column(name = "address", nullable = true)
+    private String address; // Đảm bảo cột này được ánh xạ
+
+    @Column(name = "acreage")
+    private Float acreage;
 
         @Column(name = "max_tenants")
         private Integer max_tenants;
@@ -70,25 +73,22 @@
         private List<Image> images;
 
         @Override
-        public String toString() {
-            return "Rooms{" +
-                    "roomId=" + roomId +
-                    ", category=" + category +
-                    ", hostel=" + hostel +
-                    ", description='" + description + '\'' +
-                    ", namerooms='" + namerooms + '\'' +
-                    ", status=" + status +
-                    ", acreage=" + acreage +
-                    ", max_tenants=" + max_tenants +
-                    ", price=" + price +
-                    ", utilities=" + utilities +
-                    ", images=" + images +
-                    '}';
-        }
+    public String toString() {
+        return "Rooms{" +
+                "roomId=" + roomId +
+                ", category=" + category +
+                ", hostel=" + hostel +
+                ", description='" + description + '\'' +
+                ", namerooms='" + namerooms + '\'' +
+                ", status=" + status +
+                ", address='" + address + '\'' +
+                ", acreage=" + acreage +
+                ", max_tenants=" + max_tenants +
+                ", price=" + price +
+                ", utilities=" + utilities +
+                ", images=" + images +
+                '}';
+    }
 
-        public enum RoomStatus {
-            ACTIVE,
-            INACTIVE,
-            MAINTENANCE // Thêm các trạng thái khác nếu cần
-        }
+    
     }

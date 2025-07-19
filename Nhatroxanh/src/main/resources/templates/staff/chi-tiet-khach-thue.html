@@ -297,14 +297,11 @@
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
-            background: linear-gradient(135deg, var(--success-color-staff) 0%, #1e7e34 100%);
-            color: white;
             padding: 0.75rem 1.5rem;
             border-radius: 2rem;
             font-size: 0.9rem;
             font-weight: 600;
             margin-top: 0.75rem;
-            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.2);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -577,6 +574,34 @@
                 transform: translateX(0);
             }
         }
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        /* Trạng thái Đang thuê - Màu xanh lá */
+        .badge-active {
+            background-color: #e6f4ea;
+            color: #1a7f37;
+        }
+
+        /* Trạng thái Sắp hết hạn - Màu cam */
+        .badge-expired {
+            background-color: #fff8e1;
+            color: #b76e00;
+        }
+
+        /* Trạng thái Ngừng thuê - Màu đỏ */
+        .badge-terminated {
+            background-color: #fdecea;
+            color: #c62828;
+        }
     </style>
 </head>
 
@@ -695,61 +720,72 @@
                 <i class="fas fa-home"></i>
                 Thông tin thuê trọ
             </h2>
-            <form id="rentalForm">
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="area" class="form-label-staff">Khu trọ</label>
-                        <input type="text" class="form-control-staff" id="area"
-                            th:value="${contract != null ? contract.room.hostel.name : ''}" readonly>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="roomNumber" class="form-label-staff">Số Phòng</label>
-                        <input type="text" class="form-control-staff" id="roomNumber"
-                            th:value="${contract != null ? contract.room.namerooms : ''}" readonly>
-                    </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label for="startDate" class="form-label-staff">Ngày bắt đầu</label>
-                        <input type="date" class="form-control-staff" id="startDate"
-                            th:value="${contract != null ? #dates.format(contract.startDate, 'yyyy-MM-dd') : ''}"
-                            readonly>
-
+            <div th:if="${contracts != null and !contracts.isEmpty()}">
+                <div th:each="contract : ${contracts}" class="contract-block border rounded p-3 mb-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-staff">Khu trọ</label>
+                            <input type="text" class="form-control-staff" readonly
+                                th:value="${contract.room.hostel.name}" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-staff">Phòng</label>
+                            <input type="text" class="form-control-staff" readonly
+                                th:value="${contract.room.namerooms}" />
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-4">
-                        <label for="endDate" class="form-label-staff">Ngày kết thúc</label>
-                        <input type="date" class="form-control-staff" id="endDate"
-                            th:value="${contract != null ? #dates.format(contract.endDate, 'yyyy-MM-dd') : ''}"
-                            readonly>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-staff">Ngày bắt đầu</label>
+                            <input type="date" class="form-control-staff" readonly
+                                th:value="${#dates.format(contract.startDate, 'yyyy-MM-dd')}" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-staff">Ngày kết thúc</label>
+                            <input type="date" class="form-control-staff" readonly
+                                th:value="${#dates.format(contract.endDate, 'yyyy-MM-dd')}" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <label class="form-label-staff">Trạng thái thuê</label>
-                        <div>
-                            <span class="status-badge-staff">
-                                <i class="fas"
-                                    th:classappend="${contract != null and contract.status.name() == 'ACTIVE' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
-                                <span
-                                    th:text="${contract != null ? (contract.status.name() == 'ACTIVE' ? 'Đang thuê' : 'Ngừng thuê') : 'Chưa thuê'}"></span>
-                            </span>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label-staff">Trạng thái</label>
+                            <div>
+                                <span class="status-badge-staff" th:switch="${contract.status.name()}">
+                                    <span th:case="'ACTIVE'" class="badge-status badge-active">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>Đang thuê</span>
+                                    </span>
+                                    <span th:case="'EXPIRED'" class="badge-status badge-expired">
+                                        <i class="fas fa-hourglass-end"></i>
+                                        <span>Sắp hết hạn</span>
+                                    </span>
+                                    <span th:case="'TERMINATED'" class="badge-status badge-terminated">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>Ngừng thuê</span>
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label-staff">Ghi chú</label>
+                            <textarea class="form-control-staff notes-textarea-staff" readonly
+                                th:text="${contract.terms != null ? contract.terms : 'Không có ghi chú đặc biệt'}"></textarea>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-md-12 mb-4">
-                        <label for="notes" class="form-label-staff">Ghi chú</label>
-                        <textarea class="form-control-staff notes-textarea-staff" id="notes" readonly
-                            placeholder="Không có ghi chú đặc biệt..."
-                            th:text="${contract != null ? contract.terms : ''}"> </textarea>
-                    </div>
-                </div>
-            </form>
+            <div th:if="${contracts == null or contracts.isEmpty()}">
+                <p class="text-muted">Khách thuê này chưa có hợp đồng thuê trọ nào.</p>
+            </div>
         </div>
+
     </div>
 
     <script th:src="@{/js/sidebar.js}"></script>

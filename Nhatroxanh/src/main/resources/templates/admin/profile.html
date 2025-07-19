@@ -550,7 +550,6 @@
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            margin-top: 2px;
             vertical-align: middle;
             cursor: not-allowed;
             /* vì đang disabled */
@@ -600,11 +599,11 @@
                 <p class="profile-role">Quản Trị Viên Hệ Thống</p>
                 <div class="profile-stats">
                     <div class="stat-item">
-                        <span class="stat-number">25</span>
+                        <span class="stat-number" th:text="${roomCount}"></span>
                         <span class="stat-label">Phòng trọ</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number">48</span>
+                        <span class="stat-number" th:text="${tenantCount}">48</span>
                         <span class="stat-label">Khách thuê</span>
                     </div>
                 </div>
@@ -624,14 +623,6 @@
             <div class="settings-header">
                 <h2><i class="fas fa-cogs"></i> Cài Đặt Tài Khoản</h2>
             </div>
-
-            <div class="success-message" id="successMessage" th:if="${successMessage}">
-                <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
-            </div>
-            <div class="error-message" id="errorMessage" th:if="${errorMessage}">
-                <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
-            </div>
-
             <div class="settings-tabs">
                 <button class="tab-btn active" onclick="showTab('personal')">Thông Tin Cá Nhân</button>
                 <button class="tab-btn" onclick="showTab('security')">Bảo Mật</button>
@@ -790,8 +781,7 @@
             </div>
         </div>
 
-        <!-- Dashboard Statistics -->
-        <div class="dashboard-stats">
+        <!-- <div class="dashboard-stats">
             <div class="stat-card">
                 <div class="stat-card-header">
                     <div>
@@ -850,7 +840,6 @@
             </div>
         </div>
 
-        <!-- Recent Notifications -->
         <div class="notifications-panel">
             <h3><i class="fas fa-bell"></i> Thông Báo Gần Đây</h3>
             <div class="notification-item">
@@ -883,7 +872,7 @@
                 </div>
                 <div class="notification-time">1 ngày trước</div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Loading Overlay -->
         <div id="loadingOverlay" class="loading-overlay" style="display: none;">
@@ -1202,7 +1191,14 @@
                         break;
 
                     case "cccdNumber":
-                        if (value) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Số CCCD không được để trống";
+                            const cccdInfo = document.getElementById("cccdInfo");
+                            if (cccdInfo) {
+                                cccdInfo.style.display = "none";
+                            }
+                        } else {
                             const cccdValidation = this.validateCCCDNumber(value);
                             if (!cccdValidation.isValid) {
                                 isValid = false;
@@ -1251,19 +1247,25 @@
                         break;
 
                     case "issuePlace":
-                        if (value && value.length < 2) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp không được để trống";
+                        } else if (value.length < 2) {
                             isValid = false;
                             errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Nơi cấp hợp lệ";
                         }
                         break;
 
                     case "street":
-                        if (value && value.length < 5) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ không được để trống";
+                        } else if (value.length < 5) {
                             isValid = false;
                             errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Địa chỉ hợp lệ";
                         }
                         break;
@@ -1702,70 +1704,72 @@
                 this.wardSelect = document.getElementById("ward");
                 this.streetInput = document.getElementById("street");
                 this.fullAddress = document.getElementById("fullAddress");
-                this.addressData = []; // lưu toàn bộ JSON đã load
             }
 
             async init(savedAddress = "") {
-                await this.loadData();
-                this.populateProvinces();
+                await this.populateProvinces();
                 this.addListeners();
                 if (savedAddress) {
                     await this.setInitialAddress(savedAddress);
                 }
             }
 
-            async loadData() {
+            async populateProvinces() {
                 try {
-                    const response = await fetch("/data/vietnam_full_address.json");
-                    this.addressData = await response.json();
+                    const response = await fetch("https://provinces.open-api.vn/api/p/");
+                    const provinces = await response.json();
+
+                    this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+                    provinces.forEach(province => {
+                        this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
+                    });
                 } catch (error) {
-                    console.error("❌ Lỗi khi load dữ liệu địa chỉ:", error);
+                    console.error("❌ Lỗi khi load tỉnh/thành:", error);
                 }
             }
 
-            populateProvinces() {
-                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
-                this.addressData.forEach(province => {
-                    this.provinceSelect.innerHTML += `<option value="${province.code}">${province.name}</option>`;
-                });
+            async populateDistricts(provinceCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    const data = await response.json();
+                    const districts = data.districts || [];
+
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    districts.forEach(district => {
+                        this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
+                    });
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                } catch (error) {
+                    console.error("❌ Lỗi khi load quận/huyện:", error);
+                }
             }
 
-            populateDistricts(provinceCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
+            async populateWards(districtCode) {
+                try {
+                    const response = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    const data = await response.json();
+                    const wards = data.wards || [];
 
-                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                province.districts.forEach(district => {
-                    this.districtSelect.innerHTML += `<option value="${district.code}">${district.name}</option>`;
-                });
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-            }
-
-            populateWards(provinceCode, districtCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
-
-                const district = province.districts.find(d => d.code === districtCode);
-                if (!district) return;
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                district.wards.forEach(ward => {
-                    this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
-                });
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    wards.forEach(ward => {
+                        this.wardSelect.innerHTML += `<option value="${ward.code}">${ward.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error("❌ Lỗi khi load phường/xã:", error);
+                }
             }
 
             addListeners() {
-                this.provinceSelect.addEventListener("change", (e) => {
+                this.provinceSelect.addEventListener("change", async (e) => {
                     const provinceCode = e.target.value;
-                    this.populateDistricts(provinceCode);
+                    await this.populateDistricts(provinceCode);
                     this.updateFullAddress();
                 });
 
-                this.districtSelect.addEventListener("change", (e) => {
-                    const provinceCode = this.provinceSelect.value;
+                this.districtSelect.addEventListener("change", async (e) => {
                     const districtCode = e.target.value;
-                    this.populateWards(provinceCode, districtCode);
+                    await this.populateWards(districtCode);
                     this.updateFullAddress();
                 });
 
@@ -1781,7 +1785,6 @@
 
                 const parts = [street, ward, district, province].filter(part =>
                     part && !part.startsWith("Chọn"));
-
                 this.fullAddress.value = parts.join(", ");
             }
 
@@ -1793,23 +1796,25 @@
                     const [street, wardName, districtName, provinceName] = parts;
                     this.streetInput.value = street;
 
-                    const province = this.addressData.find(p =>
-                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    const provinces = await fetch("https://provinces.open-api.vn/api/p/").then(res => res.json());
+                    const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
                     if (!province) return;
-
                     this.provinceSelect.value = province.code;
-                    this.populateDistricts(province.code);
 
-                    const district = province.districts.find(d =>
-                        d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    const districtData = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`).then(res => res.json());
+                    const district = districtData.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
                     if (!district) return;
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    districtData.districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}" ${d.code === district.code ? 'selected' : ''}>${d.name}</option>`;
+                    });
 
-                    this.districtSelect.value = district.code;
-                    this.populateWards(province.code, district.code);
-
-                    const ward = district.wards.find(w =>
-                        w.name.toLowerCase().includes(wardName.toLowerCase()));
-                    if (ward) this.wardSelect.value = ward.code;
+                    const wardData = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`).then(res => res.json());
+                    const ward = wardData.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    wardData.wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}" ${ward && w.code === ward.code ? 'selected' : ''}>${w.name}</option>`;
+                    });
 
                     this.updateFullAddress();
                 } catch (error) {
@@ -1817,6 +1822,7 @@
                 }
             }
         }
+
 
         function showTab(tabName) {
             const tabContents = document.querySelectorAll('.tab-content');
@@ -1854,8 +1860,6 @@
 
         document.addEventListener("DOMContentLoaded", () => {
             window.adminProfileManager = new EnhancedAdminProfileManager();
-
-            // Toast message handling
             document.querySelectorAll('.notification-close').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const toast = btn.closest('.notification-toast');
@@ -1870,6 +1874,21 @@
                     setTimeout(() => toast.remove(), 300);
                 });
             }, 5000);
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
         });
     </script>
 </body>

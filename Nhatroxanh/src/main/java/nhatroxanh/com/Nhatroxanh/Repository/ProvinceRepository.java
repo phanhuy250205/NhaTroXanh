@@ -11,4 +11,6 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
 public interface ProvinceRepository extends JpaRepository<Province, Integer> {
     List<Province> findAllByOrderByNameAsc();
     Optional<Province> findByCode(String code);
+
+    Optional<Province> findByName(String name);
 }

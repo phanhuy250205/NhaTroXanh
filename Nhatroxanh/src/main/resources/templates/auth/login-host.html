@@ -1,6 +1,19 @@
 <!DOCTYPE html>
 <html lang="vi">
 
+
+    <head>
+        <!-- ICON -->
+        <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}"
+            type="image/x-icon">
+        <!-- Font Awesome -->
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
+        <link rel="stylesheet" th:href="@{/css/login-host.css}">
+    </head>
+
 <!-- <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
 </head> -->
@@ -78,7 +91,7 @@
                     </p>
 
                     <form id="loginFormHost" th:action="@{/login-processing}" method="post">
-                        <!-- ĐÃ XÓA CSRF TOKEN VÌ ĐÃ TẮT CSRF TRONG CONFIG -->
+
 
                         <div class="form-group">
                             <label for="emailPhone">Email hoặc Số điện
@@ -124,8 +137,6 @@
                 </div>
             </section>
         </div>
-
-
     <script th:src="@{/js/login-host.js}"></script>
 
     </body>

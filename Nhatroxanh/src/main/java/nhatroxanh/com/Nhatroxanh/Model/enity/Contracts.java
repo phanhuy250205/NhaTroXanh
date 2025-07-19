@@ -19,7 +19,7 @@ public class Contracts {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contract_id")
-    private Integer contractId; // Giữ Integer để phù hợp với database hiện tại
+    private Integer contractId; // Đổi sang Long để thống nhất
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id", nullable = false)
@@ -49,8 +49,6 @@ public class Contracts {
     @Column(name = "end_date", nullable = false)
     private Date endDate;
 
-
-
     @Column(name = "price", nullable = false)
     private Float price;
 
@@ -60,13 +58,15 @@ public class Contracts {
     @Column(name = "duration", nullable = false)
     private Float duration;
 
-
     @Column(name = "terms", length = 1000) // Tăng giới hạn để khớp với ContractServiceImpl
     private String terms;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private Status status;
+
+    @Column(name = "return_reason", length = 1000) // Thêm trường để lưu lý do trả phòng
+    private String returnReason;
 
     @Column(name = "tenant_phone", nullable = false)
     private String tenantPhone;
@@ -80,4 +80,13 @@ public class Contracts {
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED
     }
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "return_status")
+    private ReturnStatus returnStatus; 
+
+    public enum ReturnStatus {
+        PENDING, APPROVED, REJECTED
+    }
+
 }

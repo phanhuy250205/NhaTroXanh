@@ -16,28 +16,38 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-                                        HttpServletResponse response,
-                                        Authentication authentication) throws IOException, ServletException {
+            HttpServletResponse response,
+            Authentication authentication) throws IOException, ServletException {
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        String redirectURL = request.getContextPath();
+        String redirectURL = null;
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
+
             if (role.equals("ROLE_OWNER")) {
-                redirectURL += "/chu-tro/trang-chu";
+                redirectURL = "/chu-tro/tong-quan";
                 break;
-            } else if (role.equals("ROLE_CUSTOMER")) {
-                redirectURL += "/trang-chu";
+            } else if (role.equals("ROLE_STAFF")) {
+                redirectURL = "/nhan-vien/bai-dang";
+                break;
+            } else if (role.equals("ROLE_ADMIN")) {
+                redirectURL = "/admin/thong-ke";
                 break;
             }
         }
 
-        response.sendRedirect(redirectURL);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+
+        if (redirectURL != null) {
+            // ✅ Có quyền, trả URL để frontend redirect
+            response.getWriter().write("{\"redirectUrl\": \"" + redirectURL + "\"}");
+        } else {
+            // ❌ Không có quyền (ví dụ: CUSTOMER)
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            response.getWriter().write("{\"error\": \"Bạn không có quyền truy cập vào hệ thống này.\"}");
+        }
     }
 
 }
-
-
-

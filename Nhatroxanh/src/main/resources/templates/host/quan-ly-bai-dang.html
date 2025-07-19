@@ -221,8 +221,8 @@
           <select class="form-select" name="status">
             <option value="">Trạng thái</option>
             <option value="APPROVED" th:selected="${status?.name() == 'APPROVED'}">Đã duyệt</option>
-            <option value="PENDING" th:selected="${status?.name() == 'PENDING'}">Chưa duyệt</option>
-            <option value="REJECTED" th:selected="${status?.name() == 'REJECTED'}">Bị từ chối</option>
+            <option value="PENDING" th:selected="${status?.name() == 'PENDING'}">Chờ duyệt</option>
+            <option value="REJECTED" th:selected="${status?.name() == 'REJECTED'}">Từ chối duyệt</option>
           </select>
         </div>
         <div class="col-md-2">
@@ -253,8 +253,8 @@
                 (${post.approvalStatus.name() == 'PENDING'} ? ' chua-duyet' :
                 (${post.approvalStatus.name() == 'REJECTED'} ? ' bi-an' : ''))" th:text="
                 ${post.approvalStatus != null and post.approvalStatus.name() == 'APPROVED'} ? 'Đã duyệt' :
-                (${post.approvalStatus.name() == 'PENDING'} ? 'Chưa duyệt' :
-                (${post.approvalStatus.name() == 'REJECTED'} ? 'Bị từ chối' : 'Không xác định'))">
+                (${post.approvalStatus.name() == 'PENDING'} ? 'Chờ duyệt' :
+                (${post.approvalStatus.name() == 'REJECTED'} ? 'Từ chối duyệt' : 'Không xác định'))">
           </span>
           <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}">
             <img
@@ -278,10 +278,12 @@
               </span>
             </p>
             <p><strong>Mô tả:</strong>
-              <span th:text="${#strings.length(post.description) > 100} ?
+              <span th:with="desc=${#strings.length(post.description) > 100} ?
                           ${#strings.substring(post.description, 0, 100)} + '...' :
-                          ${post.description}"></span>
+                          ${post.description}" th:utext="${#strings.replace(desc, '\n', '<br/>')}">
+              </span>
             </p>
+
           </div>
           <div class="listing-footer">
             <a class="btn-edit-host text-decoration-none" th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}">

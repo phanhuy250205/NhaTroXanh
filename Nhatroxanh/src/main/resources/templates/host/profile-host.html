@@ -551,7 +551,9 @@
                             <h6><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
                             <div class="row g-2">
                                 <div class="col-12">
-                                    <p class="mb-2"><strong>Ngày tham gia:</strong> 01/06/2025</p>
+                                    <p class="mb-2"><strong>Ngày tham gia:</strong>
+                                        <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                    </p>
                                 </div>
                                 <div class="col-12">
                                     <p class="mb-2"><strong>Tổng số khu trọ:</strong>
@@ -642,7 +644,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" id="email" th:field="*{email}" required>
+                                <input type="email" class="form-control" id="email" th:field="*{email}" readonly>
                                 <div class="invalid-feedback" id="emailError" style="display: none;"></div>
                                 <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
                             </div>
@@ -757,7 +759,7 @@
             constructor() {
                 this.formElements = [
                     "fullname", "email", "phone", "birthday", "cccdNumber",
-                    "issueDate", "issuePlace", "street"
+                    "issueDate", "issuePlace", "street", "province", "district", "ward"
                 ];
                 this.init();
             }
@@ -867,7 +869,14 @@
                         break;
 
                     case "cccdNumber":
-                        if (value) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Số CCCD không được để trống";
+                            const cccdInfo = document.getElementById("cccdInfo");
+                            if (cccdInfo) {
+                                cccdInfo.style.display = "none";
+                            }
+                        } else {
                             const cccdValidation = this.validateCCCDNumber(value);
                             if (!cccdValidation.isValid) {
                                 isValid = false;
@@ -916,25 +925,41 @@
                         break;
 
                     case "issuePlace":
-                        if (value && value.length < 2) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp không được để trống";
+                        } else if (value.length < 2) {
                             isValid = false;
                             errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Nơi cấp hợp lệ";
                         }
                         break;
 
                     case "street":
-                        if (value && value.length < 5) {
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ không được để trống";
+                        } else if (value.length < 5) {
                             isValid = false;
                             errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
-                        } else if (value) {
+                        } else {
                             successMessage = "Địa chỉ hợp lệ";
+                        }
+                        break;
+                    case "province":
+                    case "district":
+                    case "ward":
+                        if (this.isEditMode && !value) {
+                            isValid = false;
+                            errorMessage = `Vui lòng chọn ${fieldId === "province" ? "Tỉnh/Thành phố" : fieldId === "district" ? "Quận/Huyện" : "Phường/Xã"}`;
+                        } else if (value) {
+                            successMessage = "Đã chọn hợp lệ";
                         }
                         break;
                 }
 
-                // Update UI
+                // Cập nhật giao diện
                 this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
                 return isValid;
             }
@@ -976,7 +1001,7 @@
             // Validate CCCD number
             validateCCCDNumber(cccdNumber) {
                 if (!cccdNumber) {
-                    return { isValid: true, message: "" };
+                    return { isValid: false, message: "CCCD không được để trống!" };
                 }
 
                 const cleanCCCD = cccdNumber.replace(/\s/g, "");
@@ -1049,20 +1074,20 @@
 
                 if (!element) return;
 
-                // Clear previous states
+                // Xóa trạng thái cũ
                 element.classList.remove("is-invalid", "is-valid");
 
+                // Ẩn thông báo cũ
                 if (errorElement) {
                     errorElement.style.display = "none";
                     errorElement.textContent = "";
                 }
-
                 if (successElement) {
                     successElement.style.display = "none";
                     successElement.textContent = "";
                 }
 
-                // Apply new state
+                // Cập nhật trạng thái mới
                 if (isValid && successMessage) {
                     element.classList.add("is-valid");
                     if (successElement) {
@@ -1077,7 +1102,6 @@
                     }
                 }
             }
-
             // Validate existing data on page load
             validateExistingData() {
                 const phoneElement = document.getElementById("phone");
@@ -1250,70 +1274,71 @@
                 this.wardSelect = document.getElementById('ward');
                 this.streetInput = document.getElementById('street');
                 this.fullAddress = document.getElementById('fullAddress');
-                this.addressData = [];
             }
 
             async init(savedAddress = "") {
-                await this.loadAddressData();
-                this.populateProvinces();
+                await this.populateProvinces();
                 this.addListeners();
                 if (savedAddress) {
                     await this.setInitialAddress(savedAddress);
                 }
             }
 
-            async loadAddressData() {
+            async populateProvinces() {
                 try {
-                    const res = await fetch("/data/vietnam_full_address.json");
-                    this.addressData = await res.json();
+                    const res = await fetch("https://provinces.open-api.vn/api/p/");
+                    const provinces = await res.json();
+                    this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+                    provinces.forEach(p => {
+                        this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
+                    });
                 } catch (error) {
-                    console.error("❌ Lỗi khi load file địa chỉ:", error);
+                    console.error("❌ Lỗi khi load tỉnh/thành:", error);
                 }
             }
 
-            populateProvinces() {
-                this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
-                this.addressData.forEach(p => {
-                    this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
-                });
+            async populateDistricts(provinceCode) {
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                    const province = await res.json();
+                    const districts = province.districts || [];
+
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                    });
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                } catch (error) {
+                    console.error("❌ Lỗi khi load quận/huyện:", error);
+                }
             }
 
-            populateDistricts(provinceCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
+            async populateWards(districtCode) {
+                try {
+                    const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                    const district = await res.json();
+                    const wards = district.wards || [];
 
-                this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-                province.districts.forEach(d => {
-                    this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
-                });
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-            }
-
-            populateWards(provinceCode, districtCode) {
-                const province = this.addressData.find(p => p.code === provinceCode);
-                if (!province) return;
-
-                const district = province.districts.find(d => d.code === districtCode);
-                if (!district) return;
-
-                this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-                district.wards.forEach(w => {
-                    this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
-                });
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
+                    });
+                } catch (error) {
+                    console.error("❌ Lỗi khi load phường/xã:", error);
+                }
             }
 
             addListeners() {
-                this.provinceSelect.addEventListener("change", (e) => {
+                this.provinceSelect.addEventListener("change", async (e) => {
                     const provinceCode = e.target.value;
-                    this.populateDistricts(provinceCode);
+                    await this.populateDistricts(provinceCode);
                     this.updateFullAddress();
                 });
 
-                this.districtSelect.addEventListener("change", (e) => {
-                    const provinceCode = this.provinceSelect.value;
+                this.districtSelect.addEventListener("change", async (e) => {
                     const districtCode = e.target.value;
-                    this.populateWards(provinceCode, districtCode);
+                    await this.populateWards(districtCode);
                     this.updateFullAddress();
                 });
 
@@ -1339,28 +1364,35 @@
                     const [street, wardName, districtName, provinceName] = parts;
                     this.streetInput.value = street;
 
-                    const province = this.addressData.find(p =>
-                        p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                    const provinces = await fetch("https://provinces.open-api.vn/api/p/").then(res => res.json());
+                    const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
                     if (!province) return;
                     this.provinceSelect.value = province.code;
-                    this.populateDistricts(province.code);
 
-                    const district = province.districts.find(d =>
-                        d.name.toLowerCase().includes(districtName.toLowerCase()));
+                    const provinceDetail = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`).then(res => res.json());
+                    const district = provinceDetail.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
                     if (!district) return;
-                    this.districtSelect.value = district.code;
-                    this.populateWards(province.code, district.code);
 
-                    const ward = district.wards.find(w =>
-                        w.name.toLowerCase().includes(wardName.toLowerCase()));
-                    if (ward) this.wardSelect.value = ward.code;
+                    this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                    provinceDetail.districts.forEach(d => {
+                        this.districtSelect.innerHTML += `<option value="${d.code}" ${d.code === district.code ? 'selected' : ''}>${d.name}</option>`;
+                    });
+
+                    const districtDetail = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`).then(res => res.json());
+                    const ward = districtDetail.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
+
+                    this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    districtDetail.wards.forEach(w => {
+                        this.wardSelect.innerHTML += `<option value="${w.code}" ${ward && w.code === ward.code ? 'selected' : ''}>${w.name}</option>`;
+                    });
 
                     this.updateFullAddress();
                 } catch (error) {
-                    console.error("❌ Lỗi set địa chỉ ban đầu:", error);
+                    console.error("❌ Lỗi khi thiết lập địa chỉ ban đầu:", error);
                 }
             }
         }
+
 
         // Initialize when DOM is loaded
         document.addEventListener('DOMContentLoaded', async () => {

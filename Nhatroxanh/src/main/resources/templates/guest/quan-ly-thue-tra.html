@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head th:replace="~{/layouts/head}">
     <title>Quản Lý Thuê Trả Phòng</title>
 </head>
+
 <head>
     <style>
         .rental-body-guest {
@@ -648,7 +650,8 @@
             font-weight: 600;
             font-size: 15px;
         }
-        .room-detail-price{
+
+        .room-detail-price {
             color: #FF8000;
         }
 
@@ -720,7 +723,7 @@
         }
 
         /* ===== IMPROVED RESPONSIVE TABLE STYLES ===== */
-        
+
         /* Mobile Card Layout - Hidden by default */
         .mobile-cards-container {
             display: none;
@@ -923,7 +926,7 @@
                 padding: 9px 0;
                 border-bottom: 1px solid rgba(62, 131, 204, 0.1);
             }
-    
+
             .room-detail-item:last-child {
                 border-bottom: none;
             }
@@ -993,10 +996,249 @@
         .table-container-guest::-webkit-scrollbar-thumb:hover {
             background: #549eed;
         }
+
+        .room-stats-layout {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .room-list-guest {
+            flex: 1 1 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .room-card-guest {
+            background: #f4f8fc;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-card-guest {
+            flex: 0 0 28%;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .stats-icon-guest {
+            font-size: 24px;
+            color: #3e83cc;
+            margin-bottom: 10px;
+        }
+
+        .stats-title-guest {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid-guest {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stats-item-guest {
+            flex: 1;
+        }
+
+        .stats-number-guest {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .stats-label-guest {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Responsive cho mobile */
+        @media (max-width: 768px) {
+            .room-stats-layout {
+                flex-direction: column;
+            }
+
+            .room-list-guest,
+            .stats-card-guest {
+                flex: 1 1 100%;
+            }
+        }
+
+        .status-badge-guest {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-draft-guest {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-active-guest {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        .status-terminated-guest {
+            background-color: #fab1a0;
+            color: #d63031;
+        }
+
+        .status-completed-guest {
+            background-color: #dfe6e9;
+            color: #2d3436;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-badge-guest {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-transform: capitalize;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-draft-guest {
+            background-color: #9e9e9e;
+            /* xám */
+        }
+
+        .status-active-guest {
+            background-color: #28a745;
+            /* xanh lá */
+        }
+
+        .status-terminated-guest {
+            background-color: #dc3545;
+            /* đỏ */
+        }
+
+        .status-completed-guest {
+            background-color: #007bff;
+            /* xanh dương */
+        }
+
+        .status-badge-guest i {
+            font-size: 14px;
+        }
+
+        .status-pending-expiration-guest {
+            background-color: #ffc107;
+            /* Màu vàng Bootstrap */
+            color: #000;
+            /* Chữ đen để dễ đọc */
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-expired-guest {
+            background-color: #ffc107;
+            /* vàng */
+            color: #212529;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
     </style>
 </head>
+
 <body class="rental-body-guest">
-    <!-- NAVBAR -->
     <div th:replace="~{/layouts/navbar}"></div>
 
     <div class="main-container-guest" id="main-content">
@@ -1006,78 +1248,102 @@
                 <p class="page-subtitle-guest">Theo dõi và quản lý các phòng thuê của bạn một cách hiệu quả</p>
             </div>
         </div>
-
-        <!-- Phòng Đang Thuê -->
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
         <div class="section-card-guest">
             <h2 class="section-header-guest">
-                <i class="fas fa-key"></i>
-                Phòng Đang Thuê
+                <i class="fas fa-key"></i> Phòng Đang Thuê
             </h2>
-            <div class="room-info-grid-guest">
-                <div class="room-card-guest">
-                    <div class="room-card-header-guest">
-                        <h5 class="room-title-guest">Phòng A101 - Deluxe</h5>
-                        <span class="status-badge-guest status-active-guest">
-                            <i class="fas fa-circle"></i>
-                            Đang thuê
-                        </span>
-                    </div>
-                    <div class="room-info-guest">
-                        <div class="info-grid-guest">
-                            <div>
-                                <div class="info-item-guest">
-                                    <span class="info-label-guest">
-                                        <i class="fas fa-calendar-alt"></i>
-                                        Ngày thuê:
-                                    </span>
-                                    <span class="info-value-guest">15/12/2024</span>
+            <div class="room-stats-layout">
+                <!-- Cột trái: Danh sách phòng -->
+                <div class="room-list-guest">
+                    <div th:each="contract : ${activeContracts}" class="room-card-guest">
+                        <div class="room-card-header-guest">
+                            <h5 class="room-title-guest"
+                                th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">
+                                Phòng 101 - Căn hộ
+                            </h5>
+                            <span class="status-badge-guest" th:classappend="
+    ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
+    (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+    (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' :
+    (${contract.status.name() == 'EXPIRED'} ? ' status-pending-expiration-guest' : ' status-completed-guest')))">
+                                <i th:class="
+        ${contract.status.name() == 'DRAFT'} ? 'fas fa-pencil-alt' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' :
+        (${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle')))">
+                                </i>
+                                <span th:text="
+        ${contract.status.name() == 'DRAFT'} ? 'Chưa xác nhận' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' :
+        (${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' : 'Đã hoàn thành')))">
+                                    Đã hoàn thành
+                                </span>
+                            </span>
+                        </div>
+                        <div class="room-info-guest">
+                            <div class="info-grid-guest">
+                                <div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-calendar-alt"></i> Ngày
+                                            thuê:</span>
+                                        <span class="info-value-guest"
+                                            th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">01/06/2025</span>
+                                    </div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-calendar-check"></i> Ngày hết
+                                            hạn:</span>
+                                        <span class="info-value-guest"
+                                            th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">31/12/2025</span>
+                                    </div>
                                 </div>
-                                <div class="info-item-guest">
-                                    <span class="info-label-guest">
-                                        <i class="fas fa-calendar-check"></i>
-                                        Ngày hết hạn:
-                                    </span>
-                                    <span class="info-value-guest">20/12/2024</span>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="info-item-guest">
-                                    <span class="info-label-guest">
-                                        <i class="fas fa-dollar-sign"></i>
-                                        Giá thuê:
-                                    </span>
-                                    <span class="info-value-guest price-highlight-guest">1,200,000 VNĐ/tháng</span>
-                                </div>
-                                <div class="info-item-guest">
-                                    <span class="info-label-guest">
-                                        <i class="fas fa-users"></i>
-                                        Số khách:
-                                    </span>
-                                    <span class="info-value-guest">2 người</span>
+                                <div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-dollar-sign"></i> Giá
+                                            thuê:</span>
+                                        <span class="info-value-guest price-highlight-guest"
+                                            th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                            15,000,000 VNĐ/tháng
+                                        </span>
+                                    </div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-users"></i> Số người ở :</span>
+                                        <span class="info-value-guest"
+                                            th:text="${contract.room.max_tenants} + ' người'">2 người</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="room-actions-guest">
-                        <small class="room-note-guest">
-                            <i class="fas fa-info-circle"></i>
-                            Nhấn để xem chi tiết phòng
-                        </small>
-                        <div class="room-buttons-guest">
-                            <a href="/khach-thue/chitiet-phongthue">
-                                <button class="action-btn-guest">
-                                    <i class="fas fa-edit"></i>
-                                    Xem chi tiết
-                                </button>
-                            </a>
-                            
-                            <button class="action-btn-guest btn-danger-guest" onclick="openReturnModal()">
-                                <i class="fas fa-sign-out-alt"></i>
-                                Trả phòng
-                            </button>
+
+                        <div class="room-actions-guest">
+                            <small class="room-note-guest"><i class="fas fa-info-circle"></i> Nhấn để xem chi tiết
+                                phòng</small>
+                            <div class="room-buttons-guest">
+                                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract.contractId})}">
+                                    <button class="action-btn-guest"><i class="fas fa-edit"></i> Xem chi tiết</button>
+                                </a>
+                                <a class="action-btn-guest btn-danger-guest"
+                                    th:href="@{'/khach-thue/tra-phong/' + ${contract.contractId}}">
+                                    <i class="fas fa-sign-out-alt"></i> Trả phòng
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- Cột phải: Thống kê -->
                 <div class="stats-card-guest">
                     <div class="stats-icon-guest">
                         <i class="fas fa-chart-line"></i>
@@ -1085,16 +1351,21 @@
                     <h5 class="stats-title-guest">Thống Kê Nhanh</h5>
                     <div class="stats-grid-guest">
                         <div class="stats-item-guest">
-                            <div class="stats-number-guest" style="color: #3e83cc;">1</div>
+                            <div class="stats-number-guest" style="color: #3e83cc;" th:text="${quickStats.activeRooms}">
+                                3</div>
                             <div class="stats-label-guest">Phòng đang thuê</div>
                         </div>
                         <div class="stats-item-guest">
-                            <div class="stats-number-guest" style="color: #10b981;">5</div>
+                            <div class="stats-number-guest" style="color: #10b981;"
+                                th:text="${quickStats.totalRentals}">5</div>
                             <div class="stats-label-guest">Lần thuê trước</div>
                         </div>
                     </div>
                     <div class="stats-item-guest">
-                        <div class="stats-number-guest price-highlight-guest">6,000,000 VNĐ</div>
+                        <div class="stats-number-guest price-highlight-guest"
+                            th:text="${#numbers.formatDecimal(quickStats.totalCostThisMonth,0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            6,000,000 VNĐ
+                        </div>
                         <div class="stats-label-guest">Tổng chi phí tháng này</div>
                     </div>
                 </div>
@@ -1103,12 +1374,13 @@
 
         <!-- Lịch Sử Thuê Phòng -->
         <div class="table-section-guest">
-            <div style="background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%); color: white; padding: 16px 20px; font-size: 16px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;">
+            <!-- Title -->
+            <div class="section-title-guest">
                 <i class="fas fa-history"></i>
                 Lịch Sử Thuê Phòng
             </div>
-            
-            <!-- Desktop Table -->
+
+            <!-- Table Desktop -->
             <div class="table-container-guest">
                 <table class="rental-table-guest">
                     <thead>
@@ -1119,139 +1391,57 @@
                             <th>Ngày trả</th>
                             <th>Tổng tiền</th>
                             <th>Trạng thái</th>
-                            <th>Thao tác</th>
+                            <!-- <th>Thao tác</th> -->
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td style="font-weight: 600;">1</td>
-                            <td class="room-info-cell-guest">
-                                <div class="room-name-guest">B205 - Standard</div>
-                                <div class="room-type-guest">2 giường đơn</div>
-                            </td>
-                            <td>10/12/2024</td>
-                            <td>13/12/2024</td>
-                            <td><span class="price-highlight-guest">2,700,000 VNĐ</span></td>
+                        <tr th:each="contract, iter : ${contractHistory}">
+                            <td th:text="${iter.index + 1 + currentPage * size}">1</td>
                             <td>
-                                <span class="status-badge-guest status-completed-guest">
-                                    <i class="fas fa-check-circle"></i>
-                                    Đã hoàn thành
+                                <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205
+                                    - Standard</div>
+                                <div th:text="${contract.room.description}">2 giường đơn</div>
+                            </td>
+                            <td th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">--</td>
+                            <td th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">--</td>
+                            <td>
+                                <span class="price-highlight-guest"
+                                    th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                    2,000,000 VNĐ
                                 </span>
                             </td>
                             <td>
-                                <button class="action-btn-guest" onclick="viewDetails(1)">
-                                    <i class="fas fa-eye"></i>
-                                    Xem
-                                </button>
-                                <button class="action-btn-guest btn-outline-guest">
-                                    <i class="fas fa-download"></i>
-                                    Tải
-                                </button>
+                                <span class="status-badge-guest" th:classappend="
+        ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
+        (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+        (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))">
+
+                                    <i th:class="
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
+
+                                    <span th:text="
+        ${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' : 'Đã hoàn thành'))">
+                                        Đã hoàn thành
+                                    </span>
+                                </span>
                             </td>
+                            <!-- <td>
+                                <button class="action-btn-guest"
+                                    th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
+                                    <i class="fas fa-eye"></i> Xem
+                                </button>
+                                <button class="action-btn-guest btn-outline-guest"
+                                    th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
+                                    <i class="fas fa-download"></i> Tải
+                                </button>
+                            </td> -->
                         </tr>
-                        <tr>
-                            <td style="font-weight: 600;">2</td>
-                            <td class="room-info-cell-guest">
-                                <div class="room-name-guest">A102 - Deluxe</div>
-                                <div class="room-type-guest">King Size</div>
-                            </td>
-                            <td>05/12/2024</td>
-                            <td>08/12/2024</td>
-                            <td><span class="price-highlight-guest">3,600,000 VNĐ</span></td>
-                            <td>
-                                <span class="status-badge-guest status-completed-guest">
-                                    <i class="fas fa-check-circle"></i>
-                                    Đã hoàn thành
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn-guest" onclick="viewDetails(2)">
-                                    <i class="fas fa-eye"></i>
-                                    Xem
-                                </button>
-                                <button class="action-btn-guest btn-outline-guest">
-                                    <i class="fas fa-download"></i>
-                                    Tải
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: 600;">3</td>
-                            <td class="room-info-cell-guest">
-                                <div class="room-name-guest">C301 - Suite</div>
-                                <div class="room-type-guest">Phòng VIP</div>
-                            </td>
-                            <td>28/11/2024</td>
-                            <td>02/12/2024</td>
-                            <td><span class="price-highlight-guest">8,000,000 VNĐ</span></td>
-                            <td>
-                                <span class="status-badge-guest status-completed-guest">
-                                    <i class="fas fa-check-circle"></i>
-                                    Đã hoàn thành
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn-guest" onclick="viewDetails(3)">
-                                    <i class="fas fa-eye"></i>
-                                    Xem
-                                </button>
-                                <button class="action-btn-guest btn-outline-guest">
-                                    <i class="fas fa-download"></i>
-                                    Tải
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: 600;">4</td>
-                            <td class="room-info-cell-guest">
-                                <div class="room-name-guest">A103 - Deluxe</div>
-                                <div class="room-type-guest">Queen Size</div>
-                            </td>
-                            <td>20/11/2024</td>
-                            <td>23/11/2024</td>
-                            <td><span class="price-highlight-guest">3,300,000 VNĐ</span></td>
-                            <td>
-                                <span class="status-badge-guest status-completed-guest">
-                                    <i class="fas fa-check-circle"></i>
-                                    Đã hoàn thành
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn-guest" onclick="viewDetails(4)">
-                                    <i class="fas fa-eye"></i>
-                                    Xem
-                                </button>
-                                <button class="action-btn-guest btn-outline-guest">
-                                    <i class="fas fa-download"></i>
-                                    Tải
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td style="font-weight: 600;">5</td>
-                            <td class="room-info-cell-guest">
-                                <div class="room-name-guest">B201 - Standard</div>
-                                <div class="room-type-guest">2 giường đơn</div>
-                            </td>
-                            <td>15/11/2024</td>
-                            <td>17/11/2024</td>
-                            <td><span class="price-highlight-guest">1,600,000 VNĐ</span></td>
-                            <td>
-                                <span class="status-badge-guest status-completed-guest">
-                                    <i class="fas fa-check-circle"></i>
-                                    Đã hoàn thành
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn-guest" onclick="viewDetails(5)">
-                                    <i class="fas fa-eye"></i>
-                                    Xem
-                                </button>
-                                <button class="action-btn-guest btn-outline-guest">
-                                    <i class="fas fa-download"></i>
-                                    Tải
-                                </button>
-                            </td>
+                        <tr th:if="${contractHistory.size() == 0}">
+                            <td colspan="7" class="text-center">Không có hợp đồng nào.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1259,562 +1449,376 @@
 
             <!-- Mobile Cards -->
             <div class="mobile-cards-container">
-                <div class="rental-card-mobile">
+                <div th:each="contract, iter : ${contractHistory}" class="rental-card-mobile">
                     <div class="rental-card-header">
-                        <div class="rental-card-number">#1</div>
-                        <div class="rental-card-status">Đã hoàn thành</div>
-                    </div>
-                    <div class="rental-card-body">
-                        <div class="rental-card-room">
-                            <div class="rental-card-room-name">B205 - Standard</div>
-                            <div class="rental-card-room-type">2 giường đơn</div>
-                        </div>
-                        <div class="rental-card-info">
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày thuê</div>
-                                <div class="rental-card-info-value">10/12/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày trả</div>
-                                <div class="rental-card-info-value">13/12/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Tổng tiền</div>
-                                <div class="rental-card-info-value rental-card-price">2,700,000 VNĐ</div>
-                            </div>
-                        </div>
-                        <div class="rental-card-actions">
-                            <button class="action-btn-guest" onclick="viewDetails(1)">
-                                <i class="fas fa-eye"></i>
-                                Xem
-                            </button>
-                            <button class="action-btn-guest btn-outline-guest">
-                                <i class="fas fa-download"></i>
-                                Tải
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                        <div th:text="'#' + ${iter.index + 1 + currentPage * size}">#1</div>
+                        <div class="status-badge-guest" th:classappend="
+    ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
+    (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+    (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))"
+                            th:switch="${contract.status.name()}">
+                            <i th:class="
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
 
-                <div class="rental-card-mobile">
-                    <div class="rental-card-header">
-                        <div class="rental-card-number">#2</div>
-                        <div class="rental-card-status">Đã hoàn thành</div>
+                            <span th:case="'EXPIRED'">Sắp hết hạn</span>
+                            <span th:case="'ACTIVE'">Đang thuê</span>
+                            <span th:case="'TERMINATED'">Đã trả phòng</span>
+                            <span th:case="*">Không xác định</span>
+                        </div>
                     </div>
                     <div class="rental-card-body">
                         <div class="rental-card-room">
-                            <div class="rental-card-room-name">A102 - Deluxe</div>
-                            <div class="rental-card-room-type">King Size</div>
+                            <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205 -
+                                Standard</div>
+                            <div th:text="${contract.room.description}">2 giường đơn</div>
                         </div>
                         <div class="rental-card-info">
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày thuê</div>
-                                <div class="rental-card-info-value">05/12/2024</div>
+                            <div>
+                                <span>Ngày thuê:</span>
+                                <span th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">--</span>
                             </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày trả</div>
-                                <div class="rental-card-info-value">08/12/2024</div>
+                            <div>
+                                <span>Ngày trả:</span>
+                                <span th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">--</span>
                             </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Tổng tiền</div>
-                                <div class="rental-card-info-value rental-card-price">3,600,000 VNĐ</div>
+                            <div>
+                                <span>Tổng tiền:</span>
+                                <span
+                                    th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">2,000,000
+                                    VNĐ</span>
                             </div>
                         </div>
-                        <div class="rental-card-actions">
-                            <button class="action-btn-guest" onclick="viewDetails(2)">
-                                <i class="fas fa-eye"></i>
-                                Xem
+                        <!-- <div class="rental-card-actions">
+                            <button class="action-btn-guest"
+                                th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
+                                <i class="fas fa-eye"></i> Xem
                             </button>
-                            <button class="action-btn-guest btn-outline-guest">
-                                <i class="fas fa-download"></i>
-                                Tải
+                            <button class="action-btn-guest btn-outline-guest"
+                                th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
+                                <i class="fas fa-download"></i> Tải
                             </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rental-card-mobile">
-                    <div class="rental-card-header">
-                        <div class="rental-card-number">#3</div>
-                        <div class="rental-card-status">Đã hoàn thành</div>
-                    </div>
-                    <div class="rental-card-body">
-                        <div class="rental-card-room">
-                            <div class="rental-card-room-name">C301 - Suite</div>
-                            <div class="rental-card-room-type">Phòng VIP</div>
-                        </div>
-                        <div class="rental-card-info">
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày thuê</div>
-                                <div class="rental-card-info-value">28/11/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày trả</div>
-                                <div class="rental-card-info-value">02/12/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Tổng tiền</div>
-                                <div class="rental-card-info-value rental-card-price">8,000,000 VNĐ</div>
-                            </div>
-                        </div>
-                        <div class="rental-card-actions">
-                            <button class="action-btn-guest" onclick="viewDetails(3)">
-                                <i class="fas fa-eye"></i>
-                                Xem
-                            </button>
-                            <button class="action-btn-guest btn-outline-guest">
-                                <i class="fas fa-download"></i>
-                                Tải
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rental-card-mobile">
-                    <div class="rental-card-header">
-                        <div class="rental-card-number">#4</div>
-                        <div class="rental-card-status">Đã hoàn thành</div>
-                    </div>
-                    <div class="rental-card-body">
-                        <div class="rental-card-room">
-                            <div class="rental-card-room-name">A103 - Deluxe</div>
-                            <div class="rental-card-room-type">Queen Size</div>
-                        </div>
-                        <div class="rental-card-info">
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày thuê</div>
-                                <div class="rental-card-info-value">20/11/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày trả</div>
-                                <div class="rental-card-info-value">23/11/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Tổng tiền</div>
-                                <div class="rental-card-info-value rental-card-price">3,300,000 VNĐ</div>
-                            </div>
-                        </div>
-                        <div class="rental-card-actions">
-                            <button class="action-btn-guest" onclick="viewDetails(4)">
-                                <i class="fas fa-eye"></i>
-                                Xem
-                            </button>
-                            <button class="action-btn-guest btn-outline-guest">
-                                <i class="fas fa-download"></i>
-                                Tải
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="rental-card-mobile">
-                    <div class="rental-card-header">
-                        <div class="rental-card-number">#5</div>
-                        <div class="rental-card-status">Đã hoàn thành</div>
-                    </div>
-                    <div class="rental-card-body">
-                        <div class="rental-card-room">
-                            <div class="rental-card-room-name">B201 - Standard</div>
-                            <div class="rental-card-room-type">2 giường đơn</div>
-                        </div>
-                        <div class="rental-card-info">
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày thuê</div>
-                                <div class="rental-card-info-value">15/11/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Ngày trả</div>
-                                <div class="rental-card-info-value">17/11/2024</div>
-                            </div>
-                            <div class="rental-card-info-item">
-                                <div class="rental-card-info-label">Tổng tiền</div>
-                                <div class="rental-card-info-value rental-card-price">1,600,000 VNĐ</div>
-                            </div>
-                        </div>
-                        <div class="rental-card-actions">
-                            <button class="action-btn-guest" onclick="viewDetails(5)">
-                                <i class="fas fa-eye"></i>
-                                Xem
-                            </button>
-                            <button class="action-btn-guest btn-outline-guest">
-                                <i class="fas fa-download"></i>
-                                Tải
-                            </button>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
 
+            <!-- Pagination -->
             <div class="pagination-guest">
-                <div class="pagination-info-guest">Hiển thị 5 kết quả gần nhất</div>
-                <div class="pagination-controls-guest">
-                    <span class="page-btn-guest disabled">Trước</span>
-                    <span class="page-btn-guest active">1</span>
-                    <a href="#" class="page-btn-guest">2</a>
-                    <a href="#" class="page-btn-guest">3</a>
-                    <a href="#" class="page-btn-guest">Sau</a>
+                <div class="pagination-info-guest">
+                    <span th:text="'Hiển thị ' + ${totalItems} + ' kết quả'">Hiển thị 0 kết quả</span>
+                </div>
+                <div class="pagination-controls-guest" th:if="${totalItems > 0}">
+                    <a th:if="${currentPage > 0}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage - 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang trước">Trước</a>
+                    <span th:if="${currentPage == 0}" class="page-btn-guest disabled" aria-disabled="true">Trước</span>
+                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${i}, size=${size})}" th:text="${i + 1}"
+                        th:classappend="${i == currentPage} ? 'active' : ''" class="page-btn-guest"
+                        th:attr="aria-label='Trang ' + ${i + 1}"></a>
+                    <a th:if="${currentPage < totalPages - 1}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage + 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang sau">Sau</a>
+                    <span th:if="${currentPage == totalPages - 1}" class="page-btn-guest disabled"
+                        aria-disabled="true">Sau</span>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Return Room Modal -->
-    <div class="modal-overlay" id="returnModal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Trả Phòng
-                </h3>
-                <button class="modal-close" onclick="closeReturnModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <!-- Room Information -->
-                <div class="room-info-modal">
-                    <h4>
-                        <i class="fas fa-door-open"></i>
-                        Thông tin phòng
-                    </h4>
-                    <div class="room-details">
-                        <div class="room-detail-item">
-                            <span class="room-detail-label">Phòng:</span>
-                            <span class="room-detail-value">A101 - Deluxe</span>
-                        </div>
-                        <div class="room-detail-item">
-                            <span class="room-detail-label">Ngày thuê:</span>
-                            <span class="room-detail-value">15/12/2024</span>
-                        </div>
-                        <div class="room-detail-item">
-                            <span class="room-detail-label">Ngày hết hạn:</span>
-                            <span class="room-detail-value">20/12/2024</span>
-                        </div>
-                        <div class="room-detail-item">
-                            <span class="room-detail-label">Giá thuê:</span>
-                            <span class="room-detail-price price-highlight-guest">1,200,000 VNĐ/tháng</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Return Form -->
-                <form id="returnForm">
-                    <div class="form-group">
-                        <label class="form-label" for="returnDate">
-                            <i class="fas fa-calendar-alt"></i>
-                            Ngày trả phòng
-                        </label>
-                        <input 
-                            type="date" 
-                            id="returnDate" 
-                            class="form-input" 
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="returnReason">
-                            <i class="fas fa-comment-alt"></i>
-                            Lý do trả phòng
-                        </label>
-                        <textarea 
-                            id="returnReason" 
-                            class="form-input form-textarea" 
-                            placeholder="Nhập lý do trả phòng (tùy chọn)..."
-                            rows="4"
-                        ></textarea>
-                    </div>
-                </form>
-            </div>
-
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" onclick="closeReturnModal()">
-                    <i class="fas fa-times"></i>
-                    Hủy bỏ
-                </button>
-                <button class="modal-btn modal-btn-primary" onclick="confirmReturn()">
-                    <i class="fas fa-check"></i>
-                    Xác nhận trả phòng
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Rating Modal -->
-    <div class="modal-overlay" id="ratingModal">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h3 class="modal-title">
-                    <i class="fas fa-star"></i>
-                    Đánh Giá Phòng
-                </h3>
-                <button class="modal-close" onclick="closeRatingModal()">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            
-            <div class="modal-body">
-                <!-- Room Information -->
-                <div class="room-info-modal">
-                    <h4>
-                        <i class="fas fa-door-open"></i>
-                        Phòng vừa trả: A101 - Deluxe
-                    </h4>
-                </div>
-
-                <!-- Overall Rating -->
-                <div class="rating-container">
-                    <h4 style="color: #3e83cc; margin-bottom: 16px;">Đánh giá tổng thể</h4>
-                    <div class="rating-stars" id="overallRating">
-                        <span class="star" data-rating="1">★</span>
-                        <span class="star" data-rating="2">★</span>
-                        <span class="star" data-rating="3">★</span>
-                        <span class="star" data-rating="4">★</span>
-                        <span class="star" data-rating="5">★</span>
-                    </div>
-                    <div class="rating-text" id="overallRatingText">Chọn số sao để đánh giá</div>
-                </div>
-
-                <!-- Category Ratings -->
-                <div class="rating-categories">
-                    <div class="rating-category">
-                        <div class="category-title">
-                            <i class="fas fa-broom"></i>
-                            Vệ sinh phòng
-                        </div>
-                        <div class="category-stars" data-category="cleanliness">
-                            <span class="star" data-rating="1">★</span>
-                            <span class="star" data-rating="2">★</span>
-                            <span class="star" data-rating="3">★</span>
-                            <span class="star" data-rating="4">★</span>
-                            <span class="star" data-rating="5">★</span>
-                        </div>
-                    </div>
-
-                    <div class="rating-category">
-                        <div class="category-title">
-                            <i class="fas fa-concierge-bell"></i>
-                            Dịch vụ
-                        </div>
-                        <div class="category-stars" data-category="service">
-                            <span class="star" data-rating="1">★</span>
-                            <span class="star" data-rating="2">★</span>
-                            <span class="star" data-rating="3">★</span>
-                            <span class="star" data-rating="4">★</span>
-                            <span class="star" data-rating="5">★</span>
-                        </div>
-                    </div>
-
-                    <div class="rating-category">
-                        <div class="category-title">
-                            <i class="fas fa-bed"></i>
-                            Tiện nghi
-                        </div>
-                        <div class="category-stars" data-category="amenities">
-                            <span class="star" data-rating="1">★</span>
-                            <span class="star" data-rating="2">★</span>
-                            <span class="star" data-rating="3">★</span>
-                            <span class="star" data-rating="4">★</span>
-                            <span class="star" data-rating="5">★</span>
-                        </div>
-                    </div>
-
-                    <div class="rating-category">
-                        <div class="category-title">
-                            <i class="fas fa-dollar-sign"></i>
-                            Giá cả
-                        </div>
-                        <div class="category-stars" data-category="price">
-                            <span class="star" data-rating="1">★</span>
-                            <span class="star" data-rating="2">★</span>
-                            <span class="star" data-rating="3">★</span>
-                            <span class="star" data-rating="4">★</span>
-                            <span class="star" data-rating="5">★</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Comment -->
-                <div class="form-group">
-                    <label class="form-label" for="ratingComment">
-                        <i class="fas fa-comment"></i>
-                        Nhận xét (tùy chọn)
-                    </label>
-                    <textarea 
-                        id="ratingComment" 
-                        class="form-input form-textarea" 
-                        placeholder="Chia sẻ trải nghiệm của bạn về phòng này..."
-                        rows="4"
-                    ></textarea>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" onclick="skipRating()">
-                    <i class="fas fa-skip-forward"></i>
-                    Bỏ qua
-                </button>
-                <button class="modal-btn modal-btn-primary" onclick="submitRating()">
-                    <i class="fas fa-paper-plane"></i>
-                    Gửi đánh giá
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div th:replace="~{/layouts/footer}"></div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
-        // Rating system variables
-        let ratings = {
-            overall: 0,
-            cleanliness: 0,
-            service: 0,
-            amenities: 0,
-            price: 0
-        };
-
-        const ratingTexts = {
-            1: 'Rất không hài lòng',
-            2: 'Không hài lòng',
-            3: 'Bình thường',
-            4: 'Hài lòng',
-            5: 'Rất hài lòng'
-        };
-
-        // Hàm xem chi tiết lịch sử thuê
-        function viewDetails(id) {
-            console.log('Xem chi tiết lịch sử thuê ID:', id);
-            
-            // Tạo modal chi tiết đơn giản
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 1000;
-            `;
-            
-            modal.innerHTML = `
-                <div style="
-                    background: white;
-                    padding: 24px;
-                    border-radius: 16px;
-                    max-width: 500px;
-                    width: 90%;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-                ">
-                    <div style="
-                        background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
-                        color: white;
-                        padding: 16px;
-                        margin: -24px -24px 20px -24px;
-                        border-radius: 16px 16px 0 0;
-                        font-weight: 600;
-                        font-size: 16px;
-                    ">
-                        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>
-                        Chi tiết lịch sử thuê #${id}
-                    </div>
-                    <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px; font-size: 14px;">
-                        Thông tin chi tiết về lần thuê phòng này sẽ được hiển thị ở đây.
-                    </p>
-                    <button onclick="this.closest('div').parentElement.remove()" 
-                            style="
-                                background: #3e83cc;
-                                color: white;
-                                border: none;
-                                padding: 12px 24px;
-                                border-radius: 8px;
-                                font-weight: 600;
-                                cursor: pointer;
-                                font-size: 14px;
-                                transition: all 0.2s ease;
-                            "
-                            onmouseover="this.style.background='#549eed'"
-                            onmouseout="this.style.background='#3e83cc'">
-                        Đóng
-                    </button>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return isNaN(date) ? 'N/A' : date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
         }
 
-        // Return Modal Functions
-        function openReturnModal() {
-            const modal = document.getElementById('returnModal');
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('returnDate').value = today;
-            document.getElementById('returnDate').min = today;
-            
-            modal.classList.add('active');
-            document.body.style.overflow = 'hidden';
+        function formatCurrency(amount) {
+            return amount ? amount.toLocaleString('vi-VN') + ' VNĐ' : 'N/A';
         }
 
-        function closeReturnModal() {
-            const modal = document.getElementById('returnModal');
-            modal.classList.remove('active');
-            document.body.style.overflow = 'auto';
-            
-            // Reset form
-            document.getElementById('returnForm').reset();
-        }
+        function openContractDetailModal(contractId) {
+            fetch(`/khach-thue/chi-tiet-hop-dong/${contractId}/json`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    const content = `
+                        <div class="contract-detail-header-guest">
+                            <div class="contract-id-badge-guest">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Mã hợp đồng: #CT${contractId}</span>
+                            </div>
+                            <div class="contract-actions-header-guest">
+                                <button class="contract-action-btn-guest" onclick="downloadContractAsPDF(${contractId})">
+                                    <i class="fas fa-download"></i> Tải file hợp đồng
+                                </button>
+                                <button class="contract-action-btn-guest" onclick="printContract()">
+                                    <i class="fas fa-print"></i> In
+                                </button>
+                            </div>
+                        </div>
 
-        function confirmReturn() {
-            const returnDate = document.getElementById('returnDate').value;
-            const returnReason = document.getElementById('returnReason').value;
-            
-            if (!returnDate) {
-                alert('Vui lòng chọn ngày trả phòng!');
-                return;
-            }
-            
-            // Hiển thị thông báo xác nhận
-            const confirmMessage = `
-                Xác nhận trả phòng A101 - Deluxe
-                
-                Ngày trả: ${new Date(returnDate).toLocaleDateString('vi-VN')}
-                ${returnReason ? `Lý do: ${returnReason}` : ''}
-                
-                Bạn có chắc chắn muốn thực hiện?
-            `;
-            
-            if (confirm(confirmMessage)) {
-                // Simulate API call
-                console.log('Trả phòng:', {
-                    room: 'A101 - Deluxe',
-                    returnDate: returnDate,
-                    reason: returnReason
+                        <div class="contract-section-blue-guest">
+                            <h4 class="contract-section-title-blue-guest">
+                                <i class="fas fa-info-circle"></i> Thông tin tổng quan
+                            </h4>
+                            <div class="contract-general-info-guest">
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Ngày ký hợp đồng</span>
+                                    <div class="contract-date-value-guest">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(data.startDate)}</span>
+                                    </div>
+                                </div>
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Ngày hết hạn</span>
+                                    <div class="contract-date-value-guest">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(data.endDate)}</span>
+                                    </div>
+                                </div>
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Thời hạn hợp đồng</span>
+                                    <div class="contract-duration-value-guest">${data.duration} tháng</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest">
+                            <h4 class="contract-section-title-guest">
+                                <i class="fas fa-home"></i> Thông tin phòng trọ
+                            </h4>
+                            <div class="contract-property-info-guest">
+                                <div class="contract-property-row-guest">
+                                    <div class="contract-property-item-guest">
+                                        <span class="contract-property-label-guest">Địa chỉ</span>
+                                        <span class="contract-property-value-guest">
+                                            ${data.room.hostel.address ?
+                            `${data.room.hostel.address.street}, ${data.room.hostel.address.ward.name}, ${data.room.hostel.address.ward.district.name}, ${data.room.hostel.address.ward.district.province.name}`
+                            : 'Chưa xác định'}
+                                        </span>
+                                    </div>
+                                    <div class="contract-property-item-guest">
+                                        <span class="contract-property-label-guest">Diện tích</span>
+                                        <span class="contract-property-value-guest">${data.room.acreage} m²</span>
+                                    </div>
+                                </div>
+                                <div class="contract-property-utilities-guest">
+                                    <span class="contract-property-label-guest">Tiện ích có sẵn phòng</span>
+                                    <ul class="contract-utilities-list-guest">
+                                        ${data.room.utilities && data.room.utilities.length > 0 ?
+                            data.room.utilities.map(utility => `
+                                                <li class="contract-utility-item-guest">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    <span>${utility.name || 'Tiện ích không xác định'}</span>
+                                                </li>
+                                            `).join('')
+                            : '<p class="text-muted">Phòng này hiện không có tiện ích nào.</p>'}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest">
+                            <h4 class="contract-section-title-guest">
+                                <i class="fas fa-dollar-sign"></i> Điều khoản tài chính
+                            </h4>
+                            <div class="contract-financial-grid-guest">
+                                <div class="contract-financial-card-guest contract-rental-card-guest">
+                                    <div class="contract-financial-label-guest">Tiền thuê hàng tháng</div>
+                                    <div class="contract-financial-amount-guest">${formatCurrency(data.price)}</div>
+                                    <div class="contract-financial-note-guest">Thanh toán vào ngày 1 hàng tháng</div>
+                                </div>
+                                <div class="contract-financial-card-guest contract-deposit-card-guest">
+                                    <div class="contract-financial-label-guest">Tiền cọc đặt cọc</div>
+                                    <div class="contract-financial-amount-guest">${formatCurrency(data.deposit)}</div>
+                                    <div class="contract-financial-note-guest">Hoàn trả khi kết thúc hợp đồng</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-parties-section-guest">
+                            <div class="contract-party-card-guest">
+                                <h4 class="contract-party-title-guest">
+                                    <i class="fas fa-user-tie"></i> Thông tin chủ nhà (Bên cho thuê)
+                                </h4>
+                                <div class="contract-party-details-guest">
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Họ tên</span>
+                                        <span class="contract-party-value-guest">${data.owner.fullname}</span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Số điện thoại</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-phone"></i>
+                                            <span>${data.owner.phone}</span>
+                                        </span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Email</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>${data.owner.email}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="contract-party-card-guest">
+                                <h4 class="contract-party-title-guest">
+                                    <i class="fas fa-user"></i> Thông tin người thuê (Bên thuê)
+                                </h4>
+                                <div class="contract-party-details-guest">
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Họ tên</span>
+                                        <span class="contract-party-value-guest">${data.tenant ? data.tenant.fullname : 'Chưa xác định'}</span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Số điện thoại</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-phone"></i>
+                                            <span>${data.tenant ? data.tenant.phone : 'Chưa xác định'}</span>
+                                        </span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Email</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>${data.tenant ? data.tenant.email : 'Chưa xác định'}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest p-3 rounded shadow-sm" style="background-color: #f9f9f9;">
+                            <h4 class="contract-section-title-guest mb-3" style="font-weight: 600; color: #2c3e50;">
+                                <i class="fas fa-list-ul me-2 text-primary"></i> Điều khoản và điều kiện
+                            </h4>
+                            <pre class="contract-terms-box">${data.terms || 'Không có điều khoản'}</pre>
+                        </div>
+
+                        <div class="contract-signature-section-guest">
+                            <div class="contract-signature-card-guest">
+                                <h5 class="contract-signature-title-guest">CHỮ KÝ BÊN CHO THUÊ</h5>
+                                <div class="contract-signature-date-guest">Ngày ký: ${formatDate(data.startDate)}</div>
+                                <div class="contract-signature-name-guest">${data.owner.fullname}</div>
+                                <div class="contract-signature-placeholder-guest">(Chữ ký)</div>
+                            </div>
+                            <div class="contract-signature-card-guest">
+                                <h5 class="contract-signature-title-guest">CHỮ KÝ BÊN THUÊ</h5>
+                                <div class="contract-signature-date-guest">Ngày ký: ${formatDate(data.startDate)}</div>
+                                <div class="contract-signature-name-guest">${data.tenant ? data.tenant.fullname : 'Chưa xác định'}</div>
+                                <div class="contract-signature-placeholder-guest">(Chữ ký)</div>
+                            </div>
+                        </div>
+
+                        <div class="contract-footer-note-guest">
+                            <p>Hợp đồng này được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.</p>
+                            <p>Ngày lập: ${formatDate(data.startDate)}</p>
+                        </div>
+                    `;
+                    document.getElementById('contractDetailContent').innerHTML = content;
+                    document.getElementById('downloadContractBtn').setAttribute('onclick', `downloadContractAsPDF(${contractId})`);
+                    document.getElementById('contractDetailModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                })
+                .catch(error => {
+                    console.error('Error fetching contract details:', error);
+                    showToast('error', 'Đã xảy ra lỗi khi tải chi tiết hợp đồng.');
                 });
-                
-                // Show success message
-                alert('Trả phòng thành công! Phòng đã được cập nhật trạng thái.');
-                
-                // Close return modal
-                closeReturnModal();
-                
-                // Open rating modal after successful return
-                setTimeout(() => {
-                    openRatingModal();
-                }, 500);
+        }
+
+        function closeContractDetailModal() {
+            document.getElementById('contractDetailModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('contractDetailContent').innerHTML = '';
+        }
+
+        function downloadContractAsPDF(contractId) {
+            const element = document.getElementById('contractDetailContent');
+            if (!element.innerHTML) {
+                openContractDetailModal(contractId);
+                setTimeout(() => generatePDF(contractId), 500);
+            } else {
+                generatePDF(contractId);
             }
         }
 
-        // Rating Modal Functions
-        function openRatingModal() {
+        function generatePDF(contractId) {
+            const element = document.getElementById('contractDetailContent');
+            const opt = {
+                margin: 0.5,
+                filename: `HopDong_${contractId}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save()
+                .then(() => {
+                    showToast('success', 'Tải hợp đồng thành công!');
+                })
+                .catch(error => {
+                    console.error('Error generating PDF:', error);
+                    showToast('error', 'Đã xảy ra lỗi khi tạo PDF.');
+                });
+        }
+
+        function printContract() {
+            const content = document.getElementById('contractDetailContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>In Hợp Đồng</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            ${document.querySelector('style').innerText}
+                        </style>
+                    </head>
+                    <body>
+                        ${content}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function showToast(type, message) {
+            const toastContainer = document.querySelector('.custom-toast-container');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `
+                <i class="toast-icon fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+
+        // Giữ nguyên các hàm liên quan đến rating
+        function openRatingModal(roomId, roomName) {
             const modal = document.getElementById('ratingModal');
+            document.getElementById('ratingRoomId').value = roomId;
+            document.getElementById('rating-room-name').textContent = roomName;
             modal.classList.add('active');
             document.body.style.overflow = 'hidden';
-            
-            // Initialize rating system
             initializeRatingSystem();
         }
 
@@ -1822,43 +1826,24 @@
             const modal = document.getElementById('ratingModal');
             modal.classList.remove('active');
             document.body.style.overflow = 'auto';
-            
-            // Reset ratings
-            resetRatings();
+            resetRating();
         }
 
         function initializeRatingSystem() {
-            // Overall rating
-            const overallStars = document.querySelectorAll('#overallRating .star');
-            overallStars.forEach((star, index) => {
-                star.addEventListener('click', () => setOverallRating(index + 1));
-                star.addEventListener('mouseover', () => highlightStars(overallStars, index + 1));
-                star.addEventListener('mouseout', () => highlightStars(overallStars, ratings.overall));
-            });
-
-            // Category ratings
-            const categories = ['cleanliness', 'service', 'amenities', 'price'];
-            categories.forEach(category => {
-                const categoryStars = document.querySelectorAll(`[data-category="${category}"] .star`);
-                categoryStars.forEach((star, index) => {
-                    star.addEventListener('click', () => setCategoryRating(category, index + 1));
-                    star.addEventListener('mouseover', () => highlightStars(categoryStars, index + 1));
-                    star.addEventListener('mouseout', () => highlightStars(categoryStars, ratings[category]));
-                });
+            const stars = document.querySelectorAll('#overallRating .star');
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => setRating(index + 1));
+                star.addEventListener('mouseover', () => highlightStars(stars, index + 1));
+                star.addEventListener('mouseout', () => highlightStars(stars, currentRating));
             });
         }
 
-        function setOverallRating(rating) {
-            ratings.overall = rating;
-            const overallStars = document.querySelectorAll('#overallRating .star');
-            highlightStars(overallStars, rating);
+        function setRating(rating) {
+            currentRating = rating;
+            document.getElementById('overallRatingValue').value = rating;
+            const stars = document.querySelectorAll('#overallRating .star');
+            highlightStars(stars, rating);
             document.getElementById('overallRatingText').textContent = ratingTexts[rating];
-        }
-
-        function setCategoryRating(category, rating) {
-            ratings[category] = rating;
-            const categoryStars = document.querySelectorAll(`[data-category="${category}"] .star`);
-            highlightStars(categoryStars, rating);
         }
 
         function highlightStars(stars, rating) {
@@ -1871,44 +1856,26 @@
             });
         }
 
-        function resetRatings() {
-            ratings = {
-                overall: 0,
-                cleanliness: 0,
-                service: 0,
-                amenities: 0,
-                price: 0
-            };
-            
-            // Reset all stars
-            document.querySelectorAll('.star').forEach(star => {
-                star.classList.remove('active');
-            });
-            
-            // Reset overall rating text
-            document.getElementById('overallRatingText').textContent = 'Chọn số sao để đánh giá';
-            
-            // Reset comment
+        function resetRating() {
+            currentRating = 0;
+            document.getElementById('overallRatingValue').value = '';
             document.getElementById('ratingComment').value = '';
+            document.getElementById('overallRatingText').textContent = 'Chọn số sao để đánh giá';
+            const stars = document.querySelectorAll('#overallRating .star');
+            stars.forEach(star => star.classList.remove('active'));
         }
 
         function submitRating() {
-            if (ratings.overall === 0) {
-                alert('Vui lòng chọn đánh giá tổng thể!');
+            const ratingForm = document.getElementById('ratingForm');
+            if (currentRating === 0) {
+                showToast('error', 'Vui lòng chọn điểm đánh giá!');
                 return;
             }
-            
-            const comment = document.getElementById('ratingComment').value;
-            
-            // Simulate API call
-            console.log('Gửi đánh giá:', {
-                room: 'A101 - Deluxe',
-                ratings: ratings,
-                comment: comment
-            });
-            
-            alert('Cảm ơn bạn đã đánh giá! Phản hồi của bạn rất quan trọng với chúng tôi.');
-            closeRatingModal();
+            if (ratingForm.checkValidity()) {
+                ratingForm.submit();
+            } else {
+                showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+            }
         }
 
         function skipRating() {
@@ -1917,26 +1884,42 @@
             }
         }
 
-        // Close modals when clicking outside
-        document.getElementById('returnModal').addEventListener('click', function(e) {
+        // Xử lý toast và sự kiện đóng modal
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+
+        document.getElementById('contractDetailModal').addEventListener('click', function (e) {
             if (e.target === this) {
-                closeReturnModal();
+                closeContractDetailModal();
             }
         });
 
-        document.getElementById('ratingModal').addEventListener('click', function(e) {
+        document.getElementById('ratingModal').addEventListener('click', function (e) {
             if (e.target === this) {
                 closeRatingModal();
             }
         });
 
-        // Close modals with Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
-                closeReturnModal();
+                closeContractDetailModal();
                 closeRatingModal();
             }
         });
     </script>
 </body>
+
 </html>

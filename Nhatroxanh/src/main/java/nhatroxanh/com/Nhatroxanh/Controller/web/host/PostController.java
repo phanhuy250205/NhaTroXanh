@@ -117,7 +117,7 @@ public class PostController {
 
     @PostMapping("/xoa-bai-dang/{postId}")
     public String deletePost(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails,
-                             RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes) {
         try {
             Integer userId = userDetails.getUser().getUserId();
             Post post = postService.getPostById(postId);
@@ -176,8 +176,8 @@ public class PostController {
 
     @PostMapping("/cap-nhat-trang-thai")
     public String updatePostStatus(@RequestParam("postId") Integer postId,
-                                   @RequestParam("status") Boolean status,
-                                   RedirectAttributes redirectAttributes) {
+            @RequestParam("status") Boolean status,
+            RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(postId);
         if (post == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy bài đăng.");
@@ -204,9 +204,9 @@ public class PostController {
             roomData.put("acreage", room.getAcreage());
             roomData.put("maxTenants", room.getMax_tenants());
             roomData.put("status", room.getStatus() != null ? switch (room.getStatus()) {
-                case ACTIVE -> "Đã thuê";
-                case INACTIVE -> "Trống";
-                case MAINTENANCE -> "Bảo trì";
+                case active -> "Đã thuê";
+                case unactive -> "Trống";
+                case repair -> "Bảo trì";
             } : "Không xác định");
             roomData.put("category", room.getCategory() != null ? room.getCategory().getName() : "Chưa xác định");
             roomData.put("utilities", room.getUtilities() != null
@@ -318,7 +318,7 @@ public class PostController {
 
     @GetMapping("/sua-bai-dang/{postId}")
     public String showEditPostForm(@PathVariable Integer postId, Model model,
-                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new IllegalArgumentException("Bài đăng không tồn tại với ID: " + postId));
@@ -424,4 +424,24 @@ public class PostController {
             return "redirect:/chu-tro/sua-bai-dang/" + postId;
         }
     }
+
+    @PostMapping("/{postId}/reset-approval")
+    public String resetApprovalStatus(@PathVariable Integer postId, RedirectAttributes redirectAttributes) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đăng"));
+            if (post.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                post.setApprovalStatus(ApprovalStatus.PENDING);
+                post.setApprovedAt(null);
+                post.setApprovedBy(null); 
+                postRepository.save(post);
+                redirectAttributes.addFlashAttribute("successMessage", "Chuyển về trạng thái chờ duyệt thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/chu-tro/chi-tiet-bai-dang/" + postId;
+    }
+
 }

@@ -69,5 +69,4 @@ public class IncidentReports {
 
     @OneToMany(mappedBy = "report", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
-
 }
