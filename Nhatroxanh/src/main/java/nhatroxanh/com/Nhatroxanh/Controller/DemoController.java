@@ -1,8 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
-import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +20,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
@@ -41,9 +40,9 @@ import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
+
 
 @Controller
 public class DemoController {
@@ -282,6 +281,14 @@ public class DemoController {
             return "redirect:/chu-tro/khach-thue";
         }
 
+    }
+    @GetMapping("/notifications")
+    public String notifications() {
+        return "guest/chitiet-thongbao";
+    }
+    @GetMapping("/infor-chutro")
+    public String chutro() {
+        return "host/infor-chutro";
     }
 
     private Integer getCurrentOwnerId() {

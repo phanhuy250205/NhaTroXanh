@@ -10,7 +10,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -24,15 +23,16 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private CustomLoginSuccessHandler customLoginSuccessHandler;
+
     @Autowired
     private DataSource dataSource;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-        // return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
@@ -53,7 +53,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/**", "/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
@@ -61,7 +61,7 @@ public class SecurityConfig {
                                 "/uploads/**")
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/momo/**","/vnpay/**",
                                 "/tat-ca-phong-tro")
                         .permitAll()
                         .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
@@ -75,7 +75,10 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login-processing")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler) // CHỈ DÙNG handler này thôi
+                        .successHandler(customLoginSuccessHandler)
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        })
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");

@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi">
-<head th:replace="~{/layouts/head}">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head th:replace="~{/layouts/head}"/>
+  
 <head>
+    <meta charset="UTF-8">
     <title>Thanh Toán Tiền Phòng - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/thanhtoan-guest.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <!-- NAVBAR -->
@@ -48,7 +50,7 @@
                                 </div>
                                 <div class="info-content-guest">
                                     <h6>Phòng</h6>
-                                    <p>A101</p>
+                                    <p th:text="${roomName} ?: 'Không xác định'" id="roomName"></p>
                                 </div>
                             </div>
                             <div class="info-item-guest">
@@ -57,7 +59,7 @@
                                 </div>
                                 <div class="info-content-guest">
                                     <h6>Địa chỉ</h6>
-                                    <p>K814A/14 Trần Cao Vân, P.Thanh Kê, TP. Đà Nẵng</p>
+                                    <p th:text="${hostelAddress} ?: 'Không xác định'"></p>
                                 </div>
                             </div>
                             <div class="info-item-guest">
@@ -66,7 +68,7 @@
                                 </div>
                                 <div class="info-content-guest">
                                     <h6>Chủ trọ</h6>
-                                    <p>Nguyễn Văn A</p>
+                                    <p th:text="${hostName} ?: 'Không xác định'"></p>
                                 </div>
                             </div>
                             <div class="info-item-guest">
@@ -75,7 +77,7 @@
                                 </div>
                                 <div class="info-content-guest">
                                     <h6>Hạn thanh toán</h6>
-                                    <p>05/01/2025</p>
+                                    <p th:text="${dueDate} ?: 'Không xác định'"></p>
                                 </div>
                             </div>
                             <div class="info-item-guest">
@@ -84,13 +86,13 @@
                                 </div>
                                 <div class="info-content-guest">
                                     <h6>Kỳ thanh toán</h6>
-                                    <p>Tháng 12/2024</p>
+                                    <p th:text="${month} ?: 'Không xác định'"></p>
                                 </div>
                             </div>
                             <div class="info-item-guest">
-                                <div class="status-badge-guest status-pending-guest">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    Sắp đến hạn
+                                <div class="status-badge-guest" th:classappend="${status == 'PENDING' ? 'status-pending-guest' : status == 'OVERDUE' ? 'status-overdue-guest' : 'status-paid-guest'}">
+                                    <i class="fas" th:class="'fa-' + (${status == 'PENDING' ? 'clock' : status == 'OVERDUE' ? 'exclamation-triangle' : 'check'})"></i>
+                                    <span th:text="${status == 'PENDING' ? 'Chưa thanh toán' : status == 'OVERDUE' ? 'Quá hạn' : 'Đã thanh toán'}"></span>
                                 </div>
                             </div>
                         </div>
@@ -102,7 +104,8 @@
                     <div class="card-header-guest">
                         <h3 class="card-title-guest">
                             <i class="fas fa-tachometer-alt"></i>
-                            Chỉ Số Điện Nước Tháng 12/2024
+                            Chỉ Số Điện Nước
+                            <span th:text="'Tháng ' + ${month}"></span>
                         </h3>
                     </div>
                     <div class="card-body-guest">
@@ -112,26 +115,26 @@
                                 <div class="meter-header-guest">
                                     <div>
                                         <div class="meter-icon-wrapper-guest electric-gradient-guest mb-2">
-                                            <i class="fas fa-bolt "></i>
+                                            <i class="fas fa-bolt"></i>
                                         </div>
                                         <div class="meter-type-guest">Điện</div>
                                     </div>
                                     <div class="text-end">
-                                        <div class="usage-display-guest">71.4 kWh</div>
+                                        <div class="usage-display-guest" th:text="${electricUsage} ?: '0 kWh'"></div>
                                         <div class="usage-range-guest">
-                                            <span>1245</span>
+                                            <span th:text="${prevElectricReading} ?: '0'"></span>
                                             <i class="fas fa-arrow-right"></i>
-                                            <span>1316</span>
+                                            <span th:text="${currElectricReading} ?: '0'"></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="meter-stats-guest">
                                     <div class="stat-item-guest">
-                                        <div class="stat-value-guest">3,500 VNĐ</div>
+                                        <div class="stat-value-guest" th:text="${electricUnitPrice} ?: '0 VNĐ'"></div>
                                         <div class="stat-label-guest">Đơn giá/kWh</div>
                                     </div>
                                     <div class="stat-item-guest">
-                                        <div class="stat-value-guest">250,000 VNĐ</div>
+                                        <div class="stat-value-guest" th:text="${electricCost} ?: '0 VNĐ'"></div>
                                         <div class="stat-label-guest">Thành tiền</div>
                                     </div>
                                 </div>
@@ -147,21 +150,21 @@
                                         <div class="meter-type-guest">Nước</div>
                                     </div>
                                     <div class="text-end">
-                                        <div class="usage-display-guest">4 m³</div>
+                                        <div class="usage-display-guest" th:text="${waterUsage} ?: '0 m³'"></div>
                                         <div class="usage-range-guest">
-                                            <span>156</span>
+                                            <span th:text="${prevWaterReading} ?: '0'"></span>
                                             <i class="fas fa-arrow-right"></i>
-                                            <span>160</span>
+                                            <span th:text="${currWaterReading} ?: '0'"></span>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="meter-stats-guest">
                                     <div class="stat-item-guest">
-                                        <div class="stat-value-guest">20,000 VNĐ</div>
+                                        <div class="stat-value-guest" th:text="${waterUnitPrice} ?: '0 VNĐ'"></div>
                                         <div class="stat-label-guest">Đơn giá/m³</div>
                                     </div>
                                     <div class="stat-item-guest">
-                                        <div class="stat-value-guest">80,000 VNĐ</div>
+                                        <div class="stat-value-guest" th:text="${waterCost} ?: '0 VNĐ'"></div>
                                         <div class="stat-label-guest">Thành tiền</div>
                                     </div>
                                 </div>
@@ -206,7 +209,6 @@
                                         <p>Thanh toán qua ví điện tử - Dễ dàng, tiện lợi</p>
                                     </div>
                                 </div>
-                                
                                 <div class="wallet-options-guest" id="walletOptions">
                                     <h6 class="mb-3 text-primary">
                                         <i class="fas fa-wallet me-2"></i>
@@ -219,14 +221,6 @@
                                             <div>
                                                 <strong>VNPay</strong>
                                                 <p class="mb-0 text-muted small">Ví điện tử VNPay</p>
-                                            </div>
-                                        </div>
-                                        <div class="wallet-item-guest" onclick="selectWallet('zalopay')">
-                                            <input type="radio" name="wallet" id="zalopay" value="zalopay">
-                                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTlp4qW2M8xPofmuZHwEfGi9mNMWUG0zs53A&s" alt="ZaloPay" class="wallet-logo-guest">
-                                            <div>
-                                                <strong>ZaloPay</strong>
-                                                <p class="mb-0 text-muted small">Ví điện tử ZaloPay</p>
                                             </div>
                                         </div>
                                         <div class="wallet-item-guest" onclick="selectWallet('momo')">
@@ -253,7 +247,6 @@
                                         <p>Thanh toán trực tiếp - Đặt lịch hẹn trước</p>
                                     </div>
                                 </div>
-                                
                                 <div class="cash-options-guest" id="cashOptions">
                                     <h6 class="mb-3 text-primary">
                                         <i class="fas fa-calendar-check me-2"></i>
@@ -262,7 +255,7 @@
                                     <div class="date-grid-guest">
                                         <div class="form-group-guest">
                                             <label class="form-label-guest">Ngày thanh toán</label>
-                                            <input type="date" class="form-control-guest" id="paymentDate" min="">
+                                            <input type="date" class="form-control-guest" id="paymentDate" th:value="${dueDate}" min="">
                                         </div>
                                         <div class="form-group-guest">
                                             <label class="form-label-guest">Giờ thanh toán</label>
@@ -319,26 +312,26 @@
                                 <table class="invoice-table-guest">
                                     <tr>
                                         <td>Tiền phòng</td>
-                                        <td>3,500,000 VNĐ</td>
+                                        <td th:text="${roomPrice} ?: '0 VNĐ'"></td>
                                     </tr>
                                     <tr>
-                                        <td>Tiền điện (71.4 kWh)</td>
-                                        <td>250,000 VNĐ</td>
+                                        <td>Tiền điện (<span th:text="${electricUsage} ?: '0'"></span> kWh)</td>
+                                        <td th:text="${electricCost} ?: '0 VNĐ'"></td>
                                     </tr>
                                     <tr>
-                                        <td>Tiền nước (4 m³)</td>
-                                        <td>80,000 VNĐ</td>
+                                        <td>Tiền nước (<span th:text="${waterUsage} ?: '0'"></span> m³)</td>
+                                        <td th:text="${waterCost} ?: '0 VNĐ'"></td>
                                     </tr>
                                     <tr>
                                         <td>Phí dịch vụ</td>
-                                        <td>100,000 VNĐ</td>
+                                        <td th:text="${serviceFee} ?: '0 VNĐ'"></td>
                                     </tr>
                                 </table>
                                 <div class="invoice-total-guest">
                                     <table class="invoice-table-guest">
                                         <tr>
                                             <td><strong>Tổng cộng</strong></td>
-                                            <td class="total-amount-guest">3,930,000 VNĐ</td>
+                                            <td class="total-amount-guest" th:text="${totalAmount} ?: '0 VNĐ'"></td>
                                         </tr>
                                     </table>
                                 </div>
@@ -395,520 +388,47 @@
                 </div>
             </div>
         </div>
-
-        <!-- Payment History -->
-        <div class="card-guest history-section-guest">
-            <div class="card-header-guest">
-                <h3 class="card-title-guest">
-                    <i class="fas fa-history"></i>
-                    Lịch Sử Thanh Toán
-                </h3>
-            </div>
-            <div class="card-body-guest">
-                <!-- Filters -->
-                <div class="history-filters-guest">
-                    <div class="filter-group-guest">
-                        <label>Năm:</label>
-                        <select class="filter-select-guest">
-                            <option>2024</option>
-                            <option>2023</option>
-                        </select>
-                    </div>
-                    <div class="filter-group-guest">
-                        <label>Trạng thái:</label>
-                        <select class="filter-select-guest">
-                            <option>Tất cả</option>
-                            <option>Đã thanh toán</option>
-                            <option>Chưa thanh toán</option>
-                            <option>Trễ hạn</option>
-                        </select>
-                    </div>
-                    <div class="filter-group-guest">
-                        <label>Phương thức:</label>
-                        <select class="filter-select-guest">
-                            <option>Tất cả</option>
-                            <option>Ngân hàng</option>
-                            <option>Ví điện tử</option>
-                            <option>Tiền mặt</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Desktop Table -->
-                <div class="history-table-wrapper-guest">
-                    <table class="history-table-guest">
-                        <thead>
-                            <tr>
-                                <th>Kỳ thanh toán</th>
-                                <th>Ngày thanh toán</th>
-                                <th>Số tiền</th>
-                                <th>Phương thức</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><strong>Tháng 12/2024</strong></td>
-                                <td>-</td>
-                                <td><strong style="color: var(--danger-red);">3,930,000 VNĐ</strong></td>
-                                <td>-</td>
-                                <td><span class="status-badge-guest status-pending-guest"><i class="fas fa-clock"></i> Chưa thanh toán</span></td>
-                                <td>
-                                    <button class="btn-guest btn-primary-guest btn-sm-guest" onclick="scrollToPayment()">
-                                        <i class="fas fa-credit-card"></i> Thanh toán
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tháng 11/2024</strong></td>
-                                <td>03/12/2024</td>
-                                <td><strong style="color: var(--success-green);">3,850,000 VNĐ</strong></td>
-                                <td><i class="fas fa-mobile-alt text-primary me-1"></i> VNPay</td>
-                                <td><span class="status-badge-guest status-paid-guest"><i class="fas fa-check"></i> Đã thanh toán</span></td>
-                                <td>
-                                    <button class="btn-guest btn-outline-guest btn-sm-guest" onclick="viewInvoice('202411')">
-                                        <i class="fas fa-eye"></i> Xem
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tháng 10/2024</strong></td>
-                                <td>05/11/2024</td>
-                                <td><strong style="color: var(--success-green);">3,920,000 VNĐ</strong></td>
-                                <td><i class="fas fa-university text-primary me-1"></i> Ngân hàng</td>
-                                <td><span class="status-badge-guest status-paid-guest"><i class="fas fa-check"></i> Đã thanh toán</span></td>
-                                <td>
-                                    <button class="btn-guest btn-outline-guest btn-sm-guest" onclick="viewInvoice('202410')">
-                                        <i class="fas fa-eye"></i> Xem
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tháng 09/2024</strong></td>
-                                <td>02/10/2024</td>
-                                <td><strong style="color: var(--success-green);">3,780,000 VNĐ</strong></td>
-                                <td><i class="fas fa-money-bill-wave text-primary me-1"></i> Tiền mặt</td>
-                                <td><span class="status-badge-guest status-paid-guest"><i class="fas fa-check"></i> Đã thanh toán</span></td>
-                                <td>
-                                    <button class="btn-guest btn-outline-guest btn-sm-guest" onclick="viewInvoice('202409')">
-                                        <i class="fas fa-eye"></i> Xem
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><strong>Tháng 08/2024</strong></td>
-                                <td>07/09/2024</td>
-                                <td><strong style="color: var(--warning-orange);">3,650,000 VNĐ</strong></td>
-                                <td><i class="fas fa-mobile-alt text-primary me-1"></i> Momo</td>
-                                <td><span class="status-badge-guest status-overdue-guest"><i class="fas fa-exclamation-triangle"></i> Trễ hạn</span></td>
-                                <td>
-                                    <button class="btn-guest btn-outline-guest btn-sm-guest" onclick="viewInvoice('202408')">
-                                        <i class="fas fa-eye"></i> Xem
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <!-- Mobile Cards -->
-                <div class="history-mobile-guest">
-                    <div class="history-card-guest">
-                        <div class="history-card-header-guest">
-                            <div class="history-card-title-guest">Tháng 12/2024</div>
-                            <span class="status-badge-guest status-pending-guest"><i class="fas fa-clock"></i> Chưa thanh toán</span>
-                        </div>
-                        <div class="history-card-body-guest">
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Ngày thanh toán</span>
-                                <span class="history-value-guest">-</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Số tiền</span>
-                                <span class="history-value-guest" style="color: var(--danger-red);">3,930,000 VNĐ</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Phương thức</span>
-                                <span class="history-value-guest">-</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <button class="btn-guest btn-primary-guest btn-sm-guest w-100" onclick="scrollToPayment()">
-                                    <i class="fas fa-credit-card"></i> Thanh toán ngay
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="history-card-guest">
-                        <div class="history-card-header-guest">
-                            <div class="history-card-title-guest">Tháng 11/2024</div>
-                            <span class="status-badge-guest status-paid-guest"><i class="fas fa-check"></i> Đã thanh toán</span>
-                        </div>
-                        <div class="history-card-body-guest">
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Ngày thanh toán</span>
-                                <span class="history-value-guest">03/12/2024</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Số tiền</span>
-                                <span class="history-value-guest" style="color: var(--success-green);">3,850,000 VNĐ</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Phương thức</span>
-                                <span class="history-value-guest"><i class="fas fa-mobile-alt text-primary me-1"></i> VNPay</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <button class="btn-guest btn-outline-guest btn-sm-guest w-100" onclick="viewInvoice('202411')">
-                                    <i class="fas fa-eye"></i> Xem hóa đơn
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="history-card-guest">
-                        <div class="history-card-header-guest">
-                            <div class="history-card-title-guest">Tháng 10/2024</div>
-                            <span class="status-badge-guest status-paid-guest"><i class="fas fa-check"></i> Đã thanh toán</span>
-                        </div>
-                        <div class="history-card-body-guest">
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Ngày thanh toán</span>
-                                <span class="history-value-guest">05/11/2024</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Số tiền</span>
-                                <span class="history-value-guest" style="color: var(--success-green);">3,920,000 VNĐ</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <span class="history-label-guest">Phương thức</span>
-                                <span class="history-value-guest"><i class="fas fa-university text-primary me-1"></i> Ngân hàng</span>
-                            </div>
-                            <div class="history-item-guest">
-                                <button class="btn-guest btn-outline-guest btn-sm-guest w-100" onclick="viewInvoice('202410')">
-                                    <i class="fas fa-eye"></i> Xem hóa đơn
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Modal chi tiết hóa đơn -->
-    <div class="modal fade" id="invoiceModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); color: white;">
-                    <h5 class="modal-title">
-                        <i class="fas fa-file-invoice me-2"></i>
-                        Chi Tiết Hóa Đơn Tháng 12/2024
-                        <span class="modal-title-text d-none">Phòng A101</span>
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <!-- Header Info -->
-                    <div class="invoice-header-info-guest">
-                        <div class="row mb-4">
-                            <div class="col-md-6 mb-3">
-                                <div class="info-section-guest">
-                                    <h6 class="info-section-title-guest">
-                                        <i class="fas fa-file-alt me-2"></i>
-                                        Thông tin hóa đơn
-                                    </h6>
-                                    <div class="info-grid-guest">
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Mã hóa đơn:</span>
-                                            <span class="info-value-guest text-primary">HD001234</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Ngày tạo:</span>
-                                            <span class="info-value-guest">01/12/2024</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Hạn thanh toán:</span>
-                                            <span class="info-value-guest text-danger">05/01/2025</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Trạng thái:</span>
-                                            <span class="info-value-guest">
-                                                <span class="status-badge-guest status-pending-guest">
-                                                    <i class="fas fa-clock"></i> Chưa thanh toán
-                                                </span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="info-section-guest">
-                                    <h6 class="info-section-title-guest">
-                                        <i class="fas fa-home me-2"></i>
-                                        Thông tin phòng
-                                    </h6>
-                                    <div class="info-grid-guest">
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Phòng:</span>
-                                            <span class="info-value-guest">A101 - Tầng 1</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Địa chỉ:</span>
-                                            <span class="info-value-guest">123 Đường ABC, Quận 1, TP.HCM</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Chủ trọ:</span>
-                                            <span class="info-value-guest">Nguyễn Văn A</span>
-                                        </div>
-                                        <div class="info-row-guest">
-                                            <span class="info-label-guest">Số điện thoại:</span>
-                                            <span class="info-value-guest">0123.456.789</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Desktop Table -->
-                    <div class="invoice-table-desktop-guest">
-                        <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead style="background: var(--bg-blue);">
-                                    <tr>
-                                        <th>Khoản thu</th>
-                                        <th>Đơn giá</th>
-                                        <th>Số lượng</th>
-                                        <th>Chỉ số</th>
-                                        <th class="text-end">Thành tiền</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Tiền phòng</strong></td>
-                                        <td>3,500,000 VNĐ</td>
-                                        <td>1 tháng</td>
-                                        <td>-</td>
-                                        <td class="text-end"><strong>3,500,000 VNĐ</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Tiền điện</strong></td>
-                                        <td>3,500 VNĐ/kWh</td>
-                                        <td>71.4 kWh</td>
-                                        <td>1245 → 1316</td>
-                                        <td class="text-end"><strong>250,000 VNĐ</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Tiền nước</strong></td>
-                                        <td>20,000 VNĐ/m³</td>
-                                        <td>4 m³</td>
-                                        <td>156 → 160</td>
-                                        <td class="text-end"><strong>80,000 VNĐ</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Tiền rác</strong></td>
-                                        <td>30,000 VNĐ</td>
-                                        <td>1</td>
-                                        <td>-</td>
-                                        <td class="text-end"><strong>30,000 VNĐ</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Phí khác</strong></td>
-                                        <td>100,000 VNĐ</td>
-                                        <td>1</td>
-                                        <td>-</td>
-                                        <td class="text-end"><strong>100,000 VNĐ</strong></td>
-                                    </tr>
-                                </tbody>
-                                <tfoot style="background: var(--bg-blue);">
-                                    <tr>
-                                        <th colspan="4"><strong>Tổng cộng</strong></th>
-                                        <th class="text-end"><strong style="color: var(--primary-blue); font-size: 1.2rem;">3,930,000 VNĐ</strong></th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Mobile Cards -->
-                    <div class="invoice-cards-mobile-guest">
-                        <!-- Room Fee Card -->
-                        <div class="invoice-item-card-guest">
-                            <div class="invoice-card-header-guest">
-                                <div class="invoice-icon-guest room-icon-guest">
-                                    <i class="fas fa-home"></i>
-                                </div>
-                                <div class="invoice-card-title-guest">
-                                    <h6>Tiền phòng</h6>
-                                    <p>Phòng A101 - Tháng 12/2024</p>
-                                </div>
-                                <div class="invoice-card-amount-guest">3,500,000 VNĐ</div>
-                            </div>
-                            <div class="invoice-card-details-guest">
-                                <div class="detail-row-guest">
-                                    <span>Đơn giá:</span>
-                                    <span>3,500,000 VNĐ</span>
-                                </div>
-                                <div class="detail-row-guest">
-                                    <span>Thời gian:</span>
-                                    <span>1 tháng</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Electric Fee Card -->
-                        <div class="invoice-item-card-guest">
-                            <div class="invoice-card-header-guest">
-                                <div class="invoice-icon-guest electric-icon-guest">
-                                    <i class="fas fa-bolt"></i>
-                                </div>
-                                <div class="invoice-card-title-guest">
-                                    <h6>Tiền điện</h6>
-                                    <p>Chỉ số: 1245 → 1316</p>
-                                </div>
-                                <div class="invoice-card-amount-guest">250,000 VNĐ</div>
-                            </div>
-                            <div class="invoice-card-details-guest">
-                                <div class="detail-row-guest">
-                                    <span>Đơn giá:</span>
-                                    <span>3,500 VNĐ/kWh</span>
-                                </div>
-                                <div class="detail-row-guest">
-                                    <span>Sử dụng:</span>
-                                    <span>71.4 kWh</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Water Fee Card -->
-                        <div class="invoice-item-card-guest">
-                            <div class="invoice-card-header-guest">
-                                <div class="invoice-icon-guest water-icon-guest">
-                                    <i class="fas fa-tint"></i>
-                                </div>
-                                <div class="invoice-card-title-guest">
-                                    <h6>Tiền nước</h6>
-                                    <p>Chỉ số: 156 → 160</p>
-                                </div>
-                                <div class="invoice-card-amount-guest">80,000 VNĐ</div>
-                            </div>
-                            <div class="invoice-card-details-guest">
-                                <div class="detail-row-guest">
-                                    <span>Đơn giá:</span>
-                                    <span>20,000 VNĐ/m³</span>
-                                </div>
-                                <div class="detail-row-guest">
-                                    <span>Sử dụng:</span>
-                                    <span>4 m³</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Service Fee Card -->
-                        <div class="invoice-item-card-guest">
-                            <div class="invoice-card-header-guest">
-                                <div class="invoice-icon-guest service-icon-guest">
-                                    <!-- <i class="fas fa-cogs"></i> -->
-                                    <i class="fas fa-trash-alt"></i>
-                                </div>
-                                <div class="invoice-card-title-guest">
-                                    <h6>Tiền rác</h6>
-                                    <p>Phí quản lý, vệ sinh chung</p>
-                                </div>
-                                <div class="invoice-card-amount-guest">30,000 VNĐ</div>
-                            </div>
-                            <div class="invoice-card-details-guest">
-                                <div class="detail-row-guest">
-                                    <span>Loại phí:</span>
-                                    <span>Cố định</span>
-                                </div>
-                                <div class="detail-row-guest">
-                                    <span>Chu kỳ:</span>
-                                    <span>Hàng tháng</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="invoice-item-card-guest">
-                            <div class="invoice-card-header-guest">
-                                <div class="invoice-icon-guest service-icon-guest">
-                                    <i class="fas fa-cogs"></i>
-                                </div>
-                                <div class="invoice-card-title-guest">
-                                    <h6>Phí khác</h6>
-                                    <p>Phí quản lý, vệ sinh chung</p>
-                                </div>
-                                <div class="invoice-card-amount-guest">100,000 VNĐ</div>
-                            </div>
-                            <div class="invoice-card-details-guest">
-                                <div class="detail-row-guest">
-                                    <span>Loại phí:</span>
-                                    <span>Cố định</span>
-                                </div>
-                                <div class="detail-row-guest">
-                                    <span>Chu kỳ:</span>
-                                    <span>Hàng tháng</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Total Card -->
-                        <div class="invoice-total-card-guest">
-                            <div class="total-card-content-guest">
-                                <div class="total-icon-guest">
-                                    <i class="fas fa-calculator"></i>
-                                </div>
-                                <div class="total-info-guest">
-                                    <h5>Tổng cộng</h5>
-                                    <p>Tổng số tiền cần thanh toán</p>
-                                </div>
-                                <div class="total-amount-guest">3,930,000 VNĐ</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn-guest btn-outline-guest" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>
-                        <span class="btn-text-guest">Đóng</span>
-                    </button>
-                    <button type="button" class="btn-guest btn-primary-guest">
-                        <i class="fas fa-download me-2"></i>
-                        <span class="btn-text-guest">Tải Hóa Đơn PDF</span>
-                    </button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div th:replace="~{/layouts/footer}"></div>
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome (for icons) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
     <script>
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('paymentDate').setAttribute('min', today);
+
+            // Fetch room data
+            const urlParams = new URLSearchParams(window.location.search);
+            const invoiceId = urlParams.get('invoiceId');
+            const roomId = urlParams.get('room_id');
+            const hostelId = urlParams.get('hostel_id');
+            const addressId = urlParams.get('address_id');
+
+            if (invoiceId && roomId) {
+                fetch(`/api/rooms/${roomId}`)
+                    .then(response => response.json())
+                    .then(roomData => {
+                        if (roomData) {
+                            document.getElementById('roomName').textContent = roomData.namerooms || 'Không xác định';
+                        }
+                    })
+                    .catch(error => console.error('Error fetching room data:', error));
+            }
         });
 
         function selectPaymentMethod(method) {
-            // Remove active class from all payment methods
             document.querySelectorAll('.payment-option-guest').forEach(el => {
                 el.classList.remove('active');
             });
-            
-            // Add active class to selected method
             event.currentTarget.classList.add('active');
-            
-            // Check the radio button
             document.getElementById(method).checked = true;
-            
-            // Hide all sub-options
             document.getElementById('walletOptions').style.display = 'none';
             document.getElementById('cashOptions').style.display = 'none';
-            
-            // Show relevant sub-options
             if (method === 'ewallet') {
                 document.getElementById('walletOptions').style.display = 'block';
             } else if (method === 'cash') {
@@ -918,16 +438,10 @@
 
         function selectWallet(wallet) {
             event.stopPropagation();
-            
-            // Remove active class from all wallet options
             document.querySelectorAll('.wallet-item-guest').forEach(el => {
                 el.classList.remove('active');
             });
-            
-            // Add active class to selected wallet
             event.currentTarget.classList.add('active');
-            
-            // Check the radio button
             document.getElementById(wallet).checked = true;
         }
 
@@ -936,80 +450,251 @@
             modal.show();
         }
 
-        function viewInvoice(period) {
-            alert(`Xem hóa đơn tháng ${period}`);
-        }
-
-        function scrollToPayment() {
-            document.querySelector('.payment-methods-guest').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
-        }
-
         function processPayment() {
-            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
-            const paymentBtn = document.getElementById('paymentBtn');
-            
-            if (!selectedMethod) {
-                alert('Vui lòng chọn phương thức thanh toán!');
+            if (!validatePaymentForm()) {
                 return;
             }
-            
-            let message = 'Xác nhận thanh toán 3,930,000 VNĐ bằng ';
-            
-            switch(selectedMethod.value) {
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const invoiceId = urlParams.get('invoiceId');
+            const roomId = urlParams.get('room_id');
+            const hostelId = urlParams.get('hostel_id');
+            const addressId = urlParams.get('address_id');
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+            const paymentBtn = document.getElementById('paymentBtn');
+            let formData = new FormData();
+
+            formData.append('invoiceId', invoiceId);
+            if (roomId) formData.append('room_id', roomId);
+            if (hostelId) formData.append('hostel_id', hostelId);
+            if (addressId) formData.append('address_id', addressId);
+            formData.append('paymentMethod', selectedMethod.value);
+
+            if (selectedMethod.value === 'ewallet') {
+                const selectedWallet = document.querySelector('input[name="wallet"]:checked');
+                if (!selectedWallet) {
+                    showAlert('Vui lòng chọn ví điện tử!', 'warning');
+                    return;
+                }
+                formData.append('wallet', selectedWallet.value);
+
+                if (selectedWallet.value === 'momo') {
+                    processMoMoPayment(invoiceId, paymentBtn);
+                    return;
+                } else if (selectedWallet.value === 'vnpay') {
+                    processVNPayPayment(invoiceId, paymentBtn);
+                    return;
+                }
+            } else if (selectedMethod.value === 'cash') {
+                const paymentDate = document.getElementById('paymentDate').value;
+                const paymentTime = document.getElementById('paymentTime').value;
+                const paymentNote = document.getElementById('paymentNote').value;
+                formData.append('paymentDate', paymentDate);
+                formData.append('paymentTime', paymentTime);
+                formData.append('paymentNote', paymentNote);
+            }
+
+            let message = 'Xác nhận thanh toán ' + (document.querySelector('.total-amount-guest').textContent || '0 VNĐ') + ' bằng ';
+            switch (selectedMethod.value) {
                 case 'bank':
                     message += 'chuyển khoản ngân hàng?';
                     break;
                 case 'ewallet':
-                    const selectedWallet = document.querySelector('input[name="wallet"]:checked');
-                    if (!selectedWallet) {
-                        alert('Vui lòng chọn ví điện tử!');
-                        return;
-                    }
-                    message += `ví điện tử ${selectedWallet.value.toUpperCase()}?`;
+                    message += `ví điện tử ${document.querySelector('input[name="wallet"]:checked').value.toUpperCase()}?`;
                     break;
                 case 'cash':
-                    const paymentDate = document.getElementById('paymentDate').value;
-                    const paymentTime = document.getElementById('paymentTime').value;
-                    
-                    if (!paymentDate || !paymentTime) {
-                        alert('Vui lòng chọn ngày và giờ thanh toán!');
-                        return;
-                    }
-                    
-                    message += `tiền mặt vào ngày ${paymentDate} lúc ${paymentTime}?`;
+                    message += `tiền mặt vào ngày ${document.getElementById('paymentDate').value} lúc ${document.getElementById('paymentTime').value}?`;
                     break;
             }
-            
+
             if (confirm(message)) {
-                // Show loading state
                 paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán...';
                 paymentBtn.disabled = true;
-                
-                setTimeout(() => {
-                    paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
+
+                fetch('/thanh-toan', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
+                        paymentBtn.classList.remove('btn-primary-guest');
+                        paymentBtn.classList.add('btn-success-guest');
+
+                        setTimeout(() => {
+                            if (selectedMethod.value === 'cash') {
+                                showAlert('Đã đặt lịch thanh toán thành công! Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian.', 'success');
+                            } else {
+                                showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn. Hóa đơn đã được gửi qua email.', 'success');
+                            }
+
+                            setTimeout(() => {
+                                if (data.redirectUrl) {
+                                    window.location.href = data.redirectUrl;
+                                } else {
+                                    window.location.reload();
+                                }
+                            }, 2000);
+                        }, 1500);
+                    } else {
+                        showAlert(data.error || 'Thanh toán thất bại: Lỗi hệ thống.', 'danger');
+                        paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                        paymentBtn.classList.remove('btn-success-guest');
+                        paymentBtn.classList.add('btn-primary-guest');
+                        paymentBtn.disabled = false;
+                        
+                        // Redirect to failure page if available
+                        if (data.failureUrl) {
+                            setTimeout(() => {
+                                window.location.href = data.failureUrl;
+                            }, 3000);
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error processing payment:', error);
+                    showAlert('Thanh toán thất bại: Lỗi kết nối hoặc phản hồi không đầy đủ. Chi tiết: ' + error.message, 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+                    
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const invoiceId = urlParams.get('invoiceId');
+                        if (invoiceId) {
+                            window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent('Lỗi kết nối mạng')}`;
+                        }
+                    }, 3000);
+                });
+            }
+        }
+
+
+        function processMoMoPayment(invoiceId, paymentBtn) {
+            paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán MoMo...';
+            paymentBtn.disabled = true;
+
+            fetch('/momo/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'invoiceId': invoiceId })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đang chuyển hướng...';
                     paymentBtn.classList.remove('btn-primary-guest');
                     paymentBtn.classList.add('btn-success-guest');
+
+                    setTimeout(() => {
+                        window.location.href = data.payUrl; // Redirect to MoMo payment page
+                    }, 1000);
+                } else {
+                    showAlert(data.error || 'Tạo đơn hàng MoMo thất bại.', 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+                    
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(data.error || 'Tạo đơn hàng MoMo thất bại')}`;
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error processing MoMo payment:', error);
+                showAlert('Tạo đơn hàng MoMo thất bại: Lỗi kết nối. Chi tiết: ' + error.message, 'danger');
+                paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                paymentBtn.classList.remove('btn-success-guest');
+                paymentBtn.classList.add('btn-primary-guest');
+                paymentBtn.disabled = false;
+                
+                // Redirect to failure page after showing error
+                setTimeout(() => {
+                    window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent('Lỗi kết nối MoMo')}`;
+                }, 3000);
+            });
+        }
+
+        function processVNPayPayment(invoiceId, paymentBtn) {
+            paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán VNPay...';
+            paymentBtn.disabled = true;
+
+            console.log('Creating VNPay order for invoiceId:', invoiceId);
+
+            fetch('/vnpay/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'invoiceId': invoiceId })
+            })
+            .then(response => {
+                console.log('VNPay response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok: ' + response.status + ' ' + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('VNPay response data:', data);
+                
+                if (data.success && data.paymentUrl) {
+                    paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đang chuyển hướng đến VNPay...';
+                    paymentBtn.classList.remove('btn-primary-guest');
+                    paymentBtn.classList.add('btn-success-guest');
+
+                    showAlert('Tạo đơn hàng thành công! Đang chuyển hướng đến VNPay...', 'success');
                     
                     setTimeout(() => {
-                        if (selectedMethod.value === 'cash') {
-                            alert('Đã đặt lịch thanh toán thành công! Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian.');
-                        } else {
-                            alert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn. Hóa đơn đã được gửi qua email.');
-                        }
-                        
-                        // Reset button after 3 seconds
-                        setTimeout(() => {
-                            paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
-                            paymentBtn.classList.remove('btn-success-guest');
-                            paymentBtn.classList.add('btn-primary-guest');
-                            paymentBtn.disabled = false;
-                        }, 3000);
+                        console.log('Redirecting to VNPay URL:', data.paymentUrl);
+                        window.location.href = data.paymentUrl; // Redirect to VNPay payment page
                     }, 1500);
-                }, 2500);
-            }
+                } else {
+                    const errorMessage = data.message || 'Tạo đơn hàng VNPay thất bại';
+                    console.error('VNPay order creation failed:', errorMessage);
+                    showAlert(errorMessage, 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+                    
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error processing VNPay payment:', error);
+                const errorMessage = 'Lỗi kết nối VNPay: ' + error.message;
+                showAlert(errorMessage, 'danger');
+                paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                paymentBtn.classList.remove('btn-success-guest');
+                paymentBtn.classList.add('btn-primary-guest');
+                paymentBtn.disabled = false;
+                
+                // Redirect to failure page after showing error
+                setTimeout(() => {
+                    window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                }, 3000);
+            });
         }
 
         function goBack() {
@@ -1024,9 +709,6 @@
                 e.preventDefault();
             }
         });
-
-        // Add smooth scroll behavior
-        document.documentElement.style.scrollBehavior = 'smooth';
 
         // Auto-hide alerts after 5 seconds
         function showAlert(message, type = 'info') {
@@ -1072,7 +754,6 @@
                     return false;
                 }
                 
-                // Check if selected date is not in the past
                 const selectedDateTime = new Date(paymentDate + ' ' + paymentTime);
                 const now = new Date();
                 

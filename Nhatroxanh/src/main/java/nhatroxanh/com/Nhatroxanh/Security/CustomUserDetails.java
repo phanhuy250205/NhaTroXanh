@@ -55,6 +55,10 @@ public class CustomUserDetails implements UserDetails {
         return userCccd != null ? userCccd.getIssuePlace() : null;
     }
 
+    public Double getBalance() {
+        return user.getBalance();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(

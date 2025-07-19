@@ -142,7 +142,7 @@ public class HomeController {
             roomData.put("maxTenants", room.getMax_tenants());
             roomData.put("status", room.getStatus() != null ? switch (room.getStatus()) {
                 case active -> "Đã thuê";
-                case unactive -> "Trống";
+                case unactive-> "Trống";
                 case repair -> "Bảo trì";
             } : "Không xác định");
             roomData.put("category", room.getCategory() != null ? room.getCategory().getName() : "Chưa xác định");

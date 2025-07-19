@@ -63,6 +63,10 @@ public class Users {
     @Column(name = "bank_account", length = 50)
     private String bankAccount;
 
+    @Column(name = "balance", nullable = false)
+    @Builder.Default
+    private Double balance = 0.0;
+
     @Column(name = "gender")
     private Boolean gender;
 

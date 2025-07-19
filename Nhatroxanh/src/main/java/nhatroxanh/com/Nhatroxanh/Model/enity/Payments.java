@@ -49,11 +49,20 @@ public class Payments {
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
+    private String appTransId;
+     @Column(name = "notification_attempts_today", nullable = false)
+    private Integer notificationAttemptsToday = 0;
+
+    @Column(name = "last_notification_date")
+    private Date lastNotificationDate;
     public enum PaymentStatus {
         CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN
     }
 
     public enum PaymentMethod {
-        TIỀN_MẶT, CHUYỂN_KHOẢN_NGÂN_HÀNG, MOMO
+        TIỀN_MẶT,
+        BANK,
+        VNPAY,
+        MOMO
     }
 }

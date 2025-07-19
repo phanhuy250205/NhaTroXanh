@@ -76,5 +76,16 @@ public interface PaymentService {
      * Tính toán chi phí utilities (điện, nước) với đơn giá từ frontend
      */
     Map<String, Object> calculateUtilityCosts(Integer previousReading, Integer currentReading, String utilityType, Float unitPrice);
+    
+    /**
+     * Xóa payment theo ID
+     */
     void deletePayment(Integer paymentId);
+    
+    /**
+     * Gửi hóa đơn chưa thanh toán hoặc quá hạn đến người thuê
+     * @param payments List of PaymentResponseDto containing unpaid or overdue invoices
+     * @return Number of invoices successfully sent
+     */
+    int sendInvoicesToTenants(List<PaymentResponseDto> payments);
 }
