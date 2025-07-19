@@ -9,12 +9,16 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.District;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,6 +37,13 @@ public class RoomsServiceImpl implements RoomsService {
 
     @Autowired
     private RoomsRepository roomsRepository;
+
+    @Autowired
+    private UtilityRepository utilityRepository;
+
+    @Autowired
+    private ImageRepository imageRepository;
+
 
     @Override
     public List<Rooms> findAllRooms() {
@@ -130,4 +141,5 @@ public class RoomsServiceImpl implements RoomsService {
         logger.info("Mapped room: {}", roomDto);
         return roomDto;
     }
+
 }

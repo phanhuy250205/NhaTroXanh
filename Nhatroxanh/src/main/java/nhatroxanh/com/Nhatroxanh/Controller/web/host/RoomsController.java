@@ -2,10 +2,13 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.RoomCreateDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
 import nhatroxanh.com.Nhatroxanh.Model.enity.RoomStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
@@ -45,57 +48,63 @@ public class RoomsController {
     @Autowired
     private UtilityRepository utilityRepository;
 
-    @GetMapping("/chu-tro/quan-ly-tro")
-public String showRoomList(@RequestParam(required = false) Integer hostelId, Model model) {
-    Integer ownerId = null;
-    Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    if (principal instanceof CustomUserDetails) {
-        ownerId = ((CustomUserDetails) principal).getUserId();
-    }
+    @Autowired
+    private RoomsRepository roomsRepository;
 
-    if (ownerId == null) {
-        model.addAttribute("error", "Bạn cần đăng nhập để xem danh sách phòng trọ.");
-        model.addAttribute("rooms", List.of());
-        model.addAttribute("hostels", List.of());
-        model.addAttribute("hostelId", null);
-        model.addAttribute("utilities", List.of()); // Thêm danh sách tiện ích rỗng
+    @Autowired
+    private ImageRepository imageRepository;
+
+    @GetMapping("/chu-tro/quan-ly-tro")
+    public String showRoomList(@RequestParam(required = false) Integer hostelId, Model model) {
+        Integer ownerId = null;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            ownerId = ((CustomUserDetails) principal).getUserId();
+        }
+
+        if (ownerId == null) {
+            model.addAttribute("error", "Bạn cần đăng nhập để xem danh sách phòng trọ.");
+            model.addAttribute("rooms", List.of());
+            model.addAttribute("hostels", List.of());
+            model.addAttribute("hostelId", null);
+            model.addAttribute("utilities", List.of()); // Thêm danh sách tiện ích rỗng
+            return "host/phongtro";
+        }
+
+        List<Hostel> hostels = hostelService.getHostelsByOwnerId(ownerId);
+        model.addAttribute("hostels", hostels);
+
+        if (hostelId == null && !hostels.isEmpty()) {
+            hostelId = hostels.get(0).getHostelId();
+        }
+
+        List<Rooms> rooms;
+        if (hostelId != null) {
+            rooms = roomsService.getRoomsByHostelId(hostelId).stream()
+                    .map(dto -> {
+                        Rooms room = new Rooms();
+                        room.setRoomId(dto.getRoomId());
+                        room.setNamerooms(dto.getRoomName());
+                        room.setPrice(dto.getPrice());
+                        room.setStatus(RoomStatus.fromString(dto.getStatus()));
+                        room.setAcreage(dto.getArea());
+                        room.setMax_tenants(dto.getMaxTenants());
+                        return room;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            rooms = List.of();
+            model.addAttribute("error", "Bạn chưa có khu trọ nào. Vui lòng tạo khu trọ trước.");
+        }
+
+        // Lấy tất cả tiện ích để hiển thị trong form
+        List<Utility> allUtilities = utilityRepository.findAll();
+        model.addAttribute("rooms", rooms);
+        model.addAttribute("hostelId", hostelId);
+        model.addAttribute("utilities", allUtilities); // Truyền danh sách tiện ích
+
         return "host/phongtro";
     }
-
-    List<Hostel> hostels = hostelService.getHostelsByOwnerId(ownerId);
-    model.addAttribute("hostels", hostels);
-
-    if (hostelId == null && !hostels.isEmpty()) {
-        hostelId = hostels.get(0).getHostelId();
-    }
-
-    List<Rooms> rooms;
-    if (hostelId != null) {
-        rooms = roomsService.getRoomsByHostelId(hostelId).stream()
-                .map(dto -> {
-                    Rooms room = new Rooms();
-                    room.setRoomId(dto.getRoomId());
-                    room.setNamerooms(dto.getRoomName());
-                    room.setPrice(dto.getPrice());
-                    room.setStatus(RoomStatus.fromString(dto.getStatus()));
-                    room.setAcreage(dto.getArea());
-                    room.setMax_tenants(dto.getMaxTenants());
-                    return room;
-                })
-                .collect(Collectors.toList());
-    } else {
-        rooms = List.of();
-        model.addAttribute("error", "Bạn chưa có khu trọ nào. Vui lòng tạo khu trọ trước.");
-    }
-
-    // Lấy tất cả tiện ích để hiển thị trong form
-    List<Utility> allUtilities = utilityRepository.findAll();
-    model.addAttribute("rooms", rooms);
-    model.addAttribute("hostelId", hostelId);
-    model.addAttribute("utilities", allUtilities); // Truyền danh sách tiện ích
-
-    return "host/phongtro";
-}
 
    
     @GetMapping("/chu-tro/cap-nhat-phong/{roomId}")
@@ -185,4 +194,28 @@ public String showRoomList(@RequestParam(required = false) Integer hostelId, Mod
         redirectAttributes.addFlashAttribute("success", "Cập nhật phòng trọ thành công!");
         return "redirect:/chu-tro/quan-ly-tro?hostelId=" + roomDTO.getHostelId();
     }
+
+    @PostMapping("/chu-tro/xoa-phong/{roomId}")
+    public String deleteRoom(@PathVariable Integer roomId, RedirectAttributes redirectAttributes, @RequestParam(required = false) Integer hostelId) {
+        Optional<Rooms> roomOpt = roomsRepository.findById(roomId);
+        if (roomOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Phòng trọ không tồn tại.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + (hostelId != null ? hostelId : "");
+        }
+
+        Rooms room = roomOpt.get();
+        Integer currentHostelId = room.getHostel().getHostelId();
+
+        // Xóa các ảnh liên quan
+        List<Image> images = imageRepository.findByRoom(room);
+        if (!images.isEmpty()) {
+            imageRepository.deleteAll(images);
+        }
+
+        // Xóa phòng
+        roomsRepository.delete(room);
+        redirectAttributes.addFlashAttribute("success", "Xóa phòng trọ thành công!");
+        return "redirect:/chu-tro/quan-ly-tro?hostelId=" + currentHostelId;
+    }
+
 }

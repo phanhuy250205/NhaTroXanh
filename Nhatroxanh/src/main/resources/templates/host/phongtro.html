@@ -119,9 +119,12 @@
                                                     aria-controls="add-room-host" th:attr="data-room-id=${room.roomId}">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <button class="btn-delete-host" title="Xóa" th:attr="data-room-id=${room.roomId}">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <form th:action="@{/chu-tro/xoa-phong/{roomId}(roomId=${room.roomId})}" method="post" style="display:inline;">
+                                                    <input type="hidden" name="hostelId" th:value="${hostelId}">
+                                                    <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa phòng này?')">
+                                                        <i class="fas fa-trash"></i> Xóa
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

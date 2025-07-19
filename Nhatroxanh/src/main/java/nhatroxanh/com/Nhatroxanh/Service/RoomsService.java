@@ -21,7 +21,6 @@ public interface RoomsService {
     List<ContractDto.Room> getRoomsByHostelId(Integer hostelId); 
     Optional<Rooms> findById(Integer id);
     Rooms save(Rooms room);
-
     Set<Utility> getUtilitiesByRoomId(Integer roomId);
 
 }
