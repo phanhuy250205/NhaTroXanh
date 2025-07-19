@@ -135,4 +135,12 @@ public class DemoController {
     public String napTien() {
         return "host/nap-tien";
     }
+    @GetMapping("/rut-tien")
+    public String rutTien() {
+        return "host/rut-tien";
+    }
+    @GetMapping("/duyet-rut-tien")
+    public String duyetRutTien() {
+        return "staff/duyet-ruttien";
+    }
 }
