@@ -841,7 +841,7 @@ public class ContractServiceImpl implements ContractService {
         return contracts.stream()
                 .map(contract -> {
                     ContractListDto dto = new ContractListDto();
-
+                    
                     // ID hợp đồng
                     dto.setContractId(contract.getContractId() != null
                             ? contract.getContractId().longValue()

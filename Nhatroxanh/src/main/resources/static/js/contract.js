@@ -93,7 +93,7 @@ updateGuardianDisplay() {
     if (this.guardianInfo && container && nameEl && addButton) {
         nameEl.textContent = this.guardianInfo.name; // Chỉ hiện tên (khớp với HTML của bạn)
         container.style.display = 'block'; // Hiện khối thông tin
-        addButton.style.display = 'none';  // Ẩn nút "Thêm người bảo hộ"
+       addButton.classList.add('d-none-important'); // Ẩn nút "Thêm người bảo hộ"
     }
 },
 
@@ -103,7 +103,7 @@ clearGuardianDisplay() {
     const container = document.getElementById('guardian-display-container');
     const addButton = document.getElementById('btn-add-customer-host');
     if (container) container.style.display = 'none'; // Ẩn khối thông tin
-    if (addButton) addButton.style.display = 'block';  // Hiện lại nút "Thêm"
+    if (addButton) addButton.classList.remove('d-none-important');   // Hiện lại nút "Thêm"
     this.showNotification('Đã xóa thông tin người bảo hộ.', 'info');
 },
 
@@ -2474,3 +2474,4 @@ document.addEventListener("DOMContentLoaded", () => {
     window.NhaTroContract.init()
 })
 /* ]]> */
+//đã xong phần ẩn nút thêm người người bảo hộ
