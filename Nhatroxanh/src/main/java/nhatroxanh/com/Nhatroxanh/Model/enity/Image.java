@@ -1,14 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,8 +21,6 @@ public class Image {
     @Column(columnDefinition = "varchar(255)", nullable = false)
     private String url;
 
-    // private String description;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id", nullable = true)
     private Post post;
@@ -46,4 +36,16 @@ public class Image {
     @ManyToOne
     @JoinColumn(name = "report_id", nullable = true)
     private IncidentReports report;
+
+    @ManyToOne
+    @JoinColumn(name = "user_cccd_id", nullable = true)
+    private UserCccd userCccd;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ImageType type;
+
+    public enum ImageType {
+        FRONT, BACK, OTHER
+    }
 }

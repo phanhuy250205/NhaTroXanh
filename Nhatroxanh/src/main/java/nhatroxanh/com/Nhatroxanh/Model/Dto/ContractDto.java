@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.sql.Date;
 import java.time.LocalDate;
 
@@ -151,10 +153,30 @@ public class ContractDto {
         private String ward;
         private String street;
         private Date birthday;
-        private String cccdFrontUrl;
-        private String cccdBackUrl;
+        private MultipartFile cccdFront; // Phải là MultipartFile
+        private MultipartFile cccdBack;  // Phải là MultipartFile
+        private String cccdFrontUrl;     // Lưu URL sau khi tải lên
+        private String cccdBackUrl;      // Lưu URL sau khi tải lên
 
         // Getters and setters
+
+
+        public MultipartFile getCccdFront() {
+            return cccdFront;
+        }
+
+        public void setCccdFront(MultipartFile cccdFront) {
+            this.cccdFront = cccdFront;
+        }
+
+        public MultipartFile getCccdBack() {
+            return cccdBack;
+        }
+
+        public void setCccdBack(MultipartFile cccdBack) {
+            this.cccdBack = cccdBack;
+        }
+
         public String getFullName() { return fullName; }
         public void setFullName(String fullName) { this.fullName = fullName; }
         public String getPhone() { return phone; }
@@ -200,11 +222,29 @@ public class ContractDto {
         private String ward;
         private String street;
         private Date birthday;
-        private String cccdFrontUrl;
-        private String cccdBackUrl;
+        private MultipartFile cccdFront; // Phải là MultipartFile
+        private MultipartFile cccdBack;  // Phải là MultipartFile
+        private String cccdFrontUrl;     // Lưu URL sau khi tải lên
+        private String cccdBackUrl;      // Lưu URL sau khi tải lên
 
         // Getters and setters
 
+
+        public MultipartFile getCccdFront() {
+            return cccdFront;
+        }
+
+        public void setCccdFront(MultipartFile cccdFront) {
+            this.cccdFront = cccdFront;
+        }
+
+        public MultipartFile getCccdBack() {
+            return cccdBack;
+        }
+
+        public void setCccdBack(MultipartFile cccdBack) {
+            this.cccdBack = cccdBack;
+        }
 
         public Long getUserId() {
             return userId;
