@@ -15,4 +15,7 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     List<Image> findByPost(Post post);
 
     void deleteByPost(Post post);
+    List<Image> findByUserCccdId(Long userCccdId);
+
+    List<Image> findByUserCccdIdAndType(Long userCccdId, Image.ImageType type);
 }

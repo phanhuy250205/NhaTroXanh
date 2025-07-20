@@ -406,24 +406,34 @@
                                 <!-- CCCD Images -->
                                 <div class="col-md-6">
                                     <label class="form-label">Ảnh CCCD mặt trước</label>
-                                    <div class="nha-tro-image-upload"
-                                         onclick="document.getElementById('cccd-front').click()">
-                                        <input type="file" id="cccd-front" accept="image/*" style="display: none;">
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-front').click()">
+                                        <input type="file" id="cccd-front" name="tenant.cccdFront" accept="image/*" style="display: none;"
+                                               onchange="NhaTroContract.previewImage(event, 'cccd-front-preview')">
                                         <div id="cccd-front-preview" class="nha-tro-image-preview">
-                                            <i class="fa fa-camera fa-2x"></i>
-                                            <div class="mt-2">Tải ảnh mặt trước</div>
+                                            <th:block th:if="${contract.tenant.cccdFrontUrl != null}">
+                                                <img th:src="${contract.tenant.cccdFrontUrl}" alt="CCCD Front" />
+                                            </th:block>
+                                            <th:block th:unless="${contract.tenant.cccdFrontUrl != null}">
+                                                <i class="fa fa-camera fa-2x"></i>
+                                                <div class="mt-2">Tải ảnh mặt trước</div>
+                                            </th:block>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Ảnh CCCD mặt sau</label>
-                                    <div class="nha-tro-image-upload"
-                                         onclick="document.getElementById('cccd-back').click()">
-                                        <input type="file" id="cccd-back" accept="image/*" style="display: none;">
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('cccd-back').click()">
+                                        <input type="file" id="cccd-back" name="tenant.cccdBack" accept="image/*" style="display: none;"
+                                               onchange="NhaTroContract.previewImage(event, 'cccd-back-preview')">
                                         <div id="cccd-back-preview" class="nha-tro-image-preview">
-                                            <i class="fa fa-camera fa-2x"></i>
-                                            <div class="mt-2">Tải ảnh mặt sau</div>
+                                            <th:block th:if="${contract.tenant.cccdBackUrl != null}">
+                                                <img th:src="${contract.tenant.cccdBackUrl}" alt="CCCD Back" />
+                                            </th:block>
+                                            <th:block th:unless="${contract.tenant.cccdBackUrl != null}">
+                                                <i class="fa fa-camera fa-2x"></i>
+                                                <div class="mt-2">Tải ảnh mặt sau</div>
+                                            </th:block>
                                         </div>
                                     </div>
                                 </div>
@@ -1098,6 +1108,9 @@
                             <input type="text" class="form-control nha-tro-host-input"
                                    id="newCustomer-relationship-note" placeholder="Ghi chú thêm về mối quan hệ...">
                         </div>
+
+
+
                         <div class="col-md-4">
                             <label class="form-label">Tỉnh/Thành phố</label>
                             <select class="form-select nha-tro-host-input" id="newCustomer-province">
@@ -1366,5 +1379,16 @@
 <script th:src="@{/js/contract.js}" onerror="console.log('⚠️ contract.js not found - using inline script')"></script>
 
 </body>
-
+<style>
+    .nha-tro-image-preview img {
+        max-width: 100%;
+        max-height: 200px;
+        height: auto;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+    .nha-tro-image-upload {
+        cursor: pointer;
+    }
+</style>
 </html>

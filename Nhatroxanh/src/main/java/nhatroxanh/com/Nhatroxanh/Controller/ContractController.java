@@ -4,18 +4,13 @@ import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
-import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.ContractService;
-import nhatroxanh.com.Nhatroxanh.Service.HostelService;
-import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
-import nhatroxanh.com.Nhatroxanh.Service.UserService;
+import nhatroxanh.com.Nhatroxanh.Service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,6 +24,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,6 +62,11 @@ public class ContractController {
 
     @Autowired
     private RoomsService roomsService;
+    @Autowired
+    private FileUploadService fileUploadService;
+
+    @Autowired
+    private ImageService imageService; // Sử dụng ImageService thay vì ImageRepository
     @Autowired
     private ContractsRepository contractsRepository;
     private Integer hostelId;
@@ -313,7 +314,7 @@ public class ContractController {
     @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public ResponseEntity<?> createContract(
-            @Valid @RequestBody ContractDto contract,  // ← SỬA: @RequestBody thay vì @ModelAttribute
+            @Valid @RequestBody ContractDto contract,
             Authentication authentication) {
 
         logger.info("=== START CREATE CONTRACT ===");
@@ -506,6 +507,102 @@ public class ContractController {
             response.put("message", "Lỗi khi tạo hợp đồng: " + e.getMessage());
             return ResponseEntity.badRequest()
                     .body("Dữ liệu không hợp lệ: " + e.getMessage());
+        }
+    }
+
+    @PostMapping(value = "/upload-cccd", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('OWNER')")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> uploadCccd(
+            @RequestParam(value = "cccdFront", required = false) MultipartFile cccdFront,
+            @RequestParam(value = "cccdBack", required = false) MultipartFile cccdBack,
+            @RequestParam(value = "cccdNumber") String cccdNumber, // Lấy từ tenant.cccdNumber
+            Authentication authentication) {
+        logger.info("=== BẮT ĐẦU UPLOAD CCCD ===");
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+            logger.info("CCCD chủ trọ từ xác thực: {}", ownerCccd);
+
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
+            if (owner == null) {
+                logger.error("Không tìm thấy chủ trọ với CCCD: {}", ownerCccd);
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
+            }
+
+            if (!StringUtils.hasText(cccdNumber)) {
+                logger.error("Số CCCD không được để trống");
+                throw new IllegalArgumentException("Số CCCD không được để trống!");
+            }
+
+            // Kiểm tra độ dài và định dạng (12 chữ số)
+            if (!cccdNumber.matches("[0-9]{12}")) {
+                logger.error("Số CCCD không hợp lệ: {}", cccdNumber);
+                throw new IllegalArgumentException("Số CCCD phải là 12 chữ số!");
+            }
+
+            // Tìm UserCccd hiện có, nếu không có thì tạo mới và lưu ngay
+            UserCccd tenantCccd = userCccdRepository.findByCccdNumber(cccdNumber)
+                    .orElseGet(() -> {
+                        UserCccd newCccd = new UserCccd();
+                        newCccd.setCccdNumber(cccdNumber);
+                        newCccd.setUser(null);
+                        return userCccdRepository.save(newCccd); // Lưu ngay để lấy ID
+                    });
+
+            // Đảm bảo cccdNumber khớp với bản ghi hiện tại
+            if (!tenantCccd.getCccdNumber().equals(cccdNumber)) {
+                logger.warn("cccdNumber không khớp với bản ghi hiện tại, cập nhật lại");
+                tenantCccd.setCccdNumber(cccdNumber);
+                tenantCccd = userCccdRepository.saveAndFlush(tenantCccd);
+            }
+
+            logger.info("Using UserCccd with ID: {} for cccdNumber: {}", tenantCccd.getId(), cccdNumber);
+
+            String cccdFrontUrl = null;
+            String cccdBackUrl = null;
+
+            // Xóa ảnh cũ chỉ khi có ảnh mới được upload
+            if (cccdFront != null && !cccdFront.isEmpty()) {
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.FRONT);
+                Image cccdFrontImage = imageService.saveImage(cccdFront, "cccd", tenantCccd, Image.ImageType.FRONT);
+                cccdFrontUrl = cccdFrontImage.getUrl();
+                logger.info("Lưu ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(), cccdFrontUrl);
+            }
+
+            if (cccdBack != null && !cccdBack.isEmpty()) {
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.BACK);
+                Image cccdBackImage = imageService.saveImage(cccdBack, "cccd", tenantCccd, Image.ImageType.BACK);
+                cccdBackUrl = cccdBackImage.getUrl();
+                logger.info("Lưu ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(), cccdBackUrl);
+            }
+
+            // Cập nhật lại tenantCccd để đảm bảo dữ liệu đồng bộ
+            tenantCccd = userCccdRepository.saveAndFlush(tenantCccd);
+
+            response.put("success", true);
+            response.put("cccdFrontUrl", cccdFrontUrl);
+            response.put("cccdBackUrl", cccdBackUrl);
+            response.put("cccdId", tenantCccd.getId());
+            response.put("message", "Upload ảnh CCCD thành công!");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            logger.error("Lỗi dữ liệu không hợp lệ: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (IOException e) {
+            logger.error("Lỗi khi tải lên ảnh: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi tải lên ảnh: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        } catch (Exception e) {
+            logger.error("Lỗi khi upload CCCD: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi upload CCCD: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
@@ -712,47 +809,49 @@ public class ContractController {
     }
 
     private Users handleRegisteredTenant(ContractDto.Tenant tenantDto) {
-        logger.info("=== HANDLE REGISTERED TENANT ===");
-        logger.info("Tenant data: {}", tenantDto);
+        logger.info("=== XỬ LÝ KHÁCH THUÊ ĐÃ ĐĂNG KÝ ===");
+        logger.info("Dữ liệu tenant: {}", tenantDto);
 
+        // 1. Kiểm tra số điện thoại
         if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            logger.error("Tenant phone is null or empty");
+            logger.error("Số điện thoại người thuê là null hoặc rỗng");
             throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
         }
-        logger.info("Looking for tenant with phone: {}", tenantDto.getPhone());
+        logger.info("Tìm khách thuê với số điện thoại: {}", tenantDto.getPhone());
 
+        // 2. Tìm tenant
         Optional<Users> tenantUser = userRepository.findByPhone(tenantDto.getPhone());
         if (!tenantUser.isPresent()) {
-            logger.error("Tenant not found with phone: {}", tenantDto.getPhone());
+            logger.error("Không tìm thấy khách thuê với số điện thoại: {}", tenantDto.getPhone());
             throw new IllegalArgumentException("Không tìm thấy người thuê với số điện thoại: " + tenantDto.getPhone());
         }
 
         Users tenant = tenantUser.get();
-        logger.info("Found tenant: ID={}, Name={}, Current Address={}", tenant.getUserId(), tenant.getFullname(), tenant.getAddress());
+        logger.info("Tìm thấy khách thuê: ID={}, Tên={}, Địa chỉ hiện tại={}",
+                tenant.getUserId(), tenant.getFullname(), tenant.getAddress());
 
-        boolean updated = false;  // Flag cho toàn bộ
+        boolean updated = false; // Flag để kiểm tra có cần lưu tenant không
 
-        // Cập nhật fullname nếu có dữ liệu
+        // 3. Cập nhật thông tin tenant
         if (StringUtils.hasText(tenantDto.getFullName())) {
             tenant.setFullname(tenantDto.getFullName());
             updated = true;
-            logger.info("Set tenant fullname: {}", tenantDto.getFullName());
+            logger.info("Cập nhật tên khách thuê: {}", tenantDto.getFullName());
         }
 
-        // Cập nhật birthday nếu có dữ liệu
         if (tenantDto.getBirthday() != null) {
             tenant.setBirthday(new java.sql.Date(tenantDto.getBirthday().getTime()));
             updated = true;
-            logger.info("Set tenant birthday: {}", tenantDto.getBirthday());
+            logger.info("Cập nhật ngày sinh khách thuê: {}", tenantDto.getBirthday());
         }
 
-        // Cập nhật địa chỉ: Build nếu có ít nhất một trường, và trigger updated ngay
+        // 4. Cập nhật địa chỉ
         StringBuilder newAddress = new StringBuilder();
         boolean hasAddressData = false;
         if (StringUtils.hasText(tenantDto.getStreet())) {
             newAddress.append(tenantDto.getStreet().trim());
             hasAddressData = true;
-            updated = true;  // Trigger ngay nếu có street
+            updated = true;
         }
         if (StringUtils.hasText(tenantDto.getWard())) {
             if (newAddress.length() > 0) newAddress.append(", ");
@@ -773,67 +872,204 @@ public class ContractController {
             updated = true;
         }
 
-        // Set địa chỉ nếu có data
         if (hasAddressData) {
             String addressString = newAddress.toString().trim();
-            logger.info("Old address: {}, New address to set: {}", tenant.getAddress(), addressString);
+            logger.info("Địa chỉ cũ: {}, Địa chỉ mới: {}", tenant.getAddress(), addressString);
             tenant.setAddress(addressString);
         }
 
-        // Cập nhật CCCD (giữ nguyên như trước)
-        UserCccd tenantCccd = userCccdRepository.findByUserId(tenant.getUserId())
-                .orElseGet(() -> {
-                    UserCccd newCccd = new UserCccd();
-                    newCccd.setUser(tenant);
-                    return newCccd;
-                });
-
-        boolean cccdDataPresent = false;
+        // 5. Cập nhật thông tin CCCD
+        UserCccd tenantCccd = null;
         if (StringUtils.hasText(tenantDto.getCccdNumber())) {
-            tenantCccd.setCccdNumber(tenantDto.getCccdNumber());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD number: {}", tenantDto.getCccdNumber());
-        }
-        if (tenantDto.getIssueDate() != null) {
-            tenantCccd.setIssueDate(tenantDto.getIssueDate());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD issue date: {}", tenantDto.getIssueDate());
-        }
-        if (StringUtils.hasText(tenantDto.getIssuePlace())) {
-            tenantCccd.setIssuePlace(tenantDto.getIssuePlace());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD issue place: {}", tenantDto.getIssuePlace());
-        }
+            // Kiểm tra xem CCCD đã tồn tại chưa
+            Optional<UserCccd> existingCccd = userCccdRepository.findByCccdNumber(tenantDto.getCccdNumber());
+            if (existingCccd.isPresent()) {
+                tenantCccd = existingCccd.get();
+                logger.info("Tìm thấy CCCD hiện có: {}", tenantDto.getCccdNumber());
+            } else {
+                tenantCccd = userCccdRepository.findByUserId(tenant.getUserId())
+                        .orElseGet(() -> {
+                            UserCccd newCccd = new UserCccd();
+                            newCccd.setUser(tenant);
+                            return newCccd;
+                        });
+            }
 
-        // Save nếu có thay đổi
-        if (updated) {
-            try {
-                logger.info("Before save: Tenant address = {}", tenant.getAddress());
+            boolean cccdDataPresent = false;
+            if (StringUtils.hasText(tenantDto.getCccdNumber())) {
+                tenantCccd.setCccdNumber(tenantDto.getCccdNumber());
+                updated = true;
+                cccdDataPresent = true;
+                logger.info("Cập nhật số CCCD: {}", tenantDto.getCccdNumber());
+            }
+            if (tenantDto.getIssueDate() != null) {
+                tenantCccd.setIssueDate(tenantDto.getIssueDate());
+                updated = true;
+                cccdDataPresent = true;
+                logger.info("Cập nhật ngày cấp CCCD: {}", tenantDto.getIssueDate());
+            }
+            if (StringUtils.hasText(tenantDto.getIssuePlace())) {
+                tenantCccd.setIssuePlace(tenantDto.getIssuePlace());
+                updated = true;
+                cccdDataPresent = true;
+                logger.info("Cập nhật nơi cấp CCCD: {}", tenantDto.getIssuePlace());
+            }
 
-                Users savedTenant = userService.saveUser(tenant);
-                logger.info("Tenant User saved successfully: ID={}", savedTenant.getUserId());
-
-                if (cccdDataPresent || userCccdRepository.findByUserId(tenant.getUserId()).isPresent()) {
-                    userCccdRepository.save(tenantCccd);
-                    logger.info("Tenant CCCD saved successfully");
+            // 6. Xử lý ảnh CCCD từ URL (vì endpoint /api/contracts dùng @RequestBody)
+            if (StringUtils.hasText(tenantDto.getCccdFrontUrl())) {
+                List<Image> existingImages = imageService.findByUserCccdId(Long.valueOf(tenantCccd.getId()));
+                boolean frontExists = existingImages != null && existingImages.stream()
+                        .anyMatch(img -> img.getType() == Image.ImageType.FRONT);
+                if (!frontExists) {
+                    Image cccdFrontImage = Image.builder()
+                            .url(tenantDto.getCccdFrontUrl())
+                            .userCccd(tenantCccd)
+                            .type(Image.ImageType.FRONT)
+                            .build();
+                    imageService.saveImage(cccdFrontImage);
+                    logger.info("Lưu ảnh CCCD mặt trước từ URL thành công: URL={}", tenantDto.getCccdFrontUrl());
+                    updated = true;
                 } else {
-                    logger.info("Skipping save for new empty CCCD entity.");
+                    logger.info("Ảnh CCCD mặt trước đã tồn tại cho userCccdId: {}", tenantCccd.getId());
                 }
+            }
 
-                logger.info("After save: Tenant address in DB should be updated to {}", savedTenant.getAddress());
-            } catch (Exception e) {
-                logger.error("Error saving tenant information: {}", e.getMessage(), e);
+            if (StringUtils.hasText(tenantDto.getCccdBackUrl())) {
+                List<Image> existingImages = imageService.findByUserCccdId(Long.valueOf(tenantCccd.getId()));
+                boolean backExists = existingImages != null && existingImages.stream()
+                        .anyMatch(img -> img.getType() == Image.ImageType.BACK);
+                if (!backExists) {
+                    Image cccdBackImage = Image.builder()
+                            .url(tenantDto.getCccdBackUrl())
+                            .userCccd(tenantCccd)
+                            .type(Image.ImageType.BACK)
+                            .build();
+                    imageService.saveImage(cccdBackImage);
+                    logger.info("Lưu ảnh CCCD mặt sau từ URL thành công: URL={}", tenantDto.getCccdBackUrl());
+                    updated = true;
+                } else {
+                    logger.info("Ảnh CCCD mặt sau đã tồn tại cho userCccdId: {}", tenantCccd.getId());
+                }
+            }
+
+            // Lưu tenantCccd nếu có dữ liệu CCCD
+            if (cccdDataPresent) {
+                try {
+                    userCccdRepository.saveAndFlush(tenantCccd);
+                    logger.info("Lưu thông tin CCCD thành công");
+                } catch (DataIntegrityViolationException e) {
+                    logger.error("Lỗi trùng lặp CCCD: {}", tenantDto.getCccdNumber(), e);
+                    throw new IllegalArgumentException("Số CCCD đã tồn tại: " + tenantDto.getCccdNumber());
+                }
+            } else {
+                logger.info("Không có dữ liệu CCCD mới để lưu.");
             }
         } else {
-            logger.info("No data to update for tenant. No save called.");
+            logger.info("Không có số CCCD, bỏ qua lưu UserCccd.");
+        }
+
+        // 7. Lưu tenant nếu có thay đổi
+        if (updated) {
+            try {
+                logger.info("Trước khi lưu: Địa chỉ tenant = {}", tenant.getAddress());
+                Users savedTenant = userService.saveUser(tenant);
+                logger.info("Lưu tenant thành công: ID={}", savedTenant.getUserId());
+                logger.info("Sau khi lưu: Địa chỉ tenant trong DB = {}", savedTenant.getAddress());
+            } catch (Exception e) {
+                logger.error("Lỗi khi lưu thông tin tenant: {}", e.getMessage(), e);
+                throw new IllegalStateException("Lỗi khi lưu thông tin tenant: " + e.getMessage());
+            }
+        } else {
+            logger.info("Không có dữ liệu để cập nhật cho tenant. Bỏ qua lưu.");
         }
 
         return tenant;
     }
 
+
+    @PostMapping(value = "/update-cccd-image", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('OWNER')")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateCccdImage(
+            @RequestParam(value = "cccdNumber") String cccdNumber,
+            @RequestParam(value = "cccdFront", required = false) MultipartFile cccdFront,
+            @RequestParam(value = "cccdBack", required = false) MultipartFile cccdBack,
+            Authentication authentication) {
+
+        logger.info("=== BẮT ĐẦU CẬP NHẬT ẢNH CCCD ===");
+        logger.info("CCCD Number: {}", cccdNumber);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Kiểm tra quyền chủ trọ
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+            logger.info("CCCD chủ trọ từ xác thực: {}", ownerCccd);
+
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
+            if (owner == null) {
+                logger.error("Không tìm thấy chủ trọ với CCCD: {}", ownerCccd);
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
+            }
+
+            // Kiểm tra số CCCD
+            if (!StringUtils.hasText(cccdNumber)) {
+                logger.error("Số CCCD không được để trống");
+                throw new IllegalArgumentException("Số CCCD không được để trống!");
+            }
+
+            // Tìm UserCccd
+            UserCccd tenantCccd = userCccdRepository.findByCccdNumber(cccdNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CCCD: " + cccdNumber));
+            logger.info("Tìm thấy UserCccd, ID: {}", tenantCccd.getId());
+
+            String cccdFrontUrl = null;
+            String cccdBackUrl = null;
+
+            // Xử lý ảnh mặt trước
+            if (cccdFront != null && !cccdFront.isEmpty()) {
+                // Xóa ảnh mặt trước cũ
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.FRONT);
+                // Lưu ảnh mặt trước mới
+                Image cccdFrontImage = imageService.saveImage(cccdFront, "cccd", tenantCccd, Image.ImageType.FRONT);
+                cccdFrontUrl = cccdFrontImage.getUrl();
+                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(), cccdFrontUrl);
+            }
+
+            // Xử lý ảnh mặt sau
+            if (cccdBack != null && !cccdBack.isEmpty()) {
+                // Xóa ảnh mặt sau cũ
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.BACK);
+                // Lưu ảnh mặt sau mới
+                Image cccdBackImage = imageService.saveImage(cccdBack, "cccd", tenantCccd, Image.ImageType.BACK);
+                cccdBackUrl = cccdBackImage.getUrl();
+                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(), cccdBackUrl);
+            }
+
+            response.put("success", true);
+            response.put("cccdFrontUrl", cccdFrontUrl);
+            response.put("cccdBackUrl", cccdBackUrl);
+            response.put("cccdId", tenantCccd.getId());
+            response.put("message", "Cập nhật ảnh CCCD thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Lỗi dữ liệu không hợp lệ: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (IOException e) {
+            logger.error("Lỗi khi tải lên ảnh: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi tải lên ảnh: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật ảnh CCCD: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật ảnh CCCD: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private void validateContractData(ContractDto contract) {
         logger.info("=== VALIDATE CONTRACT DATA ===");
@@ -1789,6 +2025,36 @@ public class ContractController {
         }
     }
 
+    @GetMapping("/edit-data/{contractId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<ContractDto> getContractForEdit(@PathVariable Integer contractId, Authentication authentication) {
+        logger.info("Preparing edit data for Contract ID: {}", contractId);
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            Optional<Contracts> contractOptional = contractService.findContractById(contractId);
+            if (!contractOptional.isPresent()) {
+                logger.error("Contract not found with ID: {}", contractId);
+                return ResponseEntity.notFound().build();
+            }
+
+            Contracts contract = contractOptional.get();
+            if (!contract.getOwner().getUserId().equals(ownerId)) {
+                logger.error("User {} does not own contract {}", ownerId, contractId);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            ContractDto contractDto = convertToContractDto(contract);
+            logger.info("Edit data prepared successfully for Contract ID: {}", contractId);
+            return ResponseEntity.ok(contractDto);
+        } catch (Exception e) {
+            logger.error("Error preparing edit data for Contract ID {}: {}", contractId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     @GetMapping("/by-hostel/{hostelId}")
     public ResponseEntity<List<ContractDto.Room>> getRoomsByHostel(@PathVariable Long hostelId) {
         try {
@@ -1999,13 +2265,8 @@ public class ContractController {
     }
 
 
-
-
-
-
     private ContractDto convertToContractDto(Contracts contract) {
         System.out.println("🔄 Converting contract to DTO - ID: " + contract.getContractId());
-
         ContractDto dto = new ContractDto();
         dto.setId(Long.valueOf(contract.getContractId()));
 
@@ -2021,7 +2282,7 @@ public class ContractController {
             Users user = contract.getTenant();
 
             if (user != null) {
-                tenant.setUserId(Long.valueOf(user.getUserId())); // ✅ THÊM userId
+                tenant.setUserId(Long.valueOf(user.getUserId()));
                 tenant.setFullName(user.getFullname());
                 tenant.setPhone(user.getPhone());
                 tenant.setEmail(user.getEmail() != null ? user.getEmail() : "");
@@ -2030,7 +2291,6 @@ public class ContractController {
                 // ✅ Lấy và tách địa chỉ từ cột address của Users
                 String address = user.getAddress();
                 logger.info("Tenant address for userId {}: {}", user.getUserId(), address);
-
                 if (StringUtils.hasText(address)) {
                     Map<String, String> addressParts = parseAddress(address);
                     tenant.setStreet(addressParts.getOrDefault("street", ""));
@@ -2054,7 +2314,24 @@ public class ContractController {
                     tenant.setCccdNumber(cccd.getCccdNumber());
                     tenant.setIssueDate(cccd.getIssueDate());
                     tenant.setIssuePlace(cccd.getIssuePlace() != null ? cccd.getIssuePlace() : "");
+
+                    List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
+                    if (images.isEmpty()) {
+                        logger.warn("No images found for userCccdId: {}", cccd.getId());
+                    } else {
+                        logger.info("Found {} images for userCccdId: {}", images.size(), cccd.getId());
+                        for (Image image : images) {
+                            logger.info("Image ID: {}, Type: {}, URL: {}", image.getId(), image.getType(), image.getUrl());
+                            String imageUrl = image.getUrl().startsWith("/uploads/cccd/") ? image.getUrl() : "/uploads/cccd" + image.getUrl().replace("/uploads", "");
+                            if (image.getType() == Image.ImageType.FRONT) {
+                                tenant.setCccdFrontUrl(imageUrl);
+                            } else if (image.getType() == Image.ImageType.BACK) {
+                                tenant.setCccdBackUrl(imageUrl);
+                            }
+                        }
+                    }
                 } else {
+                    logger.warn("No UserCccd found for tenant userId: {}", user.getUserId());
                     tenant.setCccdNumber("");
                     tenant.setIssueDate(null);
                     tenant.setIssuePlace("");
@@ -2071,7 +2348,6 @@ public class ContractController {
             ContractDto.UnregisteredTenant unregTenant = new ContractDto.UnregisteredTenant();
             UnregisteredTenants unregUser = contract.getUnregisteredTenant();
 
-//            unregTenant.setId(unregUser.getId()); // ✅ THÊM id
             unregTenant.setFullName(unregUser.getFullName());
             unregTenant.setPhone(unregUser.getPhone());
             unregTenant.setCccdNumber(unregUser.getCccdNumber());
@@ -2082,7 +2358,6 @@ public class ContractController {
             // ✅ Lấy địa chỉ từ cột address của UnregisteredTenants
             String address = unregUser.getAddress();
             logger.info("Address for unregistered tenant with ID {}: {}", unregUser.getId(), address);
-
             if (StringUtils.hasText(address)) {
                 Map<String, String> addressParts = parseAddress(address);
                 unregTenant.setStreet(addressParts.getOrDefault("street", ""));
@@ -2097,6 +2372,22 @@ public class ContractController {
                 unregTenant.setProvince("");
             }
 
+            // ✅ Lấy URL ảnh CCCD
+            List<Image> images = imageService.findByUserCccdId(Long.valueOf(unregUser.getId()));
+            if (images.isEmpty()) {
+                logger.warn("No images found for unregistered tenant userCccdId: {}", unregUser.getId());
+            } else {
+                logger.info("Found {} images for unregistered tenant userCccdId: {}", images.size(), unregUser.getId());
+                for (Image image : images) {
+                    logger.info("Image ID: {}, Type: {}, URL: {}", image.getId(), image.getType(), image.getUrl());
+                    if (image.getType() == Image.ImageType.FRONT) {
+                        unregTenant.setCccdFrontUrl(image.getUrl());
+                    } else if (image.getType() == Image.ImageType.BACK) {
+                        unregTenant.setCccdBackUrl(image.getUrl());
+                    }
+                }
+            }
+
             dto.setUnregisteredTenant(unregTenant);
             dto.setTenantType("UNREGISTERED");
             System.out.println("✅ Mapped unregistered tenant: " + unregUser.getFullName());
@@ -2108,7 +2399,7 @@ public class ContractController {
             Users user = contract.getOwner();
 
             if (user != null) {
-                owner.setUserId(Long.valueOf(user.getUserId())); // ✅ THÊM userId
+                owner.setUserId(Long.valueOf(user.getUserId()));
                 owner.setFullName(user.getFullname());
                 owner.setPhone(user.getPhone());
                 owner.setEmail(user.getEmail());
@@ -2118,7 +2409,6 @@ public class ContractController {
                 // ✅ Lấy địa chỉ từ cột address của Users
                 String address = user.getAddress();
                 logger.info("Address for owner with userId {}: {}", user.getUserId(), address);
-
                 if (StringUtils.hasText(address)) {
                     Map<String, String> addressParts = parseAddress(address);
                     owner.setStreet(addressParts.getOrDefault("street", ""));
@@ -2182,7 +2472,6 @@ public class ContractController {
                 room.setWard(addressParts.getOrDefault("ward", ""));
                 room.setDistrict(addressParts.getOrDefault("district", ""));
                 room.setProvince(addressParts.getOrDefault("province", ""));
-
                 System.out.println("✅ Room address from hostel: " + hostelAddress);
             } else if (StringUtils.hasText(roomEntity.getAddress())) {
                 // Fallback: lấy từ room address nếu có
@@ -2194,7 +2483,6 @@ public class ContractController {
                 room.setWard(addressParts.getOrDefault("ward", ""));
                 room.setDistrict(addressParts.getOrDefault("district", ""));
                 room.setProvince(addressParts.getOrDefault("province", ""));
-
                 System.out.println("✅ Room address from room: " + roomAddress);
             } else {
                 System.out.println("⚠️ WARNING: No address found for room!");
@@ -2244,6 +2532,74 @@ public class ContractController {
         System.out.println("✅ Contract DTO conversion completed successfully");
         return dto;
     }
+
+
+    @PostMapping("/cccd-images")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Map<String, Object>> getCccdImages(@RequestParam String cccdNumber, Authentication authentication) {
+        logger.info("=== BẮT ĐẦU LẤY ẢNH CCCD ===");
+        logger.info("CCCD Number: {}", cccdNumber);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+            logger.info("CCCD chủ trọ từ xác thực: {}", ownerCccd);
+
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
+            if (owner == null) {
+                logger.error("Không tìm thấy chủ trọ với CCCD: {}", ownerCccd);
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
+            }
+
+            if (!StringUtils.hasText(cccdNumber)) {
+                logger.error("Số CCCD không được để trống");
+                throw new IllegalArgumentException("Số CCCD không được để trống!");
+            }
+
+            UserCccd tenantCccd = userCccdRepository.findByCccdNumber(cccdNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CCCD: " + cccdNumber));
+            logger.info("Tìm thấy UserCccd, ID: {}", tenantCccd.getId());
+
+            String cccdFrontUrl = null;
+            String cccdBackUrl = null;
+
+            List<Image> images = imageService.findByUserCccdId(Long.valueOf(tenantCccd.getId()));
+            if (images.isEmpty()) {
+                logger.warn("No images found for userCccdId: {}", tenantCccd.getId());
+            } else {
+                logger.info("Found {} images for userCccdId: {}", images.size(), tenantCccd.getId());
+                for (Image image : images) {
+                    logger.info("Image ID: {}, Type: {}, URL: {}", image.getId(), image.getType(), image.getUrl());
+                    if (image.getType() == Image.ImageType.FRONT) {
+                        cccdFrontUrl = image.getUrl();
+                    } else if (image.getType() == Image.ImageType.BACK) {
+                        cccdBackUrl = image.getUrl();
+                    }
+                }
+            }
+
+            response.put("success", true);
+            response.put("cccdFrontUrl", cccdFrontUrl);
+            response.put("cccdBackUrl", cccdBackUrl);
+            response.put("cccdId", tenantCccd.getId());
+            response.put("message", "Lấy ảnh CCCD thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Lỗi dữ liệu không hợp lệ: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            logger.error("Lỗi khi lấy ảnh CCCD: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi lấy ảnh CCCD: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
 
 
     @GetMapping("/{id}")
