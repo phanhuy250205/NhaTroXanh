@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -24,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -953,6 +955,17 @@ public class ContractServiceImpl implements ContractService {
         if (room.getStatus() != RoomStatus.unactive) {
             throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
         }
+         if (contractDto.getRoom().getUtilityIds() != null && !contractDto.getRoom().getUtilityIds().isEmpty()) {
+        // Dùng repository để tìm tất cả các đối tượng Utility tương ứng với ID đã chọn
+        Set<Utility> utilities = utilityRepository.findByUtilityIdIn(contractDto.getRoom().getUtilityIds());
+        // Gán tập hợp tiện ích này cho đối tượng phòng trọ
+        room.setUtilities(utilities);
+        logger.info("SERVICE: Đã gán {} tiện ích cho phòng ID {}.", utilities.size(), room.getRoomId());
+    } else {
+        // Nếu người dùng không chọn tiện ích nào, hãy xóa hết các tiện ích cũ (nếu có)
+        room.getUtilities().clear();
+        logger.info("SERVICE: Đã xóa hết tiện ích cho phòng ID {}.", room.getRoomId());
+    }
 
         // 2. Tạo đối tượng hợp đồng và gán các thông tin
         Contracts contract = new Contracts();

@@ -67,8 +67,13 @@ public class Rooms {
 
 
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
-    private Set<Utility> utilities = new HashSet<>();
+@JoinTable(
+    name = "RoomUtilities", // <--- Tên của bảng trung gian sẽ được tạo
+    joinColumns = @JoinColumn(name = "room_id"), // <--- Khóa ngoại trỏ đến bảng 'rooms'
+    inverseJoinColumns = @JoinColumn(name = "utility_id") // <--- Khóa ngoại trỏ đến bảng 'Utilities'
+)
+private Set<Utility> utilities = new HashSet<>();
+
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;

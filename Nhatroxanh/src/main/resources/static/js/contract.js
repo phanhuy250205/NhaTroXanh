@@ -59,6 +59,42 @@ window.NhaTroContract = {
                 this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố", "error")
             })
     },
+    fetchAndSetRoomUtilities(roomId) {
+    // 1. Bỏ check tất cả các ô tiện ích trước
+    document.querySelectorAll('#amenities-list-host input[type="checkbox"]').forEach(cb => cb.checked = false);
+
+    if (!roomId) {
+        this.updateAmenities(); // Cập nhật preview về trạng thái trống
+        return;
+    }
+
+    // 2. Gọi API để lấy danh sách tiện ích của phòng này
+    fetch(`/api/contracts/rooms/${roomId}/utilities`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(utilities => {
+            if (utilities && utilities.length > 0) {
+                console.log(`Found ${utilities.length} utilities for room ${roomId}`);
+                // 3. Tick vào các ô checkbox tương ứng
+                utilities.forEach(util => {
+                    const checkbox = document.getElementById(`utility-${util.utilityId}`);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                    }
+                });
+            }
+            this.updateAmenities(); // 4. Cập nhật lại phần xem trước
+        })
+        .catch(error => {
+            console.error('Error fetching room utilities:', error);
+            this.showNotification('Không thể tải tiện ích của phòng.', 'error');
+        });
+},
+
     setupGuardianDisplayButtons() {
         // Gán sự kiện cho nút Sửa/Xóa (chỉ chạy 1 lần khi trang được tải)
         document.getElementById('btn-edit-guardian')?.addEventListener('click', () => {
@@ -747,6 +783,7 @@ editGuardian() {
 
     async onRoomSelected() {
         const roomSelect = document.getElementById("roomId")
+        
         if (!roomSelect) {
             this.showNotification("Không tìm thấy dropdown phòng trọ!", "error")
             return
@@ -754,6 +791,7 @@ editGuardian() {
 
         const selectedOption = roomSelect.options[roomSelect.selectedIndex]
         const roomId = roomSelect.value
+        this.fetchAndSetRoomUtilities(roomId);
         if (!roomId) {
             this.clearRoomFields()
             return
@@ -2500,6 +2538,8 @@ saveNewCustomer() {
         }, 10000)
     },
 }
+
+
 
 document.addEventListener("DOMContentLoaded", () => {
     window.NhaTroContract.init()
