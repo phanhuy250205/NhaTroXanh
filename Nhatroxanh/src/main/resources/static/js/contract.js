@@ -1757,15 +1757,17 @@ saveContract() {
         alert("Lỗi: Vui lòng chọn một phòng trọ trước khi lưu!");
         return;
     }
+    // Set roomId lồng trong đối tượng 'room'
     formData.set('room.roomId', roomId);
+    // Xóa key 'roomId' thừa nếu có (do name="roomId" trong HTML)
+    if (formData.has('roomId')) {
+        formData.delete('roomId');
+    }
 
-    // ✅ QUAN TRỌNG: Đính kèm dữ liệu người bảo hộ với key là "unregisteredTenant"
-    // Biến tạm this.guardianInfo vẫn giữ nguyên tên cho dễ hiểu
-    if (this.guardianInfo) { 
+    if (this.guardianInfo) {  
         console.log("Đang thêm dữ liệu người bảo hộ vào FormData...");
         
-        // Key ở đây phải khớp với tên đối tượng trong ContractDto
-        // Sửa từ "guardian.fullName" thành "unregisteredTenant.fullName"
+        // Append các trường text
         formData.append('unregisteredTenant.fullName', this.guardianInfo.name);
         formData.append('unregisteredTenant.phone', this.guardianInfo.phone);
         formData.append('unregisteredTenant.birthday', this.guardianInfo.dob);
@@ -1777,17 +1779,33 @@ saveContract() {
         formData.append('unregisteredTenant.ward', this.guardianInfo.ward);
         formData.append('unregisteredTenant.district', this.guardianInfo.district);
         formData.append('unregisteredTenant.province', this.guardianInfo.province);
+        
+        // Append các file ảnh
+        if (this.guardianCccdFrontFile) {
+            // ✅ Đảm bảo key này là 'unregisteredTenant.cccdFrontFile'
+            formData.append('unregisteredTenant.cccdFrontFile', this.guardianCccdFrontFile);
+        }
+        if (this.guardianCccdBackFile) {
+            // ✅ Đảm bảo key này là 'unregisteredTenant.cccdBackFile'
+            formData.append('unregisteredTenant.cccdBackFile', this.guardianCccdBackFile);
+        }
     }
 
-    // 5. Gửi request đến backend
-     fetch('/api/contracts', {
+    // Gửi request đến backend (giữ nguyên)
+    fetch('/api/contracts', {
         method: 'POST',
         body: formData,
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ''
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            // Nếu có lỗi, đọc lỗi dưới dạng text để debug dễ hơn
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             alert('Hợp đồng đã được tạo thành công!');
@@ -1798,7 +1816,7 @@ saveContract() {
     })
     .catch(error => {
         console.error("Lỗi khi lưu hợp đồng:", error);
-        alert('Lỗi hệ thống khi gửi dữ liệu. Vui lòng xem console (F12).');
+        alert('Lỗi hệ thống khi gửi dữ liệu. Chi tiết: ' + error.message);
     });
 },
 
@@ -2350,11 +2368,10 @@ saveContract() {
         })
     },
 
-    // ✅ SỬA LẠI HÀM NÀY BẰNG PHIÊN BẢN HOÀN CHỈNH
 saveNewCustomer() {
     console.log("Bắt đầu lưu tạm thông tin người bảo hộ ở frontend...");
     
-    // 1. Thu thập dữ liệu từ modal vào biến tạm this.guardianInfo
+    // 1. Thu thập dữ liệu TEXT từ modal
     this.guardianInfo = {
         name: document.getElementById('newCustomer-name').value || '',
         dob: document.getElementById('newCustomer-dob').value || '',
@@ -2368,17 +2385,31 @@ saveNewCustomer() {
         district: this.getSelectText('newCustomer-district') || '',
         province: this.getSelectText('newCustomer-province') || '',
     };
-
-    if (!this.guardianInfo.name || !this.guardianInfo.phone) {
-        this.showNotification('Vui lòng nhập ít nhất Họ tên và Số điện thoại.', 'warning');
-        this.guardianInfo = null;
-        return;
+    
+    // ✅ 2. LẤY DỮ LIỆU FILE (ĐẶT Ở NGOÀI ĐỐI TƯỢNG guardianInfo)
+    const frontInput = document.getElementById('newCustomer-cccd-front');
+    if (frontInput && frontInput.files.length > 0) {
+        this.guardianCccdFrontFile = frontInput.files[0];
     }
 
-    // 2. ✅ GỌI HÀM CẬP NHẬT GIAO DIỆN
+    const backInput = document.getElementById('newCustomer-cccd-back');
+    if (backInput && backInput.files.length > 0) {
+        this.guardianCccdBackFile = backInput.files[0];
+    }
+    
+    // In ra để kiểm tra
+    console.log(" Guardian Front File (Temp):", this.guardianCccdFrontFile);
+    console.log(" Guardian Back File (Temp):", this.guardianCccdBackFile);
+
+    // 3. Validate và đóng modal (giữ nguyên)
+    if (!this.guardianInfo.name || !this.guardianInfo.phone) {
+        this.showNotification('Vui lòng nhập ít nhất Họ tên và Số điện thoại.', 'warning');
+        this.guardianInfo = null; // Reset nếu không hợp lệ
+        return;
+    }
+    
     this.updateGuardianDisplay();
     
-    // 3. ✅ GỌI LỆNH ĐÓNG MODAL
     const modalElement = document.getElementById('addCustomerModal-host');
     const modal = bootstrap.Modal.getInstance(modalElement);
     if (modal) {

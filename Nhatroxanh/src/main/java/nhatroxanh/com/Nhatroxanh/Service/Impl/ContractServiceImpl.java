@@ -878,9 +878,6 @@ public class ContractServiceImpl implements ContractService {
                 })
                 .collect(Collectors.toList());
     }
-
-
-
     private LocalDate calculateEndDate(Contracts contract) {
         if (contract.getEndDate() != null) {
             return contract.getEndDate().toLocalDate();

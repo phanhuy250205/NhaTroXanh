@@ -305,54 +305,61 @@ public class ContractController {
 @Transactional
 public ResponseEntity<?> createContract(
         @Valid @ModelAttribute ContractDto contractDto,
+        @RequestParam(value = "unregisteredTenant.cccdFrontFile", required = false) MultipartFile cccdFrontFile,
+        @RequestParam(value = "unregisteredTenant.cccdBackFile", required = false) MultipartFile cccdBackFile,
         Authentication authentication) {
 
     logger.info("--- BẮT ĐẦU TẠO HỢP ĐỒNG (Logic cuối cùng) ---");
     Map<String, Object> response = new HashMap<>();
 
-    try {
-        // 1. Lấy thông tin CHỦ TRỌ (Owner)
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-        Users owner = userService.findOwnerByCccdOrPhone(authentication, userDetails.getCccd(), null);
-        if (owner == null) throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
+            try {
+            // 1. Lấy thông tin chủ trọ (Owner)
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, userDetails.getCccd(), null);
+            if (owner == null) throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
 
-        // 2. Lấy thông tin NGƯỜI THUÊ CHÍNH (Tenant - Luôn là User đã đăng ký)
-        // Dùng hàm có sẵn của bạn để tìm User bằng SĐT từ DTO
-        Users tenant = handleRegisteredTenant(contractDto.getTenant());
-        logger.info("Người thuê chính đã được xác định: {}", tenant.getFullname());
+            // 2. Xử lý người thuê chính (Tenant)
+            Users tenant = handleRegisteredTenant(contractDto.getTenant());
+            logger.info("Người thuê chính đã được xác định: {}", tenant.getFullname());
 
-        // 3. Xử lý NGƯỜI BẢO HỘ (dữ liệu được lưu vào bảng unregistered_tenants)
-        UnregisteredTenants unregisteredTenantForGuardian = null; // Khai báo biến để chứa người bảo hộ
-        
-        // Kiểm tra xem frontend có gửi dữ liệu người bảo hộ không
-        if (contractDto.getUnregisteredTenant() != null && StringUtils.hasText(contractDto.getUnregisteredTenant().getPhone())) {
-            logger.info("Controller nhận thấy có dữ liệu người bảo hộ, đang xử lý...");
-            // Gọi hàm helper để tạo và lưu người bảo hộ vào bảng `unregistered_tenants`
-            unregisteredTenantForGuardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner);
-            logger.info("Đã tạo bản ghi cho người bảo hộ: {}", unregisteredTenantForGuardian.getFullName());
+            // 3. Xử lý người bảo hộ (Guardian)
+            UnregisteredTenants unregisteredTenantForGuardian = null;
+            if (contractDto.getUnregisteredTenant() != null && StringUtils.hasText(contractDto.getUnregisteredTenant().getPhone())) {
+                logger.info("Controller nhận thấy có dữ liệu người bảo hộ, đang xử lý...");
+                
+                // ✅ GỌI HÀM HELPER ĐÃ CÓ FILE
+                unregisteredTenantForGuardian = handleUnregisteredTenant(
+                    contractDto.getUnregisteredTenant(), 
+                    owner, 
+                    cccdFrontFile, // Truyền file vào
+                    cccdBackFile   // Truyền file vào
+                );
+                
+                logger.info("Đã tạo bản ghi cho người bảo hộ: {}", unregisteredTenantForGuardian.getFullName());
+            }
+
+            // 4. Gọi Service để tạo hợp đồng cuối cùng
+            Contracts savedContract = contractService.createContractFinal(
+                contractDto,
+                owner,
+                tenant,
+                unregisteredTenantForGuardian // Có thể là null
+            );
+
+            // 5. Trả về kết quả
+            response.put("success", true);
+            response.put("message", "Hợp đồng đã được tạo thành công!");
+            response.put("contractId", savedContract.getContractId());
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tạo hợp đồng: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
-
-        // 4. Gọi Service để tạo hợp đồng cuối cùng
-        Contracts savedContract = contractService.createContractFinal(
-            contractDto,
-            owner,
-            tenant,                     // Người thuê chính
-            unregisteredTenantForGuardian // Người bảo hộ (có thể là null)
-        );
-
-        // 5. Trả về kết quả thành công
-        response.put("success", true);
-        response.put("message", "Hợp đồng đã được tạo thành công!");
-        response.put("contractId", savedContract.getContractId());
-        return ResponseEntity.ok(response);
-
-    } catch (Exception e) {
-        logger.error("Lỗi khi tạo hợp đồng: {}", e.getMessage(), e);
-        response.put("success", false);
-        response.put("message", "Lỗi: " + e.getMessage());
-        return ResponseEntity.badRequest().body(response);
     }
-}
+
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private Rooms validateAndGetRoom(Integer roomId) {
         logger.info("=== VALIDATE AND GET ROOM ===");
@@ -474,7 +481,12 @@ public ResponseEntity<?> createContract(
         }
     }
 
-    private UnregisteredTenants handleUnregisteredTenant(ContractDto.UnregisteredTenant tenantDto, Users owner) {
+     private UnregisteredTenants handleUnregisteredTenant(
+        ContractDto.UnregisteredTenant tenantDto, 
+        Users owner,
+        MultipartFile cccdFrontFile, 
+        MultipartFile cccdBackFile
+    ) {
         logger.info("=== HANDLE UNREGISTERED TENANT ===");
         logger.info("Tenant data: {}", tenantDto);
         logger.info("Owner ID: {}", owner.getUserId());
@@ -525,7 +537,16 @@ public ResponseEntity<?> createContract(
             logger.warn("No address data provided for unregistered tenant");
             unregisteredTenant.setAddress(null); // Hoặc gán giá trị mặc định nếu cần
         }
-
+           if (cccdFrontFile != null && !cccdFrontFile.isEmpty()) {
+            String frontUrl = saveFile(cccdFrontFile);
+            unregisteredTenant.setCccdFrontUrl(frontUrl);
+            logger.info("Đã lưu ảnh mặt trước CCCD, URL: {}", frontUrl);
+        }
+        if (cccdBackFile != null && !cccdBackFile.isEmpty()) {
+            String backUrl = saveFile(cccdBackFile);
+            unregisteredTenant.setCccdBackUrl(backUrl);
+            logger.info("Đã lưu ảnh mặt sau CCCD, URL: {}", backUrl);
+        }
         unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
 
         UnregisteredTenants saved = unregisteredTenantsRepository.save(unregisteredTenant);
@@ -1029,7 +1050,35 @@ public ResponseEntity<?> createContract(
             return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
         }
     }
+    private UnregisteredTenants handleUnregisteredTenant(ContractDto.UnregisteredTenant tenantDto, Users owner) {
+    logger.info("=== HANDLE UNREGISTERED TENANT (NO FILES) ===");
+    // Chỉ xử lý các trường text, không xử lý file
+    if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
+        throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
+    }
 
+    UnregisteredTenants unregisteredTenant = new UnregisteredTenants();
+    unregisteredTenant.setUser(owner);
+    unregisteredTenant.setFullName(tenantDto.getFullName());
+    unregisteredTenant.setPhone(tenantDto.getPhone());
+    unregisteredTenant.setCccdNumber(tenantDto.getCccdNumber());
+    unregisteredTenant.setIssueDate(tenantDto.getIssueDate());
+    unregisteredTenant.setIssuePlace(tenantDto.getIssuePlace());
+    unregisteredTenant.setBirthday(tenantDto.getBirthday());
+
+    // Xử lý địa chỉ
+    StringBuilder newAddress = new StringBuilder();
+    if (StringUtils.hasText(tenantDto.getStreet())) newAddress.append(tenantDto.getStreet());
+    if (StringUtils.hasText(tenantDto.getWard())) newAddress.append(", ").append(tenantDto.getWard());
+    if (StringUtils.hasText(tenantDto.getDistrict())) newAddress.append(", ").append(tenantDto.getDistrict());
+    if (StringUtils.hasText(tenantDto.getProvince())) newAddress.append(", ").append(tenantDto.getProvince());
+    if (!newAddress.toString().isEmpty()) {
+        unregisteredTenant.setAddress(newAddress.toString());
+    }
+
+    unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
+    return unregisteredTenantsRepository.save(unregisteredTenant);
+}
 
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")

@@ -17,4 +17,4 @@ public class UnregisteredTenantsDTO {
     private String ward;
     private String district;
     private String province;
-}
+}   
