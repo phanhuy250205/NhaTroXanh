@@ -1,13 +1,17 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web.Staff;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.CategoryService;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -39,30 +43,41 @@ public class StaffPostController {
     @Autowired
     private HostelRepository hostelRepository;
 
-    // Trang danh sách bài đăng
     @GetMapping
     public String showPostManagement(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String search,
+
+            @RequestParam(defaultValue = "0") int pendingPage,
+            @RequestParam(defaultValue = "0") int approvedPage,
+            @RequestParam(defaultValue = "6") int size,
+
             Model model) {
 
-        List<Post> posts = postService.getFilteredPosts(status, type, sortBy, search);
+        Sort sort = "oldest".equalsIgnoreCase(sortBy)
+                ? Sort.by("createdAt").ascending()
+                : Sort.by("createdAt").descending();
 
-        List<Post> pendingPosts = posts.stream()
-                .filter(post -> post.getApprovalStatus() == ApprovalStatus.PENDING)
-                .toList();
+        Pageable pendingPageable = PageRequest.of(pendingPage, size, sort);
+        Pageable approvedPageable = PageRequest.of(approvedPage, size, sort);
 
-        List<Post> approvedPosts = posts.stream()
-                .filter(post -> post.getApprovalStatus() == ApprovalStatus.APPROVED)
-                .toList();
+        Page<Post> pendingPosts = postService.getFilteredPostsByApprovalStatus(
+                ApprovalStatus.PENDING, type, search, pendingPageable);
 
-        List<Category> categories = categoryService.getAllCategories();
+        Page<Post> approvedPosts = postService.getFilteredPostsByApprovalStatus(
+                ApprovalStatus.APPROVED, type, search, approvedPageable);
 
-        model.addAttribute("pendingPosts", pendingPosts);
-        model.addAttribute("approvedPosts", approvedPosts);
-        model.addAttribute("categories", categories);
+        model.addAttribute("pendingPosts", pendingPosts.getContent());
+        model.addAttribute("approvedPosts", approvedPosts.getContent());
+        model.addAttribute("pendingTotalPages", pendingPosts.getTotalPages());
+        model.addAttribute("approvedTotalPages", approvedPosts.getTotalPages());
+        model.addAttribute("pendingCurrentPage", pendingPage);
+        model.addAttribute("approvedCurrentPage", approvedPage);
+
+        model.addAttribute("categories", categoryService.getAllCategories());
+
         model.addAttribute("status", status);
         model.addAttribute("type", type);
         model.addAttribute("sortBy", sortBy);
@@ -170,4 +185,24 @@ public class StaffPostController {
 
         return "Staff/chi-tiet-bai-dang";
     }
+
+    @PostMapping("/{postId}/reject")
+    public String rejectPost(@PathVariable Integer postId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Bài đăng không tồn tại"));
+
+            post.setApprovalStatus(ApprovalStatus.REJECTED);
+            post.setApprovedBy(userDetails.getUser());
+            postRepository.save(post);
+
+            redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối bài đăng!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi từ chối bài đăng: " + e.getMessage());
+        }
+        return "redirect:/nhan-vien/bai-dang";
+    }
+
 }

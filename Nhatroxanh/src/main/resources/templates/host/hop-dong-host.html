@@ -249,6 +249,7 @@
                         method="post" enctype="multipart/form-data" th:object="${contract}" novalidate
                         id="contractForm">
 
+<<<<<<< HEAD
                         <th:if test="${isEditMode}">
                             <input type="hidden" name="_method" value="PUT" />
                         </th:if>
@@ -273,6 +274,21 @@
                                             th:field="*{contractDate}" required
                                             th:value="${contract.contractDate != null ? #temporals.format(contract.contractDate, 'yyyy-MM-dd') : ''}">
                                     </div>
+=======
+                    <th:if test="${isEditMode}">
+                        <input type="hidden" name="_method" value="PUT"/>
+                    </th:if>
+                    <!-- Basic Info Card -->
+                    <div class="card nha-tro-card mb-3">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">
+                                        Số điện thoại <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" id="tenant-phone" th:field="*{tenant.phone}" required pattern="[0-9]{10}" maxlength="10" placeholder="Số điện thoại người thuê">
+                                </div>
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
                                     <div class="col-md-4">
                                         <label class="form-label">
@@ -316,6 +332,7 @@
                             </li>
                         </ul>
 
+<<<<<<< HEAD
                         <!-- Tab Content -->
                         <div class="tab-content card p-4 nha-tro-tab-content" style="border-radius: 0px;">
                             <!-- Tenant Info Tab -->
@@ -323,6 +340,15 @@
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h6 class="mb-0">Thông tin người thuê</h6>
                                     <button type="button"
+=======
+                    <!-- Tab Content -->
+                    <div class="tab-content card p-4 nha-tro-tab-content" style="border-radius: 0px;">
+                        <!-- Tenant Info Tab -->
+                        <div class="tab-pane fade show active" id="tenantInfo" >
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0">Thông tin người thuê</h6>
+                                <button type="button"
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
                                         class="btn btn-outline-success btn-sm nha-tro-host-btn-add-customer"
                                         id="btn-add-customer-host" data-bs-toggle="modal"
                                         data-bs-target="#addCustomerModal-host">
@@ -611,10 +637,72 @@
                                         </select>
                                     </div>
 
+<<<<<<< HEAD
                                     <div class="col-md-6">
                                         <label class="form-label">
                                             <i class="fa fa-door-open me-1"></i>Chọn phòng trọ <span
                                                 class="text-danger">*</span>
+=======
+                                <div class="col-md-6">
+                                    <label class="form-label">
+                                        <i class="fa fa-door-open me-1"></i>Chọn phòng trọ <span class="text-danger">*</span>
+                                    </label>
+                                    <!-- ✅ Đổi name thành roomId để server nhận được -->
+                                    <select class="form-select" id="roomSelect" name="roomId" required>
+                                        <option value="">-- Chọn phòng trọ --</option>
+                                        <!-- Options sẽ được load bằng AJAX -->
+                                    </select>
+                                    <!-- ✅ Bỏ hidden input vì không cần thiết nữa -->
+                                </div>
+
+
+                                <!-- ✅ THÊM HIDDEN INPUTS ĐỂ JAVASCRIPT BIẾT EDIT MODE -->
+                                <input type="hidden" name="isEditMode" th:value="${isEditMode}" id="isEditMode">
+                                <input type="hidden" name="currentRoomId" th:value="${contract?.room?.roomId}" id="currentRoomId">
+                                <input type="hidden" name="currentHostelId" th:value="${contract?.room?.hostelId}" id="currentHostelId">
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Tỉnh/Thành phố</label>
+                                    <select class="form-select" id="room-province">
+                                        <option value="">Tỉnh/Thành phố</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Quận/Huyện</label>
+                                    <select class="form-select" id="room-district">
+                                        <option value="">Quận/Huyện</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label class="form-label">Phường/Xã</label>
+                                    <select class="form-select" id="room-ward">
+                                        <option value="">Phường/Xã</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Tên đường/Số nhà</label>
+                                    <input type="text" class="form-control" id="room-street">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Số phòng</label>
+                                    <input type="text" class="form-control" id="room-number" readonly>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label">Diện tích (m²)</label>
+                                    <input type="number" class="form-control" id="room-area">
+                                </div>
+
+                                <!-- Residents Section -->
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <label class="form-label mb-0">
+                                            <i class="fa fa-users me-2"></i>Số người ở
+                                            <span class="badge bg-primary ms-2" id="residents-count">0</span>
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
                                         </label>
                                         <!-- ✅ Đổi name thành roomId để server nhận được -->
                                         <select class="form-select" id="roomSelect" name="roomId" required>
@@ -847,8 +935,16 @@
                                     <p><strong>HỢP ĐỒNG THUÊ NHÀ</strong></p>
                                 </div>
 
+<<<<<<< HEAD
                                 <p>Hôm nay, ngày <span id="preview-sign-date"
                                         class="nha-tro-highlight">........................</span>, chúng tôi gồm:</p>
+=======
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-wrap justify-content-center gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-info flex-fill" id="btn-update" th:attr="data-contract-id=${contract != null ? contract.id : ''}">
+                            <i class="fa fa-pen-to-square me-1"></i> Cập nhật hợp đồng
+                        </button>
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
                                 <div class="mb-3">
                                     <p><strong>BÊN CHO THUÊ (Bên A):</strong> <span id="preview-owner-name"
@@ -1229,7 +1325,11 @@
         let currentHostelId = $('#currentHostelId').val();
         let isLoading = false; // Flag để tránh loop
 
+<<<<<<< HEAD
         let globalCurrentRoomId = currentRoomId || null;  // ✅ Đổi tên & set từ currentRoomId (nếu edit mode)
+=======
+    let globalCurrentRoomId = currentRoomId || null;  // ✅ Đổi tên & set từ currentRoomId (nếu edit mode)
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
         // ✅ Hàm load rooms (filter unactive + current room nếu active)
         // ✅ Hàm load rooms (dùng globalCurrentRoomId)
@@ -1252,7 +1352,12 @@
                                 filteredRooms.push(currentRoom);  // Add current dù active
                             }
                         }
+<<<<<<< HEAD
                         console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
+=======
+                    }
+                    console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
+>>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
                         if (filteredRooms.length === 0) {
                             roomOptions += '<option value="">Không có phòng unactive</option>';

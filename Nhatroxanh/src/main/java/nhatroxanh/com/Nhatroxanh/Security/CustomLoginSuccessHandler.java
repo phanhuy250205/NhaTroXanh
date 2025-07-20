@@ -16,14 +16,17 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
+
                                         HttpServletResponse response,
                                         Authentication authentication) throws IOException {
+
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String redirectURL = null;
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
+
 
             switch (role) {
                 case "ROLE_OWNER":
@@ -41,12 +44,14 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             }
 
             if (redirectURL != null) break;
+
         }
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         if (redirectURL != null) {
+
             response.getWriter().write("{\"redirectUrl\": \"" + redirectURL + "\"}");
         } else {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
@@ -54,6 +59,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         }
     }
 }
+
 
 
 

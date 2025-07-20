@@ -14,10 +14,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ApprovalStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, Integer> {
@@ -305,5 +305,186 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
         List<Post> findByApprovalStatusAndStatusOrderByCreatedAtDesc(ApprovalStatus approvalStatus, Boolean status);
 
         List<Post> findByStatusTrueAndApprovalStatusOrderByCreatedAtDesc(ApprovalStatus approvalStatus);
+
+        Page<Post> findByApprovalStatus(ApprovalStatus approvalStatus, Pageable pageable);
+
+        @Query("""
+                            SELECT p FROM Post p
+                            LEFT JOIN p.category c
+                            WHERE p.approvalStatus = :approvalStatus
+                            AND p.status = true
+                            AND (:type IS NULL OR c.name = :type)
+                            AND (
+                                :search IS NULL OR
+                                LOWER(p.title) LIKE LOWER(CONCAT('%', :search, '%')) OR
+                                LOWER(p.description) LIKE LOWER(CONCAT('%', :search, '%'))
+                            )
+                        """)
+        Page<Post> findFilteredPosts(
+                        @Param("approvalStatus") ApprovalStatus approvalStatus,
+                        @Param("type") String type,
+                        @Param("search") String search,
+                        Pageable pageable);
+
+        Page<Post> findByStatusAndApprovalStatus(boolean status, ApprovalStatus approvalStatus, Pageable pageable);
+
+        @Query("SELECT DISTINCT p FROM Post p " +
+                        "LEFT JOIN FETCH p.utilities u " +
+                        "LEFT JOIN FETCH p.address a " +
+                        "LEFT JOIN FETCH a.ward w " +
+                        "LEFT JOIN FETCH w.district d " +
+                        "LEFT JOIN FETCH d.province " +
+                        "LEFT JOIN FETCH p.images i " +
+                        "LEFT JOIN FETCH p.category c " +
+                        "WHERE p.status = true " +
+                        "AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:minArea IS NULL OR p.area >= :minArea) " +
+                        "AND (:maxArea IS NULL OR p.area <= :maxArea)")
+        Page<Post> findActivePostsWithAreaFilterPaginated(
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        Pageable pageable);
+
+        @Query("SELECT DISTINCT p FROM Post p " +
+                        "LEFT JOIN FETCH p.utilities u " +
+                        "LEFT JOIN FETCH p.address a " +
+                        "LEFT JOIN FETCH a.ward w " +
+                        "LEFT JOIN FETCH w.district d " +
+                        "LEFT JOIN FETCH d.province " +
+                        "LEFT JOIN FETCH p.images i " +
+                        "LEFT JOIN FETCH p.category c " +
+                        "WHERE p.status = true " +
+                        "AND p.approvalStatus = 'APPROVED' " +
+                        "AND EXISTS (SELECT 1 FROM p.utilities pu WHERE pu.utilityId IN :utilityIds) " +
+                        "AND (:minArea IS NULL OR p.area >= :minArea) " +
+                        "AND (:maxArea IS NULL OR p.area <= :maxArea)")
+        Page<Post> findActivePostsWithUtilityFilterPaginated(
+                        @Param("utilityIds") List<Integer> utilityIds,
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        Pageable pageable);
+
+        @Query("SELECT DISTINCT p FROM Post p " +
+                        "LEFT JOIN FETCH p.utilities u " +
+                        "LEFT JOIN FETCH p.address a " +
+                        "LEFT JOIN FETCH a.ward w " +
+                        "LEFT JOIN FETCH w.district d " +
+                        "LEFT JOIN FETCH d.province pr " +
+                        "LEFT JOIN FETCH p.images i " +
+                        "LEFT JOIN FETCH p.category c " +
+                        "WHERE p.status = true " +
+                        "AND p.approvalStatus = 'APPROVED' " +
+                        "AND (:categoryId IS NULL OR p.category.categoryId = :categoryId) " +
+                        "AND (:provinceCode IS NULL OR pr.code = :provinceCode) " +
+                        "AND (:districtCode IS NULL OR d.code = :districtCode) " +
+                        "AND (:wardCode IS NULL OR w.code = :wardCode) " +
+                        "AND (:utilityIds IS NULL OR EXISTS (SELECT 1 FROM p.utilities pu WHERE pu.utilityId IN :utilityIds)) "
+                        +
+                        "AND (:minArea IS NULL OR p.area >= :minArea) " +
+                        "AND (:maxArea IS NULL OR p.area <= :maxArea)")
+        Page<Post> findActivePostsByLocationCodesAndUtilityFilter(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceCode") String provinceCode,
+                        @Param("districtCode") String districtCode,
+                        @Param("wardCode") String wardCode,
+                        @Param("utilityIds") List<Integer> utilityIds,
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        Pageable pageable);
+
+        @Query("""
+                            SELECT DISTINCT p FROM Post p
+                            LEFT JOIN p.utilities u
+                            WHERE p.status = true
+                              AND p.approvalStatus = 'APPROVED'
+                              AND (:categoryId IS NULL OR p.category.id = :categoryId)
+                              AND (:provinceCode IS NULL OR p.address.ward.district.province.code = :provinceCode)
+                              AND (:districtCode IS NULL OR p.address.ward.district.code = :districtCode)
+                              AND (:wardCode IS NULL OR p.address.ward.code = :wardCode)
+                              AND (:minArea IS NULL OR p.area >= :minArea)
+                              AND (:maxArea IS NULL OR p.area <= :maxArea)
+                              AND (:minPrice IS NULL OR p.price >= :minPrice)
+                              AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+                              AND (
+                                :searchTerm IS NULL OR (
+                                    LOWER(p.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+                                    LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                                )
+                              )
+                              AND (:utilityIds IS NULL OR u.id IN :utilityIds)
+                        """)
+        Page<Post> filterPostsWithAllConditions(
+                        @Param("categoryId") Integer categoryId,
+                        @Param("provinceCode") String provinceCode,
+                        @Param("districtCode") String districtCode,
+                        @Param("wardCode") String wardCode,
+                        @Param("utilityIds") List<Integer> utilityIds,
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        @Param("minPrice") Float minPrice,
+                        @Param("maxPrice") Float maxPrice,
+                        @Param("searchTerm") String searchTerm,
+                        Pageable pageable);
+
+        @Query("""
+                            SELECT DISTINCT p FROM Post p
+                            JOIN p.utilities u
+                            WHERE u.id IN :utilityIds
+                              AND (:minArea IS NULL OR p.area >= :minArea)
+                              AND (:maxArea IS NULL OR p.area <= :maxArea)
+                              AND (:minPrice IS NULL OR p.price >= :minPrice)
+                              AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+                              AND (:provinceCode IS NULL OR p.address.ward.district.province.code = :provinceCode)
+                              AND (:districtCode IS NULL OR p.address.ward.district.code = :districtCode)
+                              AND (:wardCode IS NULL OR p.address.ward.code = :wardCode)
+                              AND (
+                                :searchTerm IS NULL OR (
+                                    LOWER(p.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+                                    LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                                )
+                              )
+                              AND p.status = true
+                              AND p.approvalStatus = 'APPROVED'
+                        """)
+        Page<Post> filterPostsWithUtilitiesByCode(
+                        @Param("utilityIds") List<Integer> utilityIds,
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        @Param("minPrice") Double minPrice,
+                        @Param("maxPrice") Double maxPrice,
+                        @Param("provinceCode") String provinceCode,
+                        @Param("districtCode") String districtCode,
+                        @Param("wardCode") String wardCode,
+                        @Param("searchTerm") String searchTerm,
+                        Pageable pageable);
+
+        @Query("""
+                            SELECT p FROM Post p
+                            WHERE (:minArea IS NULL OR p.area >= :minArea)
+                              AND (:maxArea IS NULL OR p.area <= :maxArea)
+                              AND (:minPrice IS NULL OR p.price >= :minPrice)
+                              AND (:maxPrice IS NULL OR p.price <= :maxPrice)
+                              AND (:provinceCode IS NULL OR p.address.ward.district.province.code = :provinceCode)
+                              AND (:districtCode IS NULL OR p.address.ward.district.code = :districtCode)
+                              AND (:wardCode IS NULL OR p.address.ward.code = :wardCode)
+                              AND (
+                                :searchTerm IS NULL OR (
+                                    LOWER(p.title) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR
+                                    LOWER(p.address.street) LIKE LOWER(CONCAT('%', :searchTerm, '%'))
+                                )
+                              )
+                              AND p.status = true
+                              AND p.approvalStatus = 'APPROVED'
+                        """)
+        Page<Post> filterPostsWithoutUtilitiesByCode(
+                        @Param("minArea") Float minArea,
+                        @Param("maxArea") Float maxArea,
+                        @Param("minPrice") Double minPrice,
+                        @Param("maxPrice") Double maxPrice,
+                        @Param("provinceCode") String provinceCode,
+                        @Param("districtCode") String districtCode,
+                        @Param("wardCode") String wardCode,
+                        @Param("searchTerm") String searchTerm,
+                        Pageable pageable);
 
 }

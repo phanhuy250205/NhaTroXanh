@@ -1,12 +1,12 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
-import nhatroxanh.com.Nhatroxanh.Model.enity.District;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.District;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
@@ -71,10 +71,10 @@ public class RoomsServiceImpl implements RoomsService {
         return result;
     }
 
-    @Override
-    public List<Rooms> findByHostelId(Integer hostelId) {
-        return roomsRepository.findByHostel_HostelId(hostelId);
-    }
+    // @Override
+    // public List<Rooms> findByHostelId(Integer hostelId) {
+    //     return roomsRepository.findByHostel_HostelId(hostelId);
+    // }
 
     @Override
     public Rooms save(Rooms room) {
@@ -94,6 +94,9 @@ public class RoomsServiceImpl implements RoomsService {
             return Optional.empty();
         }
         return roomsRepository.findById(id);
+    }
+    public Rooms findRoomById(Integer roomId) {
+        return roomsRepository.findById(roomId).orElse(null);
     }
     private ContractDto.Room convertToRoomDto(Rooms room) {
         ContractDto.Room roomDto = new ContractDto.Room();
@@ -127,6 +130,11 @@ public class RoomsServiceImpl implements RoomsService {
 
         logger.info("Mapped room: {}", roomDto);
         return roomDto;
+    }
+
+    @Override
+    public List<Rooms> findByHostelId(Integer hostelId) {
+         return roomsRepository.findByHostel_HostelId(hostelId);
     }
 
 

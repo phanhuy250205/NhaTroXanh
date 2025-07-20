@@ -1,9 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.District;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
 import org.springframework.stereotype.Service;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.District;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 
 @Service
 public interface LocationService {

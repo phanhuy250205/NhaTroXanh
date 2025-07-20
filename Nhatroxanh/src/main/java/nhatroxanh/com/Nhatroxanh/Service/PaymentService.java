@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
 import java.util.List;
 import java.util.Map;
@@ -76,5 +76,16 @@ public interface PaymentService {
      * Tính toán chi phí utilities (điện, nước) với đơn giá từ frontend
      */
     Map<String, Object> calculateUtilityCosts(Integer previousReading, Integer currentReading, String utilityType, Float unitPrice);
+    
+    /**
+     * Xóa payment theo ID
+     */
     void deletePayment(Integer paymentId);
+    
+    /**
+     * Gửi hóa đơn chưa thanh toán hoặc quá hạn đến người thuê
+     * @param payments List of PaymentResponseDto containing unpaid or overdue invoices
+     * @return Number of invoices successfully sent
+     */
+    int sendInvoicesToTenants(List<PaymentResponseDto> payments);
 }

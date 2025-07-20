@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
 import java.sql.Date;
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 public class PaymentResponseDto {
     private Integer paymentId;
-    private Long contractId;
+    private Integer contractId;
     private String roomCode;
     private String hostelName;
     private String tenantName;

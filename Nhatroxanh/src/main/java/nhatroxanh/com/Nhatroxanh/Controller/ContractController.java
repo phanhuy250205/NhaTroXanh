@@ -3,7 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
@@ -22,7 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
@@ -31,7 +31,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -318,9 +317,11 @@ public class ContractController {
     @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public ResponseEntity<?> createContract(
+
             @Valid @ModelAttribute ContractDto contractDto,
             @RequestParam(value = "unregisteredTenant.cccdFrontFile", required = false) MultipartFile cccdFrontFile,
             @RequestParam(value = "unregisteredTenant.cccdBackFile", required = false) MultipartFile cccdBackFile,
+
             Authentication authentication) {
 
         logger.info("--- BẮT ĐẦU TẠO HỢP ĐỒNG (Logic cuối cùng) ---");
@@ -410,98 +411,122 @@ public class ContractController {
     }
 
     // SỬA các method helper - bỏ file upload parameters
+
     private void updateOwnerInformation(Users owner, ContractDto.Owner ownerDto) {
         logger.info("=== START UPDATE OWNER INFORMATION ===");
         logger.info("Owner Current Details - ID: {}, Name: {}, Phone: {}, Address: {}",
                 owner.getUserId(), owner.getFullname(), owner.getPhone(), owner.getAddress());
         logger.info("Incoming Owner DTO: {}", ownerDto);
 
-        try {
-            // Update fullname
-            if (StringUtils.hasText(ownerDto.getFullName())) {
-                owner.setFullname(ownerDto.getFullName());
-                logger.info("Updated fullname: {}", ownerDto.getFullName());
-            } else {
-                logger.warn("New fullname is empty or null");
+        boolean updated = false;  // Flag cho toàn bộ (info + CCCD)
+
+        // Cập nhật tên nếu có dữ liệu
+        if (StringUtils.hasText(ownerDto.getFullName())) {
+            owner.setFullname(ownerDto.getFullName());
+            updated = true;
+            logger.info("Set fullname: {}", ownerDto.getFullName());
+        }
+
+        // Cập nhật số điện thoại nếu có dữ liệu
+        if (StringUtils.hasText(ownerDto.getPhone())) {
+            owner.setPhone(ownerDto.getPhone());
+            updated = true;
+            logger.info("Set phone: {}", ownerDto.getPhone());
+        }
+
+        // Cập nhật ngày sinh nếu có dữ liệu
+        if (ownerDto.getBirthday() != null) {
+            java.sql.Date sqlBirthday = new java.sql.Date(ownerDto.getBirthday().getTime());
+            owner.setBirthday(sqlBirthday);
+            updated = true;
+            logger.info("Set birthday: {}", sqlBirthday);
+        }
+
+        // Cập nhật địa chỉ: Build nếu có ít nhất một trường
+        StringBuilder addressBuilder = new StringBuilder();
+        if (StringUtils.hasText(ownerDto.getStreet())) {
+            addressBuilder.append(ownerDto.getStreet().trim());
+            updated = true;
+        }
+        if (StringUtils.hasText(ownerDto.getWard())) {
+            if (addressBuilder.length() > 0) addressBuilder.append(", ");
+            addressBuilder.append(ownerDto.getWard().trim());
+            updated = true;
+        }
+        if (StringUtils.hasText(ownerDto.getDistrict())) {
+            if (addressBuilder.length() > 0) addressBuilder.append(", ");
+            addressBuilder.append(ownerDto.getDistrict().trim());
+            updated = true;
+        }
+        if (StringUtils.hasText(ownerDto.getProvince())) {
+            if (addressBuilder.length() > 0) addressBuilder.append(", ");
+            addressBuilder.append(ownerDto.getProvince().trim());
+            updated = true;
+        }
+
+        // Set địa chỉ nếu builder có nội dung
+        if (addressBuilder.length() > 0) {
+            String addressString = addressBuilder.toString().trim();
+            owner.setAddress(addressString);
+            logger.info("Set owner address: {}", addressString);
+        }
+
+        // Cập nhật CCCD: Load hoặc tạo mới (nhưng không set updated ở đây)
+        UserCccd ownerCccdEntity = userCccdRepository.findByUserId(owner.getUserId())
+                .orElseGet(() -> {
+                    UserCccd newCccd = new UserCccd();
+                    newCccd.setUser(owner);
+                    return newCccd;  // Không set updated ở đây nữa
+                });
+
+        // Set CCCD fields nếu có dữ liệu, và set flag chỉ khi set
+        boolean cccdDataPresent = false;  // Flag riêng để check có data CCCD không
+        if (StringUtils.hasText(ownerDto.getCccdNumber())) {
+            ownerCccdEntity.setCccdNumber(ownerDto.getCccdNumber());
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set CCCD Number: {}", ownerDto.getCccdNumber());
+        }
+        if (ownerDto.getIssueDate() != null) {
+            ownerCccdEntity.setIssueDate(ownerDto.getIssueDate());
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set CCCD Issue Date: {}", ownerDto.getIssueDate());
+        }
+        if (StringUtils.hasText(ownerDto.getIssuePlace())) {
+            ownerCccdEntity.setIssuePlace(ownerDto.getIssuePlace());
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set CCCD Issue Place: {}", ownerDto.getIssuePlace());
+        }
+
+        // Save nếu có thay đổi
+        if (updated) {
+            try {
+                // Chỉ save CCCD nếu tồn tại data hoặc đang cập nhật fields khác (nhưng ưu tiên check cccdDataPresent nếu tạo mới)
+                if (cccdDataPresent || userCccdRepository.findByUserId(owner.getUserId()).isPresent()) {
+                    userCccdRepository.save(ownerCccdEntity);
+                    logger.info("CCCD saved successfully");
+                } else {
+                    logger.info("Skipping save for new empty CCCD entity.");
+                }
+                Users savedUser = userService.saveUser(owner);
+                logger.info("Owner information saved. User ID: {}", savedUser.getUserId());
+            } catch (Exception e) {
+                logger.error("Error saving owner information: {}", e.getMessage(), e);
             }
-
-            // Update phone
-            if (StringUtils.hasText(ownerDto.getPhone())) {
-                owner.setPhone(ownerDto.getPhone());
-                logger.info("Updated phone: {}", ownerDto.getPhone());
-            } else {
-                logger.warn("New phone number is empty or null");
-            }
-
-            // Update birthday
-            if (ownerDto.getBirthday() != null) {
-                java.sql.Date sqlBirthday = new java.sql.Date(ownerDto.getBirthday().getTime());
-                owner.setBirthday(sqlBirthday);
-                logger.info("Updated birthday: {}", sqlBirthday);
-            } else {
-                logger.warn("Birthday is null, skipping update");
-            }
-
-            // Update owner CCCD
-            logger.info("Processing CCCD Information");
-            UserCccd ownerCccdEntity = userCccdRepository.findByUserId(owner.getUserId())
-                    .orElseGet(() -> {
-                        logger.info("No existing CCCD found. Creating new CCCD entity for owner");
-                        UserCccd newCccd = new UserCccd();
-                        newCccd.setUser(owner);
-                        return newCccd;
-                    });
-
-            if (StringUtils.hasText(ownerDto.getCccdNumber())) {
-                ownerCccdEntity.setCccdNumber(ownerDto.getCccdNumber());
-                logger.info("Updated CCCD Number: {}", ownerDto.getCccdNumber());
-            }
-            if (ownerDto.getIssueDate() != null) {
-                ownerCccdEntity.setIssueDate(ownerDto.getIssueDate());
-                logger.info("Updated CCCD Issue Date: {}", ownerDto.getIssueDate());
-            }
-            if (StringUtils.hasText(ownerDto.getIssuePlace())) {
-                ownerCccdEntity.setIssuePlace(ownerDto.getIssuePlace());
-                logger.info("Updated CCCD Issue Place: {}", ownerDto.getIssuePlace());
-            }
-
-            // Save CCCD
-            UserCccd savedCccd = userCccdRepository.save(ownerCccdEntity);
-            logger.info("CCCD saved successfully. CCCD ID: {}", savedCccd.getId());
-
-            // Chỉ cập nhật địa chỉ nếu có đầy đủ dữ liệu (tùy chọn)
-            boolean hasNewAddressData = StringUtils.hasText(ownerDto.getStreet()) &&
-                    StringUtils.hasText(ownerDto.getWard()) &&
-                    StringUtils.hasText(ownerDto.getDistrict()) &&
-                    StringUtils.hasText(ownerDto.getProvince());
-            if (hasNewAddressData) {
-                StringBuilder newAddress = new StringBuilder();
-                newAddress.append(ownerDto.getStreet())
-                        .append(", ").append(ownerDto.getWard())
-                        .append(", ").append(ownerDto.getDistrict())
-                        .append(", ").append(ownerDto.getProvince());
-                owner.setAddress(newAddress.toString());
-                logger.info("Updated Owner Address: {}", newAddress.toString());
-            } else {
-                logger.info("Skipping address update due to incomplete data");
-            }
-
-            // Save user
-            Users savedUser = userService.saveUser(owner);
-            logger.info("Owner information saved. User ID: {}", savedUser.getUserId());
-
-            logger.info("=== COMPLETED OWNER INFORMATION UPDATE ===");
-        } catch (Exception e) {
-            logger.error("Error updating owner information", e);
-            throw new RuntimeException("Failed to update owner information", e);
+        } else {
+            logger.info("No data to update for owner.");
         }
     }
+
 
     private UnregisteredTenants handleUnregisteredTenant(
             ContractDto.UnregisteredTenant tenantDto,
             Users owner,
             MultipartFile cccdFrontFile,
             MultipartFile cccdBackFile) {
+
         logger.info("=== HANDLE UNREGISTERED TENANT ===");
         logger.info("Tenant data: {}", tenantDto);
         logger.info("Owner ID: {}", owner.getUserId());
@@ -586,81 +611,110 @@ public class ContractController {
         }
 
         Users tenant = tenantUser.get();
-        logger.info("Found tenant: ID={}, Name={}", tenant.getUserId(), tenant.getFullname());
+        logger.info("Found tenant: ID={}, Name={}, Current Address={}", tenant.getUserId(), tenant.getFullname(), tenant.getAddress());
 
-        // Cập nhật thông tin cơ bản
+        boolean updated = false;  // Flag cho toàn bộ
+
+        // Cập nhật fullname nếu có dữ liệu
         if (StringUtils.hasText(tenantDto.getFullName())) {
             tenant.setFullname(tenantDto.getFullName());
-            logger.info("Updated tenant fullname: {}", tenantDto.getFullName());
-        }
-        if (tenantDto.getBirthday() != null) {
-            tenant.setBirthday(new java.sql.Date(tenantDto.getBirthday().getTime()));
-            logger.info("Updated tenant birthday: {}", tenantDto.getBirthday());
+            updated = true;
+            logger.info("Set tenant fullname: {}", tenantDto.getFullName());
         }
 
-        // Cập nhật CCCD
-        logger.info("Updating tenant CCCD information");
+        // Cập nhật birthday nếu có dữ liệu
+        if (tenantDto.getBirthday() != null) {
+            tenant.setBirthday(new java.sql.Date(tenantDto.getBirthday().getTime()));
+            updated = true;
+            logger.info("Set tenant birthday: {}", tenantDto.getBirthday());
+        }
+
+        // Cập nhật địa chỉ: Build nếu có ít nhất một trường, và trigger updated ngay
+        StringBuilder newAddress = new StringBuilder();
+        boolean hasAddressData = false;
+        if (StringUtils.hasText(tenantDto.getStreet())) {
+            newAddress.append(tenantDto.getStreet().trim());
+            hasAddressData = true;
+            updated = true;  // Trigger ngay nếu có street
+        }
+        if (StringUtils.hasText(tenantDto.getWard())) {
+            if (newAddress.length() > 0) newAddress.append(", ");
+            newAddress.append(tenantDto.getWard().trim());
+            hasAddressData = true;
+            updated = true;
+        }
+        if (StringUtils.hasText(tenantDto.getDistrict())) {
+            if (newAddress.length() > 0) newAddress.append(", ");
+            newAddress.append(tenantDto.getDistrict().trim());
+            hasAddressData = true;
+            updated = true;
+        }
+        if (StringUtils.hasText(tenantDto.getProvince())) {
+            if (newAddress.length() > 0) newAddress.append(", ");
+            newAddress.append(tenantDto.getProvince().trim());
+            hasAddressData = true;
+            updated = true;
+        }
+
+        // Set địa chỉ nếu có data
+        if (hasAddressData) {
+            String addressString = newAddress.toString().trim();
+            logger.info("Old address: {}, New address to set: {}", tenant.getAddress(), addressString);
+            tenant.setAddress(addressString);
+        }
+
+        // Cập nhật CCCD (giữ nguyên như trước)
         UserCccd tenantCccd = userCccdRepository.findByUserId(tenant.getUserId())
                 .orElseGet(() -> {
-                    logger.info("Creating new CCCD entity for tenant");
                     UserCccd newCccd = new UserCccd();
                     newCccd.setUser(tenant);
                     return newCccd;
                 });
 
+        boolean cccdDataPresent = false;
         if (StringUtils.hasText(tenantDto.getCccdNumber())) {
             tenantCccd.setCccdNumber(tenantDto.getCccdNumber());
-            logger.info("Tenant CCCD number updated: {}", tenantDto.getCccdNumber());
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set tenant CCCD number: {}", tenantDto.getCccdNumber());
         }
         if (tenantDto.getIssueDate() != null) {
             tenantCccd.setIssueDate(tenantDto.getIssueDate());
-            logger.info("Tenant CCCD issue date updated: {}", tenantDto.getIssueDate());
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set tenant CCCD issue date: {}", tenantDto.getIssueDate());
         }
         if (StringUtils.hasText(tenantDto.getIssuePlace())) {
             tenantCccd.setIssuePlace(tenantDto.getIssuePlace());
-            logger.info("Tenant CCCD issue place updated: {}", tenantDto.getIssuePlace());
-        }
-        userCccdRepository.save(tenantCccd);
-        logger.info("Tenant CCCD saved successfully");
-
-        // Cập nhật địa chỉ
-        logger.info("Updating tenant address");
-        StringBuilder newAddress = new StringBuilder();
-        boolean hasAddressData = false;
-
-        if (StringUtils.hasText(tenantDto.getStreet())) {
-            newAddress.append(tenantDto.getStreet());
-            hasAddressData = true;
-        }
-        if (StringUtils.hasText(tenantDto.getWard())) {
-            newAddress.append(", ").append(tenantDto.getWard());
-            hasAddressData = true;
-        }
-        if (StringUtils.hasText(tenantDto.getDistrict())) {
-            newAddress.append(", ").append(tenantDto.getDistrict());
-            hasAddressData = true;
-        }
-        if (StringUtils.hasText(tenantDto.getProvince())) {
-            newAddress.append(", ").append(tenantDto.getProvince());
-            hasAddressData = true;
+            updated = true;
+            cccdDataPresent = true;
+            logger.info("Set tenant CCCD issue place: {}", tenantDto.getIssuePlace());
         }
 
-        if (hasAddressData) {
-            String addressString = newAddress.toString();
-            if (!addressString.equals(tenant.getAddress())) {
-                tenant.setAddress(addressString);
-                logger.info("Updated tenant address: {}", addressString);
-            } else {
-                logger.info("Tenant address unchanged: {}", addressString);
+        // Save nếu có thay đổi
+        if (updated) {
+            try {
+                logger.info("Before save: Tenant address = {}", tenant.getAddress());
+
+                Users savedTenant = userService.saveUser(tenant);
+                logger.info("Tenant User saved successfully: ID={}", savedTenant.getUserId());
+
+                if (cccdDataPresent || userCccdRepository.findByUserId(tenant.getUserId()).isPresent()) {
+                    userCccdRepository.save(tenantCccd);
+                    logger.info("Tenant CCCD saved successfully");
+                } else {
+                    logger.info("Skipping save for new empty CCCD entity.");
+                }
+
+                logger.info("After save: Tenant address in DB should be updated to {}", savedTenant.getAddress());
+            } catch (Exception e) {
+                logger.error("Error saving tenant information: {}", e.getMessage(), e);
             }
         } else {
-            logger.warn("No address data provided for tenant, skipping address update");
+            logger.info("No data to update for tenant. No save called.");
         }
 
-        // Lưu tenant
-        Users savedTenant = userService.saveUser(tenant);
-        logger.info("Registered tenant updated successfully: ID={}", savedTenant.getUserId());
-        return savedTenant;
+        return tenant;
     }
 
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
@@ -695,7 +749,6 @@ public class ContractController {
                 errors.add("Thời hạn hợp đồng phải lớn hơn 0!");
             }
 
-            // Validation cho BigDecimal - ĐÚNG CÁCH
             // Validation cho Double - CÁCH CHUYỂN ĐỔI
             if (contract.getTerms().getPrice() == null ||
                     contract.getTerms().getPrice() <= 0.0) {
@@ -1043,33 +1096,111 @@ public class ContractController {
     @PutMapping("/update/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateContract(
-            @PathVariable Long contractId,
+            @PathVariable Integer contractId,
             @RequestBody ContractDto contractDto,
+
             Authentication authentication) {
+         Map<String, Object> response = new HashMap<>();
         try {
-            // Lấy thông tin chủ sở hữu
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            String ownerCccd = userDetails.getCccd();
+            Integer ownerId = userDetails.getUserId();
+            logger.info("Authenticated user ID: {}", ownerId);
 
-            // Xác định người thuê
-            Users tenant = null;
-            UnregisteredTenants unregisteredTenant = null;
-
-            if ("REGISTERED".equals(contractDto.getTenantType())) {
-                tenant = handleRegisteredTenant(contractDto.getTenant());
-            } else if ("UNREGISTERED".equals(contractDto.getTenantType())) {
-                unregisteredTenant = handleUnregisteredTenant(contractDto.getUnregisteredTenant(),
-                        userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null));
+            // Tìm contract hiện tại
+            Optional<Contracts> contractOptional = contractService.findContractById(contractId);
+            if (!contractOptional.isPresent()) {
+                logger.error("Contract {} not found", contractId);
+                response.put("success", false);
+                response.put("message", "Hợp đồng không tồn tại!");
+                return ResponseEntity.status(404).body(response);
             }
 
-            // Gọi service để cập nhật
-            Contracts updatedContract = contractService.updateContract(contractId, contractDto);
+            Contracts contract = contractOptional.get();
+            if (!contract.getOwner().getUserId().equals(ownerId)) {
+                logger.error("User {} does not own contract {}", ownerId, contractId);
+                response.put("success", false);
+                response.put("message", "Bạn không có quyền cập nhật hợp đồng này!");
+                return ResponseEntity.status(403).body(response);
+            }
 
-            return ResponseEntity.ok(updatedContract);
+            // Validate room (nếu có trong DTO)
+            if (contractDto.getRoom() != null && contractDto.getRoom().getRoomId() != null) {
+                logger.info("=== VALIDATE AND GET ROOM ===");
+                logger.info("Searching for room with ID: {}", contractDto.getRoom().getRoomId());
+                Optional<Rooms> room = roomsService.findById(contractDto.getRoom().getRoomId());
+                if (room.isEmpty()) {
+                    logger.error("Room not found: {}", contractDto.getRoom().getRoomId());
+                    response.put("success", false);
+                    response.put("message", "Phòng không tồn tại!");
+                    return ResponseEntity.status(404).body(response);
+                }
+                logger.info("Room found: ID={}, Name={}, Status={}", room.get().getRoomId(), room.get().getNamerooms(), room.get().getStatus());
+                // Chỉ kiểm tra trạng thái nếu roomId thay đổi
+                if (!room.get().getRoomId().equals(contract.getRoom().getRoomId()) && !room.get().getStatus().equals(RoomStatus.unactive)) {
+                    logger.error("Room is not available. Current status: {}", room.get().getStatus());
+                    response.put("success", false);
+                    response.put("message", "Phòng đã được thuê hoặc không khả dụng! Trạng thái hiện tại: " + room.get().getStatus());
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+
+            // Cập nhật hợp đồng
+            Contracts updatedContract = contractService.updateContract(contractId, contractDto);
+            response.put("success", true);
+            response.put("message", "Cập nhật hợp đồng thành công!");
+            response.put("contractId", updatedContract.getContractId());
+            logger.info("Contract updated successfully: ID={}", updatedContract.getContractId());
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid data: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Lỗi cập nhật: " + e.getMessage());
+            logger.error("Error updating contract: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
         }
     }
+    @PutMapping("/update-owner")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<?> updateOwner(
+            @RequestBody ContractDto.Owner ownerDto,
+            Authentication authentication) {
+        logger.info("=== START UPDATE OWNER ===");
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            String ownerCccd = userDetails.getCccd();
+
+            Users owner = userRepository.findById(ownerId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy chủ trọ!"));
+
+            // Cập nhật thông tin owner sử dụng hàm updateOwnerInformation đã có
+            updateOwnerInformation(owner, ownerDto);
+
+            response.put("success", true);
+            response.put("message", "Thông tin chủ trọ đã được cập nhật thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid data: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            logger.error("Error updating owner: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật thông tin chủ trọ: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
 
     private UnregisteredTenants handleUnregisteredTenant(ContractDto.UnregisteredTenant tenantDto, Users owner) {
         logger.info("=== HANDLE UNREGISTERED TENANT (NO FILES) ===");
@@ -1107,7 +1238,7 @@ public class ContractController {
 
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<?> deleteContract(@PathVariable Long contractId) {
+    public ResponseEntity<?> deleteContract(@PathVariable Integer contractId) {
         logger.info("Received request to delete contract with ID: {}", contractId);
         try {
             contractService.deleteContract(contractId);
@@ -1124,6 +1255,78 @@ public class ContractController {
             return ResponseEntity.badRequest().body("Lỗi khi xóa hợp đồng. Vui lòng thử lại.");
         }
     }
+
+
+    @PutMapping("/rooms/{roomId}")
+    @PreAuthorize("hasRole('OWNER')")
+    @Transactional
+    public ResponseEntity<?> updateRoom(
+            @PathVariable Integer roomId,
+            @RequestBody Rooms roomDto,
+            Authentication authentication) {
+        logger.info("=== START UPDATE ROOM ===");
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            Rooms room = roomsService.findById(roomId)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng với ID: " + roomId));
+
+            // Kiểm tra quyền sở hữu
+            if (!room.getHostel().getOwner().getUserId().equals(ownerId)) {
+                throw new IllegalArgumentException("Bạn không có quyền cập nhật phòng này!");
+            }
+
+            // Cập nhật fields từ DTO
+            if (roomDto.getNamerooms() != null) {
+                room.setNamerooms(roomDto.getNamerooms());
+            }
+            if (roomDto.getAcreage() != null) {
+                room.setAcreage(roomDto.getAcreage());
+            }
+            if (roomDto.getPrice() != null) {
+                room.setPrice(roomDto.getPrice());
+            }
+            if (roomDto.getMax_tenants() != null) {
+                room.setMax_tenants(roomDto.getMax_tenants());
+            }
+            if (roomDto.getDescription() != null) {
+                room.setDescription(roomDto.getDescription());
+            }
+            if (roomDto.getAddress() != null) {
+                room.setAddress(roomDto.getAddress());
+            }
+            // Status chỉ update nếu cần, ví dụ từ DTO
+            if (roomDto.getStatus() != null) {
+                room.setStatus(roomDto.getStatus());
+            }
+
+            // Save room
+            Rooms updatedRoom = roomsService.save(room);
+
+            response.put("success", true);
+            response.put("message", "Thông tin phòng trọ đã được cập nhật thành công!");
+            response.put("room", updatedRoom);
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid data: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            logger.error("Error updating room: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật thông tin phòng trọ: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+
+
 
     private String saveFile(MultipartFile file) {
         logger.info("Saving file");
@@ -1238,7 +1441,7 @@ public class ContractController {
 
     @PostMapping("/hop-dong/update-status/{contractId}")
     public ResponseEntity<Map<String, Object>> updateContractStatus(
-            @PathVariable Long contractId,
+            @PathVariable Integer contractId,
             @RequestBody Map<String, String> request) {
 
         logger.info("🔄 === BẮT ĐẦU UPDATE CONTRACT STATUS ===");
@@ -1301,7 +1504,7 @@ public class ContractController {
 
     // 🧪 DEBUG ENDPOINT
     @GetMapping("/debug/contract/{contractId}")
-    public ResponseEntity<Map<String, Object>> debugContract(@PathVariable Long contractId) {
+    public ResponseEntity<Map<String, Object>> debugContract(@PathVariable Integer contractId) {
         logger.info("🧪 Debug contract: {}", contractId);
 
         Map<String, Object> response = new HashMap<>();
@@ -1348,7 +1551,7 @@ public class ContractController {
 
     @GetMapping("/details/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Map<String, Object>> getContractDetails(@PathVariable Long contractId,
+    public ResponseEntity<Map<String, Object>> getContractDetails(@PathVariable Integer contractId,
             Authentication authentication) {
         logger.info("Received request to get contract details for ID: {}", contractId);
         Map<String, Object> response = new HashMap<>();
@@ -1395,7 +1598,7 @@ public class ContractController {
 
     @GetMapping("/edit/{contractId}")
     public String editContractForm(
-            @PathVariable Long contractId,
+            @PathVariable Integer contractId,
             Model model,
             Authentication authentication) {
         System.out.println("🔍 === EDIT CONTRACT FORM CALLED ===");
@@ -1820,7 +2023,7 @@ public class ContractController {
             Users user = contract.getOwner();
 
             if (user != null) {
-                owner.setUserId(Long.valueOf(user.getUserId())); // ✅ THÊM userId
+                owner.setUserId(user.getUserId()); // ✅ THÊM userId
                 owner.setFullName(user.getFullname());
                 owner.setPhone(user.getPhone());
                 owner.setEmail(user.getEmail());
@@ -1961,7 +2164,7 @@ public class ContractController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<?> findContractById(@PathVariable Long id) {
+    public ResponseEntity<?> findContractById(@PathVariable Integer id) {
         logger.info("Received request to find contract by ID: {}", id);
         try {
             Optional<Contracts> contract = contractService.findContractById(id);

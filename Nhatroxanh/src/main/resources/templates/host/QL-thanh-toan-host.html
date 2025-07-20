@@ -14,7 +14,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <style>
     :root {
       --primary-color: #3498db;
@@ -485,6 +485,18 @@
       margin: 0 2px;
     }
 
+    .swal2-popup {
+      border-radius: 10px;
+    }
+
+    .swal2-confirm,
+    .swal2-cancel {
+      border-radius: 20px;
+      padding: 8px 20px;
+      color: #ffff;
+      background: #3E83CC;
+    }
+
     @media (max-width: 768px) {
       .main-container {
         margin: 0 10px;
@@ -641,7 +653,9 @@
 
                   <!-- Send Invoice Button -->
                   <div class="col-12 col-sm-6 col-md-auto">
-                    <button class="btn btn-warning w-100" onclick="sendUnpaidInvoices()">
+                    <button class="btn btn-warning w-100" onclick="sendUnpaidInvoices()" id="send-invoices-btn"
+                      aria-label="Gửi hóa đơn chưa thanh toán">
+                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
                       <i class="fas fa-paper-plane d-md-inline me-0 me-md-2"></i>
                       <span class="d-none d-sm-inline">Gửi hóa đơn</span>
                     </button>
@@ -916,7 +930,7 @@
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
-           <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
+          <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
             <i class="fas fa-trash me-2"></i>Xóa
           </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
@@ -1012,7 +1026,7 @@
           </form>
         </div>
         <div class="modal-footer">
-          
+
           <button type="button" class="btn btn-primary" onclick="createNewInvoice()">
             <i class="fas fa-plus me-2"></i>Tạo hóa đơn
           </button>
@@ -1027,6 +1041,7 @@
   <!-- Bootstrap 5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script th:src="@{/js/payment-management.js}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 </body>
 
 </html>

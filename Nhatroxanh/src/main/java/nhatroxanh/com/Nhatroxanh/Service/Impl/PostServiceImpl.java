@@ -18,14 +18,14 @@ import org.springframework.web.multipart.MultipartFile;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ApprovalStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Category;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
@@ -420,4 +420,22 @@ public class PostServiceImpl implements PostService {
         post.setStatus(false);
         postRepository.save(post);
     }
+
+    @Override
+    public Page<Post> getFilteredPostsByApprovalStatus(
+            ApprovalStatus approvalStatus,
+            String type,
+            String search,
+            Pageable pageable) {
+
+        if (type != null && type.trim().isEmpty()) {
+            type = null;
+        }
+        if (search != null && search.trim().isEmpty()) {
+            search = null;
+        }
+
+        return postRepository.findFilteredPosts(approvalStatus, type, search, pageable);
+    }
+
 }

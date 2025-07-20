@@ -540,6 +540,9 @@
                 transform: translateX(0);
             }
         }
+        .text-danger {
+            font-size: 12px;
+        }
     </style>
 </head>
 
@@ -557,39 +560,27 @@
             </button>
         </div>
 
-        <!-- Search & Filter -->
         <div class="search-filter-section">
             <form th:action="@{/nhan-vien/khuyen-mai}" method="get">
                 <div class="row mb-4 align-items-center">
                     <div class="col-md-6 mb-2 mb-md-0">
                         <div class="input-group search-input-group">
-                            <input type="text" class="form-control" name="search" th:value="${search}"
+                            <input type="text" class="form-control ms-3" name="search" th:value="${search}"
                                 placeholder="Tìm kiếm voucher...">
-                            <button class="btn" type="submit">
+                            <button class="btn ms-2" type="submit">
                                 <i class="fa fa-magnifying-glass"></i> Tìm kiếm
                             </button>
                         </div>
                     </div>
-                    <div
-                        class="col-md-6 text-md-end text-start d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
+                    <div class="col-md-6 d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
                         <div class="position-relative">
                             <i class="fa fa-filter filter-icon"></i>
                             <select class="form-select filter-select" name="statusFilter">
                                 <option value="">Trạng thái</option>
-                                <option value="Hoạt động" th:selected="${statusFilter == 'true'}">Hoạt động
+                                <option value="Hoạt động" th:selected="${statusFilter == 'Hoạt động'}">Hoạt động
                                 </option>
-                                <option value="Ngừng hoạt động" th:selected="${statusFilter == 'false'}">Ngừng
+                                <option value="Ngừng hoạt động" th:selected="${statusFilter == 'Ngừng hoạt động'}">Ngừng
                                     hoạt động</option>
-                            </select>
-                        </div>
-                        <div class="position-relative">
-                            <i class="fa fa-percentage filter-icon"></i>
-                            <select class="form-select filter-select" name="discountType">
-                                <option value="">Loại giảm giá</option>
-                                <option value="Phần trăm" th:selected="${discountType == 'true'}">Phần trăm
-                                </option>
-                                <option value="Số tiền cố định" th:selected="${discountType == 'false'}">Số
-                                    tiền cố định</option>
                             </select>
                         </div>
 
@@ -606,6 +597,7 @@
             </form>
         </div>
 
+
         <div class="custom-toast-container">
             <div th:if="${successMessage}" class="custom-toast success">
                 <i class="toast-icon fas fa-check-circle"></i>
@@ -618,8 +610,6 @@
                 <button class="toast-close" aria-label="Đóng">×</button>
             </div>
         </div>
-
-        <!-- Tabs -->
         <ul class="nav custom-tabs" id="voucherTabs" role="tablist">
             <li class="nav-item">
                 <a class="nav-link custom-tab active" id="manage-tab" data-bs-toggle="tab" href="#manage" role="tab"
@@ -627,21 +617,13 @@
                     <i class="fas fa-cogs me-2"></i>Quản lý voucher
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link custom-tab" id="approve-tab" data-bs-toggle="tab" href="#approve" role="tab"
-                    aria-controls="approve" aria-selected="false">
-                    <i class="fas fa-check-circle me-2"></i>Duyệt voucher
-                </a>
-            </li>
         </ul>
 
-        <!-- Tab content -->
         <div class="tab-content" id="voucherTabsContent">
 
-            <!-- TAB 1: Quản lý voucher -->
             <div class="tab-pane fade show active" id="manage" role="tabpanel" aria-labelledby="manage-tab">
                 <div class="row" id="voucherList">
-                    <div th:each="voucher : ${activeVouchers.content}" class="col-lg-4 col-md-6 mb-4">
+                    <div th:each="voucher : ${vouchers.content}" class="col-lg-4 col-md-6 mb-4">
                         <div class="card voucher-card h-100">
                             <div class="card-body voucher-card-body d-flex flex-column">
                                 <h5 class="voucher-title">
@@ -652,10 +634,6 @@
                                 <div class="voucher-info"><i class="fas fa-user"></i> Người tạo:
                                     <span class="voucher-info-value" th:text="${voucher.user.fullname}"></span>
                                 </div>
-
-                                <!-- <div class="voucher-info"><i class="fas fa-home"></i> Khu trọ:
-                                    <span class="voucher-info-value" th:text="${voucher.hostel.name}"></span>
-                                </div> -->
 
                                 <div class="voucher-info"><i class="fas fa-tag"></i> Mã:
                                     <span class="voucher-info-value" th:text="${voucher.code}"></span>
@@ -692,123 +670,47 @@
                                         th:onclick="'window.location.href=\'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id} + '\';'">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <button class="btn action-btn action-btn-delete"
-                                        th:onclick="'confirmDeleteVoucher(' + ${voucher.id} + ')'" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="pagination-container d-flex justify-content-center mt-4">
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${activeVouchers.first} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activeVouchers.number - 1}, pendingPage=${pendingPage})}">&laquo;</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, activeVouchers.totalPages - 1)}"
-                            th:classappend="${i == activeVouchers.number} ? 'active'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${i}, pendingPage=${pendingPage})}"
-                                th:text="${i + 1}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${activeVouchers.last} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activeVouchers.number + 1}, pendingPage=${pendingPage})}">&raquo;</a>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- TAB 2: Duyệt voucher -->
-            <div class="tab-pane fade" id="approve" role="tabpanel" aria-labelledby="approve-tab">
-                <div class="row" id="voucherPendingList">
-                    <div th:each="voucher : ${pendingVouchers.content}" class="col-lg-4 col-md-6 mb-4">
-                        <div class="card voucher-card h-100">
-                            <div class="card-body voucher-card-body d-flex flex-column">
-                                <h5 class="voucher-title">
-                                    <i class="fas fa-gift me-2 text-primary"></i>
-                                    <span th:text="${voucher.title}">Tiêu đề</span>
-                                </h5>
-
-                                <div class="voucher-info"><i class="fas fa-user"></i> Người tạo:
-                                    <span class="voucher-info-value" th:text="${voucher.user.fullname}"></span>
-                                </div>
-
-                                <!-- <div class="voucher-info"><i class="fas fa-home"></i> Khu trọ:
-                                    <span class="voucher-info-value" th:text="${voucher.hostel.name}"></span>
-                                </div> -->
-
-                                <div class="voucher-info"><i class="fas fa-tag"></i> Mã:
-                                    <span class="voucher-info-value" th:text="${voucher.code}"></span>
-                                </div>
-
-                                <div class="voucher-info"><i class="fas fa-clock"></i> Thời gian:
-                                    <span class="voucher-info-value"
-                                        th:text="${#dates.format(voucher.startDate, 'dd/MM/yyyy')} + ' - ' + ${#dates.format(voucher.endDate, 'dd/MM/yyyy')}"></span>
-                                </div>
-
-                                <div class="voucher-info"><i class="fas fa-percent"></i> Giảm:
-                                    <span class="voucher-info-value" th:text="${voucher.formattedDiscount}"></span>
-                                </div>
-
-                                <div class="voucher-info mb-3"><i class="fas fa-check-circle"></i> Trạng thái:
-                                    <span class="status-badge status-pending">
-                                        <i class="fas fa-clock"></i> Chờ duyệt
-                                    </span>
-                                </div>
-
-                                <div class="mt-auto d-flex justify-content-end gap-2">
-                                    <form th:action="@{/nhan-vien/khuyen-mai/duyet/{id}(id=${voucher.id})}"
-                                        method="post" th:object="${voucher}">
-                                        <button type="submit" class="btn action-btn action-btn-approve" title="Duyệt">
-                                            <i class="fas fa-check"></i>
+                                    <form th:action="@{/nhan-vien/khuyen-mai/xoa/{id}(id=${voucher.id})}" method="post"
+                                        th:object="${voucher}" class="delete-voucher-form" th:data-id="${voucher.id}">
+                                        <button type="submit" class="btn action-btn action-btn-delete">
+                                            <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
-
-                                    <button class="btn action-btn action-btn-delete"
-                                        th:onclick="'confirmDeleteVoucher(' + ${voucher.id} + ')'" title="Xóa">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Pagination -->
                 <div class="pagination-container d-flex justify-content-center mt-4">
                     <ul class="pagination">
-                        <li class="page-item" th:classappend="${pendingVouchers.first} ? 'disabled'">
+                        <li class="page-item" th:classappend="${vouchers.first} ? 'disabled'">
                             <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${pendingVouchers.number - 1})}">&laquo;</a>
+                                th:href="@{/nhan-vien/khuyen-mai(page=${vouchers.number - 1}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}">&laquo;</a>
                         </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, pendingVouchers.totalPages - 1)}"
-                            th:classappend="${i == pendingVouchers.number} ? 'active'">
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, vouchers.totalPages - 1)}"
+                            th:classappend="${i == vouchers.number} ? 'active'">
                             <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${i})}"
+                                th:href="@{/nhan-vien/khuyen-mai(page=${i}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}"
                                 th:text="${i + 1}">1</a>
                         </li>
-                        <li class="page-item" th:classappend="${pendingVouchers.last} ? 'disabled'">
+                        <li class="page-item" th:classappend="${vouchers.last} ? 'disabled'">
                             <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${pendingVouchers.number + 1})}">&raquo;</a>
+                                th:href="@{/nhan-vien/khuyen-mai(page=${vouchers.number + 1}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}">&raquo;</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
-    <!-- Modal: Tạo Voucher Nội Bộ -->
+
     <div class="modal fade" id="internalVoucherModal" tabindex="-1" aria-labelledby="internalVoucherLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content rounded-4 border-0">
                 <div class="modal-header border-0">
                     <h5 class="modal-title fw-bold" id="internalVoucherLabel">
-                        <i class="fa fa-star text-warning me-2"></i>Tạo Voucher Nội Bộ
+                        <i class="fa fa-star text-warning me-2"></i> Tạo Voucher Nội Bộ
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
@@ -818,62 +720,67 @@
 
                         <div class="mb-3">
                             <label class="form-label">Tên chương trình</label>
-                            <input type="text" class="form-control" th:field="*{title}"
+                            <input type="text" class="form-control" th:field="*{title}" name="title"
                                 placeholder="VD: Tặng 5% cho người thuê mới">
+                            <div class="text-danger" id="error-title"></div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Mã voucher</label>
-                            <input type="text" class="form-control text-uppercase" th:field="*{code}"
+                            <input type="text" class="form-control text-uppercase" th:field="*{code}" name="code"
                                 placeholder="VD: NHANVIEN5">
+                            <div class="text-danger" th:errors="*{code}"></div>
                         </div>
 
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Loại giảm giá</label>
-                                <select class="form-select" th:field="*{discountType}">
-                                    <option th:value="true">Phần trăm (%)</option>
-                                    <option th:value="false">Số tiền (VNĐ)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Giá trị giảm</label>
-                                <input type="number" class="form-control" th:field="*{discountValue}"
-                                    placeholder="VD: 5 hoặc 50000">
-                            </div>
+                        <div class="mb-3">
+                            <label class="form-label">Giá trị giảm</label>
+                            <input type="number" class="form-control" th:field="*{discountValue}" name="discountValue"
+                                placeholder="VD: 5 hoặc 50000">
+                            <div class="text-danger" id="error-discountValue"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" th:field="*{description}" name="description"></textarea>
+                            <div class="text-danger" id="error-description"></div>
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Ngày bắt đầu</label>
-                                <input type="date" class="form-control" th:field="*{startDate}">
+                                <input type="date" class="form-control" th:field="*{startDate}" name="startDate">
+                                <div class="text-danger" id="error-startDate"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Ngày kết thúc</label>
-                                <input type="date" class="form-control" th:field="*{endDate}">
+                                <input type="date" class="form-control" th:field="*{endDate}" name="endDate">
+                                <div class="text-danger" id="error-endDate"></div>
                             </div>
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
-                                <label class="form-label">Đơn tối thiểu</label>
-                                <input type="number" class="form-control" th:field="*{minAmount}"
+                                <label class="form-label">Đơn tối thiểu (VNĐ)</label>
+                                <input type="number" class="form-control" th:field="*{minAmount}" name="minAmount"
                                     placeholder="VD: 1000000">
+                                <div class="text-danger" id="error-minAmount"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Số lượng</label>
-                                <input type="number" class="form-control" th:field="*{quantity}" placeholder="VD: 50">
+                                <input type="number" class="form-control" th:field="*{quantity}" name="quantity"
+                                    placeholder="VD: 50">
+                                <div class="text-danger" id="error-quantity"></div>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Trạng thái voucher</label>
-
-                            <input type="hidden" name="status" th:value="${voucher.status ?: true}" />
-
-                            <button type="button" id="statusBtnInternal"
-                                class="btn status-toggle-btn status-toggle-active">
-                                <i class="fas fa-check-circle me-2"></i> Đang áp dụng
+                            <label class="form-label d-block">Trạng thái voucher</label>
+                            <input type="hidden" th:field="*{status}" id="statusInputInternal" />
+                            <button type="button" id="statusBtnInternal" class="btn status-toggle-btn"
+                                th:classappend="${voucher.status} ? 'status-toggle-active' : 'status-toggle-inactive'">
+                                <i class="fas me-2"
+                                    th:classappend="${voucher.status} ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                                <span th:text="${voucher.status} ? 'Đang áp dụng' : 'Ngừng áp dụng'">Đang áp dụng</span>
                             </button>
                         </div>
 
@@ -932,27 +839,6 @@
             new StatusManager("statusBtnInternal", "status", true);
         });
 
-
-        function confirmDeleteVoucher(voucherId) {
-            Swal.fire({
-                title: 'Bạn có chắc chắn muốn xóa?',
-                text: "Hành động này không thể hoàn tác!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Xóa ngay!',
-                cancelButtonText: 'Hủy'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/nhan-vien/khuyen-mai/xoa/${voucherId}`;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.toast-close').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -991,6 +877,125 @@
                     e.preventDefault();
                     searchForm.submit();
                 }
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("createInternalVoucherForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // Ngăn form submit nếu có lỗi
+                clearErrors();
+
+                let isValid = true;
+
+                const title = form.querySelector('[name="title"]');
+                const code = form.querySelector('[name="code"]');
+                const discount = form.querySelector('[name="discountValue"]');
+                const description = form.querySelector('[name="description"]');
+                const startDate = form.querySelector('[name="startDate"]');
+                const endDate = form.querySelector('[name="endDate"]');
+                const quantity = form.querySelector('[name="quantity"]');
+                const minAmount = form.querySelector('[name="minAmount"]');
+
+                // Kiểm tra rỗng hoặc sai logic
+                if (!title.value.trim()) {
+                    showError("title", "Tên chương trình không được để trống");
+                    isValid = false;
+                }
+
+                if (!code.value.trim()) {
+                    showError("code", "Mã voucher không được để trống");
+                    isValid = false;
+                }
+
+                if (!discount.value || parseFloat(discount.value) <= 0) {
+                    showError("discountValue", "Giá trị giảm phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (!description.value.trim()) {
+                    showError("description", "Mô tả không được để trống");
+                    isValid = false;
+                }
+
+                if (!startDate.value) {
+                    showError("startDate", "Ngày bắt đầu không được để trống");
+                    isValid = false;
+                }
+
+                if (!endDate.value) {
+                    showError("endDate", "Ngày kết thúc không được để trống");
+                    isValid = false;
+                }
+
+                if (startDate.value && endDate.value && new Date(startDate.value) > new Date(endDate.value)) {
+                    showError("endDate", "Ngày kết thúc phải sau ngày bắt đầu");
+                    isValid = false;
+                }
+
+                if (!minAmount.value || parseFloat(minAmount.value) <= 0) {
+                    showError("minAmount", "Đơn tối thiểu phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (!quantity.value || parseInt(quantity.value) <= 0) {
+                    showError("quantity", "Số lượng phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    form.submit(); // Submit nếu hợp lệ
+                } else {
+                    const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
+                    modal.show(); // Mở lại modal nếu có lỗi
+                }
+            });
+
+            function showError(fieldName, message) {
+                const errorDiv = document.getElementById("error-" + fieldName);
+                const input = form.querySelector('[name="' + fieldName + '"]');
+
+                if (errorDiv) {
+                    errorDiv.innerText = message;
+                    errorDiv.style.display = "block";
+                }
+
+                if (input) {
+                    input.classList.add("is-invalid");
+                }
+            }
+
+            function clearErrors() {
+                const errorDivs = document.querySelectorAll(".text-danger");
+                errorDivs.forEach(div => div.innerText = "");
+
+                const inputs = document.querySelectorAll(".form-control");
+                inputs.forEach(input => input.classList.remove("is-invalid"));
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForms = document.querySelectorAll('.delete-voucher-form');
+
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Ngăn submit mặc định
+
+                    Swal.fire({
+                        title: 'Bạn chắc chắn?',
+                        text: "Hành động này sẽ xóa voucher vĩnh viễn!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); // Gửi form nếu người dùng xác nhận
+                        }
+                    });
+                });
             });
         });
     </script>

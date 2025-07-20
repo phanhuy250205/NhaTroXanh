@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết khiếu nại và sự cố</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --primary-light: #e8f2ff;
+            --primary-dark: #2c6ba0;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f1f8ff 50%, var(--light-bg) 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .main-container {
+            margin-left: 100px;
+            width: calc(100% - 100px);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .detail-header-host {
+            background: var(--white);
+            padding: 1.75rem;
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .back-button-host {
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.75rem 0;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .back-button-host:hover {
+            color: var(--primary-dark);
+            transform: translateX(-5px);
+        }
+
+        .detail-title-host {
+            color: var(--primary-color);
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .info-section-host {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .info-header-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .info-content-host {
+            padding: 2rem;
+        }
+
+        .info-field-host {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-label-host {
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 0.6rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value-host {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1rem;
+            font-size: 0.95rem;
+            color: #212529;
+            transition: var(--transition);
+        }
+
+        .info-value-host:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(62, 131, 204, 0.15);
+            outline: none;
+        }
+
+        .info-value-large-host {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .status-buttons-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-success:hover {
+            background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #545b62 0%, #383d41 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .images-section-host {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .images-header-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .images-content-host {
+            padding: 2rem;
+        }
+
+        .image-placeholder-host {
+            width: 160px;
+            height: 160px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px dashed #dee2e6;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-right: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .image-placeholder-host:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: scale(1.05);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .image-placeholder-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(62, 131, 204, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .image-placeholder-host:hover::before {
+            transform: translateX(100%);
+        }
+
+        .fade-in-host {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                margin-left: 80px;
+                width: calc(100% - 80px);
+            }
+
+            .content-container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 13px;
+            }
+
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .detail-title-host {
+                font-size: 1.5rem;
+            }
+
+            .content-container {
+                padding: 0 1rem;
+            }
+
+            .info-content-host {
+                padding: 1.25rem;
+            }
+
+            .images-content-host {
+                padding: 1.25rem;
+            }
+
+            .image-placeholder-host {
+                width: 130px;
+                height: 130px;
+            }
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-badge-staff {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 600;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        .status-pending-staff {
+            background-color: #ffc107;
+            /* vàng */
+        }
+
+        .status-pending-staff:hover {
+            background-color: #e0a800;
+        }
+
+        .status-processing-staff {
+            background-color: #17a2b8;
+            /* xanh dương nhạt */
+        }
+
+        .status-processing-staff:hover {
+            background-color: #138496;
+        }
+
+        .status-completed-staff {
+            background-color: #28a745;
+            /* xanh lá */
+        }
+
+        .status-completed-staff:hover {
+            background-color: #218838;
+        }
+
+        .status-badge-staff:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <div class="container">
+        <div class="content-container">
+            <div class="detail-header-host fade-in-host">
+                <a th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${page})}" class="back-button-host">
+                    <i class="fas fa-arrow-left"></i>Quay lại
+                </a>
+                <h1 class="detail-title-host">Chi tiết khiếu nại và sự cố</h1>
+            </div>
+            <div class="custom-toast-container">
+                <div th:if="${successMessage}" class="custom-toast success">
+                    <i class="toast-icon fas fa-check-circle"></i>
+                    <span class="toast-message" th:text="${successMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+                <div th:if="${errorMessage}" class="custom-toast error">
+                    <i class="toast-icon fas fa-exclamation-circle"></i>
+                    <span class="toast-message" th:text="${errorMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+            </div>
+            <div class="info-section-host fade-in-host">
+                <div class="info-header-host">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin khiếu nại/sự cố
+                </div>
+                <div class="info-content-host">
+                    <form th:action="@{/chu-tro/quan-ly-su-co/{id}/update(id=${incident.reportId})}" method="post"
+                        class="row">
+                        <input type="hidden" name="search" th:value="${search}">
+                        <input type="hidden" name="page" th:value="${page}">
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">ID khiếu nại</div>
+                                <div class="info-value-host" th:text="${incident.reportId}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Loại sự cố</div>
+                                <div class="info-value-host" th:text="${incident.incidentType}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Mức độ ưu tiên</div>
+                                <div class="info-value-host">
+                                    <span th:classappend="
+            ${incident.level.name() == 'CAO'} ? 'priority-high-host' :
+            (${incident.level.name() == 'TRUNG_BINH'} ? 'priority-medium-host' : 'priority-low-host')"
+                                        class="priority-badge-host">
+
+                                        <i class="fas fa-exclamation-triangle"></i>
+
+                                        <span th:switch="${incident.level.name()}">
+                                            <span th:case="'CAO'">Cao</span>
+                                            <span th:case="'TRUNG_BINH'">Trung bình</span>
+                                            <span th:case="'THAP'">Thấp</span>
+                                        </span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Thời gian gửi</div>
+                                <div class="info-value-host"
+                                    th:text="${#dates.format(incident.reportedAt, 'dd/MM/yyyy HH:mm')}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Họ và tên người gửi</div>
+                                <div class="info-value-host" th:text="${incident.user.fullname}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Số điện thoại</div>
+                                <div class="info-value-host" th:text="${incident.user.phone}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Khu trọ</div>
+                                <div class="info-value-host" th:text="${incident.room.hostel.name}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Phòng</div>
+                                <div class="info-value-host" th:text="${incident.room.namerooms}" disabled></div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4 col-md-6">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Trạng thái</div>
+                                <form th:action="@{/chu-tro/quan-ly-su-co/{id}/update-status(id=${incident.reportId})}"
+                                    method="post">
+                                    <input type="hidden" name="status" th:value="${incident.status.name() == 'CHUA_XU_LY' ? 'DANG_XU_LY' :
+                      (incident.status.name() == 'DANG_XU_LY' ? 'DA_XU_LY' : 'DA_XU_LY')}" />
+
+                                    <button type="submit" th:if="${incident.status.name() == 'CHUA_XU_LY'}"
+                                        class="status-badge-staff status-pending-staff">
+                                        <i class="fas fa-clock"></i> Chờ xử lý
+                                    </button>
+
+                                    <button type="submit" th:if="${incident.status.name() == 'DANG_XU_LY'}"
+                                        class="status-badge-staff status-processing-staff">
+                                        <i class="fas fa-cog"></i> Đang xử lý
+                                    </button>
+
+                                    <button type="button" th:if="${incident.status.name() == 'DA_XU_LY'}"
+                                        class="status-badge-staff status-completed-staff" disabled>
+                                        <i class="fas fa-check-circle"></i> Đã xử lý
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="info-field-host">
+                                <div class="info-label-host">Nội dung khiếu nại</div>
+                                <textarea name="description" class="form-control info-value-host info-value-large-host"
+                                    th:text="${incident.description}" rows="6" disabled></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="images-section-host fade-in-host">
+                <div class="images-header-host">
+                    <i class="fas fa-images"></i>
+                    Hình ảnh đính kèm
+                </div>
+                <div class="images-content-host">
+                    <div class="d-flex flex-wrap">
+                        <div th:each="img : ${incident.images}" class="image-placeholder-host">
+                            <span>Ảnh khiếu nại</span>
+                            <img th:src="@{${img.url}}" alt="" style="width: 150px; height: 100px;"
+                                th:attr="onclick=|openModalImage('${img.url}')|" />
+                            <small style="margin-top: 0.5rem; opacity: 0.7;">Nhấn để xem</small>
+                        </div>
+                        <div th:if="${#lists.isEmpty(incident.images)}" class="text-center w-100">
+                            Không có hình ảnh đính kèm.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Modal xem ảnh -->
+            <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageModalTitle">Xem ảnh</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img id="modalImage" src="" alt="" class="img-fluid rounded">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 500);
+                });
+            }, 3000);
+        });
+        function openModalImage(url) {
+            document.getElementById('modalImage').src = url;
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show();
+        }
+    </script>
+</body>
+
+</html>

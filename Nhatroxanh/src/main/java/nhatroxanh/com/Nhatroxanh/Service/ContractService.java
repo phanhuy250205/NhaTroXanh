@@ -8,10 +8,11 @@ import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ContractService {
@@ -27,14 +28,14 @@ public interface ContractService {
     @Transactional
     Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
 
-    Contracts updateContract(Long contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
+    Contracts updateContract(Integer contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
 
     @Transactional
-    Contracts updateContract(Long contractId, ContractDto contractDto) throws Exception;
+    Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception;
 
-    void deleteContract(Long contractId) throws Exception;
+    void deleteContract(Integer contractId) throws Exception;
 
-    Optional<Contracts> findContractById(Long contractId);
+    Optional<Contracts> findContractById(Integer contractId);
 
     List<Contracts> findContractsByRoomId(Integer roomId);
 
@@ -69,14 +70,13 @@ public interface ContractService {
     List<ContractListDto> getAllContractsForList();
     List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
 
-    void updateStatus(Long contractId, String newStatus);
+    void updateStatus(Integer contractId, String newStatus);
 
-    Contracts getContractById(Long contractId);
+    Contracts getContractById(Integer contractId);
     // Thêm method mới để lấy phòng theo tenant ID
     Rooms findRoomByTenantId(Long tenantId);
 
 
-
-    List<Contracts> getMyContracts();
+     List<Contracts> getMyContracts();
     Contracts createContractFinal(ContractDto contractDto, Users owner, Users tenant, UnregisteredTenants guardian);
 }

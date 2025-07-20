@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
 
 import java.sql.Date;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentRequestDto {
-    private Long contractId;
+    private Integer contractId;
     private String month; // Format: "MM/yyyy"
     private Date dueDate;
     private PaymentMethod paymentMethod;

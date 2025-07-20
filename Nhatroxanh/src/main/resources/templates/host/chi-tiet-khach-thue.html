@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    
+
     <style>
         .tenant-detail-body-host {
             font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -222,7 +223,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            margin-top: 8px;
+            margin-top: -2px;
         }
 
         .status-active-host {
@@ -623,8 +624,27 @@
         .modal-content-host::-webkit-scrollbar-thumb:hover {
             background: #549eed;
         }
+
+        .status-active-host {
+            background-color: #28a745;
+            /* xanh lá */
+            color: white;
+        }
+
+        .status-warning-host {
+            background-color: #ffc107;
+            /* vàng cảnh báo */
+            color: black;
+        }
+
+        .status-inactive-host {
+            background-color: #dc3545;
+            /* đỏ */
+            color: white;
+        }
     </style>
 </head>
+
 <body class="tenant-detail-body-host">
     <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -639,9 +659,9 @@
                 </a>
                 <h1 class="page-title-host">Chi tiết khách thuê</h1>
             </div>
-            <button class="edit-btn-host" onclick="showEditModal()">
+            <!-- <button class="edit-btn-host" onclick="showEditModal()">
                 <i class="fas fa-edit"></i> Chỉnh sửa
-            </button>
+            </button> -->
         </div>
 
         <!-- HIỂN THỊ THÔNG BÁO THÀNH CÔNG/LỖI (NẾU CÓ) -->
@@ -661,11 +681,13 @@
                         <label class="form-label-host">Giới tính</label>
                         <div class="gender-group-host">
                             <div class="radio-group-host">
-                                <input type="radio" class="radio-input-host" name="gioiTinh" th:checked="*{userGender == true}" disabled>
+                                <input type="radio" class="radio-input-host" name="gioiTinh"
+                                    th:checked="*{userGender == true}" disabled>
                                 <label class="radio-label-host">Nam</label>
                             </div>
                             <div class="radio-group-host">
-                                <input type="radio" class="radio-input-host" name="gioiTinh" th:checked="*{userGender == false}" disabled>
+                                <input type="radio" class="radio-input-host" name="gioiTinh"
+                                    th:checked="*{userGender == false}" disabled>
                                 <label class="radio-label-host">Nữ</label>
                             </div>
                         </div>
@@ -678,7 +700,9 @@
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày sinh</label>
-                        <input type="text" class="form-control-host" th:value="*{userBirthday != null ? #dates.format(userBirthday, 'dd/MM/yyyy') : 'N/A'}" disabled>
+                        <input type="text" class="form-control-host"
+                            th:value="*{userBirthday != null ? #dates.format(userBirthday, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Nơi cấp CCCD</label>
@@ -707,22 +731,33 @@
                     </div>
                     <div class="form-group-host status-container-host">
                         <label class="form-label-host">Trạng thái Hợp đồng</label>
-                        <span th:if="*{contractStatus}" class="status-badge-host status-active-host">
-                            <i class="fas fa-check-circle"></i> Đang thuê
-                        </span>
-                        <span th:unless="*{contractStatus}" class="status-badge-host status-inactive-host">
-                            <i class="fas fa-times-circle"></i> Đã trả phòng
+                        <span th:switch="*{contractStatus}" class="status-badge-host">
+                            <span th:case="'ACTIVE'" class="status-badge-host status-active-host">
+                                <i class="fas fa-check-circle"></i> Đang thuê
+                            </span>
+                            <span th:case="'EXPIRED'" class="status-badge-host status-warning-host">
+                                <i class="fas fa-exclamation-circle"></i> Sắp hết hạn
+                            </span>
+                            <span th:case="'TERMINATED'" class="status-badge-host status-inactive-host">
+                                <i class="fas fa-times-circle"></i> Đã hủy
+                            </span>
+                            <span th:case="*">
+                                <i class="fas fa-question-circle"></i> Không xác định
+                            </span>
                         </span>
                     </div>
+
                 </div>
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày bắt đầu</label>
-                        <input type="text" class="form-control-host" th:value="*{startDate != null ? #dates.format(startDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
+                        <input type="text" class="form-control-host"
+                            th:value="*{startDate != null ? #dates.format(startDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày kết thúc</label>
-                        <input type="text" class="form-control-host" th:value="*{endDate != null ? #dates.format(endDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
+                        <input type="text" class="form-control-host"
+                            th:value="*{endDate != null ? #dates.format(endDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
                     </div>
                 </div>
                 <div class="form-row-host">
@@ -736,7 +771,7 @@
     </div>
 
     <!-- Edit Modal -->
-    <div id="editModal" class="modal-overlay-host" th:if="${tenant != null}" th:object="${tenant}">
+    <!-- <div id="editModal" class="modal-overlay-host" th:if="${tenant != null}" th:object="${tenant}">
         <div class="modal-content-host">
             <form th:action="@{/chu-tro/chi-tiet-khach-thue/update}" method="post">
                 <input type="hidden" name="contractId" th:value="*{contractId}" />
@@ -767,7 +802,7 @@
                 </div>
             </form>
         </div>
-    </div>
+    </div> -->
 
     <!-- Bootstrap JS và các script khác -->
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
@@ -775,7 +810,8 @@
     <script>
         function showEditModal() { document.getElementById('editModal').classList.add('show'); }
         function hideEditModal() { document.getElementById('editModal').classList.remove('show'); }
-        document.getElementById('editModal').addEventListener('click', function(e) { if (e.target === this) { hideEditModal(); } });
+        document.getElementById('editModal').addEventListener('click', function (e) { if (e.target === this) { hideEditModal(); } });
     </script>
 </body>
+
 </html>

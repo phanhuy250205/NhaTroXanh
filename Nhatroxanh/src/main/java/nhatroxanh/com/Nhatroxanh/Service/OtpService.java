@@ -1,7 +1,7 @@
 
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 public interface OtpService {
    // Tạo và gửi OTP cho một user cụ thể

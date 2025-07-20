@@ -3,8 +3,9 @@ package nhatroxanh.com.Nhatroxanh.Security;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -53,6 +54,10 @@ public class CustomUserDetails implements UserDetails {
 
     public String getIssuePlace() {
         return userCccd != null ? userCccd.getIssuePlace() : null;
+    }
+
+    public Double getBalance() {
+        return user.getBalance();
     }
 
     @Override

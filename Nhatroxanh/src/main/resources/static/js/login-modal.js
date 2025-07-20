@@ -52,22 +52,19 @@ document.addEventListener("DOMContentLoaded", () => {
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            const errorMessageDiv = document.getElementById("login-error-message");
-            errorMessageDiv.style.display = 'none'; 
-
-            // 1. Lấy dữ liệu từ form trong modal
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
             const rememberMe = document.getElementById("rememberMe").checked;
+
             const formData = new URLSearchParams();
-            formData.append('username', username); 
+            formData.append('username', username);
             formData.append('password', password);
             if (rememberMe) {
-                // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
-            // 3. Gọi đến cổng xử lý đăng nhập chung của Spring Security
+
             fetch('/login-processing', {
+
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: formData
@@ -89,8 +86,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         alert(error.message);
                     }
                 });
+
         });
     }
+
 });
 
 
