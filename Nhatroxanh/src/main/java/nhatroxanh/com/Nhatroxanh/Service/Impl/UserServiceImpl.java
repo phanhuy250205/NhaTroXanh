@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
         }
 
         newUser.setRole(Users.Role.OWNER);
-        newUser.setEnabled(true);
+        newUser.setEnabled(false);
         newUser.setCreatedAt(LocalDateTime.now());
 
 
