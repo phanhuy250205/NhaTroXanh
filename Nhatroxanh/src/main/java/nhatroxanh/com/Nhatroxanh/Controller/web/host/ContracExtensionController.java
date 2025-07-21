@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import nhatroxanh.com.Nhatroxanh.Model.enity.ContractStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests.RequestStatus;
@@ -95,6 +96,7 @@ public class ContracExtensionController {
 
                 Contracts contract = req.getContract();
                 contract.setEndDate(req.getRequestedExtendDate());
+                contract.setStatus(Contracts.Status.ACTIVE);
                 contractsRepository.save(contract);
                 extensionRequestRepository.save(req);
 

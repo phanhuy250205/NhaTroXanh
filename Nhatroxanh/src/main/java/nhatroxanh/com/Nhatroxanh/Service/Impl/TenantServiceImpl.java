@@ -20,6 +20,8 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import lombok.RequiredArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts.Status;
 import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
@@ -135,6 +137,7 @@ public class TenantServiceImpl implements TenantService {
                 .contractStatus(contract.getStatus().name())
                 .roomName(room.getNamerooms())
                 .hostelName(hostel.getName())
+                .userId(tenant.getUserId()) // 👈 QUAN TRỌNG: thêm dòng này để fix lỗi bạn gặp
                 .userFullName(tenant.getFullname())
                 .userGender(tenant.getGender())
                 .userPhone(tenant.getPhone())
@@ -142,7 +145,9 @@ public class TenantServiceImpl implements TenantService {
                 .userCccdNumber(cccdNumber)
                 .userCccdMasked(maskCccd(cccdNumber))
                 .userIssuePlace(issuePlace)
+                .enabled(tenant.isEnabled())
                 .build();
+
     }
 
     @Override
@@ -485,4 +490,14 @@ public class TenantServiceImpl implements TenantService {
         extensionRequestRepository.save(request);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable) {
+        return contractRepository.getTenantSummaryByOwnerWithFilters(ownerId, keyword, pageable);
+    }
+
+    @Override
+    public List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId) {
+        return contractRepository.findRoomHistoryByTenantId(tenantId);
+    }
 }

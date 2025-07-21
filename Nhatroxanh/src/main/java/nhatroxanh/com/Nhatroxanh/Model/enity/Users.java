@@ -22,7 +22,7 @@ import java.util.Objects;
         "ownedContracts",
         "rentedContracts",
         "vouchers",
-        "addressEntity"  // ✅ THÊM DÒNG NÀY
+        "addressEntity" // ✅ THÊM DÒNG NÀY
 })
 // ✅ SỬA: Chỉ dùng userId làm key cho equals/hashCode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -33,7 +33,7 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    @EqualsAndHashCode.Include  // ✅ THÊM annotation này
+    @EqualsAndHashCode.Include // ✅ THÊM annotation này
     private Integer userId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
@@ -93,10 +93,9 @@ public class Users {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    @JsonIgnore
-    private Address addressEntity;
+    // @ManyToOne
+    // @JoinColumn(name = "address_id")
+    // private Address addressEntity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
@@ -118,6 +117,10 @@ public class Users {
     @JsonIgnore
     private List<Vouchers> vouchers;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
+
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }
@@ -126,9 +129,13 @@ public class Users {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 
+    public enum Status  {
+        PENDING, APPROVED, REJECTED
+    }
+
     // ✅ XÓA method hashCode() tự viết vì đã có @EqualsAndHashCode
     // @Override
     // public int hashCode() {
-    //     return Objects.hash(userId, fullname, phone, email);
+    // return Objects.hash(userId, fullname, phone, email);
     // }
 }
