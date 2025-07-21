@@ -1,7 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;

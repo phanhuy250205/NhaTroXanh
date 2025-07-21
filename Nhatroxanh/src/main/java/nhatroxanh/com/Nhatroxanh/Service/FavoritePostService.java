@@ -1,9 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 import java.util.List;
 import java.util.Map;

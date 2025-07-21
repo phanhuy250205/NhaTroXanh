@@ -1,15 +1,13 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
@@ -77,5 +75,10 @@ public interface UserService {
 
     Users getById(Integer id);
 
+    void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage);
+    
+
+
     Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status);
+
 }

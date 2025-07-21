@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
 public interface UtilityRepository extends JpaRepository<Utility, Integer> {
     @Query("SELECT u FROM Utility u ORDER BY u.name ASC")

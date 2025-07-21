@@ -3,8 +3,8 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.ImageService;

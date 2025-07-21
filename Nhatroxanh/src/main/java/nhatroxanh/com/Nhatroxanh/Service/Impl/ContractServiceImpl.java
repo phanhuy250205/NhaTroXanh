@@ -2,11 +2,12 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import nhatroxanh.com.Nhatroxanh.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.sql.Date;
 import java.time.LocalDate;
@@ -24,12 +26,16 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class ContractServiceImpl implements ContractService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
+
+    @Autowired // <-- THÊM DÒNG NÀY
+    private UtilityRepository utilityRepository;
 
     @Autowired
     private ContractRepository contractRepository;
@@ -65,9 +71,9 @@ public class ContractServiceImpl implements ContractService {
         logger.info("Tenant phone validated: {}", tenantPhone);
 
         if (roomId == null || roomId <= 0) {
-            logger.error("Invalid room ID: {}", roomId);
-            throw new IllegalArgumentException("ID phòng không hợp lệ!");
-        }
+    logger.error("Invalid room ID: {}", roomId);
+    throw new IllegalArgumentException("ID phòng không hợp lệ!");
+}
         logger.info("Room ID validated: {}", roomId);
 
         if (contractDate == null) {
@@ -771,7 +777,7 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public void updateStatus(Long contractId, String newStatusString) {
+    public void updateStatus(Integer contractId, String newStatusString) {
         logger.info("🔄 === SERVICE: UPDATE STATUS ===");
         logger.info("📝 Contract ID: {}", contractId);
         logger.info("📝 New Status String: '{}'", newStatusString);
@@ -791,7 +797,7 @@ public class ContractServiceImpl implements ContractService {
 
             // 🔍 TÌM HỢP ĐỒNG
             logger.info("🔍 Tìm hợp đồng với ID: {}", contractId);
-            Optional<Contracts> contractOpt = contractRepository.findById(Math.toIntExact(contractId));
+            Optional<Contracts> contractOpt = contractRepository.findById(contractId);
 
             if (contractOpt.isEmpty()) {
                 logger.error("❌ Không tìm thấy hợp đồng với ID: {}", contractId);
@@ -824,9 +830,9 @@ public class ContractServiceImpl implements ContractService {
     // 🔍 TÌM HỢP ĐỒNG THEO ID
     @Override
     @Transactional(readOnly = true)
-    public Contracts getContractById(Long contractId) {
+    public Contracts getContractById(Integer contractId) {
         logger.info("🔍 Service: Tìm hợp đồng với ID: {}", contractId);
-        return contractRepository.findById(Math.toIntExact(contractId))
+        return contractRepository.findById(contractId)
                 .orElseThrow(() -> {
                     logger.warn("⚠️ Không tìm thấy hợp đồng với ID: {}", contractId);
                     return new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId);
@@ -936,7 +942,7 @@ public class ContractServiceImpl implements ContractService {
         return contracts.stream()
                 .map(contract -> {
                     ContractListDto dto = new ContractListDto();
-
+                    
                     // ID hợp đồng
                     dto.setContractId(contract.getContractId() != null
                             ? contract.getContractId().longValue()
@@ -973,9 +979,6 @@ public class ContractServiceImpl implements ContractService {
                 })
                 .collect(Collectors.toList());
     }
-
-
-
     private LocalDate calculateEndDate(Contracts contract) {
         if (contract.getEndDate() != null) {
             return contract.getEndDate().toLocalDate();
@@ -1033,7 +1036,73 @@ public class ContractServiceImpl implements ContractService {
     //     Users user = userRepository.findByEmail(email)
     //             .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-    //     // Lấy danh sách hợp đồng của chủ trọ
-    //    return contractRepository.findByOwnerId(user.getUserId());
-    // }
+
+    @Override
+    public List<Contracts> getMyContracts() {
+       Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        // Lấy danh sách hợp đồng của chủ trọ
+       return contractRepository.findByOwnerId(user.getUserId());
+    }
+
+ @Override
+    @Transactional
+    public Contracts createContractFinal(ContractDto contractDto, Users owner, Users tenant, UnregisteredTenants guardian) {
+        logger.info("SERVICE: Bắt đầu tạo và liên kết hợp đồng.");
+
+        // 1. Tìm phòng trọ từ DTO và kiểm tra
+        Rooms room = roomRepository.findById(contractDto.getRoom().getRoomId())
+                .orElseThrow(() -> new IllegalArgumentException("Phòng trọ không tồn tại!"));
+        
+        if (room.getStatus() != RoomStatus.unactive) {
+            throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
+        }
+         if (contractDto.getRoom().getUtilityIds() != null && !contractDto.getRoom().getUtilityIds().isEmpty()) {
+        // Dùng repository để tìm tất cả các đối tượng Utility tương ứng với ID đã chọn
+        Set<Utility> utilities = utilityRepository.findByUtilityIdIn(contractDto.getRoom().getUtilityIds());
+        // Gán tập hợp tiện ích này cho đối tượng phòng trọ
+        room.setUtilities(utilities);
+        logger.info("SERVICE: Đã gán {} tiện ích cho phòng ID {}.", utilities.size(), room.getRoomId());
+    } else {
+        // Nếu người dùng không chọn tiện ích nào, hãy xóa hết các tiện ích cũ (nếu có)
+        room.getUtilities().clear();
+        logger.info("SERVICE: Đã xóa hết tiện ích cho phòng ID {}.", room.getRoomId());
+    }
+
+        // 2. Tạo đối tượng hợp đồng và gán các thông tin
+        Contracts contract = new Contracts();
+        contract.setOwner(owner);
+        contract.setRoom(room);
+        contract.setTenant(tenant);         // Gán người thuê chính (User)
+        contract.setUnregisteredTenant(guardian);     // Gán người bảo hộ (dữ liệu từ bảng unregistered_tenants)
+
+        // Lấy thông tin từ DTO để điền vào hợp đồng
+        contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
+        contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
+        contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
+        contract.setPrice(contractDto.getTerms().getPrice().floatValue());
+        contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
+        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+        contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+        contract.setTerms(contractDto.getTerms().getTerms());
+        contract.setCreatedAt(new java.sql.Date(System.currentTimeMillis()));
+        // Lấy SĐT từ người thuê chính
+        contract.setTenantPhone(tenant.getPhone());
+
+
+        // 3. Lưu hợp đồng vào database
+        Contracts savedContract = contractRepository.save(contract);
+        
+        // 4. Cập nhật trạng thái phòng
+        room.setStatus(RoomStatus.active);
+        roomRepository.save(room);
+
+        logger.info("SERVICE: Đã tạo và liên kết hợp đồng ID {} thành công.", savedContract.getContractId());
+        return savedContract;
+    }
+
 }

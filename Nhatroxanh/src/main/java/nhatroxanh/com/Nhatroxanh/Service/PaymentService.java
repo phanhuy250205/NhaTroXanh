@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
 import java.util.List;
 import java.util.Map;

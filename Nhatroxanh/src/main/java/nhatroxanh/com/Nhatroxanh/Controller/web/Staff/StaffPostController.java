@@ -1,10 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web.Staff;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.CategoryService;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;

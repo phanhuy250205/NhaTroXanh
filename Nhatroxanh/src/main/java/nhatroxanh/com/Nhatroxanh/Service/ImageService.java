@@ -1,8 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
+
 import org.springframework.web.multipart.MultipartFile;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
 
 import java.io.IOException;
 import java.util.List;

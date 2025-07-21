@@ -3,15 +3,17 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.Builder;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Set;
 
 public class ContractDto {
-    private Long id;
+    private Integer id;
     private LocalDate contractDate;
     private String status;
     private Owner owner;
@@ -54,8 +56,8 @@ public class ContractDto {
     }
 
     // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public LocalDate getContractDate() { return contractDate; }
     public void setContractDate(LocalDate contractDate) { this.contractDate = contractDate; }
@@ -86,7 +88,7 @@ public class ContractDto {
     public void setTerms(Terms terms) { this.terms = terms; }
 
     public static class Owner {
-        private  Long userId; // ✅ THÊM FIELD NÀY
+        private  Integer userId; // ✅ THÊM FIELD NÀY
         private String fullName;
         private String phone;
         private String cccdNumber;
@@ -103,11 +105,11 @@ public class ContractDto {
         // Getters and setters
 
 
-        public Long getUserId() {
+        public Integer getUserId() {
             return userId;
         }
 
-        public void setUserId(Long userId) {
+        public void setUserId(Integer userId) {
             this.userId = userId;
         }
 
@@ -302,8 +304,16 @@ public class ContractDto {
         private String province; // Thêm trường province
         @JsonProperty("isCurrent")  // ✅ THÊM ANNOTATION
         private Boolean isCurrent = false;
-
+        private Set<Integer> utilityIds;
         // ✅ SỬA GETTER/SETTER
+
+        public Set<Integer> getUtilityIds() {
+            return utilityIds;
+        }
+
+        public void setUtilityIds(Set<Integer> utilityIds) {
+            this.utilityIds = utilityIds;
+        }
         public Boolean getIsCurrent() {  // ✅ TÊN ĐÚNG
             return isCurrent;
         }

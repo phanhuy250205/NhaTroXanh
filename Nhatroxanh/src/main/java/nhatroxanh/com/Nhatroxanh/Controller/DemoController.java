@@ -18,9 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
@@ -31,8 +28,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
@@ -271,8 +270,10 @@ public class DemoController {
         return "guest/thanh-toan";
     }
 
+
     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
     public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+
         try {
             TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
             model.addAttribute("tenant", tenantDetail);

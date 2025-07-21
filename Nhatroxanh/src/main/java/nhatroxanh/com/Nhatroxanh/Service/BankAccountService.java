@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import org.springframework.stereotype.Service;
 

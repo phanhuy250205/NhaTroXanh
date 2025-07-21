@@ -10,14 +10,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
 public interface TenantService {
         Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId,

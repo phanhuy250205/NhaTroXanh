@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;

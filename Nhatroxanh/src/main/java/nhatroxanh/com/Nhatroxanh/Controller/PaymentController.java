@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 

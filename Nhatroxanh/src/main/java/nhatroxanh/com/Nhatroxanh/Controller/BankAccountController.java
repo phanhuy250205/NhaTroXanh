@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.BankAccountService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;

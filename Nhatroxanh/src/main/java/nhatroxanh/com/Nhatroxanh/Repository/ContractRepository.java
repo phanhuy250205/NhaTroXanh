@@ -2,6 +2,9 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+
 import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -10,9 +13,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 
 import java.sql.Date;
 import java.util.List;
@@ -78,7 +78,9 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
                         "ORDER BY c.contractDate DESC")
         List<Contracts> findByOwnerUserIdOrderByContractDateDesc(@Param("ownerId") Integer ownerId);
 
+
         List<Contracts> findByTenantAndStatusIn(Users tenant, List<Contracts.Status> statuses);
+
 
         List<Contracts> findByTenant(Users tenant);
 
@@ -108,6 +110,14 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         // Tìm hợp đồng theo tenant ID
         @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
-        Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
+        Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId);
+
+
+
+    // Tìm hợp đồng theo tenant ID
+    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
+    Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
+
+
 
 }

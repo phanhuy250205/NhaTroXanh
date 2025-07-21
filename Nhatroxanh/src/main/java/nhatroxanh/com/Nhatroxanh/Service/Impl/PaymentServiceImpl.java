@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import jakarta.mail.internet.MimeMessage;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 

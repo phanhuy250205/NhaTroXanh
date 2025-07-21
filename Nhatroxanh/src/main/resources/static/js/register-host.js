@@ -34,26 +34,32 @@ document.addEventListener("DOMContentLoaded", () => {
             };
 
             fetch("/api/users/register-owner", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userRequest),
-            })
-            .then(response => {
-                if (response.ok) {
-                    // ---- PHẦN THAY ĐỔI ----
-                    // 1. Thay đổi thông báo
-                  
-                    // 2. Chuyển hướng thẳng đến trang đăng nhập của chủ trọ
-                    window.location.href = '/dang-nhap-chu-tro'; 
-                    // -----------------------
-                } else {
-                    return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi đăng ký:", error);
-                alert("Đăng ký thất bại: " + error.message);
-            });
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userRequest),
+    })
+    .then(response => {
+        if (response.ok) {
+            // Nếu thành công, lấy đối tượng JSON từ response
+            return response.json();
+        } else {
+            // Nếu có lỗi,โยน lỗi ra để catch xử lý
+            return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
+        }
+    })
+    .then(createdUser => {
+        // ---- PHẦN THAY ĐỔI ----
+        // 1. Thông báo cho người dùng
+        alert("Tạo tài khoản thành công! Vui lòng bổ sung thông tin chi tiết để hoàn tất.");
+        
+        // 2. Chuyển hướng đến form thứ hai với userId
+        window.location.href = `/dang-ky-chi-tiet?userId=${createdUser.userId}`; 
+        // -----------------------
+    })
+    .catch(error => {
+        console.error("Lỗi đăng ký:", error);
+        alert("Đăng ký thất bại: " + error.message);
+    });
         });
     }
     passwordToggles.forEach((toggle) => {

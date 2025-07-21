@@ -1,11 +1,12 @@
 package nhatroxanh.com.Nhatroxanh.Controller.api;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 // import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
@@ -28,8 +29,8 @@ import java.util.Map;
 public class UserApiController {
     @Autowired
     private UserService userService;
-    // @Autowired
-    // private OtpService otpService;
+    @Autowired
+    private OtpService otpService;
     @Autowired
     private UserRepository userRepository;
 
@@ -60,9 +61,9 @@ public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userReques
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản đã được kích hoạt.");
-        // if (otpService.verifyOtp(user, otp)) {
-        //     return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
-        // }
+        if (otpService.verifyOtp(user, otp)) {
+            return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
+        }
         else {
             return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
@@ -75,7 +76,7 @@ public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userReques
             return ResponseEntity.badRequest().body("Email không tồn tại.");
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản này đã được kích hoạt.");
-        // otpService.createAndSendOtp(user);
+        otpService.createAndSendOtp(user);
         return ResponseEntity.ok("Đã gửi lại mã OTP. Vui lòng kiểm tra email.");
     }
 
@@ -120,14 +121,24 @@ public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userReques
     }
 
     @PostMapping("/register-owner")
-    public ResponseEntity<?> registerOwner(@Valid @RequestBody UserOwnerRequest userOwnerRequest) {
-        try {
-            userService.registerOwner(userOwnerRequest);
-            return ResponseEntity.ok("Đăng ký chủ trọ thành công! Vui lòng kiểm tra email để xác thực tài khoản.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra trong quá trình đăng ký.");
-        }
+public ResponseEntity<?> registerOwner(@Valid @RequestBody UserOwnerRequest userOwnerRequest, BindingResult bindingResult) {
+    if (bindingResult.hasErrors()) {
+        String errorMessage = bindingResult.getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst()
+                .orElse("Dữ liệu không hợp lệ");
+        return ResponseEntity.badRequest().body(errorMessage);
     }
+
+    try {
+        // Gọi service và nhận lại đối tượng user đã lưu
+        Users savedUser = userService.registerOwner(userOwnerRequest);
+        // Trả về đối tượng user để phía client có thể lấy userId
+        return ResponseEntity.ok(savedUser); 
+    } catch (RuntimeException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.SC_INTERNAL_SERVER_ERROR).body("Đã có lỗi xảy ra.");
+    }
+}
 }

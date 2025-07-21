@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.VoucherStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.VoucherStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 
 public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         // 1. Tìm tất cả voucher đang hoạt động (status = true)

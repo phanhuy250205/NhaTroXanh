@@ -8,8 +8,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 
 public interface IncidentReportsRepository extends JpaRepository<IncidentReports, Integer> {
     @Query("SELECT r FROM IncidentReports r " +

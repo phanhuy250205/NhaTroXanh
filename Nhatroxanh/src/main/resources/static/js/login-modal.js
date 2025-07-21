@@ -64,13 +64,29 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             fetch('/login-processing', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            }).finally(() => {
-                // Reload lại trang bất kể đăng nhập thành công hay thất bại
-                window.location.reload();
-            });
+
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: formData
+})
+.then(async response => {
+    if (response.ok) {
+        const data = await response.json();
+        window.location.href = data.redirectUrl;
+    } else {
+        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+    }
+})
+
+                .catch(error => {
+                    if (errorMessageDiv) {
+                        errorMessageDiv.textContent = error.message;
+                        errorMessageDiv.style.display = 'block';
+                    } else {
+                        alert(error.message);
+                    }
+                });
+
         });
     }
 

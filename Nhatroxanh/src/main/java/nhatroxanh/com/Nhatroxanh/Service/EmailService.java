@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.sql.Date;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
 
 public interface EmailService {
     void sendExtensionApprovalEmail(String to, String fullname, String contractCode, Date newEndDate);

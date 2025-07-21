@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 

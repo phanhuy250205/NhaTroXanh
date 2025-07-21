@@ -1,8 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-
 import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -11,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts; // <-- Import lớp Entity Contracts của bạn
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 import java.util.Optional;
 import java.sql.Date;
@@ -19,6 +17,7 @@ import java.sql.Date;
 import java.util.List;
 
 @Repository
+
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c " +
                         "WHERE c.owner.userId = :ownerId " +
@@ -32,6 +31,7 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
                         @Param("hostelId") Integer hostelId,
                         @Param("status") Contracts.Status status,
                         Pageable pageable);
+
 
         @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId")
         List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
