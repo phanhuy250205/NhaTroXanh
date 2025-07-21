@@ -545,4 +545,9 @@ public class PayController {
             }
         }
     }
+
+     @GetMapping("/nap-rut")
+    public String rutTien() {
+        return "redirect:/staff/transactions/duyet-nap-rut";
+    }
 }

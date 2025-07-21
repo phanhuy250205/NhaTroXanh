@@ -146,14 +146,35 @@ public class VNPayService {
             String vnpResponseCode = vnpParams.get("vnp_ResponseCode");
             String vnpTransactionStatus = vnpParams.get("vnp_TransactionStatus");
             String vnpSecureHash = vnpParams.get("vnp_SecureHash");
+            
+            // Check for host wallet context
+            String context = vnpParams.get("context");
+            String userId = vnpParams.get("user_id");
 
-            log.info("VNPay return with txnRef={}, responseCode={}, transactionStatus={}", 
-                    vnpTxnRef, vnpResponseCode, vnpTransactionStatus);
+            log.info("VNPay return with txnRef={}, responseCode={}, transactionStatus={}, context={}, user_id={}", 
+                    vnpTxnRef, vnpResponseCode, vnpTransactionStatus, context, userId);
 
+            // If this is a host wallet deposit, redirect to host wallet controller
+            if ("host_wallet".equals(context)) {
+                log.info("Redirecting host wallet VNPay return to HostWalletController");
+                StringBuilder redirectUrl = new StringBuilder("redirect:/host/wallet/vnpay-return?");
+                for (Map.Entry<String, String> entry : vnpParams.entrySet()) {
+                    redirectUrl.append(entry.getKey()).append("=").append(entry.getValue()).append("&");
+                }
+                // Remove the last "&"
+                if (redirectUrl.length() > 0 && redirectUrl.charAt(redirectUrl.length() - 1) == '&') {
+                    redirectUrl.setLength(redirectUrl.length() - 1);
+                }
+                return redirectUrl.toString();
+            }
+
+            // Continue with regular guest payment processing
             // Verify signature
             Map<String, String> fields = new HashMap<>(vnpParams);
             fields.remove("vnp_SecureHash");
             fields.remove("vnp_SecureHashType");
+            fields.remove("context");
+            fields.remove("user_id");
             
             String signValue = buildQueryString(fields);
             String computedHash = hmacSHA512(vnpHashSecret, signValue);

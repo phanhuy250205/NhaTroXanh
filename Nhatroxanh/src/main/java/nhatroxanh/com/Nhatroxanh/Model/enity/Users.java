@@ -1,5 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.sql.Date;
@@ -7,17 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
-
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +27,7 @@ import lombok.ToString;
 // ✅ SỬA: Chỉ dùng userId làm key cho equals/hashCode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Data
-
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Users {
 
     @Id
@@ -46,9 +37,11 @@ public class Users {
     private Integer userId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JsonIgnore
     private List<Notification> notifications;
 
     @Column(name = "password", nullable = false, length = 256)
+    @JsonIgnore
     private String password;
 
     @Column(name = "fullname", length = 100)
@@ -62,6 +55,15 @@ public class Users {
 
     @Column(name = "bank_account", length = 50)
     private String bankAccount;
+
+    @Column(name = "bank_id", length = 10)
+    private String bankId;
+
+    @Column(name = "bank_name", length = 100)
+    private String bankName;
+
+    @Column(name = "account_holder_name", length = 100)
+    private String accountHolderName;
 
     @Column(name = "balance", nullable = false)
     @Builder.Default
@@ -93,27 +95,29 @@ public class Users {
 
     @ManyToOne
     @JoinColumn(name = "address_id")
+    @JsonIgnore
     private Address addressEntity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
 
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private UserCccd userCccd;
 
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Contracts> ownedContracts;
 
     @OneToMany(mappedBy = "tenant", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Contracts> rentedContracts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @JsonIgnore
     private List<Vouchers> vouchers;
 
-
-    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }

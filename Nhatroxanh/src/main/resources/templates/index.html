@@ -91,6 +91,35 @@
         </div>
     </section>
 
+    <section class="owner-register-section">
+        <div class="owner-register-container">
+            <div class="owner-register-left">
+                <h1 class="owner-title">Bạn là chủ nhà?</h1>
+                <p class="owner-subtitle">Đăng ký để quản lý hiệu quả và tăng doanh thu!</p>
+                <ul class="owner-benefits">
+                    <li><i class="fa-solid fa-check"></i> Miễn phí đăng tin 30 ngày đầu</li>
+                    <li><i class="fa-solid fa-check"></i> Công cụ quản lý hiện đại</li>
+                    <li><i class="fa-solid fa-check"></i> Hỗ trợ 24/7</li>
+                </ul>
+                <a href="/dang-ky-chu-tro">
+                    <button class="owner-register-btn"><i class="fa-solid fa-plus"></i> Đăng ký ngay</button>
+                </a>
+                
+            </div>
+
+            <div class="owner-register-right">
+                <img th:src="@{/images/slider/slider4.jpg}" alt="Hình ảnh nhà" class="owner-house-image">
+                <div class="owner-revenue-box">
+                    <div class="owner-revenue-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="owner-revenue-text">
+                        <p class="owner-revenue-title">Doanh thu tăng</p>
+                        <p class="owner-revenue-percent">+35% so với tháng trước</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Property Cards Section -->
     <section class="property-section py-5">
         <div class="container">
@@ -178,6 +207,55 @@
             </div>
         </div>
     </section>
+
+    <!-- Interior Showcase Section -->
+    <section class="interior-showcase-index">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="showcase-title-index">Khám phá không gian sống lý tưởng</h2>
+                <p class="showcase-subtitle-index">Hàng ngàn phòng trọ chất lượng cao đang chờ bạn</p>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh1.jpg}" alt="Phòng khách hiện đại" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh2.jpg}" alt="Phòng ăn sang trọng" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh3.jpg}" alt="Phòng ngủ thoải mái" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh4.jpg}" alt="Không gian sống hiện đại"
+                            class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh5.jpg}" alt="Phòng khách tối giản" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh6.jpg}" alt="Không gian xanh" class="interior-img-index">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+
+    
+
+
 
     <div th:replace="~{/layouts/footer}"></div>
 
