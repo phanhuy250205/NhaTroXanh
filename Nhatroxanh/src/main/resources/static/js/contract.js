@@ -719,36 +719,42 @@ window.NhaTroContract = {
             return;
         }
 
-        const contractData = this.buildContractData(roomIdNumber, roomSelect);
-        contractData.id = parsedId;
+        // Gọi uploadCccd để cập nhật ảnh trước
+        this.uploadCccd(parsedId).then(() => {
+            const contractData = this.buildContractData(roomIdNumber, roomSelect);
+            contractData.id = parsedId;
 
-        console.log("Data gửi:", JSON.stringify(contractData, null, 2));
+            console.log("Data gửi:", JSON.stringify(contractData, null, 2));
 
-        fetch(`/api/contracts/update/${parsedId}`, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
-            },
-            body: JSON.stringify(contractData)
-        })
-            .then(response => {
-                console.log("Response:", response.status);
-                return response.json();
+            fetch(`/api/contracts/update/${parsedId}`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
+                },
+                body: JSON.stringify(contractData)
             })
-            .then(data => {
-                if (data.success) {
-                    this.showNotification("Cập nhật thành công!", "success");
-                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
-                } else {
-                    this.showNotification(data.message || "Lỗi cập nhật!", "error");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                this.showNotification("Lỗi kết nối: " + error.message, "error");
-            });
+                .then(response => {
+                    console.log("Response:", response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        this.showNotification("Cập nhật thành công!", "success");
+                        setTimeout(() => window.location.href = "/api/contracts/list", 1500);
+                    } else {
+                        this.showNotification(data.message || "Lỗi cập nhật!", "error");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    this.showNotification("Lỗi kết nối: " + error.message, "error");
+                });
+        }).catch(error => {
+            console.error("Error uploading CCCD:", error);
+            this.showNotification("Lỗi khi cập nhật ảnh: " + error.message, "error");
+        });
     },
 
 
@@ -1024,6 +1030,77 @@ window.NhaTroContract = {
         registeredFields.style.display = tenantType === "REGISTERED" ? "block" : "none"
         unregisteredFields.style.display = tenantType === "UNREGISTERED" ? "block" : "none"
     },
+    async uploadCccd(contractId) {
+        const cccdFront = document.getElementById('cccd-front')?.files[0];
+        const cccdBack = document.getElementById('cccd-back')?.files[0];
+        const cccdNumber = document.getElementById('tenant-id')?.value;
+
+        // Kiểm tra điều kiện bắt buộc
+        if (!cccdNumber || !cccdNumber.match(/^\d{12}$/)) {
+            throw new Error("Số CCCD phải là 12 chữ số hợp lệ!");
+        }
+
+        // Kiểm tra định dạng file
+        const validTypes = ['image/jpeg', 'image/png'];
+        if (cccdFront && !validTypes.includes(cccdFront.type)) {
+            throw new Error("Ảnh mặt trước phải là file .jpg hoặc .png!");
+        }
+        if (cccdBack && !validTypes.includes(cccdBack.type)) {
+            throw new Error("Ảnh mặt sau phải là file .jpg hoặc .png!");
+        }
+
+        // Nếu không có ảnh mới, bỏ qua upload
+        if (!cccdFront && !cccdBack) {
+            console.log("Không có ảnh mới được chọn, bỏ qua upload.");
+            return; // Resolve promise để tiếp tục editContract
+        }
+
+        const formData = new FormData();
+        formData.append('cccdNumber', cccdNumber);
+        if (cccdFront) formData.append('cccdFront', cccdFront);
+        if (cccdBack) formData.append('cccdBack', cccdBack);
+
+        try {
+            const response = await fetch('/api/contracts/update-cccd-image', { // Sửa đường dẫn
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
+                }
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("Server error response:", errorText);
+                if (response.status === 405) {
+                    throw new Error(`Phương thức không được hỗ trợ. Status: ${response.status} - ${errorText}`);
+                }
+                throw new Error(`Lỗi server: ${response.status} - ${errorText}`);
+            }
+
+            const data = await response.json();
+            if (!data.success) {
+                throw new Error(data.message || "Lỗi khi cập nhật ảnh CCCD");
+            }
+
+            console.log("Upload CCCD thành công:", data);
+            // Cập nhật preview ảnh trong UI
+            const frontPreview = document.getElementById('cccd-front-preview');
+            const backPreview = document.getElementById('cccd-back-preview');
+            if (frontPreview && data.cccdFrontUrl) {
+                frontPreview.innerHTML = `<img src="${data.cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%; max-height: 200px;">`;
+            }
+            if (backPreview && data.cccdBackUrl) {
+                backPreview.innerHTML = `<img src="${data.cccdBackUrl}" alt="CCCD Back" style="max-width: 100%; max-height: 200px;">`;
+            }
+
+            this.showNotification("Cập nhật ảnh CCCD thành công!", "success");
+        } catch (error) {
+            console.error("Lỗi khi upload CCCD:", error);
+            throw error; // Ném lỗi để xử lý trong catch của editContract
+        }
+    },
+
 
     // Hàm lấy thông tin người thuê qua số điện thoại
     async fetchTenantByPhone(phone) {
@@ -2125,6 +2202,12 @@ formatDate(dateStr) {
             const tenantProvince = document.getElementById("tenant-province")?.options[document.getElementById("tenant-province")?.selectedIndex]?.text?.trim();
             if (tenantProvince) tenant.province = tenantProvince;
 
+
+            // Thêm ảnh từ fillTenantFields
+            const frontPreview = document.getElementById('cccd-front-preview');
+            const backPreview = document.getElementById('cccd-back-preview');
+            if (frontPreview && frontPreview.querySelector('img')) tenant.cccdFrontUrl = frontPreview.querySelector('img').src;
+            if (backPreview && backPreview.querySelector('img')) tenant.cccdBackUrl = backPreview.querySelector('img').src;
 
             if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
 
