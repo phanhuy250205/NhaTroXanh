@@ -3,17 +3,10 @@ window.NhaTroContract = {
     currentTab: "tenantInfo",
     zoomLevel: 1,
     residents: [],
-<<<<<<< HEAD
     contractTerms: [],
      guardianInfo: null, // New array to store individual terms
 
     init() {
-        
-=======
-    contractTerms: [], // New array to store individual terms
-
-    init() {
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
         // Kiểm tra các phần tử select cần thiết
         const requiredSelects = ["tenant-province", "owner-province", "room-province", "newCustomer-province"]
         const missingSelects = requiredSelects.filter((id) => !document.getElementById(id))
@@ -32,11 +25,7 @@ window.NhaTroContract = {
         this.setupCustomerModal()
         this.setupResidentModal()
         this.initializePreviewUpdates()
-<<<<<<< HEAD
         this.setupGuardianDisplayButtons();
-        
-=======
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
         return this.loadProvinces()
             .then(() => {
                 console.log("Provinces loaded")
@@ -68,7 +57,7 @@ window.NhaTroContract = {
                 this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố", "error")
             })
     },
-<<<<<<< HEAD
+
     fetchAndSetRoomUtilities(roomId) {
     // 1. Bỏ check tất cả các ô tiện ích trước
     document.querySelectorAll('#amenities-list-host input[type="checkbox"]').forEach(cb => cb.checked = false);
@@ -199,8 +188,6 @@ editGuardian() {
    
     
     // ✅ HÀM MỚI 4: Mở modal để sửa thông tin
-=======
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
     // New method to setup terms management
     setupTermsManagement() {
@@ -650,8 +637,7 @@ editGuardian() {
             })
         })
 
-<<<<<<< HEAD
-=======
+
         // ✅ EVENT CHO NÚT UPDATE (giữ cái này, xóa duplicate bên dưới)
         const updateBtn = document.getElementById("btn-update");
         if (updateBtn) {
@@ -674,8 +660,6 @@ editGuardian() {
                 this.editContract(parsedId);  // Gọi hàm edit
             });
         }
-
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
         // Sự kiện cho các nút điều hướng
         document.getElementById("btn-next-owner")?.addEventListener("click", () => this.showTab("ownerInfo"))
         document.getElementById("btn-prev-tenant")?.addEventListener("click", () => this.showTab("tenantInfo"))
@@ -741,8 +725,7 @@ editGuardian() {
         this.setupLocationListeners()
     },
 
-<<<<<<< HEAD
-=======
+
     editContract(contractId) {
         console.log("=== EDIT CONTRACT ===");
         console.log("ID:", contractId);
@@ -797,7 +780,7 @@ editGuardian() {
 
 
 
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
+
     // Hàm xử lý khu trọ và phòng trọ
     filterRooms() {
         const hostelId = document.getElementById("hostelId").value
@@ -878,10 +861,6 @@ editGuardian() {
 
     async onRoomSelected() {
         const roomSelect = document.getElementById("roomId")
-<<<<<<< HEAD
-        
-=======
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
         if (!roomSelect) {
             this.showNotification("Không tìm thấy dropdown phòng trọ!", "error")
             return
@@ -889,10 +868,7 @@ editGuardian() {
 
         const selectedOption = roomSelect.options[roomSelect.selectedIndex]
         const roomId = roomSelect.value
-<<<<<<< HEAD
         this.fetchAndSetRoomUtilities(roomId);
-=======
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
         if (!roomId) {
             this.clearRoomFields()
             return
@@ -962,8 +938,7 @@ editGuardian() {
                         }
                     }
 
-<<<<<<< HEAD
-=======
+
                     function autoLoadRoomAndHostel() {
                         if (isLoading) return;
                         isLoading = true;
@@ -974,8 +949,6 @@ editGuardian() {
                             isLoading = false;
                         }, 1000);  // Tăng lên 1000ms
                     }
-
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
                     // Điền vào dropdown Quận/Huyện
                     const districtSelect = document.getElementById("room-district")
                     if (districtSelect && provinceSelect && provinceSelect.value) {
@@ -1897,7 +1870,7 @@ editGuardian() {
         `)
         printWindow.document.close()
         printWindow.print()
-<<<<<<< HEAD
+
     },
 
 saveContract() {
@@ -2063,161 +2036,6 @@ saveContract() {
         console.log(JSON.stringify(contractData, null, 2))
 
         return contractData
-=======
-    },
-
-    saveContract() {
-        // ✅ Debug roomId chi tiết
-        const roomSelect = document.getElementById('roomSelect')
-        const roomIdValue = roomSelect?.value
-
-        console.log("=== ROOM DEBUG ===")
-        console.log("Room select element:", roomSelect)
-        console.log("Room ID value:", roomIdValue)
-        console.log("Room ID type:", typeof roomIdValue)
-
-        // ✅ Validation
-        if (!roomIdValue || roomIdValue.trim() === "" || roomIdValue === "null" || roomIdValue === "undefined") {
-            this.showNotification("Vui lòng chọn phòng trọ!", "error")
-            return
-        }
-
-        const roomIdNumber = parseInt(roomIdValue, 10)
-        console.log("Room ID as number:", roomIdNumber)
-
-        if (isNaN(roomIdNumber) || roomIdNumber <= 0) {
-            this.showNotification("ID phòng không hợp lệ!", "error")
-            return
-        }
-
-        // 🔥 TẠO ĐÚNG CẤU TRÚC JSON THEO BACKEND
-        const contractData = this.buildContractData(roomIdNumber, roomSelect)
-
-        console.log("=== SENDING CONTRACT DATA ===")
-        console.log(JSON.stringify(contractData, null, 2))
-
-        this.sendContractData(contractData)
-    },
-
-
-
-    buildContractData(roomIdNumber, roomSelect) {
-        const contractData = {};
-
-        // Room (chỉ gửi nếu người dùng chọn phòng mới)
-        if (roomIdNumber && roomSelect && roomSelect.selectedIndex >= 0) {
-            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
-            contractData.room = {
-                roomId: roomIdNumber,
-                roomName: selectedOption.dataset.roomName || `Phòng ${roomIdNumber}`,
-                price: parseFloat(selectedOption.dataset.price) || undefined,
-                area: parseFloat(selectedOption.dataset.area) || undefined,
-                status: selectedOption.dataset.status || undefined
-            };
-        }
-
-        // Contract basic info
-        const contractDate = document.getElementById("contract-date")?.value?.trim();
-        if (contractDate) contractData.contractDate = contractDate;
-
-        const contractStatus = document.getElementById("contract-status")?.value?.trim();
-        if (contractStatus) contractData.status = contractStatus;
-
-        // Terms
-        const terms = {};
-        const startDate = document.getElementById("start-date")?.value?.trim();
-        if (startDate) terms.startDate = startDate;
-
-        const duration = parseInt(document.getElementById("contract-duration")?.value);
-        if (!isNaN(duration) && duration > 0) terms.duration = duration;
-
-        const rentPrice = parseFloat(document.getElementById("rent-price")?.value);
-        if (!isNaN(rentPrice) && rentPrice > 0) terms.price = rentPrice;
-
-        const depositMonths = parseFloat(document.getElementById("deposit-months")?.value);
-        if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
-            terms.deposit = depositMonths * rentPrice;
-        }
-
-        const termsText = this.getContractTermsText ? this.getContractTermsText() : undefined;
-        if (termsText) terms.terms = termsText;
-
-        if (Object.keys(terms).length > 0) contractData.terms = terms;
-
-        // Tenant
-        const tenantType = document.getElementById("tenantType")?.value?.trim() || "REGISTERED";
-        contractData.tenantType = tenantType;
-
-        if (tenantType === "REGISTERED") {
-            const tenant = {};
-            const tenantPhone = document.getElementById("tenant-phone")?.value?.trim();
-            if (tenantPhone) tenant.phone = tenantPhone;
-
-            const tenantFullName = document.getElementById("tenant-name")?.value?.trim();
-            if (tenantFullName) tenant.fullName = tenantFullName;
-
-            const tenantCccd = document.getElementById("tenant-id")?.value?.trim();
-            if (tenantCccd) tenant.cccdNumber = tenantCccd;
-
-            const tenantBirthday = document.getElementById("tenant-dob")?.value?.trim();
-            if (tenantBirthday) tenant.birthday = tenantBirthday;
-
-            const tenantEmail = document.getElementById("tenant-email")?.value?.trim();
-            if (tenantEmail) tenant.email = tenantEmail;
-
-            const tenantStreet = document.getElementById("tenant-street")?.value?.trim();
-            if (tenantStreet) tenant.street = tenantStreet;
-
-            const tenantWard = document.getElementById("tenant-ward")?.options[document.getElementById("tenant-ward")?.selectedIndex]?.text?.trim();
-            if (tenantWard) tenant.ward = tenantWard;
-
-            const tenantDistrict = document.getElementById("tenant-district")?.options[document.getElementById("tenant-district")?.selectedIndex]?.text?.trim();
-            if (tenantDistrict) tenant.district = tenantDistrict;
-
-            const tenantProvince = document.getElementById("tenant-province")?.options[document.getElementById("tenant-province")?.selectedIndex]?.text?.trim();
-            if (tenantProvince) tenant.province = tenantProvince;
-
-            if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
-        } else if (tenantType === "UNREGISTERED") {
-            const unregisteredTenant = {};
-            const tenantPhone = document.getElementById("unregisteredTenantPhone")?.value?.trim();
-            if (tenantPhone) unregisteredTenant.phone = tenantPhone;
-
-            const tenantFullName = document.getElementById("unregisteredTenantFullName")?.value?.trim();
-            if (tenantFullName) unregisteredTenant.fullName = tenantFullName;
-
-            const tenantCccd = document.getElementById("unregisteredTenantCccdNumber")?.value?.trim();
-            if (tenantCccd) unregisteredTenant.cccdNumber = tenantCccd;
-
-            const tenantBirthday = document.getElementById("unregisteredTenantBirthday")?.value?.trim();
-            if (tenantBirthday) unregisteredTenant.birthday = tenantBirthday;
-
-            const tenantIssueDate = document.getElementById("unregisteredTenantIssueDate")?.value?.trim();
-            if (tenantIssueDate) unregisteredTenant.issueDate = tenantIssueDate;
-
-            const tenantIssuePlace = document.getElementById("unregisteredTenantIssuePlace")?.value?.trim();
-            if (tenantIssuePlace) unregisteredTenant.issuePlace = tenantIssuePlace;
-
-            if (Object.keys(unregisteredTenant).length > 0) contractData.unregisteredTenant = unregisteredTenant;
-        }
-
-        // Owner
-        const owner = {};
-        const ownerFullName = document.getElementById("owner-name")?.value?.trim();
-        if (ownerFullName) owner.fullName = ownerFullName;
-
-        const ownerPhone = document.getElementById("owner-phone")?.value?.trim();
-        if (ownerPhone) owner.phone = ownerPhone;
-
-        const ownerCccd = document.getElementById("owner-id")?.value?.trim();
-        if (ownerCccd) owner.cccdNumber = ownerCccd;
-
-        if (Object.keys(owner).length > 0) contractData.owner = owner;
-
-        console.log("=== FINAL CONTRACT DATA ===");
-        console.log(JSON.stringify(contractData, null, 2));
-        return contractData;
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
     },
 
 
@@ -2677,7 +2495,7 @@ saveContract() {
         })
     },
 
-<<<<<<< HEAD
+
 saveNewCustomer() {
     console.log("Bắt đầu lưu tạm thông tin người bảo hộ ở frontend...");
     
@@ -2729,71 +2547,7 @@ saveNewCustomer() {
     this.showNotification('Đã thêm thông tin người bảo hộ (tạm thời).', 'success');
     console.log("Đã lưu tạm dữ liệu người bảo hộ vào biến guardianInfo:", this.guardianInfo);
 },
-=======
-    saveNewCustomer() {
-        const formData = new FormData()
-        formData.append("name", document.getElementById("newCustomer-name").value || "")
-        formData.append("dob", document.getElementById("newCustomer-dob").value || "")
-        formData.append("id", document.getElementById("newCustomer-id").value || "")
-        formData.append("id-date", document.getElementById("newCustomer-id-date").value || "")
-        formData.append("id-place", document.getElementById("newCustomer-id-place").value || "")
-        formData.append("phone", document.getElementById("newCustomer-phone").value || "")
-        formData.append("email", document.getElementById("newCustomer-email").value || "")
-        formData.append("street", document.getElementById("newCustomer-street").value || "")
-        formData.append("ward", this.getSelectText("newCustomer-ward") || "")
-        formData.append("district", this.getSelectText("newCustomer-district") || "")
-        formData.append("province", this.getSelectText("newCustomer-province") || "")
-        formData.append("cccd-front", document.getElementById("newCustomer-cccd-front").files[0] || null)
-        formData.append("cccd-back", document.getElementById("newCustomer-cccd-back").files[0] || null)
 
-        fetch("/api/contracts/add-unregistered-tenant", {
-            method: "POST",
-            body: formData,
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success) {
-                    document.getElementById("unregisteredTenantFullName").value = data.tenant.fullName || ""
-                    document.getElementById("unregisteredTenantPhone").value = data.tenant.phone || ""
-                    document.getElementById("unregisteredTenantCccdNumber").value = data.tenant.cccdNumber || ""
-                    document.getElementById("unregisteredTenantBirthday").value = data.tenant.birthday || ""
-                    document.getElementById("unregisteredTenantIssueDate").value = data.tenant.issueDate || ""
-                    document.getElementById("unregisteredTenantIssuePlace").value = data.tenant.issuePlace || ""
-                    document.getElementById("unregisteredTenantStreet").value = data.tenant.street || ""
-                    document.getElementById("unregisteredTenantProvince").value = data.tenant.province || ""
-                    this.loadDistricts(data.tenant.province, "unregisteredTenantDistrict", "unregisteredTenantWard")
-                    setTimeout(() => {
-                        document.getElementById("unregisteredTenantDistrict").value = data.tenant.district || ""
-                        this.loadWards(data.tenant.district, "unregisteredTenantWard")
-                        setTimeout(() => {
-                            document.getElementById("unregisteredTenantWard").value = data.tenant.ward || ""
-                            this.updateAddress("tenant")
-                        }, 200)
-                    }, 200)
-
-                    const modalElement = document.getElementById("addCustomerModal-host")
-                    const modal = bootstrap.Modal.getInstance(modalElement)
-                    if (modal) {
-                        modal.hide()
-                    }
-                    // Đảm bảo cleanup sau khi đóng
-                    setTimeout(() => {
-                        this.cleanupModalBackdrop()
-                    }, 300)
-
-                    document.getElementById("tenantType").value = "UNREGISTERED"
-                    this.toggleTenantFields()
-                    this.showNotification("Đã thêm thông tin người thuê thành công!", "success")
-                } else {
-                    this.showNotification(data.message || "Lỗi khi thêm người thuê!", "error")
-                }
-            })
-            .catch((error) => {
-                console.error("Error saving unregistered tenant:", error)
-                this.showNotification("Lỗi khi thêm người thuê: " + error.message, "error")
-            })
-    },
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
 
     previewCustomerImage(event, previewId) {
         const file = event.target.files[0]
@@ -2881,9 +2635,6 @@ saveNewCustomer() {
 document.addEventListener("DOMContentLoaded", () => {
     window.NhaTroContract.init()
 })
-<<<<<<< HEAD
+
 /* ]]> */
-//đã xong phần ẩn nút thêm người người bảo hộ
-=======
-/* ]]> */
->>>>>>> fa1b62d49e062a432764635e8131b492d5786443
+
