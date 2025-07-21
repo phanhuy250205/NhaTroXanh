@@ -95,4 +95,24 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.phone = :phone AND u.userId <> :userId")
     boolean existsByPhoneAndNotUserId(@Param("phone") String phone, @Param("userId") Integer userId);
 
+    // Tìm staff có thông tin ngân hàng đầy đủ
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL")
+    Optional<Users> findByRoleAndEnabledAndBankAccountIsNotNull(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+
+    // Tìm staff đang hoạt động có thông tin ngân hàng đầy đủ để tạo QR
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
+           "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
+           "AND u.accountHolderName IS NOT NULL " +
+           "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
+           "ORDER BY u.createdAt ASC")
+    List<Users> findActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+
+    // Tìm staff đang hoạt động có thông tin ngân hàng đầy đủ (lấy 1 record đầu tiên)
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
+           "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
+           "AND u.accountHolderName IS NOT NULL " +
+           "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
+           "ORDER BY u.createdAt ASC")
+    Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+
 }
