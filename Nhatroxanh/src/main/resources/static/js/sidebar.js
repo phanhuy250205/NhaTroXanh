@@ -152,7 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
       '/nhan-vien/khieu-nai': { sidebar: '.nav-sidebar:has(.fa-comment-dots)' },
       '/nhan-vien/chu-tro': { sidebar: '.nav-sidebar:has(.fa-user-tie)' },
       '/nhan-vien/khach-thue': { sidebar: '.nav-sidebar:has(.fa-user)' },
-      '/nhan-vien/thanh-toan': { sidebar: '.nav-sidebar:has(.fa-credit-card)' },
+      '/staff/transactions/duyet-nap-rut': { sidebar: '.nav-sidebar:has(.fa-credit-card)' },
       '/nhan-vien/thong-tin-tro': { sidebar: '.nav-sidebar:has(.fa-house-user)' },
       '/nhan-vien/profile': { sidebar: '.nav-sidebar:has(.fa-user-circle)' }
     };

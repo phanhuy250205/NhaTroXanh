@@ -2,10 +2,13 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.Staff;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,11 +17,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.HostInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
@@ -30,6 +36,7 @@ import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 
 @Controller
 @RequestMapping("/nhan-vien")
+@Slf4j
 public class ProfileStaffController {
 
     @Autowired
@@ -61,6 +68,12 @@ public class ProfileStaffController {
             dto.setGender(user.getGender());
             dto.setEmail(user.getEmail());
             dto.setAddress(user.getAddress());
+            
+            // Set bank account information
+            dto.setBankId(user.getBankId());
+            dto.setBankName(user.getBankName());
+            dto.setBankAccount(user.getBankAccount());
+            dto.setAccountHolderName(user.getAccountHolderName());
 
             if (cccd != null) {
                 dto.setCccdNumber(cccd.getCccdNumber());
@@ -215,6 +228,75 @@ public class ProfileStaffController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/nhan-vien/profile-nhan-vien";
+        }
+    }
+
+    /**
+     * Update bank account information for staff
+     */
+    @PostMapping("/update-bank-account")
+    @Transactional
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> updateBankAccount(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("bankId") String bankId,
+            @RequestParam("bankName") String bankName,
+            @RequestParam("bankAccount") String bankAccount,
+            @RequestParam("accountHolderName") String accountHolderName) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validate input
+            if (bankId == null || bankId.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng chọn ngân hàng");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (bankAccount == null || bankAccount.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập số tài khoản");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (accountHolderName == null || accountHolderName.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập tên chủ tài khoản");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Validate bank account format
+            if (!bankAccount.matches("^[0-9]{6,20}$")) {
+                response.put("success", false);
+                response.put("message", "Số tài khoản phải từ 6-20 chữ số");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Update bank account information
+            user.setBankId(bankId.trim());
+            user.setBankName(bankName != null ? bankName.trim() : "");
+            user.setBankAccount(bankAccount.trim());
+            user.setAccountHolderName(accountHolderName.trim());
+
+            // Save user
+            usersRepository.save(user);
+
+            response.put("success", true);
+            response.put("message", "Cập nhật thông tin ngân hàng thành công");
+            
+            log.info("Bank account updated successfully for staff user {}", user.getUserId());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error updating bank account for staff: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi cập nhật thông tin ngân hàng: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
         }
     }
 }
