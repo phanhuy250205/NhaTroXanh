@@ -50,39 +50,55 @@ public class VoucherHostController {
         int pageSize = 6;
         Pageable pageable = PageRequest.of(page, pageSize);
 
+        String normalizedSearchQuery = (searchQuery != null && !searchQuery.trim().isEmpty()) ? searchQuery.trim()
+                : null;
+        String normalizedStatusFilter = (statusFilter != null && !statusFilter.trim().isEmpty()) ? statusFilter.trim()
+                : null;
+
         Page<Vouchers> voucherPage = voucherService.getVouchersByOwnerIdWithFilters(
-                currentUser.getUserId(), searchQuery, statusFilter, pageable);
+                currentUser.getUserId(), normalizedSearchQuery, normalizedStatusFilter, pageable);
 
         model.addAttribute("hostels", hostels);
         model.addAttribute("vouchers", voucherPage.getContent());
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", voucherPage.getTotalPages());
         model.addAttribute("totalVouchers", voucherPage.getTotalElements());
+        model.addAttribute("searchQuery", normalizedSearchQuery); 
+        model.addAttribute("statusFilter", normalizedStatusFilter);
         return "host/voucher-host";
     }
 
     @PostMapping("/create")
     public String createVoucher(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestParam("title") String title,
-            @RequestParam("code") String code,
-            @RequestParam("hostelId") Integer hostelId,
-            @RequestParam("discountValue") Float discountValue,
-            @RequestParam("quantity") Integer quantity,
-            @RequestParam(value = "minAmount", required = false) Float minAmount,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
-            @RequestParam(value = "description", required = false) String description,
+            @RequestParam String title,
+            @RequestParam String code,
+            @RequestParam Integer hostelId,
+            @RequestParam Float discountValue,
+            @RequestParam Integer quantity,
+            @RequestParam(required = false) Float minAmount,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @RequestParam(required = false) String description,
             RedirectAttributes redirectAttributes) {
 
         try {
             Users currentUser = userDetails.getUser();
+            Hostel hostel = null;
+
+            if (hostelId != -1) {
+                hostel = hostelService.getHostelById(hostelId)
+                        .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
+                if (!hostel.getOwner().getUserId().equals(currentUser.getUserId())) {
+                    throw new SecurityException("Bạn không có quyền tạo voucher cho khu trọ này.");
+                }
+            }
+
             Vouchers voucher = Vouchers.builder()
                     .title(title.trim())
                     .code(code.trim())
                     .user(currentUser)
-                    .hostel(hostelService.getHostelById(hostelId)
-                            .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại.")))
+                    .hostel(hostel) // null nếu áp dụng toàn bộ
                     .discountValue(discountValue)
                     .quantity(quantity)
                     .minAmount(minAmount)
@@ -95,16 +111,13 @@ public class VoucherHostController {
 
             voucherService.createVoucherHost(voucher, currentUser.getUserId());
 
-            voucherService.checkAndDeactivateVouchersIfNeeded();
-
             redirectAttributes.addFlashAttribute("successMessage", "Tạo voucher thành công!");
-        } catch (IllegalArgumentException e) {
-            logger.error("Lỗi khi tạo voucher: {}", e.getMessage());
+        } catch (IllegalArgumentException | SecurityException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         } catch (Exception e) {
-            logger.error("Lỗi bất ngờ khi tạo voucher: {}", e.getMessage(), e);
-            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi tạo voucher. Vui lòng thử lại.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi không xác định.");
         }
+
         return "redirect:/chu-tro/voucher";
     }
 
@@ -173,7 +186,7 @@ public class VoucherHostController {
                     discountValue, quantity, minAmount, Date.valueOf(startDate),
                     Date.valueOf(endDate), description, status);
 
-                    voucherService.checkAndDeactivateVouchersIfNeeded();
+            // voucherService.checkAndDeactivateVouchersIfNeeded();
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật voucher thành công!");
         } catch (SecurityException e) {
             logger.error("Lỗi bảo mật khi cập nhật voucher: {}", e.getMessage());

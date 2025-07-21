@@ -8,17 +8,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -31,7 +20,7 @@ import lombok.ToString;
         "ownedContracts",
         "rentedContracts",
         "vouchers",
-        "addressEntity"  // ✅ THÊM DÒNG NÀY
+        "addressEntity" // ✅ THÊM DÒNG NÀY
 })
 // ✅ SỬA: Chỉ dùng userId làm key cho equals/hashCode
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
@@ -42,7 +31,7 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    @EqualsAndHashCode.Include  // ✅ THÊM annotation này
+    @EqualsAndHashCode.Include // ✅ THÊM annotation này
     private Integer userId;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
@@ -87,14 +76,13 @@ public class Users {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @ManyToOne
-    @JoinColumn(name = "address_id")
-    private Address addressEntity;
+    // @ManyToOne
+    // @JoinColumn(name = "address_id")
+    // private Address addressEntity;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;
-
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private UserCccd userCccd;
@@ -108,8 +96,10 @@ public class Users {
     @OneToMany(mappedBy = "user", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private List<Vouchers> vouchers;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
 
-    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }
@@ -118,9 +108,13 @@ public class Users {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 
+    public enum Status  {
+        PENDING, APPROVED, REJECTED
+    }
+
     // ✅ XÓA method hashCode() tự viết vì đã có @EqualsAndHashCode
     // @Override
     // public int hashCode() {
-    //     return Objects.hash(userId, fullname, phone, email);
+    // return Objects.hash(userId, fullname, phone, email);
     // }
 }
