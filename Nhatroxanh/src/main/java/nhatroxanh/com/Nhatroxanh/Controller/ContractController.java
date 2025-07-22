@@ -314,68 +314,43 @@ public class ContractController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('OWNER')")
-    @Transactional
-    public ResponseEntity<?> createContract(
+@PreAuthorize("hasRole('OWNER')")
+@Transactional
+public ResponseEntity<?> createContract(
+    @Valid @ModelAttribute ContractDto contractDto,
+    @RequestParam(value = "unregisteredTenant.cccdFrontFile", required = false) MultipartFile cccdFrontFile,
+    @RequestParam(value = "unregisteredTenant.cccdBackFile", required = false) MultipartFile cccdBackFile,
+    Authentication authentication) {
 
-            @Valid @ModelAttribute ContractDto contractDto,
-            @RequestParam(value = "unregisteredTenant.cccdFrontFile", required = false) MultipartFile cccdFrontFile,
-            @RequestParam(value = "unregisteredTenant.cccdBackFile", required = false) MultipartFile cccdBackFile,
+    logger.info("--- CONTROLLER: Nhận yêu cầu tạo hợp đồng ---");
+    Map<String, Object> response = new HashMap<>();
 
-            Authentication authentication) {
+    try {
+        // 1. Chỉ lấy ID của chủ trọ từ người dùng đang đăng nhập
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Integer ownerId = userDetails.getUserId();
 
-        logger.info("--- BẮT ĐẦU TẠO HỢP ĐỒNG (Logic cuối cùng) ---");
-        Map<String, Object> response = new HashMap<>();
+        // 2. Gửi tất cả dữ liệu thô (raw data) sang cho Service xử lý
+        Contracts savedContract = contractService.createContractFromDto(
+            contractDto, 
+            ownerId, 
+            cccdFrontFile, 
+            cccdBackFile
+        );
+        
+        // 3. Trả về kết quả thành công
+        response.put("success", true);
+        response.put("message", "Hợp đồng đã được tạo thành công!");
+        response.put("contractId", savedContract.getContractId());
+        return ResponseEntity.ok(response);
 
-        try {
-            // 1. Lấy thông tin chủ trọ (Owner)
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Users owner = userService.findOwnerByCccdOrPhone(authentication, userDetails.getCccd(), null);
-            if (owner == null)
-                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
-
-            // 2. Xử lý người thuê chính (Tenant)
-            Users tenant = handleRegisteredTenant(contractDto.getTenant());
-            logger.info("Người thuê chính đã được xác định: {}", tenant.getFullname());
-
-            // 3. Xử lý người bảo hộ (Guardian)
-            UnregisteredTenants unregisteredTenantForGuardian = null;
-            if (contractDto.getUnregisteredTenant() != null
-                    && StringUtils.hasText(contractDto.getUnregisteredTenant().getPhone())) {
-                logger.info("Controller nhận thấy có dữ liệu người bảo hộ, đang xử lý...");
-
-                // ✅ GỌI HÀM HELPER ĐÃ CÓ FILE
-                unregisteredTenantForGuardian = handleUnregisteredTenant(
-                        contractDto.getUnregisteredTenant(),
-                        owner,
-                        cccdFrontFile, // Truyền file vào
-                        cccdBackFile // Truyền file vào
-                );
-
-                logger.info("Đã tạo bản ghi cho người bảo hộ: {}", unregisteredTenantForGuardian.getFullName());
-            }
-
-            // 4. Gọi Service để tạo hợp đồng cuối cùng
-            Contracts savedContract = contractService.createContractFinal(
-                    contractDto,
-                    owner,
-                    tenant,
-                    unregisteredTenantForGuardian // Có thể là null
-            );
-
-            // 5. Trả về kết quả
-            response.put("success", true);
-            response.put("message", "Hợp đồng đã được tạo thành công!");
-            response.put("contractId", savedContract.getContractId());
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            logger.error("Lỗi khi tạo hợp đồng: {}", e.getMessage(), e);
-            response.put("success", false);
-            response.put("message", "Lỗi: " + e.getMessage());
-            return ResponseEntity.badRequest().body(response);
-        }
+    } catch (Exception e) {
+        logger.error("Lỗi tại Controller khi tạo hợp đồng: {}", e.getMessage(), e);
+        response.put("success", false);
+        response.put("message", "Lỗi: " + e.getMessage());
+        return ResponseEntity.badRequest().body(response);
     }
+}
 
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private Rooms validateAndGetRoom(Integer roomId) {
@@ -594,128 +569,128 @@ public class ContractController {
         return saved;
     }
 
-    private Users handleRegisteredTenant(ContractDto.Tenant tenantDto) {
-        logger.info("=== HANDLE REGISTERED TENANT ===");
-        logger.info("Tenant data: {}", tenantDto);
+    // private Users handleRegisteredTenant(ContractDto.Tenant tenantDto) {
+    //     logger.info("=== HANDLE REGISTERED TENANT ===");
+    //     logger.info("Tenant data: {}", tenantDto);
 
-        if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            logger.error("Tenant phone is null or empty");
-            throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
-        }
-        logger.info("Looking for tenant with phone: {}", tenantDto.getPhone());
+    //     if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
+    //         logger.error("Tenant phone is null or empty");
+    //         throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
+    //     }
+    //     logger.info("Looking for tenant with phone: {}", tenantDto.getPhone());
 
-        Optional<Users> tenantUser = userRepository.findByPhone(tenantDto.getPhone());
-        if (!tenantUser.isPresent()) {
-            logger.error("Tenant not found with phone: {}", tenantDto.getPhone());
-            throw new IllegalArgumentException("Không tìm thấy người thuê với số điện thoại: " + tenantDto.getPhone());
-        }
+    //     Optional<Users> tenantUser = userRepository.findByPhone(tenantDto.getPhone());
+    //     if (!tenantUser.isPresent()) {
+    //         logger.error("Tenant not found with phone: {}", tenantDto.getPhone());
+    //         throw new IllegalArgumentException("Không tìm thấy người thuê với số điện thoại: " + tenantDto.getPhone());
+    //     }
 
-        Users tenant = tenantUser.get();
-        logger.info("Found tenant: ID={}, Name={}, Current Address={}", tenant.getUserId(), tenant.getFullname(), tenant.getAddress());
+    //     Users tenant = tenantUser.get();
+    //     logger.info("Found tenant: ID={}, Name={}, Current Address={}", tenant.getUserId(), tenant.getFullname(), tenant.getAddress());
 
-        boolean updated = false;  // Flag cho toàn bộ
+    //     boolean updated = false;  // Flag cho toàn bộ
 
-        // Cập nhật fullname nếu có dữ liệu
-        if (StringUtils.hasText(tenantDto.getFullName())) {
-            tenant.setFullname(tenantDto.getFullName());
-            updated = true;
-            logger.info("Set tenant fullname: {}", tenantDto.getFullName());
-        }
+    //     // Cập nhật fullname nếu có dữ liệu
+    //     if (StringUtils.hasText(tenantDto.getFullName())) {
+    //         tenant.setFullname(tenantDto.getFullName());
+    //         updated = true;
+    //         logger.info("Set tenant fullname: {}", tenantDto.getFullName());
+    //     }
 
-        // Cập nhật birthday nếu có dữ liệu
-        if (tenantDto.getBirthday() != null) {
-            tenant.setBirthday(new java.sql.Date(tenantDto.getBirthday().getTime()));
-            updated = true;
-            logger.info("Set tenant birthday: {}", tenantDto.getBirthday());
-        }
+    //     // Cập nhật birthday nếu có dữ liệu
+    //     if (tenantDto.getBirthday() != null) {
+    //         tenant.setBirthday(new java.sql.Date(tenantDto.getBirthday().getTime()));
+    //         updated = true;
+    //         logger.info("Set tenant birthday: {}", tenantDto.getBirthday());
+    //     }
 
-        // Cập nhật địa chỉ: Build nếu có ít nhất một trường, và trigger updated ngay
-        StringBuilder newAddress = new StringBuilder();
-        boolean hasAddressData = false;
-        if (StringUtils.hasText(tenantDto.getStreet())) {
-            newAddress.append(tenantDto.getStreet().trim());
-            hasAddressData = true;
-            updated = true;  // Trigger ngay nếu có street
-        }
-        if (StringUtils.hasText(tenantDto.getWard())) {
-            if (newAddress.length() > 0) newAddress.append(", ");
-            newAddress.append(tenantDto.getWard().trim());
-            hasAddressData = true;
-            updated = true;
-        }
-        if (StringUtils.hasText(tenantDto.getDistrict())) {
-            if (newAddress.length() > 0) newAddress.append(", ");
-            newAddress.append(tenantDto.getDistrict().trim());
-            hasAddressData = true;
-            updated = true;
-        }
-        if (StringUtils.hasText(tenantDto.getProvince())) {
-            if (newAddress.length() > 0) newAddress.append(", ");
-            newAddress.append(tenantDto.getProvince().trim());
-            hasAddressData = true;
-            updated = true;
-        }
+    //     // Cập nhật địa chỉ: Build nếu có ít nhất một trường, và trigger updated ngay
+    //     StringBuilder newAddress = new StringBuilder();
+    //     boolean hasAddressData = false;
+    //     if (StringUtils.hasText(tenantDto.getStreet())) {
+    //         newAddress.append(tenantDto.getStreet().trim());
+    //         hasAddressData = true;
+    //         updated = true;  // Trigger ngay nếu có street
+    //     }
+    //     if (StringUtils.hasText(tenantDto.getWard())) {
+    //         if (newAddress.length() > 0) newAddress.append(", ");
+    //         newAddress.append(tenantDto.getWard().trim());
+    //         hasAddressData = true;
+    //         updated = true;
+    //     }
+    //     if (StringUtils.hasText(tenantDto.getDistrict())) {
+    //         if (newAddress.length() > 0) newAddress.append(", ");
+    //         newAddress.append(tenantDto.getDistrict().trim());
+    //         hasAddressData = true;
+    //         updated = true;
+    //     }
+    //     if (StringUtils.hasText(tenantDto.getProvince())) {
+    //         if (newAddress.length() > 0) newAddress.append(", ");
+    //         newAddress.append(tenantDto.getProvince().trim());
+    //         hasAddressData = true;
+    //         updated = true;
+    //     }
 
-        // Set địa chỉ nếu có data
-        if (hasAddressData) {
-            String addressString = newAddress.toString().trim();
-            logger.info("Old address: {}, New address to set: {}", tenant.getAddress(), addressString);
-            tenant.setAddress(addressString);
-        }
+    //     // Set địa chỉ nếu có data
+    //     if (hasAddressData) {
+    //         String addressString = newAddress.toString().trim();
+    //         logger.info("Old address: {}, New address to set: {}", tenant.getAddress(), addressString);
+    //         tenant.setAddress(addressString);
+    //     }
 
-        // Cập nhật CCCD (giữ nguyên như trước)
-        UserCccd tenantCccd = userCccdRepository.findByUserId(tenant.getUserId())
-                .orElseGet(() -> {
-                    UserCccd newCccd = new UserCccd();
-                    newCccd.setUser(tenant);
-                    return newCccd;
-                });
+    //     // Cập nhật CCCD (giữ nguyên như trước)
+    //     UserCccd tenantCccd = userCccdRepository.findByUserId(tenant.getUserId())
+    //             .orElseGet(() -> {
+    //                 UserCccd newCccd = new UserCccd();
+    //                 newCccd.setUser(tenant);
+    //                 return newCccd;
+    //             });
 
-        boolean cccdDataPresent = false;
-        if (StringUtils.hasText(tenantDto.getCccdNumber())) {
-            tenantCccd.setCccdNumber(tenantDto.getCccdNumber());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD number: {}", tenantDto.getCccdNumber());
-        }
-        if (tenantDto.getIssueDate() != null) {
-            tenantCccd.setIssueDate(tenantDto.getIssueDate());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD issue date: {}", tenantDto.getIssueDate());
-        }
-        if (StringUtils.hasText(tenantDto.getIssuePlace())) {
-            tenantCccd.setIssuePlace(tenantDto.getIssuePlace());
-            updated = true;
-            cccdDataPresent = true;
-            logger.info("Set tenant CCCD issue place: {}", tenantDto.getIssuePlace());
-        }
+    //     boolean cccdDataPresent = false;
+    //     if (StringUtils.hasText(tenantDto.getCccdNumber())) {
+    //         tenantCccd.setCccdNumber(tenantDto.getCccdNumber());
+    //         updated = true;
+    //         cccdDataPresent = true;
+    //         logger.info("Set tenant CCCD number: {}", tenantDto.getCccdNumber());
+    //     }
+    //     if (tenantDto.getIssueDate() != null) {
+    //         tenantCccd.setIssueDate(tenantDto.getIssueDate());
+    //         updated = true;
+    //         cccdDataPresent = true;
+    //         logger.info("Set tenant CCCD issue date: {}", tenantDto.getIssueDate());
+    //     }
+    //     if (StringUtils.hasText(tenantDto.getIssuePlace())) {
+    //         tenantCccd.setIssuePlace(tenantDto.getIssuePlace());
+    //         updated = true;
+    //         cccdDataPresent = true;
+    //         logger.info("Set tenant CCCD issue place: {}", tenantDto.getIssuePlace());
+    //     }
 
-        // Save nếu có thay đổi
-        if (updated) {
-            try {
-                logger.info("Before save: Tenant address = {}", tenant.getAddress());
+    //     // Save nếu có thay đổi
+    //     if (updated) {
+    //         try {
+    //             logger.info("Before save: Tenant address = {}", tenant.getAddress());
 
-                Users savedTenant = userService.saveUser(tenant);
-                logger.info("Tenant User saved successfully: ID={}", savedTenant.getUserId());
+    //             Users savedTenant = userService.saveUser(tenant);
+    //             logger.info("Tenant User saved successfully: ID={}", savedTenant.getUserId());
 
-                if (cccdDataPresent || userCccdRepository.findByUserId(tenant.getUserId()).isPresent()) {
-                    userCccdRepository.save(tenantCccd);
-                    logger.info("Tenant CCCD saved successfully");
-                } else {
-                    logger.info("Skipping save for new empty CCCD entity.");
-                }
+    //             if (cccdDataPresent || userCccdRepository.findByUserId(tenant.getUserId()).isPresent()) {
+    //                 userCccdRepository.save(tenantCccd);
+    //                 logger.info("Tenant CCCD saved successfully");
+    //             } else {
+    //                 logger.info("Skipping save for new empty CCCD entity.");
+    //             }
 
-                logger.info("After save: Tenant address in DB should be updated to {}", savedTenant.getAddress());
-            } catch (Exception e) {
-                logger.error("Error saving tenant information: {}", e.getMessage(), e);
-            }
-        } else {
-            logger.info("No data to update for tenant. No save called.");
-        }
+    //             logger.info("After save: Tenant address in DB should be updated to {}", savedTenant.getAddress());
+    //         } catch (Exception e) {
+    //             logger.error("Error saving tenant information: {}", e.getMessage(), e);
+    //         }
+    //     } else {
+    //         logger.info("No data to update for tenant. No save called.");
+    //     }
 
-        return tenant;
-    }
+    //     return tenant;
+    // }
 
     // THÊM METHOD NÀY VÀO CONTROLLER CLASS CỦA BẠN
     private void validateContractData(ContractDto contract) {
@@ -1202,39 +1177,39 @@ public class ContractController {
 
 
 
-    private UnregisteredTenants handleUnregisteredTenant(ContractDto.UnregisteredTenant tenantDto, Users owner) {
-        logger.info("=== HANDLE UNREGISTERED TENANT (NO FILES) ===");
-        // Chỉ xử lý các trường text, không xử lý file
-        if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
-        }
+    // private UnregisteredTenants handleUnregisteredTenant(ContractDto.UnregisteredTenant tenantDto, Users owner) {
+    //     logger.info("=== HANDLE UNREGISTERED TENANT (NO FILES) ===");
+    //     // Chỉ xử lý các trường text, không xử lý file
+    //     if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
+    //         throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
+    //     }
 
-        UnregisteredTenants unregisteredTenant = new UnregisteredTenants();
-        unregisteredTenant.setUser(owner);
-        unregisteredTenant.setFullName(tenantDto.getFullName());
-        unregisteredTenant.setPhone(tenantDto.getPhone());
-        unregisteredTenant.setCccdNumber(tenantDto.getCccdNumber());
-        unregisteredTenant.setIssueDate(tenantDto.getIssueDate());
-        unregisteredTenant.setIssuePlace(tenantDto.getIssuePlace());
-        unregisteredTenant.setBirthday(tenantDto.getBirthday());
+    //     UnregisteredTenants unregisteredTenant = new UnregisteredTenants();
+    //     unregisteredTenant.setUser(owner);
+    //     unregisteredTenant.setFullName(tenantDto.getFullName());
+    //     unregisteredTenant.setPhone(tenantDto.getPhone());
+    //     unregisteredTenant.setCccdNumber(tenantDto.getCccdNumber());
+    //     unregisteredTenant.setIssueDate(tenantDto.getIssueDate());
+    //     unregisteredTenant.setIssuePlace(tenantDto.getIssuePlace());
+    //     unregisteredTenant.setBirthday(tenantDto.getBirthday());
 
-        // Xử lý địa chỉ
-        StringBuilder newAddress = new StringBuilder();
-        if (StringUtils.hasText(tenantDto.getStreet()))
-            newAddress.append(tenantDto.getStreet());
-        if (StringUtils.hasText(tenantDto.getWard()))
-            newAddress.append(", ").append(tenantDto.getWard());
-        if (StringUtils.hasText(tenantDto.getDistrict()))
-            newAddress.append(", ").append(tenantDto.getDistrict());
-        if (StringUtils.hasText(tenantDto.getProvince()))
-            newAddress.append(", ").append(tenantDto.getProvince());
-        if (!newAddress.toString().isEmpty()) {
-            unregisteredTenant.setAddress(newAddress.toString());
-        }
+    //     // Xử lý địa chỉ
+    //     StringBuilder newAddress = new StringBuilder();
+    //     if (StringUtils.hasText(tenantDto.getStreet()))
+    //         newAddress.append(tenantDto.getStreet());
+    //     if (StringUtils.hasText(tenantDto.getWard()))
+    //         newAddress.append(", ").append(tenantDto.getWard());
+    //     if (StringUtils.hasText(tenantDto.getDistrict()))
+    //         newAddress.append(", ").append(tenantDto.getDistrict());
+    //     if (StringUtils.hasText(tenantDto.getProvince()))
+    //         newAddress.append(", ").append(tenantDto.getProvince());
+    //     if (!newAddress.toString().isEmpty()) {
+    //         unregisteredTenant.setAddress(newAddress.toString());
+    //     }
 
-        unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
-        return unregisteredTenantsRepository.save(unregisteredTenant);
-    }
+    //     unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
+    //     return unregisteredTenantsRepository.save(unregisteredTenant);
+    // }
 
     @DeleteMapping("/{contractId}")
     @PreAuthorize("hasRole('OWNER')")

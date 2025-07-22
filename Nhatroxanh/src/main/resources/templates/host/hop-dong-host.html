@@ -745,13 +745,13 @@
                                         <label class="form-label">
                                             Phương thức thanh toán <span class="text-danger">*</span>
                                         </label>
-                                        <select class="form-select" id="payment-method" required>
-                                            <option value="">Chọn phương thức</option>
-                                            <option value="cash">Tiền mặt</option>
-                                            <option value="transfer">Chuyển khoản</option>
+
+                                        <select class="form-select" id="payment-method" th:field="*{paymentMethod}"
+                                            required>
+                                            <option value="TIEN_MAT">Tiền mặt</option>
+                                            <option value="BANK">Chuyển khoản</option>
                                         </select>
                                     </div>
-
                                     <div class="col-md-6">
                                         <label class="form-label">
                                             Ngày thanh toán hàng tháng <span class="text-danger">*</span>

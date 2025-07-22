@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.Builder;
-import lombok.Data;
-import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
 
+import lombok.Data;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.Set;
@@ -25,6 +23,7 @@ public class ContractDto {
     // Thêm trường địa chỉ cho chủ trọ và người thuê
     private String ownerAddress;
     private String tenantAddress;
+    private PaymentMethod paymentMethod;
 
     public ContractDto() {
         this.owner = new Owner();
@@ -37,6 +36,16 @@ public class ContractDto {
         this.unregisteredTenant = new UnregisteredTenant();
         this.tenantAddress = ""; // Khởi tạo địa chỉ người thuê
         this.ownerAddress = ""; // Khởi tạo địa chỉ chủ trọ
+    }
+    public enum PaymentMethod {
+        TIEN_MAT,
+        BANK
+    }
+    public PaymentMethod getPaymentMethod() {
+        return paymentMethod;
+    }
+    public void setPaymentMethod(PaymentMethod paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public String getOwnerAddress() {
