@@ -123,9 +123,13 @@
       </div>
     </div>
 
-    <button class="btn w-100 mb-3 text-white fw-bold" style="background-color: #ff6600;">
-      <i class="fas fa-dollar-sign me-2"></i> Nạp tiền
-    </button>
+    <a th:href="@{/host/wallet/nap-tien}" class="btn w-100 mb-2 text-white fw-bold" style="background-color: #ff6600; text-decoration: none;">
+      <i class="fas fa-plus-circle me-2"></i> Nạp tiền
+    </a>
+    
+    <a th:href="@{/host/wallet/rut-tien}" class="btn w-100 mb-3 text-white fw-bold" style="background-color: #28a745; text-decoration: none;">
+      <i class="fas fa-money-bill-transfer me-2"></i> Rút tiền
+    </a>
 
     <div class="list-group border-0">
       <a th:href="@{/chu-tro/profile-host}"
