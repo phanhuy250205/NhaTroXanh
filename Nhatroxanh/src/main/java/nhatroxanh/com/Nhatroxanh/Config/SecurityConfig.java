@@ -61,10 +61,11 @@ public class SecurityConfig {
                                 "/uploads/**")
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/momo/**","/vnpay/**",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**",
+                                "/vnpay/**",
                                 "/tat-ca-phong-tro")
                         .permitAll()
-                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
+                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
@@ -75,10 +76,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login-processing")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler)
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
+                        .successHandler(customLoginSuccessHandler) // <-- ĐÃ SỬA: Chỉ giữ lại trình xử lý đúng
                         .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
