@@ -228,4 +228,15 @@ public class EmailServiceImpl implements EmailService {
         sendHtmlMail(to, subject, content);
     }
 
+    @Override
+    public void sendNewPasswordEmail(String to, String fullname, String newPassword) {
+        String subject = "Mật khẩu mới của bạn";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Mật khẩu mới của bạn là: <b>" + newPassword + "</b></p>" +
+                "<p>Vui lòng sử dụng mật khẩu này để đăng nhập và đổi mật khẩu trong hệ thống nếu cần.</p>" +
+                "<p>Trân trọng,<br>Nhà Trọ Xanh</p>";
+
+        sendHtmlMail(to, subject, content);
+    }
+
 }

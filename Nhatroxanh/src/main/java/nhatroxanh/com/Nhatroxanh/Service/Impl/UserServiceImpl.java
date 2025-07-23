@@ -171,7 +171,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
         logger.info("Finding owner with CCCD: {} or phone: {}", cccd, phone);
         if (authentication == null || !authentication.isAuthenticated()) {

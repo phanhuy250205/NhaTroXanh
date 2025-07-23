@@ -210,98 +210,61 @@
         }
 
         function applyFilter(page = 0) {
-            const loading = document.getElementById('loading');
-            const postsContainer = document.getElementById('postsContainer');
-            const noResults = document.getElementById('noResults');
-            const debugInfo = document.getElementById('debugInfo');
-
-            if (!loading || !postsContainer || !noResults || !debugInfo) {
-                console.error('Missing DOM elements');
-                return;
-            }
-
-            loading.style.display = 'block';
-            postsContainer.style.display = 'none';
-            noResults.style.display = 'none';
-            debugInfo.style.display = 'none';
-
-            const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
-                .map(checkbox => checkbox.value);
-
-            const selectedArea = document.querySelector('input[name="area"]:checked')?.value;
-            let minArea = null;
-            let maxArea = null;
-            if (selectedArea && selectedArea !== 'all') {
-                if (selectedArea.includes('-')) {
-                    const parts = selectedArea.split('-');
-                    minArea = parts[0] !== '' ? parseFloat(parts[0]) : null;
-                    maxArea = parts[1] !== '' ? parseFloat(parts[1]) : null;
-                } else if (selectedArea.endsWith('-')) {
-                    minArea = parseFloat(selectedArea.replace('-', ''));
-                } else if (selectedArea.startsWith('-')) {
-                    maxArea = parseFloat(selectedArea.replace('-', ''));
-                }
-            }
-
-            // Lấy giá trị từ input lọc giá tiền
-            const minPrice = document.getElementById('minPrice')?.value;
-            const maxPrice = document.getElementById('maxPrice')?.value;
-
-            // Lấy giá trị từ select lọc địa chỉ
-            const provinceCode = document.getElementById('province')?.value;
-            const districtCode = document.getElementById('district')?.value;
-            const wardCode = document.getElementById('ward')?.value;
-
-            // Lấy giá trị từ input tìm kiếm (searchTerm)
+            const selectedSort = document.getElementById('sortBy')?.value || 'latest';
+            const priceRange = document.getElementById('priceRange')?.value?.trim() || '';
+            const provinceCode = document.getElementById('province')?.value?.trim();
+            const districtCode = document.getElementById('district')?.value?.trim();
+            const wardCode = document.getElementById('ward')?.value?.trim();
             const searchTerm = document.getElementById('searchInput')?.value?.trim();
 
-            const sort = document.getElementById('sortBy')?.value || 'latest';
+            let minPrice = null;
+            let maxPrice = null;
+            switch (priceRange) {
+                case 'under_1m': maxPrice = 1000000; break;
+                case '1_2m': minPrice = 1000000; maxPrice = 2000000; break;
+                case '2_3m': minPrice = 2000000; maxPrice = 3000000; break;
+                case '3_5m': minPrice = 3000000; maxPrice = 5000000; break;
+                case 'over_5m': minPrice = 5000000; break;
+            }
 
-            const params = new URLSearchParams();
+            // Diện tích
+            let minArea = null;
+            let maxArea = null;
+            const areaValue = document.querySelector('input[name="area"]:checked')?.value;
+            if (areaValue) {
+                const [min, max] = areaValue.split('-');
+                minArea = min !== '' ? parseInt(min) : null;
+                maxArea = max !== '' ? parseInt(max) : null;
+            }
 
-            selectedUtilities.forEach(utilityId => {
-                params.append('utilities', utilityId);
-            });
+            // Tiện ích
+            const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
+                .map(cb => cb.value);
 
-            if (minArea !== null) params.append('minArea', minArea);
-            if (maxArea !== null) params.append('maxArea', maxArea);
-            if (minPrice) params.append('minPrice', minPrice);
-            if (maxPrice) params.append('maxPrice', maxPrice);
-            if (provinceCode) params.append('provinceCode', provinceCode);
-            if (districtCode) params.append('districtCode', districtCode);
-            if (wardCode) params.append('wardCode', wardCode);
-            if (searchTerm) params.append('searchTerm', searchTerm);
+            const url = new URL('/api/filter-all-posts', window.location.origin);
+            url.searchParams.append('page', page);
+            url.searchParams.append('sort', selectedSort);
+            if (minPrice !== null) url.searchParams.append('minPrice', minPrice);
+            if (maxPrice !== null) url.searchParams.append('maxPrice', maxPrice);
+            if (provinceCode) url.searchParams.append('provinceCode', provinceCode);
+            if (districtCode) url.searchParams.append('districtCode', districtCode);
+            if (wardCode) url.searchParams.append('wardCode', wardCode);
+            if (searchTerm) url.searchParams.append('searchTerm', searchTerm);
+            if (minArea !== null) url.searchParams.append('minArea', minArea);
+            if (maxArea !== null) url.searchParams.append('maxArea', maxArea);
+            if (selectedUtilities.length > 0) {
+                selectedUtilities.forEach(id => url.searchParams.append('utilities', id));
+            }
 
-            params.append('sort', sort);
-            params.append('page', page);
-
-            console.log('Filter request:', `/api/filter-all-posts?${params.toString()}`);
-
-            fetch(`/api/filter-all-posts?${params.toString()}`)
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(`HTTP ${response.status}: ${text}`);
-                        });
-                    }
-                    return response.json();
-                })
+            fetch(url.toString())
+                .then(response => response.json())
                 .then(data => {
-                    if (!data || !data.content) {
-                        throw new Error('Invalid API response: content missing');
-                    }
-                    loading.style.display = 'none';
                     displayPosts(data.content);
                     updatePostCount(data.totalElements);
                     updatePagination(data.number, data.totalPages);
                 })
                 .catch(error => {
-                    console.error('Fetch error:', error);
-                    loading.style.display = 'none';
-                    debugInfo.style.display = 'block';
-                    debugInfo.className = 'alert alert-danger';
-                    debugInfo.innerHTML = `Lỗi: ${error.message}`;
-                    postsContainer.style.display = 'none';
+                    console.error('Lỗi khi lọc bài đăng:', error);
                 });
         }
 
@@ -427,17 +390,31 @@
         function resetFilter() {
             const utilities = document.querySelectorAll('input[name="utilities"]');
             const areaAll = document.getElementById('area_all');
+            const priceRange = document.getElementById('priceRange');
+            const province = document.getElementById('province');
+            const district = document.getElementById('district');
+            const ward = document.getElementById('ward');
+            const searchInput = document.getElementById('searchInput');
             const sortBy = document.getElementById('sortBy');
 
-            if (!utilities || !areaAll || !sortBy) {
+            if (!utilities || !areaAll || !priceRange || !sortBy) {
                 console.error('Filter elements not found for reset');
                 return;
             }
 
-            utilities.forEach(checkbox => {
-                checkbox.checked = false;
-            });
+            utilities.forEach(checkbox => checkbox.checked = false);
             areaAll.checked = true;
+            priceRange.value = '';
+            if (province) province.value = '';
+            if (district) {
+                district.value = '';
+                district.disabled = true;
+            }
+            if (ward) {
+                ward.value = '';
+                ward.disabled = true;
+            }
+            if (searchInput) searchInput.value = '';
             sortBy.value = 'latest';
 
             console.log('Filters reset');
