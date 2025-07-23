@@ -14,8 +14,11 @@ import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.lowagie.text.StandardFonts;
 import jakarta.validation.Valid;
+
+
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
+
 import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
@@ -33,7 +36,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
