@@ -1,5 +1,18 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
+import com.itextpdf.io.font.PdfEncodings;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.Border;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import com.lowagie.text.StandardFonts;
 import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
@@ -16,8 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
@@ -29,7 +41,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -69,12 +83,19 @@ public class ContractController {
     private UserService userService;
 
     @Autowired
+    private PdfService pdfService; // ✅ INJECT PDF SERVICE
+
+    @Autowired
     private HostelService hostelService;
 
     @Autowired
     private RoomsService roomsService;
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private EmailService emailService;
+
 
     @Autowired
     private ImageService imageService; // Sử dụng ImageService thay vì ImageRepository
@@ -870,6 +891,373 @@ public class ContractController {
 
         return tenant;
     }
+    @PostMapping("/send-email")
+    @ResponseBody
+    public ResponseEntity<?> sendContractEmail(@RequestBody Map<String, Object> requestData) {
+        try {
+            Object contractIdObj = requestData.get("contractId");
+            if (contractIdObj == null) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "❌ Thiếu contractId trong request"
+                ));
+            }
+
+            Long contractId = Long.valueOf(contractIdObj.toString());
+            System.out.println("📧 Sending email for contract: " + contractId);
+
+            // 1. Tìm hợp đồng
+            Optional<Contracts> contractOpt = contractService.findContractById(contractId.intValue());
+            if (!contractOpt.isPresent()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "❌ Không tìm thấy hợp đồng với ID: " + contractId
+                ));
+            }
+
+            Contracts contract = contractOpt.get();
+
+            // 2. Lấy email người thuê
+            String tenantEmail = getTenantEmail(requestData, contract);
+            if (tenantEmail == null || tenantEmail.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of(
+                        "success", false,
+                        "message", "❌ Không tìm thấy email người thuê"
+                ));
+            }
+
+            // ✅ 3. TẠO PDF HỢP ĐỒNG
+            byte[] pdfBytes = generateContractPDF(contract,
+                    contract.getTenant().getFullname(),
+                    contract.getRoom().getNamerooms());
+
+            // ✅ 4. GỬI EMAIL VỚI PDF ATTACHMENT
+            String subject = "📋 Hợp đồng thuê trọ - Phòng " + contract.getRoom().getNamerooms();
+            String body = createEmailBodyForPDF(contract);
+            String fileName = "HopDong_" + contract.getRoom().getNamerooms() + "_" + contractId + ".pdf";
+
+            emailService.sendEmailWithAttachment(tenantEmail, subject, body, pdfBytes, fileName);
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "✅ Email với file PDF đã được gửi thành công đến: " + tenantEmail
+            ));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "❌ Lỗi gửi email: " + e.getMessage()
+            ));
+        }
+    }
+
+    private byte[] generateContractPDF(Contracts contract, String tenantName, String roomName) throws Exception {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PdfWriter writer = new PdfWriter(baos);
+            PdfDocument pdfDoc = new PdfDocument(writer);
+            Document document = new Document(pdfDoc);
+
+            // ✅ SỬ DỤNG FONT SVN-ARIAL TỪ RESOURCES
+            PdfFont regularFont;
+            PdfFont boldFont;
+
+            try {
+                // Sử dụng font SVN-Arial Regular và Bold
+                InputStream regularStream = getClass().getResourceAsStream("/fonts/SVN-Arial Regular.ttf");
+                InputStream boldStream = getClass().getResourceAsStream("/fonts/SVN-Arial Bold.ttf");
+
+                if (regularStream != null && boldStream != null) {
+                    byte[] regularBytes = regularStream.readAllBytes();
+                    byte[] boldBytes = boldStream.readAllBytes();
+
+                    regularFont = PdfFontFactory.createFont(regularBytes, PdfEncodings.IDENTITY_H);
+                    boldFont = PdfFontFactory.createFont(boldBytes, PdfEncodings.IDENTITY_H);
+
+                    regularStream.close();
+                    boldStream.close();
+                } else {
+                    // Fallback nếu không load được
+                    regularFont = PdfFontFactory.createFont(String.valueOf(StandardFonts.HELVETICA));
+                    boldFont = PdfFontFactory.createFont(String.valueOf(StandardFonts.HELVETICA_BOLD));
+                }
+            } catch (Exception e) {
+                System.err.println("⚠️ Không thể load font SVN-Arial, sử dụng font mặc định");
+                regularFont = PdfFontFactory.createFont(String.valueOf(StandardFonts.HELVETICA));
+                boldFont = PdfFontFactory.createFont(String.valueOf(StandardFonts.HELVETICA_BOLD));
+            }
+
+            // ✅ TIÊU ĐỀ
+            Paragraph title = new Paragraph("HỢP ĐỒNG THUÊ TRỌ")
+                    .setFont(boldFont)
+                    .setFontSize(20)
+                    .setTextAlignment(TextAlignment.CENTER)
+                    .setMarginBottom(30)
+                    .setBold();
+            document.add(title);
+
+            // ✅ THÔNG TIN HỢP ĐỒNG
+            document.add(new Paragraph("Mã hợp đồng: " + contract.getContractId())
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Phòng: " + roomName)
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Người thuê: " + tenantName)
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Ngày bắt đầu: " + contract.getStartDate())
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Ngày kết thúc: " + contract.getEndDate())
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Giá thuê: " + String.format("%,.0f", contract.getPrice()) + " VNĐ/tháng")
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            document.add(new Paragraph("Tiền cọc: " + String.format("%,.0f", contract.getDeposit()) + " VNĐ")
+                    .setFont(regularFont).setFontSize(12).setMarginBottom(8));
+
+            // ✅ ĐIỀU KHOẢN (NẾU CÓ)
+            if (contract.getTerms() != null && !contract.getTerms().isEmpty()) {
+                document.add(new Paragraph("\nĐIỀU KHOẢN HỢP ĐỒNG:")
+                        .setFont(boldFont).setFontSize(14).setMarginTop(20).setMarginBottom(10));
+
+                document.add(new Paragraph(contract.getTerms())
+                        .setFont(regularFont).setFontSize(11));
+            }
+
+            // ✅ CHỮ KÝ
+            document.add(new Paragraph("\n\n")
+                    .setMarginTop(30));
+
+            Table signatureTable = new Table(2);
+            signatureTable.setWidth(UnitValue.createPercentValue(100));
+
+            signatureTable.addCell(new Cell().add(new Paragraph("Người cho thuê\n\n\n_________________")
+                    .setFont(regularFont).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+
+            signatureTable.addCell(new Cell().add(new Paragraph("Người thuê\n\n\n_________________")
+                    .setFont(regularFont).setTextAlignment(TextAlignment.CENTER)).setBorder(Border.NO_BORDER));
+
+            document.add(signatureTable);
+
+            document.close();
+            return baos.toByteArray();
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi tạo PDF: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    // ✅ THÊM ENDPOINT TEST PDF TRONG CONTROLLER
+    @GetMapping("/test-pdf-direct")
+    public ResponseEntity<byte[]> testPdfDirect() {
+        try {
+            String testHtml = """
+            <div class="header">TEST PDF DIRECT</div>
+            <p>Testing PDF generation directly</p>
+            <table>
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>Test</td><td>Direct Download</td></tr>
+            </table>
+            """;
+
+            byte[] pdfBytes = pdfService.generateContractPdf(testHtml);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_PDF);
+            headers.setContentDisposition(ContentDisposition.attachment().filename("test_direct.pdf").build());
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(("Error: " + e.getMessage()).getBytes());
+        }
+    }
+
+    @PostMapping("/generate-pdf")
+    public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
+        try {
+            String contractHtml = (String) request.get("contractHtml");
+            String fileName = (String) request.get("fileName");
+
+            if (contractHtml == null || contractHtml.trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (fileName == null || fileName.trim().isEmpty()) {
+                fileName = "contract_" + System.currentTimeMillis();
+            }
+
+            // Generate PDF
+            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+
+            // ✅ VALIDATE PDF
+            if (pdfBytes == null || pdfBytes.length == 0) {
+                return ResponseEntity.status(500).build();
+            }
+
+            // ✅ SỬA LẠI HEADERS
+            HttpHeaders headers = new HttpHeaders();
+
+            // ✅ SET CONTENT TYPE ĐÚNG
+            headers.add("Content-Type", "application/pdf");
+
+            // ✅ INLINE ĐỂ PREVIEW ĐƯỢC (thay vì attachment)
+            headers.add("Content-Disposition", "inline; filename=\"" + fileName + ".pdf\"");
+
+            // ✅ THÊM CÁC HEADERS KHÁC
+            headers.setContentLength(pdfBytes.length);
+            headers.add("Accept-Ranges", "bytes");
+            headers.add("Cache-Control", "private, max-age=0");
+
+            System.out.println("✅ PDF Response Headers:");
+            System.out.println("📄 Content-Type: application/pdf");
+            System.out.println("📁 Filename: " + fileName + ".pdf");
+            System.out.println("📊 Size: " + pdfBytes.length + " bytes");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+
+
+    // ✅ NỘI DUNG EMAIL CHO PDF
+    private String createEmailBodyForPDF(Contracts contract) {
+        return "Xin chào " + contract.getTenant().getFullname() + ",\n\n" +
+                "Đính kèm là file PDF hợp đồng thuê trọ phòng " + contract.getRoom().getNamerooms() + ".\n\n" +
+                "Vui lòng kiểm tra và liên hệ nếu có thắc mắc.\n\n" +
+                "Trân trọng!\n" +
+                "Ban quản lý";
+    }
+
+
+
+
+    // ✅ ENDPOINT SEND PDF VIA EMAIL
+    @PostMapping("/send-email-pdf")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String recipientEmail = (String) request.get("recipientEmail");
+            String recipientName = (String) request.get("recipientName");
+            String contractHtml = (String) request.get("contractHtml");
+            String subject = (String) request.get("subject");
+            String contractId = (String) request.get("contractId");
+
+            // ✅ VALIDATE
+            if (recipientEmail == null || contractHtml == null) {
+                response.put("success", false);
+                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            System.out.println("📧 Generating PDF and sending email to: " + recipientEmail);
+
+            // ✅ GENERATE PDF FROM HTML
+            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+
+            // ✅ CREATE FILE NAME
+            String fileName = String.format("HopDong_%s_%s",
+                    recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
+                    contractId != null ? contractId : System.currentTimeMillis()
+            );
+
+            // ✅ SEND EMAIL WITH PDF ATTACHMENT
+            emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
+
+            response.put("success", true);
+            response.put("message", "Hợp đồng PDF đã được gửi thành công qua email");
+            response.put("fileName", fileName + ".pdf");
+            response.put("recipientEmail", recipientEmail);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email PDF: " + e.getMessage());
+            e.printStackTrace();
+
+            response.put("success", false);
+            response.put("message", "Lỗi gửi email: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+    @PostMapping("/send-email-html")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendContractEmailHtml(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String recipientEmail = (String) request.get("recipientEmail");
+            String recipientName = (String) request.get("recipientName");
+            String contractHtml = (String) request.get("contractHtml");
+            String subject = (String) request.get("subject");
+
+            // Validate
+            if (recipientEmail == null || contractHtml == null) {
+                response.put("success", false);
+                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // ✅ GỬI EMAIL VỚI HTML CONTENT
+            emailService.sendContractHtml(recipientEmail, recipientName, subject, contractHtml);
+
+            response.put("success", true);
+            response.put("message", "Hợp đồng đã được gửi thành công qua email");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email HTML: " + e.getMessage());
+            e.printStackTrace();
+
+            response.put("success", false);
+            response.put("message", "Lỗi gửi email: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+
+    // ✅ THÊM METHOD NÀY VÀO CONTROLLER
+    private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
+        // Kiểm tra email từ request trước
+        Object emailObj = requestData.get("email");
+        if (emailObj != null && !emailObj.toString().trim().isEmpty()) {
+            return emailObj.toString().trim();
+        }
+
+        // Nếu không có trong request, lấy từ tenant trong contract
+        if (contract.getTenant() != null && contract.getTenant().getEmail() != null) {
+            return contract.getTenant().getEmail();
+        }
+
+        // Nếu vẫn không có, thử lấy từ các field khác
+        if (contract.getTenant().getEmail() != null) {
+            return contract.getTenant().getEmail();
+        }
+
+        return null;
+    }
+
+
 
 
     @PostMapping(value = "/update-cccd-image", consumes = {"multipart/form-data"})
