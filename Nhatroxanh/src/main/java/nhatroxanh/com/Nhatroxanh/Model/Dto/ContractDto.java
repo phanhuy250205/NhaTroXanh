@@ -96,6 +96,7 @@ public class ContractDto {
         private Date birthday;
         private String bankAccount;
         private Date issueDate;
+        private String fullCccdNumber; // Thêm trường
         private String issuePlace;
         private String province;
         private String district;
@@ -104,6 +105,14 @@ public class ContractDto {
 
         // Getters and setters
 
+
+        public String getFullCccdNumber() {
+            return fullCccdNumber;
+        }
+
+        public void setFullCccdNumber(String fullCccdNumber) {
+            this.fullCccdNumber = fullCccdNumber;
+        }
 
         public Integer getUserId() {
             return userId;
@@ -152,6 +161,7 @@ public class ContractDto {
         private String issuePlace;
         private String province;
         private String district;
+        private String fullCccdNumber; // Thêm trường
         private String ward;
         private String street;
         private Date birthday;
@@ -162,6 +172,14 @@ public class ContractDto {
 
         // Getters and setters
 
+
+        public String getFullCccdNumber() {
+            return fullCccdNumber;
+        }
+
+        public void setFullCccdNumber(String fullCccdNumber) {
+            this.fullCccdNumber = fullCccdNumber;
+        }
 
         public MultipartFile getCccdFront() {
             return cccdFront;
@@ -217,6 +235,7 @@ public class ContractDto {
         private String phone;
         private String cccdNumber;
         private String email;
+        private String fullCccdNumber; // Thêm trường
         private Date issueDate;
         private String issuePlace;
         private String province;
@@ -231,6 +250,14 @@ public class ContractDto {
 
         // Getters and setters
 
+
+        public String getFullCccdNumber() {
+            return fullCccdNumber;
+        }
+
+        public void setFullCccdNumber(String fullCccdNumber) {
+            this.fullCccdNumber = fullCccdNumber;
+        }
 
         public MultipartFile getCccdFront() {
             return cccdFront;

@@ -25,6 +25,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.*;
+import nhatroxanh.com.Nhatroxanh.Util.CccdUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -95,6 +96,8 @@ public class ContractController {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private CccdUtils cccdUtils;
 
 
     @Autowired
@@ -1436,105 +1439,61 @@ public class ContractController {
 
         Map<String, Object> response = new HashMap<>();
         try {
-            logger.info("🔎 Đang tìm kiếm người dùng với số điện thoại: {}", phone);
             Optional<Users> tenantUser = userRepository.findByPhone(phone);
-
             if (tenantUser.isPresent()) {
+                Users user = tenantUser.get();
                 logger.info("✅ Tìm thấy người dùng với số điện thoại: {}", phone);
 
-                Users user = tenantUser.get();
-                logger.info("👤 Thông tin người dùng:");
-                logger.info("   - ID: {}", user.getUserId());
-                logger.info("   - Tên: {}", user.getFullname());
-                logger.info("   - Email: {}", user.getEmail());
-
-                logger.info("🆔 Đang tìm thông tin CCCD cho người dùng");
                 UserCccd tenantCccd = userService.findUserCccdByUserId(user.getUserId());
-
                 Map<String, Object> tenantData = new HashMap<>();
                 tenantData.put("fullName", user.getFullname());
                 tenantData.put("phone", user.getPhone());
                 tenantData.put("email", user.getEmail() != null ? user.getEmail() : "");
                 tenantData.put("birthday", user.getBirthday() != null ? user.getBirthday().toString() : null);
 
-                // Xử lý thông tin CCCD
                 if (tenantCccd != null) {
-                    logger.info("🆔 Thông tin CCCD:");
-                    logger.info("   - Số CCCD: {}", tenantCccd.getCccdNumber());
-                    logger.info("   - Ngày cấp: {}", tenantCccd.getIssueDate());
-                    logger.info("   - Nơi cấp: {}", tenantCccd.getIssuePlace());
-                    tenantData.put("cccdNumber", tenantCccd.getCccdNumber());
-                    tenantData.put("issueDate",
-                            tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
+                    // Trả về số CCCD dạng ẩn
+                    tenantData.put("cccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber()));
+                    tenantData.put("issueDate", tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
                 } else {
-                    logger.warn("⚠️ Không tìm thấy thông tin CCCD cho người dùng");
                     tenantData.put("cccdNumber", "");
                     tenantData.put("issueDate", null);
                     tenantData.put("issuePlace", "");
                 }
 
                 // Xử lý địa chỉ
-                logger.info("🏠 Địa chỉ người dùng: {}", user.getAddress());
                 tenantData.put("street", "");
                 tenantData.put("ward", "");
                 tenantData.put("district", "");
                 tenantData.put("province", "");
                 tenantData.put("address", user.getAddress() != null ? user.getAddress() : "");
-
                 if (StringUtils.hasText(user.getAddress())) {
                     String[] addressParts = user.getAddress().split(",\\s*");
-                    logger.info("📍 Chi tiết địa chỉ:");
-                    logger.info("   - Số thành phần địa chỉ: {}", addressParts.length);
-
-                    if (addressParts.length >= 1) {
-                        logger.info("   - Đường/Số nhà: {}", addressParts[0]);
-                        tenantData.put("street", addressParts[0].trim());
-                    }
-                    if (addressParts.length >= 2) {
-                        logger.info("   - Phường/Xã: {}", addressParts[1]);
-                        tenantData.put("ward", addressParts[1].trim());
-                    }
-                    if (addressParts.length >= 3) {
-                        logger.info("   - Quận/Huyện: {}", addressParts[2]);
-                        tenantData.put("district", addressParts[2].trim());
-                    }
-                    if (addressParts.length >= 4) {
-                        logger.info("   - Tỉnh/Thành phố: {}", addressParts[3]);
-                        tenantData.put("province", addressParts[3].trim());
-                    }
-                } else {
-                    logger.warn("⚠️ Không có thông tin địa chỉ cho người dùng");
+                    if (addressParts.length >= 1) tenantData.put("street", addressParts[0].trim());
+                    if (addressParts.length >= 2) tenantData.put("ward", addressParts[1].trim());
+                    if (addressParts.length >= 3) tenantData.put("district", addressParts[2].trim());
+                    if (addressParts.length >= 4) tenantData.put("province", addressParts[3].trim());
                 }
 
                 response.put("success", true);
                 response.put("tenant", tenantData);
-
                 logger.info("✅ === KẾT QUẢ TÌM KIẾM NGƯỜI THUÊ ===");
                 logger.info("📊 Chi tiết người thuê: {}", tenantData);
-
                 return ResponseEntity.ok(response);
             } else {
-                logger.warn("❌ KHÔNG TÌM THẤY NGƯỜI DÙNG");
-                logger.warn("📱 Số điện thoại: {}", phone);
-
+                logger.warn("❌ Không tìm thấy người dùng với số điện thoại: {}", phone);
                 response.put("success", false);
                 response.put("message", "Không tìm thấy người thuê với số điện thoại: " + phone);
-
                 return ResponseEntity.ok(response);
             }
         } catch (Exception e) {
-            logger.error("❌ === LỖI KHI TÌM KIẾM NGƯỜI THUÊ ===");
-            logger.error("📱 Số điện thoại: {}", phone);
-            logger.error("🔥 Chi tiết lỗi: {}", e.getMessage(), e);
-
+            logger.error("❌ Lỗi khi tìm kiếm người thuê: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Lỗi khi lấy thông tin người thuê: " + e.getMessage());
-
             return ResponseEntity.status(500).body(response);
         }
     }
-
     private Map<String, String> parseAddress(String addressString) {
         Map<String, String> addressParts = new HashMap<>();
         if (addressString == null || addressString.trim().isEmpty()) {

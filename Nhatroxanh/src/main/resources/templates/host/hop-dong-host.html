@@ -340,7 +340,9 @@
                                         Số CMND/CCCD <span class="text-danger">*</span>
                                     </label>
                                     <input type="text" class="form-control" name="tenant.cccdNumber" id="tenant-id" required
-                                           pattern="[0-9]{12}" maxlength="12" placeholder="12 chữ số" th:field="*{tenant.cccdNumber}">
+                                           pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
+                                           placeholder="123****789" th:field="*{tenant.cccdNumber}">
+                                    <input type="hidden" id="tenant-full-cccd-number" name="tenant.fullCccdNumber" th:field="*{tenant.fullCccdNumber}">
                                 </div>
 
                                 <div class="col-md-5">
@@ -1325,6 +1327,130 @@
         });
     });
 
+
+    $(document).ready(function() {
+        // Xử lý tìm người thuê theo số điện thoại
+        $('#tenant-phone').on('change', function() {
+            const phone = $(this).val();
+            $.ajax({
+                url: '/api/contracts/get-tenant-by-phone',
+                method: 'POST',
+                data: { phone: phone },
+                success: function(response) {
+                    if (response.success) {
+                        const tenant = response.tenant;
+                        $('#tenant-id').val(tenant.cccdNumber); // CCCD dạng ẩn
+                        $('#tenant-full-cccd-number').val(tenant.fullCccdNumber); // CCCD đầy đủ
+                        $('#tenant-name').val(tenant.fullName);
+                        $('#tenant-dob').val(tenant.birthday);
+                        $('#tenant-id-date').val(tenant.issueDate);
+                        $('#tenant-id-place').val(tenant.issuePlace);
+                        $('#tenant-street').val(tenant.street);
+                        $('#tenant-ward').val(tenant.ward);
+                        $('#tenant-district').val(tenant.district);
+                        $('#tenant-province').val(tenant.province);
+                        $('#tenant-email').val(tenant.email);
+
+                        // Lấy ảnh CCCD
+                        const fullCccdNumber = tenant.fullCccdNumber;
+                        if (fullCccdNumber) {
+                            $.ajax({
+                                url: '/api/contracts/cccd-images',
+                                method: 'POST',
+                                data: { cccdNumber: fullCccdNumber },
+                                success: function(imageResponse) {
+                                    if (imageResponse.success) {
+                                        if (imageResponse.cccdFrontUrl) {
+                                            $('#cccd-front-preview').html(`<img src="${imageResponse.cccdFrontUrl}" alt="CCCD Front"/>`);
+                                        } else {
+                                            $('#cccd-front-preview').html('<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>');
+                                        }
+                                        if (imageResponse.cccdBackUrl) {
+                                            $('#cccd-back-preview').html(`<img src="${imageResponse.cccdBackUrl}" alt="CCCD Back"/>`);
+                                        } else {
+                                            $('#cccd-back-preview').html('<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>');
+                                        }
+                                    } else {
+                                        alert('Không tìm thấy ảnh CCCD: ' + imageResponse.message);
+                                    }
+                                },
+                                error: function(xhr) {
+                                    alert('Lỗi khi lấy ảnh CCCD: ' + xhr.responseJSON.message);
+                                }
+                            });
+                        }
+                    } else {
+                        alert('Không tìm thấy người thuê!');
+                    }
+                },
+                error: function(xhr) {
+                    alert('Lỗi: ' + xhr.responseJSON.message);
+                }
+            });
+        });
+
+        // Xử lý thêm người thuê chưa đăng ký
+        $('#saveCustomer-host').on('click', function() {
+            const formData = new FormData();
+            formData.append('name', $('#newCustomer-name').val());
+            formData.append('dob', $('#newCustomer-dob').val());
+            formData.append('id', $('#newCustomer-id').val());
+            formData.append('id-date', $('#newCustomer-id-date').val());
+            formData.append('id-place', $('#newCustomer-id-place').val());
+            formData.append('phone', $('#newCustomer-phone').val());
+            formData.append('email', $('#newCustomer-email').val());
+            formData.append('street', $('#newCustomer-street').val());
+            formData.append('ward', $('#newCustomer-ward').val());
+            formData.append('district', $('#newCustomer-district').val());
+            formData.append('province', $('#newCustomer-province').val());
+            formData.append('cccd-front', $('#newCustomer-cccd-front')[0].files[0]);
+            formData.append('cccd-back', $('#newCustomer-cccd-back')[0].files[0]);
+
+            $.ajax({
+                url: '/api/contracts/add-unregistered-tenant',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    if (response.success) {
+                        const tenant = response.tenant;
+                        $('#unregistered-tenant-id').val(tenant.cccdNumber); // CCCD dạng ẩn
+                        $('#unregistered-tenant-full-cccd-number').val(tenant.fullCccdNumber); // CCCD đầy đủ
+                        $('#tenant-name').val(tenant.fullName);
+                        $('#tenant-dob').val(tenant.birthday);
+                        $('#tenant-id-date').val(tenant.issueDate);
+                        $('#tenant-id-place').val(tenant.issuePlace);
+                        $('#tenant-street').val(tenant.street);
+                        $('#tenant-ward').val(tenant.ward);
+                        $('#tenant-district').val(tenant.district);
+                        $('#tenant-province').val(tenant.province);
+                        $('#tenant-email').val(tenant.email);
+
+                        if (tenant.cccdFrontUrl) {
+                            $('#cccd-front-preview').html(`<img src="${tenant.cccdFrontUrl}" alt="CCCD Front"/>`);
+                        } else {
+                            $('#cccd-front-preview').html('<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>');
+                        }
+                        if (tenant.cccdBackUrl) {
+                            $('#cccd-back-preview').html(`<img src="${tenant.cccdBackUrl}" alt="CCCD Back"/>`);
+                        } else {
+                            $('#cccd-back-preview').html('<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>');
+                        }
+
+                        $('#addCustomerModal-host').modal('hide');
+                        alert('Thêm người thuê thành công!');
+                    } else {
+                        alert('Lỗi: ' + response.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert('Lỗi: ' + xhr.responseJSON.message);
+                }
+            });
+        });
+    });
+
     // ✅ HÀM CAPTURE HTML PREVIEW
     function captureContractPreview() {
         // Lấy toàn bộ HTML của preview container
@@ -1756,10 +1882,6 @@
 
         return contractHtml;
     }
-
-
-
-
 
 
     // ✅ NÚT DOWNLOAD PDF
