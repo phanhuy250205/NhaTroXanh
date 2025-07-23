@@ -1150,6 +1150,19 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
     if (contractDto.getPaymentMethod() != null) {
         contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
     }
+    if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
+        logger.info("SERVICE: Tìm thấy {} người ở. Đang xử lý...", contractDto.getResidents().size());
+        for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
+            Resident resident = new Resident();
+            resident.setFullName(residentDto.getFullName());
+            resident.setBirthYear(residentDto.getBirthYear());
+            resident.setPhone(residentDto.getPhone());
+            resident.setCccdNumber(residentDto.getCccdNumber());
+            resident.setContract(contract); // **QUAN TRỌNG**: Liên kết người ở với hợp đồng này
+            
+            contract.getResidents().add(resident); // Thêm vào danh sách của hợp đồng
+        }
+    }
     
     Contracts savedContract = contractRepository.save(contract);
     

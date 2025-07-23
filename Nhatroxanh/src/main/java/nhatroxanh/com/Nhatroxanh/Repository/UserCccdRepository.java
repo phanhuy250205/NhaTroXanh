@@ -27,7 +27,7 @@ public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
     @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
     Optional<UserCccd> findByUserId(@Param("userId") Integer userId);
 
-     
+     boolean existsByCccdNumber(String cccdNumber);
 
 
    

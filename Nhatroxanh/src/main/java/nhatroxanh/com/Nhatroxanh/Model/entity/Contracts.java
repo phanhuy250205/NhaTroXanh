@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -82,6 +83,10 @@ public class Contracts {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payments> payments;
 
+
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Resident> residents = new ArrayList<>();
+    
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED
     }

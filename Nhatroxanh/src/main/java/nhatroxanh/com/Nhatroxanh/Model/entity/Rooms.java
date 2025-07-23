@@ -1,96 +1,95 @@
-    package nhatroxanh.com.Nhatroxanh.Model.entity;
+package nhatroxanh.com.Nhatroxanh.Model.entity;
 
-    import java.util.HashSet;
-    import java.util.List;
-    import java.util.Set;
+import jakarta.persistence.*;
+import lombok.*;
 
-    import jakarta.persistence.CascadeType;
-    import jakarta.persistence.Column;
-    import jakarta.persistence.Entity;
-    import jakarta.persistence.Enumerated;
-    import jakarta.persistence.FetchType;
-    import jakarta.persistence.GeneratedValue;
-    import jakarta.persistence.GenerationType;
-    import jakarta.persistence.Id;
-    import jakarta.persistence.JoinColumn;
-    import jakarta.persistence.JoinTable;
-    import jakarta.persistence.ManyToMany;
-    import jakarta.persistence.ManyToOne;
-    import jakarta.persistence.OneToMany;
-    import jakarta.persistence.Table;
-    import lombok.*;
-    import jakarta.persistence.EnumType;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-    @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Entity
-    @Table(name = "rooms")
+// Bỏ @Data, thay bằng các annotation cụ thể
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "rooms")
+public class Rooms {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "room_id")
+    private Integer roomId;
 
-    public class Rooms {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        @Column(name = "room_id")
-        private Integer roomId;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 
-        @ManyToOne
-        @JoinColumn(name = "category_id")
-        @EqualsAndHashCode.Exclude
-        private Category category;
+    @ManyToOne
+    @JoinColumn(name = "hostel_id")
+    private Hostel hostel;
 
-        @ManyToOne
-        @JoinColumn(name = "hostel_id")
-        private Hostel hostel;
+    @Column(name = "description", columnDefinition = "NVARCHAR(200)")
+    private String description;
 
-        @Column(name = "description", columnDefinition = "NVARCHAR(200)")
-        private String description;
+    @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
+    private String namerooms;
 
-        @Column(name = "namerooms", columnDefinition = "NVARCHAR(200)")
-        private String namerooms;
-
-        @Enumerated(EnumType.STRING)
-        @Column(name = "status", nullable = false)
-        private RoomStatus status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private RoomStatus status;
 
     @Column(name = "address", nullable = true)
-    private String address; // Đảm bảo cột này được ánh xạ
+    private String address;
 
     @Column(name = "acreage")
     private Float acreage;
 
-        @Column(name = "max_tenants")
-        private Integer max_tenants;
+    @Column(name = "max_tenants")
+    private Integer max_tenants;
 
-        @Column(name = "price")
-        private Float price;
+    @Column(name = "price")
+    private Float price;
 
-        @ManyToMany(fetch = FetchType.LAZY)
-        @JoinTable(name = "RoomUtilities", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
-        private Set<Utility> utilities = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "RoomUtilities",
+        joinColumns = @JoinColumn(name = "room_id"),
+        inverseJoinColumns = @JoinColumn(name = "utility_id")
+    )
+    private Set<Utility> utilities = new HashSet<>();
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Image> images;
 
-        @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
-        private List<Image> images;
+    // --- PHẦN SỬA LỖI ---
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Rooms rooms = (Rooms) o;
+        // Chỉ so sánh dựa trên ID
+        return roomId != null && roomId.equals(rooms.roomId);
+    }
 
-        @Override
+    @Override
+    public int hashCode() {
+        // Chỉ băm dựa trên ID
+        return Objects.hash(roomId);
+    }
+
+    @Override
     public String toString() {
+        // toString an toàn, không in các đối tượng liên quan trực tiếp để tránh vòng lặp
         return "Rooms{" +
                 "roomId=" + roomId +
-                ", category=" + category +
-                ", hostel=" + hostel +
-                ", description='" + description + '\'' +
+                ", hostelId=" + (hostel != null ? hostel.getHostelId() : "null") +
                 ", namerooms='" + namerooms + '\'' +
                 ", status=" + status +
-                ", address='" + address + '\'' +
-                ", acreage=" + acreage +
-                ", max_tenants=" + max_tenants +
-                ", price=" + price +
-                ", utilities=" + utilities +
-                ", images=" + images +
+                ", utilityIds=" + (utilities != null ? utilities.stream().map(Utility::getUtilityId).collect(Collectors.toList()) : "[]") +
                 '}';
     }
-
-    
-    }
+}

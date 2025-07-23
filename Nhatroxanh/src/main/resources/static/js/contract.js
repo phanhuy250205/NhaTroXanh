@@ -633,23 +633,23 @@ window.NhaTroContract = {
         // Sự kiện nhập số điện thoại
         const tenantPhoneInput = document.getElementById("tenant-phone")
         if (tenantPhoneInput) {
-        tenantPhoneInput.addEventListener("input", (e) => {
-            const phone = e.target.value.trim();
+            tenantPhoneInput.addEventListener("input", (e) => {
+                const phone = e.target.value.trim();
 
-            // Nếu đang có thông tin người bảo hộ, xóa nó đi
-            if (this.guardianInfo) {
-                this.showNotification("Đã xóa thông tin người bảo hộ để tìm kiếm người thuê mới.", "info");
-                this.clearGuardianDisplay(); // Hàm này sẽ tự động mở lại các ô
-            }
-            
-            // Logic tìm kiếm SĐT như cũ
-            if (phone.length >= 10) {
-                this.fetchTenantByPhone(phone);
-            } else {
-                this.clearTenantFields();
-            }
-        });
-    }
+                // Nếu đang có thông tin người bảo hộ, xóa nó đi
+                if (this.guardianInfo) {
+                    this.showNotification("Đã xóa thông tin người bảo hộ để tìm kiếm người thuê mới.", "info");
+                    this.clearGuardianDisplay(); // Hàm này sẽ tự động mở lại các ô
+                }
+
+                // Logic tìm kiếm SĐT như cũ
+                if (phone.length >= 10) {
+                    this.fetchTenantByPhone(phone);
+                } else {
+                    this.clearTenantFields();
+                }
+            });
+        }
 
         // Sự kiện chọn khu trọ
         const hostelSelect = document.getElementById("hostelId")
@@ -1773,6 +1773,17 @@ window.NhaTroContract = {
             formData.delete('roomId');
         }
 
+        if (this.residents && this.residents.length > 0) {
+        console.log(`Đang thêm ${this.residents.length} người ở vào form...`);
+        this.residents.forEach((resident, index) => {
+            // Spring Boot sẽ tự động map các key có dạng list[index].field
+            formData.append(`residents[${index}].fullName`, resident.name);
+            formData.append(`residents[${index}].birthYear`, resident.birthYear);
+            formData.append(`residents[${index}].phone`, resident.phone);
+            formData.append(`residents[${index}].cccdNumber`, resident.id); // 'id' trong JS tương ứng với 'cccdNumber'
+        });
+    }
+
         if (this.guardianInfo) {
             console.log("Đang thêm dữ liệu người bảo hộ vào FormData...");
 
@@ -2099,42 +2110,79 @@ window.NhaTroContract = {
     },
 
     // FIX: Thêm hàm saveNewResident
-    saveNewResident() {
-        const residentName = document.getElementById("resident-name").value.trim()
-        const residentBirthYear = document.getElementById("resident-birth-year").value
-        const residentPhone = document.getElementById("resident-phone").value.trim()
-        const residentId = document.getElementById("resident-id").value.trim()
-        const residentNotes = document.getElementById("resident-notes").value.trim()
+    async saveNewResident() { // Chuyển hàm thành async
+    const residentName = document.getElementById("resident-name").value.trim();
+    const residentBirthYear = document.getElementById("resident-birth-year").value;
+    const residentPhone = document.getElementById("resident-phone").value.trim();
+    const residentId = document.getElementById("resident-id").value.trim();
+    const residentNotes = document.getElementById("resident-notes").value.trim();
 
-        if (!residentName || !residentBirthYear) {
-            this.showNotification("Vui lòng nhập đầy đủ họ tên và năm sinh", "warning")
-            return
+    // 1. Kiểm tra các trường bắt buộc phía client
+    if (!residentName || !residentBirthYear) {
+        this.showNotification("Vui lòng nhập đầy đủ họ tên và năm sinh", "warning");
+        return;
+    }
+
+    // --- PHẦN THÊM MỚI: KIỂM TRA TRÙNG LẶP TRÊN SERVER ---
+    // Chỉ gọi API nếu người dùng có nhập SĐT hoặc CCCD
+    if (residentPhone || residentId) {
+        try {
+            // Chuẩn bị tham số, gửi chuỗi rỗng nếu không có dữ liệu
+            const phoneToCheck = residentPhone || "";
+            const cccdToCheck = residentId || "";
+
+            const response = await fetch(`/api/contracts/check-guardian-duplicates?phone=${encodeURIComponent(phoneToCheck)}&cccd=${encodeURIComponent(cccdToCheck)}`);
+            
+            if (!response.ok) {
+                throw new Error('Lỗi kết nối đến máy chủ.');
+            }
+
+            const data = await response.json();
+            const serverErrors = [];
+
+            if (data.phoneExists) {
+                serverErrors.push('Số điện thoại này đã được sử dụng.');
+            }
+            if (data.cccdExists) {
+                serverErrors.push('Số CCCD này đã được sử dụng.');
+            }
+
+            if (serverErrors.length > 0) {
+                this.showNotification(serverErrors.join('<br>'), 'danger');
+                return; // Dừng lại, không đóng modal
+            }
+
+        } catch (error) {
+            console.error("Lỗi khi kiểm tra trùng lặp cho người ở:", error);
+            this.showNotification('Không thể kiểm tra dữ liệu, vui lòng thử lại.', 'error');
+            return;
         }
+    }
+    // --- KẾT THÚC PHẦN THÊM MỚI ---
 
-        // Add to residents array for preview
-        this.addResidentToPreview()
+    // 2. Nếu mọi thứ hợp lệ, thêm người ở vào danh sách
+    const residentData = {
+        name: residentName,
+        birthYear: residentBirthYear,
+        phone: residentPhone,
+        id: residentId,
+        notes: residentNotes,
+    };
 
-        // Thêm resident vào danh sách UI
-        this.addResidentToList({
-            name: residentName,
-            birthYear: residentBirthYear,
-            phone: residentPhone,
-            id: residentId,
-            notes: residentNotes,
-        })
+    this.residents.push(residentData); // Cập nhật mảng JS
+    this.addResidentToList(residentData); // Cập nhật giao diện
+    this.updateResidentsPreview(); // Cập nhật phần xem trước
+    this.updateResidentsCount(); // Cập nhật số lượng
 
-        const modalElement = document.getElementById("addResidentModal")
-        const modal = bootstrap.Modal.getInstance(modalElement)
-        if (modal) {
-            modal.hide()
-        }
-        // Đảm bảo cleanup sau khi đóng
-        setTimeout(() => {
-            this.cleanupModalBackdrop()
-        }, 300)
-        this.showNotification(`Đã thêm người ở "${residentName}" thành công!`, "success")
-        this.updateResidentsCount()
-    },
+    // 3. Đóng modal và thông báo thành công
+    const modalElement = document.getElementById("addResidentModal");
+    const modal = bootstrap.Modal.getInstance(modalElement);
+    if (modal) {
+        modal.hide();
+    }
+    
+    this.showNotification(`Đã thêm người ở "${residentName}" thành công!`, "success");
+},
 
     // FIX: Thêm hàm addResidentToList
     addResidentToList(resident) {
@@ -2316,44 +2364,58 @@ window.NhaTroContract = {
         }
     },
 
-    setupCustomerModal() {
-        const addCustomerBtn = document.getElementById("btn-add-customer-host")
-        const saveCustomerBtn = document.getElementById("saveCustomer-host")
-        const customerForm = document.getElementById("addCustomerForm-host")
-        const modalElement = document.getElementById("addCustomerModal-host")
+    // Thay thế hàm setupCustomerModal() cũ của bạn bằng hàm này
 
+    setupCustomerModal() {
+        const addCustomerBtn = document.getElementById("btn-add-customer-host");
+        const saveCustomerBtn = document.getElementById("saveCustomer-host");
+        const customerForm = document.getElementById("addCustomerForm-host");
+        const modalElement = document.getElementById("addCustomerModal-host");
+
+        // Lấy các input file
+        const frontInput = document.getElementById("newCustomer-cccd-front");
+        const backInput = document.getElementById("newCustomer-cccd-back");
+
+        // Gán sự kiện 'change' để kiểm tra file ngay lập tức
+        if (frontInput) {
+            frontInput.addEventListener("change", (event) => { // Thêm 'event'
+                this.previewCustomerImage(event, "newCustomer-cccd-front-preview");
+                this.validateFile('newCustomer-cccd-front', 'newCustomer-cccd-front-preview');
+            });
+        }
+
+        if (backInput) {
+            backInput.addEventListener("change", (event) => { // Thêm 'event'
+                this.previewCustomerImage(event, "newCustomer-cccd-back-preview");
+                this.validateFile('newCustomer-cccd-back', 'newCustomer-cccd-back-preview');
+            });
+        }
+
+        // Gán sự kiện cho nút mở Modal
         if (addCustomerBtn && modalElement) {
             addCustomerBtn.addEventListener("click", () => {
-                console.log("Add customer button clicked")
-                // Đảm bảo xóa backdrop cũ trước khi mở modal mới
-                this.cleanupModalBackdrop()
-                const modal = new bootstrap.Modal(modalElement)
-                modal.show()
-                if (customerForm) customerForm.reset()
-                this.clearCustomerFormImages()
-                this.setupCustomerLocationListeners()
-            })
+                console.log("Add customer button clicked");
+                this.cleanupModalBackdrop();
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                if (customerForm) customerForm.reset();
+                this.clearCustomerFormImages();
+                // Không cần gọi setupCustomerLocationListeners() ở đây nữa nếu nó đã có trong init()
+            });
         }
 
+        // Gán sự kiện cho nút Lưu
         if (saveCustomerBtn) {
             saveCustomerBtn.addEventListener("click", () => {
-                this.saveNewCustomer()
-            })
+                this.saveNewCustomer();
+            });
         }
 
-        document.getElementById("newCustomer-cccd-front")?.addEventListener("change", (e) => {
-            this.previewCustomerImage(e, "newCustomer-cccd-front-preview")
-        })
-
-        document.getElementById("newCustomer-cccd-back")?.addEventListener("change", (e) => {
-            this.previewCustomerImage(e, "newCustomer-cccd-back-preview")
-        })
-
-        // Thêm event listener để cleanup khi modal đóng
+        // Gán sự kiện khi modal đóng
         if (modalElement) {
             modalElement.addEventListener("hidden.bs.modal", () => {
-                this.cleanupModalBackdrop()
-            })
+                this.cleanupModalBackdrop();
+            });
         }
     },
 
@@ -2377,46 +2439,116 @@ window.NhaTroContract = {
         })
     },
 
-    saveNewCustomer() {
-        console.log("Bắt đầu lưu tạm thông tin người bảo hộ ở frontend...");
+  async   saveNewCustomer() {
+        console.log("Bắt đầu xác thực và lưu thông tin người bảo hộ...");
 
-        // 1. Thu thập dữ liệu TEXT từ modal
+        // 1. Thu thập dữ liệu từ form
         this.guardianInfo = {
-            name: document.getElementById('newCustomer-name').value || '',
-            dob: document.getElementById('newCustomer-dob').value || '',
-            id: document.getElementById('newCustomer-id').value || '',
-            idDate: document.getElementById('newCustomer-id-date').value || '',
-            idPlace: document.getElementById('newCustomer-id-place').value || '',
-            phone: document.getElementById('newCustomer-phone').value || '',
-            email: document.getElementById('newCustomer-email').value || '',
-            street: document.getElementById('newCustomer-street').value || '',
-            ward: this.getSelectText('newCustomer-ward') || '',
-            district: this.getSelectText('newCustomer-district') || '',
-            province: this.getSelectText('newCustomer-province') || '',
+            name: document.getElementById('newCustomer-name').value.trim(),
+            dob: document.getElementById('newCustomer-dob').value,
+            id: document.getElementById('newCustomer-id').value.trim(),
+            idDate: document.getElementById('newCustomer-id-date').value,
+            idPlace: document.getElementById('newCustomer-id-place').value.trim(),
+            phone: document.getElementById('newCustomer-phone').value.trim(),
+            email: document.getElementById('newCustomer-email').value.trim(),
+            street: document.getElementById('newCustomer-street').value.trim(),
+            ward: this.getSelectText('newCustomer-ward'),
+            district: this.getSelectText('newCustomer-district'),
+            province: this.getSelectText('newCustomer-province'),
         };
 
-        // ✅ 2. LẤY DỮ LIỆU FILE (ĐẶT Ở NGOÀI ĐỐI TƯỢNG guardianInfo)
         const frontInput = document.getElementById('newCustomer-cccd-front');
-        if (frontInput && frontInput.files.length > 0) {
-            this.guardianCccdFrontFile = frontInput.files[0];
-        }
-
         const backInput = document.getElementById('newCustomer-cccd-back');
-        if (backInput && backInput.files.length > 0) {
-            this.guardianCccdBackFile = backInput.files[0];
+        const errors = [];
+        const MAX_FILE_SIZE_MB = 10;
+        const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+        // 2. Thực hiện xác thực (Validation)
+        if (!this.guardianInfo.name) {
+            errors.push('Họ và tên không được để trống.');
+        }
+        if (!this.guardianInfo.phone) {
+            errors.push('Số điện thoại không được để trống.');
+        }
+        if (!this.guardianInfo.id) {
+            errors.push('Số CMND/CCCD không được để trống.');
         }
 
-        // In ra để kiểm tra
-        console.log(" Guardian Front File (Temp):", this.guardianCccdFrontFile);
-        console.log(" Guardian Back File (Temp):", this.guardianCccdBackFile);
+        // --- PHẦN THÊM MỚI ---
+        if (!this.guardianInfo.dob) {
+            errors.push('Ngày sinh không được để trống.');
+        }
+        if (!this.guardianInfo.idDate) {
+            errors.push('Ngày cấp CCCD không được để trống.');
+        }
+        // --- KẾT THÚC PHẦN THÊM MỚI ---
 
-        // 3. Validate và đóng modal (giữ nguyên)
-        if (!this.guardianInfo.name || !this.guardianInfo.phone) {
-            this.showNotification('Vui lòng nhập ít nhất Họ tên và Số điện thoại.', 'warning');
-            this.guardianInfo = null; // Reset nếu không hợp lệ
+        if (!this.guardianInfo.email) {
+            errors.push('Email không được để trống.');
+        } else {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(this.guardianInfo.email)) {
+                errors.push('Định dạng email không hợp lệ.');
+            }
+        }
+
+        // Kiểm tra file mặt trước
+        if (!frontInput || frontInput.files.length === 0) {
+            errors.push('Ảnh CCCD mặt trước không được để trống.');
+        } else if (frontInput.files[0].size > MAX_FILE_SIZE_BYTES) {
+            errors.push(`Ảnh CCCD mặt trước không được vượt quá ${MAX_FILE_SIZE_MB}MB.`);
+        }
+
+        // Kiểm tra file mặt sau
+        if (!backInput || backInput.files.length === 0) {
+            errors.push('Ảnh CCCD mặt sau không được để trống.');
+        } else if (backInput.files[0].size > MAX_FILE_SIZE_BYTES) {
+            errors.push(`Ảnh CCCD mặt sau không được vượt quá ${MAX_FILE_SIZE_MB}MB.`);
+        }
+
+        // 3. Xử lý kết quả xác thực
+        if (errors.length > 0) {
+            this.showNotification(errors.join('<br>'), 'danger');
+            this.guardianInfo = null;
+            return;
+        }
+        try {
+        const phoneToCheck = this.guardianInfo.phone;
+        const cccdToCheck = this.guardianInfo.id;
+        
+        const response = await fetch(`/api/contracts/check-guardian-duplicates?phone=${encodeURIComponent(phoneToCheck)}&cccd=${encodeURIComponent(cccdToCheck)}`);
+        
+        if (!response.ok) {
+            throw new Error('Lỗi kết nối đến máy chủ.');
+        }
+
+        const data = await response.json();
+        const serverErrors = [];
+
+        if (data.phoneExists) {
+            serverErrors.push('Số điện thoại này đã được sử dụng.');
+        }
+        if (data.cccdExists) {
+            serverErrors.push('Số CCCD này đã được sử dụng.');
+        }
+
+        if (serverErrors.length > 0) {
+            this.showNotification(serverErrors.join('<br>'), 'danger');
+            this.guardianInfo = null;
             return;
         }
 
+    } catch (error) {
+        console.error("Lỗi khi kiểm tra trùng lặp:", error);
+        this.showNotification('Không thể kiểm tra dữ liệu, vui lòng thử lại.', 'error');
+        return;
+    }
+
+        // Nếu không có lỗi, tiếp tục lưu trữ file và thông tin
+        this.guardianCccdFrontFile = frontInput.files[0];
+        this.guardianCccdBackFile = backInput.files[0];
+
+        // Cập nhật giao diện và đóng modal
         this.updateGuardianDisplay();
         this.disableTenantFields();
 
@@ -2426,8 +2558,7 @@ window.NhaTroContract = {
             modal.hide();
         }
 
-        this.showNotification('Đã thêm thông tin người bảo hộ (tạm thời).', 'success');
-        console.log("Đã lưu tạm dữ liệu người bảo hộ vào biến guardianInfo:", this.guardianInfo);
+        this.showNotification('Đã thêm thông tin người bảo hộ.', 'success');
     },
 
     previewCustomerImage(event, previewId) {
@@ -2527,7 +2658,39 @@ window.NhaTroContract = {
             field.style.backgroundColor = '#fff'; // Trả về màu trắng
         });
     },
+
+    validateFile(fileInputId, previewId) {
+        const fileInput = document.getElementById(fileInputId);
+        const MAX_FILE_SIZE_MB = 10;
+        const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+
+            // Kiểm tra dung lượng file
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                this.showNotification(`Kích thước file không được vượt quá ${MAX_FILE_SIZE_MB}MB.`, 'danger');
+
+                // **QUAN TRỌNG**: Xóa file đã chọn nếu nó không hợp lệ
+                fileInput.value = '';
+
+                // Reset lại ảnh preview
+                const preview = document.getElementById(previewId);
+                const uploadContainer = preview.closest(".nha-tro-image-upload");
+                preview.innerHTML = `
+                <i class="fa fa-camera fa-2x"></i>
+                <div class="mt-2">${previewId.includes('front') ? 'Tải ảnh mặt trước' : 'Tải ảnh mặt sau'}</div>
+                <small class="text-muted">Nhấn để chọn ảnh</small>
+            `;
+                uploadContainer.classList.remove("has-image");
+                return false; // Báo hiệu là file không hợp lệ
+            }
+        }
+        return true; // Báo hiệu file hợp lệ
+    },
 }
+
+
 
 
 
@@ -2535,4 +2698,3 @@ document.addEventListener("DOMContentLoaded", () => {
     window.NhaTroContract.init()
 })
 /* ]]> */
-//đã xong phần ẩn nút thêm người người bảo hộ
