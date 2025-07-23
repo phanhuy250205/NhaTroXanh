@@ -9,6 +9,10 @@ public interface OtpService {
 
     // Xác thực OTP mà người dùng cung cấp
     boolean verifyOtp(Users user, String providedOtp);
-
     
+    // Tạo và gửi OTP cho giao dịch rút tiền
+    void createAndSendWithdrawalOtp(Users user, Double amount);
+    
+    // Xác thực OTP cho giao dịch rút tiền
+    boolean verifyWithdrawalOtp(Users user, String providedOtp);
 }

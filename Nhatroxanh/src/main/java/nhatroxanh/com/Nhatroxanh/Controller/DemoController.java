@@ -303,5 +303,4 @@ public class DemoController {
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {
     // return "host/sua-bai-dang";
-    // }
 }

@@ -700,29 +700,13 @@
                         </li>
                     </ul>
                 </div>
-
-                <!-- Pagination -->
-                <div class="pagination-container d-flex justify-content-center mt-4">
-                    <ul class="pagination">
-                        <li class="page-item" th:classappend="${pendingVouchers.first} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${pendingVouchers.number - 1})}">&laquo;</a>
-                        </li>
-                        <li class="page-item" th:each="i : ${#numbers.sequence(0, pendingVouchers.totalPages - 1)}"
-                            th:classappend="${i == pendingVouchers.number} ? 'active'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${i})}"
-                                th:text="${i + 1}">1</a>
-                        </li>
-                        <li class="page-item" th:classappend="${pendingVouchers.last} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/nhan-vien/khuyen-mai(activePage=${activePage}, pendingPage=${pendingVouchers.number + 1})}">&raquo;</a>
-                        </li>
-                    </ul>
-                </div>
             </div>
         </div>
     </div>
+<<<<<<< HEAD
+=======
+
+>>>>>>> b7194872fae2d90aa5fd4a71442846aced16dfc2
     <div class="modal fade" id="internalVoucherModal" tabindex="-1" aria-labelledby="internalVoucherLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">

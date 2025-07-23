@@ -346,9 +346,6 @@ public class ContractServiceImpl implements ContractService {
             contract.setDuration(updatedContract.getDuration());
             logger.info("Updated duration: {}", updatedContract.getDuration());
         }
-        if (updatedContract.getDuration() != null && updatedContract.getDuration() > 0) {
-            contract.setDuration(updatedContract.getDuration());
-        }
 
         if (updatedContract.getRoom() != null && updatedContract.getRoom().getRoomId() != null) {
             logger.info("Updating room with ID: {}", updatedContract.getRoom().getRoomId());

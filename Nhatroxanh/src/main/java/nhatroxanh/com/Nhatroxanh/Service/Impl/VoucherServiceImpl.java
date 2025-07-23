@@ -30,6 +30,7 @@ import nhatroxanh.com.Nhatroxanh.Util.VoucherCodeGenerator;
 @Service
 @Transactional
 public class VoucherServiceImpl implements VoucherService {
+
     @Autowired
     private VoucherRepository voucherRepository;
 

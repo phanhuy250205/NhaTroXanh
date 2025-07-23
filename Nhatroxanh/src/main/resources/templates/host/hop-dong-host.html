@@ -279,12 +279,29 @@
                         </div>
                     </div>
 
-        <div class="container-fluid mt-4">
-            <div class="row mt-3">
-                <!-- Form Column -->
-                <div class="col-lg-7">
-                    <form th:action="@{/api/contracts}" method="post" enctype="multipart/form-data"
-                        th:object="${contract}" novalidate id="contractForm">
+                    <!-- Tabs Navigation -->
+                    <ul class="nav nav-tabs nha-tro-tabs" id="contractTabs">
+                        <li class="nav-item">
+                            <a class="nav-link active" data-tab="tenantInfo" href="#tenantInfo">
+                                <i class="fa fa-user me-2"></i> Người thuê
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="ownerInfo" href="#ownerInfo">
+                                <i class="fa fa-id-card me-2"></i> Chủ trọ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="roomInfo" href="#roomInfo">
+                                <i class="fa fa-house me-2"></i> Nhà trọ
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" data-tab="terms" href="#terms">
+                                <i class="fa fa-file-contract me-2"></i> Điều khoản
+                            </a>
+                        </li>
+                    </ul>
 
                     <!-- Tab Content -->
                     <div class="tab-content card p-4 nha-tro-tab-content" style="border-radius: 0px;">
@@ -920,6 +937,7 @@
             </div>
         </div>
     </div>
+</div>
 
 <!-- Add Resident Modal -->
 <div class="modal fade" id="addResidentModal" tabindex="-1" aria-labelledby="addResidentModalLabel"
@@ -964,17 +982,18 @@
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer nha-tro-host-modal-footer">
-                    <button type="button" class="btn btn-secondary nha-tro-host-btn-cancel" data-bs-dismiss="modal">
-                        <i class="fa fa-times me-1"></i>Hủy
-                    </button>
-                    <button type="button" class="btn btn-primary nha-tro-host-btn-save" id="saveAmenity-host">
-                        <i class="fa fa-check me-1"></i>Lưu tiện ích
-                    </button>
-                </div>
+            </div>
+            <div class="modal-footer nha-tro-host-modal-footer">
+                <button type="button" class="btn btn-secondary nha-tro-host-btn-cancel" data-bs-dismiss="modal">
+                    <i class="fa fa-times me-1"></i>Hủy
+                </button>
+                <button type="button" class="btn btn-success nha-tro-host-btn-save" id="btn-save-resident">
+                    <i class="fa fa-check me-1"></i>Thêm người ở
+                </button>
             </div>
         </div>
     </div>
+</div>
 
 <!-- Add Amenity Modal -->
 <div class="modal fade" id="addAmenityModal-host" tabindex="-1" aria-labelledby="addAmenityModalLabel-host"
@@ -1126,11 +1145,6 @@
                                     <small class="text-muted">Nhấn để chọn ảnh</small>
                                 </div>
                             </div>
-                            <div class="col-12">
-                                <label class="form-label">Ghi chú (tùy chọn)</label>
-                                <textarea class="form-control nha-tro-host-input" id="newCustomer-notes" rows="3"
-                                    placeholder="Ghi chú thêm về khách thuê..."></textarea>
-                            </div>
                         </div>
                         <div class="col-12">
                             <label class="form-label">Ghi chú (tùy chọn)</label>
@@ -1150,6 +1164,7 @@
             </div>
         </div>
     </div>
+</div>
 
 <!-- ✅ JQUERY FIRST -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1350,10 +1365,6 @@
 <!-- ✅ LOAD CONTRACT.JS IF EXISTS -->
 <script th:src="@{/js/contract.js}" onerror="console.log('⚠️ contract.js not found - using inline script')"></script>
 
-    </script>
-
-    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/js/contract.js}"></script>
 </body>
 
 </html>

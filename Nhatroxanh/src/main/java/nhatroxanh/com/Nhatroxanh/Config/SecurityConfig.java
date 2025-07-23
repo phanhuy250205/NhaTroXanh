@@ -56,7 +56,6 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/forgot-password").permitAll() 
                         .requestMatchers("/api/users/**", "/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
                                 "/fonts/**",
                                 "/uploads/**")

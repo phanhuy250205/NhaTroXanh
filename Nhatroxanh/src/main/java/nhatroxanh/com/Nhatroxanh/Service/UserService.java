@@ -78,6 +78,4 @@ public interface UserService {
     Users getById(Integer id);
 
     Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status);
-
-    
 }

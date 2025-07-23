@@ -19,7 +19,6 @@
 
 
 <body>
-    <div th:replace="~{/layouts/modal_quen_MK}"></div>
     <div class="login-page-wrapper">
         <div class="login-card shadow-sm">
             <section class="login-left">
@@ -82,13 +81,12 @@
                     </p>
 
                     <form id="loginFormHost" th:action="@{/login-processing}" method="post">
-                        <!-- ĐÃ XÓA CSRF TOKEN VÌ ĐÃ TẮT CSRF TRONG CONFIG -->
 
                         <div class="form-group">
                             <label for="emailPhone">Email hoặc Số điện
                                 thoại</label>
                             <input type="text" class="form-control" id="emailPhone" name="emailPhone"
-                                placeholder="Nhập email hoặc Số điện thoại của bạn"
+                                placeholder="Nhập email hoặc Số điện thoại của bạn" required
                                 aria-describedby="emailPhoneHelp" />
                             <div class="invalid-feedback">
                                 Vui lòng nhập Email hoặc số điện thoại hợp
@@ -99,7 +97,7 @@
                         <div class="form-group password-wrapper">
                             <label for="password">Mật khẩu</label>
                             <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Nhập mật khẩu"  aria-describedby="passwordHelp" />
+                                placeholder="Nhập mật khẩu" required aria-describedby="passwordHelp" />
                             <button type="button" class="password-toggle-host" aria-label="Hiện hoặc ẩn mật khẩu"
                                 tabindex="0">
                                 <i class="fa-solid fa-eye-slash"></i>
@@ -128,12 +126,8 @@
                 </div>
             </section>
         </div>
-
-    </div>
     <script th:src="@{/js/login-host.js}"></script>
     <script th:src="@{/js/quenmk-modal.js}"></script>
 
-</body>
-
-
+    </body>
 </html>
