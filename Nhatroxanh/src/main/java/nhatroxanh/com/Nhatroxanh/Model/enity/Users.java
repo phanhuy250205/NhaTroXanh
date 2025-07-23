@@ -9,7 +9,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -102,6 +101,7 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private UserCccd userCccd;
@@ -118,6 +118,8 @@ public class Users {
     @JsonIgnore
     private List<Vouchers> vouchers;
 
+
+    
     public enum Role {
         ADMIN, STAFF, OWNER, CUSTOMER
     }

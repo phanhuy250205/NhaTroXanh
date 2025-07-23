@@ -191,7 +191,6 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment = paymentsRepository.save(payment);
         log.info("Updated payment status to {} for payment id: {}", status, paymentId);
-
         return convertToResponseDto(payment);
     }
 
@@ -227,7 +226,6 @@ public class PaymentServiceImpl implements PaymentService {
                 contractData.put("roomCode", contract.getRoom().getNamerooms());
                 contractData.put("hostelName", contract.getRoom().getHostel().getName());
                 contractData.put("roomPrice", contract.getPrice());
-
                 String tenantName = "";
                 if (contract.getTenant() != null) {
                     tenantName = contract.getTenant().getFullname();
