@@ -3,10 +3,6 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -44,9 +40,7 @@ import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 import java.util.*;
-
 
 @Controller
 public class DemoController {
@@ -264,14 +258,13 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
-    public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+    public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {
         try {
-            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByUserId(userId); // 🔁 dùng userId
             model.addAttribute("tenant", tenantDetail);
 
-            // Lấy lịch sử thuê bằng tenantId
-            Integer tenantId = tenantDetail.getUserId(); // hoặc getTenantId tùy DTO của bạn
-            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(tenantId);
+            // Lấy lịch sử thuê trọ
+            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(userId);
             model.addAttribute("rentalHistory", historyList);
 
             return "host/chi-tiet-khach-thue";
@@ -297,10 +290,12 @@ public class DemoController {
         // ✅ chuyển hướng lại đúng trang chi tiết khách thuê
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
     }
+
     @GetMapping("/notifications")
     public String notifications() {
         return "guest/chitiet-thongbao";
     }
+
     @GetMapping("/infor-chutro")
     public String chutro() {
         return "host/infor-chutro";
@@ -318,5 +313,6 @@ public class DemoController {
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {
     // return "host/sua-bai-dang";
+
 
 }

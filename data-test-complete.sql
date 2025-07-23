@@ -9,14 +9,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. LOCATION DATA (Province, District, Ward)
 -- =====================================================
 
-INSERT INTO Province (id, code, name) VALUES
+INSERT INTO province (id, code, name) VALUES
 (1, '79', 'Thành phố Hồ Chí Minh'),
 (2, '01', 'Hà Nội'),
 (3, '48', 'Đà Nẵng'),
 (4, '74', 'Bình Dương'),
 (5, '77', 'Bà Rịa - Vũng Tàu');
 
-INSERT INTO District (id, code, name, province_id) VALUES
+INSERT INTO district (id, code, name, province_id) VALUES
 (1, '760', 'Quận 1', 1),
 (2, '761', 'Quận 2', 1),
 (3, '762', 'Quận 3', 1),
@@ -28,7 +28,7 @@ INSERT INTO District (id, code, name, province_id) VALUES
 (9, '768', 'Quận 9', 1),
 (10, '769', 'Quận 10', 1);
 
-INSERT INTO Ward (id, code, name, district_id) VALUES
+INSERT INTO ward (id, code, name, district_id) VALUES
 (1, '26734', 'Phường Bến Nghé', 1),
 (2, '26735', 'Phường Bến Thành', 1),
 (3, '26736', 'Phường Cầu Kho', 1),
@@ -44,7 +44,7 @@ INSERT INTO Ward (id, code, name, district_id) VALUES
 -- 2. ADDRESS DATA
 -- =====================================================
 
-INSERT INTO Address (id, street, ward_id, user_id) VALUES
+INSERT INTO address (id, street, ward_id, user_id) VALUES
 (1, '123 Đường Nguyễn Huệ', 1, NULL),
 (2, '456 Đường Lê Lợi', 2, NULL),
 (3, '789 Đường Hai Bà Trưng', 3, NULL),
@@ -60,7 +60,7 @@ INSERT INTO Address (id, street, ward_id, user_id) VALUES
 -- 3. CATEGORY DATA
 -- =====================================================
 
-INSERT INTO Category (category_id, name) VALUES
+INSERT INTO category (category_id, name) VALUES
 (1, 'Phòng trọ'),
 (2, 'Căn hộ mini'),
 (3, 'Nhà nguyên căn'),
@@ -76,12 +76,12 @@ INSERT INTO Category (category_id, name) VALUES
 -- 4. UTILITIES DATA
 -- =====================================================
 
-INSERT INTO Utilities (utilityId, name) VALUES
-(1, 'Wifi miễn phí'),
-(2, 'Điều hòa'),
-(3, 'Tủ lạnh'),
-(4, 'Máy giặt'),
-(5, 'Bếp gas'),
+INSERT INTO utilities (name) VALUES
+('Wifi miễn phí'),
+('Điều hòa'),
+('Tủ lạnh'),
+('Máy giặt'),
+('Bếp gas');
 (6, 'Nóng lạnh'),
 (7, 'Ban công'),
 (8, 'Thang máy'),
@@ -102,24 +102,17 @@ INSERT INTO Utilities (utilityId, name) VALUES
 -- 5. USERS DATA
 -- =====================================================
 
-INSERT INTO users (user_id, password, fullname, phone, birthday, bank_account, balance, gender, email, avatar, otp_code, otp_expiration, enabled, address, created_at, address_id, role) VALUES
--- Admin
-(1, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Văn Admin', '0901000001', '1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
-
--- Staff
-(2, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
-
--- Owners
-(3, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
-(4, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Thị Lan Anh', '0901000004', '1982-07-25', '4567890123', 80000000.00, 0, 'owner2@nhatroxanh.com', '/uploads/owner2-avatar.jpg', NULL, NULL, 1, '321 Đường Chủ Trọ 2', '2024-01-04 08:00:00', 4, 'OWNER'),
-(5, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Hoàng Minh Tuấn', '0901000005', '1978-12-03', '5678901234', 120000000.00, 1, 'owner3@nhatroxanh.com', '/uploads/owner3-avatar.jpg', NULL, NULL, 1, '654 Đường Chủ Trọ 3', '2024-01-05 08:00:00', 5, 'OWNER'),
-
--- Customers
-(6, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Thị Hoa', '0901000006', '1995-02-14', '6789012345', 5000000.00, 0, 'customer1@gmail.com', '/uploads/customer1-avatar.jpg', NULL, NULL, 1, '987 Đường Khách Hàng 1', '2024-01-06 08:00:00', 6, 'CUSTOMER'),
-(7, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Văn Nam', '0901000007', '1993-08-22', '7890123456', 3000000.00, 1, 'customer2@gmail.com', '/uploads/customer2-avatar.jpg', NULL, NULL, 1, '147 Đường Khách Hàng 2', '2024-01-07 08:00:00', 7, 'CUSTOMER'),
-(8, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Thị Mai', '0901000008', '1996-11-30', '8901234567', 4000000.00, 0, 'customer3@gmail.com', '/uploads/customer3-avatar.jpg', NULL, NULL, 1, '258 Đường Khách Hàng 3', '2024-01-08 08:00:00', 8, 'CUSTOMER'),
-(9, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Văn Đức', '0901000009', '1994-04-18', '9012345678', 6000000.00, 1, 'customer4@gmail.com', '/uploads/customer4-avatar.jpg', NULL, NULL, 1, '369 Đường Khách Hàng 4', '2024-01-09 08:00:00', 9, 'CUSTOMER'),
-(10, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Võ Thị Lan', '0901000010', '1997-09-05', '0123456789', 2500000.00, 0, 'customer5@gmail.com', '/uploads/customer5-avatar.jpg', NULL, NULL, 1, '741 Đường Khách Hàng 5', '2024-01-10 08:00:00', 10, 'CUSTOMER');
+INSERT INTO users (password,fullname, phone, birthday, bank_account, balance, gender, email, avatar, otp_code, otp_expiration, enabled, address, created_at, address_id, role) VALUES
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2','Nguyễn Văn Admin','0901000001','1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Thị Lan Anh', '0901000004', '1982-07-25', '4567890123', 80000000.00, 0, 'owner2@nhatroxanh.com', '/uploads/owner2-avatar.jpg', NULL, NULL, 1, '321 Đường Chủ Trọ 2', '2024-01-04 08:00:00', 4, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Hoàng Minh Tuấn', '0901000005', '1978-12-03', '5678901234', 120000000.00, 1, 'owner3@nhatroxanh.com', '/uploads/owner3-avatar.jpg', NULL, NULL, 1, '654 Đường Chủ Trọ 3', '2024-01-05 08:00:00', 5, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Thị Hoa', '0901000006', '1995-02-14', '6789012345', 5000000.00, 0, 'customer1@gmail.com', '/uploads/customer1-avatar.jpg', NULL, NULL, 1, '987 Đường Khách Hàng 1', '2024-01-06 08:00:00', 6, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Văn Nam', '0901000007', '1993-08-22', '7890123456', 3000000.00, 1, 'customer2@gmail.com', '/uploads/customer2-avatar.jpg', NULL, NULL, 1, '147 Đường Khách Hàng 2', '2024-01-07 08:00:00', 1, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Thị Mai', '0901000008', '1996-11-30', '8901234567', 4000000.00, 0, 'customer3@gmail.com', '/uploads/customer3-avatar.jpg', NULL, NULL, 1, '258 Đường Khách Hàng 3', '2024-01-08 08:00:00', 1, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Văn Đức', '0901000009', '1994-04-18', '9012345678', 6000000.00, 1, 'customer4@gmail.com', '/uploads/customer4-avatar.jpg', NULL, NULL, 1, '369 Đường Khách Hàng 4', '2024-01-09 08:00:00', 4, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Võ Thị Lan', '0901000010', '1997-09-05', '0123456789', 2500000.00, 0, 'customer5@gmail.com', '/uploads/customer5-avatar.jpg', NULL, NULL, 1, '741 Đường Khách Hàng 5', '2024-01-10 08:00:00', 1, 'CUSTOMER');
 
 -- =====================================================
 -- 6. USER CCCD DATA
@@ -134,48 +127,37 @@ INSERT INTO User_CCCD (id, user_id, cccd_number, full_name, date_of_birth, gende
 -- 7. HOSTELS DATA
 -- =====================================================
 
-INSERT INTO hostels (hostel_id, name, description, status, room_number, createdAt, owner_id, address_id) VALUES
+INSERT INTO hostels (hostel_id, name, description, status, room_number, created_at, owner_id, address_id) VALUES
 (1, 'Nhà Trọ Xanh Quận 1', 'Nhà trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi, an ninh 24/7', 1, 20, '2024-01-15', 3, 1),
 (2, 'Căn Hộ Mini Lê Lợi', 'Căn hộ mini hiện đại, gần trung tâm thương mại, tiện ích đầy đủ', 1, 15, '2024-01-20', 3, 2),
-(3, 'Homestay Hai Bà Trưng', 'Homestay ấm cúng, phù hợp cho sinh viên và người đi làm', 1, 12, '2024-01-25', 4, 3),
-(4, 'Phòng Trọ Pasteur', 'Phòng trọ giá rẻ, sạch sẽ, gần bệnh viện và trường học', 1, 18, '2024-02-01', 4, 4),
-(5, 'Nhà Trọ Cách Mạng Tháng 8', 'Nhà trọ rộng rãi, thoáng mát, có sân để xe rộng', 1, 25, '2024-02-05', 5, 5),
-(6, 'Studio Xa Lộ Hà Nội', 'Studio cao cấp cho thuê theo tháng, đầy đủ nội thất', 1, 10, '2024-02-10', 5, 6);
+(3, 'Homestay Hai Bà Trưng', 'Homestay ấm cúng, phù hợp cho sinh viên và người đi làm', 1, 12, '2024-01-25', 1, 3),
+(4, 'Phòng Trọ Pasteur', 'Phòng trọ giá rẻ, sạch sẽ, gần bệnh viện và trường học', 1, 18, '2024-02-01', 1, 4),
+(5, 'Nhà Trọ Cách Mạng Tháng 8', 'Nhà trọ rộng rãi, thoáng mát, có sân để xe rộng', 1, 25, '2024-02-05', 1, 5),
+(6, 'Studio Xa Lộ Hà Nội', 'Studio cao cấp cho thuê theo tháng, đầy đủ nội thất', 1, 10, '2024-02-10', 2, 6);
 
 -- =====================================================
 -- 8. ROOMS DATA
 -- =====================================================
 
 INSERT INTO rooms (room_id, category_id, hostel_id, description, namerooms, status, address, acreage, max_tenants, price) VALUES
--- Nhà Trọ Xanh Quận 1
 (1, 1, 1, 'Phòng trọ cao cấp, đầy đủ tiện nghi, view đẹp', 'Phòng 101', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 25.0, 2, 4500000.00),
 (2, 1, 1, 'Phòng trọ rộng rãi, có ban công, thoáng mát', 'Phòng 102', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 28.0, 2, 5000000.00),
 (3, 6, 1, 'Phòng cao cấp, nội thất sang trọng', 'Phòng 201', 'active', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 35.0, 2, 7000000.00),
 (4, 6, 1, 'Phòng VIP, view thành phố, đầy đủ tiện ích', 'Phòng 202', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 40.0, 3, 8500000.00),
 (5, 1, 1, 'Phòng tiêu chuẩn, sạch sẽ, giá hợp lý', 'Phòng 301', 'active', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 22.0, 2, 4000000.00),
-
--- Căn Hộ Mini Lê Lợi
 (6, 2, 2, 'Căn hộ mini 1 phòng ngủ, bếp riêng', 'Mini 01', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 30.0, 2, 6000000.00),
 (7, 2, 2, 'Căn hộ mini 2 phòng ngủ, phòng khách riêng', 'Mini 02', 'active', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 45.0, 4, 9000000.00),
 (8, 8, 2, 'Studio hiện đại, không gian mở', 'Studio 01', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 25.0, 1, 5500000.00),
 (9, 8, 2, 'Studio cao cấp, nội thất đầy đủ', 'Studio 02', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 28.0, 2, 6500000.00),
-
--- Homestay Hai Bà Trưng
 (10, 4, 3, 'Homestay ấm cúng, phù hợp gia đình nhỏ', 'Home 01', 'active', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 35.0, 3, 5500000.00),
 (11, 4, 3, 'Homestay rộng rãi, có sân vườn nhỏ', 'Home 02', 'unactive', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 50.0, 5, 8000000.00),
 (12, 4, 3, 'Homestay tiện nghi, gần trung tâm', 'Home 03', 'unactive', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 40.0, 4, 7000000.00),
-
--- Phòng Trọ Pasteur
 (13, 7, 4, 'Phòng bình dân, giá rẻ, sạch sẽ', 'Phòng A01', 'unactive', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 18.0, 2, 2800000.00),
 (14, 7, 4, 'Phòng nhỏ gọn, phù hợp sinh viên', 'Phòng A02', 'active', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 20.0, 2, 3200000.00),
 (15, 1, 4, 'Phòng trọ tiêu chuẩn, tiện nghi cơ bản', 'Phòng B01', 'unactive', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 25.0, 3, 3800000.00),
-
--- Nhà Trọ Cách Mạng Tháng 8
 (16, 1, 5, 'Phòng trọ rộng rãi, thoáng mát', 'Phòng 1A', 'active', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 30.0, 3, 4200000.00),
 (17, 1, 5, 'Phòng trọ có ban công, view đẹp', 'Phòng 1B', 'unactive', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 32.0, 3, 4500000.00),
 (18, 6, 5, 'Phòng cao cấp, nội thất hiện đại', 'Phòng 2A', 'unactive', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 38.0, 4, 6500000.00),
-
--- Studio Xa Lộ Hà Nội
 (19, 8, 6, 'Studio sang trọng, đầy đủ tiện nghi', 'Studio Premium 01', 'active', '987 Đường Xa Lộ Hà Nội, P.An Phú, Q.2', 35.0, 2, 7500000.00),
 (20, 8, 6, 'Studio hiện đại, không gian mở', 'Studio Premium 02', 'unactive', '987 Đường Xa Lộ Hà Nội, P.An Phú, Q.2', 32.0, 2, 7000000.00);
 
@@ -183,23 +165,13 @@ INSERT INTO rooms (room_id, category_id, hostel_id, description, namerooms, stat
 -- 9. ROOM UTILITIES RELATIONSHIP
 -- =====================================================
 
-INSERT INTO RoomUtilities (room_id, utility_id) VALUES
--- Phòng 101 (room_id = 1)
+INSERT INTO room_utilities (room_id, utility_id) VALUES
 (1, 1), (1, 2), (1, 3), (1, 6), (1, 9), (1, 10), (1, 16), (1, 18), (1, 19),
--- Phòng 102 (room_id = 2)
 (2, 1), (2, 2), (2, 3), (2, 4), (2, 6), (2, 7), (2, 9), (2, 10), (2, 16), (2, 18), (2, 19),
--- Phòng 201 (room_id = 3)
 (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 16), (3, 17), (3, 18), (3, 19), (3, 20),
--- Phòng 202 (room_id = 4)
 (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10), (4, 16), (4, 17), (4, 18), (4, 19), (4, 20),
--- Mini 01 (room_id = 6)
 (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 9), (6, 10), (6, 16), (6, 17), (6, 18), (6, 19),
--- Studio Premium 01 (room_id = 19)
 (19, 1), (19, 2), (19, 3), (19, 4), (19, 5), (19, 6), (19, 8), (19, 9), (19, 10), (19, 16), (19, 17), (19, 18), (19, 19), (19, 20);
-
--- =====================================================
--- 10. POSTS DATA
--- =====================================================
 
 INSERT INTO posts (post_id, description, price, area, view, status, title, created_at, approval_status, approved_by, approved_at, user_id, address_id, category_id, hostel_id) VALUES
 (1, 'Phòng trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi hiện đại. Gần trường học, bệnh viện, trung tâm thương mại. An ninh 24/7, thang máy, chỗ để xe rộng rãi.', 4500000.00, 25.0, 150, 1, 'Cho thuê phòng trọ cao cấp Q1 - Đầy đủ tiện nghi', '2024-02-15', 'APPROVED', 2, '2024-02-16', 3, 1, 1, 1),
@@ -277,27 +249,20 @@ INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_t
 -- =====================================================
 
 INSERT INTO Payments (payment_id, contract_id, total_amount, due_date, payment_date, payment_status, payment_method, transaction_id, app_trans_id, notes) VALUES
--- Payments for active contracts
 (1, 1, 7000000.00, '2024-03-05', '2024-03-03', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN001', 'APP001', 'Thanh toán tiền thuê tháng 3/2024'),
 (2, 1, 7000000.00, '2024-04-05', '2024-04-04', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN002', 'APP002', 'Thanh toán tiền thuê tháng 4/2024'),
 (3, 1, 7000000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (4, 2, 9000000.00, '2024-03-05', '2024-03-02', 'ĐÃ_THANH_TOÁN', 'ZALOPAY', 'TXN003', 'APP003', 'Thanh toán tiền thuê tháng 3/2024'),
 (5, 2, 9000000.00, '2024-04-05', '2024-04-03', 'ĐÃ_THANH_TOÁN', 'ZALOPAY', 'TXN004', 'APP004', 'Thanh toán tiền thuê tháng 4/2024'),
 (6, 2, 9000000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (7, 3, 5500000.00, '2024-03-05', '2024-03-01', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN005', 'APP005', 'Thanh toán tiền thuê tháng 3/2024'),
 (8, 3, 5500000.00, '2024-04-05', '2024-04-06', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN006', 'APP006', 'Thanh toán tiền thuê tháng 4/2024 (trễ 1 ngày)'),
 (9, 3, 5500000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (10, 4, 3200000.00, '2024-03-20', '2024-03-18', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN007', 'APP007', 'Thanh toán tiền thuê tháng 3/2024'),
 (11, 4, 3200000.00, '2024-04-20', NULL, 'QUÁ_HẠN_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024 - Quá hạn'),
-
 (12, 5, 4200000.00, '2024-03-20', '2024-03-19', 'ĐÃ_THANH_TOÁN', 'MOMO', 'TXN008', 'APP008', 'Thanh toán tiền thuê tháng 3/2024'),
 (13, 5, 4200000.00, '2024-04-20', '2024-04-18', 'ĐÃ_THANH_TOÁN', 'MOMO', 'TXN009', 'APP009', 'Thanh toán tiền thuê tháng 4/2024'),
-
 (14, 6, 7500000.00, '2024-04-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024'),
-
 (15, 7, 4500000.00, '2024-04-05', '2024-04-03', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN010', 'APP010', 'Thanh toán tiền thuê tháng 4/2024'),
 (16, 8, 5000000.00, '2024-04-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024');
 

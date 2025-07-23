@@ -55,9 +55,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Tài khoản chưa được kích hoạt");
         }
         
-        // if (user.getStatus() != Users.Status.APPROVED) {
-        //     throw new UsernameNotFoundException("Tài khoản đang chờ duyệt");
-        // }
+        if (user.getStatus() != Users.Status.APPROVED) {
+            throw new UsernameNotFoundException("Tài khoản đang chờ duyệt");
+        }
         // Tìm UserCccd tương ứng
         UserCccd userCccd = userCccdRepository.findByUser_UserId(user.getUserId()).orElse(null);
 

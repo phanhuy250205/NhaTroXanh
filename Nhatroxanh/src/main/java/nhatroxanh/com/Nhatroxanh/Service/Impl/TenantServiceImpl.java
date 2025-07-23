@@ -500,4 +500,41 @@ public class TenantServiceImpl implements TenantService {
     public List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId) {
         return contractRepository.findRoomHistoryByTenantId(tenantId);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TenantDetailDTO getTenantDetailByUserId(Integer userId) {
+        Users tenant = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+
+        Contracts contract = contractRepository.findTopByTenantOrderByContractIdDesc(tenant)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng của người thuê"));
+
+        Rooms room = contract.getRoom();
+        Hostel hostel = room.getHostel();
+        UserCccd userCccd = tenant.getUserCccd();
+
+        String cccdNumber = (userCccd != null) ? userCccd.getCccdNumber() : "Chưa có";
+        String issuePlace = (userCccd != null) ? userCccd.getIssuePlace() : "Chưa có";
+
+        return TenantDetailDTO.builder()
+                .contractId(contract.getContractId())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .terms(contract.getTerms())
+                .contractStatus(contract.getStatus().name())
+                .roomName(room.getNamerooms())
+                .hostelName(hostel.getName())
+                .userId(tenant.getUserId())
+                .userFullName(tenant.getFullname())
+                .userGender(tenant.getGender())
+                .userPhone(tenant.getPhone())
+                .userBirthday(tenant.getBirthday())
+                .userCccdNumber(cccdNumber)
+                .userCccdMasked(maskCccd(cccdNumber))
+                .userIssuePlace(issuePlace)
+                .enabled(tenant.isEnabled())
+                .build();
+    }
+
 }

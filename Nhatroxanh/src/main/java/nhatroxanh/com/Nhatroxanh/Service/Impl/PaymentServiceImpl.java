@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,6 +17,7 @@ import jakarta.mail.internet.MimeMessage;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
 import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
@@ -596,5 +598,42 @@ public class PaymentServiceImpl implements PaymentService {
             return detail.getQuantity() + " m³";
         }
         return detail.getQuantity() != null ? detail.getQuantity().toString() : "";
+    }
+
+    public Page<Payments> getPaymentHistory(Integer year, String status, String method, int page, int size) {
+        PaymentStatus paymentStatus = null;
+        PaymentMethod paymentMethod = null;
+
+        // Convert string status to enum
+        if (status != null && !status.equals("Tất cả")) {
+            try {
+                paymentStatus = PaymentStatus.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                paymentStatus = null;
+            }
+        }
+
+        // Convert string method to enum
+        if (method != null && !method.equals("Tất cả")) {
+            try {
+                paymentMethod = PaymentMethod.valueOf(method);
+            } catch (IllegalArgumentException e) {
+                paymentMethod = null;
+            }
+        }
+
+        // Create pageable object, sorting by dueDate descending
+        Pageable pageable = PageRequest.of(page, size, Sort.by("dueDate").descending());
+        return paymentsRepository.findPaymentsByFilters(year, paymentStatus, paymentMethod, pageable);
+    }
+
+    public List<DetailPayments> getDetailPaymentsByPaymentId(Integer paymentId) {
+        return detailPaymentsRepository.findByPaymentId(paymentId);
+    }
+
+    @Override
+    public Payments findPaymentById(Integer paymentId) {
+        return paymentsRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + paymentId));
     }
 }

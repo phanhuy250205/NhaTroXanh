@@ -606,7 +606,6 @@
             }
         }
 
-        /* Custom scrollbar */
         .modal-content-host::-webkit-scrollbar {
             width: 6px;
         }
@@ -627,19 +626,16 @@
 
         .status-active-host {
             background-color: #28a745;
-            /* xanh lá */
             color: white;
         }
 
         .status-warning-host {
             background-color: #ffc107;
-            /* vàng cảnh báo */
             color: black;
         }
 
         .status-inactive-host {
             background-color: #dc3545;
-            /* đỏ */
             color: white;
         }
 
@@ -722,10 +718,8 @@
 </head>
 
 <body class="tenant-detail-body-host">
-    <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-container-host" id="main-content" th:if="${tenant != null}" th:object="${tenant}">
         <div class="page-header-host d-flex justify-content-between align-items-center">
             <div>
@@ -807,7 +801,6 @@
             </div>
         </div>
 
-        <!-- Rental Information Section -->
         <div th:each="item : ${rentalHistory}" class="info-section-host">
             <h3 class="section-header-host"><i class="fas fa-home"></i> Thông tin thuê trọ</h3>
             <div class="section-content-host">
@@ -855,7 +848,6 @@
                     </div>
                 </div>
 
-                <!-- Nếu bạn muốn thêm điều khoản hợp đồng -->
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Điều khoản hợp đồng</label>
@@ -865,42 +857,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Edit Modal -->
-    <!-- <div id="editModal" class="modal-overlay-host" th:if="${tenant != null}" th:object="${tenant}">
-        <div class="modal-content-host">
-            <form th:action="@{/chu-tro/chi-tiet-khach-thue/update}" method="post">
-                <input type="hidden" name="contractId" th:value="*{contractId}" />
-                
-                <div class="modal-header-host">
-                    <h4 class="modal-title-host"><i class="fas fa-edit"></i> Chỉnh sửa thông tin</h4>
-                    <button type="button" class="close-btn-host" onclick="hideEditModal()"><i class="bi bi-x-lg"></i></button>
-                </div>
-                <div class="modal-body-host">
-                    <div class="modal-section-host">
-                        <h5 class="modal-section-title-host"><i class="fas fa-file-contract"></i> Hợp đồng</h5>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Trạng thái hợp đồng</label>
-                            <select class="form-select-edit-host" name="status">
-                                <option value="true" th:selected="*{contractStatus}">Đang thuê</option>
-                                <option value="false" th:selected="!*{contractStatus}">Đã trả phòng</option>
-                            </select>   
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-actions-host">
-                    <button type="submit" class="btn-save-host">
-                        <i class="fas fa-save"></i> Lưu thay đổi
-                    </button>
-                    <button type="button" class="btn-cancel-host" onclick="hideEditModal()">
-                        <i class="fas fa-times"></i> Hủy bỏ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div> -->
-
-    <!-- Bootstrap JS và các script khác -->
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
     <script>
