@@ -12,23 +12,103 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 </head>
+<style>
+    .custom-toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1055;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .custom-toast {
+        display: flex;
+        align-items: center;
+        background-color: #e6f7f0;
+        color: #1a2e05;
+        padding: 12px 16px;
+        border-left: 5px solid #10b981;
+        border-radius: 10px;
+        min-width: 320px;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-size: 15px;
+        position: relative;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .custom-toast.error {
+        background-color: #fff0f0;
+        border-left-color: #ef4444;
+        color: #7f1d1d;
+    }
+
+    .toast-icon {
+        margin-right: 10px;
+        font-size: 18px;
+        color: #10b981;
+    }
+
+    .custom-toast.error .toast-icon {
+        color: #ef4444;
+    }
+
+    .toast-message {
+        flex: 1;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .toast-close:hover {
+        color: #333;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
 
 <body class="management-body-staff">
     <div th:replace="~{/layouts/sidebar-staff}"></div>
     <div class="main-content-staff" id="main-content">
         <div class="page-header-staff">
             <h1 class="page-title-staff">Quản lý chủ trọ</h1>
-
-            <!-- Tabs -->
+            <div class="custom-toast-container">
+                <div th:if="${successMessage}" class="custom-toast success">
+                    <i class="toast-icon fas fa-check-circle"></i>
+                    <span class="toast-message" th:text="${successMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+                <div th:if="${errorMessage}" class="custom-toast error">
+                    <i class="toast-icon fas fa-exclamation-circle"></i>
+                    <span class="toast-message" th:text="${errorMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+            </div>
             <div class="custom-tabs-staff">
                 <a href="#" class="custom-tab-staff active" onclick="switchTab(0, this)">QUẢN LÝ CHỦ TRỌ</a>
                 <a href="#" class="custom-tab-staff" onclick="switchTab(1, this)">DUYỆT ĐĂNG KÝ</a>
             </div>
         </div>
-
         <!-- Tab Content 1: Quản lý chủ trọ -->
         <div id="tab-content-0" class="tab-content-panel-staff">
-            <!-- Search Section -->
             <div class="search-section-staff">
                 <div class="search-container-staff">
                     <div class="search-input-group-staff">
@@ -109,25 +189,27 @@
         </div>
 
         <!-- Tab Content 2: Duyệt đăng ký -->
-        <div id="tab-content-1" class="tab-content-panel-staff hidden">
+        <div id="tab-content-1" class="tab-content-panel-staff"
+            th:classappend="${activeTab == 'manage'} ? 'hidden' : ''">
             <!-- Search Section -->
             <div class="search-section-staff">
                 <div class="search-container-staff">
-                    <div class="search-input-group-staff">
-                        <input type="text" class="search-input-staff" placeholder="Tìm kiếm..."
-                            id="searchInputApproval">
-                        <button class="search-btn-staff" onclick="performApprovalSearch()">
+                    <form th:action="@{/nhan-vien/chu-tro}" method="get" class="search-input-group-staff">
+                        <input type="text" class="search-input-staff" name="approvalSearch" th:value="${approvalSearch}"
+                            placeholder="Tìm kiếm theo tên, số điện thoại..." id="searchInputApproval">
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <button type="submit" class="search-btn-staff">
                             <i class="fas fa-search"></i>
                             TÌM KIẾM
                         </button>
-                    </div>
+                    </form>
                 </div>
             </div>
 
             <!-- Registration Cards Grid -->
             <div class="registration-grid-staff" id="registrationGrid">
-                <!-- Card 1 -->
-                <div class="registration-card-staff" data-id="1">
+                <div th:each="user : ${pendingOwners.content}" class="registration-card-staff"
+                    th:data-id="${user.userId}">
                     <div class="card-header-staff">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <span>Thông tin người dùng</span>
@@ -136,308 +218,114 @@
                     <div class="card-body-staff">
                         <div class="form-group-staff">
                             <label class="form-label-staff">Họ và tên</label>
-                            <input type="text" class="form-input-staff" value="Nguyễn Văn A" disabled>
+                            <input type="text" class="form-input-staff" th:value="${user.fullname}" disabled>
                         </div>
                         <div class="form-group-staff">
                             <label class="form-label-staff">Ngày sinh</label>
-                            <input type="text" class="form-input-staff" value="17/09/1990" disabled>
+                            <input type="text" class="form-input-staff" th:value="${user.birthday}" disabled>
                         </div>
                         <div class="form-group-staff">
                             <label class="form-label-staff">Số điện thoại</label>
-                            <input type="text" class="form-input-staff" value="0987654321" disabled>
+                            <input type="text" class="form-input-staff" th:value="${user.phone}" disabled>
                         </div>
                         <div class="form-group-staff">
                             <label class="form-label-staff">Giới tính</label>
                             <div class="gender-group-staff">
                                 <div class="gender-option-staff">
-                                    <input type="radio" id="male1" name="gender1" class="gender-radio-staff" checked
-                                        disabled>
-                                    <label for="male1" class="gender-label-staff">Nam</label>
+                                    <input type="radio" th:id="'male' + ${user.userId}"
+                                        th:name="'gender' + ${user.userId}" class="gender-radio-staff"
+                                        th:checked="${user.gender}" disabled>
+                                    <label th:for="'male' + ${user.userId}" class="gender-label-staff">Nam</label>
                                 </div>
                                 <div class="gender-option-staff">
-                                    <input type="radio" id="female1" name="gender1" class="gender-radio-staff" disabled>
-                                    <label for="female1" class="gender-label-staff">Nữ</label>
+                                    <input type="radio" th:id="'female' + ${user.userId}"
+                                        th:name="'gender' + ${user.userId}" class="gender-radio-staff"
+                                        th:checked="${not user.gender}" disabled>
+                                    <label th:for="'female' + ${user.userId}" class="gender-label-staff">Nữ</label>
                                 </div>
                             </div>
                         </div>
                         <div class="card-actions-staff">
-                            <button class="view-detail-btn-staff" onclick="showDetailModal(1)">
-                                <i class="fas fa-eye"></i>
-                                Xem chi tiết
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                            <a th:href="@{'/nhan-vien/chu-tro/chi-tiet-duyet/' + ${user.userId} + '?approvalPage=' + ${approvalPage} + '&approvalSearch=' + ${approvalSearch}}"
+                                class="view-detail-btn-staff text-decoration-none">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </a>
 
-                <!-- Card 2 -->
-                <div class="registration-card-staff" data-id="2">
-                    <div class="card-header-staff">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>Thông tin người dùng</span>
-                        </div>
-                    </div>
-                    <div class="card-body-staff">
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Họ và tên</label>
-                            <input type="text" class="form-input-staff" value="Trần Thị B" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Ngày sinh</label>
-                            <input type="text" class="form-input-staff" value="25/03/1995" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Số điện thoại</label>
-                            <input type="text" class="form-input-staff" value="0123456789" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Giới tính</label>
-                            <div class="gender-group-staff">
-                                <div class="gender-option-staff">
-                                    <input type="radio" id="male2" name="gender2" class="gender-radio-staff" disabled>
-                                    <label for="male2" class="gender-label-staff">Nam</label>
-                                </div>
-                                <div class="gender-option-staff">
-                                    <input type="radio" id="female2" name="gender2" class="gender-radio-staff" checked
-                                        disabled>
-                                    <label for="female2" class="gender-label-staff">Nữ</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions-staff">
-                            <button class="view-detail-btn-staff" onclick="showDetailModal(2)">
-                                <i class="fas fa-eye"></i>
-                                Xem chi tiết
-                            </button>
                         </div>
                     </div>
                 </div>
+                <div th:if="${pendingOwners.empty}" class="text-center">
+                    <p>Không có đăng ký chủ trọ nào chờ duyệt.</p>
+                </div>
+            </div>
 
-                <!-- Card 3 -->
-                <div class="registration-card-staff" data-id="3">
-                    <div class="card-header-staff">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <span>Thông tin người dùng</span>
-                        </div>
-                    </div>
-                    <div class="card-body-staff">
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Họ và tên</label>
-                            <input type="text" class="form-input-staff" value="Lê Minh C" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Ngày sinh</label>
-                            <input type="text" class="form-input-staff" value="12/11/1988" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Số điện thoại</label>
-                            <input type="text" class="form-input-staff" value="0369852147" disabled>
-                        </div>
-                        <div class="form-group-staff">
-                            <label class="form-label-staff">Giới tính</label>
-                            <div class="gender-group-staff">
-                                <div class="gender-option-staff">
-                                    <input type="radio" id="male3" name="gender3" class="gender-radio-staff" checked
-                                        disabled>
-                                    <label for="male3" class="gender-label-staff">Nam</label>
-                                </div>
-                                <div class="gender-option-staff">
-                                    <input type="radio" id="female3" name="gender3" class="gender-radio-staff" disabled>
-                                    <label for="female3" class="gender-label-staff">Nữ</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-actions-staff">
-                            <button class="view-detail-btn-staff" onclick="showDetailModal(3)">
-                                <i class="fas fa-eye"></i>
-                                Xem chi tiết
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <!-- Pagination for Pending Owners -->
+            <div class="pagination-section-staff" th:if="${not pendingOwners.empty}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${approvalPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/chu-tro(approvalPage=${approvalPage - 1}, size=10, approvalSearch=${approvalSearch}, activeTab='approve')}">Trước</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"
+                                th:text="${pendingOwners.totalPages}"></span>
+                        </li>
+                        <li class="page-item"
+                            th:classappend="${approvalPage >= pendingOwners.totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/chu-tro(approvalPage=${approvalPage + 1}, size=10, approvalSearch=${approvalSearch}, activeTab='approve')}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
 
-    <!-- Detail Modal -->
-    <div class="modal fade" id="detailModal" tabindex="-1">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="fas fa-user-circle"></i>
-                        Chi tiết thông tin đăng ký
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <!-- Personal Information -->
-                        <div class="col-md-6">
-                            <div class="detail-section-staff">
-                                <h6 class="detail-section-title-staff">
-                                    <i class="fas fa-user"></i>
-                                    Thông tin cá nhân
-                                </h6>
-                                <div class="detail-info-staff">
-                                    <div class="detail-row-staff">
-                                        <label>Họ và tên:</label>
-                                        <span id="detailName">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Ngày sinh:</label>
-                                        <span id="detailBirthDate">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Giới tính:</label>
-                                        <span id="detailGender">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Số CCCD:</label>
-                                        <span id="detailCccd">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Ngày cấp CCCD:</label>
-                                        <span id="detailCccdDate">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Nơi cấp:</label>
-                                        <span id="detailCccdPlace">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Contact Information -->
-                        <div class="col-md-6">
-                            <div class="detail-section-staff">
-                                <h6 class="detail-section-title-staff">
-                                    <i class="fas fa-phone"></i>
-                                    Thông tin liên hệ
-                                </h6>
-                                <div class="detail-info-staff">
-                                    <div class="detail-row-staff">
-                                        <label>Số điện thoại:</label>
-                                        <span id="detailPhone">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Email:</label>
-                                        <span id="detailEmail">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Địa chỉ thường trú:</label>
-                                        <span id="detailAddress">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Nghề nghiệp:</label>
-                                        <span id="detailJob">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Nơi làm việc:</label>
-                                        <span id="detailWorkplace">-</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Additional Information -->
-                    <!-- <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="detail-section-staff">
-                                <h6 class="detail-section-title-staff">
-                                    <i class="fas fa-info-circle"></i>
-                                    Thông tin bổ sung
-                                </h6>
-                                <div class="detail-info-staff">
-                                    <div class="detail-row-staff">
-                                        <label>Ngày đăng ký:</label>
-                                        <span id="detailRegisterDate">-</span>
-                                    </div>
-                                    <div class="detail-row-staff">
-                                        <label>Lý do đăng ký:</label>
-                                        <span id="detailReason">-</span>
-                                    </div>
-                                    <div class="detail-row-staff full-width">
-                                        <label>Ghi chú:</label>
-                                        <div id="detailNote" class="detail-note-staff">-</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div> -->
-
-                    <!-- Document Images -->
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="detail-section-staff">
-                                <h6 class="detail-section-title-staff">
-                                    <i class="fas fa-images"></i>
-                                    Hình ảnh giấy tờ
-                                </h6>
-                                <div class="document-images-staff" id="documentImages">
-                                    <!-- Images will be populated by JavaScript -->
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                        Đóng
-                    </button>
-                    <button type="button" class="btn btn-danger" id="rejectDetailBtn">
-                        <i class="fas fa-times-circle"></i>
-                        Từ chối
-                    </button>
-                    <button type="button" class="btn btn-success" id="approveDetailBtn">
-                        <i class="fas fa-check-circle"></i>
-                        Phê duyệt
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modalTitle">Xác nhận</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p id="modalMessage">Bạn có chắc chắn muốn thực hiện hành động này?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                    <button type="button" class="btn" id="confirmBtn">Xác nhận</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Image Modal -->
-    <div class="modal fade" id="imageModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Xem ảnh</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <img id="modalImage" src="/placeholder.svg?height=400&width=600" alt="Document Image"
-                        class="img-fluid">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function switchTab(tabIndex, clickedTab) {
+            const allTabs = document.querySelectorAll('.custom-tab-staff');
+            const allContents = document.querySelectorAll('.tab-content-panel-staff');
 
-    <script th:src="@{/js/QL-chu-tro.js}"></script>
+            // Ẩn toàn bộ tab content
+            allContents.forEach(tab => tab.classList.add('hidden'));
+
+            // Bỏ active ở tất cả tab
+            allTabs.forEach(tab => tab.classList.remove('active'));
+
+            // Hiện tab tương ứng
+            document.getElementById('tab-content-' + tabIndex).classList.remove('hidden');
+            clickedTab.classList.add('active');
+        }
+
+        // Mặc định active theo biến server (nếu có)
+        document.addEventListener("DOMContentLoaded", function () {
+            const activeTab = /*[[${activeTab}]]*/ 'approve'; // fallback nếu không có
+            if (activeTab === 'approve') {
+                const tab = document.querySelectorAll('.custom-tab-staff')[1];
+                switchTab(1, tab);
+            } else {
+                const tab = document.querySelectorAll('.custom-tab-staff')[0];
+                switchTab(0, tab);
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
     <script th:src="@{/js/sidebar.js}"></script>
 </body>
 

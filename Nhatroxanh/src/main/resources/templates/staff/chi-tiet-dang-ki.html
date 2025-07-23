@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đăng ký chủ trọ</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/QL-chu-tro.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<style>
+    /* ===== Page Header ===== */
+    .page-header-staff {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #e0e6ed;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .page-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-left: auto;
+        /* Đẩy sang phải */
+    }
+
+    /* Responsive cho mobile */
+    @media (max-width: 768px) {
+        .page-header-staff {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-header-actions {
+            margin-left: 0;
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    /* Nút Quay lại */
+    .btn-back {
+        order: 1;
+        /* Đảm bảo nút quay lại luôn ở giữa */
+    }
+
+    /* Nhóm nút phê duyệt */
+    .approval-buttons {
+        display: flex;
+        gap: 15px;
+        order: 2;
+        /* Đặt sau nút quay lại */
+    }
+</style>
+
+<body class="management-body-staff">
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content-staff" id="main-content">
+        <div class="page-header-staff">
+            <h1 class="page-title-staff">Chi tiết đăng ký chủ trọ</h1>
+
+            <div class="page-header-actions">
+                <a th:href="@{/nhan-vien/chu-tro(activeTab='approve', approvalPage=${approvalPage}, approvalSearch=${approvalSearch})}"
+                    class="btn btn-secondary btn-back">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+
+                <div class="approval-buttons">
+                    <form th:if="${user != null}" th:action="@{/nhan-vien/chu-tro/reject-owner/__${user.userId}__}"
+                        method="post" style="display: inline;">
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <input type="hidden" name="approvalSearch" th:value="${approvalSearch}" />
+                        <input type="hidden" name="activeTab" value="approve" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times-circle"></i> Từ chối
+                        </button>
+                    </form>
+                    <form th:if="${user != null}" th:action="@{/nhan-vien/chu-tro/approve-owner/__${user.userId}__}"
+                        method="post" style="display: inline;">
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <input type="hidden" name="approvalSearch" th:value="${approvalSearch}" />
+                        <input type="hidden" name="activeTab" value="approve" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle"></i> Phê duyệt
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Content -->
+        <div class="detail-section-staff">
+            <div class="row">
+                <!-- Personal Information -->
+                <div class="col-md-6">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-user"></i>
+                            Thông tin cá nhân
+                        </h6>
+                        <div class="detail-info-staff">
+                            <div class="detail-row-staff">
+                                <label>Họ và tên:</label>
+                                <span th:text="${user != null} ? ${user.fullname} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Ngày sinh:</label>
+                                <span th:text="${user != null} ? ${user.birthday} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Giới tính:</label>
+                                <span
+                                    th:text="${user != null and user.gender != null} ? (${user.gender} ? 'Nam' : 'Nữ') : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Số CCCD:</label>
+                                <span th:text="${cccd != null} ? ${cccd.cccdNumber} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Ngày cấp CCCD:</label>
+                                <span th:text="${cccd != null} ? ${cccd.issueDate} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Nơi cấp:</label>
+                                <span th:text="${cccd != null} ? ${cccd.issuePlace} : '-'">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="col-md-6">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-phone"></i>
+                            Thông tin liên hệ
+                        </h6>
+                        <div class="detail-info-staff">
+                            <div class="detail-row-staff">
+                                <label>Số điện thoại:</label>
+                                <span th:text="${user != null} ? ${user.phone} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Email:</label>
+                                <span th:text="${user != null} ? ${user.email} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Địa chỉ thường trú:</label>
+                                <span th:text="${user != null} ? ${user.address} : '-'">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Images -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-images"></i>
+                            Hình ảnh giấy tờ
+                        </h6>
+                        <div class="document-images-staff">
+                            <div th:if="${cccd != null and cccd.frontImageUrl != null}"
+                                class="document-image-item-staff">
+                                <a th:href="@{${cccd.frontImageUrl}}" target="_blank">
+                                    <img th:src="@{${cccd.frontImageUrl}}" alt="CCCD mặt trước">
+                                    <div class="document-image-overlay-staff">
+                                        <i class="fas fa-search-plus"></i>
+                                    </div>
+                                    <div class="document-image-label-staff">CCCD mặt trước</div>
+                                </a>
+                            </div>
+                            <div th:if="${cccd != null and cccd.backImageUrl != null}"
+                                class="document-image-item-staff">
+                                <a th:href="@{${cccd.backImageUrl}}" target="_blank">
+                                    <img th:src="@{${cccd.backImageUrl}}" alt="CCCD mặt sau">
+                                    <div class="document-image-overlay-staff">
+                                        <i class="fas fa-search-plus"></i>
+                                    </div>
+                                    <div class="document-image-label-staff">CCCD mặt sau</div>
+                                </a>
+                            </div>
+                            <div th:if="${cccd == null or (cccd.frontImageUrl == null and cccd.backImageUrl == null)}"
+                                class="text-center">
+                                <p>Không có hình ảnh giấy tờ.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+
+</html>

@@ -28,4 +28,24 @@ public class UserOwnerRequest {
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Ngày sinh phải đúng định dạng yyyy-MM-dd.")
     private String birthDate;
 
+    @NotBlank(message = "Giới tính không được để trống.")
+    private String gender;
+
+    @NotBlank(message = "Số CCCD không được để trống.")
+    @Pattern(regexp = "^[0-9]{12}$", message = "Số CCCD phải có 12 chữ số.")
+    private String cccdNumber;
+
+    @NotBlank(message = "Nơi cấp CCCD không được để trống.")
+    private String issuePlace;
+
+    @NotBlank(message = "Ngày cấp CCCD không được để trống.")
+    @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Ngày cấp phải đúng định dạng yyyy-MM-dd.")
+    private String issueDate;
+
+    private String frontImageUrl;
+
+    private String backImageUrl;
+
+    @NotBlank(message = "Địa chỉ không được để trống.")
+    private String address;
 }

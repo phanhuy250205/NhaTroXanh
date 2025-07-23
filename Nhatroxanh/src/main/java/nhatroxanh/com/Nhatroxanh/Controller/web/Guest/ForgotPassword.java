@@ -4,7 +4,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
-
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +24,7 @@ public class ForgotPassword {
     @Autowired private OtpService otpService;
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private EmailService emailService;
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPass(@RequestBody Map<String, String> request) {
@@ -65,6 +66,10 @@ public class ForgotPassword {
         boolean isValid = otpService.verifyOtp(user, otp);
         if (isValid) {
             logger.info("OTP verified successfully for: {}", email);
+            // Xóa OTP sau khi xác thực thành công
+            user.setOtpCode(null);
+            user.setOtpExpiration(null);
+            userRepository.save(user);
             return ResponseEntity.ok(Map.of("message", "Xác thực OTP thành công."));
         } else {
             logger.warn("Invalid or expired OTP for: {}", email);
@@ -100,9 +105,18 @@ public class ForgotPassword {
     public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         String newPassword = request.get("newPassword");
-        if (email == null || newPassword == null || email.trim().isEmpty() || newPassword.trim().isEmpty()) {
-            logger.warn("Invalid input for reset-password: email={}, newPassword={}", email, newPassword);
-            return ResponseEntity.badRequest().body(Map.of("message", "Email và mật khẩu mới không được để trống."));
+        String confirmPassword = request.get("confirmPassword");
+
+        if (email == null || newPassword == null || confirmPassword == null || 
+            email.trim().isEmpty() || newPassword.trim().isEmpty() || confirmPassword.trim().isEmpty()) {
+            logger.warn("Invalid input for reset-password: email={}, newPassword={}, confirmPassword={}", 
+                        email, newPassword, confirmPassword);
+            return ResponseEntity.badRequest().body(Map.of("message", "Email, mật khẩu mới và xác nhận mật khẩu không được để trống."));
+        }
+
+        if (!newPassword.equals(confirmPassword)) {
+            logger.warn("Passwords do not match for: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("message", "Mật khẩu mới và xác nhận mật khẩu không khớp."));
         }
 
         Users user = userRepository.findByEmail(email).orElse(null);
@@ -113,8 +127,6 @@ public class ForgotPassword {
 
         try {
             user.setPassword(passwordEncoder.encode(newPassword));
-            user.setOtpCode(null);
-            user.setOtpExpiration(null);
             userRepository.save(user);
             logger.info("Password reset successfully for: {}", email);
             return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công."));

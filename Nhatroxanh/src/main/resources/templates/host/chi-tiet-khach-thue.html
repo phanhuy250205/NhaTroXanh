@@ -606,7 +606,6 @@
             }
         }
 
-        /* Custom scrollbar */
         .modal-content-host::-webkit-scrollbar {
             width: 6px;
         }
@@ -627,31 +626,102 @@
 
         .status-active-host {
             background-color: #28a745;
-            /* xanh lá */
             color: white;
         }
 
         .status-warning-host {
             background-color: #ffc107;
-            /* vàng cảnh báo */
             color: black;
         }
 
         .status-inactive-host {
             background-color: #dc3545;
-            /* đỏ */
             color: white;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-lg-custom {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
         }
     </style>
 </head>
 
 <body class="tenant-detail-body-host">
-    <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-container-host" id="main-content" th:if="${tenant != null}" th:object="${tenant}">
-        <div class="page-header-host">
+        <div class="page-header-host d-flex justify-content-between align-items-center">
             <div>
                 <a th:href="@{/chu-tro/khach-thue}" class="back-link-host">
                     <i class="bi bi-arrow-left"></i>
@@ -659,16 +729,31 @@
                 </a>
                 <h1 class="page-title-host">Chi tiết khách thuê</h1>
             </div>
-            <!-- <button class="edit-btn-host" onclick="showEditModal()">
-                <i class="fas fa-edit"></i> Chỉnh sửa
-            </button> -->
+
+            <form th:action="@{/chu-tro/khach-thue/kich-hoat}" method="post" class="ms-auto">
+                <input type="hidden" name="userId" th:value="${tenant.userId}" />
+                <input type="hidden" name="contractId" th:value="${tenant.contractId}" />
+                <button type="submit" class="btn btn-md d-flex align-items-center gap-1"
+                    th:classappend="${tenant.enabled} ? 'btn-danger' : 'btn-success'">
+                    <i class="bi" th:classappend="${tenant.enabled} ? 'bi-x-circle' : 'bi-check-circle'"></i>
+                    <span th:text="${tenant.enabled} ? 'Vô hiệu hóa' : 'Kích hoạt lại'"></span>
+                </button>
+            </form>
         </div>
 
-        <!-- HIỂN THỊ THÔNG BÁO THÀNH CÔNG/LỖI (NẾU CÓ) -->
-        <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
 
-        <!-- Personal Information Section -->
         <div class="info-section-host">
             <h3 class="section-header-host"><i class="fas fa-user"></i> Thông tin cá nhân</h3>
             <div class="section-content-host">
@@ -716,22 +801,21 @@
             </div>
         </div>
 
-        <!-- Rental Information Section -->
-        <div class="info-section-host">
+        <div th:each="item : ${rentalHistory}" class="info-section-host">
             <h3 class="section-header-host"><i class="fas fa-home"></i> Thông tin thuê trọ</h3>
             <div class="section-content-host">
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Khu trọ</label>
-                        <input type="text" class="form-control-host" th:value="*{hostelName}" disabled>
+                        <input type="text" class="form-control-host" th:value="${item.hostelName}" disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Phòng</label>
-                        <input type="text" class="form-control-host" th:value="*{roomName}" disabled>
+                        <input type="text" class="form-control-host" th:value="${item.roomName}" disabled>
                     </div>
                     <div class="form-group-host status-container-host">
                         <label class="form-label-host">Trạng thái Hợp đồng</label>
-                        <span th:switch="*{contractStatus}" class="status-badge-host">
+                        <span th:switch="${item.status}" class="status-badge-host">
                             <span th:case="'ACTIVE'" class="status-badge-host status-active-host">
                                 <i class="fas fa-check-circle"></i> Đang thuê
                             </span>
@@ -748,66 +832,49 @@
                     </div>
 
                 </div>
+
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày bắt đầu</label>
                         <input type="text" class="form-control-host"
-                            th:value="*{startDate != null ? #dates.format(startDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
+                            th:value="${item.startDate != null ? #dates.format(item.startDate, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày kết thúc</label>
                         <input type="text" class="form-control-host"
-                            th:value="*{endDate != null ? #dates.format(endDate, 'dd/MM/yyyy') : 'N/A'}" disabled>
+                            th:value="${item.endDate != null ? #dates.format(item.endDate, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
                     </div>
                 </div>
+
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Điều khoản hợp đồng</label>
-                        <textarea class="form-textarea-host" disabled th:text="*{terms}"></textarea>
+                        <textarea class="form-textarea-host" disabled th:text="${item.terms}"></textarea>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Edit Modal -->
-    <!-- <div id="editModal" class="modal-overlay-host" th:if="${tenant != null}" th:object="${tenant}">
-        <div class="modal-content-host">
-            <form th:action="@{/chu-tro/chi-tiet-khach-thue/update}" method="post">
-                <input type="hidden" name="contractId" th:value="*{contractId}" />
-                
-                <div class="modal-header-host">
-                    <h4 class="modal-title-host"><i class="fas fa-edit"></i> Chỉnh sửa thông tin</h4>
-                    <button type="button" class="close-btn-host" onclick="hideEditModal()"><i class="bi bi-x-lg"></i></button>
-                </div>
-                <div class="modal-body-host">
-                    <div class="modal-section-host">
-                        <h5 class="modal-section-title-host"><i class="fas fa-file-contract"></i> Hợp đồng</h5>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Trạng thái hợp đồng</label>
-                            <select class="form-select-edit-host" name="status">
-                                <option value="true" th:selected="*{contractStatus}">Đang thuê</option>
-                                <option value="false" th:selected="!*{contractStatus}">Đã trả phòng</option>
-                            </select>   
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-actions-host">
-                    <button type="submit" class="btn-save-host">
-                        <i class="fas fa-save"></i> Lưu thay đổi
-                    </button>
-                    <button type="button" class="btn-cancel-host" onclick="hideEditModal()">
-                        <i class="fas fa-times"></i> Hủy bỏ
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div> -->
-
-    <!-- Bootstrap JS và các script khác -->
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
         function showEditModal() { document.getElementById('editModal').classList.add('show'); }
         function hideEditModal() { document.getElementById('editModal').classList.remove('show'); }
         document.getElementById('editModal').addEventListener('click', function (e) { if (e.target === this) { hideEditModal(); } });
