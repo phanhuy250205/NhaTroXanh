@@ -102,17 +102,17 @@ INSERT INTO utilities (name) VALUES
 -- 5. USERS DATA
 -- =====================================================
 
-INSERT INTO users (user_id, password, fullname, phone, birthday, bank_account, balance, gender, email, avatar, otp_code, otp_expiration, enabled, address, created_at, address_id, role) VALUES
-(11, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Văn Admin', '0901000001', '1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
-(22, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
-(33, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
-(4, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Thị Lan Anh', '0901000004', '1982-07-25', '4567890123', 80000000.00, 0, 'owner2@nhatroxanh.com', '/uploads/owner2-avatar.jpg', NULL, NULL, 1, '321 Đường Chủ Trọ 2', '2024-01-04 08:00:00', 4, 'OWNER'),
-(5, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Hoàng Minh Tuấn', '0901000005', '1978-12-03', '5678901234', 120000000.00, 1, 'owner3@nhatroxanh.com', '/uploads/owner3-avatar.jpg', NULL, NULL, 1, '654 Đường Chủ Trọ 3', '2024-01-05 08:00:00', 5, 'OWNER'),
-(6, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Thị Hoa', '0901000006', '1995-02-14', '6789012345', 5000000.00, 0, 'customer1@gmail.com', '/uploads/customer1-avatar.jpg', NULL, NULL, 1, '987 Đường Khách Hàng 1', '2024-01-06 08:00:00', 6, 'CUSTOMER'),
-(7, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Văn Nam', '0901000007', '1993-08-22', '7890123456', 3000000.00, 1, 'customer2@gmail.com', '/uploads/customer2-avatar.jpg', NULL, NULL, 1, '147 Đường Khách Hàng 2', '2024-01-07 08:00:00', 7, 'CUSTOMER'),
-(8, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Thị Mai', '0901000008', '1996-11-30', '8901234567', 4000000.00, 0, 'customer3@gmail.com', '/uploads/customer3-avatar.jpg', NULL, NULL, 1, '258 Đường Khách Hàng 3', '2024-01-08 08:00:00', 8, 'CUSTOMER'),
-(9, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Văn Đức', '0901000009', '1994-04-18', '9012345678', 6000000.00, 1, 'customer4@gmail.com', '/uploads/customer4-avatar.jpg', NULL, NULL, 1, '369 Đường Khách Hàng 4', '2024-01-09 08:00:00', 9, 'CUSTOMER'),
-(10, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Võ Thị Lan', '0901000010', '1997-09-05', '0123456789', 2500000.00, 0, 'customer5@gmail.com', '/uploads/customer5-avatar.jpg', NULL, NULL, 1, '741 Đường Khách Hàng 5', '2024-01-10 08:00:00', 10, 'CUSTOMER');
+INSERT INTO users (password,fullname, phone, birthday, bank_account, balance, gender, email, avatar, otp_code, otp_expiration, enabled, address, created_at, address_id, role) VALUES
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2','Nguyễn Văn Admin','0901000001','1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Thị Lan Anh', '0901000004', '1982-07-25', '4567890123', 80000000.00, 0, 'owner2@nhatroxanh.com', '/uploads/owner2-avatar.jpg', NULL, NULL, 1, '321 Đường Chủ Trọ 2', '2024-01-04 08:00:00', 4, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Hoàng Minh Tuấn', '0901000005', '1978-12-03', '5678901234', 120000000.00, 1, 'owner3@nhatroxanh.com', '/uploads/owner3-avatar.jpg', NULL, NULL, 1, '654 Đường Chủ Trọ 3', '2024-01-05 08:00:00', 5, 'OWNER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Thị Hoa', '0901000006', '1995-02-14', '6789012345', 5000000.00, 0, 'customer1@gmail.com', '/uploads/customer1-avatar.jpg', NULL, NULL, 1, '987 Đường Khách Hàng 1', '2024-01-06 08:00:00', 6, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Văn Nam', '0901000007', '1993-08-22', '7890123456', 3000000.00, 1, 'customer2@gmail.com', '/uploads/customer2-avatar.jpg', NULL, NULL, 1, '147 Đường Khách Hàng 2', '2024-01-07 08:00:00', 1, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Thị Mai', '0901000008', '1996-11-30', '8901234567', 4000000.00, 0, 'customer3@gmail.com', '/uploads/customer3-avatar.jpg', NULL, NULL, 1, '258 Đường Khách Hàng 3', '2024-01-08 08:00:00', 1, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Văn Đức', '0901000009', '1994-04-18', '9012345678', 6000000.00, 1, 'customer4@gmail.com', '/uploads/customer4-avatar.jpg', NULL, NULL, 1, '369 Đường Khách Hàng 4', '2024-01-09 08:00:00', 4, 'CUSTOMER'),
+('$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Võ Thị Lan', '0901000010', '1997-09-05', '0123456789', 2500000.00, 0, 'customer5@gmail.com', '/uploads/customer5-avatar.jpg', NULL, NULL, 1, '741 Đường Khách Hàng 5', '2024-01-10 08:00:00', 1, 'CUSTOMER');
 
 -- =====================================================
 -- 6. USER CCCD DATA
@@ -173,18 +173,14 @@ INSERT INTO room_utilities (room_id, utility_id) VALUES
 (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 9), (6, 10), (6, 16), (6, 17), (6, 18), (6, 19),
 (19, 1), (19, 2), (19, 3), (19, 4), (19, 5), (19, 6), (19, 8), (19, 9), (19, 10), (19, 16), (19, 17), (19, 18), (19, 19), (19, 20);
 
--- =====================================================
--- 10. POSTS DATA
--- =====================================================
-
-INSERT INTO posts (description, price, area, view, status, title, created_at, approval_status, approved_by, approved_at, user_id, address_id, category_id, hostel_id) VALUES
-('Phòng trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi hiện đại. Gần trường học, bệnh viện, trung tâm thương mại. An ninh 24/7, thang máy, chỗ để xe rộng rãi.', 4500000.00, 25.0, 150, 1, 'Cho thuê phòng trọ cao cấp Q1 - Đầy đủ tiện nghi', '2024-02-15', 'APPROVED', 2, '2024-02-16', 3, 1, 1, 1),
-('Căn hộ mini hiện đại với thiết kế tối ưu không gian. Bếp riêng, phòng tắm riêng, đầy đủ nội thất. Phù hợp cho cặp đôi hoặc gia đình nhỏ.', 6000000.00, 30.0, 89, 1, 'Căn hộ mini Lê Lợi - Thiết kế hiện đại', '2024-02-20', 'APPROVED', 2, '2024-02-21', 3, 2, 2, 2),
-('Homestay ấm cúng với không gian xanh mát. Phù hợp cho những ai yêu thích sự yên tĩnh và gần gũi với thiên nhiên. Có sân vườn nhỏ để thư giãn.', 5500000.00, 35.0, 67, 1, 'Homestay Hai Bà Trưng - Không gian xanh', '2024-02-25', 'APPROVED', 2, '2024-02-26', 4, 3, 4, 3),
-('Phòng trọ giá rẻ dành cho sinh viên và người lao động. Vị trí thuận tiện, gần trường học và bệnh viện. Môi trường sạch sẽ, an toàn.', 2800000.00, 18.0, 234, 1, 'Phòng trọ sinh viên Pasteur - Giá rẻ', '2024-03-01', 'APPROVED', 2, '2024-03-02', 4, 4, 7, 4),
-('Studio cao cấp với thiết kế sang trọng. Không gian mở, tận dụng tối đa ánh sáng tự nhiên. Đầy đủ tiện nghi hiện đại cho cuộc sống tiện nghi.', 7500000.00, 35.0, 112, 1, 'Studio Premium Xa Lộ Hà Nội - Sang trọng', '2024-03-05', 'APPROVED', 2, '2024-03-06', 5, 6, 8, 6),
-('Phòng trọ mới đăng, đang chờ duyệt. Vị trí đẹp, giá cả hợp lý, phù hợp cho nhiều đối tượng khách hàng.', 4200000.00, 30.0, 45, 1, 'Phòng trọ Cách Mạng Tháng 8 - Mới', '2024-03-10', 'PENDING', NULL, NULL, 5, 5, 1, 5),
-('Bài đăng bị từ chối do không đủ thông tin. Cần bổ sung thêm hình ảnh và mô tả chi tiết hơn.', 3500000.00, 22.0, 12, 0, 'Phòng trọ cần cập nhật thông tin', '2024-03-12', 'REJECTED', 2, '2024-03-13', 3, 1, 1, 1);
+INSERT INTO posts (post_id, description, price, area, view, status, title, created_at, approval_status, approved_by, approved_at, user_id, address_id, category_id, hostel_id) VALUES
+(1, 'Phòng trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi hiện đại. Gần trường học, bệnh viện, trung tâm thương mại. An ninh 24/7, thang máy, chỗ để xe rộng rãi.', 4500000.00, 25.0, 150, 1, 'Cho thuê phòng trọ cao cấp Q1 - Đầy đủ tiện nghi', '2024-02-15', 'APPROVED', 2, '2024-02-16', 3, 1, 1, 1),
+(2, 'Căn hộ mini hiện đại với thiết kế tối ưu không gian. Bếp riêng, phòng tắm riêng, đầy đủ nội thất. Phù hợp cho cặp đôi hoặc gia đình nhỏ.', 6000000.00, 30.0, 89, 1, 'Căn hộ mini Lê Lợi - Thiết kế hiện đại', '2024-02-20', 'APPROVED', 2, '2024-02-21', 3, 2, 2, 2),
+(3, 'Homestay ấm cúng với không gian xanh mát. Phù hợp cho những ai yêu thích sự yên tĩnh và gần gũi với thiên nhiên. Có sân vườn nhỏ để thư giãn.', 5500000.00, 35.0, 67, 1, 'Homestay Hai Bà Trưng - Không gian xanh', '2024-02-25', 'APPROVED', 2, '2024-02-26', 4, 3, 4, 3),
+(4, 'Phòng trọ giá rẻ dành cho sinh viên và người lao động. Vị trí thuận tiện, gần trường học và bệnh viện. Môi trường sạch sẽ, an toàn.', 2800000.00, 18.0, 234, 1, 'Phòng trọ sinh viên Pasteur - Giá rẻ', '2024-03-01', 'APPROVED', 2, '2024-03-02', 4, 4, 7, 4),
+(5, 'Studio cao cấp với thiết kế sang trọng. Không gian mở, tận dụng tối đa ánh sáng tự nhiên. Đầy đủ tiện nghi hiện đại cho cuộc sống tiện nghi.', 7500000.00, 35.0, 112, 1, 'Studio Premium Xa Lộ Hà Nội - Sang trọng', '2024-03-05', 'APPROVED', 2, '2024-03-06', 5, 6, 8, 6),
+(6, 'Phòng trọ mới đăng, đang chờ duyệt. Vị trí đẹp, giá cả hợp lý, phù hợp cho nhiều đối tượng khách hàng.', 4200000.00, 30.0, 45, 1, 'Phòng trọ Cách Mạng Tháng 8 - Mới', '2024-03-10', 'PENDING', NULL, NULL, 5, 5, 1, 5),
+(7, 'Bài đăng bị từ chối do không đủ thông tin. Cần bổ sung thêm hình ảnh và mô tả chi tiết hơn.', 3500000.00, 22.0, 12, 0, 'Phòng trọ cần cập nhật thông tin', '2024-03-12', 'REJECTED', 2, '2024-03-13', 3, 1, 1, 1);
 
 -- =====================================================
 -- 11. POST UTILITIES RELATIONSHIP
