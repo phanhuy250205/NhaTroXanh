@@ -61,10 +61,11 @@ public class SecurityConfig {
                                 "/uploads/**")
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/momo/**","/vnpay/**",
-                                "/tat-ca-phong-tro")
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**",
+                                "/vnpay/**",
+                                "/tat-ca-phong-tro","/khach-thue/lich-su-thanh-toan")
                         .permitAll()
-                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
+                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
@@ -73,13 +74,10 @@ public class SecurityConfig {
                 .formLogin(form -> form
                         .loginPage("/dang-nhap-chu-tro")
                         .loginProcessingUrl("/login-processing")
-                        .usernameParameter("username")
+                        .usernameParameter("username") // <-- Sửa lại tên parameter cho đúng với JS
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler)
-                        .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK);
-                        })
-                        .failureHandler((request, response, exception) -> {
+                        .successHandler(customLoginSuccessHandler) // <-- CHỈ GIỮ LẠI HANDLER NÀY
+                        .failureHandler((request, response, exception) -> { // Giữ nguyên failureHandler
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
                             response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");

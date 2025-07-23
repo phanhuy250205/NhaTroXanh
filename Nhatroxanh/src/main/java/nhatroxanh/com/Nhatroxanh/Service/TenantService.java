@@ -14,7 +14,10 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts.Status;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
@@ -64,4 +67,11 @@ public interface TenantService {
                         CustomUserDetails userDetails) throws IOException;
 
         void createExtensionRequest(Integer contractId, LocalDate requestedExtendDate, String message, Users tenant);
+
+        Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable);
+
+        List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId);
+
+        TenantDetailDTO getTenantDetailByUserId(Integer userId);
+
 }

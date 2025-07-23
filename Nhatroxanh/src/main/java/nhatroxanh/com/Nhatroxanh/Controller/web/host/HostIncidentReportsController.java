@@ -17,6 +17,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.IncidentReportsService;
 
 @Controller
@@ -24,6 +25,9 @@ import nhatroxanh.com.Nhatroxanh.Service.IncidentReportsService;
 public class HostIncidentReportsController {
     @Autowired
     private IncidentReportsService incidentService;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping
     public String listIncidents(
@@ -73,13 +77,34 @@ public class HostIncidentReportsController {
             @RequestParam(defaultValue = "") String search,
             @RequestParam(defaultValue = "0") int page,
             RedirectAttributes redirectAttributes) {
+
         try {
+            // Lấy sự cố hiện tại
             IncidentReports incident = incidentService.getIncidentById(id);
+            IncidentReports.IncidentStatus oldStatus = incident.getStatus();
+
+            // Cập nhật dữ liệu
             incidentService.updateIncident(id, updatedIncident);
-            redirectAttributes.addFlashAttribute("successMessage", "Câp nhật trạng thái thành công!");
+
+            // Gửi email nếu có thay đổi trạng thái
+            IncidentReports.IncidentStatus newStatus = updatedIncident.getStatus();
+            String to = incident.getUser().getEmail();
+            if (to != null && !to.isBlank() && newStatus != oldStatus) {
+                if (newStatus == IncidentReports.IncidentStatus.DANG_XU_LY) {
+                    // Gửi email báo đã bắt đầu xử lý
+                    emailService.sendIncidentProcessingEmail(to, incident);
+                } else if (newStatus == IncidentReports.IncidentStatus.DA_XU_LY) {
+                    // Gửi email báo đã xử lý xong
+                    emailService.sendIncidentResolvedEmail(to, incident);
+                }
+            }
+
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật khiếu nại: " + e.getMessage());
         }
+
         return "redirect:/chu-tro/quan-ly-su-co?search=" + search + "&page=" + page;
     }
+
 }

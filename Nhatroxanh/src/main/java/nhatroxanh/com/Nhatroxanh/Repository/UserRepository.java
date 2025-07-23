@@ -37,12 +37,12 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
     Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
 
-        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
-        String findAddressByUserId(@Param("userId") Integer userId);
+    @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+    String findAddressByUserId(@Param("userId") Integer userId);
 
-        // Hoặc nếu bạn muốn join trực tiếp từ Users
-        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
-        Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
+    // Hoặc nếu bạn muốn join trực tiếp từ Users
+    @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+    Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
 
     @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
     Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
@@ -57,11 +57,13 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
             """)
     List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role "
-            + "AND (:keyword IS NULL OR u.fullname LIKE %:keyword% OR u.email LIKE %:keyword% OR u.phone LIKE %:keyword%) "
-            + "AND (:enabled IS NULL OR u.enabled = :enabled)")
-    Page<Users> searchOwners(
-            @Param("role") Users.Role role,
+    @Query("SELECT u FROM Users u " +
+            "WHERE u.role = :role " +
+            "AND u.status = :status " +
+            "AND (:enabled IS NULL OR u.enabled = :enabled) " +
+            "AND (:keyword IS NULL OR LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Users> searchOwners(@Param("role") Users.Role role,
+            @Param("status") Users.Status status,
             @Param("keyword") String keyword,
             @Param("enabled") Boolean enabled,
             Pageable pageable);
@@ -114,5 +116,11 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
            "ORDER BY u.createdAt ASC")
     Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+
+    Page<Users> findByRoleAndStatus(Users.Role role, Users.Status status, Pageable pageable);
+
+    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.status = :status AND (LOWER(u.fullname) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Users> findPendingOwnersBySearch(@Param("role") Users.Role role, @Param("status") Users.Status status,
+            @Param("search") String search, Pageable pageable);
 
 }

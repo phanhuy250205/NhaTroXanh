@@ -3,10 +3,6 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -27,10 +23,14 @@ import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
@@ -40,9 +40,7 @@ import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
 import java.util.*;
-
 
 @Controller
 public class DemoController {
@@ -104,13 +102,13 @@ public class DemoController {
     public String hopdong() {
         return "redirect:/api/contracts/form";
     }
+
     @GetMapping("/chu-tro/hop-dong/edit/{contractId}")
     @PreAuthorize("hasRole('OWNER')")
     public String editContract(
             @PathVariable Integer contractId,
             Authentication authentication,
-            Model model
-    ) {
+            Model model) {
         try {
             // Có thể thêm logic kiểm tra quyền nếu cần
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -208,31 +206,19 @@ public class DemoController {
             Model model,
             @AuthenticationPrincipal CustomUserDetails loggedInUser,
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "hostelId", required = false) Integer selectedHostelId,
-            @RequestParam(name = "status", required = false) Contracts.Status status) {
+            @RequestParam(name = "keyword", required = false) String keyword) {
 
         Integer ownerId = loggedInUser.getUserId();
 
-        // Lấy danh sách khách đang thuê
-        Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+        Page<TenantSummaryDTO> tenantPage = tenantService.getTenantSummaryForOwner(
                 ownerId,
                 keyword,
-                selectedHostelId,
-                status,
                 PageRequest.of(page, 10));
-
-        List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
 
         model.addAttribute("tenants", tenantPage.getContent());
         model.addAttribute("totalPages", tenantPage.getTotalPages());
         model.addAttribute("currentPage", tenantPage.getNumber());
         model.addAttribute("keyword", keyword);
-        model.addAttribute("selectedHostelId", selectedHostelId);
-        model.addAttribute("hostels", ownerHostels);
-        model.addAttribute("selectedStatus", status);
-        model.addAttribute("selectedStatus", status != null ? status.name() : null);
-
 
         return "host/quan-ly-khach-thue";
     }
@@ -272,20 +258,44 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
-    public String chitietkhachthue(@PathVariable("id") Integer contractId, Model model) {
+    public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {
         try {
-            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByUserId(userId); // 🔁 dùng userId
             model.addAttribute("tenant", tenantDetail);
-            return "host/chi-tiet-khach-thue"; // Tên file HTML chi tiết
+
+            // Lấy lịch sử thuê trọ
+            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(userId);
+            model.addAttribute("rentalHistory", historyList);
+
+            return "host/chi-tiet-khach-thue";
         } catch (Exception e) {
             return "redirect:/chu-tro/khach-thue";
         }
-
     }
+
+    @PostMapping("/chu-tro/khach-thue/kich-hoat")
+    public String toggleStatus(@RequestParam("userId") Integer userId,
+            @RequestParam("contractId") Integer contractId,
+            RedirectAttributes redirectAttributes) {
+        Users tenant = userRepository.findById(userId).orElse(null);
+        if (tenant == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy người dùng.");
+            return "redirect:/chu-tro/khach-thue";
+        }
+
+        tenant.setEnabled(!tenant.isEnabled());
+        userRepository.save(tenant);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công.");
+        // ✅ chuyển hướng lại đúng trang chi tiết khách thuê
+        return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
+    }
+
     @GetMapping("/notifications")
     public String notifications() {
         return "guest/chitiet-thongbao";
     }
+
     @GetMapping("/infor-chutro")
     public String chutro() {
         return "host/infor-chutro";
@@ -303,4 +313,5 @@ public class DemoController {
     // @GetMapping("/chu-tro/sua-bai-dang")
     // public String chitiethopdong() {
     // return "host/sua-bai-dang";
+
 }

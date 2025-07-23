@@ -81,22 +81,22 @@ INSERT INTO utilities (name) VALUES
 ('Điều hòa'),
 ('Tủ lạnh'),
 ('Máy giặt'),
-('Bếp gas'),
-('Nóng lạnh'),
-('Ban công'),
-('Thang máy'),
-('Bảo vệ 24/7'),
-('Chỗ để xe'),
-('Gần trường học'),
-('Gần bệnh viện'),
-('Gần chợ'),
-('Gần công viên'),
-('Gần trung tâm thương mại'),
-('Phòng tắm riêng'),
-('Phòng bếp riêng'),
-('Cửa sổ thoáng mát'),
-('Giường tủ đầy đủ'),
-('Camera an ninh');
+('Bếp gas');
+(6, 'Nóng lạnh'),
+(7, 'Ban công'),
+(8, 'Thang máy'),
+(9, 'Bảo vệ 24/7'),
+(10, 'Chỗ để xe'),
+(11, 'Gần trường học'),
+(12, 'Gần bệnh viện'),
+(13, 'Gần chợ'),
+(14, 'Gần công viên'),
+(15, 'Gần trung tâm thương mại'),
+(16, 'Phòng tắm riêng'),
+(17, 'Phòng bếp riêng'),
+(18, 'Cửa sổ thoáng mát'),
+(19, 'Giường tủ đầy đủ'),
+(20, 'Camera an ninh');
 
 -- =====================================================
 -- 5. USERS DATA
@@ -130,17 +130,16 @@ INSERT INTO user_cccd (user_id, cccd_number, front_image_url, back_image_url) VA
 INSERT INTO hostels (hostel_id, name, description, status, room_number, created_at, owner_id, address_id) VALUES
 (1, 'Nhà Trọ Xanh Quận 1', 'Nhà trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi, an ninh 24/7', 1, 20, '2024-01-15', 3, 1),
 (2, 'Căn Hộ Mini Lê Lợi', 'Căn hộ mini hiện đại, gần trung tâm thương mại, tiện ích đầy đủ', 1, 15, '2024-01-20', 3, 2),
-(3, 'Homestay Hai Bà Trưng', 'Homestay ấm cúng, phù hợp cho sinh viên và người đi làm', 1, 12, '2024-01-25', 4, 3),
-(4, 'Phòng Trọ Pasteur', 'Phòng trọ giá rẻ, sạch sẽ, gần bệnh viện và trường học', 1, 18, '2024-02-01', 4, 4),
-(5, 'Nhà Trọ Cách Mạng Tháng 8', 'Nhà trọ rộng rãi, thoáng mát, có sân để xe rộng', 1, 25, '2024-02-05', 5, 5),
-(6, 'Studio Xa Lộ Hà Nội', 'Studio cao cấp cho thuê theo tháng, đầy đủ nội thất', 1, 10, '2024-02-10', 5, 6);
+(3, 'Homestay Hai Bà Trưng', 'Homestay ấm cúng, phù hợp cho sinh viên và người đi làm', 1, 12, '2024-01-25', 1, 3),
+(4, 'Phòng Trọ Pasteur', 'Phòng trọ giá rẻ, sạch sẽ, gần bệnh viện và trường học', 1, 18, '2024-02-01', 1, 4),
+(5, 'Nhà Trọ Cách Mạng Tháng 8', 'Nhà trọ rộng rãi, thoáng mát, có sân để xe rộng', 1, 25, '2024-02-05', 1, 5),
+(6, 'Studio Xa Lộ Hà Nội', 'Studio cao cấp cho thuê theo tháng, đầy đủ nội thất', 1, 10, '2024-02-10', 2, 6);
 
 -- =====================================================
 -- 8. ROOMS DATA
 -- =====================================================
 
 INSERT INTO rooms (room_id, category_id, hostel_id, description, namerooms, status, address, acreage, max_tenants, price) VALUES
--- Nhà Trọ Xanh Quận 1
 (1, 1, 1, 'Phòng trọ cao cấp, đầy đủ tiện nghi, view đẹp', 'Phòng 101', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 25.0, 2, 4500000.00),
 (2, 1, 1, 'Phòng trọ rộng rãi, có ban công, thoáng mát', 'Phòng 102', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 28.0, 2, 5000000.00),
 (3, 6, 1, 'Phòng cao cấp, nội thất sang trọng', 'Phòng 201', 'active', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 35.0, 2, 7000000.00),
@@ -166,18 +165,12 @@ INSERT INTO rooms (room_id, category_id, hostel_id, description, namerooms, stat
 -- 9. ROOM UTILITIES RELATIONSHIP
 -- =====================================================
 
-INSERT INTO RoomUtilities (room_id, utility_id) VALUES
--- Phòng 101 (room_id = 1)
+INSERT INTO room_utilities (room_id, utility_id) VALUES
 (1, 1), (1, 2), (1, 3), (1, 6), (1, 9), (1, 10), (1, 16), (1, 18), (1, 19),
--- Phòng 102 (room_id = 2)
 (2, 1), (2, 2), (2, 3), (2, 4), (2, 6), (2, 7), (2, 9), (2, 10), (2, 16), (2, 18), (2, 19),
--- Phòng 201 (room_id = 3)
 (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 16), (3, 17), (3, 18), (3, 19), (3, 20),
--- Phòng 202 (room_id = 4)
 (4, 1), (4, 2), (4, 3), (4, 4), (4, 5), (4, 6), (4, 7), (4, 8), (4, 9), (4, 10), (4, 16), (4, 17), (4, 18), (4, 19), (4, 20),
--- Mini 01 (room_id = 6)
 (6, 1), (6, 2), (6, 3), (6, 4), (6, 5), (6, 6), (6, 9), (6, 10), (6, 16), (6, 17), (6, 18), (6, 19),
--- Studio Premium 01 (room_id = 19)
 (19, 1), (19, 2), (19, 3), (19, 4), (19, 5), (19, 6), (19, 8), (19, 9), (19, 10), (19, 16), (19, 17), (19, 18), (19, 19), (19, 20);
 
 -- =====================================================
@@ -260,27 +253,20 @@ INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_t
 -- =====================================================
 
 INSERT INTO Payments (payment_id, contract_id, total_amount, due_date, payment_date, payment_status, payment_method, transaction_id, app_trans_id, notes) VALUES
--- Payments for active contracts
 (1, 1, 7000000.00, '2024-03-05', '2024-03-03', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN001', 'APP001', 'Thanh toán tiền thuê tháng 3/2024'),
 (2, 1, 7000000.00, '2024-04-05', '2024-04-04', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN002', 'APP002', 'Thanh toán tiền thuê tháng 4/2024'),
 (3, 1, 7000000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (4, 2, 9000000.00, '2024-03-05', '2024-03-02', 'ĐÃ_THANH_TOÁN', 'ZALOPAY', 'TXN003', 'APP003', 'Thanh toán tiền thuê tháng 3/2024'),
 (5, 2, 9000000.00, '2024-04-05', '2024-04-03', 'ĐÃ_THANH_TOÁN', 'ZALOPAY', 'TXN004', 'APP004', 'Thanh toán tiền thuê tháng 4/2024'),
 (6, 2, 9000000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (7, 3, 5500000.00, '2024-03-05', '2024-03-01', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN005', 'APP005', 'Thanh toán tiền thuê tháng 3/2024'),
 (8, 3, 5500000.00, '2024-04-05', '2024-04-06', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN006', 'APP006', 'Thanh toán tiền thuê tháng 4/2024 (trễ 1 ngày)'),
 (9, 3, 5500000.00, '2024-05-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 5/2024'),
-
 (10, 4, 3200000.00, '2024-03-20', '2024-03-18', 'ĐÃ_THANH_TOÁN', 'BANK_TRANSFER', 'TXN007', 'APP007', 'Thanh toán tiền thuê tháng 3/2024'),
 (11, 4, 3200000.00, '2024-04-20', NULL, 'QUÁ_HẠN_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024 - Quá hạn'),
-
 (12, 5, 4200000.00, '2024-03-20', '2024-03-19', 'ĐÃ_THANH_TOÁN', 'MOMO', 'TXN008', 'APP008', 'Thanh toán tiền thuê tháng 3/2024'),
 (13, 5, 4200000.00, '2024-04-20', '2024-04-18', 'ĐÃ_THANH_TOÁN', 'MOMO', 'TXN009', 'APP009', 'Thanh toán tiền thuê tháng 4/2024'),
-
 (14, 6, 7500000.00, '2024-04-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024'),
-
 (15, 7, 4500000.00, '2024-04-05', '2024-04-03', 'ĐÃ_THANH_TOÁN', 'CASH', 'TXN010', 'APP010', 'Thanh toán tiền thuê tháng 4/2024'),
 (16, 8, 5000000.00, '2024-04-05', NULL, 'CHƯA_THANH_TOÁN', NULL, NULL, NULL, 'Tiền thuê tháng 4/2024');
 

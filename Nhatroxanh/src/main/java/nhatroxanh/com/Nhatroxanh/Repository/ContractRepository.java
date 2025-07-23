@@ -2,6 +2,9 @@ package nhatroxanh.com.Nhatroxanh.Repository;
 
 import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
+
 import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -109,5 +112,42 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         // Tìm hợp đồng theo tenant ID
         @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
         Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
+
+        @Query("""
+                            SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO(
+                                c.tenant.userId,
+                                c.tenant.fullname,
+                                c.tenant.phone,
+                                COUNT(c.contractId)
+                            )
+                            FROM Contracts c
+                            WHERE c.room.hostel.owner.userId = :ownerId
+                                AND (:keyword IS NULL OR LOWER(c.tenant.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                                                      OR c.tenant.phone LIKE CONCAT('%', :keyword, '%'))
+                            GROUP BY c.tenant.userId, c.tenant.fullname, c.tenant.phone
+                        """)
+        Page<TenantSummaryDTO> getTenantSummaryByOwnerWithFilters(
+                        @Param("ownerId") Integer ownerId,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
+
+        @Query("""
+                            SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO(
+                                c.contractId,
+                                c.room.hostel.name,
+                                c.room.namerooms,
+                                c.startDate,
+                                c.endDate,
+                                c.status,
+                                c.terms
+                            )
+                            FROM Contracts c
+                            WHERE c.tenant.userId = :tenantId
+                            ORDER BY c.startDate DESC
+                        """)
+        List<TenantRoomHistoryDTO> findRoomHistoryByTenantId(@Param("tenantId") Integer tenantId);
+
+        // ContractsRepository.java
+        Optional<Contracts> findTopByTenantOrderByContractIdDesc(Users tenant);
 
 }
