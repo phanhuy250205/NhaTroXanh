@@ -10,13 +10,16 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
+import nhatroxanh.com.Nhatroxanh.Util.AddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -54,13 +57,24 @@ public class RoomsServiceImpl implements RoomsService {
         }
 
         List<Rooms> rooms = roomsRepository.findByHostelId(hostelId);
-        logger.info("Found {} rooms in database", rooms.size());
+        logger.info("Raw rooms from database: {}", rooms.stream().map(r -> {
+            return "roomId=" + r.getRoomId() + ", address=" + (r.getAddress() != null ? r.getAddress() : "null") +
+                    ", entityClass=" + r.getClass().getName();
+        }).collect(Collectors.toList()));
         List<ContractDto.Room> result = rooms.stream()
                 .map(this::convertToRoomDto)
                 .collect(Collectors.toList());
-        logger.info("Returning {} rooms", result.size());
+        logger.info("Returning rooms with addresses: {}", result.stream().map(r -> {
+            return "roomId=" + r.getRoomId() + ", address=" + (r.getAddress() != null ? r.getAddress() : "null") +
+                    ", dtoClass=" + r.getClass().getName();
+        }).collect(Collectors.toList()));
         return result;
     }
+
+    // @Override
+    // public List<Rooms> findByHostelId(Integer hostelId) {
+    //     return roomsRepository.findByHostel_HostelId(hostelId);
+    // }
 
     @Override
     public Rooms save(Rooms room) {
@@ -81,7 +95,9 @@ public class RoomsServiceImpl implements RoomsService {
         }
         return roomsRepository.findById(id);
     }
-
+    public Rooms findRoomById(Integer roomId) {
+        return roomsRepository.findById(roomId).orElse(null);
+    }
     private ContractDto.Room convertToRoomDto(Rooms room) {
         ContractDto.Room roomDto = new ContractDto.Room();
         roomDto.setRoomId(room.getRoomId());
@@ -92,29 +108,34 @@ public class RoomsServiceImpl implements RoomsService {
         roomDto.setHostelId(room.getHostel() != null ? room.getHostel().getHostelId() : null);
         roomDto.setHostelName(room.getHostel() != null ? room.getHostel().getName() : null);
 
-        // Xử lý địa chỉ đầy đủ
-        if (room.getHostel() != null && room.getHostel().getAddress() != null) {
-            Address address = room.getHostel().getAddress();
-            List<String> addressParts = new ArrayList<>();
-            if (address.getStreet() != null) {
-                addressParts.add(address.getStreet());
-            }
-            if (address.getWard() != null) {
-                addressParts.add(address.getWard().getName());
-                if (address.getWard().getDistrict() != null) {
-                    addressParts.add(address.getWard().getDistrict().getName());
-                    if (address.getWard().getDistrict().getProvince() != null) {
-                        addressParts.add(address.getWard().getDistrict().getProvince().getName());
-                    }
-                }
-            }
-            String fullAddress = addressParts.isEmpty() ? "" : String.join(", ", addressParts);
-            roomDto.setAddress(fullAddress);
+        // Xử lý địa chỉ từ cột address của Rooms
+        String roomAddress = room.getAddress();
+        logger.info("Address for room with roomId {}: {}", room.getRoomId(), roomAddress);
+
+        if (StringUtils.hasText(roomAddress)) {
+            Map<String, String> addressParts = AddressUtils.parseAddress(roomAddress);
+            roomDto.setStreet(addressParts.getOrDefault("street", ""));
+            roomDto.setWard(addressParts.getOrDefault("ward", ""));
+            roomDto.setDistrict(addressParts.getOrDefault("district", ""));
+            roomDto.setProvince(addressParts.getOrDefault("province", ""));
+            roomDto.setAddress(roomAddress); // Lưu toàn bộ chuỗi địa chỉ
         } else {
+            logger.warn("No address found for room with roomId: {}", room.getRoomId());
+            roomDto.setStreet("");
+            roomDto.setWard("");
+            roomDto.setDistrict("");
+            roomDto.setProvince("");
             roomDto.setAddress("");
         }
 
         logger.info("Mapped room: {}", roomDto);
         return roomDto;
     }
+
+    @Override
+    public List<Rooms> findByHostelId(Integer hostelId) {
+         return roomsRepository.findByHostel_HostelId(hostelId);
+    }
+
+
 }

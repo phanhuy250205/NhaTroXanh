@@ -87,14 +87,14 @@
 
 .slide-btn {
     background-color: var(--orange-color) !important;
-    border: none !important;
-    padding: 15px 30px !important;
-    font-size: 1.1rem !important;
-    font-weight: 600 !important;
-    border-radius: 50px !important;
-    transition: all 0.3s ease !important;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(255, 128, 0, 0.3) !important;
-    animation: fadeInUp 1s ease-out 0.9s both !important;
+    animation: fadeInUp 1s ease-out 0.9s both;
 }
 
 .slide-btn:hover {

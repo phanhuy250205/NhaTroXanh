@@ -1,10 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.enity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 
 import java.util.List;
@@ -26,14 +23,12 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @EqualsAndHashCode.Exclude
     private Users user;
 
     // Các trường khác như ward, district, province nếu có
     @ManyToOne
     @JoinColumn(name = "ward_id")
+    @EqualsAndHashCode.Exclude
     private Ward ward;
-
-
-
-
 }

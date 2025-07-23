@@ -2,6 +2,7 @@
 let currentPage = 0;
 let currentSearch = '';
 let currentStatus = '';
+let availableContracts = []; // Store contracts globally for access
 
 // Load specific page
 function loadPage(page) {
@@ -29,7 +30,7 @@ function loadPage(page) {
         })
         .catch(error => {
             console.error('Error loading page:', error);
-            showToast('Có lỗi xảy ra khi tải dữ liệu', 'error');
+            showAlert('error', 'Có lỗi xảy ra khi tải dữ liệu');
         });
 }
 
@@ -189,17 +190,51 @@ function performSearch() {
     loadPage(0);
 }
 
-// Show toast message
-function showToast(message, type = 'info') {
-    const toastId = type + 'Toast';
-    const toast = document.getElementById(toastId);
-    if (toast) {
-        const messageElement = toast.querySelector('.toast-message');
-        if (messageElement) {
-            messageElement.textContent = message;
-        }
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
+// Show alert message using SweetAlert2 with custom color #3E83CC
+function showAlert(type, message, options = {}) {
+    const { showConfirm = false, onConfirm = null, onCancel = null } = options;
+
+    if (showConfirm) {
+        Swal.fire({
+            title: '',
+            text: message,
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
+            background: '#1a1a1a',
+            color: '#ffffff',
+            showCancelButton: true,
+            confirmButtonColor: '#3E83CC',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Hủy',
+            customClass: {
+                popup: 'animated fadeInDown'
+            },
+            buttonsStyling: false,
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed && onConfirm) {
+                onConfirm();
+            } else if (result.dismiss === Swal.DismissReason.cancel && onCancel) {
+                onCancel();
+            }
+        });
+    } else {
+        Swal.fire({
+            title: '',
+            text: message,
+            icon: type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
+            background: '#1a1a1a',
+            color: '#ffffff',
+            confirmButtonColor: '#3E83CC',
+            confirmButtonText: 'Đóng',
+            customClass: {
+                popup: 'animated fadeInDown'
+            },
+            timer: 5000,
+            timerProgressBar: true,
+            showConfirmButton: true,
+            buttonsStyling: false
+        });
     }
 }
 
@@ -216,7 +251,7 @@ function showInvoiceModalById(paymentId) {
         })
         .catch(error => {
             console.error('Error loading payment details:', error);
-            showToast('Có lỗi xảy ra khi tải chi tiết hóa đơn', 'error');
+            showAlert('error', 'Có lỗi xảy ra khi tải chi tiết hóa đơn');
         });
 }
 
@@ -266,7 +301,7 @@ function markAsPaid() {
     const paymentId = modal.getAttribute('data-payment-id');
     
     if (!paymentId) {
-        showToast('Không tìm thấy ID hóa đơn', 'error');
+        showAlert('error', 'Không tìm thấy ID hóa đơn');
         return;
     }
     
@@ -280,30 +315,118 @@ function markAsPaid() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            showToast('Đã cập nhật trạng thái thanh toán', 'success');
+            showAlert('success', 'Đã cập nhật trạng thái thanh toán');
             // Close modal
             const bsModal = bootstrap.Modal.getInstance(modal);
             bsModal.hide();
             // Reload current page
             loadPage(currentPage);
         } else {
-            showToast(data.message || 'Có lỗi xảy ra', 'error');
+            showAlert('error', data.message || 'Có lỗi xảy ra');
         }
     })
     .catch(error => {
         console.error('Error updating payment status:', error);
-        showToast('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
+        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái');
     });
+}
+
+// Delete invoice
+function deleteInvoice() {
+    const modal = document.getElementById('invoiceModal');
+    const paymentId = modal.getAttribute('data-payment-id');
+    
+    if (!paymentId) {
+        showAlert('error', 'Không tìm thấy ID hóa đơn');
+        return;
+    }
+    
+    // Confirm deletion
+    showAlert('warning', 'Bạn có chắc chắn muốn xóa hóa đơn này?', { showConfirm: true, onConfirm: () => {
+        fetch(`/api/payments/${paymentId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json().catch(() => ({})); // Handle empty response
+            } else {
+                throw new Error('Failed to delete payment');
+            }
+        })
+        .then(data => {
+            showAlert('success', 'Đã xóa hóa đơn thành công');
+            // Close modal
+            const bsModal = bootstrap.Modal.getInstance(modal);
+            bsModal.hide();
+            // Reload current page
+            loadPage(currentPage);
+        })
+        .catch(error => {
+            console.error('Error deleting payment:', error);
+            showAlert('error', 'Có lỗi xảy ra khi xóa hóa đơn');
+        });
+    }});
 }
 
 // Download invoice (placeholder function)
 function downloadInvoice() {
-    showToast('Tính năng tải xuống đang được phát triển', 'info');
+    showAlert('info', 'Tính năng tải xuống đang được phát triển');
 }
 
 // Send unpaid invoices (placeholder function)
 function sendUnpaidInvoices() {
-    showToast('Tính năng gửi hóa đơn đang được phát triển', 'info');
+    showAlert('warning', 'Bạn có chắc muốn gửi tất cả hóa đơn chưa thanh toán và quá hạn đến người thuê?', { showConfirm: true, onConfirm: () => {
+        const button = document.getElementById('send-invoices-btn');
+        const spinner = button.querySelector('.spinner-border');
+        const buttonText = button.querySelector('.d-none.d-sm-inline');
+        const originalText = buttonText.textContent;
+
+        // Disable button and show spinner
+        button.disabled = true;
+        spinner.classList.remove('d-none');
+        buttonText.textContent = 'Đang gửi...';
+
+        fetch('/api/payments/send-unpaid', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                // Add CSRF token if required: 'X-CSRF-TOKEN': getCsrfToken()
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Re-enable button and hide spinner
+            button.disabled = false;
+            spinner.classList.add('d-none');
+            buttonText.textContent = originalText;
+
+            if (data.success) {
+                if (data.sentCount > 0) {
+                    showAlert('success', data.message + ` (${data.sentCount} hóa đơn)`);
+                } else {
+                    showAlert('warning', 'Không có hóa đơn nào được gửi. Có thể tất cả hóa đơn đã đạt giới hạn 2 lần gửi thông báo hôm nay.');
+                }
+                // Refresh notifications
+                if (typeof loadNotifications === 'function') {
+                    loadNotifications();
+                }
+            } else {
+                showAlert('error', 'Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            // Re-enable button and hide spinner
+            button.disabled = false;
+            spinner.classList.add('d-none');
+            buttonText.textContent = originalText;
+
+            console.error('Error sending unpaid invoices:', error);
+            showAlert('error', 'Đã xảy ra lỗi khi gửi hóa đơn: ' + error.message + '. Vui lòng kiểm tra kết nối hoặc cấu hình email.');
+        });
+    }});
 }
 
 // Create new invoice
@@ -312,7 +435,7 @@ function createNewInvoice() {
     if (form.checkValidity()) {
         form.submit();
     } else {
-        showToast('Vui lòng điền đầy đủ thông tin', 'error');
+        showAlert('error', 'Vui lòng điền đầy đủ thông tin');
     }
 }
 
@@ -369,6 +492,7 @@ function loadAvailableContracts() {
     fetch('/api/payments/available-contracts')
         .then(response => response.json())
         .then(contracts => {
+            availableContracts = contracts; // Store contracts globally
             const select = document.getElementById('invoiceRoomSelect');
             if (select && contracts) {
                 select.innerHTML = '<option value="">Chọn phòng</option>';
@@ -379,9 +503,25 @@ function loadAvailableContracts() {
                     select.appendChild(option);
                 });
             }
+            // Add event listener to update room fee when a room is selected
+            select.addEventListener('change', function() {
+                const selectedContractId = select.value;
+                const roomFeeInput = document.getElementById('roomFeeInput');
+                if (roomFeeInput && selectedContractId) {
+                    const selectedContract = availableContracts.find(contract => contract.contractId == selectedContractId);
+                    if (selectedContract && selectedContract.roomPrice) {
+                        roomFeeInput.value = selectedContract.roomPrice;
+                    } else {
+                        roomFeeInput.value = ''; // Clear if no price is found
+                    }
+                } else {
+                    roomFeeInput.value = ''; // Clear if no room is selected
+                }
+            });
         })
         .catch(error => {
             console.error('Error loading contracts:', error);
+            showAlert('error', 'Có lỗi khi tải danh sách hợp đồng');
         });
 }
 

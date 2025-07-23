@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -32,8 +33,18 @@ public class UserApiController {
     @Autowired
     private UserRepository userRepository;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody UserRequest userRequest) {
+   @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody UserRequest userRequest, BindingResult bindingResult) {
+        // Nếu có lỗi validation
+        if (bindingResult.hasErrors()) {
+            // Duyệt qua các lỗi và trả về message đầu tiên (hoặc gom lại nếu muốn)
+            String errorMessage = bindingResult.getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .findFirst() // hoặc .collect(Collectors.joining("\n"))
+                .orElse("Dữ liệu không hợp lệ");
+            return ResponseEntity.badRequest().body(errorMessage);
+        }
+
         try {
             userService.registerNewUser(userRequest);
             return ResponseEntity.ok("Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản.");

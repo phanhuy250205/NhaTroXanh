@@ -1916,9 +1916,9 @@
                         } else if (value.length < 2) {
                             isValid = false;
                             errorMessage = "Họ tên phải có ít nhất 2 ký tự";
-                        } else if (value.length > 100) {
+                        } else if (value.length > 50) {
                             isValid = false;
-                            errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                            errorMessage = "Họ tên không được vượt quá 50 ký tự";
                         } else {
                             successMessage = "Họ tên hợp lệ";
                         }
@@ -1958,6 +1958,9 @@
                                 successMessage = "CCCD hợp lệ";
                                 this.showCCCDProvinceInfo(value);
                             }
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "CCCD không được để trống";
                         }
                         break;
 
@@ -1976,7 +1979,11 @@
                             } else {
                                 successMessage = `Tuổi: ${age} (hợp lệ)`;
                             }
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Ngày sinh không được để trống";
                         }
+
                         break;
 
                     case "issueDate":
@@ -1994,6 +2001,9 @@
                             } else {
                                 successMessage = "Ngày cấp hợp lệ";
                             }
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Ngày cấp không được để trống";
                         }
                         break;
 
@@ -2003,6 +2013,9 @@
                             errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
                         } else if (value) {
                             successMessage = "Nơi cấp hợp lệ";
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Nơi cấp không được để trống";
                         }
                         break;
 
@@ -2012,7 +2025,11 @@
                             errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
                         } else if (value) {
                             successMessage = "Địa chỉ hợp lệ";
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Địa chỉ không được để trống";
                         }
+
                         break;
                 }
 

@@ -1,5 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web.admin;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +34,23 @@ public class StaffAdminController {
     public String listStaffUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "") String status,
             Model model) {
 
-        Page<Users> staffPage = usersService.getStaffUsers(page, size);
+        long totalStaff = userRepository.countByRole(Users.Role.STAFF);
+        long activeStaff = userRepository.countByRoleAndEnabled(Users.Role.STAFF, true);
+        long inactiveStaff = userRepository.countByRoleAndEnabled(Users.Role.STAFF, false);
+        Page<Users> staffPage = usersService.searchAndFilterStaffUsers(page, size, keyword, status);
+        model.addAttribute("totalStaff", totalStaff);
+        model.addAttribute("activeStaff", activeStaff);
+        model.addAttribute("inactiveStaff", inactiveStaff);
+
         model.addAttribute("staffPage", staffPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", staffPage.getTotalPages());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("statusFilter", status);
 
         return "admin/quan-ly-nhan-vien";
     }
@@ -108,6 +121,7 @@ public class StaffAdminController {
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(Users.Role.STAFF);
         newUser.setEnabled(true);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         userRepository.save(newUser);
 

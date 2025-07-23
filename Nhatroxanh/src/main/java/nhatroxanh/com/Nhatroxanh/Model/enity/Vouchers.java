@@ -29,16 +29,13 @@ public class Vouchers {
     // @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "code")
+    @Column(name = "code", unique = true, nullable = false)
     private String code;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @ManyToOne
-    @JoinColumn(name = "room_id", nullable = true)
-    private Rooms room;
     @ManyToOne
     @JoinColumn(name = "hostel_id", nullable = true)
     private Hostel hostel;
@@ -48,9 +45,6 @@ public class Vouchers {
 
     @Column(name = "description", length = 255)
     private String description;
-
-    @Column(name = "discount_type")
-    private Boolean discountType;
 
     @Column(name = "discount_value")
     private Float discountValue;
@@ -76,20 +70,8 @@ public class Vouchers {
     @Column(name = "formatted_discount", insertable = false, updatable = false)
     private String formattedDiscount;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "voucher_status")
-    private VoucherStatus voucherStatus;
-
-    @ManyToOne
-    @JoinColumn(name = "approved_by")
-    private Users approvedBy;
-
     public String getFormattedDiscount() {
-        if (Boolean.TRUE.equals(discountType)) {
-            return discountValue.intValue() + "%";
-        } else {
-            return String.format("%,.0fđ", discountValue);
-        }
+        return String.format("%,.0fđ", discountValue);
     }
 
 }

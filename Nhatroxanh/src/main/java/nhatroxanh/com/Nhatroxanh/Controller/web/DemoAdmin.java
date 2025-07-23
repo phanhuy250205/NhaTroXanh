@@ -10,10 +10,10 @@ public class DemoAdmin {
 //     public String nhanvien(Model model) {
 //         return "admin/quan-ly-nhan-vien"; 
 //     }
-     @GetMapping("/admin/thong-ke")
-    public String thongke(Model model) {
-        return "admin/thong-ke"; 
-    }
+    //  @GetMapping("/admin/thong-ke")
+    // public String thongke(Model model) {
+    //     return "admin/thong-ke"; 
+    // }
     //  @GetMapping("/admin/profile")
     // public String profile(Model model) {
     //     return "admin/profile"; 

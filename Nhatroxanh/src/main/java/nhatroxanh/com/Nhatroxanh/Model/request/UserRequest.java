@@ -24,16 +24,4 @@ public class UserRequest {
     @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại phải có 10-11 chữ số.")
     private String phoneNumber;
 
-    @NotBlank(message = "Số CCCD không được để trống.")
-    @Pattern(regexp = "^[0-9]{12}$", message = "Số CCCD phải có đúng 12 chữ số.")
-    private String cccd;
-
-    @Pattern(
-        regexp = "^$|^\\d{4}-\\d{2}-\\d{2}$",
-        message = "Ngày cấp CCCD phải đúng định dạng yyyy-MM-dd hoặc để trống."
-    )
-    private String issueDate;
-
-    @Size(min = 2, max = 100, message = "Nơi cấp CCCD phải có từ 2 đến 100 ký tự hoặc để trống.")
-    private String issuePlace;
 }

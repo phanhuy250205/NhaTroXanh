@@ -13,6 +13,8 @@ public class LoginController {
     public String registerHost() {
         return "auth/register-host";
     }
-
-    
+    @GetMapping("/infor-chu-tro")
+    public String loginCustomer() {
+        return "host/infor-chutro";
+    }
 }

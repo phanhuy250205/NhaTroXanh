@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
+import java.io.IOException;
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
@@ -11,7 +13,8 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-// import nhatroxanh.com.Nhatroxanh.Service.OtpService;
+import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
 import org.slf4j.Logger;
@@ -25,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.transaction.Transactional;
 
@@ -39,15 +43,16 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @Autowired
-    // private OtpService otpService;
+    @Autowired
+    private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
 
     @Autowired
     private AddressRepository addressRepository;
-
+    @Autowired
+    private FileUploadService fileUploadService;
     @Override
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
@@ -56,14 +61,10 @@ public class UserServiceImpl implements UserService {
             logger.error("Email already exists: {}", userRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
-
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userRequest.getCccd());
-                throw new RuntimeException("Số CCCD đã được sử dụng!");
-            }
+        if (userRepository.findByPhone(userRequest.getPhoneNumber()).isPresent()) {
+            logger.error("Phone number already exists: {}", userRequest.getPhoneNumber());
+            throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
-
         Users newUser = new Users();
         newUser.setFullname(userRequest.getFullName());
         newUser.setEmail(userRequest.getEmail());
@@ -71,28 +72,11 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         newUser.setEnabled(false);
         newUser.setRole(Users.Role.CUSTOMER);
+        newUser.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
-
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            UserCccd userCccd = new UserCccd();
-            userCccd.setUser(savedUser);
-            userCccd.setCccdNumber(userRequest.getCccd());
-            try {
-                if (userRequest.getIssueDate() != null && !userRequest.getIssueDate().isEmpty()) {
-                    userCccd.setIssueDate(Date.valueOf(userRequest.getIssueDate()));
-                }
-                userCccd.setIssuePlace(userRequest.getIssuePlace());
-                userCccdRepository.save(userCccd);
-                logger.info("Saved UserCccd for userId: {}", savedUser.getUserId());
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid CCCD issue date format: {}", userRequest.getIssueDate(), e);
-                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userRequest.getIssueDate());
-            }
-        }
-
-        // otpService.createAndSendOtp(savedUser);
+        otpService.createAndSendOtp(savedUser);
 
         return savedUser;
     }
@@ -101,23 +85,27 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public Users registerOwner(UserOwnerRequest userOwnerRequest) {
         logger.info("Registering new owner with email: {}", userOwnerRequest.getEmail());
+
+        // Kiểm tra email trùng lặp
         if (userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()) {
             logger.error("Email already exists: {}", userOwnerRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
 
-        if (userOwnerRequest.getCccd() != null && !userOwnerRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userOwnerRequest.getCccd());
-                throw new RuntimeException("Số CCCD đã được sử dụng!");
-            }
+        // Kiểm tra số điện thoại trùng lặp
+        if (userRepository.findByPhone(userOwnerRequest.getPhoneNumber()).isPresent()) {
+            logger.error("Phone number already exists: {}", userOwnerRequest.getPhoneNumber());
+            throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
 
+        // Tạo user mới
         Users newUser = new Users();
         newUser.setFullname(userOwnerRequest.getFullName());
         newUser.setEmail(userOwnerRequest.getEmail());
         newUser.setPhone(userOwnerRequest.getPhoneNumber());
         newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
+
+        // Xử lý ngày sinh
         if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
             try {
                 newUser.setBirthday(Date.valueOf(userOwnerRequest.getBirthDate()));
@@ -126,33 +114,20 @@ public class UserServiceImpl implements UserService {
                 throw new RuntimeException("Định dạng ngày sinh không hợp lệ: " + userOwnerRequest.getBirthDate());
             }
         }
+
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(true);
+        newUser.setCreatedAt(LocalDateTime.now());
 
+
+        // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new owner with ID: {}", savedUser.getUserId());
 
-        if (userOwnerRequest.getCccd() != null && !userOwnerRequest.getCccd().trim().isEmpty()) {
-            UserCccd userCccd = new UserCccd();
-            userCccd.setUser(savedUser);
-            userCccd.setCccdNumber(userOwnerRequest.getCccd());
-            try {
-                if (userOwnerRequest.getIssueDate() != null && !userOwnerRequest.getIssueDate().isEmpty()) {
-                    userCccd.setIssueDate(Date.valueOf(userOwnerRequest.getIssueDate()));
-                }
-                userCccd.setIssuePlace(userOwnerRequest.getIssuePlace());
-                userCccdRepository.save(userCccd);
-                logger.info("Saved UserCccd for owner with userId: {}", savedUser.getUserId());
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid CCCD issue date format: {}", userOwnerRequest.getIssueDate(), e);
-                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
-            }
-        }
         return savedUser;
     }
 
     @Override
-
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
         logger.info("Finding owner with CCCD: {} or phone: {}", cccd, phone);
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -277,4 +252,26 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Override
+    public Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status) {
+        Pageable pageable = PageRequest.of(page, size);
+        keyword = keyword == null ? "" : keyword.trim();
+
+        if ("active".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, true, keyword, pageable);
+        } else if ("inactive".equalsIgnoreCase(status)) {
+            return userRepository.findByRoleAndEnabledAndKeyword(Users.Role.STAFF, false, keyword, pageable);
+        } else {
+            return userRepository.findByRoleAndKeyword(Users.Role.STAFF, keyword, pageable);
+        }
+    }
+
+    public Optional<Users> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+
+    
+
 }

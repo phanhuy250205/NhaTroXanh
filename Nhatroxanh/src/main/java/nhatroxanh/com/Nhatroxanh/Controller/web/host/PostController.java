@@ -424,4 +424,24 @@ public class PostController {
             return "redirect:/chu-tro/sua-bai-dang/" + postId;
         }
     }
+
+    @PostMapping("/{postId}/reset-approval")
+    public String resetApprovalStatus(@PathVariable Integer postId, RedirectAttributes redirectAttributes) {
+        try {
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đăng"));
+            if (post.getApprovalStatus() == ApprovalStatus.REJECTED) {
+                post.setApprovalStatus(ApprovalStatus.PENDING);
+                post.setApprovedAt(null);
+                post.setApprovedBy(null); 
+                postRepository.save(post);
+                redirectAttributes.addFlashAttribute("successMessage", "Chuyển về trạng thái chờ duyệt thành công!");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/chu-tro/chi-tiet-bai-dang/" + postId;
+    }
+
 }

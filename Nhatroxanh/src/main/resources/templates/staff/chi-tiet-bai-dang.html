@@ -482,12 +482,9 @@
             <div class="staff-description-section">
                 <h2 class="staff-section-title">Mô tả chi tiết</h2>
                 <p class="staff-description-text"
-                    th:text="${post.description != null ? post.description : 'Chưa có mô tả'}">
-                    Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm
-                    uất.
-                    Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi
-                    cho người thuê.
+                    th:utext="${post.description != null ? #strings.replace(post.description, '\n', '<br/>') : 'Chưa có mô tả'}">
                 </p>
+
                 <div class="staff-details-grid">
                     <div class="staff-details-card">
                         <h3 class="staff-details-card-title">
@@ -544,15 +541,29 @@
         </div>
 
         <div class="action-buttons text-center mt-4">
-            <div class="d-flex justify-content-center gap-3 flex-wrap">
-                <form th:if="${post.approvalStatus.name() == 'PENDING'}"
-                    th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}" method="post">
+            <!-- Trạng thái CHỜ DUYỆT -->
+            <div th:if="${post.approvalStatus.name() == 'PENDING'}"
+                class="d-flex justify-content-center gap-3 flex-wrap">
+                <!-- Nút DUYỆT -->
+                <form th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}" method="post">
                     <button type="submit" class="btn btn-success d-flex align-items-center">
                         <i class="fas fa-check-circle me-2"></i> DUYỆT BÀI
                     </button>
                 </form>
-                <form th:if="${post.approvalStatus.name() == 'APPROVED'}"
-                    th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post">
+
+                <!-- Nút TỪ CHỐI với SweetAlert -->
+                <form th:action="@{/nhan-vien/bai-dang/{postId}/reject(postId=${post.postId})}" method="post"
+                    class="form-reject">
+                    <button type="button" class="btn btn-danger d-flex align-items-center btn-reject"
+                        th:data-post-id="${post.postId}">
+                        <i class="fas fa-times-circle me-2"></i> TỪ CHỐI
+                    </button>
+                </form>
+            </div>
+
+            <!-- Trạng thái ĐÃ DUYỆT -->
+            <div th:if="${post.approvalStatus.name() == 'APPROVED'}" class="mt-3">
+                <form th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post">
                     <input type="hidden" name="postId" th:value="${post.postId}" />
                     <button type="submit" class="btn d-flex align-items-center"
                         th:classappend="${post.status} ? 'btn-warning' : 'btn-info'">
@@ -560,19 +571,12 @@
                         <span th:text="${post.status} ? 'ẨN BÀI' : 'HIỂN BÀI'"></span>
                     </button>
                 </form>
-                <form th:action="@{/nhan-vien/bai-dang/xoa}" method="post"
-                    onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài đăng này không?')">
-                    <input type="hidden" name="postId" th:value="${post.postId}" />
-                    <button type="submit" class="btn btn-danger d-flex align-items-center">
-                        <i class="fas fa-trash-alt me-2"></i> XÓA BÀI
-                    </button>
-                </form>
             </div>
         </div>
 
 
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function changeMainImage(element) {
             const mainImage = document.getElementById('mainImage');
@@ -607,6 +611,28 @@
                     if (!this.classList.contains('active')) {
                         this.style.transform = 'scale(1)';
                     }
+                });
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            // TỪ CHỐI bài đăng
+            document.querySelectorAll('.btn-reject').forEach(button => {
+                button.addEventListener('click', function () {
+                    const form = button.closest('form');
+                    Swal.fire({
+                        title: 'Xác nhận từ chối?',
+                        text: "Bạn có chắc chắn muốn từ chối duyệt bài đăng này?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Có',
+                        cancelButtonText: 'Hủy bỏ'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
                 });
             });
         });

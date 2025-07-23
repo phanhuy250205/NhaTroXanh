@@ -34,7 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "chu-tro/tong-quan"
           } else {
             // Nếu status 401 -> thất bại
-            throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.")
+            throw new Error("Email hoặc mật khẩu không chính xác.")
           }
         })
         .catch((error) => {

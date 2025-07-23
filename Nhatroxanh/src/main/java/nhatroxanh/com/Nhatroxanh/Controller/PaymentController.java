@@ -39,7 +39,6 @@ public class PaymentController {
         if (status == null || status.isEmpty()) {
             return null;
         }
-        
         switch (status.toLowerCase()) {
             case "paid":
                 return PaymentStatus.ĐÃ_THANH_TOÁN;
@@ -67,11 +66,11 @@ public class PaymentController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
             Authentication authentication) {
-        
+
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            
+
             List<PaymentResponseDto> payments;
 
             if (search != null && !search.trim().isEmpty()) {
@@ -110,23 +109,25 @@ public class PaymentController {
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String search,
             Authentication authentication) {
-        
+
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            
+
             Pageable pageable = PageRequest.of(page, size);
             Page<PaymentResponseDto> paymentsPage;
 
             if (search != null && !search.trim().isEmpty()) {
                 log.info("Searching payments with pagination for owner {} with keyword: '{}'", ownerId, search.trim());
                 paymentsPage = paymentService.searchPaymentsWithPagination(ownerId, search.trim(), pageable);
-                log.info("Found {} payments (page {}) for search keyword: '{}'", paymentsPage.getContent().size(), page, search.trim());
+                log.info("Found {} payments (page {}) for search keyword: '{}'", paymentsPage.getContent().size(), page,
+                        search.trim());
             } else if (status != null && !status.isEmpty()) {
                 PaymentStatus paymentStatus = mapStatusFromString(status);
                 if (paymentStatus != null) {
                     log.info("Filtering payments with pagination for owner {} with status: {}", ownerId, paymentStatus);
-                    paymentsPage = paymentService.getPaymentsByOwnerIdAndStatusWithPagination(ownerId, paymentStatus, pageable);
+                    paymentsPage = paymentService.getPaymentsByOwnerIdAndStatusWithPagination(ownerId, paymentStatus,
+                            pageable);
                 } else {
                     log.warn("Invalid payment status: {}, returning all payments", status);
                     paymentsPage = paymentService.getPaymentsByOwnerIdWithPagination(ownerId, pageable);
@@ -161,7 +162,6 @@ public class PaymentController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            
             List<PaymentResponseDto> recentPayments = paymentService.getRecentPaymentsByOwnerId(ownerId);
             return ResponseEntity.ok(recentPayments);
 
@@ -194,20 +194,20 @@ public class PaymentController {
     public ResponseEntity<Map<String, Object>> createPayment(
             @RequestBody PaymentRequestDto request,
             Authentication authentication) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             // Có thể thêm validation owner ở đây nếu cần
-            
+
             PaymentResponseDto payment = paymentService.createPayment(request);
-            
+
             response.put("success", true);
             response.put("message", "Tạo hóa đơn thành công");
             response.put("data", payment);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             log.error("Error creating payment: ", e);
             response.put("success", false);
@@ -224,27 +224,27 @@ public class PaymentController {
     public ResponseEntity<Map<String, Object>> updatePaymentStatus(
             @PathVariable Integer id,
             @RequestBody Map<String, String> request) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             String statusStr = request.get("status");
             PaymentStatus status = mapStatusFromString(statusStr);
-            
+
             if (status == null) {
                 response.put("success", false);
                 response.put("message", "Trạng thái không hợp lệ: " + statusStr);
                 return ResponseEntity.badRequest().body(response);
             }
-            
+
             PaymentResponseDto payment = paymentService.updatePaymentStatus(id, status);
-            
+
             response.put("success", true);
             response.put("message", "Cập nhật trạng thái thành công");
             response.put("data", payment);
-            
+
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
             log.error("Error updating payment status: ", e);
             response.put("success", false);
@@ -262,10 +262,10 @@ public class PaymentController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            
+
             Map<String, Object> statistics = paymentService.getPaymentStatistics(ownerId);
             return ResponseEntity.ok(statistics);
-            
+
         } catch (Exception e) {
             log.error("Error getting payment statistics: ", e);
             return ResponseEntity.badRequest().build();
@@ -281,10 +281,11 @@ public class PaymentController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            
+
             List<Map<String, Object>> contracts = paymentService.getAvailableContractsForPayment(ownerId);
+            // Thêm log để debug
+            log.info("Available contracts for owner {}: {}", ownerId, contracts);
             return ResponseEntity.ok(contracts);
-            
         } catch (Exception e) {
             log.error("Error getting available contracts: ", e);
             return ResponseEntity.badRequest().build();
@@ -301,12 +302,13 @@ public class PaymentController {
             Integer previousReading = (Integer) request.get("previousReading");
             Integer currentReading = (Integer) request.get("currentReading");
             String utilityType = (String) request.get("utilityType");
-            Float unitPrice = request.get("unitPrice") != null ? 
-                Float.valueOf(request.get("unitPrice").toString()) : 0f;
-            
-            Map<String, Object> result = paymentService.calculateUtilityCosts(previousReading, currentReading, utilityType, unitPrice);
+            Float unitPrice = request.get("unitPrice") != null ? Float.valueOf(request.get("unitPrice").toString())
+                    : 0f;
+
+            Map<String, Object> result = paymentService.calculateUtilityCosts(previousReading, currentReading,
+                    utilityType, unitPrice);
             return ResponseEntity.ok(result);
-            
+
         } catch (Exception e) {
             log.error("Error calculating utility costs: ", e);
             return ResponseEntity.badRequest().build();
@@ -346,20 +348,17 @@ public class PaymentController {
             String[] monthYear = month.split("-");
             int year = Integer.parseInt(monthYear[0]);
             int monthNum = Integer.parseInt(monthYear[1]);
-            
             LocalDate dueDate = LocalDate.of(year, monthNum, 10);
             String formattedMonth = String.format("%02d/%d", monthNum, year);
 
             // Tạo PaymentRequestDto
             List<PaymentRequestDto.PaymentDetailDto> details = new ArrayList<>();
-            
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền phòng")
                     .quantity(1)
                     .unitPrice(roomFee)
                     .amount(roomFee)
                     .build());
-                    
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền điện")
                     .quantity(electricityUsage)
@@ -368,7 +367,6 @@ public class PaymentController {
                     .previousReading(electricityPrev)
                     .currentReading(electricityCurr)
                     .build());
-                    
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền nước")
                     .quantity(waterUsage)
@@ -377,14 +375,12 @@ public class PaymentController {
                     .previousReading(waterPrev)
                     .currentReading(waterCurr)
                     .build());
-                    
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền rác")
                     .quantity(1)
                     .unitPrice(trashFee)
                     .amount(trashFee)
                     .build());
-                    
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền wifi")
                     .quantity(1)
@@ -406,25 +402,87 @@ public class PaymentController {
                     .contractId(contractId)
                     .month(formattedMonth)
                     .dueDate(Date.valueOf(dueDate))
-                    .paymentMethod(PaymentMethod.TIỀN_MẶT)
                     .notes(notes)
                     .details(details)
                     .build();
 
             // Tạo payment
             PaymentResponseDto createdPayment = paymentService.createPayment(paymentRequest);
-            
-            log.info("Successfully created payment with ID: {} for contract: {}", 
+
+            log.info("Successfully created payment with ID: {} for contract: {}",
                     createdPayment.getPaymentId(), contractId);
-            
+
             redirectAttributes.addFlashAttribute("successMessage", "Tạo hóa đơn thành công!");
-           
-            
+
         } catch (Exception e) {
             log.error("Error creating payment for contract {}: ", contractId, e);
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi tạo hóa đơn: " + e.getMessage());
         }
 
         return "redirect:/chu-tro/thanh-toan";
+    }
+
+    /**
+     * Gửi tất cả hóa đơn chưa thanh toán hoặc quá hạn đến người thuê
+     */
+    @PostMapping("/send-unpaid")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendUnpaidInvoices(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            // Lấy danh sách hóa đơn chưa thanh toán hoặc quá hạn
+            List<PaymentResponseDto> unpaidPayments = paymentService.getPaymentsByOwnerIdAndStatus(ownerId, PaymentStatus.CHƯA_THANH_TOÁN);
+            List<PaymentResponseDto> overduePayments = paymentService.getPaymentsByOwnerIdAndStatus(ownerId, PaymentStatus.QUÁ_HẠN_THANH_TOÁN);
+
+            List<PaymentResponseDto> paymentsToSend = new ArrayList<>();
+            paymentsToSend.addAll(unpaidPayments);
+            paymentsToSend.addAll(overduePayments);
+
+            if (paymentsToSend.isEmpty()) {
+                response.put("success", true);
+                response.put("message", "Không có hóa đơn chưa thanh toán hoặc quá hạn để gửi");
+                response.put("sentCount", 0);
+                return ResponseEntity.ok(response);
+            }
+
+            // Gửi từng hóa đơn đến người thuê
+            int sentCount = paymentService.sendInvoicesToTenants(paymentsToSend);
+
+            log.info("Successfully sent {} unpaid/overdue invoices for owner {}", sentCount, ownerId);
+
+            response.put("success", true);
+            response.put("message", "Gửi " + sentCount + " hóa đơn thành công");
+            response.put("sentCount", sentCount);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error sending unpaid invoices: ", e);
+            response.put("success", false);
+            response.put("message", "Lỗi gửi hóa đơn: " + e.getMessage());
+            response.put("sentCount", 0);
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deletePayment(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            paymentService.deletePayment(id);
+            response.put("success", true);
+            response.put("message", "Xóa hóa đơn thành công");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error deleting payment with id {}: ", id, e);
+            response.put("success", false);
+            response.put("message", "Lỗi xóa hóa đơn: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 }

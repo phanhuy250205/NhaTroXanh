@@ -23,8 +23,10 @@ public class SecurityConfig {
 
     @Autowired
     private CustomUserDetailsService customUserDetailsService;
+
     @Autowired
     private CustomLoginSuccessHandler customLoginSuccessHandler;
+
     @Autowired
     private DataSource dataSource;
 
@@ -51,38 +53,36 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable()) // CSRF disabled for API endpoints
                 .authenticationProvider(authenticationProvider())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**",
+                        .requestMatchers("/api/auth/forgot-password").permitAll() 
+                        .requestMatchers("/api/users/**", "/api/**", "/css/**", "/js/**", "/images/**", "/bootstrap/**",
+                                "/fonts/**",
                                 "/uploads/**")
                         .permitAll()
-                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**", "/chu-tro/hop-dong", "/profile-khach-thue", "/chu-tro/quan-ly-su-co")
+                        .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher","/momo/**","/vnpay/**",
+                                "/tat-ca-phong-tro")
                         .permitAll()
-                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro" , "/admin/**").permitAll()
+                        .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll() 
+                        .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
-                        // .requestMatchers("/nhan-vien/**").hasRole("STAFF")
+                        .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/dang-nhap-chu-tro")
-                        // <<< SỬA: Đổi URL để tường minh và khớp với file JS
                         .loginProcessingUrl("/login-processing")
-                        // <<< THÊM: Tên param cho username/email để khớp với CustomUserDetailsService
                         .usernameParameter("username")
-                        // <<< THÊM: Tên param cho mật khẩu để tường minh hơn
                         .passwordParameter("password")
                         .successHandler(customLoginSuccessHandler)
                         .successHandler((request, response, authentication) -> {
-                            // Khi thành công, chỉ cần trả về status 200 OK. JavaScript sẽ xử lý việc chuyển
-                            // hướng.
                             response.setStatus(HttpServletResponse.SC_OK);
                         })
                         .failureHandler((request, response, exception) -> {
-                            // Khi thất bại, trả về status 401 Unauthorized và thông báo lỗi
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
-                            // <<< SỬA: Rút gọn thông báo lỗi cho phù hợp với cả hai luồng đăng nhập
                             response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");
                         })
                         .permitAll())

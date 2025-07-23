@@ -203,7 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         window.location.reload()
                     } else {
                         // 5. THẤT BẠI: Hiển thị lỗi
-                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.")
+                        throw new Error("Email hoặc mật khẩu không chính xác.")
                     }
                 })
                 .catch((error) => {

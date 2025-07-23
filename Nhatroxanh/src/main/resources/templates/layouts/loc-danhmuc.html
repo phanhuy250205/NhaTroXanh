@@ -1,73 +1,110 @@
-<div class="search-filter-container-guest">
-        <div class="container-fluid">
-            <div class="search-wrapper-guest">
-                <!-- Search Input -->
-                <div class="search-input-group-guest">
-                    <i class="fas fa-search search-icon-guest"></i>
-                    <input type="text" class="search-input-guest" id="searchInput-guest" placeholder="Bạn muốn tìm trọ ở đâu?">
-                </div>
-
-                <!-- Location Select -->
-                <div class="location-wrapper-guest">
-                    <i class="fas fa-map-marker-alt select-icon-guest location-guest"></i>
-                    <button class="location-display-guest placeholder-guest" id="locationDisplay-guest">
-                        Chọn địa điểm
-                    </button>
-                    <i class="fas fa-chevron-down dropdown-arrow-guest"></i>
-                    
-                    <!-- Location Dropdown -->
-                    <div class="location-dropdown-guest" id="locationDropdown-guest">
-                        <!-- Selected Location Info -->
-                        <div class="selected-location-info-guest" id="selectedLocationInfo-guest">
-                            <div class="selected-location-title-guest">Địa điểm đã chọn</div>
-                            <p class="selected-location-text-guest" id="selectedLocationText-guest"></p>
-                            <button class="clear-location-btn-guest" id="clearLocationBtn-guest">
-                                <i class="fas fa-times me-1"></i>Xóa lựa chọn
-                            </button>
-                        </div>
-
-                        <div class="location-select-group-guest">
-                            <label class="location-label-guest">Tỉnh/Thành phố</label>
-                            <select class="location-select-guest" id="provinceSelect-guest">
-                                <option value="">Chọn tỉnh/thành phố</option>
-                            </select>
-                        </div>
-                        <div class="location-select-group-guest">
-                            <label class="location-label-guest">Quận/Huyện</label>
-                            <select class="location-select-guest" id="districtSelect-guest" disabled>
-                                <option value="">Chọn quận/huyện</option>
-                            </select>
-                        </div>
-                        <div class="location-select-group-guest">
-                            <label class="location-label-guest">Phường/Xã</label>
-                            <select class="location-select-guest" id="wardSelect-guest" disabled>
-                                <option value="">Chọn phường/xã</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Price Select -->
-                <div class="select-wrapper-guest">
-                    <i class="fas fa-dollar-sign select-icon-guest price-guest"></i>
-                    <select class="filter-select-guest" id="priceRange-guest" required>
-                        <option value="" disabled selected>Mức giá</option>
-                        <option value="0-1000000">Dưới 1 triệu</option>
-                        <option value="1000000-2000000">1 - 2 triệu</option>
-                        <option value="2000000-3000000">2 - 3 triệu</option>
-                        <option value="3000000-5000000">3 - 5 triệu</option>
-                        <option value="5000000-10000000">5 - 10 triệu</option>
-                        <option value="10000000-20000000">10 - 20 triệu</option>
-                        <option value="20000000+">Trên 20 triệu</option>
-                    </select>
-                    <i class="fas fa-chevron-down dropdown-arrow-guest"></i>
-                </div>
-
-                <!-- Search Button -->
-                <button class="search-btn-guest" id="searchBtn-guest">
-                    <i class="fas fa-search me-2"></i>
-                    Tìm kiếm
-                </button>
+<div class="container-fluid px-0">
+    <div class="row search-bar mx-0">
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0">
+            <div class="input-group">
+                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                <input type="text" class="form-control-loc" id="searchInput" placeholder="Bạn muốn tìm trọ ở đâu?"
+                    th:value="${searchTerm != null ? searchTerm : ''}"
+                    onkeypress="if(event.key === 'Enter') applySearch()">
             </div>
         </div>
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+            <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownDiaDiem')">
+                <i class="fas fa-map-marker-alt text-primary"></i> Địa điểm <i class="fas fa-caret-down"></i>
+            </button>
+            <div class="dropdown-modal d-none" id="dropdownDiaDiem">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="text-primary"><i class="fas fa-map-marker-alt"></i> Địa điểm</strong>
+                    <button class="btn btn-sm"
+                        onclick="document.getElementById('dropdownDiaDiem').classList.add('d-none')">×</button>
+                </div>
+                <!-- Dropdown Tỉnh -->
+                <div class="mb-2">
+                    <label class="filter-label">Tỉnh/Thành phố</label>
+                    <select id="provinceSelect" class="form-select form-select-sm" onchange="loadDistricts()">
+                        <option value="">Chọn tỉnh</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown Huyện -->
+                <div class="mb-2">
+                    <label class="filter-label">Quận/Huyện</label>
+                    <select id="districtSelect" class="form-select form-select-sm" onchange="loadWards()">
+                        <option value="">Chọn huyện</option>
+                    </select>
+                </div>
+
+                <!-- Dropdown Xã -->
+                <div class="mb-2">
+                    <label class="filter-label">Phường/Xã</label>
+                    <select id="wardSelect" class="form-select form-select-sm">
+                        <option value="">Chọn xã</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between pt-3">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="resetLocationFilter()">
+                        <i class="fas fa-sync-alt me-1"></i> Đặt lại
+                    </button>
+                    <button class="btn btn-primary btn-sm" onclick="applyLocationFilter()">Tìm ngay</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-auto mb-2 mb-sm-0 filter-btn-wrapper">
+            <button class="filter-btn w-100 w-sm-auto" onclick="toggleDropdown('dropdownMucGia')">
+                <i class="fas fa-dollar-sign text-info"></i> Mức giá <i class="fas fa-caret-down"></i>
+            </button>
+            <div class="dropdown-modal d-none p-3" id="dropdownMucGia"
+                style="background:#fff; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); max-width: 300px;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <strong class="text-info"><i class="fas fa-dollar-sign"></i> Mức giá</strong>
+                    <button class="btn btn-sm" id="close-muc-gia">×</button>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-all" value=""
+                        th:checked="${selectedPriceRange == null or selectedPriceRange == ''}" data-min="0"
+                        data-max="10000000" />
+                    <label class="form-check-label" for="price-all">Tất cả mức giá</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-under-1m" value="under_1m"
+                        th:checked="${selectedPriceRange == 'under_1m'}" data-min="0" data-max="1000000" />
+                    <label class="form-check-label" for="price-under-1m">Dưới 1 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-1-2m" value="1_2m"
+                        th:checked="${selectedPriceRange == '1_2m'}" data-min="1000000" data-max="2000000" />
+                    <label class="form-check-label" for="price-1-2m">1 - 2 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-2-3m" value="2_3m"
+                        th:checked="${selectedPriceRange == '2_3m'}" data-min="2000000" data-max="3000000" />
+                    <label class="form-check-label" for="price-2-3m">2 - 3 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-3-5m" value="3_5m"
+                        th:checked="${selectedPriceRange == '3_5m'}" data-min="3000000" data-max="5000000" />
+                    <label class="form-check-label" for="price-3-5m">3 - 5 triệu</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="price" id="price-over-5m" value="over_5m"
+                        th:checked="${selectedPriceRange == 'over_5m'}" data-min="5000000" data-max="10000000" />
+                    <label class="form-check-label" for="price-over-5m">Trên 5 triệu</label>
+                </div>
+                <div class="d-flex justify-content-between pt-3">
+                    <button class="btn btn-outline-secondary btn-sm" id="reset-price-filter"
+                        onclick="resetPriceFilter()">
+                        <i class="fas fa-sync-alt me-1"></i> Đặt lại
+                    </button>
+                    <button class="btn btn-danger btn-sm" id="apply-price-filter" onclick="applyPriceFilter()">Áp
+                        dụng</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-auto">
+            <button class="btn btn-search w-100 w-sm-auto" onclick="applySearch()">
+                <i class="fas fa-search me-1"></i> Tìm kiếm
+            </button>
+        </div>
     </div>
+</div>
