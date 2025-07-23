@@ -9,14 +9,14 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 1. LOCATION DATA (Province, District, Ward)
 -- =====================================================
 
-INSERT INTO Province (id, code, name) VALUES
+INSERT INTO province (id, code, name) VALUES
 (1, '79', 'Thành phố Hồ Chí Minh'),
 (2, '01', 'Hà Nội'),
 (3, '48', 'Đà Nẵng'),
 (4, '74', 'Bình Dương'),
 (5, '77', 'Bà Rịa - Vũng Tàu');
 
-INSERT INTO District (id, code, name, province_id) VALUES
+INSERT INTO district (id, code, name, province_id) VALUES
 (1, '760', 'Quận 1', 1),
 (2, '761', 'Quận 2', 1),
 (3, '762', 'Quận 3', 1),
@@ -28,7 +28,7 @@ INSERT INTO District (id, code, name, province_id) VALUES
 (9, '768', 'Quận 9', 1),
 (10, '769', 'Quận 10', 1);
 
-INSERT INTO Ward (id, code, name, district_id) VALUES
+INSERT INTO ward (id, code, name, district_id) VALUES
 (1, '26734', 'Phường Bến Nghé', 1),
 (2, '26735', 'Phường Bến Thành', 1),
 (3, '26736', 'Phường Cầu Kho', 1),
@@ -44,7 +44,7 @@ INSERT INTO Ward (id, code, name, district_id) VALUES
 -- 2. ADDRESS DATA
 -- =====================================================
 
-INSERT INTO Address (id, street, ward_id, user_id) VALUES
+INSERT INTO address (id, street, ward_id, user_id) VALUES
 (1, '123 Đường Nguyễn Huệ', 1, NULL),
 (2, '456 Đường Lê Lợi', 2, NULL),
 (3, '789 Đường Hai Bà Trưng', 3, NULL),
@@ -60,7 +60,7 @@ INSERT INTO Address (id, street, ward_id, user_id) VALUES
 -- 3. CATEGORY DATA
 -- =====================================================
 
-INSERT INTO Category (category_id, name) VALUES
+INSERT INTO category (category_id, name) VALUES
 (1, 'Phòng trọ'),
 (2, 'Căn hộ mini'),
 (3, 'Nhà nguyên căn'),
@@ -76,45 +76,38 @@ INSERT INTO Category (category_id, name) VALUES
 -- 4. UTILITIES DATA
 -- =====================================================
 
-INSERT INTO Utilities (utilityId, name) VALUES
-(1, 'Wifi miễn phí'),
-(2, 'Điều hòa'),
-(3, 'Tủ lạnh'),
-(4, 'Máy giặt'),
-(5, 'Bếp gas'),
-(6, 'Nóng lạnh'),
-(7, 'Ban công'),
-(8, 'Thang máy'),
-(9, 'Bảo vệ 24/7'),
-(10, 'Chỗ để xe'),
-(11, 'Gần trường học'),
-(12, 'Gần bệnh viện'),
-(13, 'Gần chợ'),
-(14, 'Gần công viên'),
-(15, 'Gần trung tâm thương mại'),
-(16, 'Phòng tắm riêng'),
-(17, 'Phòng bếp riêng'),
-(18, 'Cửa sổ thoáng mát'),
-(19, 'Giường tủ đầy đủ'),
-(20, 'Camera an ninh');
+INSERT INTO utilities (name) VALUES
+('Wifi miễn phí'),
+('Điều hòa'),
+('Tủ lạnh'),
+('Máy giặt'),
+('Bếp gas'),
+('Nóng lạnh'),
+('Ban công'),
+('Thang máy'),
+('Bảo vệ 24/7'),
+('Chỗ để xe'),
+('Gần trường học'),
+('Gần bệnh viện'),
+('Gần chợ'),
+('Gần công viên'),
+('Gần trung tâm thương mại'),
+('Phòng tắm riêng'),
+('Phòng bếp riêng'),
+('Cửa sổ thoáng mát'),
+('Giường tủ đầy đủ'),
+('Camera an ninh');
 
 -- =====================================================
 -- 5. USERS DATA
 -- =====================================================
 
 INSERT INTO users (user_id, password, fullname, phone, birthday, bank_account, balance, gender, email, avatar, otp_code, otp_expiration, enabled, address, created_at, address_id, role) VALUES
--- Admin
-(1, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Văn Admin', '0901000001', '1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
-
--- Staff
-(2, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
-
--- Owners
-(3, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
+(11, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Văn Admin', '0901000001', '1985-01-15', '1234567890', 50000000.00, 1, 'admin@nhatroxanh.com', '/uploads/admin-avatar.jpg', NULL, NULL, 1, '123 Đường Admin', '2024-01-01 08:00:00', 1, 'ADMIN'),
+(22, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Thị Staff', '0901000002', '1990-03-20', '2345678901', 10000000.00, 0, 'staff@nhatroxanh.com', '/uploads/staff-avatar.jpg', NULL, NULL, 1, '456 Đường Staff', '2024-01-02 08:00:00', 2, 'STAFF'),
+(33, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Văn Chủ Trọ', '0901000003', '1980-05-10', '3456789012', 100000000.00, 1, 'owner1@nhatroxanh.com', '/uploads/owner1-avatar.jpg', NULL, NULL, 1, '789 Đường Chủ Trọ 1', '2024-01-03 08:00:00', 3, 'OWNER'),
 (4, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Phạm Thị Lan Anh', '0901000004', '1982-07-25', '4567890123', 80000000.00, 0, 'owner2@nhatroxanh.com', '/uploads/owner2-avatar.jpg', NULL, NULL, 1, '321 Đường Chủ Trọ 2', '2024-01-04 08:00:00', 4, 'OWNER'),
 (5, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Hoàng Minh Tuấn', '0901000005', '1978-12-03', '5678901234', 120000000.00, 1, 'owner3@nhatroxanh.com', '/uploads/owner3-avatar.jpg', NULL, NULL, 1, '654 Đường Chủ Trọ 3', '2024-01-05 08:00:00', 5, 'OWNER'),
-
--- Customers
 (6, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Nguyễn Thị Hoa', '0901000006', '1995-02-14', '6789012345', 5000000.00, 0, 'customer1@gmail.com', '/uploads/customer1-avatar.jpg', NULL, NULL, 1, '987 Đường Khách Hàng 1', '2024-01-06 08:00:00', 6, 'CUSTOMER'),
 (7, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Trần Văn Nam', '0901000007', '1993-08-22', '7890123456', 3000000.00, 1, 'customer2@gmail.com', '/uploads/customer2-avatar.jpg', NULL, NULL, 1, '147 Đường Khách Hàng 2', '2024-01-07 08:00:00', 7, 'CUSTOMER'),
 (8, '$2a$10$N.zmdr9k7uOCQb96VdodL.ZHPvsXwDxpn8SYXFrjNTYtUjuaVrTw2', 'Lê Thị Mai', '0901000008', '1996-11-30', '8901234567', 4000000.00, 0, 'customer3@gmail.com', '/uploads/customer3-avatar.jpg', NULL, NULL, 1, '258 Đường Khách Hàng 3', '2024-01-08 08:00:00', 8, 'CUSTOMER'),
@@ -125,16 +118,16 @@ INSERT INTO users (user_id, password, fullname, phone, birthday, bank_account, b
 -- 6. USER CCCD DATA
 -- =====================================================
 
-INSERT INTO User_CCCD (id, user_id, cccd_number, full_name, date_of_birth, gender, nationality, place_of_origin, place_of_residence, date_of_issue, date_of_expiry, issuing_authority, front_image_url, back_image_url, verification_status, created_at, updated_at) VALUES
-(1, 3, '079085001234', 'Lê Văn Chủ Trọ', '1980-05-10', 'Nam', 'Việt Nam', 'TP. Hồ Chí Minh', '789 Đường Chủ Trọ 1, Q.1, TP.HCM', '2015-05-10', '2030-05-10', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-1.jpg', '/uploads/cccd-back-1.jpg', 'VERIFIED', '2024-01-03 08:30:00', '2024-01-03 09:00:00'),
-(2, 4, '079082002345', 'Phạm Thị Lan Anh', '1982-07-25', 'Nữ', 'Việt Nam', 'TP. Hồ Chí Minh', '321 Đường Chủ Trọ 2, Q.1, TP.HCM', '2017-07-25', '2032-07-25', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-2.jpg', '/uploads/cccd-back-2.jpg', 'VERIFIED', '2024-01-04 08:30:00', '2024-01-04 09:00:00'),
-(3, 5, '079078003456', 'Hoàng Minh Tuấn', '1978-12-03', 'Nam', 'Việt Nam', 'TP. Hồ Chí Minh', '654 Đường Chủ Trọ 3, Q.1, TP.HCM', '2013-12-03', '2028-12-03', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-3.jpg', '/uploads/cccd-back-3.jpg', 'VERIFIED', '2024-01-05 08:30:00', '2024-01-05 09:00:00');
+INSERT INTO user_cccd (user_id, cccd_number, front_image_url, back_image_url) VALUES
+(33, '079085001234', '2015-05-10', '2030-05-10', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-1.jpg', '/uploads/cccd-back-1.jpg', 'VERIFIED', '2024-01-03 08:30:00', '2024-01-03 09:00:00'),
+(4, '079082002345', '2017-07-25', '2032-07-25', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-2.jpg', '/uploads/cccd-back-2.jpg', 'VERIFIED', '2024-01-04 08:30:00', '2024-01-04 09:00:00'),
+(5, '079078003456', '2013-12-03', '2028-12-03', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-3.jpg', '/uploads/cccd-back-3.jpg', 'VERIFIED', '2024-01-05 08:30:00', '2024-01-05 09:00:00');
 
 -- =====================================================
 -- 7. HOSTELS DATA
 -- =====================================================
 
-INSERT INTO hostels (hostel_id, name, description, status, room_number, createdAt, owner_id, address_id) VALUES
+INSERT INTO hostels (hostel_id, name, description, status, room_number, created_at, owner_id, address_id) VALUES
 (1, 'Nhà Trọ Xanh Quận 1', 'Nhà trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi, an ninh 24/7', 1, 20, '2024-01-15', 3, 1),
 (2, 'Căn Hộ Mini Lê Lợi', 'Căn hộ mini hiện đại, gần trung tâm thương mại, tiện ích đầy đủ', 1, 15, '2024-01-20', 3, 2),
 (3, 'Homestay Hai Bà Trưng', 'Homestay ấm cúng, phù hợp cho sinh viên và người đi làm', 1, 12, '2024-01-25', 4, 3),
@@ -153,29 +146,19 @@ INSERT INTO rooms (room_id, category_id, hostel_id, description, namerooms, stat
 (3, 6, 1, 'Phòng cao cấp, nội thất sang trọng', 'Phòng 201', 'active', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 35.0, 2, 7000000.00),
 (4, 6, 1, 'Phòng VIP, view thành phố, đầy đủ tiện ích', 'Phòng 202', 'unactive', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 40.0, 3, 8500000.00),
 (5, 1, 1, 'Phòng tiêu chuẩn, sạch sẽ, giá hợp lý', 'Phòng 301', 'active', '123 Đường Nguyễn Huệ, P.Bến Nghé, Q.1', 22.0, 2, 4000000.00),
-
--- Căn Hộ Mini Lê Lợi
 (6, 2, 2, 'Căn hộ mini 1 phòng ngủ, bếp riêng', 'Mini 01', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 30.0, 2, 6000000.00),
 (7, 2, 2, 'Căn hộ mini 2 phòng ngủ, phòng khách riêng', 'Mini 02', 'active', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 45.0, 4, 9000000.00),
 (8, 8, 2, 'Studio hiện đại, không gian mở', 'Studio 01', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 25.0, 1, 5500000.00),
 (9, 8, 2, 'Studio cao cấp, nội thất đầy đủ', 'Studio 02', 'unactive', '456 Đường Lê Lợi, P.Bến Thành, Q.1', 28.0, 2, 6500000.00),
-
--- Homestay Hai Bà Trưng
 (10, 4, 3, 'Homestay ấm cúng, phù hợp gia đình nhỏ', 'Home 01', 'active', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 35.0, 3, 5500000.00),
 (11, 4, 3, 'Homestay rộng rãi, có sân vườn nhỏ', 'Home 02', 'unactive', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 50.0, 5, 8000000.00),
 (12, 4, 3, 'Homestay tiện nghi, gần trung tâm', 'Home 03', 'unactive', '789 Đường Hai Bà Trưng, P.Cầu Kho, Q.1', 40.0, 4, 7000000.00),
-
--- Phòng Trọ Pasteur
 (13, 7, 4, 'Phòng bình dân, giá rẻ, sạch sẽ', 'Phòng A01', 'unactive', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 18.0, 2, 2800000.00),
 (14, 7, 4, 'Phòng nhỏ gọn, phù hợp sinh viên', 'Phòng A02', 'active', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 20.0, 2, 3200000.00),
 (15, 1, 4, 'Phòng trọ tiêu chuẩn, tiện nghi cơ bản', 'Phòng B01', 'unactive', '321 Đường Pasteur, P.Cầu Ông Lãnh, Q.1', 25.0, 3, 3800000.00),
-
--- Nhà Trọ Cách Mạng Tháng 8
 (16, 1, 5, 'Phòng trọ rộng rãi, thoáng mát', 'Phòng 1A', 'active', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 30.0, 3, 4200000.00),
 (17, 1, 5, 'Phòng trọ có ban công, view đẹp', 'Phòng 1B', 'unactive', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 32.0, 3, 4500000.00),
 (18, 6, 5, 'Phòng cao cấp, nội thất hiện đại', 'Phòng 2A', 'unactive', '654 Đường Cách Mạng Tháng 8, P.Cô Giang, Q.1', 38.0, 4, 6500000.00),
-
--- Studio Xa Lộ Hà Nội
 (19, 8, 6, 'Studio sang trọng, đầy đủ tiện nghi', 'Studio Premium 01', 'active', '987 Đường Xa Lộ Hà Nội, P.An Phú, Q.2', 35.0, 2, 7500000.00),
 (20, 8, 6, 'Studio hiện đại, không gian mở', 'Studio Premium 02', 'unactive', '987 Đường Xa Lộ Hà Nội, P.An Phú, Q.2', 32.0, 2, 7000000.00);
 
@@ -201,14 +184,14 @@ INSERT INTO RoomUtilities (room_id, utility_id) VALUES
 -- 10. POSTS DATA
 -- =====================================================
 
-INSERT INTO posts (post_id, description, price, area, view, status, title, created_at, approval_status, approved_by, approved_at, user_id, address_id, category_id, hostel_id) VALUES
-(1, 'Phòng trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi hiện đại. Gần trường học, bệnh viện, trung tâm thương mại. An ninh 24/7, thang máy, chỗ để xe rộng rãi.', 4500000.00, 25.0, 150, 1, 'Cho thuê phòng trọ cao cấp Q1 - Đầy đủ tiện nghi', '2024-02-15', 'APPROVED', 2, '2024-02-16', 3, 1, 1, 1),
-(2, 'Căn hộ mini hiện đại với thiết kế tối ưu không gian. Bếp riêng, phòng tắm riêng, đầy đủ nội thất. Phù hợp cho cặp đôi hoặc gia đình nhỏ.', 6000000.00, 30.0, 89, 1, 'Căn hộ mini Lê Lợi - Thiết kế hiện đại', '2024-02-20', 'APPROVED', 2, '2024-02-21', 3, 2, 2, 2),
-(3, 'Homestay ấm cúng với không gian xanh mát. Phù hợp cho những ai yêu thích sự yên tĩnh và gần gũi với thiên nhiên. Có sân vườn nhỏ để thư giãn.', 5500000.00, 35.0, 67, 1, 'Homestay Hai Bà Trưng - Không gian xanh', '2024-02-25', 'APPROVED', 2, '2024-02-26', 4, 3, 4, 3),
-(4, 'Phòng trọ giá rẻ dành cho sinh viên và người lao động. Vị trí thuận tiện, gần trường học và bệnh viện. Môi trường sạch sẽ, an toàn.', 2800000.00, 18.0, 234, 1, 'Phòng trọ sinh viên Pasteur - Giá rẻ', '2024-03-01', 'APPROVED', 2, '2024-03-02', 4, 4, 7, 4),
-(5, 'Studio cao cấp với thiết kế sang trọng. Không gian mở, tận dụng tối đa ánh sáng tự nhiên. Đầy đủ tiện nghi hiện đại cho cuộc sống tiện nghi.', 7500000.00, 35.0, 112, 1, 'Studio Premium Xa Lộ Hà Nội - Sang trọng', '2024-03-05', 'APPROVED', 2, '2024-03-06', 5, 6, 8, 6),
-(6, 'Phòng trọ mới đăng, đang chờ duyệt. Vị trí đẹp, giá cả hợp lý, phù hợp cho nhiều đối tượng khách hàng.', 4200000.00, 30.0, 45, 1, 'Phòng trọ Cách Mạng Tháng 8 - Mới', '2024-03-10', 'PENDING', NULL, NULL, 5, 5, 1, 5),
-(7, 'Bài đăng bị từ chối do không đủ thông tin. Cần bổ sung thêm hình ảnh và mô tả chi tiết hơn.', 3500000.00, 22.0, 12, 0, 'Phòng trọ cần cập nhật thông tin', '2024-03-12', 'REJECTED', 2, '2024-03-13', 3, 1, 1, 1);
+INSERT INTO posts (description, price, area, view, status, title, created_at, approval_status, approved_by, approved_at, user_id, address_id, category_id, hostel_id) VALUES
+('Phòng trọ cao cấp tại trung tâm Quận 1, đầy đủ tiện nghi hiện đại. Gần trường học, bệnh viện, trung tâm thương mại. An ninh 24/7, thang máy, chỗ để xe rộng rãi.', 4500000.00, 25.0, 150, 1, 'Cho thuê phòng trọ cao cấp Q1 - Đầy đủ tiện nghi', '2024-02-15', 'APPROVED', 2, '2024-02-16', 3, 1, 1, 1),
+('Căn hộ mini hiện đại với thiết kế tối ưu không gian. Bếp riêng, phòng tắm riêng, đầy đủ nội thất. Phù hợp cho cặp đôi hoặc gia đình nhỏ.', 6000000.00, 30.0, 89, 1, 'Căn hộ mini Lê Lợi - Thiết kế hiện đại', '2024-02-20', 'APPROVED', 2, '2024-02-21', 3, 2, 2, 2),
+('Homestay ấm cúng với không gian xanh mát. Phù hợp cho những ai yêu thích sự yên tĩnh và gần gũi với thiên nhiên. Có sân vườn nhỏ để thư giãn.', 5500000.00, 35.0, 67, 1, 'Homestay Hai Bà Trưng - Không gian xanh', '2024-02-25', 'APPROVED', 2, '2024-02-26', 4, 3, 4, 3),
+('Phòng trọ giá rẻ dành cho sinh viên và người lao động. Vị trí thuận tiện, gần trường học và bệnh viện. Môi trường sạch sẽ, an toàn.', 2800000.00, 18.0, 234, 1, 'Phòng trọ sinh viên Pasteur - Giá rẻ', '2024-03-01', 'APPROVED', 2, '2024-03-02', 4, 4, 7, 4),
+('Studio cao cấp với thiết kế sang trọng. Không gian mở, tận dụng tối đa ánh sáng tự nhiên. Đầy đủ tiện nghi hiện đại cho cuộc sống tiện nghi.', 7500000.00, 35.0, 112, 1, 'Studio Premium Xa Lộ Hà Nội - Sang trọng', '2024-03-05', 'APPROVED', 2, '2024-03-06', 5, 6, 8, 6),
+('Phòng trọ mới đăng, đang chờ duyệt. Vị trí đẹp, giá cả hợp lý, phù hợp cho nhiều đối tượng khách hàng.', 4200000.00, 30.0, 45, 1, 'Phòng trọ Cách Mạng Tháng 8 - Mới', '2024-03-10', 'PENDING', NULL, NULL, 5, 5, 1, 5),
+('Bài đăng bị từ chối do không đủ thông tin. Cần bổ sung thêm hình ảnh và mô tả chi tiết hơn.', 3500000.00, 22.0, 12, 0, 'Phòng trọ cần cập nhật thông tin', '2024-03-12', 'REJECTED', 2, '2024-03-13', 3, 1, 1, 1);
 
 -- =====================================================
 -- 11. POST UTILITIES RELATIONSHIP
@@ -254,16 +237,16 @@ INSERT INTO Images (image_id, image_url, post_id, room_id, contract_id) VALUES
 -- =====================================================
 
 INSERT INTO unregistered_tenants (id,user_id, full_name, phone, cccd_number, address, status, created_at) VALUES
-(1,12, 'Nguyễn Văn Khách', '0987654321', '079095001111', '123 Đường ABC, Q.1, TP.HCM', 'ACTIVE', '2024-02-01 10:00:00'),
-(33,9, 'Trần Thị Linh', '0987654322', '079096002222', '456 Đường DEF, Q.2, TP.HCM', 'ACTIVE', '2024-02-05 11:00:00'),
-(3,10, 'Lê Minh Tâm', '0987654323', '079097003333', '789 Đường GHI, Q.3, TP.HCM', 'INACTIVE', '2024-02-10 12:00:00');
+(1,6, 'Nguyễn Văn Khách', '0987654321', '079095001111', '123 Đường ABC, Q.1, TP.HCM', 'ACTIVE', '2024-02-01 10:00:00'),
+(33,7, 'Trần Thị Linh', '0987654322', '079096002222', '456 Đường DEF, Q.2, TP.HCM', 'ACTIVE', '2024-02-05 11:00:00'),
+(44,8, 'Lê Minh Tâm', '0987654323', '079097003333', '789 Đường GHI, Q.3, TP.HCM', 'INACTIVE', '2024-02-10 12:00:00');
 
 -- =====================================================
 -- 14. CONTRACTS DATA
 -- =====================================================
 
-INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_tenant_id, user_id, contract_date, created_at, start_date, end_date, price, deposit, duration, terms, status, tenant_phone, return_status) VALUES
-(33, 10, 8, 4, 3, 8, '2024-02-25', '2024-02-25', '2024-03-01', '2024-12-01', 5500000.00, 11000000.00, 9.0, 'Hợp đồng thuê homestay 9 tháng. Có thể sử dụng khu vực chung. Thanh toán đúng hạn.', 'ACTIVE', '0901000008', NULL);
+INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_tenant_id, contract_date, created_at, start_date, end_date, price, deposit, duration, terms, status, tenant_phone, return_status) VALUES
+(33, 10, 8, 3, 44, '2024-02-25', '2024-02-25', '2024-03-01', '2024-12-01', 5500000.00, 11000000.00, 9.0, 'Hợp đồng thuê homestay 9 tháng. Có thể sử dụng khu vực chung. Thanh toán đúng hạn.', 'ACTIVE', '0901000008', NULL);
 (44, 14, 9, 4, 33, 9, '2024-03-01', '2024-03-01', '2024-03-15', '2024-09-15', 3200000.00, 6400000.00, 6.0, 'Hợp đồng thuê phòng sinh viên 6 tháng. Giá rẻ, phù hợp sinh viên. Không ồn ào sau 22h.', 'ACTIVE', '0901000009', NULL),
 (55, 16, 10, 5, 33, 10, '2024-03-05', '2024-03-05', '2024-03-15', '2025-03-15', 4200000.00, 8400000.00, 12.0, 'Hợp đồng thuê phòng 12 tháng. Có chỗ để xe miễn phí. Bảo trì định kỳ.', 'ACTIVE', '0901000010', NULL),
 (66, 19, 11, 5, 33, 11, '2024-03-10', '2024-03-10', '2024-04-01', '2025-04-01', 7500000.00, 15000000.00, 12.0, 'Hợp đồng thuê studio cao cấp 12 tháng. Đầy đủ nội thất. Dịch vụ dọn dẹp hàng tuần.', 'ACTIVE', '0901000011', NULL),
