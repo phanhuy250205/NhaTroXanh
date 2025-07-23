@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -43,8 +44,12 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
+    
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -182,6 +187,71 @@ public class HostProfileController {
         }
 
         return "redirect:/chu-tro/profile-host";
+    }
+
+    // TÁCH RIÊNG - Endpoint riêng cho đổi mật khẩu
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+                                @RequestParam("newPassword") String newPassword,
+                                @RequestParam("confirmPassword") String confirmPassword,
+                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                RedirectAttributes redirectAttributes) {
+
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validation cơ bản
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng xác nhận mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu hiện tại không đúng!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Cập nhật mật khẩu
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
+
+            redirectAttributes.addFlashAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
+            return "redirect:/chu-tro/profile-host";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("passwordError", "Có lỗi xảy ra khi đổi mật khẩu: " + e.getMessage());
+            return "redirect:/chu-tro/profile-host";
+        }
     }
 
     @PostMapping("/chi-tiet-khach-thue/update")

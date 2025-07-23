@@ -212,9 +212,9 @@ class FavoriteHandler {
         } else {
             // Fallback: redirect to login page
             this.showNotification('Vui lòng đăng nhập để sử dụng tính năng này', 'warning');
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
+            // setTimeout(() => {
+            //     window.location.href = '/';
+            // }, 2000);
         }
     }
 

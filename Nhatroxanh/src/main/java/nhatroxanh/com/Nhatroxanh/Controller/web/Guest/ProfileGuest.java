@@ -86,6 +86,32 @@ public class ProfileGuest {
             return "guest/profile-guest";
         }
 
+        // ===== KIỂM TRA EMAIL ĐÃ TỒN TẠI - PHẦN MỚI =====
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            String newEmail = dto.getEmail().trim().toLowerCase();
+            String currentEmail = user.getEmail() != null ? user.getEmail().toLowerCase() : "";
+            
+            // Chỉ kiểm tra nếu email mới khác email hiện tại
+            if (!newEmail.equals(currentEmail)) {
+                Optional<Users> existingUserWithEmail = usersRepository.findByEmail(newEmail);
+                if (existingUserWithEmail.isPresent()) {
+                    Users existingUser = existingUserWithEmail.get();
+                    // Đảm bảo không phải chính user hiện tại
+                    if (!existingUser.getUserId().equals(user.getUserId())) {
+                        // model.addAttribute("error", "Email '" + newEmail + "' đã được sử dụng bởi tài khoản khác.");
+                        model.addAttribute("error", "Email đã được sử dụng bởi tài khoản khác.");
+                        model.addAttribute("user", user);
+                        return "guest/profile-guest";
+                    }
+                }
+            }
+        } else {
+            model.addAttribute("error", "Email không được để trống.");
+            model.addAttribute("user", user);
+            return "guest/profile-guest";
+        }
+        // ===== KẾT THÚC KIỂM TRA EMAIL =====
+
         UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
 
         // Handle avatar upload
@@ -124,7 +150,7 @@ public class ProfileGuest {
         user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
         user.setPhone(dto.getPhone());
         user.setGender(dto.getGender());
-        user.setEmail(dto.getEmail());
+        user.setEmail(dto.getEmail().trim().toLowerCase()); // Chuẩn hóa email
         user.setAddress(dto.getAddress());
 
         // Handle CCCD

@@ -61,17 +61,20 @@
         border-left: 5px solid #ffc107;
     }
 
-    .alert-icon {
+    /* Thay đổi từ .alert-icon thành .alert-icon-host */
+    .alert-icon-host {
         margin-right: 12px;
         font-size: 1.3rem;
     }
 
-    .alert-message {
+    /* Thay đổi từ .alert-message thành .alert-message-host */
+    .alert-message-host {
         flex-grow: 1;
         line-height: 1.4;
     }
 
-    .btn-close {
+    /* Thay đổi từ .btn-close thành .btn-close-host */
+    .btn-close-host {
         background: none;
         border: none;
         font-size: 1.4rem;
@@ -89,13 +92,14 @@
         justify-content: center;
     }
 
-    .btn-close:hover {
+    .btn-close-host:hover {
         opacity: 1;
         background: rgba(0, 0, 0, 0.1);
     }
 
     /* Enhanced Profile Styles */
-    .main-content {
+    /* Thay đổi từ .main-content thành .main-content-host */
+    .main-content-host {
         padding: 2rem;
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         min-height: 100vh;
@@ -236,8 +240,9 @@
     }
 
     /* Enhanced Form Styles */
-    .form-control,
-    .form-select {
+    /* Thay đổi từ .form-control thành .form-control-host */
+    .form-control-host,
+    .form-select-host {
         border: 2px solid #e9ecef;
         border-radius: 10px;
         padding: 12px 15px;
@@ -246,21 +251,21 @@
         font-weight: 500;
     }
 
-    .form-control:focus,
-    .form-select:focus {
+    .form-control-host:focus,
+    .form-select-host:focus {
         border-color: #007bff;
         box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.1);
         background: white;
         transform: translateY(-1px);
     }
 
-    .form-control.is-invalid {
+    .form-control-host.is-invalid {
         border-color: #dc3545;
         box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.1);
         animation: shake 0.5s ease-in-out;
     }
 
-    .form-control.is-valid {
+    .form-control-host.is-valid {
         border-color: #28a745;
         box-shadow: 0 0 0 4px rgba(40, 167, 69, 0.1);
     }
@@ -281,7 +286,8 @@
         }
     }
 
-    .form-label {
+    /* Thay đổi từ .form-label thành .form-label-host */
+    .form-label-host {
         font-weight: 600;
         color: #495057;
         margin-bottom: 8px;
@@ -290,7 +296,8 @@
         letter-spacing: 0.5px;
     }
 
-    .invalid-feedback {
+    /* Thay đổi từ .invalid-feedback thành .invalid-feedback-host */
+    .invalid-feedback-host {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -304,13 +311,14 @@
         font-weight: 500;
     }
 
-    .invalid-feedback::before {
+    .invalid-feedback-host::before {
         content: "\f071";
         font-family: "Font Awesome 6 Free";
         font-weight: 900;
     }
 
-    .valid-feedback {
+    /* Thay đổi từ .valid-feedback thành .valid-feedback-host */
+    .valid-feedback-host {
         display: flex;
         align-items: center;
         gap: 8px;
@@ -324,13 +332,14 @@
         font-weight: 500;
     }
 
-    .valid-feedback::before {
+    .valid-feedback-host::before {
         content: "\f00c";
         font-family: "Font Awesome 6 Free";
         font-weight: 900;
     }
 
-    .field-info {
+    /* Thay đổi từ .field-info thành .field-info-host */
+    .field-info-host {
         margin-top: 8px;
         font-size: 0.875rem;
         font-weight: 500;
@@ -341,23 +350,88 @@
         border-radius: 6px;
     }
 
-    .field-info.text-success {
+    .field-info-host.text-success {
         color: #28a745;
         background: rgba(40, 167, 69, 0.1);
     }
 
-    .field-info.text-info {
+    .field-info-host.text-info {
         color: #17a2b8;
         background: rgba(23, 162, 184, 0.1);
     }
 
-    .field-info.text-warning {
+    .field-info-host.text-warning {
         color: #ffc107;
         background: rgba(255, 193, 7, 0.1);
     }
 
+    /* Password Input Container */
+    /* Thay đổi từ .password-input-container thành .password-input-container-host */
+    .password-input-container-host {
+        position: relative;
+    }
+
+    /* Thay đổi từ .password-toggle thành .password-toggle-host */
+    .password-toggle-host {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .password-toggle-host:hover {
+        color: #495057;
+        background: rgba(0, 0, 0, 0.05);
+    }
+
+    .password-toggle-host:focus {
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+    }
+
+    /* Password strength indicator */
+    /* Thay đổi từ .password-strength thành .password-strength-host */
+    .password-strength-host {
+        margin-top: 8px;
+        height: 4px;
+        border-radius: 2px;
+        background: #e9ecef;
+        overflow: hidden;
+    }
+
+    /* Thay đổi từ .password-strength-bar thành .password-strength-bar-host */
+    .password-strength-bar-host {
+        height: 100%;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .password-strength-host.weak .password-strength-bar-host {
+        width: 33%;
+        background: #dc3545;
+    }
+
+    .password-strength-host.medium .password-strength-bar-host {
+        width: 66%;
+        background: #ffc107;
+    }
+
+    .password-strength-host.strong .password-strength-bar-host {
+        width: 100%;
+        background: #28a745;
+    }
+
     /* Enhanced Button Styles */
-    .btn {
+    /* Thay đổi từ .btn thành .btn-host */
+    .btn-host {
         border-radius: 10px;
         padding: 12px 24px;
         font-weight: 600;
@@ -367,7 +441,7 @@
         overflow: hidden;
     }
 
-    .btn::before {
+    .btn-host::before {
         content: '';
         position: absolute;
         top: 0;
@@ -378,25 +452,41 @@
         transition: left 0.5s;
     }
 
-    .btn:hover::before {
+    .btn-host:hover::before {
         left: 100%;
     }
 
-    .btn-outline-primary {
+    /* Thay đổi từ .btn-outline-primary thành .btn-outline-primary-host */
+    .btn-outline-primary-host {
         background: linear-gradient(135deg, #007bff, #0056b3);
         color: white;
         box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
     }
 
-    .btn-outline-primary:hover {
+    .btn-outline-primary-host:hover {
         background: linear-gradient(135deg, #0056b3, #004085);
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(0, 123, 255, 0.4);
         color: white;
     }
 
+    /* Thay đổi từ .btn-warning thành .btn-warning-host */
+    .btn-warning-host {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        color: #212529;
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-warning-host:hover {
+        background: linear-gradient(135deg, #e0a800, #d39e00);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(255, 193, 7, 0.4);
+        color: #212529;
+    }
+
     /* Loading Overlay */
-    .loading-overlay {
+    /* Thay đổi từ .loading-overlay thành .loading-overlay-host */
+    .loading-overlay-host {
         position: fixed;
         top: 0;
         left: 0;
@@ -409,7 +499,8 @@
         z-index: 9999;
     }
 
-    .loading-spinner {
+    /* Thay đổi từ .loading-spinner thành .loading-spinner-host */
+    .loading-spinner-host {
         background: white;
         padding: 2rem;
         border-radius: 15px;
@@ -417,7 +508,7 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .loading-spinner i {
+    .loading-spinner-host i {
         font-size: 2rem;
         color: #007bff;
         margin-bottom: 1rem;
@@ -425,7 +516,7 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
-        .main-content {
+        .main-content-host {
             padding: 1rem;
         }
 
@@ -450,11 +541,13 @@
     }
 
     /* Animation Classes */
-    .animate-fade-in {
+    /* Thay đổi từ .animate-fade-in thành .animate-fade-in-host */
+    .animate-fade-in-host {
         animation: fadeIn 0.8s ease-out;
     }
 
-    .animate-slide-up {
+    /* Thay đổi từ .animate-slide-up thành .animate-slide-up-host */
+    .animate-slide-up-host {
         animation: slideUp 0.6s ease-out;
     }
 
@@ -485,35 +578,52 @@
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <div class="main-content">
+    <div class="main-content-host">
         <!-- Enhanced Toast Container -->
         <div class="toast-container-host" id="toastContainer">
-            <div th:if="${success}" class="alert-host success animate-fade-in" role="alert">
-                <i class="alert-icon fas fa-check-circle"></i>
-                <span class="alert-message" th:text="${success}"></span>
-                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            <!-- Thông báo cho cập nhật thông tin -->
+            <div th:if="${success}" class="alert-host success animate-fade-in-host" role="alert">
+                <i class="alert-icon-host fas fa-check-circle"></i>
+                <span class="alert-message-host" th:text="${success}"></span>
+                <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
             </div>
-            <div th:if="${error}" class="alert-host danger animate-fade-in" role="alert">
-                <i class="alert-icon fas fa-exclamation-circle"></i>
-                <span class="alert-message" th:text="${error}"></span>
-                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            
+            <!-- Thông báo cho đổi mật khẩu -->
+            <div th:if="${passwordSuccess}" class="alert-host success animate-fade-in-host" role="alert">
+                <i class="alert-icon-host fas fa-check-circle"></i>
+                <span class="alert-message-host" th:text="${passwordSuccess}"></span>
+                <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
+            </div>
+            
+            <div th:if="${passwordError}" class="alert-host danger animate-fade-in-host" role="alert">
+                <i class="alert-icon-host fas fa-exclamation-circle"></i>
+                <span class="alert-message-host" th:text="${passwordError}"></span>
+                <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
+            </div>
+            
+            <!-- Thông báo lỗi chung -->
+            <div th:if="${error}" class="alert-host danger animate-fade-in-host" role="alert">
+                <i class="alert-icon-host fas fa-exclamation-circle"></i>
+                <span class="alert-message-host" th:text="${error}"></span>
+                <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
             </div>
         </div>
 
-        <div class="animate-fade-in">
+        <div class="animate-fade-in-host">
             <h4 class="mb-4" style="color: #007bff; font-weight: 700;">
                 <i class="fas fa-user-circle me-2"></i>Thông tin tài khoản
             </h4>
             <hr style="border: 2px solid #007bff; border-radius: 2px;">
         </div>
 
-        <form th:action="@{/chu-tro/profile-host}" th:object="${hostInfo}" method="post" enctype="multipart/form-data"
-            id="hostProfileForm" class="animate-slide-up">
+        <div class="row g-4 animate-slide-up-host">
+            <!-- Cột trái - Profile Card -->
+            <div class="col-12 col-lg-4 text-center text-lg-start">
+                <div class="host-card text-center">
+                    <!-- FORM CẬP NHẬT THÔNG TIN CÁ NHÂN -->
+                    <form th:action="@{/chu-tro/profile-host}" th:object="${hostInfo}" method="post" 
+                          enctype="multipart/form-data" id="hostProfileForm">
 
-            <div class="row g-4">
-                <!-- Cột trái - Profile Card -->
-                <div class="col-12 col-lg-4 text-center text-lg-start">
-                    <div class="host-card text-center">
                         <input type="file" id="avatarInput" name="avatarFile" class="d-none" accept="image/*">
 
                         <div class="position-relative d-inline-block mb-3">
@@ -542,167 +652,235 @@
                         </div>
 
                         <div class="mb-4">
-                            <button type="submit" class="btn btn-outline-primary" id="submitBtn">
+                            <button type="submit" class="btn-host btn-outline-primary-host" id="submitBtn">
                                 <i class="fas fa-save me-2"></i>Cập nhật thông tin
                             </button>
                         </div>
+                    </form>
 
-                        <div class="host-section text-start">
-                            <h6><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
-                            <div class="row g-2">
-                                <div class="col-12">
-                                    <p class="mb-2"><strong>Ngày tham gia:</strong>
-                                        <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                    </p>
+                    <!-- FORM ĐỔI MẬT KHẨU - TÁCH RIÊNG HOÀN TOÀN -->
+                    <div class="host-section text-start">
+                        <h6><i class="fas fa-key me-2"></i>Đổi mật khẩu</h6>
+                        <form th:action="@{/chu-tro/change-password}" method="post" id="changePasswordForm">
+                            <div class="mb-3">
+                                <label class="form-label-host">Mật khẩu hiện tại *</label>
+                                <div class="password-input-container-host">
+                                    <input type="password" class="form-control-host" id="currentPassword" name="currentPassword">
+                                    <button type="button" class="password-toggle-host" onclick="togglePassword('currentPassword')">
+                                        <i class="fas fa-eye" id="currentPasswordIcon"></i>
+                                    </button>
                                 </div>
-                                <div class="col-12">
-                                    <p class="mb-2"><strong>Tổng số khu trọ:</strong>
-                                        <span class="text-primary fw-bold" th:text="${totalHostels}">5 khu trọ</span>
-                                    </p>
+                                <div class="invalid-feedback-host" id="currentPasswordError" style="display: none;"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-host">Mật khẩu mới *</label>
+                                <div class="password-input-container-host">
+                                    <input type="password" class="form-control-host" id="newPassword" name="newPassword">
+                                    <button type="button" class="password-toggle-host" onclick="togglePassword('newPassword')">
+                                        <i class="fas fa-eye" id="newPasswordIcon"></i>
+                                    </button>
                                 </div>
-                                <div class="col-12">
-                                    <p class="mb-2"><strong>Xác minh tài khoản:</strong></p>
-                                    <span
-                                        th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
-                                        class="host-badge host-verified">
-                                        <i class="fas fa-shield-check"></i> Đã xác minh
-                                    </span>
-                                    <span
-                                        th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
-                                        class="host-badge host-inactive">
-                                        <i class="fas fa-shield-exclamation"></i> Chưa xác minh
-                                    </span>
+                                <div class="password-strength-host" id="passwordStrength" style="display: none;">
+                                    <div class="password-strength-bar-host"></div>
                                 </div>
-                                <div class="col-12">
-                                    <p class="mb-0"><strong>Đánh giá:</strong>
-                                        <span class="host-rating">★ 4.8/5</span> (30 đánh giá)
-                                    </p>
+                                <div class="invalid-feedback-host" id="newPasswordError" style="display: none;"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label-host">Xác nhận mật khẩu mới *</label>
+                                <div class="password-input-container-host">
+                                    <input type="password" class="form-control-host" id="confirmPassword" name="confirmPassword">
+                                    <button type="button" class="password-toggle-host" onclick="togglePassword('confirmPassword')">
+                                        <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                    </button>
                                 </div>
+                                <div class="invalid-feedback-host" id="confirmPasswordError" style="display: none;"></div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Cột phải - Form Information -->
-                <div class="col-12 col-lg-8">
-                    <!-- Thông tin cá nhân -->
-                    <div class="host-section">
-                        <h6><i class="fas fa-user me-2"></i>Thông tin cá nhân</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Họ và tên *</label>
-                                <input type="text" class="form-control" id="fullname" th:field="*{fullname}" required>
-                                <div class="invalid-feedback" id="fullnameError" style="display: none;"></div>
-                                <div class="valid-feedback" id="fullnameSuccess" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ngày sinh</label>
-                                <input type="date" class="form-control" id="birthday" th:field="*{birthday}">
-                                <div class="invalid-feedback" id="birthdayError" style="display: none;"></div>
-                                <div class="valid-feedback" id="birthdaySuccess" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control" id="cccdNumber" th:field="*{cccdNumber}"
-                                    maxlength="12">
-                                <div class="invalid-feedback" id="cccdNumberError" style="display: none;"></div>
-                                <div class="valid-feedback" id="cccdNumberSuccess" style="display: none;"></div>
-                                <div class="field-info" id="cccdInfo" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ngày cấp</label>
-                                <input type="date" class="form-control" id="issueDate" th:field="*{issueDate}">
-                                <div class="invalid-feedback" id="issueDateError" style="display: none;"></div>
-                                <div class="valid-feedback" id="issueDateSuccess" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Nơi cấp</label>
-                                <input type="text" class="form-control" id="issuePlace" th:field="*{issuePlace}">
-                                <div class="invalid-feedback" id="issuePlaceError" style="display: none;"></div>
-                                <div class="valid-feedback" id="issuePlaceSuccess" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label d-block">Giới tính</label>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="genderNam"
-                                        value="true" th:checked="${hostInfo.gender} == true">
-                                    <label class="form-check-label" for="genderNam">Nam</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input class="form-check-input" type="radio" name="gender" id="genderNu"
-                                        value="false" th:checked="${hostInfo.gender} == false">
-                                    <label class="form-check-label" for="genderNu">Nữ</label>
-                                </div>
-                                <div class="invalid-feedback" id="genderError" style="display: none;"></div>
-                            </div>
-                        </div>
+                            
+                            <button type="submit" class="btn-host btn-warning-host w-100" id="changePasswordBtn">
+                                <i class="fas fa-lock me-2"></i>Đổi mật khẩu
+                            </button>
+                        </form>
                     </div>
 
-                    <!-- Thông tin liên hệ -->
-                    <div class="host-section">
-                        <h6><i class="fas fa-envelope me-2"></i>Thông tin liên hệ</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Email *</label>
-                                <input type="email" class="form-control" id="email" th:field="*{email}" readonly>
-                                <div class="invalid-feedback" id="emailError" style="display: none;"></div>
-                                <div class="valid-feedback" id="emailSuccess" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Số điện thoại *</label>
-                                <input type="tel" class="form-control" id="phone" th:field="*{phone}" required>
-                                <div class="invalid-feedback" id="phoneError" style="display: none;"></div>
-                                <div class="valid-feedback" id="phoneSuccess" style="display: none;"></div>
-                                <div class="field-info" id="phoneInfo" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Tỉnh/Thành phố</label>
-                                <select class="form-select" id="province" name="province">
-                                    <option value="">Chọn Tỉnh/TP</option>
-                                </select>
-                                <div class="invalid-feedback" id="provinceError" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Quận/Huyện</label>
-                                <select class="form-select" id="district" name="district">
-                                    <option value="">Chọn Quận/Huyện</option>
-                                </select>
-                                <div class="invalid-feedback" id="districtError" style="display: none;"></div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Phường/Xã</label>
-                                <select class="form-select" id="ward" name="ward">
-                                    <option value="">Chọn Phường/Xã</option>
-                                </select>
-                                <div class="invalid-feedback" id="wardError" style="display: none;"></div>
+                    <div class="host-section text-start">
+                        <h6><i class="fas fa-info-circle me-2"></i>Thông tin bổ sung</h6>
+                        <div class="row g-2">
+                            <div class="col-12">
+                                <p class="mb-2"><strong>Ngày tham gia:</strong>
+                                    <span th:text="${#temporals.format(user.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                                </p>
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Tên đường/Số nhà</label>
-                                <input type="text" class="form-control" id="street" name="street">
-                                <div class="invalid-feedback" id="streetError" style="display: none;"></div>
-                                <div class="valid-feedback" id="streetSuccess" style="display: none;"></div>
+                                <p class="mb-2"><strong>Tổng số khu trọ:</strong>
+                                    <span class="text-primary fw-bold" th:text="${totalHostels}">5 khu trọ</span>
+                                </p>
                             </div>
-
-                            <!-- Hidden chứa địa chỉ đầy đủ -->
-                            <input type="hidden" name="address" th:field="*{address}" id="fullAddress">
-                            <input type="hidden" id="savedAddress" th:value="*{address}" />
+                            <div class="col-12">
+                                <p class="mb-2"><strong>Xác minh tài khoản:</strong></p>
+                                <span
+                                    th:if="${hostInfo.cccdNumber != null and hostInfo.cccdNumber != '' and user.avatar != null and user.avatar != ''}"
+                                    class="host-badge host-verified">
+                                    <i class="fas fa-shield-check"></i> Đã xác minh
+                                </span>
+                                <span
+                                    th:if="${hostInfo.cccdNumber == null or hostInfo.cccdNumber == '' or user.avatar == null or user.avatar == ''}"
+                                    class="host-badge host-inactive">
+                                    <i class="fas fa-shield-exclamation"></i> Chưa xác minh
+                                </span>
+                            </div>
+                            <div class="col-12">
+                                <p class="mb-0"><strong>Đánh giá:</strong>
+                                    <span class="host-rating">★ 4.8/5</span> (30 đánh giá)
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </form>
+
+            <!-- Cột phải - Form Information -->
+            <div class="col-12 col-lg-8">
+                <!-- Thông tin cá nhân -->
+                <div class="host-section">
+                    <h6><i class="fas fa-user me-2"></i>Thông tin cá nhân</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-host">Họ và tên *</label>
+                            <input type="text" class="form-control-host" id="fullname" th:field="*{hostInfo.fullname}" 
+                                   form="hostProfileForm" required>
+                            <div class="invalid-feedback-host" id="fullnameError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="fullnameSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host">Ngày sinh</label>
+                            <input type="date" class="form-control-host" id="birthday" th:field="*{hostInfo.birthday}"
+                                   form="hostProfileForm">
+                            <div class="invalid-feedback-host" id="birthdayError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="birthdaySuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host">Số CMND/CCCD</label>
+                            <input type="text" class="form-control-host" id="cccdNumber" th:field="*{hostInfo.cccdNumber}"
+                                   maxlength="12" form="hostProfileForm">
+                            <div class="invalid-feedback-host" id="cccdNumberError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="cccdNumberSuccess" style="display: none;"></div>
+                            <div class="field-info-host" id="cccdInfo" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host">Ngày cấp</label>
+                            <input type="date" class="form-control-host" id="issueDate" th:field="*{hostInfo.issueDate}"
+                                   form="hostProfileForm">
+                            <div class="invalid-feedback-host" id="issueDateError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="issueDateSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host">Nơi cấp</label>
+                            <input type="text" class="form-control-host" id="issuePlace" th:field="*{hostInfo.issuePlace}"
+                                   form="hostProfileForm">
+                            <div class="invalid-feedback-host" id="issuePlaceError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="issuePlaceSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host d-block">Giới tính</label>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNam"
+                                    value="true" th:checked="${hostInfo.gender} == true" form="hostProfileForm">
+                                <label class="form-check-label" for="genderNam">Nam</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="gender" id="genderNu"
+                                    value="false" th:checked="${hostInfo.gender} == false" form="hostProfileForm">
+                                <label class="form-check-label" for="genderNu">Nữ</label>
+                            </div>
+                            <div class="invalid-feedback-host" id="genderError" style="display: none;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin liên hệ -->
+                <div class="host-section">
+                    <h6><i class="fas fa-envelope me-2"></i>Thông tin liên hệ</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label-host">Email *</label>
+                            <input type="email" class="form-control-host" id="email" th:field="*{hostInfo.email}" 
+                                   form="hostProfileForm" readonly>
+                            <div class="invalid-feedback-host" id="emailError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="emailSuccess" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label-host">Số điện thoại *</label>
+                            <input type="tel" class="form-control-host" id="phone" th:field="*{hostInfo.phone}" 
+                                   form="hostProfileForm" required>
+                            <div class="invalid-feedback-host" id="phoneError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="phoneSuccess" style="display: none;"></div>
+                            <div class="field-info-host" id="phoneInfo" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-host">Tỉnh/Thành phố</label>
+                            <select class="form-select-host" id="province" name="province">
+                                <option value="">Chọn Tỉnh/TP</option>
+                            </select>
+                            <div class="invalid-feedback-host" id="provinceError" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-host">Quận/Huyện</label>
+                            <select class="form-select-host" id="district" name="district">
+                                <option value="">Chọn Quận/Huyện</option>
+                            </select>
+                            <div class="invalid-feedback-host" id="districtError" style="display: none;"></div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label-host">Phường/Xã</label>
+                            <select class="form-select-host" id="ward" name="ward">
+                                <option value="">Chọn Phường/Xã</option>
+                            </select>
+                            <div class="invalid-feedback-host" id="wardError" style="display: none;"></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label-host">Tên đường/Số nhà</label>
+                            <input type="text" class="form-control-host" id="street" name="street">
+                            <div class="invalid-feedback-host" id="streetError" style="display: none;"></div>
+                            <div class="valid-feedback-host" id="streetSuccess" style="display: none;"></div>
+                        </div>
+
+                        <!-- Hidden chứa địa chỉ đầy đủ -->
+                        <input type="hidden" name="address" th:field="*{hostInfo.address}" id="fullAddress" form="hostProfileForm">
+                        <input type="hidden" id="savedAddress" th:value="*{hostInfo.address}" />
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-spinner">
+    <div id="loadingOverlay" class="loading-overlay-host">
+        <div class="loading-spinner-host">
             <i class="fas fa-spinner fa-spin"></i>
             <p>Đang xử lý...</p>
         </div>
     </div>
 
-    <!-- Enhanced JavaScript with Validation -->
+    <!-- Enhanced JavaScript with Password Change Support -->
     <script>
+        // Password Toggle Function
+        function togglePassword(fieldId) {
+            const passwordField = document.getElementById(fieldId);
+            const toggleIcon = document.getElementById(fieldId + 'Icon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
         // CCCD Province Codes - Mã tỉnh CCCD Việt Nam
         const CCCD_PROVINCE_CODES = {
             // Miền Bắc
@@ -761,6 +939,9 @@
                     "fullname", "email", "phone", "birthday", "cccdNumber",
                     "issueDate", "issuePlace", "street", "province", "district", "ward"
                 ];
+                this.passwordElements = [
+                    "currentPassword", "newPassword", "confirmPassword"
+                ];
                 this.init();
             }
 
@@ -799,6 +980,15 @@
                     }
                 });
 
+                // Password validation - TÁCH RIÊNG
+                this.passwordElements.forEach((id) => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.addEventListener("input", () => this.validatePasswordField(id));
+                        element.addEventListener("blur", () => this.validatePasswordField(id));
+                    }
+                });
+
                 // Phone and CCCD formatting
                 const phoneInput = document.getElementById("phone");
                 const cccdInput = document.getElementById("cccdNumber");
@@ -811,10 +1001,163 @@
                     cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
                 }
 
-                // Form submission
-                const form = document.getElementById("hostProfileForm");
-                if (form) {
-                    form.addEventListener("submit", (e) => this.handleFormSubmit(e));
+                // Form submission - TÁCH RIÊNG
+                const profileForm = document.getElementById("hostProfileForm");
+                if (profileForm) {
+                    profileForm.addEventListener("submit", (e) => this.handleProfileFormSubmit(e));
+                }
+
+                // Password form submission - TÁCH RIÊNG
+                const passwordForm = document.getElementById("changePasswordForm");
+                if (passwordForm) {
+                    passwordForm.addEventListener("submit", (e) => this.handlePasswordFormSubmit(e));
+                }
+            }
+
+            // TÁCH RIÊNG - Xử lý form cập nhật thông tin
+            async handleProfileFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validateProfileForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin cá nhân", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting profile form:", error);
+                    this.showNotification("Có lỗi xảy ra khi cập nhật thông tin", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // TÁCH RIÊNG - Xử lý form đổi mật khẩu
+            async handlePasswordFormSubmit(event) {
+                event.preventDefault();
+
+                if (!this.validatePasswordForm()) {
+                    this.showNotification("Vui lòng kiểm tra lại thông tin mật khẩu", "error");
+                    return;
+                }
+
+                this.showLoading(true);
+
+                try {
+                    event.target.submit();
+                } catch (error) {
+                    console.error("Error submitting password form:", error);
+                    this.showNotification("Có lỗi xảy ra khi đổi mật khẩu", "error");
+                    this.showLoading(false);
+                }
+            }
+
+            // TÁCH RIÊNG - Validate form thông tin cá nhân
+            validateProfileForm() {
+                let isValid = true;
+
+                this.formElements.forEach((fieldId) => {
+                    if (!this.validateField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // TÁCH RIÊNG - Validate form đổi mật khẩu
+            validatePasswordForm() {
+                let isValid = true;
+
+                this.passwordElements.forEach((fieldId) => {
+                    if (!this.validatePasswordField(fieldId)) {
+                        isValid = false;
+                    }
+                });
+
+                return isValid;
+            }
+
+            // Enhanced password validation
+            validatePasswordField(fieldId) {
+                const element = document.getElementById(fieldId);
+                if (!element) return true;
+
+                let isValid = true;
+                let errorMessage = "";
+                const value = element.value;
+
+                switch (fieldId) {
+                    case "currentPassword":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng nhập mật khẩu hiện tại";
+                        }
+                        break;
+
+                    case "newPassword":
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng nhập mật khẩu mới";
+                        } else if (value.length < 6) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
+                        } else {
+                            this.updatePasswordStrength(value);
+                        }
+                        
+                        // Validate confirm password if it has value
+                        const confirmPassword = document.getElementById("confirmPassword");
+                        if (confirmPassword && confirmPassword.value) {
+                            this.validatePasswordField("confirmPassword");
+                        }
+                        break;
+
+                    case "confirmPassword":
+                        const newPassword = document.getElementById("newPassword").value;
+                        if (!value) {
+                            isValid = false;
+                            errorMessage = "Vui lòng xác nhận mật khẩu mới";
+                        } else if (value !== newPassword) {
+                            isValid = false;
+                            errorMessage = "Mật khẩu xác nhận không khớp";
+                        }
+                        break;
+                }
+
+                // Update UI
+                this.updateValidationUI(fieldId, isValid, errorMessage, "");
+                return isValid;
+            }
+
+            // Update password strength indicator
+            updatePasswordStrength(password) {
+                const strengthElement = document.getElementById("passwordStrength");
+                if (!strengthElement) return;
+
+                let strength = 0;
+                
+                // Length check
+                if (password.length >= 6) strength++;
+                if (password.length >= 8) strength++;
+                
+                // Character variety checks
+                if (/[a-z]/.test(password)) strength++;
+                if (/[A-Z]/.test(password)) strength++;
+                if (/[0-9]/.test(password)) strength++;
+                if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                strengthElement.style.display = "block";
+                strengthElement.className = "password-strength-host";
+
+                if (strength <= 2) {
+                    strengthElement.classList.add("weak");
+                } else if (strength <= 4) {
+                    strengthElement.classList.add("medium");
+                } else {
+                    strengthElement.classList.add("strong");
                 }
             }
 
@@ -1029,7 +1372,7 @@
 
                 if (networkInfo && phoneInfo) {
                     phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
-                    phoneInfo.className = "field-info text-success";
+                    phoneInfo.className = "field-info-host text-success";
                     phoneInfo.style.display = "flex";
                 }
             }
@@ -1041,7 +1384,7 @@
 
                 if (provinceInfo && cccdInfo) {
                     cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
-                    cccdInfo.className = "field-info text-info";
+                    cccdInfo.className = "field-info-host text-info";
                     cccdInfo.style.display = "flex";
                 }
             }
@@ -1181,26 +1524,6 @@
                 this.showNotification("Ảnh đại diện đã được chọn", "success");
             }
 
-            // Form submission
-            async handleFormSubmit(event) {
-                event.preventDefault();
-
-                if (!this.validateForm()) {
-                    this.showNotification("Vui lòng kiểm tra lại thông tin đã nhập", "error");
-                    return;
-                }
-
-                this.showLoading(true);
-
-                try {
-                    event.target.submit();
-                } catch (error) {
-                    console.error("Error submitting form:", error);
-                    this.showNotification("Có lỗi xảy ra khi lưu thông tin", "error");
-                    this.showLoading(false);
-                }
-            }
-
             // Utility functions
             showLoading(show) {
                 const overlay = document.getElementById("loadingOverlay");
@@ -1214,11 +1537,11 @@
                 if (!container) return;
 
                 const notification = document.createElement("div");
-                notification.className = `alert-host ${type} animate-fade-in`;
+                notification.className = `alert-host ${type} animate-fade-in-host`;
                 notification.innerHTML = `
-                    <i class="alert-icon fas fa-${this.getNotificationIcon(type)}"></i>
-                    <span class="alert-message">${message}</span>
-                    <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+                    <i class="alert-icon-host fas fa-${this.getNotificationIcon(type)}"></i>
+                    <span class="alert-message-host">${message}</span>
+                    <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
                 `;
 
                 container.appendChild(notification);
@@ -1233,7 +1556,7 @@
                 }, 5000);
 
                 // Close button
-                const closeBtn = notification.querySelector(".btn-close");
+                const closeBtn = notification.querySelector(".btn-close-host");
                 if (closeBtn) {
                     closeBtn.addEventListener("click", () => notification.remove());
                 }
@@ -1253,7 +1576,7 @@
                 const sections = document.querySelectorAll(".host-section");
                 sections.forEach((section, index) => {
                     section.style.animationDelay = `${index * 0.1}s`;
-                    section.classList.add("animate-slide-up");
+                    section.classList.add("animate-slide-up-host");
                 });
             }
 
@@ -1415,7 +1738,824 @@
                     setTimeout(() => alert.remove(), 500);
                 }, 3000);
 
-                const closeBtn = alert.querySelector(".btn-close");
+                const closeBtn = alert.querySelector(".btn-close-host");
+                if (closeBtn) {
+                    closeBtn.addEventListener("click", () => alert.remove());
+                }
+            });
+        });
+
+        // Cập nhật tất cả các querySelector và getElementById để sử dụng class mới
+        // Ví dụ: document.querySelector('.password-strength') thành document.querySelector('.password-strength-host')
+        // Và tất cả các reference khác trong JavaScript
+
+        // Update JavaScript to use new classes
+        document.addEventListener('DOMContentLoaded', () => {
+            // Enhanced Host Profile Manager
+            class EnhancedHostProfileManager {
+                constructor() {
+                    this.formElements = [
+                        "fullname", "email", "phone", "birthday", "cccdNumber",
+                        "issueDate", "issuePlace", "street", "province", "district", "ward"
+                    ];
+                    this.passwordElements = [
+                        "currentPassword", "newPassword", "confirmPassword"
+                    ];
+                    this.init();
+                }
+
+                async init() {
+                    try {
+                        // Setup event listeners
+                        this.setupEventListeners();
+
+                        // Initialize form validation
+                        this.initializeValidation();
+
+                        // Show existing data validation
+                        this.validateExistingData();
+
+                        // Initialize animations
+                        this.initializeAnimations();
+                    } catch (error) {
+                        console.error("Error initializing host profile:", error);
+                        this.showNotification("Có lỗi xảy ra khi khởi tạo trang", "error");
+                    }
+                }
+
+                setupEventListeners() {
+                    // Avatar upload
+                    const avatarInput = document.getElementById("avatarInput");
+                    if (avatarInput) {
+                        avatarInput.addEventListener("change", (e) => this.handleAvatarChange(e));
+                    }
+
+                    // Form validation
+                    this.formElements.forEach((id) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.addEventListener("input", () => this.validateField(id));
+                            element.addEventListener("blur", () => this.validateField(id));
+                        }
+                    });
+
+                    // Password validation - TÁCH RIÊNG
+                    this.passwordElements.forEach((id) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.addEventListener("input", () => this.validatePasswordField(id));
+                            element.addEventListener("blur", () => this.validatePasswordField(id));
+                        }
+                    });
+
+                    // Phone and CCCD formatting
+                    const phoneInput = document.getElementById("phone");
+                    const cccdInput = document.getElementById("cccdNumber");
+
+                    if (phoneInput) {
+                        phoneInput.addEventListener("input", (e) => this.formatPhone(e));
+                    }
+
+                    if (cccdInput) {
+                        cccdInput.addEventListener("input", (e) => this.formatCCCD(e));
+                    }
+
+                    // Form submission - TÁCH RIÊNG
+                    const profileForm = document.getElementById("hostProfileForm");
+                    if (profileForm) {
+                        profileForm.addEventListener("submit", (e) => this.handleProfileFormSubmit(e));
+                    }
+
+                    // Password form submission - TÁCH RIÊNG
+                    const passwordForm = document.getElementById("changePasswordForm");
+                    if (passwordForm) {
+                        passwordForm.addEventListener("submit", (e) => this.handlePasswordFormSubmit(e));
+                    }
+                }
+
+                // TÁCH RIÊNG - Xử lý form cập nhật thông tin
+                async handleProfileFormSubmit(event) {
+                    event.preventDefault();
+
+                    if (!this.validateProfileForm()) {
+                        this.showNotification("Vui lòng kiểm tra lại thông tin cá nhân", "error");
+                        return;
+                    }
+
+                    this.showLoading(true);
+
+                    try {
+                        event.target.submit();
+                    } catch (error) {
+                        console.error("Error submitting profile form:", error);
+                        this.showNotification("Có lỗi xảy ra khi cập nhật thông tin", "error");
+                        this.showLoading(false);
+                    }
+                }
+
+                // TÁCH RIÊNG - Xử lý form đổi mật khẩu
+                async handlePasswordFormSubmit(event) {
+                    event.preventDefault();
+
+                    if (!this.validatePasswordForm()) {
+                        this.showNotification("Vui lòng kiểm tra lại thông tin mật khẩu", "error");
+                        return;
+                    }
+
+                    this.showLoading(true);
+
+                    try {
+                        event.target.submit();
+                    } catch (error) {
+                        console.error("Error submitting password form:", error);
+                        this.showNotification("Có lỗi xảy ra khi đổi mật khẩu", "error");
+                        this.showLoading(false);
+                    }
+                }
+
+                // TÁCH RIÊNG - Validate form thông tin cá nhân
+                validateProfileForm() {
+                    let isValid = true;
+
+                    this.formElements.forEach((fieldId) => {
+                        if (!this.validateField(fieldId)) {
+                            isValid = false;
+                        }
+                    });
+
+                    return isValid;
+                }
+
+                // TÁCH RIÊNG - Validate form đổi mật khẩu
+                validatePasswordForm() {
+                    let isValid = true;
+
+                    this.passwordElements.forEach((fieldId) => {
+                        if (!this.validatePasswordField(fieldId)) {
+                            isValid = false;
+                        }
+                    });
+
+                    return isValid;
+                }
+
+                // Enhanced password validation
+                validatePasswordField(fieldId) {
+                    const element = document.getElementById(fieldId);
+                    if (!element) return true;
+
+                    let isValid = true;
+                    let errorMessage = "";
+                    const value = element.value;
+
+                    switch (fieldId) {
+                        case "currentPassword":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Vui lòng nhập mật khẩu hiện tại";
+                            }
+                            break;
+
+                        case "newPassword":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Vui lòng nhập mật khẩu mới";
+                            } else if (value.length < 6) {
+                                isValid = false;
+                                errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
+                            } else {
+                                this.updatePasswordStrength(value);
+                            }
+
+                            // Validate confirm password if it has value
+                            const confirmPassword = document.getElementById("confirmPassword");
+                            if (confirmPassword && confirmPassword.value) {
+                                this.validatePasswordField("confirmPassword");
+                            }
+                            break;
+
+                        case "confirmPassword":
+                            const newPassword = document.getElementById("newPassword").value;
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Vui lòng xác nhận mật khẩu mới";
+                            } else if (value !== newPassword) {
+                                isValid = false;
+                                errorMessage = "Mật khẩu xác nhận không khớp";
+                            }
+                            break;
+                    }
+
+                    // Update UI
+                    this.updateValidationUI(fieldId, isValid, errorMessage, "");
+                    return isValid;
+                }
+
+                // Update password strength indicator
+                updatePasswordStrength(password) {
+                    const strengthElement = document.getElementById("passwordStrength");
+                    if (!strengthElement) return;
+
+                    let strength = 0;
+
+                    // Length check
+                    if (password.length >= 6) strength++;
+                    if (password.length >= 8) strength++;
+
+                    // Character variety checks
+                    if (/[a-z]/.test(password)) strength++;
+                    if (/[A-Z]/.test(password)) strength++;
+                    if (/[0-9]/.test(password)) strength++;
+                    if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+                    strengthElement.style.display = "block";
+                    strengthElement.className = "password-strength-host";
+
+                    if (strength <= 2) {
+                        strengthElement.classList.add("weak");
+                    } else if (strength <= 4) {
+                        strengthElement.classList.add("medium");
+                    } else {
+                        strengthElement.classList.add("strong");
+                    }
+                }
+
+                // Enhanced form validation
+                validateField(fieldId) {
+                    const element = document.getElementById(fieldId);
+                    if (!element) return true;
+
+                    let isValid = true;
+                    let errorMessage = "";
+                    let successMessage = "";
+                    const value = element.value.trim();
+
+                    switch (fieldId) {
+                        case "fullname":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Họ tên không được để trống";
+                            } else if (value.length < 2) {
+                                isValid = false;
+                                errorMessage = "Họ tên phải có ít nhất 2 ký tự";
+                            } else if (value.length > 100) {
+                                isValid = false;
+                                errorMessage = "Họ tên không được vượt quá 100 ký tự";
+                            } else {
+                                successMessage = "Họ tên hợp lệ";
+                            }
+                            break;
+
+                        case "email":
+                            const emailRegex = /^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Email không được để trống";
+                            } else if (!emailRegex.test(value)) {
+                                isValid = false;
+                                errorMessage = "Email không đúng định dạng";
+                            } else {
+                                successMessage = "Email hợp lệ";
+                            }
+                            break;
+
+                        case "phone":
+                            const phoneValidation = this.validatePhoneNumber(value);
+                            if (!phoneValidation.isValid) {
+                                isValid = false;
+                                errorMessage = phoneValidation.message;
+                            } else {
+                                successMessage = "Số điện thoại hợp lệ";
+                                this.showPhoneNetworkInfo(value);
+                            }
+                            break;
+
+                        case "cccdNumber":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Số CCCD không được để trống";
+                                const cccdInfo = document.getElementById("cccdInfo");
+                                if (cccdInfo) {
+                                    cccdInfo.style.display = "none";
+                                }
+                            } else {
+                                const cccdValidation = this.validateCCCDNumber(value);
+                                if (!cccdValidation.isValid) {
+                                    isValid = false;
+                                    errorMessage = cccdValidation.message;
+                                } else {
+                                    successMessage = "CCCD hợp lệ";
+                                    this.showCCCDProvinceInfo(value);
+                                }
+                            }
+                            break;
+
+                        case "birthday":
+                            if (value) {
+                                const birthDate = new Date(value);
+                                const today = new Date();
+                                const age = today.getFullYear() - birthDate.getFullYear();
+
+                                if (age < 18) {
+                                    isValid = false;
+                                    errorMessage = "Chủ trọ phải từ 18 tuổi trở lên";
+                                } else if (age > 100) {
+                                    isValid = false;
+                                    errorMessage = "Tuổi không được vượt quá 100";
+                                } else {
+                                    successMessage = `Tuổi: ${age} (hợp lệ)`;
+                                }
+                            }
+                            break;
+
+                        case "issueDate":
+                            if (value) {
+                                const issueDate = new Date(value);
+                                const birthDate = new Date(document.getElementById("birthday").value);
+                                const today = new Date();
+
+                                if (birthDate && issueDate <= birthDate) {
+                                    isValid = false;
+                                    errorMessage = "Ngày cấp CCCD phải sau ngày sinh";
+                                } else if (issueDate > today) {
+                                    isValid = false;
+                                    errorMessage = "Ngày cấp CCCD không được là tương lai";
+                                } else {
+                                    successMessage = "Ngày cấp hợp lệ";
+                                }
+                            }
+                            break;
+
+                        case "issuePlace":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Nơi cấp không được để trống";
+                            } else if (value.length < 2) {
+                                isValid = false;
+                                errorMessage = "Nơi cấp phải có ít nhất 2 ký tự";
+                            } else {
+                                successMessage = "Nơi cấp hợp lệ";
+                            }
+                            break;
+
+                        case "street":
+                            if (!value) {
+                                isValid = false;
+                                errorMessage = "Địa chỉ không được để trống";
+                            } else if (value.length < 5) {
+                                isValid = false;
+                                errorMessage = "Địa chỉ phải có ít nhất 5 ký tự";
+                            } else {
+                                successMessage = "Địa chỉ hợp lệ";
+                            }
+                            break;
+                        case "province":
+                        case "district":
+                        case "ward":
+                            if (this.isEditMode && !value) {
+                                isValid = false;
+                                errorMessage = `Vui lòng chọn ${fieldId === "province" ? "Tỉnh/Thành phố" : fieldId === "district" ? "Quận/Huyện" : "Phường/Xã"}`;
+                            } else if (value) {
+                                successMessage = "Đã chọn hợp lệ";
+                            }
+                            break;
+                    }
+
+                    // Cập nhật giao diện
+                    this.updateValidationUI(fieldId, isValid, errorMessage, successMessage);
+                    return isValid;
+                }
+
+                // Validate Vietnamese phone number
+                validatePhoneNumber(phoneNumber) {
+                    if (!phoneNumber) {
+                        return { isValid: false, message: "Số điện thoại không được để trống" };
+                    }
+
+                    const cleanPhone = phoneNumber.replace(/[\s\-()]/g, "");
+
+                    if (!cleanPhone.startsWith("0")) {
+                        return { isValid: false, message: "Số điện thoại phải bắt đầu bằng số 0" };
+                    }
+
+                    if (!/^0[0-9]{9}$/.test(cleanPhone)) {
+                        return { isValid: false, message: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0" };
+                    }
+
+                    const networkCode = cleanPhone.substring(0, 3);
+                    const validNetworks = Object.keys(PHONE_NETWORK_CODES);
+
+                    let isValidNetwork = false;
+                    for (const validCode of validNetworks) {
+                        if (networkCode.startsWith(validCode.substring(0, 2))) {
+                            isValidNetwork = true;
+                            break;
+                        }
+                    }
+
+                    if (!isValidNetwork) {
+                        return { isValid: false, message: "Số điện thoại không đúng định dạng nhà mạng Việt Nam" };
+                    }
+
+                    return { isValid: true, message: "" };
+                }
+
+                // Validate CCCD number
+                validateCCCDNumber(cccdNumber) {
+                    if (!cccdNumber) {
+                        return { isValid: false, message: "CCCD không được để trống!" };
+                    }
+
+                    const cleanCCCD = cccdNumber.replace(/\s/g, "");
+
+                    if (!/^[0-9]{12}$/.test(cleanCCCD)) {
+                        return { isValid: false, message: "CCCD phải có đúng 12 chữ số" };
+                    }
+
+                    const provinceCode = cleanCCCD.substring(0, 3);
+
+                    if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                        return {
+                            isValid: false,
+                            message: `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                        };
+                    }
+
+                    return { isValid: true, message: "" };
+                }
+
+                // Show phone network information
+                showPhoneNetworkInfo(phoneNumber) {
+                    const networkInfo = this.getNetworkFromPhone(phoneNumber);
+                    const phoneInfo = document.getElementById("phoneInfo");
+
+                    if (networkInfo && phoneInfo) {
+                        phoneInfo.innerHTML = `<i class="fas fa-mobile-alt"></i> Nhà mạng: ${networkInfo}`;
+                        phoneInfo.className = "field-info-host text-success";
+                        phoneInfo.style.display = "flex";
+                    }
+                }
+
+                // Show CCCD province information
+                showCCCDProvinceInfo(cccdNumber) {
+                    const provinceInfo = this.getProvinceFromCCCD(cccdNumber);
+                    const cccdInfo = document.getElementById("cccdInfo");
+
+                    if (provinceInfo && cccdInfo) {
+                        cccdInfo.innerHTML = `<i class="fas fa-map-marker-alt"></i> Tỉnh/Thành phố: ${provinceInfo}`;
+                        cccdInfo.className = "field-info-host text-info";
+                        cccdInfo.style.display = "flex";
+                    }
+                }
+
+                // Get network from phone number
+                getNetworkFromPhone(phoneNumber) {
+                    if (!phoneNumber || !phoneNumber.startsWith("0") || phoneNumber.length !== 10) {
+                        return null;
+                    }
+
+                    const networkCode = phoneNumber.substring(0, 3);
+                    return PHONE_NETWORK_CODES[networkCode] || null;
+                }
+
+                // Get province from CCCD
+                getProvinceFromCCCD(cccdNumber) {
+                    if (!cccdNumber || cccdNumber.length < 3) {
+                        return null;
+                    }
+
+                    const provinceCode = cccdNumber.substring(0, 3);
+                    return CCCD_PROVINCE_CODES[provinceCode] || null;
+                }
+
+                // Update validation UI
+                updateValidationUI(fieldId, isValid, errorMessage, successMessage) {
+                    const element = document.getElementById(fieldId);
+                    const errorElement = document.getElementById(fieldId + "Error");
+                    const successElement = document.getElementById(fieldId + "Success");
+
+                    if (!element) return;
+
+                    // Xóa trạng thái cũ
+                    element.classList.remove("is-invalid", "is-valid");
+
+                    // Ẩn thông báo cũ
+                    if (errorElement) {
+                        errorElement.style.display = "none";
+                        errorElement.textContent = "";
+                    }
+                    if (successElement) {
+                        successElement.style.display = "none";
+                        successElement.textContent = "";
+                    }
+
+                    // Cập nhật trạng thái mới
+                    if (isValid && successMessage) {
+                        element.classList.add("is-valid");
+                        if (successElement) {
+                            successElement.textContent = successMessage;
+                            successElement.style.display = "flex";
+                        }
+                    } else if (!isValid && errorMessage) {
+                        element.classList.add("is-invalid");
+                        if (errorElement) {
+                            errorElement.textContent = errorMessage;
+                            errorElement.style.display = "flex";
+                        }
+                    }
+                }
+                // Validate existing data on page load
+                validateExistingData() {
+                    const phoneElement = document.getElementById("phone");
+                    if (phoneElement && phoneElement.value) {
+                        this.showPhoneNetworkInfo(phoneElement.value);
+                    }
+
+                    const cccdElement = document.getElementById("cccdNumber");
+                    if (cccdElement && cccdElement.value) {
+                        this.showCCCDProvinceInfo(cccdElement.value);
+                    }
+                }
+
+                validateForm() {
+                    let isValid = true;
+
+                    this.formElements.forEach((fieldId) => {
+                        if (!this.validateField(fieldId)) {
+                            isValid = false;
+                        }
+                    });
+
+                    return isValid;
+                }
+
+                // Format phone input
+                formatPhone(event) {
+                    let value = event.target.value;
+
+                    if (value && !value.startsWith("0")) {
+                        value = "0" + value.replace(/\D/g, "");
+                    } else {
+                        value = value.replace(/[^\d]/g, "");
+                    }
+
+                    if (value.length > 10) {
+                        value = value.substring(0, 10);
+                    }
+
+                    event.target.value = value;
+                    this.validateField("phone");
+                }
+
+                // Format CCCD input
+                formatCCCD(event) {
+                    let value = event.target.value.replace(/\D/g, "");
+
+                    if (value.length > 12) {
+                        value = value.substring(0, 12);
+                    }
+
+                    event.target.value = value;
+                    this.validateField("cccdNumber");
+                }
+
+                // Handle avatar change
+                handleAvatarChange(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    if (!file.type.startsWith("image/")) {
+                        this.showNotification("Chỉ được chọn file ảnh (JPG, PNG, GIF)", "error");
+                        return;
+                    }
+
+                    if (file.size > 5 * 1024 * 1024) {
+                        this.showNotification("Kích thước file không được vượt quá 5MB", "error");
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        document.getElementById("avatarPreview").src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    this.showNotification("Ảnh đại diện đã được chọn", "success");
+                }
+
+                // Utility functions
+                showLoading(show) {
+                    const overlay = document.getElementById("loadingOverlay");
+                    if (overlay) {
+                        overlay.style.display = show ? "flex" : "none";
+                    }
+                }
+
+                showNotification(message, type = "info") {
+                    const container = document.getElementById("toastContainer");
+                    if (!container) return;
+
+                    const notification = document.createElement("div");
+                    notification.className = `alert-host ${type} animate-fade-in-host`;
+                    notification.innerHTML = `
+                        <i class="alert-icon-host fas fa-${this.getNotificationIcon(type)}"></i>
+                        <span class="alert-message-host">${message}</span>
+                        <button type="button" class="btn-close-host" aria-label="Đóng thông báo">×</button>
+                    `;
+
+                    container.appendChild(notification);
+
+                    // Auto remove after 5 seconds
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.style.opacity = '0';
+                            notification.style.transform = 'translateX(100%)';
+                            setTimeout(() => notification.remove(), 500);
+                        }
+                    }, 5000);
+
+                    // Close button
+                    const closeBtn = notification.querySelector(".btn-close-host");
+                    if (closeBtn) {
+                        closeBtn.addEventListener("click", () => notification.remove());
+                    }
+                }
+
+                getNotificationIcon(type) {
+                    const icons = {
+                        success: "check-circle",
+                        error: "exclamation-circle",
+                        warning: "exclamation-triangle",
+                        info: "info-circle",
+                    };
+                    return icons[type] || "info-circle";
+                }
+
+                initializeAnimations() {
+                    const sections = document.querySelectorAll(".host-section");
+                    sections.forEach((section, index) => {
+                        section.style.animationDelay = `${index * 0.1}s`;
+                        section.classList.add("animate-slide-up-host");
+                    });
+                }
+
+                initializeValidation() {
+                    this.formElements.forEach((id) => {
+                        const element = document.getElementById(id);
+                        if (element) {
+                            element.addEventListener("input", () => this.validateField(id));
+                        }
+                    });
+                }
+            }
+
+            class EnhancedVietnamAddressAPI {
+                constructor() {
+                    this.provinceSelect = document.getElementById('province');
+                    this.districtSelect = document.getElementById('district');
+                    this.wardSelect = document.getElementById('ward');
+                    this.streetInput = document.getElementById('street');
+                    this.fullAddress = document.getElementById('fullAddress');
+                }
+
+                async init(savedAddress = "") {
+                    await this.populateProvinces();
+                    this.addListeners();
+                    if (savedAddress) {
+                        await this.setInitialAddress(savedAddress);
+                    }
+                }
+
+                async populateProvinces() {
+                    try {
+                        const res = await fetch("https://provinces.open-api.vn/api/p/");
+                        const provinces = await res.json();
+                        this.provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/TP</option>';
+                        provinces.forEach(p => {
+                            this.provinceSelect.innerHTML += `<option value="${p.code}">${p.name}</option>`;
+                        });
+                    } catch (error) {
+                        console.error("❌ Lỗi khi load tỉnh/thành:", error);
+                    }
+                }
+
+                async populateDistricts(provinceCode) {
+                    try {
+                        const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                        const province = await res.json();
+                        const districts = province.districts || [];
+
+                        this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                        districts.forEach(d => {
+                            this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                        });
+
+                        this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                    } catch (error) {
+                        console.error("❌ Lỗi khi load quận/huyện:", error);
+                    }
+                }
+
+                async populateWards(districtCode) {
+                    try {
+                        const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                        const district = await res.json();
+                        const wards = district.wards || [];
+
+                        this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        wards.forEach(w => {
+                            this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
+                        });
+                    } catch (error) {
+                        console.error("❌ Lỗi khi load phường/xã:", error);
+                    }
+                }
+
+                addListeners() {
+                    this.provinceSelect.addEventListener("change", async (e) => {
+                        const provinceCode = e.target.value;
+                        await this.populateDistricts(provinceCode);
+                        this.updateFullAddress();
+                    });
+
+                    this.districtSelect.addEventListener("change", async (e) => {
+                        const districtCode = e.target.value;
+                        await this.populateWards(districtCode);
+                        this.updateFullAddress();
+                    });
+
+                    this.wardSelect.addEventListener("change", () => this.updateFullAddress());
+                    this.streetInput.addEventListener("input", () => this.updateFullAddress());
+                }
+
+                updateFullAddress() {
+                    const street = this.streetInput.value;
+                    const ward = this.wardSelect.selectedOptions[0]?.text || '';
+                    const district = this.districtSelect.selectedOptions[0]?.text || '';
+                    const province = this.provinceSelect.selectedOptions[0]?.text || '';
+
+                    const parts = [street, ward, district, province].filter(p => p && !p.includes("Chọn"));
+                    this.fullAddress.value = parts.join(", ");
+                }
+
+                async setInitialAddress(fullAddress) {
+                    try {
+                        const parts = fullAddress.split(",").map(p => p.trim());
+                        if (parts.length < 4) return;
+
+                        const [street, wardName, districtName, provinceName] = parts;
+                        this.streetInput.value = street;
+
+                        const provinces = await fetch("https://provinces.open-api.vn/api/p/").then(res => res.json());
+                        const province = provinces.find(p => p.name.toLowerCase().includes(provinceName.toLowerCase()));
+                        if (!province) return;
+                        this.provinceSelect.value = province.code;
+
+                        const provinceDetail = await fetch(`https://provinces.open-api.vn/api/p/${province.code}?depth=2`).then(res => res.json());
+                        const district = provinceDetail.districts.find(d => d.name.toLowerCase().includes(districtName.toLowerCase()));
+                        if (!district) return;
+
+                        this.districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+                        provinceDetail.districts.forEach(d => {
+                            this.districtSelect.innerHTML += `<option value="${d.code}">${d.name}</option>`;
+                        });
+
+                        const districtDetail = await fetch(`https://provinces.open-api.vn/api/d/${district.code}?depth=2`).then(res => res.json());
+                        const ward = districtDetail.wards.find(w => w.name.toLowerCase().includes(wardName.toLowerCase()));
+
+                        this.wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+                        districtDetail.wards.forEach(w => {
+                            this.wardSelect.innerHTML += `<option value="${w.code}">${w.name}</option>`;
+                        });
+
+                        this.updateFullAddress();
+                    } catch (error) {
+                        console.error("❌ Lỗi khi thiết lập địa chỉ ban đầu:", error);
+                    }
+                }
+            }
+
+            // Initialize enhanced profile manager
+            window.hostProfileManager = new EnhancedHostProfileManager();
+
+            // Initialize enhanced address API
+            const addressAPI = new EnhancedVietnamAddressAPI();
+            addressAPI.init();
+
+            const savedAddress = document.getElementById('savedAddress')?.value;
+            if (savedAddress) {
+                addressAPI.setInitialAddress(savedAddress);
+            }
+
+            const alerts = document.querySelectorAll(".alert-host");
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateX(100%)';
+                    setTimeout(() => alert.remove(), 500);
+                }, 3000);
+
+                const closeBtn = alert.querySelector(".btn-close-host");
                 if (closeBtn) {
                     closeBtn.addEventListener("click", () => alert.remove());
                 }

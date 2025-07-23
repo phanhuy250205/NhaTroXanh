@@ -105,11 +105,15 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow-x: auto; /* Thêm scroll ngang nếu cần */
         }
 
         .table-modern {
             margin: 0;
             border: none;
+            table-layout: fixed; /* Cố định layout bảng */
+            width: 100%;
+            min-width: 800px; /* Đảm bảo bảng có độ rộng tối thiểu */
         }
 
         .table-modern thead th {
@@ -121,7 +125,15 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-size: 14px;
+            white-space: nowrap; /* Ngăn xuống dòng trong header */
         }
+
+        /* Thiết lập độ rộng cố định cho các cột */
+        .table-modern thead th:nth-child(1) { width: 8%; } /* ID */
+        .table-modern thead th:nth-child(2) { width: 25%; } /* Tên khu trọ */
+        .table-modern thead th:nth-child(3) { width: 40%; } /* Địa chỉ */
+        .table-modern thead th:nth-child(4) { width: 15%; } /* Trạng thái */
+        .table-modern thead th:nth-child(5) { width: 12%; } /* Hành động */
 
         .table-modern tbody td {
             padding: 20px 15px;
@@ -129,15 +141,15 @@
             border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             vertical-align: middle;
             font-weight: 500;
+            white-space: nowrap; /* Ngăn xuống dòng */
+            overflow: hidden; /* Ẩn nội dung tràn */
+            text-overflow: ellipsis; /* Hiển thị dấu ... */
         }
+
+        
 
         .table-modern tbody tr {
             transition: all 0.3s ease;
-        }
-
-        .table-modern tbody tr:hover {
-            background: rgba(102, 126, 234, 0.05);
-            transform: scale(1.01);
         }
 
         .badge-status {
@@ -147,6 +159,7 @@
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            white-space: nowrap;
         }
 
         .badge-active {
@@ -172,6 +185,7 @@
             transition: all 0.3s ease;
             border: none;
             box-shadow: 0 3px 10px rgba(253, 203, 110, 0.3);
+            white-space: nowrap;
         }
 
         .action-btn:hover {
@@ -210,8 +224,7 @@
             }
         }
 
-
-
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .main-content {
                 padding: 20px;
@@ -224,6 +237,13 @@
             .search-section {
                 padding: 20px;
             }
+
+            .table-modern {
+                min-width: 600px;
+            }
+
+            .table-modern thead th:nth-child(2) { width: 20%; }
+            .table-modern thead th:nth-child(3) { width: 35%; }
         }
     </style>
 </head>
@@ -353,11 +373,11 @@
                             <td><strong th:text="${stat.index + 1}">1</strong></td>
                             <td>
                                 <div class="d-flex align-items-center justify-content-center">
-                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <!-- <i class="fas fa-home text-primary me-2"></i> -->
                                     <strong th:text="${hostel.name}">Tên khu trọ</strong>
                                 </div>
                             </td>
-                            <td>
+                            <td class="address-cell">
                                 <i class="fas fa-map-marker-alt text-danger me-2"></i>
                                 <span
                                     th:text="${hostel.address != null ? hostel.address.street + ', ' + hostel.address.ward.name + ', ' + hostel.address.ward.district.name + ', ' + hostel.address.ward.district.province.name : 'Chưa xác định'}">Địa
@@ -374,7 +394,7 @@
                                 <a th:href="@{'/nhan-vien/chi-tiet-thong-tin-tro/' + ${hostel.hostelId}}"
                                     class="action-btn">
                                     <i class="fas fa-eye me-1"></i>
-                                    Xem chi tiết
+                                    Chi tiết
                                 </a>
                             </td>
                         </tr>
@@ -413,6 +433,8 @@
     <script>
         // Add smooth scrolling and interactive effects
         document.addEventListener('DOMContentLoaded', function () {
+            // Xóa hoặc comment out phần này
+            /*
             // Add hover effects to table rows
             const tableRows = document.querySelectorAll('.table-modern tbody tr');
             tableRows.forEach(row => {
@@ -423,6 +445,7 @@
                     this.style.transform = 'translateX(0)';
                 });
             });
+            */
 
             // Add click effect to buttons
             const buttons = document.querySelectorAll('.btn, .action-btn');

@@ -33,6 +33,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 @RequestMapping("/nhan-vien")
@@ -50,6 +51,9 @@ public class ProfileStaffController {
 
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/profile-nhan-vien")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -292,6 +296,90 @@ public class ProfileStaffController {
             log.error("Error updating bank account for staff: {}", e.getMessage());
             response.put("success", false);
             response.put("message", "Có lỗi xảy ra khi cập nhật thông tin ngân hàng: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Change password for staff
+     */
+    @PostMapping("/change-password")
+    @Transactional
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validation cơ bản
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập mật khẩu hiện tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập mật khẩu mới!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng xác nhận mật khẩu mới!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu hiện tại không đúng!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (newPassword.length() < 6) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Cập nhật mật khẩu
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
+
+            response.put("success", true);
+            response.put("message", "Đổi mật khẩu thành công!");
+            
+            log.info("Password changed successfully for staff user {}", user.getUserId());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error changing password for staff: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi đổi mật khẩu: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }
