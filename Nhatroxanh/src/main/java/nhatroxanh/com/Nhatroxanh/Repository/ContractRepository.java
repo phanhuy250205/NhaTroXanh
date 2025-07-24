@@ -65,8 +65,7 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         List<Contracts> findByRoomIdAndStatus(@Param("roomId") Integer roomId,
                         @Param("status") Contracts.Status status);
 
-        @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.id = :unregisteredTenantId")
-        List<Contracts> findByUnregisteredTenantId(@Param("unregisteredTenantId") Integer unregisteredTenantId);
+      
 
         @Query("SELECT c FROM Contracts c ORDER BY c.contractDate DESC")
         List<Contracts> findAllOrderByContractDateDesc();
@@ -109,15 +108,39 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
 
         // Tìm hợp đồng theo tenant ID
-        @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
-        Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId);
+      
 
 
 
     // Tìm hợp đồng theo tenant ID
     @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
     Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
+    
 
+    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.fullName LIKE %:name%")
+    List<Contracts> findByUnregisteredTenantName(@Param("name") String name);
 
+    // THÊM: Phương thức tìm hợp đồng theo số điện thoại của người thuê CHƯA đăng ký (UnregisteredTenants)
+    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.phone = :phone")
+    List<Contracts> findByUnregisteredTenantPhone(@Param("phone") String phone);
+
+    // THÊM: Phương thức tìm hợp đồng theo CCCD của người thuê CHƯA đăng ký (UnregisteredTenants)
+    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.cccdNumber = :cccd")
+    List<Contracts> findByUnregisteredTenantCccd(@Param("cccd") String cccd);
+
+    // THÊM HOẶC SỬA: Phương thức tìm hợp đồng theo ID của unregistered tenant
+    // Cần đảm bảo rằng `unregisteredTenant.id` là trường ID của UnregisteredTenants entity
+    // và kiểu dữ liệu của ID (Integer hoặc Long) phải khớp.
+    // Tôi đã thấy bạn có một dòng query `findByUnregisteredTenantId` nhưng lại truyền Long.
+    // Nếu ID của UnregisteredTenants là Integer, bạn có thể cần chỉnh lại kiểu tham số.
+    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.id = :unregisteredTenantId")
+    Optional<Contracts> findByUnregisteredTenantId(@Param("unregisteredTenantId") Integer unregisteredTenantId); // Đã chỉnh về Integer để nhất quán với JpaRepository<Contracts, Integer>
+
+    // Nếu bạn có một phương thức findByTenantId chung cho cả 2 loại,
+    // hãy chắc chắn rằng ID của Users và UnregisteredTenants không bao giờ trùng nhau.
+    // Nếu chúng có thể trùng, bạn cần xử lý logic này ở Service thay vì dùng 1 query chung.
+    // Dựa trên code trước, bạn có 2 dòng findByTenantId, tôi sẽ giữ lại 1 và thêm 1 cái mới.
+    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId")
+    Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId); // Giữ lại cho Registered Tenant (Users)
 
 }

@@ -114,6 +114,12 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
            "ORDER BY u.createdAt ASC")
     Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
-    
+
+    @Query("SELECT u FROM Users u " +
+           "LEFT JOIN u.userCccd uc " + // LEFT JOIN với UserCccd
+           "WHERE (uc.cccdNumber = :cccd OR :cccd IS NULL) " + // Tìm theo CCCD nếu cccd không null
+           "AND (u.phone = :phone OR :phone IS NULL)")        // Tìm theo Phone nếu phone không null
+    Optional<Users> findByCccdOrPhone(@Param("cccd") String cccd, @Param("phone") String phone);
+
 
 }

@@ -31,13 +31,20 @@ public class ContractDto {
     private String tenantAddress;
     private PaymentMethod paymentMethod;
     private List<ResidentDto> residents = new ArrayList<>();
-
+    private String paymentDate;
     public List<ResidentDto> getResidents() {
         return residents;
     }
 
     public void setResidents(List<ResidentDto> residents) {
         this.residents = residents;
+    }
+    public String getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(String paymentDate) {
+        this.paymentDate = paymentDate;
     }
 
     public ContractDto() {
@@ -433,6 +440,15 @@ public class ContractDto {
         private Date birthday;
         private String cccdFrontUrl;
         private String cccdBackUrl;
+        private String fullCccdNumber;
+
+        public String getFullCccdNumber() {
+            return fullCccdNumber;
+        }
+
+        public void setFullCccdNumber(String fullCccdNumber) {
+            this.fullCccdNumber = fullCccdNumber;
+        }
 
         // Getters and setters
 
@@ -705,7 +721,7 @@ public class ContractDto {
         private LocalDate endDate;
         private String terms;
         private Integer duration;
-
+        private String paymentDate;
         public Terms() {
             this.startDate = LocalDate.now();
         }
@@ -771,6 +787,13 @@ public class ContractDto {
             this.duration = duration;
             calculateEndDate();
         }
+         public String getPaymentDate() { // <--- GETTER CẦN THIẾT
+            return paymentDate;
+        }
+
+        public void setPaymentDate(String paymentDate) { // <--- SETTER CẦN THIẾT
+            this.paymentDate = paymentDate;
+        }
 
         // Helper method to calculate end date
         private void calculateEndDate() {
@@ -778,6 +801,7 @@ public class ContractDto {
                 this.endDate = this.startDate.plusMonths(this.duration);
             }
         }
+
     }
 
     @Data // Tự động tạo getter, setter, toString, equals, hashCode
