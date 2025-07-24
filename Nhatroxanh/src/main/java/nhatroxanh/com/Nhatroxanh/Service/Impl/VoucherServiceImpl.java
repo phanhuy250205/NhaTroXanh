@@ -17,10 +17,12 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.enity.VoucherStatus;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.enity.Notification;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
@@ -42,6 +44,9 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Override
     public Page<Vouchers> getActiveVouchers(Pageable pageable) {
@@ -127,7 +132,6 @@ public class VoucherServiceImpl implements VoucherService {
         existing.setMinAmount(dto.getMinAmount() != null ? dto.getMinAmount().floatValue() : null);
 
         Date today = new java.sql.Date(System.currentTimeMillis());
-
         boolean isExpired = existing.getEndDate().before(today);
         boolean isOut = existing.getQuantity() == 0;
         existing.setStatus(!isExpired && !isOut);
@@ -188,20 +192,15 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public Page<Vouchers> getVouchersByOwnerIdWithFilters(Integer ownerId, String searchQuery, String statusFilter,
             Pageable pageable) {
-        // Chuẩn hóa searchQuery cho truy vấn SQL LIKE
         String normalizedSearchQuery = (searchQuery != null && !searchQuery.isEmpty())
                 ? "%" + searchQuery.toLowerCase() + "%"
                 : null;
-
-        // Xử lý statusFilter
         Boolean status = null;
         if ("active".equalsIgnoreCase(statusFilter)) {
             status = true;
         } else if ("expired".equalsIgnoreCase(statusFilter)) {
             status = false;
         }
-
-        // Gọi repository với tham số đã chuẩn hóa
         return voucherRepository.findByUserUserIdWithFilters(ownerId, normalizedSearchQuery, status, pageable);
     }
 
@@ -233,20 +232,14 @@ public class VoucherServiceImpl implements VoucherService {
             Date startDate, Date endDate, String description, Boolean status) {
 
         Vouchers voucher = getVoucherByIdAndHost(voucherId, hostId);
-
-        // Normalize code
         String oldCode = voucher.getCode() != null ? voucher.getCode().trim().toLowerCase() : "";
         String newCode = code != null ? code.trim().toLowerCase() : "";
-
-        // Kiểm tra nếu đổi mã mới thì mới kiểm tra trùng
         if (!oldCode.equals(newCode)) {
             if (voucherRepository.existsByCodeAndNotId(newCode, voucherId)) {
                 throw new IllegalArgumentException("Mã voucher đã tồn tại. Vui lòng chọn mã khác.");
             }
-            voucher.setCode(code.trim()); // Chỉ set lại nếu code khác
+            voucher.setCode(code.trim());
         }
-
-        // Cập nhật các trường còn lại
         voucher.setTitle(title != null ? title.trim() : voucher.getTitle());
         voucher.setDiscountValue(discountValue != null ? discountValue : voucher.getDiscountValue());
         voucher.setQuantity(quantity != null ? quantity : voucher.getQuantity());
@@ -255,7 +248,6 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setEndDate(endDate != null ? endDate : voucher.getEndDate());
         voucher.setDescription(description != null ? description.trim() : voucher.getDescription());
         voucher.setStatus(status != null ? status : voucher.getStatus());
-
         if (hostelId == -1) {
             voucher.setHostel(null);
         } else {
@@ -279,30 +271,19 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherRepository.existsByCode(code);
     }
 
+    @Override
     public void checkAndDeactivateVouchersIfNeeded() {
         List<Vouchers> activeVouchers = voucherRepository.findByStatus(true);
         Date today = new Date(System.currentTimeMillis());
-
         for (Vouchers voucher : activeVouchers) {
             boolean isExpired = voucher.getEndDate().before(today);
             boolean isDepleted = voucher.getQuantity() != null && voucher.getQuantity() <= 0;
-
             if (isExpired || isDepleted) {
-                voucher.setStatus(false); // Ngừng hoạt động
-                voucherRepository.save(voucher); // Cập nhật lại
-
-                // Lý do gửi mail
-                String reason;
-                if (isExpired && isDepleted) {
-                    reason = "Voucher đã hết hạn và số lượng đã về 0.";
-                } else if (isExpired) {
-                    reason = "Voucher đã hết hạn.";
-                } else {
-                    reason = "Số lượng voucher đã về 0.";
-                }
-
-                // Thông tin gửi mail
-                Users owner = voucher.getHostel().getOwner();
+                voucher.setStatus(false);
+                voucherRepository.save(voucher);
+                String reason = isExpired && isDepleted ? "Voucher đã hết hạn và số lượng đã về 0."
+                        : isExpired ? "Voucher đã hết hạn." : "Số lượng voucher đã về 0.";
+                Users owner = voucher.getHostel() != null ? voucher.getHostel().getOwner() : voucher.getUser();
                 if (owner != null && owner.getEmail() != null) {
                     emailService.sendVoucherDeactivatedEmail(
                             owner.getEmail(),
@@ -319,4 +300,38 @@ public class VoucherServiceImpl implements VoucherService {
         return voucherRepository.searchVouchersByStatus(user, keyword, status, pageable);
     }
 
+    @Override
+    public void sendVoucherNotification(Vouchers voucher, CustomUserDetails userDetails) {
+        List<Users> recipients;
+        if (voucher.getHostel() != null) {
+            recipients = userRepository.findByHostelId(voucher.getHostel().getHostelId());
+        } else {
+            recipients = userRepository.findAll();
+        }
+
+        for (Users recipient : recipients) {
+            Notification notification = new Notification();
+            notification.setUser(recipient);
+            notification.setTitle("Khuyến mãi mới: " + voucher.getTitle());
+            notification.setMessage("Sử dụng mã voucher " + voucher.getCode() + " để được giảm " + voucher.getDiscountValue() + " VNĐ cho đơn tối thiểu " + voucher.getMinAmount() + " VNĐ. Hạn sử dụng đến " + voucher.getEndDate() + ".");
+            notification.setType(Notification.NotificationType.PROMOTION);
+            notification.setIsRead(false);
+            notification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));
+            notificationRepository.save(notification);
+
+            if (recipient.getEmail() != null && !recipient.getEmail().isEmpty()) {
+                emailService.sendSimpleEmail(
+                        recipient.getEmail(),
+                        "Thông báo khuyến mãi mới",
+                        "Chào " + recipient.getFullname() + ",\n\n" +
+                                "Chúng tôi xin gửi đến bạn mã khuyến mãi mới: " + voucher.getCode() + "\n" +
+                                "Tiêu đề: " + voucher.getTitle() + "\n" +
+                                "Giảm: " + voucher.getDiscountValue() + " VNĐ\n" +
+                                "Đơn tối thiểu: " + voucher.getMinAmount() + " VNĐ\n" +
+                                "Hạn sử dụng: " + voucher.getEndDate() + "\n\n" +
+                                "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!\n" +
+                                "Nhà Trọ Xanh");
+            }
+        }
+    }
 }

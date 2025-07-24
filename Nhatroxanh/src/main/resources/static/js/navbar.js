@@ -308,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (notification.type === 'PAYMENT' && notification.paymentId) {
             return `/tenant/payments?paymentId=${notification.paymentId}`;
         }
-        console.warn(`No valid paymentId for PAYMENT notification: ${notification.notificationId}`);
+        
         return '#';
     }
 

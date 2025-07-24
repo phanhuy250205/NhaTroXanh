@@ -43,6 +43,6 @@ public class Notification {
     private Rooms room;
 
     public enum NotificationType {
-        PAYMENT, CONTRACT, SYSTEM, REPORT
+        PAYMENT, CONTRACT, SYSTEM, REPORT, PROMOTION, ACCOUNT, HOSTEL_ACTIVITY
     }
 }

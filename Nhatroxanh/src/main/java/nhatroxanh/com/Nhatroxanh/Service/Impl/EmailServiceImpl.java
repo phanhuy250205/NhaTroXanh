@@ -227,5 +227,12 @@ public class EmailServiceImpl implements EmailService {
 
         sendHtmlMail(to, subject, content);
     }
-
+    @Override
+    public void sendSimpleEmail(String to, String subject, String body) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(body);
+        mailSender.send(message);
+    }
 }

@@ -34,4 +34,5 @@ public interface EmailService {
 
     void sendOwnerRejectionEmail(String to, String fullname);
 
+    void sendSimpleEmail(String to, String subject, String body);
 }
