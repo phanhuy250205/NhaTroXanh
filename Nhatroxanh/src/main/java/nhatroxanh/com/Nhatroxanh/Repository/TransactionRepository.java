@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
 
+import nhatroxanh.com.Nhatroxanh.Model.entity.Transaction;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

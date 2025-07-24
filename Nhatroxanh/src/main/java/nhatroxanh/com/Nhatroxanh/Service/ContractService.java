@@ -14,6 +14,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ContractService {
 
@@ -78,5 +79,5 @@ public interface ContractService {
 
 
      List<Contracts> getMyContracts();
-    Contracts createContractFinal(ContractDto contractDto, Users owner, Users tenant, UnregisteredTenants guardian);
+    Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
 }

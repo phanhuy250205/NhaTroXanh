@@ -10,4 +10,6 @@ public interface UnregisteredTenantsRepository  extends JpaRepository<Unregister
 
     Optional<UnregisteredTenants> findByCccdNumber(String cccdNumber);
     Optional<UnregisteredTenants> findByPhone(String phone);
+    boolean existsByPhone(String phone);
+    boolean existsByCccdNumber(String cccdNumber);
 }

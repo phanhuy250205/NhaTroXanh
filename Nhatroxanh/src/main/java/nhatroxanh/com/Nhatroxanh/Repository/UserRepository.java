@@ -114,5 +114,6 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
            "ORDER BY u.createdAt ASC")
     Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+    
 
 }

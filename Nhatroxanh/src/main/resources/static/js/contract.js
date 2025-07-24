@@ -2195,20 +2195,20 @@ window.NhaTroContract = {
 
 
 // Hàm chuyển đổi định dạng ngày
-formatDate(dateStr) {
-    if (!dateStr) return "";
-    // Nếu định dạng là dd/MM/yy
-    if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
-        const [day, month, year] = dateStr.split("/");
-        return `20${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
-    }
-    // Nếu đã ở định dạng yyyy-MM-dd
-    if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        return dateStr;
-    }
-    console.warn("Invalid date format:", dateStr);
-    return "";
-},
+    formatDate(dateStr) {
+        if (!dateStr) return "";
+        // Nếu định dạng là dd/MM/yy
+        if (dateStr.match(/^\d{1,2}\/\d{1,2}\/\d{2}$/)) {
+            const [day, month, year] = dateStr.split("/");
+            return `20${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+        }
+        // Nếu đã ở định dạng yyyy-MM-dd
+        if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+            return dateStr;
+        }
+        console.warn("Invalid date format:", dateStr);
+        return "";
+    },
     setCurrentDate() {
         const today = new Date().toISOString().split("T")[0]
         const contractDateInput = document.getElementById("contract-date")
