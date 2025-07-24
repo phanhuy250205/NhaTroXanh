@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
                                 "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**",
                                 "/vnpay/**",
-                                "/tat-ca-phong-tro","/khach-thue/lich-su-thanh-toan")
+                                "/tat-ca-phong-tro", "/khach-thue/lich-su-thanh-toan")
                         .permitAll()
                         .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()

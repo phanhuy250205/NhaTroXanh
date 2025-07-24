@@ -551,9 +551,9 @@
                                 </td>
                                 <td>
                                     <p class="cccd-code-staff" th:text="${customer.userCccd != null and customer.userCccd.cccdNumber != null and customer.userCccd.cccdNumber.length() >= 4 
-       ? customer.userCccd.cccdNumber.substring(0, 2) + 
+       ? customer.userCccd.cccdNumber.substring(0, 3) + 
          '********' + 
-         customer.userCccd.cccdNumber.substring(customer.userCccd.cccdNumber.length() - 2) 
+         customer.userCccd.cccdNumber.substring(customer.userCccd.cccdNumber.length() - 3) 
        : (customer.userCccd != null ? customer.userCccd.cccdNumber : 'Chưa có')}">
                                     </p>
                                 </td>
