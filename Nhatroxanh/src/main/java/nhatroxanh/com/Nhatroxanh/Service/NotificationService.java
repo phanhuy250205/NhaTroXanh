@@ -141,6 +141,9 @@ public class NotificationService {
                     case MOMO:
                         paymentMethod = "MoMo";
                         break;
+                    case ZALOPAY:
+                        paymentMethod = "ZaloPay";
+                        break;
                     default:
                         paymentMethod = payment.getPaymentMethod().toString();
                 }

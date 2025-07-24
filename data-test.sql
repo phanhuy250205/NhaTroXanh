@@ -39,3 +39,8 @@ ALTER TABLE table_name ADD COLUMN created_at DATETIME;
 DESCRIBE posts;
 
 ALTER TABLE posts ADD COLUMN created_at DATE;
+SELECT * FROM payments WHERE app_trans_id = '250724_1753358533608';enum('BANK','MOMO','TIỀN_MẶT','VNPAY')
+
+
+ALTER TABLE payments MODIFY COLUMN payment_method ENUM('TIỀN_MẶT', 'BANK', 'VNPAY', 'MOMO') NOT NULL;
+SHOW COLUMNS FROM payments LIKE 'payment_method';
