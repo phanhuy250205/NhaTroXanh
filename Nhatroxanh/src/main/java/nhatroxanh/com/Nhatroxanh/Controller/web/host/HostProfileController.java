@@ -2,8 +2,8 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import java.io.IOException;
 import java.sql.Date;
-
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -24,6 +24,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
@@ -43,14 +44,18 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
+
     @Autowired
     private TenantService tenantService;
+
+    @Autowired
+    private EncryptionService encryptionService;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+        UserCccd cccd = userCccdRepository.findByUser(user);
 
         int totalHostels = hostelService.countByOwner(user);
 
@@ -61,11 +66,17 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
-        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
 
-        if (cccd != null) {
-            dto.setIssueDate(cccd.getIssueDate());
-            dto.setIssuePlace(cccd.getIssuePlace());
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                dto.setCccdNumber(decryptedCccd);
+                dto.setIssueDate(cccd.getIssueDate());
+                dto.setIssuePlace(cccd.getIssuePlace());
+            } catch (Exception e) {
+                model.addAttribute("error", "Không thể giải mã CCCD: " + e.getMessage());
+                dto.setCccdNumber(null);
+            }
         }
 
         model.addAttribute("hostInfo", dto);
@@ -91,7 +102,6 @@ public class HostProfileController {
             return "host/profile-host";
         }
 
-        // ✅ Kiểm tra trùng email
         if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
             Optional<Users> existingEmail = usersRepository.findByEmail(dto.getEmail().trim());
             if (existingEmail.isPresent() && !existingEmail.get().getUserId().equals(user.getUserId())) {
@@ -103,7 +113,6 @@ public class HostProfileController {
             }
         }
 
-        // ✅ Kiểm tra trùng số điện thoại
         if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
             Optional<Users> existingPhone = usersRepository.findByPhone(dto.getPhone().trim());
             if (existingPhone.isPresent() && !existingPhone.get().getUserId().equals(user.getUserId())) {
@@ -135,7 +144,6 @@ public class HostProfileController {
         }
 
         try {
-            // Cập nhật user
             user.setFullname(dto.getFullname());
             user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
             user.setPhone(dto.getPhone());
@@ -143,10 +151,10 @@ public class HostProfileController {
             user.setEmail(dto.getEmail());
             user.setAddress(dto.getAddress());
 
-            // Xử lý CCCD
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
@@ -162,7 +170,7 @@ public class HostProfileController {
                     cccd = new UserCccd();
                     cccd.setUser(user);
                 }
-                cccd.setCccdNumber(trimmedCccd);
+                cccd.setCccdNumber(encryptedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
@@ -191,10 +199,8 @@ public class HostProfileController {
 
         try {
             tenantService.updateContractStatus(contractId, newStatus);
-            // Gửi một thông báo thành công về trang chi tiết
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
         } catch (Exception e) {
-            // Gửi một thông báo lỗi về trang chi tiết
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
         }
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;

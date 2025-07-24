@@ -591,6 +591,19 @@
                 font-size: 1.2rem;
             }
         }
+
+        .zalo-icon {
+            width: 20px;
+            height: 20px;
+            object-fit: contain;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .zalo-btn {
+            font-weight: 500;
+            padding: 4px 10px;
+        }
     </style>
 </head>
 
@@ -705,8 +718,9 @@
                             <button class="btn btn-primary btn-sm me-2" onclick="fetchContact(event, 'sms')">
                                 <i class="fas fa-comment"></i> Nhắn tin
                             </button>
-                            <button class="btn btn-info btn-sm" onclick="fetchContact(event, 'zalo')">
-                                <i class="fab fa-facebook-messenger"></i> Zalo
+                            <button class="btn btn-info btn-sm me-2" onclick="fetchContact(event, 'zalo')">
+                                <img src="/images/cards/zalo-icon.png" alt="Zalo" width="18" height="18" class="me-1">
+                                Zalo
                             </button>
                             <div class="contact-loading" style="display: none;">
                                 <div class="spinner-border spinner-border-sm text-primary" role="status">
@@ -716,10 +730,13 @@
                             </div>
                         </div>
                         <div class="additional-actions mt-3">
-                            <button class="btn btn-outline-secondary me-2" onclick="saveProperty()">
+                            <button class="btn btn-outline-secondary me-2 btn-favorite-large"
+                                th:attr="data-post-id=${post.postId}"
+                                onclick="toggleFavorite(this.getAttribute('data-post-id'))" title="Lưu tin">
                                 <i class="fas fa-bookmark"></i>
                                 <span>Lưu tin</span>
                             </button>
+
                             <button class="btn btn-outline-secondary me-2" th:attr="data-post-id=${post.postId}"
                                 onclick="shareProperty(event)">
                                 <i class="fas fa-share-alt"></i>
@@ -1438,16 +1455,34 @@
         function executeContactAction(action, phoneNumber) {
             try {
                 switch (action) {
-                    case 'call': window.location.href = `tel:${phoneNumber}`; break;
-                    case 'sms': window.location.href = `sms:${phoneNumber}`; break;
-                    case 'zalo': window.location.href = `zalo://chat?phone=${phoneNumber}`; setTimeout(() => window.open(`https://zalo.me/${phoneNumber}`, '_blank'), 1000); break;
-                    default: alert("Hành động không được hỗ trợ");
+                    case 'call':
+                        // Gọi điện thoại
+                        window.location.href = `tel:${phoneNumber}`;
+                        break;
+
+                    case 'sms':
+                        // Gửi tin nhắn SMS
+                        window.location.href = `sms:${phoneNumber}`;
+                        break;
+
+                    case 'zalo':
+                        const deepLink = `zalo://chat?phone=${phoneNumber}`;
+                        const fallbackLink = `https://zalo.me/${phoneNumber}`;
+                        window.location.href = deepLink;
+                        setTimeout(() => {
+                            window.open(fallbackLink, '_blank');
+                        }, 1000);
+                        break;
+
+                    default:
+                        alert("Hành động không được hỗ trợ");
                 }
             } catch (error) {
                 console.error('Error executing contact action:', error);
                 alert("Không thể thực hiện hành động này");
             }
         }
+
 
         function saveProperty() { alert('Đã lưu tin!'); }
 

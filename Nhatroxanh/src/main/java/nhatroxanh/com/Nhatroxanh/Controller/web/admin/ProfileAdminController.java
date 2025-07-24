@@ -11,9 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,12 +24,14 @@ import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import jakarta.transaction.Transactional;
 
 @Controller
 @RequestMapping("/admin/profile")
 public class ProfileAdminController {
+
     @Autowired
     private UserRepository usersRepository;
 
@@ -47,6 +47,9 @@ public class ProfileAdminController {
     @Autowired
     private RoomsRepository roomsRepository;
 
+    @Autowired
+    private EncryptionService encryptionService; // Thêm service mã hóa
+
     @GetMapping
     public String showProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
         Users user = usersRepository.findById(currentUser.getUserId()).orElse(null);
@@ -54,8 +57,19 @@ public class ProfileAdminController {
             return "redirect:/login?error";
         }
 
-        long roomCount = roomsRepository.count(); // tổng số phòng trọ
-        long tenantCount = usersRepository.countByRole(Users.Role.CUSTOMER); // tổng số khách thuê
+        // Giải mã CCCD để hiển thị
+        UserCccd cccd = userCccdRepository.findByUser(user);
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                cccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
+
+        long roomCount = roomsRepository.count();
+        long tenantCount = usersRepository.countByRole(Users.Role.CUSTOMER);
 
         model.addAttribute("user", user);
         model.addAttribute("roomCount", roomCount);
@@ -85,7 +99,6 @@ public class ProfileAdminController {
             Users user = usersRepository.findById(currentUser.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-            // Lưu bản sao dữ liệu gốc để sử dụng khi có lỗi
             Users originalUser = usersRepository.findById(currentUser.getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
@@ -186,12 +199,10 @@ public class ProfileAdminController {
                         return "admin/profile";
                     }
 
-                    // Xóa ảnh cũ nếu có
                     if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
                         fileUploadService.deleteFile(user.getAvatar());
                     }
 
-                    // Upload và lưu đường dẫn
                     String avatarPath = fileUploadService.uploadFile(avatarFile, "");
                     user.setAvatar(avatarPath);
 
@@ -214,7 +225,9 @@ public class ProfileAdminController {
             UserCccd cccd = userCccdRepository.findByUser(user);
             if (cccdNumber != null && !cccdNumber.trim().isEmpty()) {
                 String trimmedCccd = cccdNumber.trim();
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                // Mã hóa số CCCD
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
@@ -229,7 +242,7 @@ public class ProfileAdminController {
                     cccd.setUser(user);
                 }
 
-                cccd.setCccdNumber(trimmedCccd);
+                cccd.setCccdNumber(encryptedCccd);
                 cccd.setIssueDate(issueDate != null ? Date.valueOf(issueDate) : null);
                 cccd.setIssuePlace(issuePlace != null && !issuePlace.trim().isEmpty() ? issuePlace.trim() : null);
                 userCccdRepository.save(cccd);
@@ -258,24 +271,20 @@ public class ProfileAdminController {
 
         Users user = currentUser.getUser();
 
-        // Kiểm tra xác nhận mật khẩu
         if (!newPassword.equals(confirmPassword)) {
             redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu xác nhận không khớp.");
             return "redirect:/admin/profile#security";
         }
 
-        // So sánh mật khẩu hiện tại
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             redirectAttributes.addFlashAttribute("errorMessage", "Mật khẩu hiện tại không đúng.");
             return "redirect:/admin/profile#security";
         }
 
-        // Cập nhật mật khẩu mới
         user.setPassword(passwordEncoder.encode(newPassword));
         usersRepository.save(user);
 
         redirectAttributes.addFlashAttribute("successMessage", "Đổi mật khẩu thành công!");
         return "redirect:/admin/profile#security";
     }
-
 }
