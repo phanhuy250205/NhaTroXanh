@@ -74,4 +74,6 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Page<Contracts> findReturnRequestsByOwnerAndKeyword(@Param("ownerId") Integer ownerId,
                         @Param("keyword") String keyword, Pageable pageable);
 
+                        
+
 }

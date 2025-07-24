@@ -80,4 +80,6 @@ public interface ContractService {
 
      List<Contracts> getMyContracts();
     Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
+    
+    
 }
