@@ -7,7 +7,6 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
-import nhatroxanh.com.Nhatroxanh.Service.WalletService;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
@@ -83,11 +82,11 @@ public class MoMoService {
     }
 
     /**
-     * Create MoMo payment order
+     * Create MoMo payment order for QR code payment
      */
     public PaymentResponse createMoMoOrder(String invoiceId) {
         try {
-            log.info("Creating MoMo order for invoiceId={} at {}", invoiceId, LocalDateTime.now());
+            log.info("Creating MoMo QR code order for invoiceId={} at {}", invoiceId, LocalDateTime.now());
 
             Integer paymentId = Integer.parseInt(invoiceId);
             Payments payment = paymentsRepository.findById(paymentId)
@@ -104,7 +103,7 @@ public class MoMoService {
             String extraData = "invoiceId=" + invoiceId;
 
             String rawSignature = String.format(
-                    "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=payWithATM",
+                    "accessKey=%s&amount=%s&extraData=%s&ipnUrl=%s&orderId=%s&orderInfo=%s&partnerCode=%s&redirectUrl=%s&requestId=%s&requestType=captureWallet",
                     momoAccessKey, amount, extraData, momoCallbackUrl, orderId, orderInfo, momoPartnerCode, momoReturnUrl, requestId);
             String signature = generateHmacSHA256(rawSignature);
 
@@ -118,9 +117,9 @@ public class MoMoService {
             requestBody.put("redirectUrl", momoReturnUrl);
             requestBody.put("ipnUrl", momoCallbackUrl);
             requestBody.put("extraData", extraData);
-            requestBody.put("requestType", "payWithATM");
-            requestBody.put("signature", signature);
+            requestBody.put("requestType", "captureWallet");
             requestBody.put("lang", "vi");
+            requestBody.put("signature", signature);
 
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpPost httpPost = new HttpPost(momoEndpoint);
@@ -144,20 +143,20 @@ public class MoMoService {
                     String payUrl = jsonResponse.getString("payUrl");
                     String qrCodeUrl = jsonResponse.optString("qrCodeUrl", null);
                     if (qrCodeUrl == null || qrCodeUrl.isEmpty()) {
-                        qrCodeUrl = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + payUrl;
+                        qrCodeUrl = "https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=" + URLEncoder.encode(payUrl, StandardCharsets.UTF_8.toString());
                     }
                     payment.setAppTransId(orderId);
                     paymentsRepository.save(payment);
-                    log.info("MoMo order created successfully: payUrl={}, orderId={}", payUrl, orderId);
+                    log.info("MoMo QR code order created successfully: payUrl={}, qrCodeUrl={}, orderId={}", payUrl, qrCodeUrl, orderId);
                     return new PaymentResponse(payUrl, qrCodeUrl, resultCode, message);
                 } else {
-                    log.warn("MoMo order creation failed: resultCode={}, message={}", resultCode, message);
+                    log.warn("MoMo QR code order creation failed: resultCode={}, message={}", resultCode, message);
                     return new PaymentResponse(null, null, resultCode, "Lỗi MoMo: " + message);
                 }
             }
         } catch (Exception e) {
-            log.error("Error creating MoMo order for invoiceId {}: {}", invoiceId, e.getMessage(), e);
-            return new PaymentResponse(null, null, -1, "Failed to create payment request: " + e.getMessage());
+            log.error("Error creating MoMo QR code order for invoiceId {}: {}", invoiceId, e.getMessage(), e);
+            return new PaymentResponse(null, null, -1, "Failed to create QR code payment request: " + e.getMessage());
         }
     }
 
@@ -283,7 +282,6 @@ public class MoMoService {
 
     /**
      * Handle MoMo return URL
-     * MoMo typically sends minimal parameters in return URL, so we need to query payment status
      */
     public String handlePaymentReturn(String invoiceId, String orderId, String resultCode, String message,
                                      Integer roomId, Integer hostelId, Integer addressId, Model model) {
@@ -326,7 +324,6 @@ public class MoMoService {
             }
 
             // For pending payments, query MoMo for the latest status
-            // This is crucial because MoMo return URL doesn't always contain the final status
             if (orderId != null && !orderId.trim().isEmpty()) {
                 log.info("Payment pending, querying MoMo status for orderId: {}", orderId);
                 

@@ -5,6 +5,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import java.util.List;
 import java.util.Optional;
@@ -33,6 +34,9 @@ public class CustomerController {
     @Autowired
     private ContractsRepository contractRepository;
 
+     @Autowired
+    private EncryptionService encryptionService;
+
     @GetMapping("/khach-thue")
     public String getAllCustomers(
             @RequestParam(defaultValue = "0") int page,
@@ -54,6 +58,14 @@ public class CustomerController {
         }
         Users customer = userOpt.get();
         UserCccd cccd = customer.getUserCccd();
+         if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                cccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
         customer.setUserCccd(cccd);
         List<Contracts> contracts = contractRepository.findByTenantOrderByStartDateDesc(customer);
 

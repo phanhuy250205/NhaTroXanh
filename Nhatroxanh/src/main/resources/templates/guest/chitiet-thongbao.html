@@ -605,7 +605,6 @@
 
     <div th:replace="~{/layouts/footer}"></div>
 
-    <script th:src="@{/js/notifications-page.js}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Tab switching functionality
@@ -707,7 +706,10 @@
                             'PAYMENT': 'finance-notifications-list',
                             'CONTRACT': 'lodging-notifications-list',
                             'SYSTEM': 'profile-notifications-list',
-                            'REPORT': 'deals-notifications-list'
+                            'REPORT': 'lodging-notifications-list',
+                            'PROMOTION': 'deals-notifications-list',
+                            'ACCOUNT': 'profile-notifications-list',
+                            'HOSTEL_ACTIVITY': 'lodging-notifications-list'
                         };
 
                         data.notifications.forEach(notification => {
@@ -755,7 +757,7 @@
 
             // Create notification card
             function createNotificationCard(notification) {
-                if (!notification) {
+                if (!notification || !notification.notificationId) {
                     console.error('Invalid notification data:', notification);
                     return null;
                 }
@@ -765,55 +767,206 @@
                 const cardId = `notif-card-${notification.notificationId}`;
                 const toggleId = `toggle-card-${notification.notificationId}`;
 
-                let paymentDetails = null;
-                if (notification.type === 'PAYMENT' && notification.message) {
-                    paymentDetails = parsePaymentNotification(notification);
+                // Determine the content to render based on notification type
+                let contentHtml = '';
+                if (notification.type === 'PAYMENT' && notification.paymentDetails) {
+                    contentHtml = renderPaymentNotification(notification.paymentDetails, notification.room);
+                } else if (notification.type === 'REPORT' && notification.incidentDetails) {
+                    contentHtml = renderIncidentNotification(notification.incidentDetails, notification.room);
+                } else if (notification.type === 'PROMOTION' && notification.voucherDetails) {
+                    contentHtml = renderVoucherNotification(notification.voucherDetails);
+                } else {
+                    // Handle ACCOUNT and HOSTEL_ACTIVITY or any other types with generic content
+                    contentHtml = `
+            <div class="message-body-notifications">
+                <h4><i class="fas fa-info-circle" style="color: #3e83cc;"></i> Thông tin chi tiết</h4>
+                <p>${notification.message || 'Không có nội dung'}</p>
+                ${notification.room ? `
+                    <div class="data-block-notifications">
+                        <div class="data-title-notifications">
+                            <i class="fas fa-home"></i>
+                            Thông tin phòng
+                        </div>
+                        <div class="data-content-notifications">
+                            <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
+                            <strong>Loại phòng:</strong> ${notification.room.category?.name || 'Không xác định'}<br>
+                            <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
+                            <strong>Giá phòng:</strong> ${formatCurrency(notification.room.price) || '0'} VNĐ
+                        </div>
+                    </div>
+                ` : '<p>Không có thông tin phòng liên quan.</p>'}
+            </div>`;
                 }
 
                 card.innerHTML = `
-                    <div class="notification-card-header" data-notification-id="${notification.notificationId}" onclick="toggleNotificationCard('${cardId}')">
-                        <div class="notification-card-info">
-                            <h3 class="notification-card-title">
-                                ${notification.title || 'Không có tiêu đề'}
-                                ${notification.type === 'PAYMENT' && paymentDetails && paymentDetails.status === 'PENDING' ?
+        <div class="notification-card-header" data-notification-id="${notification.notificationId}" onclick="toggleNotificationCard('${cardId}')">
+            <div class="notification-card-info">
+                <h3 class="notification-card-title">
+                    ${notification.title || 'Không có tiêu đề'}
+                    ${notification.type === 'PAYMENT' && notification.paymentDetails && notification.paymentDetails.status === 'PENDING' ?
                         '<span class="unpaid-status-badge">Chưa thanh toán</span>' : ''}
-                            </h3>
-                            <div class="notification-card-meta">
-                                <span><i class="fas fa-clock"></i> ${formatDate(notification.createAt) || 'Không có ngày'}</span>
-                                <span><i class="fas fa-tag"></i> ${getTagName(notification.type) || 'Không xác định'}</span>
-                                <span><i class="fas fa-user"></i> ${getSender(notification.type) || 'Không xác định'}</span>
-                            </div>
-                        </div>
-                        <div class="notification-card-toggle" id="${toggleId}">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                    </div>
-                    <div class="notification-card-content" id="${cardId}">
-                        <div class="notification-card-body">
-                            ${notification.type === 'PAYMENT' && paymentDetails ? renderPaymentNotification(paymentDetails, notification.room) :
-                        `<div class="message-body-notifications">
-                                <h4><i class="fas fa-info-circle" style="color: #3e83cc;"></i> Thông tin chi tiết</h4>
-                                <p>${notification.message || 'Không có nội dung'}</p>
-                                ${notification.room ? `
-                                    <div class="data-block-notifications">
-                                        <div class="data-title-notifications">
-                                            <i class="fas fa-home"></i>
-                                            Thông tin phòng
-                                        </div>
-                                        <div class="data-content-notifications">
-                                            <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
-                                            <strong>Loại phòng:</strong> ${notification.room.category?.name || 'Không xác định'}<br>
-                                            <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
-                                            <strong>Giá phòng:</strong> ${notification.room.price || '0'} VNĐ
-                                        </div>
-                                    </div>
-                                ` : '<p>Không có thông tin phòng liên quan.</p>'}
-                            </div>`}
-                        </div>
-                    </div>
-                `;
+                </h3>
+                <div class="notification-card-meta">
+                    <span><i class="fas fa-clock"></i> ${formatDate(notification.createAt) || 'Không có ngày'}</span>
+                    <span><i class="fas fa-tag"></i> ${getTagName(notification.type) || 'Không xác định'}</span>
+                    <span><i class="fas fa-user"></i> ${getSender(notification.type) || 'Không xác định'}</span>
+                </div>
+            </div>
+            <div class="notification-card-toggle" id="${toggleId}">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+        <div class="notification-card-content" id="${cardId}">
+            <div class="notification-card-body">
+                ${contentHtml}
+            </div>
+        </div>
+    `;
 
                 return card;
+            }
+
+            // Helper function to format currency values as Vietnamese currency (VND)
+            function formatCurrency(value) {
+                if (!value) return '0';
+                const num = parseFloat(value);
+                if (isNaN(num)) return value;
+                return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num);
+            }
+
+            // Helper function to render PAYMENT notification content
+            function renderPaymentNotification(paymentDetails, room) {
+                if (!paymentDetails) return '<p>Không có thông tin chi tiết hóa đơn.</p>';
+
+                let paymentHtml = `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-file-invoice-dollar" style="color: #3e83cc;"></i> Chi tiết hóa đơn</h4>
+            <p>${paymentDetails.status === 'SUCCESS' ?
+                        `Hóa đơn #${paymentDetails.invoiceId} đã thanh toán thành công.` :
+                        `Hóa đơn #${paymentDetails.invoiceId} đang chờ thanh toán.`}</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin hóa đơn
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không xác định'}<br>
+                    <strong>Tháng:</strong> ${paymentDetails.month || 'Không xác định'}<br>
+                    <strong>Tổng tiền:</strong> ${formatCurrency(paymentDetails.total) || '0'} VNĐ<br>
+                    ${paymentDetails.status === 'SUCCESS' ? `
+                        <strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'Không xác định'}<br>
+                        <strong>Phòng:</strong> ${paymentDetails.roomName || 'Không xác định'}<br>
+                        <strong>Nhà trọ:</strong> ${paymentDetails.hostelName || 'Không xác định'}<br>
+                    ` : `
+                        <strong>Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}<br>
+                    `}
+                </div>
+            </div>
+    `;
+
+                if (room) {
+                    paymentHtml += `
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-home"></i>
+                    Thông tin phòng
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
+                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
+                    <strong>Giá phòng:</strong> ${formatCurrency(room.price) || '0'} VNĐ
+                </div>
+            </div>`;
+                }
+
+                paymentHtml += `</div>`;
+                return paymentHtml;
+            }
+
+            // Helper function to render REPORT notification content
+            function renderIncidentNotification(incidentDetails, room) {
+                if (!incidentDetails) return '<p>Không có thông tin chi tiết sự cố.</p>';
+
+                let incidentHtml = `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-exclamation-triangle" style="color: #3e83cc;"></i> Chi tiết sự cố</h4>
+            <p>Sự cố #${incidentDetails.incidentId} (${incidentDetails.incidentType}) - Trạng thái: ${incidentDetails.status === 'DANG_XU_LY' ? 'Đang xử lý' : 'Đã xử lý'}</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin sự cố
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã sự cố:</strong> ${incidentDetails.incidentId || 'Không xác định'}<br>
+                    <strong>Loại sự cố:</strong> ${incidentDetails.incidentType || 'Không xác định'}<br>
+                    <strong>Mức độ:</strong> ${incidentDetails.level || 'Không xác định'}<br>
+                    <strong>Phòng:</strong> ${incidentDetails.roomName || 'Không xác định'}<br>
+                </div>
+            </div>
+    `;
+
+                if (room) {
+                    incidentHtml += `
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-home"></i>
+                    Thông tin phòng
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
+                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
+                    <strong>Giá phòng:</strong> ${room.price || '0'} 
+                </div>
+            </div>`;
+                }
+
+                incidentHtml += `</div>`;
+                return incidentHtml;
+            }
+
+            // Helper function to render PROMOTION notification content
+            function renderVoucherNotification(voucherDetails) {
+                if (!voucherDetails) return '<p>Không có thông tin chi tiết khuyến mãi.</p>';
+
+                return `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-ticket-alt" style="color: #3e83cc;"></i> Chi tiết khuyến mãi</h4>
+            <p>Sử dụng mã voucher ${voucherDetails.voucherCode || 'Không xác định'} để nhận ưu đãi.</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin voucher
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
+                    <strong>Giá trị giảm:</strong> ${voucherDetails.discountValue || '0 VNĐ'}<br>
+                    <strong>Đơn tối thiểu:</strong> ${voucherDetails.minAmount || '0 VNĐ'}<br>
+                    <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
+                </div>
+            </div>
+        </div>`;
+            }
+
+            // Placeholder functions (assumed to be defined elsewhere)
+            function formatDate(date) {
+                return date ? new Date(date).toLocaleString('vi-VN') : 'Không có ngày';
+            }
+
+            function getTagName(type) {
+                const tagMap = {
+                    'PAYMENT': 'Hóa đơn',
+                    'REPORT': 'Sự cố',
+                    'PROMOTION': 'Khuyến mãi',
+                    'ACCOUNT': 'Tài khoản',
+                    'HOSTEL_ACTIVITY': 'Hoạt động nhà trọ'
+                };
+                return tagMap[type] || 'Không xác định';
+            }
+
+            function getSender(type) {
+                return type === 'SYSTEM' ? 'Hệ thống' : 'Quản lý nhà trọ';
             }
 
             // Parse PAYMENT notification message
@@ -863,7 +1016,7 @@
                         }
                     }
 
-                    console.warn('No match for payment notification:', message);
+
                     return null;
                 } catch (e) {
                     console.error('Error parsing PAYMENT notification:', e, notification.message);
@@ -878,49 +1031,49 @@
                 const addressId = room?.hostel?.address?.id || '';
 
                 // Handle success notifications
-                if (paymentDetails.status === 'SUCCESS') {
+                if (paymentDetails && paymentDetails.status === 'SUCCESS') {
                     return `
-                        <div class="message-body-notifications">
-                            <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Thanh toán thành công</h4>
-                            <p>Bạn đã thanh toán thành công hóa đơn tháng ${paymentDetails.month || 'Không xác định'}. Cảm ơn bạn đã thanh toán đúng hạn!</p>
-                            <div class="data-layout-notifications">
-                                <div class="data-block-notifications">
-                                    <div class="data-title-notifications">
-                                        <i class="fas fa-home"></i>
-                                        Thông tin phòng
-                                    </div>
-                                    <div class="data-content-notifications">
-                                        <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
-                                    <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
-                                    <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                                    <strong>Giá phòng:</strong> ${room?.price || '0'} VNĐ
-                                    </div>
-                                </div>
-                                <div class="data-block-notifications">
-                                    <div class="data-title-notifications">
-                                        <i class="fas fa-check-circle"></i>
-                                        Thông tin thanh toán
-                                    </div>
-                                    <div class="data-content-notifications">
-                                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
-                                        <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
-                                        <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
-                            <div class="payment-summary-notifications">
-                                <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0 VNĐ'}</div>
-                            </div>
-                            <div class="payment-info-notifications">
-                                <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
-                                <div><strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'VNPay'}</div>
-                                <div><strong>Trạng thái:</strong> <span style="color: #10b981; font-weight: bold;">Đã thanh toán thành công</span></div>
-                            </div>
-                        </div>
-                    `;
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Thanh toán thành công</h4>
+            <p>Bạn đã thanh toán thành công hóa đơn tháng ${paymentDetails.month || 'Không xác định'}. Cảm ơn bạn đã thanh toán đúng hạn!</p>
+            <div class="data-layout-notifications">
+                <div class="data-block-notifications">
+                    <div class="data-title-notifications">
+                        <i class="fas fa-home"></i>
+                        Thông tin phòng
+                    </div>
+                    <div class="data-content-notifications">
+                        <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
+                        <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
+                        <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
+                        <strong>Giá phòng:</strong> ${room?.price || '0 VNĐ'}
+                    </div>
+                </div>
+                <div class="data-block-notifications">
+                    <div class="data-title-notifications">
+                        <i class="fas fa-check-circle"></i>
+                        Thông tin thanh toán
+                    </div>
+                    <div class="data-content-notifications">
+                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                        <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
+                        <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
+            <div class="payment-summary-notifications">
+                <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
+                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0 VNĐ'}</div>
+            </div>
+            <div class="payment-info-notifications">
+                <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
+                <div><strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'VNPay'}</div>
+                <div><strong>Trạng thái:</strong> <span style="color: #10b981; font-weight: bold;">Đã thanh toán thành công</span></div>
+            </div>
+        </div>
+    `;
                 }
 
                 // Handle pending notifications
@@ -938,7 +1091,7 @@
                                     <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
                                     <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
                                     <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                                    <strong>Giá phòng:</strong> ${room?.price || '0'} VNĐ
+                                    <strong>Giá phòng:</strong> ${room?.price || '0'} 
                                 </div>
                             </div>
                             <div class="data-block-notifications">
@@ -1010,8 +1163,11 @@
                 switch (type) {
                     case 'PAYMENT': return 'Thanh toán';
                     case 'CONTRACT': return 'Hoạt động trọ';
-                    case 'SYSTEM': return 'Tài khoản';
-                    case 'REPORT': return 'Khuyến mãi';
+                    case 'PROMOTION': return 'Khuyến mãi';
+                    case 'SYSTEM': return 'Hệ thống';
+                    case 'REPORT': return 'Sự cố';
+                    case 'ACCOUNT': return 'Tài khoản';
+                    case 'HOSTEL_ACTIVITY': return 'Hoạt động trọ';
                     default: return 'Hệ thống';
                 }
             }
@@ -1022,7 +1178,10 @@
                     case 'PAYMENT': return 'Hệ thống';
                     case 'CONTRACT': return 'Kỹ thuật';
                     case 'SYSTEM': return 'Hệ thống';
-                    case 'REPORT': return 'Marketing';
+                    case 'REPORT': return 'Chủ trọ';
+                    case 'PROMOTION': return 'Hệ thống';
+                    case 'ACCOUNT': return 'Hệ thống';
+                    case 'HOSTEL_ACTIVITY': return 'Chủ trọ';
                     default: return 'Hệ thống';
                 }
             }

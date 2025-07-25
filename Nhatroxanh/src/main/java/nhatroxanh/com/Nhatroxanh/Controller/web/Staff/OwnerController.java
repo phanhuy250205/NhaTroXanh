@@ -26,6 +26,7 @@ import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Controller
@@ -45,6 +46,9 @@ public class OwnerController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EncryptionService encryptionService;
 
     @GetMapping("/chu-tro")
     public String listOwners(Model model,
@@ -84,6 +88,14 @@ public class OwnerController {
 
         Users user = optionalUser.get();
         UserCccd userCccd = userCccdRepository.findByUser(user);
+        if (userCccd != null && userCccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(userCccd.getCccdNumber());
+                userCccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
         List<Hostel> hostels = hostelRepository.findByOwner(user);
 
         model.addAttribute("user", user);
@@ -157,6 +169,14 @@ public class OwnerController {
         }
 
         UserCccd userCccd = userCccdRepository.findByUser(user);
+        if (userCccd != null && userCccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(userCccd.getCccdNumber());
+                userCccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
         model.addAttribute("user", user);
         model.addAttribute("cccd", userCccd);
         model.addAttribute("approvalPage", approvalPage);

@@ -36,4 +36,5 @@ public interface EmailService {
 
     void sendNewPasswordEmail(String to, String fullname, String newPassword);
 
+    void sendSimpleEmail(String to, String subject, String body);
 }

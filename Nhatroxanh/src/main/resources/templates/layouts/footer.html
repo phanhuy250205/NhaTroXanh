@@ -300,11 +300,6 @@
         <span class="back-to-top-text">Top</span>
     </button>
 
-    <div class="chat-container">
-        <input id="userInput" />
-        <button onclick="sendMessageToAI()">Gửi</button>
-        <div id="chatBox"></div>
-    </div>
 
     <!-- Floating Elements -->
     <div class="floating-elements">
@@ -312,16 +307,4 @@
         <div class="floating-circle circle-2"></div>
         <div class="floating-circle circle-3"></div>
     </div>
-    <script>
-        async function sendMessageToAI() {
-            const userMessage = document.getElementById("userInput").value;
-            const res = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: userMessage })
-            });
-            const data = await res.json();
-            document.getElementById("chatBox").innerHTML += `<p><b>Bạn:</b> ${userMessage}</p><p><b>AI:</b> ${data.reply}</p><hr>`;
-        }
-    </script>
 </footer>

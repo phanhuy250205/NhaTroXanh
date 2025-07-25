@@ -26,7 +26,7 @@ import lombok.NoArgsConstructor;
 
 public class Vouchers {
     @Id
-    // @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "code", unique = true, nullable = false)

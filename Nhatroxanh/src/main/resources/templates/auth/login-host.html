@@ -15,6 +15,10 @@
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/login-host.css}">
     <link rel="stylesheet" th:href="@{/css/quenmk-modal.css}">
+    <link rel="stylesheet" th:href="@{/css/modalOTP.css}">
+    <link rel="stylesheet" th:href="@{/css/reset-pass.css}">
+
+
 </head>
 
 
@@ -111,8 +115,9 @@
                                 <input type="checkbox" id="rememberMe" name="rememberMe" />
                                 Ghi nhớ tài khoản của bạn
                             </label>
-                            <a href="#" class="forgot-password">Quên mật
+                            <a href="javascript:void(0);" id="forgotPasswordBtnGuest" class="forgot-password">Quên mật
                                 khẩu?</a>
+
                         </div>
                         <button type="submit" class="btn-login-host" aria-label="Đăng nhập">
                             ĐĂNG NHẬP
@@ -126,8 +131,161 @@
                 </div>
             </section>
         </div>
-    <script th:src="@{/js/login-host.js}"></script>
-    <script th:src="@{/js/quenmk-modal.js}"></script>
+        <!-- Forgot Password Modal -->
+        <div class="forgot-password-modal-overlay-guest" id="forgotPasswordModalOverlayGuest">
+            <div class="forgot-password-modal-guest">
+                <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent-guest" alt="">
+                <div class="forgot-password-modal-header-guest">
+                    <button class="forgot-password-modal-close-guest" id="forgotPasswordModalCloseGuest">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
 
-    </body>
+                <div class="forgot-password-modal-content-guest">
+                    <div class="forgot-password-greeting-guest">
+                        <h3>Khôi phục mật khẩu của bạn</h3>
+                        <h2>Nhập thông tin đầy đủ
+                            <span class="house-icons-guest">
+                                <img class="logo-forgot-password-guest d-none d-md-block"
+                                    th:src="@{/images/logo/nhatroxanh.png}" alt="">
+                            </span>
+                        </h2>
+                    </div>
+
+                    <form class="forgot-password-form-guest" id="forgotPasswordFormGuest">
+                        <div id="forgot-password-error-message-guest" class="alert-guest alert-danger-guest"
+                            style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+                        <div id="forgot-password-success-message-guest" class="alert-guest alert-success-guest"
+                            style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                        <div class="form-group-guest">
+                            <div class="input-wrapper-guest">
+                                <i class="fas fa-envelope input-icon-guest"></i>
+                                <input type="email" id="forgotPasswordContactGuest"
+                                    class="form-control-forgot-password-guest"
+                                    placeholder="Nhập email cần khôi phục mật khẩu" required>
+                            </div>
+                        </div>
+
+                        <div class="forgot-password-buttons-guest">
+                            <button type="submit" class="btn-forgot-password-submit-guest">
+                                GỬI YÊU CẦU
+                            </button>
+                            <button type="button" class="btn-back-to-login-guest" id="backToLoginBtnGuest">
+                                <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
+                            </button>
+                        </div>
+
+                        <div class="forgot-password-info-guest">
+                            <p><i class="fas fa-info-circle"></i> Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email
+                                của bạn.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Verification Modal -->
+        <div class="verification-modal-overlay-auth" id="verificationModalOverlayAuth">
+            <div class="verification-modal-auth">
+                <img src="/placeholder.svg?height=200&width=300" class="logo-transparent-auth" alt="Logo">
+                <div class="verification-modal-content-auth">
+                    <div class="verification-title-auth">
+                        <span>Xác thực tài khoản</span>
+                        <button type="button" class="auth-modal-close-btn-auth" id="authModalCloseBtnAuth">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form class="verification-form-auth" id="verificationFormAuth">
+                        <div id="verification-message-auth" class="alert-auth"
+                            style="display:none; font-size:14px; margin-bottom: 15px;"></div>
+
+                        <div class="verification-alert-auth">
+                            Mã xác thực đã được gửi đến <b id="emailDisplayAuth"></b>. Vui lòng nhập mã vào bên dưới để
+                            tiếp tục.
+                        </div>
+
+                        <input type="text" id="verificationInputAuth" class="verification-input-auth"
+                            placeholder="Nhập mã xác thực" required maxlength="6">
+
+                        <button type="submit" class="btn-verification-submit-auth">
+                            Hoàn tất
+                        </button>
+
+                        <div class="resend-code-auth">
+                            <button type="button" id="resendCodeBtnAuth" class="resend-code-btn-auth">
+                                Gửi lại mã
+                            </button>
+                            <div class="countdown-timer-auth" id="countdownTimerAuth" style="display: none;">
+                                Gửi lại sau: <span id="countdownAuth">60</span>s
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Reset Password Modal -->
+<div class="reset-password-modal-overlay-guest" id="resetPasswordModalOverlayGuest">
+    <div class="reset-password-modal-guest">
+        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent-guest" alt="">
+        <div class="reset-password-modal-header-guest">
+            <button class="reset-password-modal-close-guest" id="resetPasswordModalCloseGuest">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="reset-password-modal-content-guest">
+            <div class="reset-password-greeting-guest">
+                <p class="reset-password-title-guest">Đặt lại mật khẩu</p>
+                <h5>Nhập mật khẩu mới của bạn
+                    <span class="house-icons-guest">
+                        <img class="logo-reset-password-guest d-none" th:src="@{/images/logo/nhatroxanh.png}" alt="">
+                    </span>
+                </h5>
+            </div>
+
+            <form class="reset-password-form-guest" id="resetPasswordFormGuest">
+                <div id="reset-password-error-message-guest" class="alert-guest alert-danger-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+                <div id="reset-password-success-message-guest" class="alert-guest alert-success-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                <div class="form-group-guest">
+                    <div class="input-wrapper-guest">
+                        <i class="fas fa-lock input-icon-guest"></i>
+                        <input type="password" id="newPasswordInputGuest" class="form-control-reset-password-guest" placeholder="Nhập mật khẩu mới" required>
+                    </div>
+                </div>
+
+                <div class="form-group-guest">
+                    <div class="input-wrapper-guest">
+                        <i class="fas fa-lock input-icon-guest"></i>
+                        <input type="password" id="confirmPasswordInputGuest" class="form-control-reset-password-guest" placeholder="Xác nhận mật khẩu mới" required>
+                    </div>
+                </div>
+
+                <div class="reset-password-buttons-guest">
+                    <button type="submit" class="btn-reset-password-submit-guest">
+                        XÁC NHẬN
+                    </button>
+                    
+                    <button type="button" class="btn-back-to-login-guest" id="backToLoginFromResetBtnGuest">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại đăng nhập
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+        <script th:src="@{/js/login-host.js}"></script>
+        <script th:src="@{/js/quenmk-modal.js}"></script>
+        <script th:src="@{/js/modalOTP.js}"></script>
+        <script th:src="@{/js/reset-password-modal.js}"></script>
+
+</body>
+
 </html>

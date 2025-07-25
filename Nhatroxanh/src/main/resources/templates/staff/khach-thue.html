@@ -307,6 +307,7 @@
             font-weight: 600;
             font-size: 1.0rem;
             letter-spacing: 0.5px;
+            font-size: 11px;
         }
 
         .main-content .area-badge-staff {
@@ -487,6 +488,32 @@
                 transform: rotate(360deg);
             }
         }
+
+        .cccd-code-staff {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .badge-success-staff {
+            background-color: #10b981;
+            /* Màu xanh lá cây - hoạt động */
+        }
+
+        .badge-danger-staff {
+            background-color: #ef4444;
+            /* Màu đỏ - đã khóa */
+        }
+
+        .cccd-code-staff i {
+            font-size: 16px;
+        }
     </style>
 </head>
 
@@ -528,7 +555,7 @@
                                 <th><i class="fas fa-hashtag me-2"></i>ID</th>
                                 <th><i class="fas fa-user me-2"></i>Họ tên</th>
                                 <th><i class="fas fa-phone me-2"></i>Số điện thoại</th>
-                                <th><i class="fas fa-id-card me-2"></i>CCCD</th>
+                                <th><i class="fas fa-id-card me-2"></i>Trạng thái</th>
                                 <th><i class="fas fa-door-open me-2"></i>Số lượng phòng đang và đã thuê</th>
                                 <th><i class="fas fa-cogs me-2"></i>Hoạt động</th>
                             </tr>
@@ -550,31 +577,37 @@
                                     <p class="phone-link-staff" th:text="${customer.phone}"></p>
                                 </td>
                                 <td>
-                                    <p class="cccd-code-staff" th:text="${customer.userCccd != null and customer.userCccd.cccdNumber != null and customer.userCccd.cccdNumber.length() >= 4 
-       ? customer.userCccd.cccdNumber.substring(0, 3) + 
-         '********' + 
-         customer.userCccd.cccdNumber.substring(customer.userCccd.cccdNumber.length() - 3) 
-       : (customer.userCccd != null ? customer.userCccd.cccdNumber : 'Chưa có')}">
+                                    <p class="cccd-code-staff "
+                                        th:classappend="${customer.enabled} ? 'badge-success-staff' : 'badge-danger-staff'">
+                                        <i class="fas fa-check-circle" th:if="${customer.enabled}"></i>
+                                        <i class="fas fa-times-circle" th:if="${!customer.enabled}"></i>
+                                        <span th:text="${customer.enabled ? 'Đang hoạt động' : 'Ngừng hoạt động'}"></span>
                                     </p>
                                 </td>
                                 <td>
-                                    <span
-                                        th:if="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty()}">
-                                        <i class="fas fa-home text-muted me-1"></i>
-                                        Đang và đã thuê
-                                        <strong th:text="${customer.rentedContracts.size()}"></strong> phòng
+                                    <span>
+                                        <i class="fas fa-home text-success me-1"
+                                            th:if="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty()}"></i>
+                                        <i class="fas fa-house-circle-xmark text-muted me-1"
+                                            th:if="${customer.rentedContracts == null or customer.rentedContracts.isEmpty()}"></i>
+                                        <span
+                                            th:if="${customer.rentedContracts != null and !customer.rentedContracts.isEmpty()}">
+                                            Đang và đã thuê <strong
+                                                th:text="${customer.rentedContracts.size()}"></strong> phòng
+                                        </span>
+                                        <span
+                                            th:if="${customer.rentedContracts == null or customer.rentedContracts.isEmpty()}">
+                                            Chưa thuê phòng nào
+                                        </span>
                                     </span>
-                                    <span
-                                        th:if="${customer.rentedContracts == null or customer.rentedContracts.isEmpty()}">
-                                        Chưa thuê
-                                    </span>
+
                                 </td>
                                 <td>
                                     <a th:href="@{/nhan-vien/chi-tiet-khach-thue/{id}(id=${customer.userId})}">
                                         <button class="btn-action-staff btn-edit-staff"
                                             th:data-customer-id="${customer.userId}">
-                                            <i class="fas fa-edit"></i>
-                                            Chỉnh sửa
+                                            <i class="fas fa-eye"></i>
+                                            Xem chi tiết
                                         </button>
                                     </a>
                                 </td>

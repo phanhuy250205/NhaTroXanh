@@ -28,6 +28,7 @@ import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 
 @Controller
 @RequestMapping("/chu-tro")
@@ -50,6 +51,7 @@ public class HostProfileController {
 
     @Autowired
     private EncryptionService encryptionService;
+    private NotificationService notificationService;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -144,6 +146,16 @@ public class HostProfileController {
         }
 
         try {
+            // Store original values for comparison
+            Users originalUser = new Users();
+            originalUser.setFullname(user.getFullname());
+            originalUser.setEmail(user.getEmail());
+            originalUser.setPhone(user.getPhone());
+            originalUser.setAddress(user.getAddress());
+            originalUser.setGender(user.getGender());
+            originalUser.setBirthday(user.getBirthday());
+
+            // Cập nhật user
             user.setFullname(dto.getFullname());
             user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
             user.setPhone(dto.getPhone());
@@ -182,6 +194,41 @@ public class HostProfileController {
             }
 
             usersRepository.save(user);
+
+            // Create profile update notification
+            try {
+                java.util.List<String> updatedFields = new java.util.ArrayList<>();
+                if (!java.util.Objects.equals(originalUser.getFullname(), user.getFullname())) {
+                    updatedFields.add("Họ tên");
+                }
+                if (!java.util.Objects.equals(originalUser.getEmail(), user.getEmail())) {
+                    updatedFields.add("Email");
+                }
+                if (!java.util.Objects.equals(originalUser.getPhone(), user.getPhone())) {
+                    updatedFields.add("Số điện thoại");
+                }
+                if (!java.util.Objects.equals(originalUser.getAddress(), user.getAddress())) {
+                    updatedFields.add("Địa chỉ");
+                }
+                if (!java.util.Objects.equals(originalUser.getGender(), user.getGender())) {
+                    updatedFields.add("Giới tính");
+                }
+                if (!java.util.Objects.equals(originalUser.getBirthday(), user.getBirthday())) {
+                    updatedFields.add("Ngày sinh");
+                }
+                if (avatarFile != null && !avatarFile.isEmpty()) {
+                    updatedFields.add("Ảnh đại diện");
+                }
+
+                if (!updatedFields.isEmpty()) {
+                    String fieldsString = String.join(", ", updatedFields);
+                    notificationService.createProfileUpdateNotification(user, fieldsString);
+                }
+            } catch (Exception e) {
+                // Log error but don't fail the update
+                System.err.println("Failed to create profile update notification: " + e.getMessage());
+            }
+
             redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
 
         } catch (Exception e) {

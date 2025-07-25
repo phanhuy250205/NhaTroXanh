@@ -26,6 +26,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 import jakarta.transaction.Transactional;
 
 @Controller
@@ -49,6 +50,7 @@ public class ProfileAdminController {
 
     @Autowired
     private EncryptionService encryptionService; // Thêm service mã hóa
+    private NotificationService notificationService;
 
     @GetMapping
     public String showProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {
