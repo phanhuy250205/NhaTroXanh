@@ -75,8 +75,8 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login-processing")
                         .usernameParameter("username") // <-- Sửa lại tên parameter cho đúng với JS
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler) // <-- CHỈ GIỮ LẠI HANDLER NÀY
-                        .failureHandler((request, response, exception) -> { // Giữ nguyên failureHandler
+                        .successHandler(customLoginSuccessHandler) // <-- ĐÃ SỬA: Chỉ giữ lại trình xử lý đúng
+                        .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
                             response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");

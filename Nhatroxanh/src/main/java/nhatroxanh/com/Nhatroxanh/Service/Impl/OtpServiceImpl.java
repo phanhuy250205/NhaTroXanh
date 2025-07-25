@@ -1,6 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import org.springframework.beans.factory.annotation.Autowired;

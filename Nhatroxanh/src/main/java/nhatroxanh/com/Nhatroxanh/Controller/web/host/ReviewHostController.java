@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.ReviewRepository;
 
 @Controller

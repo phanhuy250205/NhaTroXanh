@@ -12,9 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto.PaymentMethod;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
 @Repository
 public interface PaymentsRepository extends JpaRepository<Payments, Integer> {

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 import nhatroxanh.com.Nhatroxanh.Service.UtilityService;
 
 @Controller

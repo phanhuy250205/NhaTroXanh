@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 
 @Service

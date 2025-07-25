@@ -6,10 +6,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
@@ -206,7 +205,6 @@ public class UserServiceImpl implements UserService {
         }
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(false);
-        newUser.setStatus(Users.Status.PENDING);
         newUser.setCreatedAt(LocalDateTime.now());
 
         // Xử lý CCCD
@@ -394,6 +392,39 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
+
+       @Override
+@Transactional
+public void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage) {
+    Users user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("Người dùng không hợp lệ!"));
+
+    // 2. Tải ảnh CCCD lên và lấy URL
+    try {
+        String frontImageUrl = fileUploadService.uploadFile(frontImage, "cccd-images/");
+        String backImageUrl = fileUploadService.uploadFile(backImage, "cccd-images/");
+
+        // 3. Tạo mới và điền thông tin UserCccd
+        UserCccd cccd = new UserCccd();
+        cccd.setCccdNumber(cccdNumber);
+        cccd.setIssueDate(Date.valueOf(issueDate));
+        cccd.setIssuePlace(issuePlace);
+        cccd.setFrontImageUrl(frontImageUrl);
+        cccd.setBackImageUrl(backImageUrl);
+        cccd.setUser(user);
+
+        // 4. Cập nhật thông tin còn thiếu cho User
+        user.setGender(gender);
+        user.setAddress(address); // Giả sử address là một chuỗi
+        user.setUserCccd(cccd);
+
+        // 5. Lưu lại, user.enabled vẫn là false
+        userRepository.save(user);
+    } catch (IOException e) {
+        throw new RuntimeException("Lỗi khi tải ảnh lên: " + e.getMessage());
+    }
+}
+
     public Page<Users> getPendingOwners(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
         if (search != null && !search.isEmpty()) {
@@ -433,5 +464,6 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.delete(user);
     }
+
 
 }

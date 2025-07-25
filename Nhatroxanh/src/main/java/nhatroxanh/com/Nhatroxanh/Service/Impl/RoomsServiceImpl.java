@@ -1,12 +1,12 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
-import nhatroxanh.com.Nhatroxanh.Model.enity.District;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.District;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;

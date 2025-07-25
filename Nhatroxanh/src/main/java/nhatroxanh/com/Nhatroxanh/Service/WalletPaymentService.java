@@ -2,8 +2,8 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Transaction;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Transaction;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 

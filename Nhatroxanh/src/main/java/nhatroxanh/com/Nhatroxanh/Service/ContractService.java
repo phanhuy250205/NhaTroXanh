@@ -8,11 +8,13 @@ import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ContractService {
 
@@ -69,10 +71,15 @@ public interface ContractService {
     List<ContractListDto> getAllContractsForList();
     List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
 
-    void updateStatus(Long contractId, String newStatus);
+    void updateStatus(Integer contractId, String newStatus);
 
-    Contracts getContractById(Long contractId);
+    Contracts getContractById(Integer contractId);
     // Thêm method mới để lấy phòng theo tenant ID
     Rooms findRoomByTenantId(Long tenantId);
 
+
+     List<Contracts> getMyContracts();
+    Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
+    
+    
 }

@@ -3,7 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 import java.util.List;
 import java.util.Optional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 
 // ✅ Interface KHÔNG có @Service và @Autowired
 public interface RoomsService {
