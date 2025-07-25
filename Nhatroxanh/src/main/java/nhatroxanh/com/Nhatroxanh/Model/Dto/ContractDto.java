@@ -83,6 +83,9 @@ public class ContractDto {
     public Terms getTerms() { return terms != null ? terms : (terms = new Terms()); }
     public void setTerms(Terms terms) { this.terms = terms; }
 
+
+
+
     public static class Owner {
         private  Long userId; // ✅ THÊM FIELD NÀY
         private String fullName;

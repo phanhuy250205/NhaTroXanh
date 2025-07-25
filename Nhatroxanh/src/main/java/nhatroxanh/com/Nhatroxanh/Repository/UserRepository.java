@@ -120,4 +120,12 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "LEFT JOIN FETCH r.hostel h " +
            "WHERE h.hostelId = :hostelId")
     List<Users> findByHostelId(@Param("hostelId") Integer hostelId);
+
+     @Query("SELECT DISTINCT u FROM Users u " +
+           "LEFT JOIN FETCH u.rentedContracts c " +
+           "LEFT JOIN FETCH c.room r " +
+           "LEFT JOIN FETCH r.hostel h " +
+           "WHERE h.hostelId = :hostelId AND u.role = :role")
+    List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
+        List<Users> findByRole(String role);
 }

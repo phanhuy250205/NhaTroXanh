@@ -26,7 +26,9 @@
                                 <small class="text-muted">0 mới</small>
                             </div>
                         </li>
-                        <li><hr class="dropdown-divider m-0"></li>
+                        <li>
+                            <hr class="dropdown-divider m-0">
+                        </li>
 
                         <!-- Loading Indicator -->
                         <li class="notification-loading text-center d-none">
@@ -40,7 +42,9 @@
                             <!-- Notification items will be inserted here -->
                         </div>
 
-                        <li><hr class="dropdown-divider m-0"></li>
+                        <li>
+                            <hr class="dropdown-divider m-0">
+                        </li>
 
                         <!-- Footer -->
                         <li>
@@ -110,7 +114,9 @@
                                     <small class="text-muted">0 mới</small>
                                 </div>
                             </li>
-                            <li><hr class="dropdown-divider m-0"></li>
+                            <li>
+                                <hr class="dropdown-divider m-0">
+                            </li>
 
                             <!-- Loading Indicator -->
                             <li class="notification-loading text-center d-none">
@@ -124,7 +130,9 @@
                                 <!-- Notification items will be inserted here -->
                             </div>
 
-                            <li><hr class="dropdown-divider m-0"></li>
+                            <li>
+                                <hr class="dropdown-divider m-0">
+                            </li>
 
                             <!-- Footer -->
                             <li>
@@ -157,20 +165,20 @@
                                 </div>
                             </div>
                         </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" th:href="@{/thong-tin-tai-khoan}"><i
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a class="dropdown-item" th:href="@{/khach-thue/profile-khach-thue}"><i
                                     class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
-                        <li><a class="dropdown-item" th:href="@{/doi-mat-khau}"><i class="fas fa-key me-2"></i>Đổi mật
-                                khẩu</a></li>
-                        <li><a class="dropdown-item" th:href="@{/tro-da-luu}"><i class="fas fa-heart me-2"></i>Trọ đã
-                                lưu</a></li>
-                        <li><a class="dropdown-item" th:href="@{/khach-thue/thanh-toan}"><i
-                                    class="fas fa-credit-card me-2"></i>Thanh Toán</a></li>
-                        <li><a class="dropdown-item" th:href="@{/khach-thue/quan-ly-danh-gia}"><i
-                                    class="fas fa-cog me-2"></i>Quản lý đánh giá</a></li>
+                        <li><a class="dropdown-item" th:href="@{/tro-da-luu}"><i class="fas fa-heart me-2"></i>Danh sách
+                                trọ yêu thích</a></li>
+                        <li><a class="dropdown-item" th:href="@{/khach-thue/lich-su-thanh-toan}"><i
+                                    class="fas fa-credit-card me-2"></i>Lịch Sử Thanh Toán</a></li>
                         <li><a class="dropdown-item" th:href="@{/khach-thue/quan-ly-thue-tra}"><i
                                     class="fas fa-file-contract me-2"></i>Quản lý thuê trả</a></li>
-                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
                         <li>
                             <form id="logoutForm" th:action="@{/perform_logout}" method="post">
                                 <button type="submit" class="dropdown-item text-danger">
@@ -184,50 +192,7 @@
 
             <!-- Anonymous user -->
             <div class="d-flex justify-content-center" sec:authorize="isAnonymous()">
-                <!-- Desktop notification for anonymous users -->
-                <div class="notification-wrapper desktop-notification d-none d-lg-flex me-3">
-                    <div class="dropdown">
-                        <button class="btn btn-notification dropdown-toggle" type="button"
-                            id="anonymousNotificationDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                            aria-label="Thông báo">
-                            <i class="fas fa-bell"></i>
-                            <span class="notification-badge" style="display: none;">0</span>
-                        </button>
-
-                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown-menu"
-                            aria-labelledby="anonymousNotificationDropdown">
-                            <!-- Header -->
-                            <li class="dropdown-header notification-header">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold">Thông báo</span>
-                                    <small class="text-muted">0 mới</small>
-                                </div>
-                            </li>
-                            <li><hr class="dropdown-divider m-0"></li>
-
-                            <!-- Loading Indicator -->
-                            <li class="notification-loading text-center d-none">
-                                <div class="spinner-border spinner-border-sm text-primary" role="status">
-                                    <span class="visually-hidden">Đang tải...</span>
-                                </div>
-                            </li>
-
-                            <!-- Notification Items (Static for anonymous users) -->
-                            <li>
-                                <div class="dropdown-item text-center">Vui lòng đăng nhập để xem thông báo</div>
-                            </li>
-
-                            <li><hr class="dropdown-divider m-0"></li>
-
-                            <!-- Footer -->
-                            <li>
-                                <a class="dropdown-item text-center notification-footer" href="/dang-nhap">
-                                    <small class="text-primary fw-bold">Đăng nhập để xem thông báo</small>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+             
 
                 <button class="btn btn-login me-2" type="button" id="loginBtnTrigger">
                     <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>

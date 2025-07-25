@@ -72,4 +72,6 @@ public interface TenantService {
 
         List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId);
 
+        TenantDetailDTO getTenantDetailByUserId(Integer userId);
+
 }

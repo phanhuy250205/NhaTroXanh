@@ -304,16 +304,18 @@ public class VoucherServiceImpl implements VoucherService {
     public void sendVoucherNotification(Vouchers voucher, CustomUserDetails userDetails) {
         List<Users> recipients;
         if (voucher.getHostel() != null) {
-            recipients = userRepository.findByHostelId(voucher.getHostel().getHostelId());
+            recipients = userRepository.findByHostelIdAndRole(voucher.getHostel().getHostelId(), Users.Role.CUSTOMER);
         } else {
-            recipients = userRepository.findAll();
+            recipients = userRepository.findByRole("CUSTOMER");
         }
 
         for (Users recipient : recipients) {
             Notification notification = new Notification();
             notification.setUser(recipient);
             notification.setTitle("Khuyến mãi mới: " + voucher.getTitle());
-            notification.setMessage("Sử dụng mã voucher " + voucher.getCode() + " để được giảm " + voucher.getDiscountValue() + " VNĐ cho đơn tối thiểu " + voucher.getMinAmount() + " VNĐ. Hạn sử dụng đến " + voucher.getEndDate() + ".");
+            notification.setMessage("Sử dụng mã voucher " + voucher.getCode() + " để được giảm "
+                    + voucher.getDiscountValue() + " VNĐ cho đơn tối thiểu " + voucher.getMinAmount()
+                    + " VNĐ. Hạn sử dụng đến " + voucher.getEndDate() + ".");
             notification.setType(Notification.NotificationType.PROMOTION);
             notification.setIsRead(false);
             notification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));
