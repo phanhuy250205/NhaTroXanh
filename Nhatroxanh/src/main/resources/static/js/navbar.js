@@ -1,6 +1,4 @@
-// Remove any default active states on page load
-const navLinks = document.querySelectorAll(".nav-link");
-navLinks.forEach((link) => {
+document.querySelectorAll(".nav-link").forEach(link => {
     link.classList.remove("active");
 });
 
@@ -8,319 +6,314 @@ document.addEventListener("DOMContentLoaded", () => {
     // Variables for scroll handling
     let lastScrollTop = 0;
     const navbar = document.querySelector(".navbar-custom");
+
+    if (!navbar) {
+        console.warn("Navbar not found");
+        return;
+    }
+
     const navbarHeight = navbar.offsetHeight;
 
-    // Function to remove active class from all navigation items
+    // --- MỞ MODAL ĐĂNG NHẬP/ĐĂNG KÝ ---
+    const loginBtnTrigger = document.getElementById('loginBtnTrigger');
+    const registerBtnTrigger = document.getElementById('registerBtnTrigger');
+    const loginModal = document.getElementById('loginModalOverlay');
+    const registerModal = document.getElementById('registerModalOverlay');
+
+    if (loginBtnTrigger && loginModal) {
+        loginBtnTrigger.addEventListener('click', () => {
+            loginModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    if (registerBtnTrigger && registerModal) {
+        registerBtnTrigger.addEventListener('click', () => {
+            registerModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        });
+    }
+
+    // --- QUẢN LÝ TRẠNG THÁI ACTIVE MENU ---
     function removeAllActiveClasses() {
-        // Remove active from all nav-links
-        document.querySelectorAll(".nav-link").forEach((link) => {
-            link.classList.remove("active");
-        });
-
-        // Remove active from all dropdown-items
-        document.querySelectorAll(".dropdown-item").forEach((item) => {
-            item.classList.remove("active");
-        });
+        document.querySelectorAll(".nav-link, .dropdown-item").forEach(el => el.classList.remove("active"));
     }
 
-    // Function to set active class for clicked item
-    function setActiveClass(clickedElement) {
-        // Remove all active classes first
+    function setActiveBasedOnURL() {
+        const currentPath = window.location.pathname;
         removeAllActiveClasses();
+        let activeSet = false;
 
-        // Add active class to clicked element
-        clickedElement.classList.add("active");
-
-        // If it's a dropdown item, also set its parent dropdown as active
-        if (clickedElement.classList.contains("dropdown-item")) {
-            const parentDropdown = clickedElement.closest(".dropdown");
-            if (parentDropdown) {
-                const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle");
-                if (dropdownToggle) {
-                    dropdownToggle.classList.add("active");
-                }
+        document.querySelectorAll(".nav-link:not(.dropdown-toggle)").forEach((link) => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add("active");
+                activeSet = true;
             }
-        }
+        });
 
-        // Store the active item info for page reload
-        const itemInfo = {
-            text: clickedElement.textContent.trim(),
-            href: clickedElement.getAttribute("href"),
-            isDropdownItem: clickedElement.classList.contains("dropdown-item"),
-        };
-        localStorage.setItem("activeNavItem", JSON.stringify(itemInfo));
-    }
-
-    // Function to restore active state on page load
-    function restoreActiveState() {
-        const storedItem = localStorage.getItem("activeNavItem");
-        if (storedItem) {
-            try {
-                const itemInfo = JSON.parse(storedItem);
-
-                // Find the element by text content and href
-                let targetElement = null;
-
-                if (itemInfo.isDropdownItem) {
-                    // Look for dropdown item
-                    document.querySelectorAll(".dropdown-item").forEach((item) => {
-                        if (item.textContent.trim() === itemInfo.text) {
-                            targetElement = item;
-                        }
-                    });
-                } else {
-                    // Look for nav link
-                    document.querySelectorAll(".nav-link").forEach((link) => {
-                        if (link.textContent.trim() === itemInfo.text || link.getAttribute("href") === itemInfo.href) {
-                            targetElement = link;
-                        }
-                    });
-                }
-
-                if (targetElement) {
-                    removeAllActiveClasses();
-                    targetElement.classList.add("active");
-
-                    // If it's a dropdown item, also set parent as active
-                    if (targetElement.classList.contains("dropdown-item")) {
-                        const parentDropdown = targetElement.closest(".dropdown");
-                        if (parentDropdown) {
-                            const dropdownToggle = parentDropdown.querySelector(".dropdown-toggle");
-                            if (dropdownToggle) {
-                                dropdownToggle.classList.add("active");
-                            }
-                        }
+        if (!activeSet) {
+            document.querySelectorAll(".dropdown-item").forEach((item) => {
+                if (item.getAttribute('href') === currentPath) {
+                    item.classList.add("active");
+                    const parentDropdown = item.closest(".dropdown");
+                    if (parentDropdown) {
+                        parentDropdown.querySelector(".dropdown-toggle")?.classList.add("active");
                     }
                 }
-            } catch (e) {
-                console.log("Error restoring active state:", e);
-            }
+            });
         }
     }
 
-    // Handle clicks on ALL navigation links (existing and future ones)
-    document.addEventListener("click", (e) => {
-        // Check if clicked element is a nav-link (but not dropdown-toggle)
-        if (e.target.closest(".nav-link") && !e.target.closest(".nav-link").classList.contains("dropdown-toggle")) {
-            const navLink = e.target.closest(".nav-link");
+    setActiveBasedOnURL();
+    window.addEventListener("popstate", setActiveBasedOnURL);
 
-            // Add ripple effect
-            createRipple(e, navLink);
-
-            // Set active class
-            setActiveClass(navLink);
-        }
-
-        // Check if clicked element is a dropdown-item
-        if (e.target.closest(".dropdown-item")) {
-            const dropdownItem = e.target.closest(".dropdown-item");
-
-            // Add ripple effect
-            createRipple(e, dropdownItem);
-
-            // Set active class
-            setActiveClass(dropdownItem);
-        }
-    });
-
-    // Restore active state on page load
-    restoreActiveState();
-
-    // Enhanced scroll effect for navbar with hide/show on scroll
+    // --- HIỆU ỨNG CUỘN NAVBAR ---
     window.addEventListener("scroll", () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        navbar.classList.toggle("scrolled", scrollTop > 10);
 
-        // Add scrolled class for subtle design changes
-        if (scrollTop > 10) {
-            navbar.classList.add("scrolled");
-        } else {
-            navbar.classList.remove("scrolled");
-        }
-
-        // Hide/show navbar on scroll
         if (scrollTop > navbarHeight) {
             if (scrollTop > lastScrollTop) {
-                // Scrolling down
                 navbar.classList.add("scrolled-down");
                 navbar.classList.remove("scrolled-up");
             } else {
-                // Scrolling up
                 navbar.classList.remove("scrolled-down");
                 navbar.classList.add("scrolled-up");
             }
         } else {
-            navbar.classList.remove("scrolled-up");
+            navbar.classList.remove("scrolled-up", "scrolled-down");
         }
+        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+    }, { passive: true });
 
-        lastScrollTop = scrollTop;
-    });
+    // --- QUẢN LÝ THÔNG BÁO ---
+    function loadNotifications() {
+        const dropdownMenus = document.querySelectorAll('.notification-dropdown-menu');
+        const isAuthenticated = !!document.querySelector('[sec\\:authorize="isAuthenticated()"]');
 
-    // Auto-close mobile menu when clicking on a link (except dropdown toggles)
-    const navbarCollapse = document.getElementById("navbarNav");
-    const navbarToggler = document.querySelector(".navbar-toggler");
+        dropdownMenus.forEach(dropdownMenu => {
+            const dropdownId = dropdownMenu.getAttribute('aria-labelledby');
+            const badge = dropdownMenu.closest('.notification-wrapper').querySelector('.notification-badge');
+            const headerCount = dropdownMenu.querySelector('.notification-header small');
+            const loadingIndicator = dropdownMenu.querySelector('.notification-loading');
 
-    document.addEventListener("click", (e) => {
-        if (e.target.closest(".nav-link") && !e.target.closest(".nav-link").classList.contains("dropdown-toggle")) {
-            // Only auto-close if we're on mobile
-            if (window.innerWidth < 992 && navbarCollapse.classList.contains("show")) {
-                const bsCollapse = new window.bootstrap.Collapse(navbarCollapse, {
-                    toggle: false,
-                });
-                bsCollapse.hide();
+            // Log DOM structure for debugging
+            console.debug(`Processing dropdown: ${dropdownId}`);
+            console.debug(`Found divider: ${!!dropdownMenu.querySelector('.dropdown-divider')}`);
 
-                // Reset toggler icon
-                navbarToggler.setAttribute("aria-expanded", "false");
-            }
-        }
-    });
-
-    // Button click handlers with enhanced feedback
-    const buttons = document.querySelectorAll(".auth-buttons .btn");
-    buttons.forEach((button) => {
-        button.addEventListener("click", function (e) {
-            createRipple(e, this);
-
-            // Show feedback based on button type
-            const buttonType = this.classList.contains("btn-login")
-                ? "đăng nhập"
-                : this.classList.contains("btn-register")
-                    ? "đăng ký"
-                    : this.classList.contains("btn-notification")
-                        ? "thông báo"
-                        : "đăng tin cho chủ trọ";
-
-            // Delay alert to allow ripple effect to show
-            setTimeout(() => {
-                if (this.classList.contains("btn-notification")) {
-                    alert(`Bạn có 3 thông báo mới!`);
-                } else if (this.classList.contains("btn-login")) {
-                    // Don't show alert for login button, let the modal handle it
-                    return;
-                } else if (this.classList.contains("btn-register")) {
-                    return;
+            // Skip for anonymous users
+            if (!isAuthenticated && dropdownId === 'anonymousNotificationDropdown') {
+                console.log('Skipping notification fetch for anonymous user');
+                const existingItems = dropdownMenu.querySelectorAll('.notification-item');
+                existingItems.forEach(item => item.remove());
+                const emptyItem = document.createElement('li');
+                emptyItem.innerHTML = '<div class="dropdown-item text-center">Vui lòng đăng nhập để xem thông báo</div>';
+                const divider = dropdownMenu.querySelector('.dropdown-divider');
+                if (divider && divider.parentNode === dropdownMenu) {
+                    dropdownMenu.insertBefore(emptyItem, divider);
                 } else {
-                    alert(`Chức năng ${buttonType} đã được kích hoạt`);
+                    dropdownMenu.appendChild(emptyItem);
                 }
-            }, 300);
-        });
-    });
-
-    // User dropdown menu click handlers
-    document.addEventListener("click", (e) => {
-        if (e.target.closest(".user-dropdown-menu .dropdown-item")) {
-            const dropdownItem = e.target.closest(".dropdown-item");
-            const itemText = dropdownItem.textContent.trim();
-
-            // Chỉ chặn preventDefault cho các mục không phải "Đăng xuất"
-            if (!itemText.includes("Đăng xuất")) {
-                e.preventDefault();
+                badge.textContent = '0';
+                badge.style.display = 'none';
+                headerCount.textContent = '0 mới';
+                return;
             }
 
-            // Show feedback based on menu item
-            setTimeout(() => {
-                if (itemText.includes("Đăng xuất")) {
-                    // Để form POST xử lý đăng xuất
-                    // Cập nhật trạng thái active về Trang chủ
-                    removeAllActiveClasses();
-                    const homeLink = document.querySelector('.nav-link[href="/trang-chu"]');
-                    if (homeLink) {
-                        homeLink.classList.add("active");
-                        const itemInfo = {
-                            text: homeLink.textContent.trim(),
-                            href: homeLink.getAttribute("href"),
-                            isDropdownItem: false,
-                        };
-                        localStorage.setItem("activeNavItem", JSON.stringify(itemInfo));
+            // Show loading indicator
+            loadingIndicator.classList.remove('d-none');
+
+            fetch('/api/notifications', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                // Log raw response for debugging
+                return response.text().then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        return { response, data };
+                    } catch (e) {
+                        console.error('Invalid JSON response:', text);
+                        throw new Error(`Invalid JSON: ${e.message}`);
                     }
-                } else if (itemText.includes("Hồ sơ")) {
-                    alert("Chuyển đến trang hồ sơ cá nhân");
-                } else if (itemText.includes("Trọ đã lưu")) {
-                    alert("Hiển thị danh sách trọ đã lưu");
-                } else if (itemText.includes("Cài đặt")) {
-                    alert("Mở trang cài đặt");
+                });
+            })
+            .then(({ response, data }) => {
+                // Hide loading indicator
+                loadingIndicator.classList.add('d-none');
+
+                if (data.error) {
+                    console.error('Backend error:', data.error);
+                    showAlert('danger', 'Không thể tải thông báo: ' + data.error);
+                    return;
                 }
-            }, 100);
-        }
-    });
 
-    // Ripple effect function for buttons and links
-    function createRipple(event, element) {
-        const circle = document.createElement("span");
-        const diameter = Math.max(element.clientWidth, element.clientHeight);
-        const radius = diameter / 2;
+                // Update badge and header
+                badge.textContent = data.unreadCount || 0;
+                badge.style.display = data.unreadCount > 0 ? 'inline' : 'none';
+                headerCount.textContent = `${data.unreadCount || 0} mới`;
 
-        // Position the ripple
-        const rect = element.getBoundingClientRect();
+                // Clear existing notification items
+                const existingItems = dropdownMenu.querySelectorAll('.notification-item');
+                existingItems.forEach(item => item.remove());
 
-        circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.left = `${event.clientX - rect.left - radius}px`;
-        circle.style.top = `${event.clientY - rect.top - radius}px`;
-        circle.classList.add("ripple");
+                // Find the first divider
+                const divider = dropdownMenu.querySelector('.dropdown-divider');
+                if (!divider || divider.parentNode !== dropdownMenu) {
+                    console.warn(`Divider not found in dropdown ${dropdownId}, appending to end`);
+                }
 
-        // Remove existing ripples
-        const ripple = element.querySelector(".ripple");
-        if (ripple) {
-            ripple.remove();
-        }
+                // Add new notifications
+                if (data.notifications && data.notifications.length > 0) {
+                    data.notifications.forEach(notification => {
+                        const iconClass = getIconClass(notification.type);
+                        const bgClass = getBgClass(notification.type);
+                        const item = document.createElement('li');
+                        item.innerHTML = `
+                            <a class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" data-notification-id="${notification.notificationId}">
+                                <div class="notification-icon ${bgClass}">
+                                    <i class="${iconClass} text-white"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <div class="notification-title">${notification.title}</div>
+                                    <div class="notification-text">${notification.message}</div>
+                                    <div class="notification-time">${formatTime(notification.createAt)}</div>
+                                </div>
+                                ${notification.isRead ? '' : '<div class="notification-dot"></div>'}
+                            </a>
+                        `;
+                        if (divider && divider.parentNode === dropdownMenu) {
+                            dropdownMenu.insertBefore(item, divider);
+                        } else {
+                            dropdownMenu.appendChild(item);
+                        }
+                    });
+                } else {
+                    // Show empty state
+                    const emptyItem = document.createElement('li');
+                    emptyItem.innerHTML = '<div class="dropdown-item text-center">Không có thông báo</div>';
+                    if (divider && divider.parentNode === dropdownMenu) {
+                        dropdownMenu.insertBefore(emptyItem, divider);
+                    } else {
+                        dropdownMenu.appendChild(emptyItem);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error loading notifications:', error);
+                loadingIndicator.classList.add('d-none');
+                showAlert('danger', 'Không thể tải thông báo: ' + error.message);
+            });
+        });
+    }
 
-        // Add new ripple
-        element.appendChild(circle);
-
-        // Remove ripple after animation
-        setTimeout(() => {
-            if (circle) {
-                circle.remove();
+    // Mark notification as read
+    function markNotificationAsRead(notificationId, element) {
+        fetch(`/api/notifications/${notificationId}/read`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
             }
-        }, 600);
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            element.classList.remove('unread');
+            element.querySelector('.notification-dot')?.remove();
+            document.querySelectorAll('.notification-badge').forEach(badge => {
+                const currentCount = parseInt(badge.textContent) || 0;
+                if (currentCount > 0) {
+                    badge.textContent = currentCount - 1;
+                    badge.style.display = badge.textContent > 0 ? 'inline' : 'none';
+                }
+            });
+            document.querySelectorAll('.notification-header small').forEach(headerCount => {
+                headerCount.textContent = `${document.querySelector('.notification-badge').textContent} mới`;
+            });
+        })
+        .catch(error => console.error('Error marking notification as read:', error));
     }
 
-    // Add ripple style
-    const style = document.createElement("style");
-    style.textContent = `
-    .ripple {
-      position: absolute;
-      background-color: rgba(255, 255, 255, 0.4);
-      border-radius: 50%;
-      transform: scale(0);
-      animation: ripple 0.6s linear;
-      pointer-events: none;
-    }
-    
-    @keyframes ripple {
-      to {
-        transform: scale(4);
-        opacity: 0;
-      }
-    }
-    
-    .btn, .nav-link, .dropdown-item {
-      position: relative;
-      overflow: hidden;
-    }
-  `;
-    document.head.appendChild(style);
-
-    // Preload hover states for smoother interactions
-    function preloadHoverStates() {
-        const hoverStyle = document.createElement("div");
-        hoverStyle.style.position = "absolute";
-        hoverStyle.style.width = "0";
-        hoverStyle.style.height = "0";
-        hoverStyle.style.opacity = "0";
-        hoverStyle.style.pointerEvents = "none";
-        document.body.appendChild(hoverStyle);
-
-        // Preload button hover states
-        hoverStyle.className = "btn-login hover";
-        hoverStyle.className = "btn-register hover";
-        hoverStyle.className = "btn-post hover";
-
-        // Remove after preloading
-        setTimeout(() => {
-            document.body.removeChild(hoverStyle);
-        }, 500);
+    // Map notification type to icon
+    function getIconClass(type) {
+        switch (type) {
+            case 'PAYMENT': return 'fas fa-exclamation';
+            case 'CONTRACT': return 'fas fa-file-contract';
+            case 'SYSTEM': return 'fas fa-bell';
+            case 'REPORT': return 'fas fa-exclamation-triangle';
+            default: return 'fas fa-bell';
+        }
     }
 
-    // Call preload function
-    preloadHoverStates();
+    // Map notification type to background class
+    function getBgClass(type) {
+        switch (type) {
+            case 'PAYMENT': return 'bg-warning';
+            case 'CONTRACT': return 'bg-primary';
+            case 'SYSTEM': return 'bg-secondary';
+            case 'REPORT': return 'bg-danger';
+            default: return 'bg-info';
+        }
+    }
+
+  
+
+    // Format time for Date object in Vietnam timezone (GMT+7)
+    function formatTime(date) {
+        // Chuyển đổi đầu vào thành đối tượng Date
+        const notificationDate = new Date(date);
+        const now = new Date();
+
+        // Kiểm tra xem notificationDate có hợp lệ không
+        if (isNaN(notificationDate.getTime())) {
+            console.warn(`Invalid date format: ${date}`);
+            return "Không xác định";
+        }
+
+        // Lấy thời gian theo múi giờ Việt Nam (Asia/Ho_Chi_Minh)
+        const vnOptions = { timeZone: 'Asia/Ho_Chi_Minh' };
+        const nowVN = new Date(now.toLocaleString('en-US', vnOptions));
+        const notificationVN = new Date(notificationDate.toLocaleString('en-US', vnOptions));
+
+        // Tính chênh lệch thời gian (theo giây)
+        const diff = (nowVN - notificationVN) / 1000;
+
+        // Xử lý trường hợp thời gian âm (tương lai)
+        if (diff < 0) {
+            console.warn(`Notification date is in the future: ${date}`);
+            return "Vừa xong";
+        }
+
+        // Các ngưỡng thời gian
+        if (diff < 60) return `${Math.floor(diff)} giây trước`;
+        if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+        if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+        if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`; // Dưới 7 ngày
+
+        // Nếu trên 7 ngày, hiển thị ngày tháng theo định dạng Việt Nam
+        return notificationVN.toLocaleString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZone: 'Asia/Ho_Chi_Minh'
+        });
+    }
+
+    // Show alert (assuming it's defined elsewhere)
+    function showAlert(type, message) {
+        console.log(`Alert [${type}]: ${message}`);
+        // Implement your alert display logic here
+    }
+
+    // Load notifications on page load
+    loadNotifications();
+
+    // Poll for new notifications every 30 seconds
+    setInterval(loadNotifications, 30000);
 });

@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/layouts/head}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<head>
+    <title>Thông Báo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .wrapper-container-notifications {
+            padding: 20px;
+            margin: 0 auto;
+        }
+
+        .header-section-notifications {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .primary-heading-notifications {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .secondary-text-notifications {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 4px 0 0 0;
+            font-weight: 500;
+        }
+
+        .return-button-notifications {
+            background: transparent;
+            color: #3e83cc;
+            border: 2px solid #3e83cc;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .return-button-notifications:hover {
+            background: #3e83cc;
+            color: white;
+            text-decoration: none;
+        }
+
+        .navigation-wrapper-notifications {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .menu-tabs-notifications {
+            border-bottom: 2px solid rgba(62, 131, 204, 0.1);
+            padding: 0;
+            margin-bottom: 0;
+            list-style: none;
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .menu-tabs-notifications::-webkit-scrollbar {
+            display: none;
+        }
+
+        .menu-tabs-notifications .tab-item-notifications {
+            flex-shrink: 0;
+        }
+
+        .menu-tabs-notifications .tab-link-notifications {
+            border: none;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 13px;
+            padding: 16px 20px;
+            border-radius: 0;
+            transition: all 0.2s ease;
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            min-width: fit-content;
+        }
+
+        .menu-tabs-notifications .tab-link-notifications:hover {
+            color: #3e83cc;
+            background: rgba(62, 131, 204, 0.05);
+        }
+
+        .menu-tabs-notifications .tab-link-notifications.active-tab-notifications {
+            color: #3e83cc;
+            background: transparent;
+            border-bottom: 3px solid #3e83cc;
+            font-weight: 700;
+        }
+
+        .notification-list-container {
+            margin-bottom: 20px;
+        }
+
+        .notification-card-item {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            margin-bottom: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .notification-card-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .notification-card-header {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: all 0.3s ease;
+            gap: 15px;
+        }
+
+        .notification-card-header:hover {
+            background: linear-gradient(135deg, #2d6bb3 0%, #4a8dd4 100%);
+        }
+
+        .notification-card-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .notification-card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .notification-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .notification-card-toggle {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .notification-card-toggle.expanded {
+            transform: rotate(180deg);
+        }
+
+        .notification-card-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .notification-card-content.expanded {
+            max-height: 2000px;
+        }
+
+        .notification-card-body {
+            padding: 20px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+            background-color: #f9fafc;
+        }
+
+        .content-panels-notifications {
+            padding: 0;
+        }
+
+        .panel-section-notifications {
+            display: none;
+        }
+
+        .panel-section-notifications.show-panel-notifications {
+            display: block;
+            opacity: 1;
+        }
+
+        .message-body-notifications {
+            line-height: 1.7;
+            font-size: 14px;
+            color: #374151;
+            margin-bottom: 20px;
+        }
+
+        .message-body-notifications h4 {
+            color: #1f2937;
+            font-weight: 600;
+            margin: 20px 0 10px 0;
+            font-size: 16px;
+        }
+
+        .message-body-notifications p {
+            margin-bottom: 15px;
+        }
+
+        .data-layout-notifications {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .data-block-notifications {
+            background: rgba(62, 131, 204, 0.05);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .data-title-notifications {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: #3e83cc;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .data-content-notifications {
+            color: #1f2937;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .payment-record-notifications {
+            background: white;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 15px;
+            transition: all 0.2s ease;
+        }
+
+        .payment-record-notifications:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.15);
+        }
+
+        .payment-summary-notifications {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+            gap: 10px;
+        }
+
+        .payment-label-notifications {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 14px;
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .payment-value-notifications {
+            font-weight: 700;
+            font-size: 16px;
+            color: #FF8000;
+            white-space: nowrap;
+        }
+
+        .payment-info-notifications {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .payment-button-container {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .payment-button-notifications {
+            background: linear-gradient(135deg, #FF8000 0%, #ff9500 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(255, 128, 0, 0.3);
+        }
+
+        .payment-button-notifications:hover {
+            background: linear-gradient(135deg, #e67300 0%, #e68500 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 128, 0, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .payment-button-notifications:active {
+            transform: translateY(0);
+        }
+
+        .unpaid-status-badge {
+            background: rgb(214, 3, 3);
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .wrapper-container-notifications {
+                padding: 12px;
+            }
+
+            .primary-heading-notifications {
+                font-size: 22px;
+            }
+
+            .secondary-text-notifications {
+                font-size: 13px;
+            }
+
+            .header-section-notifications {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .return-button-notifications {
+                padding: 10px 20px;
+                font-size: 13px;
+                align-self: flex-start;
+            }
+
+            .notification-card-header {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .notification-card-title {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+
+            .notification-card-meta {
+                gap: 8px;
+                font-size: 11px;
+            }
+
+            .notification-card-meta span {
+                gap: 3px;
+            }
+
+            .notification-card-toggle {
+                align-self: flex-end;
+                margin-top: -20px;
+            }
+
+            .notification-card-body {
+                padding: 16px;
+            }
+
+            .menu-tabs-notifications {
+                padding: 0 8px;
+            }
+
+            .menu-tabs-notifications .tab-link-notifications {
+                padding: 14px 16px;
+                font-size: 12px;
+                gap: 4px;
+            }
+
+            .data-layout-notifications {
+                gap: 12px;
+            }
+
+            .data-block-notifications {
+                padding: 14px;
+            }
+
+            .data-title-notifications {
+                font-size: 14px;
+                gap: 6px;
+            }
+
+            .data-content-notifications {
+                font-size: 12px;
+            }
+
+            .payment-record-notifications {
+                padding: 14px;
+            }
+
+            .payment-summary-notifications {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .payment-value-notifications {
+                font-size: 15px;
+            }
+
+            .payment-button-notifications {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wrapper-container-notifications {
+                padding: 8px;
+            }
+
+            .primary-heading-notifications {
+                font-size: 20px;
+            }
+
+            .notification-card-header {
+                padding: 14px;
+            }
+
+            .notification-card-body {
+                padding: 14px;
+            }
+
+            .menu-tabs-notifications .tab-link-notifications {
+                padding: 12px 14px;
+                font-size: 11px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .data-layout-notifications {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .payment-info-notifications {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+        }
+
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .notification-card-header,
+        .tab-link-notifications,
+        .return-button-notifications,
+        .payment-button-notifications {
+            touch-action: manipulation;
+        }
+
+        .tab-link-notifications:focus,
+        .return-button-notifications:focus,
+        .notification-card-header:focus,
+        .payment-button-notifications:focus {
+            outline: 2px solid #3e83cc;
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <div class="wrapper-container-notifications">
+        <div class="header-section-notifications">
+            <div>
+                <h1 class="primary-heading-notifications">Thông Báo</h1>
+                <p class="secondary-text-notifications">Xem và quản lý tất cả thông báo của bạn</p>
+            </div>
+            <a href="/" class="return-button-notifications">
+                <i class="fas fa-arrow-left"></i>
+                Quay lại
+            </a>
+        </div>
+
+        <div class="navigation-wrapper-notifications">
+            <ul class="menu-tabs-notifications" role="tablist">
+                <li class="tab-item-notifications" role="presentation">
+                    <button class="tab-link-notifications" data-target="lodging-notifications" type="button" role="tab">
+                        <i class="fas fa-home"></i> Hoạt động trọ
+                    </button>
+                </li>
+                <li class="tab-item-notifications" role="presentation">
+                    <button class="tab-link-notifications" data-target="finance-notifications" type="button" role="tab">
+                        <i class="fas fa-credit-card"></i> Thanh toán
+                    </button>
+                </li>
+                <li class="tab-item-notifications" role="presentation">
+                    <button class="tab-link-notifications" data-target="deals-notifications" type="button" role="tab">
+                        <i class="fas fa-gift"></i> Khuyến mãi
+                    </button>
+                </li>
+                <li class="tab-item-notifications" role="presentation">
+                    <button class="tab-link-notifications" data-target="profile-notifications" type="button" role="tab">
+                        <i class="fas fa-user-cog"></i> Tài khoản
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="content-panels-notifications">
+            <div class="panel-section-notifications show-panel-notifications active" id="lodging-notifications" role="tabpanel">
+                <div class="notification-list-container" id="lodging-notifications-list"></div>
+            </div>
+            <div class="panel-section-notifications" id="finance-notifications" role="tabpanel">
+                <div class="notification-list-container" id="finance-notifications-list"></div>
+            </div>
+            <div class="panel-section-notifications" id="deals-notifications" role="tabpanel">
+                <div class="notification-list-container" id="deals-notifications-list"></div>
+            </div>
+            <div class="panel-section-notifications" id="profile-notifications" role="tabpanel">
+                <div class="notification-list-container" id="profile-notifications-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab switching functionality
+            const tabLinks = document.querySelectorAll('.tab-link-notifications');
+            const tabPanes = document.querySelectorAll('.panel-section-notifications');
+
+            tabLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    tabLinks.forEach(tab => tab.classList.remove('active-tab-notifications'));
+                    tabPanes.forEach(pane => pane.classList.remove('show-panel-notifications'));
+                    this.classList.add('active-tab-notifications');
+                    const targetPane = document.getElementById(targetId);
+                    if (targetPane) {
+                        targetPane.classList.add('show-panel-notifications');
+                    }
+                });
+            });
+
+            // Back button functionality
+            const backButton = document.querySelector('.return-button-notifications');
+            if (backButton) {
+                backButton.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    if (window.history.length > 1) {
+                        window.history.back();
+                    } else {
+                        window.location.href = '/';
+                    }
+                });
+            }
+
+            // Add smooth scrolling
+            document.documentElement.style.scrollBehavior = 'smooth';
+
+            // Touch optimization for mobile
+            const interactiveElements = document.querySelectorAll('.notification-card-header, .tab-link-notifications, .return-button-notifications, .payment-button-notifications');
+            interactiveElements.forEach(element => {
+                element.addEventListener('touchstart', function () {
+                    this.style.opacity = '0.7';
+                });
+                element.addEventListener('touchend', function () {
+                    this.style.opacity = '1';
+                });
+                element.addEventListener('touchcancel', function () {
+                    this.style.opacity = '1';
+                });
+            });
+
+            // Fetch and render notifications
+            function loadNotifications() {
+                fetch('/api/notifications', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.text().then(text => {
+                            try {
+                                const data = JSON.parse(text);
+                                return data;
+                            } catch (e) {
+                                console.error('Invalid JSON response:', text);
+                                throw new Error(`Invalid JSON: ${e.message}`);
+                            }
+                        });
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Backend error:', data.error);
+                            showAlert('danger', 'Không thể tải thông báo: ' + data.error);
+                            return;
+                        }
+
+                        if (!data.notifications || !Array.isArray(data.notifications)) {
+                            console.error('No notifications data:', data);
+                            showAlert('danger', 'Không có dữ liệu thông báo.');
+                            return;
+                        }
+
+                        const containers = {
+                            lodging: document.getElementById('lodging-notifications-list'),
+                            finance: document.getElementById('finance-notifications-list'),
+                            deals: document.getElementById('deals-notifications-list'),
+                            profile: document.getElementById('profile-notifications-list')
+                        };
+
+                        Object.values(containers).forEach(container => {
+                            if (container) container.innerHTML = '';
+                        });
+
+                        const typeToTab = {
+                            'PAYMENT': 'finance-notifications-list',
+                            'CONTRACT': 'lodging-notifications-list',
+                            'SYSTEM': 'profile-notifications-list',
+                            'REPORT': 'lodging-notifications-list',
+                            'PROMOTION': 'deals-notifications-list',
+                            'ACCOUNT': 'profile-notifications-list',
+                            'HOSTEL_ACTIVITY': 'lodging-notifications-list'
+                        };
+
+                        data.notifications.forEach(notification => {
+                            if (!notification) {
+                                console.warn('Invalid notification:', notification);
+                                return;
+                            }
+                            const tabId = typeToTab[notification.type] || 'lodging-notifications';
+                            const container = document.getElementById(tabId);
+                            const allContainer = document.getElementById('lodging-notifications');
+
+                            if (!container || !allContainer) {
+                                console.error('Tab container not found for tabId:', tabId);
+                                return;
+                            }
+
+                            [container, allContainer].forEach(cont => {
+                                if (cont && cont !== container) return; // Skip duplicate rendering in all tab
+                                const card = createNotificationCard(notification);
+                                if (card) cont.appendChild(card);
+                            });
+
+                            const cardHeader = container.querySelector(`[data-notification-id="${notification.notificationId}"]`);
+                            if (cardHeader && !notification.isRead) {
+                                cardHeader.addEventListener('click', () => {
+                                    markNotificationAsRead(notification.notificationId, cardHeader);
+                                }, { once: true });
+                            }
+                        });
+
+                        Object.entries(containers).forEach(([key, container]) => {
+                            if (container && container.children.length === 0) {
+                                const emptyItem = document.createElement('div');
+                                emptyItem.className = 'notification-card-item';
+                                emptyItem.innerHTML = '<div class="notification-card-body text-center">Không có thông báo</div>';
+                                container.appendChild(emptyItem);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error loading notifications:', error);
+                        showAlert('danger', 'Không thể tải thông báo: ' + error.message);
+                    });
+            }
+
+            // Create notification card
+            function createNotificationCard(notification) {
+                if (!notification || !notification.notificationId) {
+                    console.error('Invalid notification data:', notification);
+                    return null;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'notification-card-item';
+                const cardId = `notif-card-${notification.notificationId}`;
+                const toggleId = `toggle-card-${notification.notificationId}`;
+
+                // Determine the content to render based on notification type
+                let contentHtml = '';
+                if (notification.type === 'PAYMENT' && notification.paymentDetails) {
+                    contentHtml = renderPaymentNotification(notification.paymentDetails, notification.room);
+                } else if (notification.type === 'REPORT' && notification.incidentDetails) {
+                    contentHtml = renderIncidentNotification(notification.incidentDetails, notification.room);
+                } else if (notification.type === 'PROMOTION' && notification.voucherDetails) {
+                    contentHtml = renderVoucherNotification(notification.voucherDetails);
+                } else {
+                    // Handle ACCOUNT and HOSTEL_ACTIVITY or any other types with generic content
+                    contentHtml = `
+            <div class="message-body-notifications">
+                <h4><i class="fas fa-info-circle" style="color: #3e83cc;"></i> Thông tin chi tiết</h4>
+                <p>${notification.message || 'Không có nội dung'}</p>
+                ${notification.room ? `
+                    <div class="data-block-notifications">
+                        <div class="data-title-notifications">
+                            <i class="fas fa-home"></i>
+                            Thông tin phòng
+                        </div>
+                        <div class="data-content-notifications">
+                            <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
+                            <strong>Loại phòng:</strong> ${notification.room.category?.name || 'Không xác định'}<br>
+                            <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
+                            <strong>Giá phòng:</strong> ${formatCurrency(notification.room.price) || '0'} VNĐ
+                        </div>
+                    </div>
+                ` : '<p>Không có thông tin phòng liên quan.</p>'}
+            </div>`;
+                }
+
+                card.innerHTML = `
+        <div class="notification-card-header" data-notification-id="${notification.notificationId}" onclick="toggleNotificationCard('${cardId}')">
+            <div class="notification-card-info">
+                <h3 class="notification-card-title">
+                    ${notification.title || 'Không có tiêu đề'}
+                    ${notification.type === 'PAYMENT' && notification.paymentDetails && notification.paymentDetails.status === 'PENDING' ?
+                        '<span class="unpaid-status-badge">Chưa thanh toán</span>' : ''}
+                </h3>
+                <div class="notification-card-meta">
+                    <span><i class="fas fa-clock"></i> ${formatDate(notification.createAt) || 'Không có ngày'}</span>
+                    <span><i class="fas fa-tag"></i> ${getTagName(notification.type) || 'Không xác định'}</span>
+                    <span><i class="fas fa-user"></i> ${getSender(notification.type) || 'Không xác định'}</span>
+                </div>
+            </div>
+            <div class="notification-card-toggle" id="${toggleId}">
+                <i class="fas fa-chevron-down"></i>
+            </div>
+        </div>
+        <div class="notification-card-content" id="${cardId}">
+            <div class="notification-card-body">
+                ${contentHtml}
+            </div>
+        </div>
+    `;
+
+                return card;
+            }
+
+            // Helper function to format currency values as Vietnamese currency (VND)
+            function formatCurrency(value) {
+                if (!value) return '0 VNĐ';
+                const num = parseFloat(value.replace(/[^0-9.,]/g, '').replace(',', '.'));
+                if (isNaN(num)) return value;
+
+                // Check if the number is a whole number
+                if (Number.isInteger(num)) {
+                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num) + ' VNĐ';
+                } else {
+                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + ' VNĐ';
+                }
+            }
+
+            // Helper function to render PAYMENT notification content
+            function renderPaymentNotification(paymentDetails, room) {
+                if (!paymentDetails) return '<p>Không có thông tin chi tiết hóa đơn.</p>';
+
+                let paymentHtml = `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-file-invoice-dollar" style="color: #3e83cc;"></i> Chi tiết hóa đơn</h4>
+            <p>${paymentDetails.status === 'SUCCESS' ?
+                        `Hóa đơn #${paymentDetails.invoiceId} đã thanh toán thành công.` :
+                        `Hóa đơn #${paymentDetails.invoiceId} đang chờ thanh toán.`}</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin hóa đơn
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không xác định'}<br>
+                    <strong>Tháng:</strong> ${paymentDetails.month || 'Không xác định'}<br>
+                    <strong>Tổng tiền:</strong> ${formatCurrency(paymentDetails.total) || '0'} VNĐ<br>
+                    ${paymentDetails.status === 'SUCCESS' ? `
+                        <strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'Không xác định'}<br>
+                        <strong>Phòng:</strong> ${paymentDetails.roomName || 'Không xác định'}<br>
+                        <strong>Nhà trọ:</strong> ${paymentDetails.hostelName || 'Không xác định'}<br>
+                    ` : `
+                        <strong>Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}<br>
+                    `}
+                </div>
+            </div>
+    `;
+
+                if (room) {
+                    paymentHtml += `
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-home"></i>
+                    Thông tin phòng
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
+                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
+                    <strong>Giá phòng:</strong> ${formatCurrency(room.price) || '0'} VNĐ
+                </div>
+            </div>`;
+                }
+
+                paymentHtml += `</div>`;
+                return paymentHtml;
+            }
+
+            // Helper function to render REPORT notification content
+            function renderIncidentNotification(incidentDetails, room) {
+                if (!incidentDetails) return '<p>Không có thông tin chi tiết sự cố.</p>';
+
+                let incidentHtml = `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-exclamation-triangle" style="color: #3e83cc;"></i> Chi tiết sự cố</h4>
+            <p>Sự cố #${incidentDetails.incidentId} (${incidentDetails.incidentType}) - Trạng thái: ${incidentDetails.status === 'DANG_XU_LY' ? 'Đang xử lý' : 'Đã xử lý'}</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin sự cố
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã sự cố:</strong> ${incidentDetails.incidentId || 'Không xác định'}<br>
+                    <strong>Loại sự cố:</strong> ${incidentDetails.incidentType || 'Không xác định'}<br>
+                    <strong>Mức độ:</strong> ${incidentDetails.level || 'Không xác định'}<br>
+                    <strong>Phòng:</strong> ${incidentDetails.roomName || 'Không xác định'}<br>
+                </div>
+            </div>
+    `;
+
+                if (room) {
+                    incidentHtml += `
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-home"></i>
+                    Thông tin phòng
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
+                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
+                    <strong>Giá phòng:</strong> ${room.price || '0 VNĐ'}
+                </div>
+            </div>`;
+                }
+
+                incidentHtml += `</div>`;
+                return incidentHtml;
+            }
+
+            // Helper function to render PROMOTION notification content
+            function renderVoucherNotification(voucherDetails) {
+                if (!voucherDetails) return '<p>Không có thông tin chi tiết khuyến mãi.</p>';
+
+                return `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-ticket-alt" style="color: #3e83cc;"></i> Chi tiết khuyến mãi</h4>
+            <p>Sử dụng mã voucher ${voucherDetails.voucherCode || 'Không xác định'} để nhận ưu đãi.</p>
+            <div class="data-block-notifications">
+                <div class="data-title-notifications">
+                    <i class="fas fa-info-circle"></i>
+                    Thông tin voucher
+                </div>
+                <div class="data-content-notifications">
+                    <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
+                    <strong>Giá trị giảm:</strong> ${voucherDetails.discountValue || '0 VNĐ'}<br>
+                    <strong>Đơn tối thiểu:</strong> ${voucherDetails.minAmount || '0 VNĐ'}<br>
+                    <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
+                </div>
+            </div>
+        </div>`;
+            }
+
+            // Placeholder functions (assumed to be defined elsewhere)
+            function formatDate(date) {
+                return date ? new Date(date).toLocaleString('vi-VN') : 'Không có ngày';
+            }
+
+            function getTagName(type) {
+                const tagMap = {
+                    'PAYMENT': 'Hóa đơn',
+                    'REPORT': 'Sự cố',
+                    'PROMOTION': 'Khuyến mãi',
+                    'ACCOUNT': 'Tài khoản',
+                    'HOSTEL_ACTIVITY': 'Hoạt động nhà trọ'
+                };
+                return tagMap[type] || 'Không xác định';
+            }
+
+            function getSender(type) {
+                return type === 'SYSTEM' ? 'Hệ thống' : 'Quản lý nhà trọ';
+            }
+
+            // Parse PAYMENT notification message
+            function parsePaymentNotification(notification) {
+                try {
+                    const message = notification.message;
+
+                    // Check if this is a success notification
+                    if (message.includes('thanh toán thành công') || message.includes('Bạn đã thanh toán thành công')) {
+                        // Parse success notification
+                        const successMatch = message.match(/Bạn đã thanh toán thành công hóa đơn #(\d+) cho phòng ([^\s]+) tại ([^.]+)\. Tháng: ([^.]+)\. Số tiền: ([^.]+)\. Phương thức: ([^.]+)\./);
+
+                        if (successMatch) {
+                            return {
+                                invoiceId: successMatch[1],
+                                month: successMatch[4],
+                                total: successMatch[5],
+                                roomName: successMatch[2],
+                                hostelName: successMatch[3],
+                                paymentMethod: successMatch[6],
+                                status: 'SUCCESS',
+                                details: []
+                            };
+                        }
+
+                        // Fallback for success messages that don't match the pattern
+                        const fallbackMatch = message.match(/hóa đơn #(\d+)/);
+                        if (fallbackMatch) {
+                            return {
+                                invoiceId: fallbackMatch[1],
+                                status: 'SUCCESS',
+                                details: []
+                            };
+                        }
+                    } else {
+                        // Parse payment reminder notification
+                        const match = message.match(/Hóa đơn #(\d+) cho tháng ([\d/]+) \(Tổng: ([^\)]+)\)\.? Hạn thanh toán: ([^\.]+)\.?/i);
+                        if (match) {
+                            return {
+                                invoiceId: match[1],
+                                month: match[2],
+                                total: match[3],
+                                dueDate: match[4],
+                                status: 'PENDING',
+                                details: []
+                            };
+                        }
+                    }
+
+                    return null;
+                } catch (e) {
+                    console.error('Error parsing PAYMENT notification:', e, notification.message);
+                    return null;
+                }
+            }
+
+            // Render PAYMENT notification content
+            function renderPaymentNotification(paymentDetails, room) {
+                const roomId = room?.roomId || '';
+                const hostelId = room?.hostel?.id || '';
+                const addressId = room?.hostel?.address?.id || '';
+
+                // Handle success notifications
+                if (paymentDetails && paymentDetails.status === 'SUCCESS') {
+                    return `
+        <div class="message-body-notifications">
+            <h4><i class="fas fa-check-circle" style="color: #10b981;"></i> Thanh toán thành công</h4>
+            <p>Bạn đã thanh toán thành công hóa đơn tháng ${paymentDetails.month || 'Không xác định'}. Cảm ơn bạn đã thanh toán đúng hạn!</p>
+            <div class="data-layout-notifications">
+                <div class="data-block-notifications">
+                    <div class="data-title-notifications">
+                        <i class="fas fa-home"></i>
+                        Thông tin phòng
+                    </div>
+                    <div class="data-content-notifications">
+                        <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
+                        <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
+                        <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
+                        <strong>Giá phòng:</strong> ${room?.price || '0 VNĐ'}
+                    </div>
+                </div>
+                <div class="data-block-notifications">
+                    <div class="data-title-notifications">
+                        <i class="fas fa-check-circle"></i>
+                        Thông tin thanh toán
+                    </div>
+                    <div class="data-content-notifications">
+                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                        <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
+                        <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
+            <div class="payment-summary-notifications">
+                <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
+                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0 VNĐ'}</div>
+            </div>
+            <div class="payment-info-notifications">
+                <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
+                <div><strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'VNPay'}</div>
+                <div><strong>Trạng thái:</strong> <span style="color: #10b981; font-weight: bold;">Đã thanh toán thành công</span></div>
+            </div>
+        </div>
+    `;
+                }
+
+                // Handle pending notifications
+                return `
+                    <div class="message-body-notifications">
+                        <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Thông báo thanh toán</h4>
+                        <p>Khoản thanh toán tiền phòng tháng ${paymentDetails.month || 'Không xác định'} của bạn đã đến hạn. Vui lòng thanh toán để tránh bị gián đoạn dịch vụ.</p>
+                        <div class="data-layout-notifications">
+                            <div class="data-block-notifications">
+                                <div class="data-title-notifications">
+                                    <i class="fas fa-home"></i>
+                                    Thông tin phòng
+                                </div>
+                                <div class="data-content-notifications">
+                                    <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
+                                    <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
+                                    <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
+                                    <strong>Giá phòng:</strong> ${room?.price || '0'} 
+                                </div>
+                            </div>
+                            <div class="data-block-notifications">
+                                <div class="data-title-notifications">
+                                    <i class="fas fa-dollar-sign"></i>
+                                    Chi phí cần thanh toán
+                                </div>
+                                <div class="data-content-notifications">
+                                    <strong style="color: #dc2626;">Tổng cộng:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                                    <strong style="color: #dc2626;">Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-record-notifications">
+                        <div class="payment-summary-notifications">
+                            <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
+                            <div class="payment-value-notifications" style="color: #dc2626;">${paymentDetails.total || '0 VNĐ'}</div>
+                        </div>
+                        <div class="payment-info-notifications">
+                            <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
+                            <div><strong>Ngày phát hành:</strong> ${paymentDetails.dueDate ? paymentDetails.dueDate.split('-').reverse().join('/') : 'Không xác định'}</div>
+                            <div><strong>Trạng thái:</strong> <span style="color: #dc2626;">Chưa thanh toán</span></div>
+                            <div><strong>Hạn thanh toán:</strong> <span style="color: #dc2626;">${paymentDetails.dueDate || 'Không xác định'}</span></div>
+                        </div>
+                        <div class="payment-button-container">
+                            <button class="payment-button-notifications" onclick="handlePayment('${paymentDetails.invoiceId}', '${(paymentDetails.total || '0').replace(/[^0-9]/g, '')}', '${roomId}', '${hostelId}', '${addressId}')">
+                                <i class="fas fa-credit-card"></i>
+                                Thanh toán ngay
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Mark notification as read
+            function markNotificationAsRead(notificationId, element) {
+                fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+                    }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        const card = element.closest('.notification-card-item');
+                        card.querySelector('.unpaid-status-badge')?.remove();
+                        card.querySelector('.notification-card-header').style.opacity = '0.7';
+                        showAlert('success', 'Thông báo đã được đánh dấu là đã đọc');
+                    })
+                    .catch(error => {
+                        console.error('Error marking notification as read:', error);
+                        showAlert('danger', 'Không thể đánh dấu thông báo là đã đọc: ' + error.message);
+                    });
+            }
+
+            // Format date
+            function formatDate(date) {
+                if (!date) return 'Không có ngày';
+                const d = new Date(date);
+                return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()} - ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
+            }
+
+            // Map NotificationType to tag name
+            function getTagName(type) {
+                switch (type) {
+                    case 'PAYMENT': return 'Thanh toán';
+                    case 'CONTRACT': return 'Hoạt động trọ';
+                    case 'PROMOTION': return 'Khuyến mãi';
+                    case 'SYSTEM': return 'Hệ thống';
+                    case 'REPORT': return 'Sự cố';
+                    case 'ACCOUNT': return 'Tài khoản';
+                    case 'HOSTEL_ACTIVITY': return 'Hoạt động trọ';
+                    default: return 'Hệ thống';
+                }
+            }
+
+            // Map NotificationType to sender
+            function getSender(type) {
+                switch (type) {
+                    case 'PAYMENT': return 'Hệ thống';
+                    case 'CONTRACT': return 'Kỹ thuật';
+                    case 'SYSTEM': return 'Hệ thống';
+                    case 'REPORT': return 'Chủ trọ';
+                    case 'PROMOTION': return 'Hệ thống';
+                    case 'ACCOUNT': return 'Hệ thống';
+                    case 'HOSTEL_ACTIVITY': return 'Chủ trọ';
+                    default: return 'Hệ thống';
+                }
+            }
+
+            // Toggle notification card
+            window.toggleNotificationCard = function (cardId) {
+                const content = document.getElementById(cardId);
+                const toggleId = cardId.replace('notif-card-', 'toggle-card-');
+                const toggle = document.getElementById(toggleId);
+
+                if (!content || !toggle) {
+                    console.error(`Element not found for cardId: ${cardId} at 03:25 PM +07, July 14, 2025`);
+                    return;
+                }
+
+                if (content.classList.contains('expanded')) {
+                    content.classList.remove('expanded');
+                    toggle.classList.remove('expanded');
+                } else {
+                    content.classList.add('expanded');
+                    toggle.classList.add('expanded');
+                }
+            };
+
+            // Handle payment with additional parameters
+            window.handlePayment = function (invoiceId, total, roomId, hostelId, addressId) {
+                console.log("Redirecting to: /thanh-toan?invoiceId=" + invoiceId + "&room_id=" + roomId + "&hostel_id=" + hostelId + "&address_id=" + addressId + " at 03:25 PM +07, July 14, 2025");
+                const button = event.target.closest('.payment-button-notifications');
+                if (!button) {
+                    console.error('Button not found at 03:25 PM +07, July 14, 2025');
+                    return;
+                }
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+                button.disabled = true;
+
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                    window.location.href = `/thanh-toan?invoiceId=${invoiceId}&room_id=${roomId}&hostel_id=${hostelId}&address_id=${addressId}`;
+                    console.log('Redirect executed to: /thanh-toan?invoiceId=' + invoiceId + '&room_id=' + roomId + '&hostel_id=' + hostelId + '&address_id=' + addressId + ' at 03:25 PM +07, July 14, 2025');
+                }, 1000);
+            };
+
+            // Show Bootstrap alert
+            function showAlert(type, message) {
+                const alertContainer = document.createElement('div');
+                alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
+                alertContainer.role = 'alert';
+                alertContainer.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                document.body.prepend(alertContainer);
+                setTimeout(() => alertContainer.remove(), 5000);
+            }
+
+            // Load notifications on page load
+            loadNotifications();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- PHẦN 1: KHAI BÁO CÁC NÚT VÀ FORM CẦN SỬ DỤNG (GIỮ NGUYÊN) ---
+    // --- PHẦN 1: KHAI BÁO CÁC NÚT VÀ FORM CẦN SỬ DỤNG ---
     const registerBtn = document.querySelector(".btn-register");
     const registerModalOverlay = document.getElementById("registerModalOverlay");
     const registerModalClose = document.getElementById("registerModalClose");
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Sự kiện: Mở modal khi click nút "Đăng ký" (GIỮ NGUYÊN)
+    // Sự kiện: Mở modal khi click nút "Đăng ký"
     if (registerBtn) {
         registerBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -32,12 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Sự kiện: Đóng modal khi click nút close (X) (GIỮ NGUYÊN)
+    // Sự kiện: Đóng modal khi click nút close (X)
     if (registerModalClose) {
         registerModalClose.addEventListener("click", closeModal);
     }
 
-    // Sự kiện: Đóng modal khi click ra ngoài vùng nội dung (GIỮ NGUYÊN)
+    // Sự kiện: Đóng modal khi click ra ngoài vùng nội dung
     if (registerModalOverlay) {
         registerModalOverlay.addEventListener("click", (e) => {
             if (e.target === registerModalOverlay) {
@@ -46,14 +46,14 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Sự kiện: Đóng modal bằng phím Escape (GIỮ NGUYÊN)
+    // Sự kiện: Đóng modal bằng phím Escape
     document.addEventListener("keydown", (e) => {
         if (e.key === "Escape" && registerModalOverlay && registerModalOverlay.classList.contains("show")) {
             closeModal();
         }
     });
 
-    // --- PHẦN 3: LOGIC ẨN/HIỆN MẬT KHẨU (GIỮ NGUYÊN) ---
+    // --- PHẦN 3: LOGIC ẨN/HIỆN MẬT KHẨU ---
     passwordToggles.forEach((toggle) => {
         toggle.addEventListener("click", function () {
             const wrapper = this.closest('.input-wrapper');
@@ -66,111 +66,114 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- PHẦN 4: LOGIC XỬ LÝ SUBMIT FORM ĐĂNG KÝ (PHẦN DUY NHẤT ĐƯỢC SỬA) ---
+    // --- PHẦN 4: LOGIC XỬ LÝ SUBMIT FORM ĐĂNG KÝ ---
     if (registerForm) {
         registerForm.addEventListener("submit", function (e) {
             e.preventDefault(); // Ngăn form tự gửi đi
 
             const submitBtn = this.querySelector(".btn-register-submit");
             const errorMessageDiv = document.getElementById("register-error-message");
-            errorMessageDiv.style.display = 'none'; // Ẩn thông báo lỗi cũ
-
+            if(errorMessageDiv) { // Kiểm tra nếu có ô báo lỗi
+                 errorMessageDiv.style.display = 'none'; // Ẩn thông báo lỗi cũ
+            }
+            
             // Lấy dữ liệu từ các ô input bằng ID
-            const fullName = document.getElementById("fullName").value;
-            const username = document.getElementById("username").value;
-            const email = document.getElementById("email").value;
-            const phoneNumber = document.getElementById("phoneNumber").value;
-            const password = document.getElementById("password").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
+            const fullNameValue = document.getElementById("fullName").value;
+            // ### THAY ĐỔI 1: Không lấy username từ form nữa ###
+            // const usernameValue = document.getElementById("username").value; 
+            const emailValue = document.getElementById("email").value;
+            const phoneNumberValue = document.getElementById("phoneNumber").value;
+            const passwordValue = document.getElementById("password").value;
+            const confirmPasswordValue = document.getElementById("confirmPassword").value;
 
-            // Kiểm tra dữ liệu phía client
-            if (!fullName || !username || !email || !phoneNumber || !password) {
-                errorMessageDiv.textContent = "Vui lòng điền đầy đủ thông tin!";
-                errorMessageDiv.style.display = "block";
+            // ### THAY ĐỔI 2: Cập nhật lại logic kiểm tra ###
+            if (!fullNameValue || !emailValue || !phoneNumberValue || !passwordValue) {
+                if (errorMessageDiv) {
+                    errorMessageDiv.textContent = "Vui lòng điền đầy đủ thông tin!";
+                    errorMessageDiv.style.display = "block";
+                }
                 return;
             }
-            if (password !== confirmPassword) {
-                errorMessageDiv.textContent = "Mật khẩu xác nhận không khớp!";
-                errorMessageDiv.style.display = "block";
+            if (passwordValue !== confirmPasswordValue) {
+                if (errorMessageDiv) {
+                    errorMessageDiv.textContent = "Mật khẩu xác nhận không khớp!";
+                    errorMessageDiv.style.display = "block";
+                }
                 return;
             }
 
-            const userData = { fullName, username, email, phoneNumber, password };
+            // ### THAY ĐỔI 3: Dùng email làm username ###
+            // Tạo đối tượng dữ liệu để gửi đi, gán giá trị của email cho username
+            const userData = {
+                fullName: fullNameValue,
+                username: emailValue, // Sử dụng email làm tên đăng nhập
+                email: emailValue,
+                phoneNumber: phoneNumberValue,
+                password: passwordValue
+            };
 
-            // Gọi API thật sự của backend
+            // Vô hiệu hóa nút và hiển thị trạng thái đang xử lý
             submitBtn.textContent = 'ĐANG XỬ LÝ...';
             submitBtn.disabled = true;
 
+            // Gọi API của backend để đăng ký
             fetch('/api/users/register', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(userData),
             })
-                .then(response => {
-                    if (response.ok) {
-                        // THÀNH CÔNG: Đóng modal này, mở modal xác thực
-                        closeModal();
-                        const verificationModal = document.getElementById('verificationModalOverlay');
-                        if (verificationModal) {
-                            verificationModal.classList.add('show');
-                            document.body.style.overflow = "hidden";
-                            verificationModal.querySelector('.verification-alert b').textContent = email;
-                            verificationModal.dataset.email = email;
-                        }
-                    } else {
-                        // THẤT BẠI: Hiển thị lỗi từ server
-                        return response.text().then(text => { throw new Error(text) });
+            .then(response => {
+                if (response.ok) {
+                    // THÀNH CÔNG: Đóng modal đăng ký, mở modal xác thực
+                    closeModal();
+                    const verificationModal = document.getElementById('verificationModalOverlay');
+                    if (verificationModal) {
+                        verificationModal.classList.add('show');
+                        document.body.style.overflow = "hidden";
+                        // Cập nhật email trong modal xác thực
+                        verificationModal.querySelector('.verification-alert b').textContent = emailValue;
+                        verificationModal.dataset.email = emailValue; // Lưu email để dùng cho việc gửi lại OTP
                     }
-                })
-                .catch(error => {
+                } else {
+    return response.text().then(text => {
+        let message = "Có lỗi xảy ra";
+        try {
+            const json = JSON.parse(text);
+            message = Object.values(json).join('\n');
+        } catch (e) {
+            message = text;
+        }
+        throw new Error(message);
+    });
+}
+            })
+            .catch(error => {
+                // Hiển thị thông báo lỗi cho người dùng
+                if (errorMessageDiv) {
                     errorMessageDiv.textContent = error.message;
                     errorMessageDiv.style.display = "block";
-                })
-                .finally(() => {
-                    submitBtn.textContent = 'ĐĂNG KÝ';
-                    submitBtn.disabled = false;
-                });
+                }
+            })
+            .finally(() => {
+                // Kích hoạt lại nút submit dù thành công hay thất bại
+                submitBtn.textContent = 'ĐĂNG KÝ';
+                submitBtn.disabled = false;
+            });
         });
     }
 
-    // --- PHẦN 5: CÁC CHỨC NĂNG KHÁC (GIỮ NGUYÊN) ---
-
-    // Social register buttons
-    const googleBtn = document.querySelector(".register-modal .btn-google")
-    const facebookBtn = document.querySelector(".register-modal .btn-facebook")
-
-    if (googleBtn) {
-        googleBtn.addEventListener("click", () => {
-            alert("Đăng ký với Google - Chức năng đang phát triển")
-        })
-    }
-    if (facebookBtn) {
-        facebookBtn.addEventListener("click", () => {
-            alert("Đăng ký với Facebook - Chức năng đang phát triển")
-        })
-    }
-
-    // Login link
-    const loginLink = document.querySelector(".register-modal .login-now")
+    // --- PHẦN 5: CÁC CHỨC NĂNG KHÁC ---
+    const loginLink = document.querySelector(".register-modal .login-now");
     if (loginLink) {
         loginLink.addEventListener("click", (e) => {
-            e.preventDefault()
-            closeModal()
+            e.preventDefault();
+            closeModal(); // Đóng modal đăng ký
             const loginModalOverlay = document.getElementById("loginModalOverlay");
             if (loginModalOverlay) {
-                loginModalOverlay.classList.add("show");
+                loginModalOverlay.classList.add("show"); // Mở modal đăng nhập
             }
         });
     }
-
-    // Add smooth animations for form elements
-    const formInputs = document.querySelectorAll(".form-control-register")
-    formInputs.forEach((input) => {
-        input.addEventListener("focus", function () {
-            this.parentElement.style.transform = "scale(1.02)"
-        })
-        input.addEventListener("blur", function () {
-            this.parentElement.style.transform = "scale(1)"
-        })
-    });
 });

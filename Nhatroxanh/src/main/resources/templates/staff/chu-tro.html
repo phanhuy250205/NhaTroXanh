@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý chủ trọ</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/QL-chu-tro.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<style>
+    .custom-toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1055;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .custom-toast {
+        display: flex;
+        align-items: center;
+        background-color: #e6f7f0;
+        color: #1a2e05;
+        padding: 12px 16px;
+        border-left: 5px solid #10b981;
+        border-radius: 10px;
+        min-width: 320px;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        font-size: 15px;
+        position: relative;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .custom-toast.error {
+        background-color: #fff0f0;
+        border-left-color: #ef4444;
+        color: #7f1d1d;
+    }
+
+    .toast-icon {
+        margin-right: 10px;
+        font-size: 18px;
+        color: #10b981;
+    }
+
+    .custom-toast.error .toast-icon {
+        color: #ef4444;
+    }
+
+    .toast-message {
+        flex: 1;
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #999;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+
+    .toast-close:hover {
+        color: #333;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(50px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<body class="management-body-staff">
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content-staff" id="main-content">
+        <div class="page-header-staff">
+            <h1 class="page-title-staff">Quản lý chủ trọ</h1>
+            <div class="custom-toast-container">
+                <div th:if="${successMessage}" class="custom-toast success">
+                    <i class="toast-icon fas fa-check-circle"></i>
+                    <span class="toast-message" th:text="${successMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+                <div th:if="${errorMessage}" class="custom-toast error">
+                    <i class="toast-icon fas fa-exclamation-circle"></i>
+                    <span class="toast-message" th:text="${errorMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+            </div>
+            <div class="custom-tabs-staff">
+                <a href="#" class="custom-tab-staff active" onclick="switchTab(0, this)">QUẢN LÝ CHỦ TRỌ</a>
+                <a href="#" class="custom-tab-staff" onclick="switchTab(1, this)">DUYỆT ĐĂNG KÝ</a>
+            </div>
+        </div>
+        <!-- Tab Content 1: Quản lý chủ trọ -->
+        <div id="tab-content-0" class="tab-content-panel-staff">
+            <div class="search-section-staff">
+                <div class="search-container-staff">
+                    <div class="search-input-group-staff">
+                        <input type="text" class="search-input-staff"
+                            placeholder="Tìm kiếm theo tên, email, số điện thoại..." id="searchInput">
+                        <button class="search-btn-staff" onclick="performSearch()">
+                            <i class="fas fa-search"></i>
+                            TÌM KIẾM
+                        </button>
+                    </div>
+
+                    <!-- Filter Dropdown -->
+                    <div class="filter-dropdown-staff">
+                        <button class="filter-btn-staff" onclick="toggleFilterDropdown()">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="fas fa-filter"></i>
+                                <span id="filterText">Tất cả</span>
+                            </div>
+                            <i class="fas fa-chevron-down" id="filterChevron"></i>
+                        </button>
+                        <div class="filter-dropdown-content-staff" id="filterDropdown">
+                            <div class="filter-option-staff selected" onclick="selectFilter('all', this)">
+                                <i class="fas fa-list"></i>
+                                <span>Tất cả</span>
+                            </div>
+                            <div class="filter-option-staff" onclick="selectFilter('active', this)">
+                                <i class="fas fa-check-circle" style="color: #10b981;"></i>
+                                <span>Hoạt động</span>
+                            </div>
+                            <div class="filter-option-staff" onclick="selectFilter('inactive', this)">
+                                <i class="fas fa-times-circle" style="color: #ef4444;"></i>
+                                <span>Vô hiệu hóa</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-section-staff">
+                <div class="custom-table-responsive-staff">
+                    <table class="custom-table-staff">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Họ tên</th>
+                                <th>Email</th>
+                                <th>SĐT</th>
+                                <th>Trạng thái</th>
+                                <th>Hoạt động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${owners.content}">
+                                <td th:text="${user.userId}"></td>
+                                <td th:text="${user.fullname}"></td>
+                                <td th:text="${user.email}"></td>
+                                <td th:text="${user.phone}"></td>
+                                <td>
+                                    <span
+                                        th:class="${user.enabled} ? 'status-badge-staff status-active-staff' : 'status-badge-staff status-inactive-staff'">
+                                        <i
+                                            th:class="${user.enabled} ? 'fas fa-check-circle' : 'fas fa-times-circle'"></i>
+                                        <span th:text="${user.enabled} ? 'Hoạt động' : 'Vô hiệu hóa'"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{'/nhan-vien/chi-tiet-chu-tro/' + ${user.userId}}"
+                                        class="action-btn-staff">
+                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content 2: Duyệt đăng ký -->
+        <div id="tab-content-1" class="tab-content-panel-staff"
+            th:classappend="${activeTab == 'manage'} ? 'hidden' : ''">
+            <!-- Search Section -->
+            <div class="search-section-staff">
+                <div class="search-container-staff">
+                    <form th:action="@{/nhan-vien/chu-tro}" method="get" class="search-input-group-staff">
+                        <input type="text" class="search-input-staff" name="approvalSearch" th:value="${approvalSearch}"
+                            placeholder="Tìm kiếm theo tên, số điện thoại..." id="searchInputApproval">
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <button type="submit" class="search-btn-staff">
+                            <i class="fas fa-search"></i>
+                            TÌM KIẾM
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Registration Cards Grid -->
+            <div class="registration-grid-staff" id="registrationGrid">
+                <div th:each="user : ${pendingOwners.content}" class="registration-card-staff"
+                    th:data-id="${user.userId}">
+                    <div class="card-header-staff">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Thông tin người dùng</span>
+                        </div>
+                    </div>
+                    <div class="card-body-staff">
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Họ và tên</label>
+                            <input type="text" class="form-input-staff" th:value="${user.fullname}" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Ngày sinh</label>
+                            <input type="text" class="form-input-staff" th:value="${user.birthday}" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Số điện thoại</label>
+                            <input type="text" class="form-input-staff" th:value="${user.phone}" disabled>
+                        </div>
+                        <div class="form-group-staff">
+                            <label class="form-label-staff">Giới tính</label>
+                            <div class="gender-group-staff">
+                                <div class="gender-option-staff">
+                                    <input type="radio" th:id="'male' + ${user.userId}"
+                                        th:name="'gender' + ${user.userId}" class="gender-radio-staff"
+                                        th:checked="${user.gender}" disabled>
+                                    <label th:for="'male' + ${user.userId}" class="gender-label-staff">Nam</label>
+                                </div>
+                                <div class="gender-option-staff">
+                                    <input type="radio" th:id="'female' + ${user.userId}"
+                                        th:name="'gender' + ${user.userId}" class="gender-radio-staff"
+                                        th:checked="${not user.gender}" disabled>
+                                    <label th:for="'female' + ${user.userId}" class="gender-label-staff">Nữ</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-actions-staff">
+                            <a th:href="@{'/nhan-vien/chu-tro/chi-tiet-duyet/' + ${user.userId} + '?approvalPage=' + ${approvalPage} + '&approvalSearch=' + ${approvalSearch}}"
+                                class="view-detail-btn-staff text-decoration-none">
+                                <i class="fas fa-eye"></i> Xem chi tiết
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+                <div th:if="${pendingOwners.empty}" class="text-center">
+                    <p>Không có đăng ký chủ trọ nào chờ duyệt.</p>
+                </div>
+            </div>
+
+            <!-- Pagination for Pending Owners -->
+            <div class="pagination-section-staff" th:if="${not pendingOwners.empty}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${approvalPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/chu-tro(approvalPage=${approvalPage - 1}, size=10, approvalSearch=${approvalSearch}, activeTab='approve')}">Trước</a>
+                        </li>
+                        <li class="page-item disabled">
+                            <span class="page-link"
+                                th:text="${pendingOwners.totalPages}"></span>
+                        </li>
+                        <li class="page-item"
+                            th:classappend="${approvalPage >= pendingOwners.totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/chu-tro(approvalPage=${approvalPage + 1}, size=10, approvalSearch=${approvalSearch}, activeTab='approve')}">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function switchTab(tabIndex, clickedTab) {
+            const allTabs = document.querySelectorAll('.custom-tab-staff');
+            const allContents = document.querySelectorAll('.tab-content-panel-staff');
+
+            // Ẩn toàn bộ tab content
+            allContents.forEach(tab => tab.classList.add('hidden'));
+
+            // Bỏ active ở tất cả tab
+            allTabs.forEach(tab => tab.classList.remove('active'));
+
+            // Hiện tab tương ứng
+            document.getElementById('tab-content-' + tabIndex).classList.remove('hidden');
+            clickedTab.classList.add('active');
+        }
+
+        // Mặc định active theo biến server (nếu có)
+        document.addEventListener("DOMContentLoaded", function () {
+            const activeTab = /*[[${activeTab}]]*/ 'approve'; // fallback nếu không có
+            if (activeTab === 'approve') {
+                const tab = document.querySelectorAll('.custom-tab-staff')[1];
+                switchTab(1, tab);
+            } else {
+                const tab = document.querySelectorAll('.custom-tab-staff')[0];
+                switchTab(0, tab);
+            }
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+
+</html>

@@ -6,6 +6,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const resendCodeBtn = document.getElementById("resendCodeBtn");
     const verificationInput = document.getElementById("verificationInput");
     const messageDiv = document.getElementById("verification-message");
+    const authModalCloseBtn = document.getElementById("authModalCloseBtn")
+
+    if (authModalCloseBtn && verificationModalOverlay) {
+        authModalCloseBtn.addEventListener("click", () => {
+            verificationModalOverlay.classList.remove("show")
+        })
+    }
 
     // --- XỬ LÝ SUBMIT FORM XÁC THỰC ---
     if (verificationForm) {

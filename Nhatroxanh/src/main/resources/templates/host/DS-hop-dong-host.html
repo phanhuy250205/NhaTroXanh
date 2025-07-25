@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+  <title>Chi Tiết - Nhà Trọ Xanh</title>
+</head>
+
+<body>
+<!-- NAVBAR -->
+<div th:replace="~{/layouts/sidebar-host}"></div>
+<div class="main-content">
+  <h5 class="fw-bold mb-4">Danh sách hợp đồng</h5>
+
+  <!-- Thống kê hợp đồng -->
+  <div class="row g-3 host-stats">
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-blue">
+        <div class="host-stat-icon"><i class="fa fa-file-alt"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Tổng hợp đồng</div>
+          <div class="host-stat-number" id="total-contracts">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-green">
+        <div class="host-stat-icon"><i class="fa fa-check-circle"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Đang hoạt động</div>
+          <div class="host-stat-number" id="active-contracts">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-yellow">
+        <div class="host-stat-icon"><i class="fa fa-edit"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Bản nháp</div>
+          <div class="host-stat-number" id="draft-contracts">0</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-purple">
+        <div class="host-stat-icon"><i class="fa fa-calendar-times"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Sắp hết hạn</div>
+          <div class="host-stat-number" id="expiring-contracts">0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading spinner -->
+  <div id="loading" class="text-center mt-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Đang tải...</span>
+    </div>
+  </div>
+
+  <!-- Danh sách hợp đồng -->
+  <div class="card mt-4 shadow-sm host-contract-table" id="contracts-table" style="display: none;">
+    <div class="card-header d-flex justify-content-between align-items-center bg-white">
+      <h6 class="mb-0 fw-bold">Danh sách các hợp đồng cho thuê</h6>
+      <a href="/chu-tro/hop-dong">
+        <button class="btn btn-sm btn-outline-primary">
+          <i class="fa fa-plus-circle"></i> Hợp đồng mới
+        </button>
+      </a>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered mb-0 text-center">
+        <thead class="table-light">
+        <tr>
+          <th>MÃ SỐ HĐ</th>
+          <th>NGƯỜI THUÊ</th>
+          <th>NGÀY BẮT ĐẦU</th>
+          <th>NGÀY KẾT THÚC</th>
+          <th>SỐ ĐIỆN THOẠI</th>
+          <th>TRẠNG THÁI</th>
+          <th>HÀNH ĐỘNG</th>
+        </tr>
+        </thead>
+        <tbody id="contracts-tbody">
+        <!-- Dữ liệu sẽ được load bằng JavaScript -->
+        </tbody>
+      </table>
+    </div>
+    <div class="card-footer d-flex justify-content-between">
+      <small id="pagination-info">Hiển thị 0 đến 0 trong số 0 hợp đồng</small>
+      <nav>
+        <ul class="pagination pagination-sm mb-0" id="pagination">
+          <!-- Pagination sẽ được tạo bằng JavaScript -->
+        </ul>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div id="error-message" class="alert alert-danger mt-4" style="display: none;">
+    <i class="fa fa-exclamation-triangle"></i>
+    <span id="error-text">Có lỗi xảy ra khi tải dữ liệu</span>
+  </div>
+</div>
+
+<script>
+  // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
+  document.addEventListener('DOMContentLoaded', function() {
+    loadContracts();
+  });
+
+  // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG
+  async function loadContracts() {
+    try {
+      showLoading(true);
+
+      const response = await fetch('/api/contracts/list', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        displayContracts(data.contracts);
+        updateStats(data.contracts);
+        updatePagination(data.totalContracts);
+      } else {
+        showError(data.message || 'Không thể tải dữ liệu hợp đồng');
+      }
+    } catch (error) {
+      console.error('Error loading contracts:', error);
+      showError('Lỗi kết nối. Vui lòng thử lại sau.');
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  function displayContracts(contracts) {
+    const tbody = document.getElementById('contracts-tbody');
+
+    if (!contracts || contracts.length === 0) {
+      tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="text-muted">
+          <i class="fa fa-inbox"></i><br>
+          Không có hợp đồng nào
+        </td>
+      </tr>
+    `;
+      return;
+    }
+
+    tbody.innerHTML = contracts.map(contract => `
+    <tr>
+      <td><strong>${contract.contractId}</strong></td>
+      <td>${contract.tenantName || 'N/A'}</td>
+      <td>${formatDate(contract.startDate)}</td>
+      <td>${formatDate(contract.endDate)}</td>
+      <td>${contract.tenantPhone || 'N/A'}</td>
+      <td>${getStatusSelect(contract.contractId, contract.status)}</td>
+      <td>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          onclick="editContract(${contract.contractId})"
+          title="Chỉnh sửa">
+          <i class="fa fa-pen"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+    document.getElementById('contracts-table').style.display = 'block';
+  }
+
+  // 🏷️ TẠO SELECT TRẠNG THÁI
+  function getStatusSelect(contractId, currentStatus) {
+    const statusOptions = [
+      { value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary' },
+      { value: 'ACTIVE', label: 'Đang thuê', class: 'text-success' },
+      { value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger' },
+      { value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning' }
+    ];
+
+    const options = statusOptions.map(option =>
+            `<option value="${option.value}"
+             class="${option.class}"
+             ${option.value === currentStatus ? 'selected' : ''}>
+       ${option.label}
+     </option>`
+    ).join('');
+
+    return `
+    <select class="form-select form-select-sm status-select"
+            data-contract-id="${contractId}"
+            data-current-status="${currentStatus}"
+            onchange="updateContractStatus(${contractId}, this.value)"
+            style="min-width: 130px;">
+      ${options}
+    </select>
+  `;
+  }
+
+  // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
+  async function updateContractStatus(contractId, newStatus) {
+    console.log('🔄 Updating contract status');
+    console.log('📝 Contract ID:', contractId);
+    console.log('📝 New Status:', newStatus);
+
+    // 🔍 VALIDATE STATUS TRƯỚC KHI GỬI
+    const validStatuses = ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED'];
+    const upperStatus = newStatus.toUpperCase();
+
+    if (!validStatuses.includes(upperStatus)) {
+      showErrorMessage(`Status không hợp lệ: ${newStatus}. Các giá trị cho phép: ${validStatuses.join(', ')}`);
+      console.error(`❌ Status không hợp lệ: ${newStatus}`);
+      return;
+    }
+
+    const requestData = {
+      status: upperStatus
+    };
+
+    console.log('📤 Sending request:', requestData);
+
+    try {
+      const response = await fetch(`/api/contracts/hop-dong/update-status/${contractId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(requestData)
+      });
+
+      console.log('📥 Response status:', response.status);
+
+      const result = await response.json();
+      console.log('📥 Response data:', result);
+
+      if (!response.ok) {
+        showErrorMessage(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
+        throw new Error(result.message || `HTTP error! status: ${response.status}`);
+      }
+
+      showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
+      console.log('✅ Update successful:', result);
+
+      // Reload danh sách hợp đồng để cập nhật giao diện
+      await loadContracts();
+
+    } catch (error) {
+      console.error('❌ Error updating contract status:', error);
+      showErrorMessage(error.message || 'Lỗi khi cập nhật trạng thái hợp đồng');
+    }
+  }
+
+  // 🔧 FUNCTION LẤY VALID STATUSES (KHÔNG SỬ DỤNG NẾU KHÔNG CÓ ENDPOINT)
+  async function getValidStatuses() {
+    return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED']; // Hardcode vì không có endpoint /chu-tro/hop-dong/valid-statuses
+  }
+
+  // 📈 CẬP NHẬT THỐNG KÊ
+  function updateStats(contracts) {
+    const stats = {
+      total: contracts.length,
+      active: contracts.filter(c => c.status === 'ACTIVE').length,
+      draft: contracts.filter(c => c.status === 'DRAFT').length,
+      expiring: contracts.filter(c => isExpiringSoon(c.endDate)).length
+    };
+
+    document.getElementById('total-contracts').textContent = stats.total;
+    document.getElementById('active-contracts').textContent = stats.active;
+    document.getElementById('draft-contracts').textContent = stats.draft;
+    document.getElementById('expiring-contracts').textContent = stats.expiring;
+  }
+
+  // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
+  function isExpiringSoon(endDate) {
+    if (!endDate) return false;
+    const today = new Date();
+    const end = new Date(endDate);
+    const daysUntilExpiry = (end - today) / (1000 * 60 * 60 * 24);
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0; // Sắp hết hạn trong 30 ngày
+  }
+
+  // 📅 FORMAT NGÀY THÁNG
+  function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+  }
+
+  // 📄 CẬP NHẬT PAGINATION
+  function updatePagination(totalContracts) {
+    document.getElementById('pagination-info').textContent =
+            `Hiển thị 1 đến ${totalContracts} trong số ${totalContracts} hợp đồng`;
+  }
+
+  // ⏳ HIỂN THỊ/ẨN LOADING
+  function showLoading(show) {
+    document.getElementById('loading').style.display = show ? 'block' : 'none';
+    document.getElementById('contracts-table').style.display = show ? 'none' : 'block';
+  }
+
+  // ❌ HIỂN THỊ LỖI
+  function showError(message) {
+    document.getElementById('error-text').textContent = message;
+    document.getElementById('error-message').style.display = 'block';
+    document.getElementById('contracts-table').style.display = 'none';
+  }
+
+  function editContract(contractId) {
+    console.log('🔍 Attempting to edit contract with ID:', contractId);
+    window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
+  }
+
+  // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
+  function showSuccessMessage(message) {
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-success position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+    <i class="fa fa-check-circle"></i> ${message}
+    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+  `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+
+  // ❌ HIỂN THỊ THÔNG BÁO LỖI
+  function showErrorMessage(message) {
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+    <i class="fa fa-exclamation-triangle"></i> ${message}
+    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+  `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+</script>
+
+<style>
+  .cursor-pointer {
+    cursor: pointer;
+  }
+
+  .cursor-pointer:hover {
+    opacity: 0.7;
+  }
+
+  .spinner-border {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .status-select {
+    border: 1px solid #dee2e6;
+    transition: all 0.3s ease;
+  }
+
+  .status-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  .status-select:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+  }
+
+  /* Custom toast styles */
+  .alert.position-fixed {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  @keyframes slideInRight {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Select option colors */
+  .status-select option.text-success {
+    color: #198754 !important;
+  }
+
+  .status-select option.text-warning {
+    color: #ffc107 !important;
+  }
+
+  .status-select option.text-danger {
+    color: #dc3545 !important;
+  }
+
+  .status-select option.text-secondary {
+    color: #6c757d !important;
+  }
+</style>
+</body>
+</html>

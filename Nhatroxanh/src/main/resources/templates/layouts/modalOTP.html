@@ -1,0 +1,39 @@
+<!-- Verification Modal -->
+<div class="verification-modal-overlay-auth" id="verificationModalOverlayAuth">
+    <div class="verification-modal-auth">
+        <img src="/placeholder.svg?height=200&width=300" class="logo-transparent-auth" alt="Logo">
+        <div class="verification-modal-content-auth">
+            <div class="verification-title-auth">
+                <span>Xác thực tài khoản</span>
+                <button type="button" class="auth-modal-close-btn-auth" id="authModalCloseBtnAuth">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <form class="verification-form-auth" id="verificationFormAuth">
+                <div id="verification-message-auth" class="alert-auth" style="display:none; font-size:14px; margin-bottom: 15px;"></div>
+
+                <div class="verification-alert-auth">
+                    Mã xác thực đã được gửi đến <b id="emailDisplayAuth"></b>. Vui lòng nhập mã vào bên dưới để tiếp tục.
+                </div>
+                
+                <input type="text" id="verificationInputAuth" class="verification-input-auth" placeholder="Nhập mã xác thực" required maxlength="6">
+                
+                <button type="submit" class="btn-verification-submit-auth">
+                    Hoàn tất
+                </button>
+                
+                <div class="resend-code-auth">
+                    <button type="button" id="resendCodeBtnAuth" class="resend-code-btn-auth">
+                        Gửi lại mã
+                    </button>
+                    <div class="countdown-timer-auth" id="countdownTimerAuth" style="display: none;">
+                        Gửi lại sau: <span id="countdownAuth">60</span>s
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
