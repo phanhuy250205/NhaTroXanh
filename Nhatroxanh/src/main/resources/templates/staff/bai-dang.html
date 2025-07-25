@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý bài đăng</title>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --primary-hover: #6c757d;
+            --secondary-color: #6b7280;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --border-radius: 12px;
+        }
+
+        .tab-content {
+            padding: 0;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #ffff, #3e83cc);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 30px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .page-header h4 {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e5e7eb;
+        }
+
+        .search-input {
+            border: 2px solid #e5e7eb;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 50px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .filter-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            background: white;
+            transition: all 0.3s ease;
+            min-width: 120px;
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .filter-icon {
+            color: var(--secondary-color);
+            font-size: 14px;
+        }
+
+        /* Custom Tabs */
+        .custom-tabs {
+            border: none;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 8px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .custom-tab {
+            border: none !important;
+            background: transparent !important;
+            color: var(--secondary-color) !important;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .custom-tab:hover {
+            background: #f1f5f9 !important;
+            color: var(--primary-color) !important;
+        }
+
+        .custom-tab.active {
+            background: var(--primary-color) !important;
+            color: white !important;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+
+        /* Post Cards */
+        .post-card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            height: 100%;
+            cursor: pointer;
+            /* Indicate clickable area */
+        }
+
+        .post-card:hover {
+            box-shadow: 0 10px 25px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            transform: translateY(-2px);
+        }
+
+        .post-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .post-card-body {
+            padding: 20px;
+        }
+
+        .post-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #1f2937;
+        }
+
+        .post-price {
+            color: var(--danger-color);
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .post-badges {
+            margin-bottom: 15px;
+        }
+
+        .post-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-right: 6px;
+        }
+
+        .badge-type {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-area {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .post-info {
+            font-size: 13px;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .post-info i {
+            width: 14px;
+            text-align: center;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 13px;
+            border: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-approve {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #059669;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-hide {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-hide:hover {
+            background: #d97706;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        /* Notification Styles */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .notification-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-body {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-content {
+                margin: 10px;
+                padding: 20px;
+            }
+
+            .search-filter-section {
+                padding: 20px;
+            }
+
+            .filter-select {
+                min-width: 100px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .post-card:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .post-card:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .btn-hide {
+            background-color: #ffc107;
+            color: #000;
+        }
+
+        .btn-show {
+            background-color: #28a745;
+            color: #fff;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="notification-container"></div>
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header">
+            <h4>
+                <i class="fas fa-clipboard-list"></i>
+                Quản lý bài đăng
+            </h4>
+        </div>
+
+        <!-- Search & Filter Section -->
+        <div class="search-filter-section">
+            <form th:action="@{/nhan-vien/bai-dang}" method="get" class="row align-items-center">
+                <div class="col-lg-6 col-md-12 mb-3 mb-lg-0">
+                    <div class="input-group">
+                        <input type="text" class="form-control search-input" name="search" th:value="${search}"
+                            placeholder="Tìm kiếm bài đăng...">
+                        <button type="submit" class="btn btn-primary search-btn ms-2">
+                            <i class="fas fa-search"></i>
+                            <span class="d-none d-sm-inline">Tìm kiếm</span>
+                        </button>
+                        <a href="/nhan-vien/bai-dang" class="btn btn-secondary ms-2">
+                            <i class="fas fa-undo-alt"></i>
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="col-lg-6 col-md-12">
+                    <div class="d-flex flex-wrap gap-2 justify-content-lg-end">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-filter filter-icon"></i>
+                            <select class="form-select filter-select" name="status">
+                                <option value="" th:selected="${status == null}">Trạng thái</option>
+                                <option value="PENDING" th:selected="${status == 'PENDING'}">Chờ duyệt</option>
+                                <option value="APPROVED" th:selected="${status == 'APPROVED'}">Đã duyệt</option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-home filter-icon"></i>
+                            <select class="form-select filter-select" name="type">
+                                <option value="" th:selected="${type == null or type == ''}">Loại</option>
+                                <option th:each="category : ${categories}" th:value="${category.name}"
+                                    th:selected="${type == category.name}" th:text="${category.name}">
+                                </option>
+                            </select>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-calendar-alt filter-icon"></i>
+                            <select class="form-select filter-select" name="sortBy">
+                                <option value="" th:selected="${sortBy == null}">Ngày</option>
+                                <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                                <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
+
+        <!-- Custom Tabs -->
+        <ul class="nav nav-tabs custom-tabs" id="managementTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link custom-tab active" id="pending-tab" data-bs-toggle="tab"
+                    data-bs-target="#pending" type="button" role="tab">
+                    <i class="fas fa-clock me-2"></i>
+                    Chờ duyệt
+                    <span class="badge bg-warning ms-2" th:text="${#lists.size(pendingPosts)}">0</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link custom-tab" id="approved-tab" data-bs-toggle="tab" data-bs-target="#approved"
+                    type="button" role="tab">
+                    <i class="fas fa-check-circle me-2"></i>
+                    Đã duyệt
+                    <span class="badge bg-success ms-2" th:text="${#lists.size(approvedPosts)}">0</span>
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="managementTabsContent">
+            <!-- Pending Posts Tab -->
+            <div class="tab-pane fade show active" id="pending" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${pendingPosts}">
+                        <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
+                            <div class="status-badge status-pending">Chờ duyệt</div>
+                            <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}">
+                                <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                    alt="Post image" class="post-card-img"></a>
+                            <div class="post-card-body">
+                                <h6 class="post-title">
+                                    <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
+                                        th:text="${post.title}" style="text-decoration: none;">Nhà trọ cao cấp</a>
+                                </h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    <span
+                                        th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.5
+                                        triệu/tháng</span>
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type"
+                                        th:text="${post.category?.name ?: 'Không xác định'}">Nhà trọ</span>
+                                    <span class="post-badge badge-area" th:text="${post.area + 'm²'}">25m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span
+                                        th:text="${post.address?.street + ', ' + post.address?.ward?.name + ', ' + post.address?.ward?.district?.name + ', ' + post.address?.ward?.district?.province?.name ?: 'Không xác định'}">Q.
+                                        Thanh Khê, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span th:text="${post.hostel?.name ?: 'Không xác định'}">KTX B1</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span
+                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">
+                                        Phòng mới, đầy đủ tiện nghi
+                                    </span>
+                                </div>
+
+                                <div class="action-buttons d-flex gap-2">
+                                    <!-- Nút DUYỆT -->
+                                    <form th:action="@{/nhan-vien/bai-dang/{postId}/approve(postId=${post.postId})}"
+                                        method="post">
+                                        <button type="submit"
+                                            class="btn btn-success action-btn d-flex align-items-center justify-content-center"
+                                            th:attr="data-post-id=${post.postId}">
+                                            <i class="fas fa-check me-1"></i> Duyệt
+                                        </button>
+                                    </form>
+
+                                    <!-- Nút TỪ CHỐI -->
+                                    <form th:action="@{/nhan-vien/bai-dang/{postId}/reject(postId=${post.postId})}"
+                                        method="post" class="form-reject">
+                                        <button type="button"
+                                            class="btn btn-danger action-btn d-flex align-items-center justify-content-center btn-reject"
+                                            th:data-post-id="${post.postId}">
+                                            <i class="fas fa-times-circle me-1"></i> Từ chối
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination-container mt-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${pendingCurrentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${0}, approvedPage=${approvedCurrentPage})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, pendingTotalPages - 1)}"
+                            th:classappend="${i == pendingCurrentPage} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${i}, approvedPage=${approvedCurrentPage})}"
+                                th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item"
+                            th:classappend="${pendingCurrentPage == pendingTotalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${pendingTotalPages - 1}, approvedPage=${approvedCurrentPage})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Approved Posts Tab -->
+            <div class="tab-pane fade" id="approved" role="tabpanel">
+                <div class="row g-4">
+                    <div class="col-xl-4 col-lg-6 col-md-6" th:each="post : ${approvedPosts}">
+                        <div class="post-card position-relative" th:attr="data-post-id=${post.postId}">
+                            <div class="status-badge status-approved">Đã duyệt</div>
+                            <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}">
+                                <img th:src="${#lists.isEmpty(post.images) ? '/images/cards/default.jpg' : post.images[0].url}"
+                                    alt="Post image" class="post-card-img"></a>
+                            <div class="post-card-body">
+                                <h6 class="post-title">
+                                    <a th:href="@{'/nhan-vien/bai-dang/chi-tiet-bai-dang/' + ${post.postId}}"
+                                        th:text="${post.title}" style="text-decoration: none;">Nhà trọ cao cấp</a>
+                                </h6>
+                                <div class="post-price">
+                                    <i class="fas fa-tag me-1"></i>
+                                    <span
+                                        th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.8
+                                        triệu/tháng</span>
+                                </div>
+                                <div class="post-badges">
+                                    <span class="post-badge badge-type"
+                                        th:text="${post.category?.name ?: 'Không xác định'}">Căn hộ</span>
+                                    <span class="post-badge badge-area" th:text="${post.area + 'm²'}">35m²</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span
+                                        th:text="${post.address?.street + ', ' + post.address?.ward?.name + ', ' + post.address?.ward?.district?.name + ', ' + post.address?.ward?.district?.province?.name ?: 'Không xác định'}">Q.
+                                        Cẩm Lệ, TP. Đà Nẵng</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-building"></i>
+                                    <span th:text="${post.hostel?.name ?: 'Không xác định'}">Chung cư Melody</span>
+                                </div>
+                                <div class="post-info">
+                                    <i class="fas fa-info-circle"></i>
+                                    <span
+                                        th:utext="${#strings.length(post.description) > 150 ? #strings.replace(post.description.substring(0, 150) + '...', '\n', '<br/>') : #strings.replace(post.description, '\n', '<br/>')}">
+                                        Đầy đủ nội thất
+                                    </span>
+
+                                </div>
+                                <div class="action-buttons">
+                                    <form th:action="@{/nhan-vien/bai-dang/cap-nhat-trang-thai}" method="post"
+                                        style="display:inline;">
+                                        <input type="hidden" name="postId" th:value="${post.postId}" />
+                                        <button type="submit" class="action-btn"
+                                            th:classappend="${post.status} ? 'btn-hide btn-warning' : 'btn-show btn-success'">
+                                            <i class="fas"
+                                                th:classappend="${post.status} ? 'fa-eye-slash' : 'fa-eye'"></i>
+                                            <span th:text="${post.status} ? 'Ẩn' : 'Hiển thị'"></span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pagination-container mt-3">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${approvedCurrentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${pendingCurrentPage}, approvedPage=${0})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, approvedTotalPages - 1)}"
+                            th:classappend="${i == approvedCurrentPage} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${pendingCurrentPage}, approvedPage=${i})}"
+                                th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item"
+                            th:classappend="${approvedCurrentPage == approvedTotalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/bai-dang(pendingPage=${pendingCurrentPage}, approvedPage=${approvedTotalPages - 1})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const rejectButtons = document.querySelectorAll(".btn-reject");
+
+            rejectButtons.forEach(button => {
+                button.addEventListener("click", function (e) {
+                    const form = button.closest(".form-reject");
+
+                    Swal.fire({
+                        title: 'Bạn có chắc chắn?',
+                        text: "Bài đăng sẽ bị từ chối!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Có',
+                        cancelButtonText: 'Hủy bỏ'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

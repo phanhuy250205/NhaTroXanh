@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<head>
+    <title>Lịch Sử Thanh Toán - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/css/thanhtoan-guest.css}">
+</head>
+<style>
+    /* Định dạng cho PDF */
+    @media print {
+        #invoiceModal .modal-content {
+            width: 210mm;
+            /* Rộng bằng A4 */
+            height: auto;
+            font-family: 'Inter', sans-serif;
+            /* Sử dụng font Inter đã khai báo */
+            font-size: 12pt;
+            /* Kích thước chữ chuẩn cho in */
+        }
+
+        #invoiceModal .modal-header {
+            background: none !important;
+            /* Loại bỏ gradient khi in */
+            color: #000 !important;
+            border-bottom: 2px solid #000;
+        }
+
+        #invoiceModal .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #invoiceModal .table th,
+        #invoiceModal .table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        #invoiceModal .invoice-item-card-guest {
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .page-break {
+            page-break-before: always;
+            /* Ngắt trang nếu cần */
+        }
+    }
+</style>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <div class="main-container-guest">
+        <!-- Header Section -->
+        <div class="header-section-guest">
+            <div class="header-content-guest">
+                <h1 class="header-title-guest">
+                    <i class="fas fa-history me-3"></i>
+                    Lịch Sử Thanh Toán
+                </h1>
+                <p class="header-subtitle-guest">Quản lý các giao dịch thanh toán của bạn</p>
+                <div class="breadcrumb-nav-guest">
+                    <a href="/"><i class="fas fa-home"></i> Trang chủ</a>
+                    <span class="mx-2">/</span>
+                    <a href="/khach-thue/thanh-toan">Thanh toán</a>
+                    <span class="mx-2">/</span>
+                    <span>Lịch sử thanh toán</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment History -->
+        <div class="card-guest history-section-guest">
+            <div class="card-header-guest">
+                <h3 class="card-title-guest">
+                    <i class="fas fa-history"></i>
+                    Lịch Sử Thanh Toán
+                </h3>
+            </div>
+            <div class="card-body-guest">
+                <form th:action="@{/khach-thue/lich-su-thanh-toan}" method="get" class="history-filters-guest">
+                    <div class="filter-group-guest">
+                        <label>Năm:</label>
+                        <select name="year" class="filter-select-guest" onchange="this.form.submit()">
+                            <option value="" th:selected="${currentYear == ''}">Tất cả</option>
+                            <option th:each="year : ${#numbers.sequence(2025, 2020, -1)}" th:value="${year}"
+                                th:text="${year}" th:selected="${currentYear == year}"></option>
+                        </select>
+                    </div>
+                    <div class="filter-group-guest">
+                        <label>Trạng thái:</label>
+                        <select name="status" class="filter-select-guest" onchange="this.form.submit()">
+                            <option value="Tất cả" th:selected="${currentStatus == 'Tất cả'}">Tất cả</option>
+                            <option value="CHƯA_THANH_TOÁN" th:selected="${currentStatus == 'CHƯA_THANH_TOÁN'}">Chưa
+                                thanh toán</option>
+                            <option value="ĐÃ_THANH_TOÁN" th:selected="${currentStatus == 'ĐÃ_THANH_TOÁN'}">Đã thanh
+                                toán</option>
+                            <option value="QUÁ_HẠN_THANH_TOÁN" th:selected="${currentStatus == 'QUÁ_HẠN_THANH_TOÁN'}">
+                                Trễ hạn</option>
+                        </select>
+                    </div>
+                    <div class="filter-group-guest">
+                        <label>Phương thức:</label>
+                        <select name="method" class="filter-select-guest" onchange="this.form.submit()">
+                            <option value="Tất cả" th:selected="${currentMethod == 'Tất cả'}">Tất cả</option>
+                            <option value="TIỀN_MẶT" th:selected="${currentMethod == 'TIỀN_MẶT'}">Tiền mặt</option>
+                            <option value="BANK" th:selected="${currentMethod == 'BANK'}">Ngân hàng</option>
+                            <option value="VNPAY" th:selected="${currentMethod == 'VNPAY'}">VNPay</option>
+                            <option value="MOMO" th:selected="${currentMethod == 'MOMO'}">Momo</option>
+                        </select>
+                    </div>
+                    <input type="hidden" name="page" value="0" />
+                    <input type="hidden" name="size" th:value="${pageSize}" />
+                </form>
+
+                <!-- Desktop Table -->
+                <div class="history-table-wrapper-guest">
+                    <table class="history-table-guest">
+                        <thead>
+                            <tr>
+                                <th>Kỳ thanh toán</th>
+                                <th>Ngày thanh toán</th>
+                                <th>Số tiền</th>
+                                <th>Phương thức</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="payment : ${payments}">
+                                <td><strong th:text="${#dates.format(payment.dueDate, 'MM/yyyy')}"></strong></td>
+                                <td
+                                    th:text="${payment.paymentDate != null ? #dates.format(payment.paymentDate, 'dd/MM/yyyy') : '-'}">
+                                </td>
+                                <td>
+                                    <strong
+                                        th:text="${#numbers.formatDecimal(payment.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>
+                                </td>
+
+                                <td>
+                                    <span th:if="${payment.paymentMethod != null}">
+                                        <i class="fas fa-mobile-alt text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'VNPAY' || payment.paymentMethod == 'MOMO'}"></i>
+                                        <i class="fas fa-university text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'BANK'}"></i>
+                                        <i class="fas fa-money-bill-wave text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'TIỀN_MẶT'}"></i>
+                                        <span th:text="${payment.paymentMethod}"></span>
+                                    </span>
+                                    <span th:unless="${payment.paymentMethod != null}">-</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge-guest" th:classappend="
+        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
+        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' : 'status-paid-guest')">
+
+                                        <i class="fas"
+                                            th:classappend="
+           ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
+           (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' : ' fa-check me-1')">
+                                        </i>
+
+                                        <span th:text="
+        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
+        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' : 'Đã thanh toán')">
+                                            Trạng thái
+                                        </span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <!-- Nút Thanh toán (chỉ hiện khi CHƯA_THANH_TOÁN) -->
+                                    <button th:if="${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'}"
+                                        class="btn-guest btn-primary-guest btn-sm-guest"
+                                        th:onclick="|window.location.href = '/thanh-toan?invoiceId=${payment.id}'|">
+                                        <i class="fas fa-credit-card"></i> Thanh toán
+                                    </button>
+
+
+                                    <!-- Nút Xem (chỉ hiện khi KHÁC CHƯA_THANH_TOÁN, tức là QUÁ_HẠN_THANH_TOÁN hoặc ĐÃ_THANH_TOÁN) -->
+                                    <button th:if="${payment.paymentStatus.name() != 'CHƯA_THANH_TOÁN'}"
+                                        class="btn-guest btn-outline-guest btn-sm-guest"
+                                        th:onclick="'viewInvoice(' + ${payment.id} + ')'">
+                                        <i class="fas fa-eye"></i> Xem
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Pagination Controls -->
+                <!-- <div class="pagination-guest mt-4 d-flex justify-content-center">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage - 1}, size=${pageSize})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${i}, size=${pageSize})}"
+                                    th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage + 1}, size=${pageSize})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div> -->
+                <!-- Mobile Cards -->
+                <div class="history-mobile-guest">
+                    <div class="history-card-guest" th:each="payment : ${payments}">
+                        <div class="history-card-header-guest">
+                            <div class="history-card-title-guest"
+                                th:text="${#dates.format(payment.dueDate, 'MM/yyyy')}"></div>
+                            <span class="status-badge-guest" th:classappend="
+        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
+        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' : 'status-paid-guest')">
+
+                                <i class="fas"
+                                    th:classappend="
+           ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
+           (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' : ' fa-check me-1')">
+                                </i>
+
+                                <span th:text="
+        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
+        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' : 'Đã thanh toán')">
+                                    Trạng thái
+                                </span>
+                            </span>
+
+                        </div>
+                        <div class="history-card-body-guest">
+                            <div class="history-item-guest">
+                                <span class="history-label-guest">Ngày thanh toán</span>
+                                <span class="history-value-guest"
+                                    th:text="${payment.paymentDate != null ? #dates.format(payment.paymentDate, 'dd/MM/yyyy') : '-'}"></span>
+                            </div>
+                            <div class="history-item-guest">
+                                <span class="history-label-guest">Số tiền</span>
+                                <span class="history-value-guest"
+                                    th:text="${#numbers.formatDecimal(payment.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            </div>
+                            <div class="history-item-guest">
+                                <span class="history-label-guest">Phương thức</span>
+                                <span class="history-value-guest">
+                                    <span th:if="${payment.paymentMethod != null}">
+                                        <i class="fas fa-mobile-alt text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'VNPAY' || payment.paymentMethod == 'MOMO'}"></i>
+                                        <i class="fas fa-university text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'BANK'}"></i>
+                                        <i class="fas fa-money-bill-wave text-primary me-1"
+                                            th:if="${payment.paymentMethod == 'TIỀN_MẶT'}"></i>
+                                        <span th:text="${payment.paymentMethod}"></span>
+                                    </span>
+                                    <span th:unless="${payment.paymentMethod != null}">-</span>
+                                </span>
+                            </div>
+                            <div class="history-item-guest">
+                                <button th:if="${payment.paymentStatus == 'CHƯA_THANH_TOÁN'}"
+                                    class="btn-guest btn-primary-guest btn-sm-guest w-100"
+                                    th:onclick="'window.location.href=\'/thanh-toan.html?id=' + ${payment.id} + '\''">
+                                    <i class="fas fa-credit-card"></i> Thanh toán ngay
+                                </button>
+                                <button th:unless="${payment.paymentStatus == 'CHƯA_THANH_TOÁN'}"
+                                    class="btn-guest btn-outline-guest btn-sm-guest w-100"
+                                    th:onclick="'viewInvoice(' + ${payment.id} + ')'">
+                                    <i class="fas fa-eye"></i> Xem hóa đơn
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination Controls for Mobile -->
+                <div class="pagination-guest mt-4 d-flex justify-content-center">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage - 1}, size=${pageSize})}">Trước</a>
+                            </li>
+                            <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i == currentPage} ? 'active'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${i}, size=${pageSize})}"
+                                    th:text="${i + 1}"></a>
+                            </li>
+                            <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                                <a class="page-link"
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage + 1}, size=${pageSize})}">Sau</a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal chi tiết hóa đơn -->
+    <div class="modal fade" id="invoiceModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header"
+                    style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); color: white;">
+                    <h5 class="modal-title">
+                        <i class="fas fa-file-invoice me-2"></i>
+                        Chi Tiết Hóa Đơn
+                        <span class="modal-title-text" id="modalPeriod"></span>
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Header Info -->
+                    <div class="invoice-header-info-guest">
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <div class="info-section-guest">
+                                    <h6 class="info-section-title-guest">
+                                        <i class="fas fa-file-alt me-2"></i>
+                                        Thông tin hóa đơn
+                                    </h6>
+                                    <div class="info-grid-guest" id="invoiceInfo">
+                                        <!-- Populated via JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="info-section-guest">
+                                    <h6 class="info-section-title-guest">
+                                        <i class="fas fa-home me-2"></i>
+                                        Thông tin phòng
+                                    </h6>
+                                    <div class="info-grid-guest" id="roomInfo">
+                                        <!-- Populated via JavaScript -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Table -->
+                    <div class="invoice-table-desktop-guest">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead style="background: var(--bg-blue);">
+                                    <tr>
+                                        <th>Khoản thu</th>
+                                        <th>Đơn giá</th>
+                                        <th>Số lượng</th>
+                                        <th>Chỉ số</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoiceItems">
+                                    <!-- Populated via JavaScript -->
+                                </tbody>
+                                <tfoot style="background: var(--bg-blue);">
+                                    <tr>
+                                        <th colspan="4"><strong>Tổng cộng</strong></th>
+                                        <th class="text-end"><strong id="totalAmount"
+                                                style="color: var(--primary-blue); font-size: 1.2rem;"></strong></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Mobile Cards -->
+                    <div class="invoice-cards-mobile-guest" id="invoiceMobileItems">
+                        <!-- Populated via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-guest btn-outline-guest" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        <span class="btn-text-guest">Đóng</span>
+                    </button>
+                    <button type="button" class="btn-guest btn-primary-guest" onclick="downloadInvoicePDF()">
+                        <i class="fas fa-download me-2"></i>
+                        <span class="btn-text-guest">Tải Hóa Đơn PDF</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{/layouts/footer}"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function viewInvoice(paymentId) {
+            console.log('Fetching invoice for paymentId:', paymentId); // Debug
+            fetch(`/khach-thue/invoice/${paymentId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => {
+                    console.log('Response status:', response.status); // Debug
+                    if (!response.ok) {
+                        throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data); // Debug
+                    const modal = new bootstrap.Modal(document.getElementById('invoiceModal'));
+                    const dateFormat = (date) => {
+                        if (!date) return '-';
+                        const d = new Date(date);
+                        return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+                    };
+
+                    // Format month for modal title
+                    const month = data.payment.dueDate ? `${(new Date(data.payment.dueDate).getMonth() + 1).toString().padStart(2, '0')}/${new Date(data.payment.dueDate).getFullYear()}` : '-';
+                    document.getElementById('modalPeriod').textContent = `Tháng ${month}`;
+
+                    // Update invoice info
+                    const invoiceInfo = document.getElementById('invoiceInfo');
+                    const statusClass = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? 'status-pending-guest' :
+                        data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? 'status-overdue-guest' :
+                            'status-paid-guest';
+                    const statusIcon = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? '<i class="fas fa-clock"></i>' :
+                        data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? '<i class="fas fa-exclamation-triangle"></i>' :
+                            '<i class="fas fa-check"></i>';
+                    const statusText = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? 'Chưa thanh toán' :
+                        data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? 'Trễ hạn' :
+                            'Đã thanh toán';
+                    invoiceInfo.innerHTML = `
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Mã hóa đơn:</span>
+                            <span class="info-value-guest text-primary">HD${String(paymentId).padStart(6, '0')}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Ngày tạo:</span>
+                            <span class="info-value-guest">${dateFormat(data.payment.dueDate)}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Hạn thanh toán:</span>
+                            <span class="info-value-guest text-danger">${dateFormat(new Date(new Date(data.payment.dueDate).setMonth(new Date(data.payment.dueDate).getMonth() + 1)))}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Trạng thái:</span>
+                            <span class="info-value-guest">
+                                <span class="status-badge-guest ${statusClass}">
+                                    ${statusIcon} ${statusText}
+                                </span>
+                            </span>
+                        </div>
+                    `;
+
+                    // Update room info
+                    const roomInfo = document.getElementById('roomInfo');
+                    roomInfo.innerHTML = `
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Phòng:</span>
+                            <span class="info-value-guest">${data.roomInfo.roomCode}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Nhà trọ:</span>
+                            <span class="info-value-guest">${data.roomInfo.hostelName}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Khách thuê:</span>
+                            <span class="info-value-guest">${data.roomInfo.tenantName}</span>
+                        </div>
+                        <div class="info-row-guest">
+                            <span class="info-label-guest">Số điện thoại:</span>
+                            <span class="info-value-guest">${data.roomInfo.tenantPhone}</span>
+                        </div>
+                    `;
+
+                    // Update invoice items table
+                    const tableBody = document.getElementById('invoiceItems');
+                    tableBody.innerHTML = '';
+                    data.items.forEach(item => {
+                        const displayText = item.itemName.toLowerCase().includes('điện') ? `${item.quantity} kWh` :
+                            item.itemName.toLowerCase().includes('nước') ? `${item.quantity} m³` :
+                                item.quantity.toString();
+                        tableBody.innerHTML += `
+                            <tr>
+                                <td><strong>${item.itemName}</strong></td>
+                                <td>${item.unitPrice.toLocaleString('vi-VN')} VNĐ</td>
+                                <td>${item.quantity}</td>
+                                <td>${displayText}</td>
+                                <td class="text-end"><strong>${item.amountUnitPrice.toLocaleString('vi-VN')} VNĐ</strong></td>
+                            </tr>`;
+                    });
+
+                    // Update mobile invoice items
+                    const mobileItems = document.getElementById('invoiceMobileItems');
+                    mobileItems.innerHTML = '';
+                    data.items.forEach(item => {
+                        let iconClass = '';
+                        let icon = '';
+                        if (item.itemName.toLowerCase().includes('phòng')) {
+                            iconClass = 'room-icon-guest';
+                            icon = 'fa-home';
+                        } else if (item.itemName.toLowerCase().includes('điện')) {
+                            iconClass = 'electric-icon-guest';
+                            icon = 'fa-bolt';
+                        } else if (item.itemName.toLowerCase().includes('nước')) {
+                            iconClass = 'water-icon-guest';
+                            icon = 'fa-tint';
+                        } else {
+                            iconClass = 'service-icon-guest';
+                            icon = 'fa-cogs';
+                        }
+                        const displayText = item.itemName.toLowerCase().includes('điện') ? `${item.quantity} kWh` :
+                            item.itemName.toLowerCase().includes('nước') ? `${item.quantity} m³` :
+                                item.quantity.toString();
+                        mobileItems.innerHTML += `
+                            <div class="invoice-item-card-guest">
+                                <div class="invoice-card-header-guest">
+                                    <div class="invoice-icon-guest ${iconClass}">
+                                        <i class="fas ${icon}"></i>
+                                    </div>
+                                    <div class="invoice-card-title-guest">
+                                        <h6>${item.itemName}</h6>
+                                        <p>Tháng ${month}</p>
+                                    </div>
+                                    <div class="invoice-card-amount-guest">${item.amountUnitPrice.toLocaleString('vi-VN')} VNĐ</div>
+                                </div>
+                                <div class="invoice-card-details-guest">
+                                    <div class="detail-row-guest">
+                                        <span>Đơn giá:</span>
+                                        <span>${item.unitPrice.toLocaleString('vi-VN')} VNĐ</span>
+                                    </div>
+                                    <div class="detail-row-guest">
+                                        <span>Số lượng:</span>
+                                        <span>${item.quantity}</span>
+                                    </div>
+                                    <div class="detail-row-guest">
+                                        <span>Chỉ số:</span>
+                                        <span>${displayText}</span>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+
+                    // Update total amount
+                    document.getElementById('totalAmount').textContent = `${data.payment.totalAmount.toLocaleString('vi-VN')} VNĐ`;
+
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Lỗi khi tải chi tiết hóa đơn:', error);
+                    alert('Không thể tải chi tiết hóa đơn. Vui lòng thử lại sau.');
+                });
+        }
+
+        function downloadInvoicePDF() {
+            const element = document.querySelector("#invoiceModal .modal-content");
+            if (!element) {
+                alert("Không tìm thấy nội dung hóa đơn.");
+                return;
+            }
+
+            // Đảm bảo nội dung được render trước khi chuyển sang PDF
+            const modalBody = document.querySelector("#invoiceModal .modal-body");
+            if (modalBody) {
+                modalBody.style.display = 'block'; // Đảm bảo modal body hiển thị
+            }
+
+            // Cấu hình tùy chỉnh cho html2pdf
+            const options = {
+                margin: [10, 10, 10, 10], // Lề 10mm quanh nội dung
+                filename: `hoa_don_${new Date().toLocaleDateString('vi-VN')}.pdf`, // Tên file với ngày
+                image: { type: 'jpeg', quality: 0.98 }, // Chất lượng cao
+                html2canvas: {
+                    scale: 2, // Tăng độ phân giải
+                    useCORS: true // Hỗ trợ tải tài nguyên từ các nguồn khác
+                },
+                jsPDF: {
+                    unit: 'mm',
+                    format: 'a4', // Kích thước A4
+                    orientation: 'portrait' // Hướng dọc
+                },
+                pagebreak: {
+                    mode: ['css', 'legacy'], // Xử lý ngắt trang
+                    before: ['#invoiceItems', '#invoiceMobileItems'], // Ngắt trang trước bảng/card nếu cần
+                    avoid: ['tr', '.invoice-item-card-guest'] // Tránh ngắt giữa hàng hoặc card
+                }
+            };
+
+            // Chuyển đổi và tải xuống PDF
+            html2pdf().set(options).from(element).toPdf().get('pdf')
+                .then(function (pdf) {
+                    const totalPages = pdf.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        pdf.setPage(i);
+                        pdf.setFontSize(10);
+                        pdf.text('Trang ' + i + ' / ' + totalPages, pdf.internal.pageSize.getWidth() - 50, pdf.internal.pageSize.getHeight() - 10);
+                    }
+                    pdf.save(); // Lưu file
+                })
+                .catch((error) => {
+                    console.error('Lỗi khi tạo PDF:', error);
+                    alert('Có lỗi xảy ra khi tạo hóa đơn PDF. Vui lòng thử lại.');
+                });
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.3/jspdf.plugin.autotable.min.js"></script>
+</body>
+
+</html>

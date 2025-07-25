@@ -3,6 +3,8 @@
 
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
+    <!-- Include favorite styles -->
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
 
 <body>
@@ -17,6 +19,15 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
+
+    <!-- FORGOTPASSWORD MODAL -->
+    <div th:replace="~{/layouts/modal_quen_MK}"></div>
+
+    <!-- VERIFICATION MODAL -->
+    <div th:replace="~{/layouts/modalOTP}"></div>
+
+    <!-- RESET PASSWORD MODAL -->
+    <div th:replace="~{/layouts/resetPasswordModal}"></div>
 
 
     <!-- Slder -->
@@ -35,7 +46,7 @@
                                     <p class="slide-description">Khám phá hàng ngàn phòng trọ chất lượng với giá cả phải
                                         chăng</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-search"></i> Tìm kiếm ngay
+                                        <i class="fas fa-search me-2"></i> Tìm kiếm ngay
                                     </button>
                                 </div>
                             </div>
@@ -53,7 +64,7 @@
                                     <h2 class="slide-title">Căn Hộ Cao Cấp</h2>
                                     <p class="slide-description">Không gian sống hiện đại với đầy đủ tiện nghi</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </div>
                             </div>
@@ -71,7 +82,7 @@
                                     <h2 class="slide-title">Nhà Nguyên Căn</h2>
                                     <p class="slide-description">Sự riêng tư tuyệt đối cho gia đình bạn</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-home"></i> Khám phá
+                                        <i class="fas fa-home me-2"></i> Khám phá
                                     </button>
                                 </div>
                             </div>
@@ -86,6 +97,36 @@
 
             <!-- Pagination -->
             <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <div th:replace="~{/layouts/loc-danhmuc}"></div>
+    <section class="owner-register-section">
+        <div class="owner-register-container">
+            <div class="owner-register-left">
+                <h1 class="owner-title">Bạn là chủ nhà?</h1>
+                <p class="owner-subtitle">Đăng ký để quản lý hiệu quả và tăng doanh thu!</p>
+                <ul class="owner-benefits">
+                    <li><i class="fa-solid fa-check"></i> Miễn phí đăng tin 30 ngày đầu</li>
+                    <li><i class="fa-solid fa-check"></i> Công cụ quản lý hiện đại</li>
+                    <li><i class="fa-solid fa-check"></i> Hỗ trợ 24/7</li>
+                </ul>
+                <a href="/dang-ky-chu-tro">
+                    <button class="owner-register-btn"><i class="fa-solid fa-plus"></i> Đăng ký ngay</button>
+                </a>
+
+            </div>
+
+            <div class="owner-register-right">
+                <img th:src="@{/images/slider/slider4.jpg}" alt="Hình ảnh nhà" class="owner-house-image">
+                <div class="owner-revenue-box">
+                    <div class="owner-revenue-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="owner-revenue-text">
+                        <p class="owner-revenue-title">Doanh thu tăng</p>
+                        <p class="owner-revenue-percent">+35% so với tháng trước</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -109,9 +150,7 @@
                                 alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
 
                             <div class="card-overlay">
-                                <button class="btn-favorite">
-                                    <i class="far fa-heart"></i>
-                                </button>
+
                                 <div class="card-badges">
                                     <span class="badge badge-featured" th:if="${post.approvalStatus == 'APPROVED'}">Nổi
                                         bật</span>
@@ -153,11 +192,11 @@
                             </div>
                             <div class="card-actions">
                                 <button class="btn btn-contact">
-                                    <i class="fas fa-phone"></i> Liên hệ
+                                    <i class="fas fa-phone me-2"></i> Liên hệ
                                 </button>
                                 <a th:href="@{'/chi-tiet/' + ${post.postId}}">
                                     <button class="btn btn-view">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </a>
                             </div>
@@ -169,14 +208,69 @@
             <!-- View More Button -->
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <button class="btn btn-view-more">
-                        <i class="fas fa-plus"></i> Xem thêm
-                    </button>
+                    <a th:href="@{/tat-ca-phong-tro}">
+                        <button class="btn btn-view-more">
+                            <i class="fas fa-plus"></i> Xem tất cả phòng
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
 
+    <!-- Interior Showcase Section -->
+    <section class="interior-showcase-index">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="showcase-title-index">Khám phá không gian sống lý tưởng</h2>
+                <p class="showcase-subtitle-index">Hàng ngàn phòng trọ chất lượng cao đang chờ bạn</p>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh1.jpg}" alt="Phòng khách hiện đại" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh2.jpg}" alt="Phòng ăn sang trọng" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh3.jpg}" alt="Phòng ngủ thoải mái" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh4.jpg}" alt="Không gian sống hiện đại"
+                            class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh5.jpg}" alt="Phòng khách tối giản" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh6.jpg}" alt="Không gian xanh" class="interior-img-index">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
 </body>
 
 </html>

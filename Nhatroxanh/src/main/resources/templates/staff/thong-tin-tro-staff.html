@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết - Nhà Trọ Xanh</title>
+
+    <style>
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+        }
+
+        .page-title {
+            color: #2c3e50;
+            font-weight: 700;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .page-subtitle {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        .nav-tabs-custom {
+            border: none;
+            margin-bottom: 30px;
+        }
+
+        .nav-tabs-custom .nav-link {
+            border: none;
+            padding: 15px 25px;
+            font-weight: 600;
+            color: #7f8c8d;
+            background: transparent;
+            border-radius: 12px;
+            margin-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs-custom .nav-link:hover {
+            background: rgba(102, 126, 234, 0.1);
+            color: #3e83cc;
+        }
+
+        .nav-tabs-custom .nav-link.active {
+            background: #3e83cc;
+            color: #fff;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .search-input {
+            border: none;
+            border-radius: 50px;
+            padding: 15px 25px;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+            border-color: #3e83cc;
+        }
+
+        .btn-search {
+            background: #3e83cc;
+            border: none;
+            border-radius: 50px;
+            padding: 15px 30px;
+            font-weight: 600;
+            color: #fff;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            color: #fff;
+        }
+
+        .table-container {
+            background: #fff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .table-modern {
+            margin: 0;
+            border: none;
+        }
+
+        .table-modern thead th {
+            background: #3e83cc;
+            color: #fff;
+            font-weight: 600;
+            padding: 20px 15px;
+            border: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 14px;
+        }
+
+        .table-modern tbody td {
+            padding: 20px 15px;
+            border: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            vertical-align: middle;
+            font-weight: 500;
+        }
+
+        .table-modern tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .table-modern tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+            transform: scale(1.01);
+        }
+
+        .badge-status {
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-active {
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(0, 184, 148, 0.3);
+        }
+
+        .badge-inactive {
+            background: linear-gradient(135deg, #e17055, #d63031);
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(225, 112, 85, 0.3);
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #fdcb6e, #e17055);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 3px 10px rgba(253, 203, 110, 0.3);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(253, 203, 110, 0.4);
+            color: #fff;
+        }
+
+        .stats-card {
+            background: #3e83cc;
+            color: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .stats-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 20px;
+            }
+
+            .content-card {
+                padding: 20px;
+            }
+
+            .search-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="content-card fade-in">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-building text-primary"></i>
+                    Quản lý thông tin trọ
+                </h1>
+                <p class="page-subtitle">Theo dõi và quản lý tất cả các khu trọ</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" th:text="${totalHostels}">0</h3>
+                                <p class="mb-0">Tổng khu trọ</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-check-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" th:text="${activeHostels}">0</h3>
+                                <p class="mb-0">Đang hoạt động</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="d-flex align-items-center">
+                            <div class="stats-icon me-3">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="mb-0" th:text="${fullHostels}">0</h3>
+                                <p class="mb-0">Ngừng hoạt động</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs nav-tabs-custom">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#">
+                        <i class="fas fa-info-circle me-2"></i>
+                        THÔNG TIN TRỌ
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/nhan-vien/category">
+                        <i class="fas fa-tags me-2"></i>
+                        LOẠI DANH MỤC
+                    </a>
+                </li>
+            </ul>
+            <!-- Search Section -->
+            <form th:action="@{/nhan-vien/thong-tin-tro}" method="get" class="search-section">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control search-input border-0"
+                                placeholder="Tìm kiếm theo ID hoặc tên khu trọ..." name="keyword" th:value="${keyword}">
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-search" type="submit">
+                            <i class="fas fa-search me-2"></i>
+                            TÌM KIẾM
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Table -->
+            <div class="table-container">
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th>
+                                <i class="fas fa-hashtag me-2"></i>
+                                ID
+                            </th>
+                            <th>
+                                <i class="fas fa-building me-2"></i>
+                                Tên khu trọ
+                            </th>
+                            <th>
+                                <i class="fas fa-map-marker-alt me-2"></i>
+                                Địa chỉ
+                            </th>
+                            <th>
+                                <i class="fas fa-info-circle me-2"></i>
+                                Trạng thái
+                            </th>
+                            <th>
+                                <i class="fas fa-cogs me-2"></i>
+                                Hành động
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="hostel, stat : ${hostels}">
+                            <td><strong th:text="${stat.index + 1}">1</strong></td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-home text-primary me-2"></i>
+                                    <strong th:text="${hostel.name}">Tên khu trọ</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                                <span
+                                    th:text="${hostel.address != null ? hostel.address.street + ', ' + hostel.address.ward.name + ', ' + hostel.address.ward.district.name + ', ' + hostel.address.ward.district.province.name : 'Chưa xác định'}">Địa
+                                    chỉ</span>
+                            </td>
+                            <td>
+                                <span th:classappend="${hostel.status} ? 'badge badge-active' : 'badge badge-inactive'">
+                                    <i
+                                        th:class="${hostel.status} ? 'fas fa-check-circle me-1' : 'fas fa-times-circle me-1'"></i>
+                                    <span th:text="${hostel.status} ? 'Hoạt động' : 'Hết phòng'">Trạng thái</span>
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{'/nhan-vien/chi-tiet-thong-tin-tro/' + ${hostel.hostelId}}"
+                                    class="action-btn">
+                                    <i class="fas fa-eye me-1"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(hostels)}">
+                            <td colspan="5" class="text-center text-danger">Không tìm thấy khu trọ nào phù hợp.</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="pagination-container mt-4" th:if="${totalPages > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/thong-tin-tro(page=${currentPage - 1}, keyword=${keyword})}">Trước</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'">
+                            <a class="page-link" th:href="@{/nhan-vien/thong-tin-tro(page=${i}, keyword=${keyword})}"
+                                th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/thong-tin-tro(page=${currentPage + 1}, keyword=${keyword})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Add Button -->
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // Add smooth scrolling and interactive effects
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add hover effects to table rows
+            const tableRows = document.querySelectorAll('.table-modern tbody tr');
+            tableRows.forEach(row => {
+                row.addEventListener('mouseenter', function () {
+                    this.style.transform = 'translateX(5px)';
+                });
+                row.addEventListener('mouseleave', function () {
+                    this.style.transform = 'translateX(0)';
+                });
+            });
+
+            // Add click effect to buttons
+            const buttons = document.querySelectorAll('.btn, .action-btn');
+            buttons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    // Create ripple effect
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+
+                    ripple.style.cssText = `
+                        position: absolute;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        background: rgba(255,255,255,0.4);
+                        border-radius: 50%;
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        pointer-events: none;
+                    `;
+
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+
+        // Add CSS for ripple animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>
