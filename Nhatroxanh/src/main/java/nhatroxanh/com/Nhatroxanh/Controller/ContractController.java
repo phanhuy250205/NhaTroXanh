@@ -327,24 +327,9 @@ public class ContractController {
     @PostMapping // Endpoint để tạo hợp đồng mới
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> createContract(
-            @RequestParam("contract") String contractDtoJson, // Nhận ContractDto dưới dạng JSON string
-            @RequestParam(value = "cccdFrontFile", required = false) MultipartFile cccdFrontFile, // File CCCD của người
-                                                                                                  // thuê chính (nếu là
-                                                                                                  // registered tenant)
-            @RequestParam(value = "cccdBackFile", required = false) MultipartFile cccdBackFile, // File CCCD của người
-                                                                                                // thuê chính
-            @RequestParam(value = "unregisteredTenantCccdFrontFile", required = false) MultipartFile unregisteredTenantCccdFrontFile, // File
-                                                                                                                                      // CCCD
-                                                                                                                                      // của
-                                                                                                                                      // người
-                                                                                                                                      // bảo
-                                                                                                                                      // hộ
-            @RequestParam(value = "unregisteredTenantCccdBackFile", required = false) MultipartFile unregisteredTenantCccdBackFile, // File
-                                                                                                                                    // CCCD
-                                                                                                                                    // của
-                                                                                                                                    // người
-                                                                                                                                    // bảo
-                                                                                                                                    // hộ
+            @RequestParam("contract") String contractDtoJson,
+            @RequestParam(value = "cccdFrontFile", required = false) MultipartFile cccdFrontFile,
+            @RequestParam(value = "cccdBackFile", required = false) MultipartFile cccdBackFile,
             Authentication authentication) {
 
         logger.info("--- CONTROLLER: Nhận yêu cầu tạo hợp đồng ---");
@@ -353,9 +338,8 @@ public class ContractController {
         try {
             // Bước 1: Parse ContractDto từ JSON string
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Bỏ qua các trường không
-                                                                                              // xác định
-            objectMapper.registerModule(new JavaTimeModule()); // Đăng ký module cho LocalDate, etc.
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new JavaTimeModule());
             ContractDto contractDto = objectMapper.readValue(contractDtoJson, ContractDto.class);
 
             // Các validation cơ bản
@@ -379,19 +363,14 @@ public class ContractController {
             if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())
                     && contractDto.getUnregisteredTenant() != null) {
                 logger.info("Xử lý Người bảo hộ mới...");
-                // Tạo hoặc cập nhật UnregisteredTenant từ DTO.
-                // Hàm handleUnregisteredTenant sẽ không còn nhận MultipartFile nữa,
-                // mà sẽ nhận trực tiếp URL ảnh nếu có hoặc lưu file nếu được truyền vào từ hàm
-                // gọi.
-                // Ở đây, ta sẽ truyền file ảnh vào handleUnregisteredTenant.
                 unregisteredTenant = handleUnregisteredTenantData(contractDto.getUnregisteredTenant(), owner,
-                        unregisteredTenantCccdFrontFile, unregisteredTenantCccdBackFile);
+                        cccdFrontFile, cccdBackFile);
                 finalTenantPhone = unregisteredTenant.getPhone();
 
             } else if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getTenant() != null) {
                 logger.info("Xử lý Người thuê đã đăng ký...");
                 registeredTenant = handleRegisteredTenantData(contractDto.getTenant(),
-                        cccdFrontFile, cccdBackFile); // Truyền file CCCD cho Registered Tenant
+                        cccdFrontFile, cccdBackFile);
                 finalTenantPhone = registeredTenant.getPhone();
             } else {
                 throw new IllegalArgumentException("Phải cung cấp thông tin người thuê hợp lệ!");
@@ -404,8 +383,8 @@ public class ContractController {
             if (room.getStatus() != RoomStatus.unactive) {
                 throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
             }
-            room.setStatus(RoomStatus.active); // Đặt trạng thái phòng là 'active' khi tạo hợp đồng
-            roomsRepository.save(room); // Lưu trạng thái phòng đã cập nhật
+            room.setStatus(RoomStatus.active);
+            roomsRepository.save(room);
 
             // Bước 4: Tạo đối tượng Contracts và lưu
             Contracts contract = new Contracts();
@@ -415,10 +394,9 @@ public class ContractController {
             contract.setUnregisteredTenant(unregisteredTenant);
             contract.setTenantPhone(finalTenantPhone);
 
-            // Điền các thông tin hợp đồng từ DTO
             contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
             contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
-            // Tính toán endDate dựa trên startDate và duration nếu endDate null
+
             if (contractDto.getTerms().getEndDate() != null) {
                 contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
             } else if (contractDto.getTerms().getDuration() != null) {
@@ -440,7 +418,6 @@ public class ContractController {
                 contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
             }
 
-            // Xử lý Residents (người ở cùng)
             if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
                 for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
                     Resident resident = new Resident();
@@ -448,8 +425,7 @@ public class ContractController {
                     resident.setBirthYear(residentDto.getBirthYear());
                     resident.setPhone(residentDto.getPhone());
                     resident.setCccdNumber(residentDto.getCccdNumber());
-
-                    resident.setContract(contract); // Liên kết người ở với hợp đồng
+                    resident.setContract(contract);
                     contract.getResidents().add(resident);
                 }
             }
@@ -577,7 +553,7 @@ public class ContractController {
             userCccd.setIssuePlace(tenantDto.getIssuePlace());
 
         if (cccdFrontFile != null && !cccdFrontFile.isEmpty()) {
-         
+
             String newFrontUrl = fileUploadService.uploadFile(cccdFrontFile, "cccd");
             userCccd.setFrontImageUrl(newFrontUrl); // <--- SỬA TẠI ĐÂY
             logger.info("Updated CCCD Front with new file: {}", newFrontUrl);
@@ -594,7 +570,7 @@ public class ContractController {
 
         // SỬA TÊN PHƯƠNG THỨC SETTER cho backImageUrl
         if (cccdBackFile != null && !cccdBackFile.isEmpty()) {
-        
+
             String newBackUrl = fileUploadService.uploadFile(cccdBackFile, "cccd");
             userCccd.setBackImageUrl(newBackUrl); // <--- SỬA TẠI ĐÂY
             logger.info("Updated CCCD Back with new file: {}", newBackUrl);
@@ -1179,7 +1155,8 @@ public class ContractController {
 
                 if (tenantCccd != null) {
                     tenantData.put("cccdNumber", tenantCccd.getCccdNumber()); // Số CCCD đầy đủ
-                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị che
+                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị
+                                                                                                        // che
                     tenantData.put("issueDate",
                             tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
@@ -1480,7 +1457,8 @@ public class ContractController {
                     response.put("message", "Số CCCD của người thuê phải là 12 chữ số!");
                     return ResponseEntity.badRequest().body(response);
                 }
-            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null) {
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())
+                    && contractDto.getUnregisteredTenant() != null) {
                 String cccdNumber = contractDto.getUnregisteredTenant().getCccdNumber();
                 logger.info("🔍 Unregistered Tenant CCCD: {}", cccdNumber);
                 if (cccdNumber == null || !cccdNumber.matches("\\d{12}")) {
@@ -1498,10 +1476,12 @@ public class ContractController {
             }
 
             // Kiểm tra trạng thái hợp đồng
-            if (contractDto.getStatus() == null || !contractDto.getStatus().matches("DRAFT|ACTIVE|TERMINATED|EXPIRED")) {
+            if (contractDto.getStatus() == null
+                    || !contractDto.getStatus().matches("DRAFT|ACTIVE|TERMINATED|EXPIRED")) {
                 logger.error("❌ Invalid status: {}", contractDto.getStatus());
                 response.put("success", false);
-                response.put("message", "Trạng thái hợp đồng không hợp lệ. Các giá trị cho phép: DRAFT, ACTIVE, TERMINATED, EXPIRED");
+                response.put("message",
+                        "Trạng thái hợp đồng không hợp lệ. Các giá trị cho phép: DRAFT, ACTIVE, TERMINATED, EXPIRED");
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -1702,9 +1682,7 @@ public class ContractController {
         }
     }
 
-
-
-    @PostMapping(value = "/update-cccd-image", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/update-cccd-image", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public ResponseEntity<Map<String, Object>> updateCccdImage(
@@ -1750,7 +1728,8 @@ public class ContractController {
                 // Lưu ảnh mặt trước mới
                 Image cccdFrontImage = imageService.saveImage(cccdFront, "cccd", tenantCccd, Image.ImageType.FRONT);
                 cccdFrontUrl = cccdFrontImage.getUrl();
-                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(), cccdFrontUrl);
+                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(),
+                        cccdFrontUrl);
             }
 
             // Xử lý ảnh mặt sau
@@ -1760,7 +1739,8 @@ public class ContractController {
                 // Lưu ảnh mặt sau mới
                 Image cccdBackImage = imageService.saveImage(cccdBack, "cccd", tenantCccd, Image.ImageType.BACK);
                 cccdBackUrl = cccdBackImage.getUrl();
-                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(), cccdBackUrl);
+                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(),
+                        cccdBackUrl);
             }
 
             response.put("success", true);
@@ -1909,7 +1889,8 @@ public class ContractController {
             logger.info("🔄 Gọi contractService.updateStatus({}, '{}')", contractId, newStatus);
             contractService.updateStatus(contractId, newStatus);
 
-            logger.info("✅ Cập nhật trạng thái hợp đồng thành công: {} -> {}", contract.getStatus(), newStatus.toUpperCase());
+            logger.info("✅ Cập nhật trạng thái hợp đồng thành công: {} -> {}", contract.getStatus(),
+                    newStatus.toUpperCase());
             response.put("success", true);
             response.put("message", "Cập nhật trạng thái hợp đồng thành công");
             response.put("contractId", contractId);
@@ -2737,7 +2718,6 @@ public class ContractController {
         }
     }
 
-
     // ✅ THÊM METHOD NÀY VÀO CONTROLLER
     private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
         // Kiểm tra email từ request trước
@@ -2758,7 +2738,6 @@ public class ContractController {
 
         return null;
     }
-
 
     // ✅ ENDPOINT SEND PDF VIA EMAIL
     @PostMapping("/send-email-pdf")
@@ -2788,8 +2767,7 @@ public class ContractController {
             // ✅ CREATE FILE NAME
             String fileName = String.format("HopDong_%s_%s",
                     recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
-                    contractId != null ? contractId : System.currentTimeMillis()
-            );
+                    contractId != null ? contractId : System.currentTimeMillis());
 
             // ✅ SEND EMAIL WITH PDF ATTACHMENT
             emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
@@ -2810,8 +2788,6 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
-
 
     @PostMapping("/generate-pdf")
     public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
@@ -2864,8 +2840,6 @@ public class ContractController {
         }
     }
 
-
-
     // ✅ NỘI DUNG EMAIL CHO PDF
     private String createEmailBodyForPDF(Contracts contract) {
         return "Xin chào " + contract.getTenant().getFullname() + ",\n\n" +
@@ -2874,8 +2848,6 @@ public class ContractController {
                 "Trân trọng!\n" +
                 "Ban quản lý";
     }
-
-
 
     // KHÔI PHỤC: checkGuardianDuplicates endpoint
     @GetMapping("/check-guardian-duplicates")

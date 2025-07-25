@@ -8,77 +8,74 @@ window.NhaTroContract = {
     unregisteredTenantCccdFrontFile: null, // File ảnh tạm thời
     unregisteredTenantCccdBackFile: null,
 
-    init() {
-        console.log("🚀 Contract form loading...");
-        this.setupEventListeners();
-        this.setupTermsManagement();
-        this.setCurrentDate();
-        this.setupAmenityModal();
-        this.setupCustomerModal();
-        this.setupResidentModal();
-        this.initializePreviewUpdates();
+init() {
+    console.log("🚀 Contract form loading...");
+    this.setupEventListeners();
+    this.setupTermsManagement();
+    this.setCurrentDate();
+    this.setupAmenityModal();
+    this.setupCustomerModal();
+    this.setupResidentModal();
+    this.initializePreviewUpdates();
 
-        return this.loadProvinces() // Load provinces ngay từ đầu
-            .then(() => {
-                console.log("Provinces loaded successfully");
+    return this.loadProvinces()
+        .then(() => {
+            console.log("Provinces loaded successfully");
 
-                // ✅ SỬA CÁCH LẤY CONTRACT ID
-                const pathParts = window.location.pathname.split('/');
-                console.log("Path parts:", pathParts);
+            const pathParts = window.location.pathname.split('/');
+            let contractId = null;
+            for (let i = pathParts.length - 1; i >= 0; i--) {
+                const part = pathParts[i];
+                if (part && !isNaN(part) && !['form', 'edit', 'create', 'new'].includes(part.toLowerCase())) {
+                    contractId = parseInt(part);
+                    break;
+                }
+            }
 
-                // Tìm ID số trong URL path
-                let contractId = null;
-                for (let i = pathParts.length - 1; i >= 0; i--) {
-                    const part = pathParts[i];
-                    // Kiểm tra nếu là số và không phải là "form", "edit", "create"
-                    if (part && !isNaN(part) && !['form', 'edit', 'create', 'new'].includes(part.toLowerCase())) {
-                        contractId = parseInt(part);
-                        break;
+            console.log("Contract ID from URL:", contractId);
+
+            if (contractId && contractId > 0) {
+                return fetch(`/api/contracts/edit-data/${contractId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
                     }
-                }
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(`HTTP error! status: ${response.status}, response: ${text}`); });
+                    }
+                    return response.json();
+                })
+                .then(contract => {
+                    console.log("Contract data:", JSON.stringify(contract, null, 2));
+                    window.contractData = contract; // Lưu dữ liệu toàn cục
 
-                console.log("Contract ID from URL:", contractId);
-
-                // ✅ CHỈ GỌI API KHI CÓ ID HỢP LỆ
-                if (contractId && contractId > 0) {
-                    return fetch(`/api/contracts/edit-data/${contractId}`, {
-                        method: 'GET',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
-                        }
-                    })
-                        .then(response => {
-                            console.log("Response status:", response.status);
-                            if (!response.ok) {
-                                return response.text().then(text => {
-                                    console.error("Response text:", text);
-                                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
-                                });
-                            }
-                            return response.json();
-                        })
-                        .then(contract => {
-                            console.log("Contract data:", JSON.stringify(contract, null, 2));
-                            window.contractData = contract; // Lưu dữ liệu toàn cục
-                            console.log("🚀 Contract data saved, waiting for tab activation");
-                            console.log("🚀 Contract form initialized");
-                        })
-                        .catch(error => {
-                            console.error("Error fetching contract data:", error);
-                            this.showNotification("Lỗi khi tải dữ liệu hợp đồng: " + error.message, "error");
-                        });
-                } else {
-                    console.log("No valid contract ID found, skipping data load (create mode)");
-                    return Promise.resolve();
-                }
-            })
-            .catch(error => {
-                console.error("Error loading provinces:", error);
-                this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố: " + error.message, "error");
-            });
-    },
+                    // 🔥 BẮT ĐẦU PHẦN SỬA LỖI 🔥
+                    // Sau khi tải dữ liệu xong, lập tức kiểm tra và điền thông tin cho tab đầu tiên
+                    if (contract.tenantType === "UNREGISTERED" && contract.unregisteredTenant) {
+                        console.log("Initial load: Filling unregistered tenant fields...");
+                        this.fillTenantFields(contract.unregisteredTenant);
+                    } else if (contract.tenantType === "REGISTERED" && contract.tenant) {
+                        console.log("Initial load: Filling registered tenant fields...");
+                        this.fillTenantFields(contract.tenant);
+                    }
+                    // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
+                    
+                    console.log("🚀 Contract data saved, and initial form filled.");
+                });
+            } else {
+                console.log("No valid contract ID found, skipping data load (create mode)");
+                return Promise.resolve();
+            }
+        })
+        .catch(error => {
+            console.error("Error during initialization:", error);
+            this.showNotification("Lỗi khi khởi tạo form: " + error.message, "error");
+        });
+},
 
 
     // New method to setup terms management
@@ -1186,89 +1183,67 @@ window.NhaTroContract = {
     },
 
     // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
-    handleTenantTypeStatus(tenant) {
-        console.log("🏷️ Handling tenant type status...");
+// ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
+handleTenantTypeStatus(tenant) {
+    console.log("🏷️ Handling tenant type status...");
 
-        try {
-            const guardianDisplayContainer = document.getElementById("guardian-display-container");
-            const guardianDisplayName = document.getElementById("guardian-display-name");
-            const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
-            const tenantTypeSelect = document.getElementById("tenantType");
-            const btnEditGuardian = document.getElementById("btn-edit-guardian");
-            const btnDeleteGuardian = document.getElementById("btn-delete-guardian");
+    try {
+        const guardianDisplayContainer = document.getElementById("guardian-display-container");
+        const guardianDisplayName = document.getElementById("guardian-display-name");
+        const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
+        const tenantTypeSelect = document.getElementById("tenantType");
+        const btnEditGuardian = document.getElementById("btn-edit-guardian");
+        const btnDeleteGuardian = document.getElementById("btn-delete-guardian");
 
-            // ✅ KIỂM TRA CÁC ELEMENTS QUAN TRỌNG
-            const requiredElements = {
-                guardianDisplayContainer,
-                btnAddCustomerHost,
-                tenantTypeSelect
-            };
-
-            const missingElements = Object.entries(requiredElements)
-                .filter(([name, element]) => !element)
-                .map(([name]) => name);
-
-            if (missingElements.length > 0) {
-                console.warn("❌ Missing tenant type elements:", missingElements);
-                return;
-            }
-
-            // ✅ XỬ LÝ LOGIC TENANT TYPE
-            if (tenant.id && typeof tenant.id === 'number') {
-                // Unregistered tenant
-                this.unregisteredTenantData = { ...tenant };
-
-                if (guardianDisplayContainer) {
-                    $('#guardian-display-container').removeClass('d-none').show();
-                }
-
-                if (guardianDisplayName) {
-                    guardianDisplayName.textContent = tenant.fullName;
-                }
-
-                if (btnAddCustomerHost) {
-                    $('#btn-add-customer-host').hide();
-                }
-
-                tenantTypeSelect.value = "UNREGISTERED";
-
-                // ✅ GẮN LISTENERS CHO NÚT SỬA/XÓA (NẾU TỒN TẠI)
-                if (btnEditGuardian) {
-                    $('#btn-edit-guardian').off('click').on('click', () => {
-                        this.openEditCustomerModal(this.unregisteredTenantData);
-                    });
-                }
-
-                if (btnDeleteGuardian) {
-                    $('#btn-delete-guardian').off('click').on('click', () => {
-                        this.clearUnregisteredTenantData();
-                    });
-                }
-
-                console.log("✅ Set as UNREGISTERED tenant");
-
-            } else {
-                // Registered tenant
-                this.unregisteredTenantData = null;
-
-                if (guardianDisplayContainer) {
-                    $('#guardian-display-container').hide();
-                }
-
-                if (btnAddCustomerHost) {
-                    $('#btn-add-customer-host').show();
-                }
-
-                tenantTypeSelect.value = "REGISTERED";
-
-                console.log("✅ Set as REGISTERED tenant");
-            }
-
-        } catch (error) {
-            console.error("❌ Error handling tenant type status:", error);
-            this.showNotification("Lỗi khi xử lý trạng thái tenant: " + error.message, "error");
+        if (!guardianDisplayContainer || !btnAddCustomerHost || !tenantTypeSelect) {
+            console.warn("❌ Missing critical elements for tenant type status handling.");
+            return;
         }
-    },
+
+        // 🔥 SỬA LỖI LOGIC TẠI ĐÂY: Kiểm tra sự tồn tại của key 'userId' 🔥
+        // Nếu đối tượng tenant KHÔNG CÓ key 'userId', đó là UnregisteredTenant (người bảo hộ).
+        if (!('userId' in tenant)) {
+            // Unregistered tenant (người bảo hộ)
+            this.unregisteredTenantData = { ...tenant };
+            this.toggleTenantInputFields(false); // Vô hiệu hóa các trường input
+            tenantTypeSelect.value = "UNREGISTERED";
+            console.log("✅ Set as UNREGISTERED tenant");
+
+            if (guardianDisplayContainer) {
+                if (guardianDisplayName) guardianDisplayName.textContent = tenant.fullName;
+                $(guardianDisplayContainer).removeClass('d-none').show();
+            }
+            
+            $(btnAddCustomerHost).hide();
+            
+            if (btnEditGuardian) {
+                $(btnEditGuardian).off('click').on('click', () => {
+                    this.openEditCustomerModal(this.unregisteredTenantData);
+                });
+            }
+
+            if (btnDeleteGuardian) {
+                $(btnDeleteGuardian).off('click').on('click', () => {
+                    this.clearUnregisteredTenantData();
+                });
+            }
+
+        } else {
+            // Registered tenant (có userId)
+            this.unregisteredTenantData = null;
+            this.toggleTenantInputFields(true); // Kích hoạt lại các trường input
+            tenantTypeSelect.value = "REGISTERED";
+            console.log("✅ Set as REGISTERED tenant");
+            
+            $(guardianDisplayContainer).hide();
+            $(btnAddCustomerHost).show();
+        }
+
+    } catch (error) {
+        console.error("❌ Error handling tenant type status:", error);
+        this.showNotification("Lỗi khi xử lý trạng thái tenant: " + error.message, "error");
+    }
+},
 
     // ✅ HÀM PHỤ: Xử lý ảnh CCCD với validation
     fillTenantImages(tenant) {
@@ -1318,7 +1293,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Đảm bảo provinces được load
+    // ✅ HÀM PHỤ: Đảm bảo provinces được load
     async ensureProvincesLoaded() {
         const tenantProvinceSelect = document.getElementById("tenant-province");
 
@@ -1338,7 +1313,7 @@ window.NhaTroContract = {
         console.log("✅ Provinces ready with", tenantProvinceSelect.options.length, "options");
     },
 
-// ✅ HÀM PHỤ: Điền thông tin cơ bản
+    // ✅ HÀM PHỤ: Điền thông tin cơ bản
     // ✅ HÀM PHỤ: Điền thông tin cơ bản với validation
     fillBasicTenantInfo(tenant) {
         console.log("🔍 Filling basic tenant info...");
@@ -1394,7 +1369,7 @@ window.NhaTroContract = {
         console.log("✅ Basic tenant info filled successfully");
     },
 
-// ✅ HÀM PHỤ: Xử lý địa chỉ với proper validation
+    // ✅ HÀM PHỤ: Xử lý địa chỉ với proper validation
     async fillTenantAddress(tenant) {
         const tenantProvinceSelect = document.getElementById("tenant-province");
 
@@ -1435,7 +1410,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý district và ward
+    // ✅ HÀM PHỤ: Xử lý district và ward
     async fillTenantDistrict(tenant, provinceCode) {
         const tenantDistrictSelect = document.getElementById("tenant-district");
 
@@ -1468,7 +1443,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý ward
+    // ✅ HÀM PHỤ: Xử lý ward
     async fillTenantWard(tenant, districtCode, provinceCode) {
         const tenantWardSelect = document.getElementById("tenant-ward");
 
@@ -1647,7 +1622,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý địa chỉ để code sạch hơn
+    // Tách riêng logic xử lý địa chỉ để code sạch hơn
     async fillOwnerAddress(owner, elements) {
         try {
             // Kiểm tra format tỉnh hợp lệ
@@ -1705,7 +1680,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý district
+    // Tách riêng logic xử lý district
     async fillOwnerDistrict(owner, elements, provinceCode) {
         try {
             const districtCode = await this.mapDistrictNameToCode(provinceCode, owner.district);
@@ -1742,7 +1717,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý ward
+    // Tách riêng logic xử lý ward
     async fillOwnerWard(owner, elements, districtCode, provinceCode) {
         try {
             const wardCode = await this.mapWardNameToCode(districtCode, owner.ward, provinceCode);
@@ -1988,7 +1963,7 @@ window.NhaTroContract = {
         return fullAddress || "Chưa có thông tin địa chỉ";
     },
 
-// Hàm chuyển đổi định dạng ngày
+    // Hàm chuyển đổi định dạng ngày
     formatDate(dateStr) {
         if (!dateStr) return "";
         // Nếu định dạng là dd/MM/yy
@@ -2440,7 +2415,7 @@ window.NhaTroContract = {
     },
 
 
-// Hàm chuyển đổi định dạng ngày
+    // Hàm chuyển đổi định dạng ngày
     formatDate(dateStr) {
         if (!dateStr) return "";
         // Nếu định dạng là dd/MM/yy
@@ -2696,7 +2671,7 @@ window.NhaTroContract = {
         printWindow.print()
     },
 
-saveContract() {
+    saveContract() {
         const roomSelect = document.getElementById('roomSelect');
         const roomIdValue = roomSelect?.value;
 
@@ -2729,34 +2704,28 @@ saveContract() {
         }
 
         const formData = new FormData();
-
-        // Append ContractDto fields as JSON
-        // Chuyển đổi contractData (JSON object) thành JSON string
         formData.append("contract", JSON.stringify(contractData));
 
-        // Append files for unregistered tenant if exist
-        if (contractData.tenantType === "UNREGISTERED" && this.unregisteredTenantData) {
+        // ✅ Đã sửa: Gửi file với tên nhất quán là "cccdFrontFile" và "cccdBackFile"
+        if (contractData.tenantType === "UNREGISTERED") {
+            // Nếu là người bảo hộ, lấy file từ biến tạm
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
-                console.log("Appending unregisteredTenantCccdFrontFile:", this.unregisteredTenantCccdFrontFile.name);
             }
             if (this.unregisteredTenantCccdBackFile) {
                 formData.append("cccdBackFile", this.unregisteredTenantCccdBackFile);
-                console.log("Appending unregisteredTenantCccdBackFile:", this.unregisteredTenantCccdBackFile.name);
             }
-        } else { // Nếu là registered tenant, gửi file CCCD của tenant chính (nếu có thay đổi)
-             const cccdFront = document.getElementById("cccd-front").files[0];
-             const cccdBack = document.getElementById("cccd-back").files[0];
-             if (cccdFront) {
-                 formData.append("cccdFrontFile", cccdFront);
-                 console.log("Appending registeredTenantCccdFrontFile:", cccdFront.name);
-             }
-             if (cccdBack) {
-                 formData.append("cccdBackFile", cccdBack);
-                 console.log("Appending registeredTenantCccdBackFile:", cccdBack.name);
-             }
+        } else {
+            // Nếu là người thuê đã đăng ký, lấy file trực tiếp từ input
+            const cccdFront = document.getElementById("cccd-front").files[0];
+            const cccdBack = document.getElementById("cccd-back").files[0];
+            if (cccdFront) {
+                formData.append("cccdFrontFile", cccdFront);
+            }
+            if (cccdBack) {
+                formData.append("cccdBackFile", cccdBack);
+            }
         }
-
 
         console.log("=== FINAL FORM DATA TO SEND ===");
         for (let [key, value] of formData.entries()) {
@@ -2765,33 +2734,37 @@ saveContract() {
 
         fetch("/api/contracts", {
             method: "POST",
-            body: formData // FormData sẽ tự thiết lập Content-Type là multipart/form-data
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(error => {
-                    throw new Error(error.message || `HTTP error! status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                this.showNotification("Hợp đồng đã được tạo thành công!", "success");
-                setTimeout(() => window.location.href = "/api/contracts/list", 1500);
-            } else {
-                this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
+            body: formData, // FormData sẽ tự thiết lập Content-Type là multipart/form-data
+            // Thêm CSRF token nếu cần
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
             }
         })
-        .catch(error => {
-            console.error("Lỗi khi tạo hợp đồng:", error);
-            this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
-        });
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => {
+                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    this.showNotification("Hợp đồng đã được tạo thành công!", "success");
+                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
+                } else {
+                    this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi tạo hợp đồng:", error);
+                this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
+            });
     },
 
 
 
- buildContractData(roomIdNumber, roomSelect) {
+    buildContractData(roomIdNumber, roomSelect) {
         const contractData = {};
 
         // Room (chỉ gửi nếu người dùng chọn phòng mới)
@@ -2898,7 +2871,7 @@ saveContract() {
             const backImg = backPreviewElement ? backPreviewElement.querySelector('img') : null;
             if (backImg && backImg.src) {
                 const relativePath = backImg.src.replace(window.location.origin, '');
-                 if (relativePath && !relativePath.includes('data:')) {
+                if (relativePath && !relativePath.includes('data:')) {
                     tenant.cccdBackUrl = relativePath;
                 }
             }
@@ -2962,7 +2935,7 @@ saveContract() {
     },
 
 
-// ✅ Method gửi FormData (backup - đã sửa)
+    // ✅ Method gửi FormData (backup - đã sửa)
     saveContractWithFormData() {
         // Lấy roomId từ form
         const roomSelect = document.getElementById('roomSelect')
@@ -2994,7 +2967,7 @@ saveContract() {
         this.sendFormData(formData)
     },
 
-// ✅ Method gửi FormData (đã sửa)
+    // ✅ Method gửi FormData (đã sửa)
     sendFormData(formData) {
         fetch("/api/contracts", {
             method: "POST",
@@ -3004,7 +2977,7 @@ saveContract() {
             .catch(this.handleError.bind(this))
     },
 
-// ✅ Handle response (đã sửa)
+    // ✅ Handle response (đã sửa)
     async handleResponse(response) {
         console.log("=== SERVER RESPONSE ===")
         console.log("Status:", response.status)
@@ -3043,7 +3016,7 @@ saveContract() {
         }
     },
 
-// ✅ Handle error (giữ nguyên)
+    // ✅ Handle error (giữ nguyên)
     handleError(error) {
         console.error("Error saving contract:", error)
         this.showNotification("Lỗi khi lưu hợp đồng: " + error.message, "error")
@@ -3364,198 +3337,212 @@ saveContract() {
         })
     },
 
-saveNewCustomer: function() {
-    const fullName = document.getElementById("newCustomer-name").value.trim();
-    const dob = document.getElementById("newCustomer-dob").value || null;
-    const cccdNumber = document.getElementById("newCustomer-id").value.trim();
-    const issueDate = document.getElementById("newCustomer-id-date").value || null;
-    const issuePlace = document.getElementById("newCustomer-id-place").value || null;
-    const phone = document.getElementById("newCustomer-phone").value.trim();
-    const email = document.getElementById("newCustomer-email").value || null;
-    const street = document.getElementById("newCustomer-street").value || null;
-    const ward = this.getSelectText("newCustomer-ward") || null;
-    const district = this.getSelectText("newCustomer-district") || null;
-    const province = this.getSelectText("newCustomer-province") || null;
-    const relationship = document.getElementById("newCustomer-relationship")?.value || null;
-    const relationshipNote = document.getElementById("newCustomer-relationship-note")?.value || null;
-    const notes = document.getElementById("newCustomer-notes")?.value || null;
+    saveNewCustomer: async function () {
+        const fullName = document.getElementById("newCustomer-name").value.trim();
+        const dob = document.getElementById("newCustomer-dob").value || null;
+        const cccdNumber = document.getElementById("newCustomer-id").value.trim();
+        const issueDate = document.getElementById("newCustomer-id-date").value || null;
+        const issuePlace = document.getElementById("newCustomer-id-place").value || null;
+        const phone = document.getElementById("newCustomer-phone").value.trim();
+        const email = document.getElementById("newCustomer-email").value || null;
+        const street = document.getElementById("newCustomer-street").value || null;
 
-    if (!fullName || !phone || !cccdNumber) {
-        this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
-        return;
-    }
+        // 🔥 SỬA LỖI: Lấy mã số (value) thay vì lấy tên (text)
+        const provinceCode = document.getElementById("newCustomer-province").value;
+        const districtCode = document.getElementById("newCustomer-district").value;
+        const wardCode = document.getElementById("newCustomer-ward").value;
 
-    this.unregisteredTenantData = {
-        fullName: fullName,
-        phone: phone,
-        cccdNumber: cccdNumber,
-        birthday: dob,
-        issueDate: issueDate,
-        issuePlace: issuePlace,
-        email: email,
-        street: street,
-        ward: ward,
-        district: district,
-        province: province,
-        relationship: relationship,
-        relationshipNote: relationshipNote,
-        notes: notes
-    };
-    this.unregisteredTenantCccdFrontFile = document.getElementById("newCustomer-cccd-front").files[0] || null;
-    this.unregisteredTenantCccdBackFile = document.getElementById("newCustomer-cccd-back").files[0] || null;
+        const relationship = document.getElementById("newCustomer-relationship")?.value || null;
+        const relationshipNote = document.getElementById("newCustomer-relationship-note")?.value || null;
+        const notes = document.getElementById("newCustomer-notes")?.value || null;
 
-    const guardianDisplayContainer = document.getElementById("guardian-display-container");
-    const guardianDisplayName = document.getElementById("guardian-display-name");
-    const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
+        if (!fullName || !phone || !cccdNumber) {
+            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
+            return;
+        }
 
-    if (guardianDisplayContainer && guardianDisplayName && btnAddCustomerHost) {
-        guardianDisplayName.textContent = fullName;
-        guardianDisplayContainer.classList.remove('d-none');
-        guardianDisplayContainer.style.display = 'flex';
-        btnAddCustomerHost.style.display = 'none';
-    } else {
-        console.error("Lỗi: Không tìm thấy các phần tử hiển thị người bảo hộ.");
-        this.showNotification("Lỗi hiển thị thông tin người bảo hộ.", "error");
-    }
+        this.unregisteredTenantData = {
+            fullName: fullName,
+            phone: phone,
+            cccdNumber: cccdNumber,
+            birthday: dob,
+            issueDate: issueDate,
+            issuePlace: issuePlace,
+            email: email,
+            street: street,
+            // Lưu cả tên để hiển thị
+            ward: this.getSelectText("newCustomer-ward"),
+            district: this.getSelectText("newCustomer-district"),
+            province: this.getSelectText("newCustomer-province"),
+            relationship: relationship,
+            relationshipNote: relationshipNote,
+            notes: notes
+        };
+        this.unregisteredTenantCccdFrontFile = document.getElementById("newCustomer-cccd-front").files[0] || null;
+        this.unregisteredTenantCccdBackFile = document.getElementById("newCustomer-cccd-back").files[0] || null;
 
-    $('#btn-edit-guardian').off('click').on('click', () => {
-        this.openEditCustomerModal(this.unregisteredTenantData);
-    });
-    $('#btn-delete-guardian').off('click').on('click', () => {
-        this.clearUnregisteredTenantData();
-    });
+        const guardianDisplayContainer = document.getElementById("guardian-display-container");
+        const guardianDisplayName = document.getElementById("guardian-display-name");
+        const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
 
-    document.getElementById("tenant-name").value = fullName;
-    document.getElementById("tenant-phone").value = phone;
-    document.getElementById("tenant-id").value = cccdNumber;
-    document.getElementById("tenant-dob").value = dob;
-    document.getElementById("tenant-id-date").value = issueDate;
-    document.getElementById("tenant-id-place").value = issuePlace;
-    document.getElementById("tenant-email").value = email;
-    document.getElementById("tenant-street").value = street;
-    document.getElementById("tenant-ward").value = ward;
-    document.getElementById("tenant-district").value = district;
-    document.getElementById("tenant-province").value = province;
-    this.toggleTenantInputFields(false);
-    document.getElementById("tenantType").value = "UNREGISTERED";
+        if (guardianDisplayContainer && guardianDisplayName && btnAddCustomerHost) {
+            guardianDisplayName.textContent = fullName;
+            guardianDisplayContainer.classList.remove('d-none');
+            guardianDisplayContainer.style.display = 'flex';
+            btnAddCustomerHost.style.display = 'none';
+        }
 
-    const frontPreview = document.getElementById("cccd-front-preview");
-    const backPreview = document.getElementById("cccd-back-preview");
-    frontPreview.innerHTML = '';
-    backPreview.innerHTML = '';
+        $('#btn-edit-guardian').off('click').on('click', () => {
+            this.openEditCustomerModal(this.unregisteredTenantData);
+        });
+        $('#btn-delete-guardian').off('click').on('click', () => {
+            this.clearUnregisteredTenantData();
+        });
 
-    if (this.unregisteredTenantCccdFrontFile) {
-        const readerFront = new FileReader();
-        readerFront.onload = (e) => { frontPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`; };
-        readerFront.readAsDataURL(this.unregisteredTenantCccdFrontFile);
-    } else if (this.unregisteredTenantData.cccdFrontUrl) {
-        frontPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdFrontUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdFrontUrl.replace(/ /g, '%20')}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
-    }
+        // Điền các thông tin cơ bản
+        document.getElementById("tenant-name").value = fullName;
+        document.getElementById("tenant-phone").value = phone;
+        document.getElementById("tenant-id").value = cccdNumber;
+        document.getElementById("tenant-dob").value = dob;
+        document.getElementById("tenant-id-date").value = issueDate;
+        document.getElementById("tenant-id-place").value = issuePlace;
+        document.getElementById("tenant-email").value = email;
+        document.getElementById("tenant-street").value = street;
 
-    if (this.unregisteredTenantCccdBackFile) {
-        const readerBack = new FileReader();
-        readerBack.onload = (e) => { backPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Back" style="max-width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`; };
-        readerBack.readAsDataURL(this.unregisteredTenantCccdBackFile);
-    } else if (this.unregisteredTenantData.cccdBackUrl) {
-        backPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdBackUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdBackUrl.replace(/ /g, '%20')}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
-    }
+        // 🔥 BẮT ĐẦU KHỐI CODE SỬA LỖI ĐỊA CHỈ 🔥
+        const tenantProvinceSelect = document.getElementById("tenant-province");
+        const tenantDistrictSelect = document.getElementById("tenant-district");
+        const tenantWardSelect = document.getElementById("tenant-ward");
 
-    // Đóng modal và cleanup
-    const $modal = $('#addCustomerModal-host');
-    if ($modal.hasClass('show')) {
-        $modal.modal('hide');
-        this.cleanupModalBackdrop();
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    }
+        if (tenantProvinceSelect && provinceCode) {
+            tenantProvinceSelect.value = provinceCode;
+            // Tải danh sách huyện tương ứng và chờ cho nó hoàn thành
+            await this.loadDistricts(provinceCode, 'tenant-district', 'tenant-ward');
 
-    this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
-    this.updateAllPreview();
-},
-toggleTenantInputFields: function(enable) {
-    const fieldsToControl = [
-        "tenant-name", "tenant-phone", "tenant-id", "tenant-dob",
-        "tenant-id-date", "tenant-id-place", "tenant-email",
-        "tenant-street", "tenant-province", "tenant-district", "tenant-ward"
-    ];
-    const cccdFileInputs = ["cccd-front", "cccd-back"]; // IDs of the file inputs
+            if (tenantDistrictSelect && districtCode) {
+                tenantDistrictSelect.value = districtCode;
+                // Tải danh sách xã tương ứng và chờ cho nó hoàn thành
+                await this.loadWards(districtCode, 'tenant-ward');
 
-    fieldsToControl.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.disabled = !enable; // Set disabled = true nếu enable là false
-            if (!enable) {
-                element.classList.add('nha-tro-input-disabled'); // Thêm class để đổi style
-            } else {
-                element.classList.remove('nha-tro-input-disabled'); // Bỏ class để kích hoạt
+                if (tenantWardSelect && wardCode) {
+                    tenantWardSelect.value = wardCode;
+                }
             }
         }
-    });
+        // 🔥 KẾT THÚC KHỐI CODE SỬA LỖI ĐỊA CHỈ 🔥
 
-    // Xử lý các input type="file" (ảnh CCCD) và div click của chúng
-    cccdFileInputs.forEach(id => {
-        const fileInput = document.getElementById(id); // Input type="file"
-        const uploadDiv = fileInput?.closest('.nha-tro-image-upload'); // Div bao ngoài có onclick
+        this.toggleTenantInputFields(false);
+        document.getElementById("tenantType").value = "UNREGISTERED";
 
-        if (fileInput) fileInput.disabled = !enable; // Vô hiệu hóa input file
-        if (uploadDiv) {
-            if (!enable) {
-                uploadDiv.classList.add('is-disabled'); // Thêm class mới cho div upload
-            } else {
-                uploadDiv.classList.remove('is-disabled');
-            }
+        const frontPreview = document.getElementById("cccd-front-preview");
+        const backPreview = document.getElementById("cccd-back-preview");
+        frontPreview.innerHTML = '';
+        backPreview.innerHTML = '';
+
+        if (this.unregisteredTenantCccdFrontFile) {
+            const readerFront = new FileReader();
+            readerFront.onload = (e) => { frontPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`; };
+            readerFront.readAsDataURL(this.unregisteredTenantCccdFrontFile);
+        } else if (this.unregisteredTenantData.cccdFrontUrl) {
+            frontPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdFrontUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdFrontUrl.replace(/ /g, '%20')}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+        } else {
+            frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
         }
-    });
-},
-clearUnregisteredTenantData: function() {
-    this.unregisteredTenantData = null;
-    this.unregisteredTenantCccdFrontFile = null;
-    this.unregisteredTenantCccdBackFile = null;
 
-    // Ẩn khung hiển thị người bảo hộ và hiện nút "Thêm người bảo hộ"
-    $('#guardian-display-container').hide();
-    $('#btn-add-customer-host').show();
+        if (this.unregisteredTenantCccdBackFile) {
+            const readerBack = new FileReader();
+            readerBack.onload = (e) => { backPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Back" style="max-width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`; };
+            readerBack.readAsDataURL(this.unregisteredTenantCccdBackFile);
+        } else if (this.unregisteredTenantData.cccdBackUrl) {
+            backPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdBackUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdBackUrl.replace(/ /g, '%20')}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+        } else {
+            backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        }
 
-    // Reset các trường hiển thị và hidden input của người thuê chính
-    // (Đây là phần quan trọng để "xóa" dữ liệu người bảo hộ khỏi form chính)
-    document.getElementById("tenant-name-display").textContent = "........................";
-    document.getElementById("tenant-phone-display").textContent = "........................";
-    document.getElementById("tenant-id-display").textContent = "........................";
-    document.getElementById("tenant-dob-display").textContent = "........................";
-    document.getElementById("tenant-id-date-display").textContent = "........................";
-    document.getElementById("tenant-id-place-display").textContent = "........................";
-    document.getElementById("tenant-email-display").textContent = "........................";
-    document.getElementById("tenant-address-display").textContent = "........................";
+        $('#addCustomerModal-host').modal('hide');
 
-    document.getElementById("tenant-name").value = "";
-    document.getElementById("tenant-phone").value = "";
-    document.getElementById("tenant-id").value = "";
-    document.getElementById("tenant-dob").value = "";
-    document.getElementById("tenant-id-date").value = "";
-    document.getElementById("tenant-id-place").value = "";
-    document.getElementById("tenant-email").value = "";
-    document.getElementById("tenant-street").value = "";
-    document.getElementById("tenant-ward").value = "";
-    document.getElementById("tenant-district").value = "";
-    document.getElementById("tenant-province").value = "";
+        this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
+        this.updateAllPreview();
+    },
+    toggleTenantInputFields: function (enable) {
+        const fieldsToControl = [
+            "tenant-name", "tenant-phone", "tenant-id", "tenant-dob",
+            "tenant-id-date", "tenant-id-place", "tenant-email",
+            "tenant-street", "tenant-province", "tenant-district", "tenant-ward"
+        ];
+        const cccdFileInputs = ["cccd-front", "cccd-back"]; // IDs of the file inputs
 
-    // Reset preview ảnh CCCD trên form chính
-    const frontPreview = document.getElementById("cccd-front-preview");
-    const backPreview = document.getElementById("cccd-back-preview");
-    frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
-    backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        fieldsToControl.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.disabled = !enable; // Set disabled = true nếu enable là false
+                if (!enable) {
+                    element.classList.add('nha-tro-input-disabled'); // Thêm class để đổi style
+                } else {
+                    element.classList.remove('nha-tro-input-disabled'); // Bỏ class để kích hoạt
+                }
+            }
+        });
 
-     NhaTroContract.toggleTenantInputFields(true);
-    // Cập nhật loại người thuê về REGISTERED (mặc định ban đầu)
-    document.getElementById("tenantType").value = "REGISTERED";
+        // Xử lý các input type="file" (ảnh CCCD) và div click của chúng
+        cccdFileInputs.forEach(id => {
+            const fileInput = document.getElementById(id); // Input type="file"
+            const uploadDiv = fileInput?.closest('.nha-tro-image-upload'); // Div bao ngoài có onclick
 
-    this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
-    this.updateAllPreview();
-},
+            if (fileInput) fileInput.disabled = !enable; // Vô hiệu hóa input file
+            if (uploadDiv) {
+                if (!enable) {
+                    uploadDiv.classList.add('is-disabled'); // Thêm class mới cho div upload
+                } else {
+                    uploadDiv.classList.remove('is-disabled');
+                }
+            }
+        });
+    },
+    clearUnregisteredTenantData: function () {
+        this.unregisteredTenantData = null;
+        this.unregisteredTenantCccdFrontFile = null;
+        this.unregisteredTenantCccdBackFile = null;
+
+        // Ẩn khung hiển thị người bảo hộ và hiện lại nút "Thêm người bảo hộ"
+        $('#guardian-display-container').hide();
+        $('#btn-add-customer-host').show();
+
+        // Reset các trường input của người thuê trên form chính
+        document.getElementById("tenant-name").value = "";
+        document.getElementById("tenant-phone").value = "";
+        document.getElementById("tenant-id").value = "";
+        document.getElementById("tenant-dob").value = "";
+        document.getElementById("tenant-id-date").value = "";
+        document.getElementById("tenant-id-place").value = "";
+        document.getElementById("tenant-email").value = "";
+        document.getElementById("tenant-street").value = "";
+        document.getElementById("tenant-ward").value = "";
+        document.getElementById("tenant-district").value = "";
+        document.getElementById("tenant-province").value = "";
+
+        // Kích hoạt lại các trường input cho người thuê
+        this.toggleTenantInputFields(true);
+
+        // Reset preview ảnh CCCD trên form chính
+        const frontPreview = document.getElementById("cccd-front-preview");
+        const backPreview = document.getElementById("cccd-back-preview");
+        if (frontPreview) {
+            frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
+        }
+        if (backPreview) {
+            backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        }
+
+        // Cập nhật loại người thuê về REGISTERED (mặc định ban đầu)
+        const tenantTypeSelect = document.getElementById("tenantType");
+        if (tenantTypeSelect) {
+            tenantTypeSelect.value = "REGISTERED";
+        }
+
+        this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
+        this.updateAllPreview();
+    },
 
     previewCustomerImage(event, previewId) {
         const file = event.target.files[0]
@@ -3849,7 +3836,7 @@ class ContractPreview {
 
 
 
-// 🔥 THÊM METHOD setPreviewText nếu chưa có:
+    // 🔥 THÊM METHOD setPreviewText nếu chưa có:
     setPreviewText(elementId, text) {
         const element = document.getElementById(elementId);
         if (element) {
@@ -4149,7 +4136,7 @@ class ContractPreview {
 }
 
 // Khởi tạo preview
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     setTimeout(() => {
         window.contractPreview = new ContractPreview();
         console.log('✅ Contract Preview initialized');
