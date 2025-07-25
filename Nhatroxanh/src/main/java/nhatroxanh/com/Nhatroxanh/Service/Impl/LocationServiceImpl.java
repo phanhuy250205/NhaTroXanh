@@ -2,9 +2,9 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.District;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
+import nhatroxanh.com.Nhatroxanh.Model.entity.District;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.DistrictRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ProvinceRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.WardRepository;

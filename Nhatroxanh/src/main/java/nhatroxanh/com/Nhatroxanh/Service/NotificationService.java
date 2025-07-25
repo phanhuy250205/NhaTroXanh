@@ -2,11 +2,11 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Notification;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
 import org.springframework.stereotype.Service;

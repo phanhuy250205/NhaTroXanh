@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import jakarta.transaction.Transactional;
-import nhatroxanh.com.Nhatroxanh.Model.enity.DetailPayments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.DetailPayments;
 
 import java.util.List;
 

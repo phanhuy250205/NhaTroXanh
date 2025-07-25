@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PostDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
 
 @Component
 public class PostMapper {

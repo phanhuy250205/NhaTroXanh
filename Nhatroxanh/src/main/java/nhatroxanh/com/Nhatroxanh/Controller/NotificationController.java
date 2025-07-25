@@ -8,8 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Notification;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;

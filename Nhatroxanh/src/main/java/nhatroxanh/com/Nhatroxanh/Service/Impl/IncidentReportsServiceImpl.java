@@ -1,9 +1,9 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports.IncidentStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports.IncidentStatus;
 import nhatroxanh.com.Nhatroxanh.Repository.IncidentReportsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.IncidentReportsService;

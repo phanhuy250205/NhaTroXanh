@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.IncidentReportsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.IncidentReportsService;

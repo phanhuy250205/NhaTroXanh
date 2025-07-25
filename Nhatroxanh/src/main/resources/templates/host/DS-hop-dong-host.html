@@ -147,68 +147,67 @@
 
     if (!contracts || contracts.length === 0) {
       tbody.innerHTML = `
-            <tr>
-                <td colspan="7" class="text-muted">
-                    <i class="fa fa-inbox"></i><br>
-                    Không có hợp đồng nào
-                </td>
-            </tr>
-        `;
+      <tr>
+        <td colspan="7" class="text-muted">
+          <i class="fa fa-inbox"></i><br>
+          Không có hợp đồng nào
+        </td>
+      </tr>
+    `;
       return;
     }
 
     tbody.innerHTML = contracts.map(contract => `
-        <tr>
-            <td><strong>${contract.contractId}</strong></td>
-            <td>${contract.tenantName || 'N/A'}</td>
-            <td>${formatDate(contract.startDate)}</td>
-            <td>${formatDate(contract.endDate)}</td>
-            <td>${contract.tenantPhone || 'N/A'}</td>
-            <td>${getStatusSelect(contract.contractId, contract.status)}</td>
-            <td>
-                <button
-                    class="btn btn-sm btn-outline-primary"
-                    onclick="editContract(${contract.contractId})"
-                    title="Chỉnh sửa">
-                    <i class="fa fa-pen"></i>
-                </button>
-            </td>
-        </tr>
-    `).join('');
+    <tr>
+      <td><strong>${contract.contractId}</strong></td>
+      <td>${contract.tenantName || 'N/A'}</td>
+      <td>${formatDate(contract.startDate)}</td>
+      <td>${formatDate(contract.endDate)}</td>
+      <td>${contract.tenantPhone || 'N/A'}</td>
+      <td>${getStatusSelect(contract.contractId, contract.status)}</td>
+      <td>
+        <button
+          class="btn btn-sm btn-outline-primary"
+          onclick="editContract(${contract.contractId})"
+          title="Chỉnh sửa">
+          <i class="fa fa-pen"></i>
+        </button>
+      </td>
+    </tr>
+  `).join('');
 
     document.getElementById('contracts-table').style.display = 'block';
   }
+
   // 🏷️ TẠO SELECT TRẠNG THÁI
   function getStatusSelect(contractId, currentStatus) {
     const statusOptions = [
       { value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary' },
-      { value: 'PENDING', label: 'Chờ xác nhận', class: 'text-warning' },
       { value: 'ACTIVE', label: 'Đang thuê', class: 'text-success' },
-      { value: 'EXPIRING', label: 'Sắp hết hạn', class: 'text-warning' },
-      { value: 'CANCELLED', label: 'Đã hủy', class: 'text-danger' }
+      { value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger' },
+      { value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning' }
     ];
 
     const options = statusOptions.map(option =>
             `<option value="${option.value}"
-               class="${option.class}"
-               ${option.value === currentStatus ? 'selected' : ''}>
-         ${option.label}
-       </option>`
+             class="${option.class}"
+             ${option.value === currentStatus ? 'selected' : ''}>
+       ${option.label}
+     </option>`
     ).join('');
 
     return `
-      <select class="form-select form-select-sm status-select"
-              data-contract-id="${contractId}"
-              data-current-status="${currentStatus}"
-              onchange="updateContractStatus(${contractId}, this.value)"
-              style="min-width: 130px;">
-        ${options}
-      </select>
-    `;
+    <select class="form-select form-select-sm status-select"
+            data-contract-id="${contractId}"
+            data-current-status="${currentStatus}"
+            onchange="updateContractStatus(${contractId}, this.value)"
+            style="min-width: 130px;">
+      ${options}
+    </select>
+  `;
   }
 
-
-  // 🔧 CẬP NHẬT JAVASCRIPT VỚI ENUM Status
+  // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
   async function updateContractStatus(contractId, newStatus) {
     console.log('🔄 Updating contract status');
     console.log('📝 Contract ID:', contractId);
@@ -219,11 +218,13 @@
     const upperStatus = newStatus.toUpperCase();
 
     if (!validStatuses.includes(upperStatus)) {
-      throw new Error(`Status không hợp lệ: ${newStatus}. Các giá trị cho phép: ${validStatuses.join(', ')}`);
+      showErrorMessage(`Status không hợp lệ: ${newStatus}. Các giá trị cho phép: ${validStatuses.join(', ')}`);
+      console.error(`❌ Status không hợp lệ: ${newStatus}`);
+      return;
     }
 
     const requestData = {
-      status: upperStatus // Đảm bảo gửi uppercase
+      status: upperStatus
     };
 
     console.log('📤 Sending request:', requestData);
@@ -244,48 +245,26 @@
       console.log('📥 Response data:', result);
 
       if (!response.ok) {
+        showErrorMessage(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
         throw new Error(result.message || `HTTP error! status: ${response.status}`);
       }
 
+      showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
       console.log('✅ Update successful:', result);
-      return result;
+
+      // Reload danh sách hợp đồng để cập nhật giao diện
+      await loadContracts();
 
     } catch (error) {
       console.error('❌ Error updating contract status:', error);
-      throw error;
+      showErrorMessage(error.message || 'Lỗi khi cập nhật trạng thái hợp đồng');
     }
   }
 
-  // 🔧 FUNCTION LẤY VALID STATUSES
+  // 🔧 FUNCTION LẤY VALID STATUSES (KHÔNG SỬ DỤNG NẾU KHÔNG CÓ ENDPOINT)
   async function getValidStatuses() {
-    try {
-      const response = await fetch('/chu-tro/hop-dong/valid-statuses');
-      const result = await response.json();
-
-      if (result.success) {
-        console.log('✅ Valid statuses:', result.statuses);
-        return result.statuses;
-      } else {
-        throw new Error('Failed to get valid statuses');
-      }
-    } catch (error) {
-      console.error('❌ Error getting valid statuses:', error);
-      return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED']; // fallback
-    }
+    return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED']; // Hardcode vì không có endpoint /chu-tro/hop-dong/valid-statuses
   }
-
-  // 🎨 HIỂN THỊ THÔNG BÁO
-  function showSuccessMessage(message) {
-    // Tùy chỉnh theo UI của bạn
-    alert('✅ ' + message);
-  }
-
-  function showErrorMessage(message) {
-    // Tùy chỉnh theo UI của bạn
-    alert('❌ ' + message);
-  }
-
-
 
   // 📈 CẬP NHẬT THỐNG KÊ
   function updateStats(contracts) {
@@ -293,7 +272,7 @@
       total: contracts.length,
       active: contracts.filter(c => c.status === 'ACTIVE').length,
       draft: contracts.filter(c => c.status === 'DRAFT').length,
-      expiring: contracts.filter(c => c.status === 'EXPIRING').length
+      expiring: contracts.filter(c => isExpiringSoon(c.endDate)).length
     };
 
     document.getElementById('total-contracts').textContent = stats.total;
@@ -302,10 +281,18 @@
     document.getElementById('expiring-contracts').textContent = stats.expiring;
   }
 
+  // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
+  function isExpiringSoon(endDate) {
+    if (!endDate) return false;
+    const today = new Date();
+    const end = new Date(endDate);
+    const daysUntilExpiry = (end - today) / (1000 * 60 * 60 * 24);
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0; // Sắp hết hạn trong 30 ngày
+  }
+
   // 📅 FORMAT NGÀY THÁNG
   function formatDate(dateString) {
     if (!dateString) return 'N/A';
-
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', {
       day: '2-digit',
@@ -338,19 +325,16 @@
     window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
   }
 
-
   // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
   function showSuccessMessage(message) {
     const toast = document.createElement('div');
     toast.className = 'alert alert-success position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
     toast.innerHTML = `
-      <i class="fa fa-check-circle"></i> ${message}
-      <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
-    `;
-
+    <i class="fa fa-check-circle"></i> ${message}
+    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+  `;
     document.body.appendChild(toast);
-
     setTimeout(() => {
       if (toast.parentElement) {
         toast.remove();
@@ -364,12 +348,10 @@
     toast.className = 'alert alert-danger position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
     toast.innerHTML = `
-      <i class="fa fa-exclamation-triangle"></i> ${message}
-      <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
-    `;
-
+    <i class="fa fa-exclamation-triangle"></i> ${message}
+    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+  `;
     document.body.appendChild(toast);
-
     setTimeout(() => {
       if (toast.parentElement) {
         toast.remove();

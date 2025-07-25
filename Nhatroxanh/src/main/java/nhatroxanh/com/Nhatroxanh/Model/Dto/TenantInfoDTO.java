@@ -4,7 +4,7 @@ import java.sql.Date; // <-- Quan trọng: import java.sql.Date
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts.Status;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 
 
 @Data

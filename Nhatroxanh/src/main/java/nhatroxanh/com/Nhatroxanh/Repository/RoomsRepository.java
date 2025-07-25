@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
-import nhatroxanh.com.Nhatroxanh.Model.enity.RoomStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.RoomStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
 public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
 

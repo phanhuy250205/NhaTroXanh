@@ -2,11 +2,12 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UnregisteredTenantsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 import nhatroxanh.com.Nhatroxanh.exception.ResourceNotFoundException;
@@ -17,19 +18,29 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class ContractServiceImpl implements ContractService {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractServiceImpl.class);
+
+    @Autowired
+    private UtilityRepository utilityRepository;
 
     @Autowired
     private ContractRepository contractRepository;
@@ -51,10 +62,12 @@ public class ContractServiceImpl implements ContractService {
     public Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
-            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant, Integer duration) throws Exception {
-        logger.info("=== START CREATE CONTRACT ===");
+            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant,
+            Integer duration) throws Exception {
+        logger.info("=== START CREATE CONTRACT (Detailed Parameters) ===");
         logger.info("Creating new contract for tenant phone: {}", tenantPhone);
-        logger.info("Input parameters - roomId: {}, contractDate: {}, startDate: {}, endDate: {}, price: {}, deposit: {}, duration: {}, status: {}",
+        logger.info(
+                "Input parameters - roomId: {}, contractDate: {}, startDate: {}, endDate: {}, price: {}, deposit: {}, duration: {}, status: {}",
                 roomId, contractDate, startDate, endDate, price, deposit, duration, status);
 
         // Validate inputs
@@ -104,7 +117,8 @@ public class ContractServiceImpl implements ContractService {
             logger.error("No tenant or unregistered tenant provided");
             throw new IllegalArgumentException("Phải cung cấp thông tin người thuê (đã đăng ký hoặc chưa đăng ký)!");
         }
-        logger.info("Tenant/unregisteredTenant provided: tenant={}, unregisteredTenant={}", tenant != null, unregisteredTenant != null);
+        logger.info("Tenant/unregisteredTenant provided: tenant={}, unregisteredTenant={}", tenant != null,
+                unregisteredTenant != null);
 
         if (duration != null && duration <= 0) {
             logger.error("Invalid duration: {}", duration);
@@ -137,7 +151,8 @@ public class ContractServiceImpl implements ContractService {
 
         // Check for active contract on room
         logger.info("Checking for active contract on room ID: {}", roomId);
-        Optional<Contracts> activeContract = contractRepository.findActiveContractByRoomId(roomId, Contracts.Status.ACTIVE);
+        Optional<Contracts> activeContract = contractRepository.findActiveContractByRoomId(roomId,
+                Contracts.Status.ACTIVE);
         if (activeContract.isPresent()) {
             logger.error("Room {} has an active contract", roomId);
             throw new Exception("Phòng hiện đang có hợp đồng active!");
@@ -170,7 +185,7 @@ public class ContractServiceImpl implements ContractService {
             }
             unregisteredTenantsRepository.save(unregisteredTenant);
             contract.setUnregisteredTenant(unregisteredTenant);
-            contract.setTenant(null);
+            contract.setTenant(null); // Đảm bảo chỉ 1 loại tenant được set
             logger.info("Unregistered tenant saved and set to contract");
         } else if (tenant != null) {
             logger.info("Handling registered tenant: {}", tenant.getFullname());
@@ -179,101 +194,116 @@ public class ContractServiceImpl implements ContractService {
                 throw new IllegalArgumentException("Người dùng không phải là khách thuê!");
             }
             contract.setTenant(tenant);
+            contract.setUnregisteredTenant(null); // Đảm bảo chỉ 1 loại tenant được set
             logger.info("Registered tenant set to contract");
         }
 
         logger.info("Saving contract to repository");
         Contracts savedContract = contractRepository.save(contract);
         logger.info("Contract created successfully: {}", savedContract.getContractId());
-        logger.info("=== END CREATE CONTRACT ===");
+        logger.info("=== END CREATE CONTRACT (Detailed Parameters) ===");
         return savedContract;
     }
 
     @Override
     @Transactional
-    public Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception {
-        logger.info("=== START CREATE CONTRACT FROM DTO ===");
-        logger.info("Creating new contract from DTO with tenant type: {}", contractDto.getTenantType());
-        logger.info("Contract DTO received: {}", contractDto);
+    public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile,
+                                           MultipartFile cccdBackFile) {
+        logger.info("SERVICE: Bắt đầu tạo hợp đồng từ DTO cho owner ID: {}", ownerId);
 
-        // Validate DTO
-        if (contractDto.getTenantType() == null || (!"REGISTERED".equals(contractDto.getTenantType()) && !"UNREGISTERED".equals(contractDto.getTenantType()))) {
-            logger.error("Invalid tenant type: {}", contractDto.getTenantType());
-            throw new IllegalArgumentException("Loại người thuê không hợp lệ!");
+        // 1. Lấy và xác thực Owner (Chủ trọ) từ ownerId
+        Users owner = userRepository.findById(ownerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin chủ trọ!"));
+
+        // 2. Lấy và xác thực Phòng trọ
+        Rooms room = roomRepository.findById(contractDto.getRoom().getRoomId())
+                .orElseThrow(() -> new ResourceNotFoundException("Phòng trọ không tồn tại!"));
+
+        if (room.getStatus() != RoomStatus.unactive) {
+            throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
         }
-        logger.info("Tenant type validated: {}", contractDto.getTenantType());
 
-        if (contractDto.getContractDate() == null) {
-            logger.error("Contract date is null");
-            throw new IllegalArgumentException("Ngày lập hợp đồng không được null!");
+        // Xử lý tiện ích phòng
+        if (contractDto.getRoom().getUtilityIds() != null && !contractDto.getRoom().getUtilityIds().isEmpty()) {
+            Set<Utility> utilities = utilityRepository.findByUtilityIdIn(contractDto.getRoom().getUtilityIds());
+            room.setUtilities(utilities);
+            logger.info("SERVICE: Đã gán {} tiện ích cho phòng ID {}.", utilities.size(), room.getRoomId());
+        } else {
+            room.getUtilities().clear();
+            logger.info("SERVICE: Đã xóa hết tiện ích cho phòng ID {}.", room.getRoomId());
         }
-        logger.info("Contract date validated: {}", contractDto.getContractDate());
 
-        if (contractDto.getTerms().getStartDate() == null || contractDto.getTerms().getEndDate() == null) {
-            logger.error("Start date or end date is null, startDate: {}, endDate: {}", contractDto.getTerms().getStartDate(), contractDto.getTerms().getEndDate());
-            throw new IllegalArgumentException("Ngày bắt đầu và kết thúc không được null!");
+        Users tenant = null;
+        UnregisteredTenants guardian = null;
+        String finalTenantPhone = null;
+
+        // 3. LOGIC QUAN TRỌNG: KIỂM TRA XEM ĐANG TẠO CHO AI
+        if (contractDto.getTenantType() != null && "UNREGISTERED".equals(contractDto.getTenantType()) &&
+                contractDto.getUnregisteredTenant() != null &&
+                StringUtils.hasText(contractDto.getUnregisteredTenant().getFullName())) {
+            logger.info("SERVICE: Phát hiện thông tin Người bảo hộ/Thuê mới. Đang xử lý...");
+            guardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner, cccdFrontFile, cccdBackFile);
+            finalTenantPhone = guardian.getPhone();
+        } else if (contractDto.getTenantType() != null && "REGISTERED".equals(contractDto.getTenantType()) &&
+                contractDto.getTenant() != null) {
+            logger.info("SERVICE: Xử lý Người thuê đã đăng ký...");
+            tenant = handleRegisteredTenant(contractDto.getTenant());
+            finalTenantPhone = tenant.getPhone();
+        } else {
+            logger.error("Không có thông tin người thuê hợp lệ được cung cấp trong DTO.");
+            throw new IllegalArgumentException("Phải cung cấp thông tin người thuê hợp lệ!");
         }
-        logger.info("Start and end dates validated: {}, {}", contractDto.getTerms().getStartDate(), contractDto.getTerms().getEndDate());
 
-        if (contractDto.getTerms().getPrice() == null || contractDto.getTerms().getPrice() <= 0) {
-            logger.error("Invalid price: {}", contractDto.getTerms().getPrice());
-            throw new IllegalArgumentException("Giá thuê phải lớn hơn 0!");
+        // 4. Tạo và lưu đối tượng Hợp đồng
+        Contracts contract = new Contracts();
+        contract.setOwner(owner);
+        contract.setRoom(room);
+        contract.setTenant(tenant);
+        contract.setUnregisteredTenant(guardian);
+        contract.setTenantPhone(finalTenantPhone);
+
+        // Điền các thông tin còn lại từ DTO
+        contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
+        contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
+        contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
+        contract.setPrice(contractDto.getTerms().getPrice().floatValue());
+        contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
+        contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+        contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+        contract.setTerms(contractDto.getTerms().getTerms());
+        contract.setCreatedAt(new java.sql.Date(System.currentTimeMillis()));
+
+        if (contractDto.getPaymentMethod() != null) {
+            contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
         }
-        logger.info("Price validated: {}", contractDto.getTerms().getPrice());
+        if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
+            logger.info("SERVICE: Tìm thấy {} người ở. Đang xử lý...", contractDto.getResidents().size());
+            for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
+                Resident resident = new Resident();
+                resident.setFullName(residentDto.getFullName());
+                resident.setBirthYear(residentDto.getBirthYear());
+                resident.setPhone(residentDto.getPhone());
+                resident.setCccdNumber(residentDto.getCccdNumber());
+                resident.setContract(contract); // **QUAN TRỌNG**: Liên kết người ở với hợp đồng này
 
-        if (contractDto.getTerms().getDeposit() == null || contractDto.getTerms().getDeposit() < 0) {
-            logger.error("Invalid deposit: {}", contractDto.getTerms().getDeposit());
-            throw new IllegalArgumentException("Tiền đặt cọc phải lớn hơn hoặc bằng 0!");
+                contract.getResidents().add(resident); // Thêm vào danh sách của hợp đồng
+            }
         }
-        logger.info("Deposit validated: {}", contractDto.getTerms().getDeposit());
 
-        if (contractDto.getTerms().getTerms() != null && contractDto.getTerms().getTerms().length() > 255) {
-            logger.error("Terms too long: {}", contractDto.getTerms().getTerms().length());
-            throw new IllegalArgumentException("Điều khoản không được vượt quá 255 ký tự!");
-        }
-        logger.info("Terms validated: {}", contractDto.getTerms().getTerms());
+        Contracts savedContract = contractRepository.save(contract);
 
-        if (contractDto.getTerms().getDuration() != null && contractDto.getTerms().getDuration() <= 0) {
-            logger.error("Invalid duration: {}", contractDto.getTerms().getDuration());
-            throw new IllegalArgumentException("Thời hạn hợp đồng phải lớn hơn 0!");
-        }
-        logger.info("Duration validated: {}", contractDto.getTerms().getDuration());
+        // 5. Cập nhật trạng thái phòng
+        room.setStatus(RoomStatus.active);
+        roomRepository.save(room);
 
-        // Find room
-        logger.info("Searching for room with name: {}", contractDto.getRoom().getRoomName());
-        Integer roomId = roomRepository.findByRoomNumber(String.valueOf(contractDto.getRoom().getRoomName()))
-                .map(Rooms::getRoomId)
-                .orElseThrow(() -> {
-                    logger.error("Room not found: {}", contractDto.getRoom().getRoomName());
-                    return new IllegalArgumentException("Phòng không tồn tại!");
-                });
-        logger.info("Room ID found: {}", roomId);
-
-        String tenantPhone = contractDto.getTenantType().equals("REGISTERED") ? contractDto.getTenant().getPhone() : contractDto.getUnregisteredTenant().getPhone();
-        logger.info("Tenant phone extracted: {}", tenantPhone);
-
-        Contracts contract = createContract(
-                tenantPhone,
-                roomId,
-                Date.valueOf(contractDto.getContractDate()),
-                Date.valueOf(contractDto.getTerms().getStartDate()),
-                Date.valueOf(contractDto.getTerms().getEndDate()),
-                contractDto.getTerms().getPrice().floatValue(),
-                contractDto.getTerms().getDeposit().floatValue(),
-                contractDto.getTerms().getTerms(),
-                Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()),
-                ownerCccd,
-                tenant,
-                unregisteredTenant,
-                contractDto.getTerms().getDuration());
-        logger.info("=== END CREATE CONTRACT FROM DTO ===");
-        return contract;
+        logger.info("SERVICE: Đã tạo hợp đồng ID {} thành công.", savedContract.getContractId());
+        return savedContract;
     }
 
     @Override
     @Transactional
     public Contracts updateContract(Integer contractId, Contracts updatedContract) throws Exception {
-        logger.info("=== START UPDATE CONTRACT ===");
+        logger.info("=== START UPDATE CONTRACT (Full Contract Object) ===");
         logger.info("Updating contract with ID: {}", contractId);
         logger.info("Updated contract data: {}", updatedContract);
 
@@ -365,14 +395,17 @@ public class ContractServiceImpl implements ContractService {
                         return new Exception("Người thuê không tồn tại!");
                     });
             contract.setTenant(tenant);
-            contract.setUnregisteredTenant(null);
+            contract.setUnregisteredTenant(null); // Đảm bảo set null cho unregistered tenant
             logger.info("Tenant updated: {}", tenant.getFullname());
         }
-        if (updatedContract.getUnregisteredTenant() != null && updatedContract.getUnregisteredTenant().getId() != null) {
+        if (updatedContract.getUnregisteredTenant() != null
+                && updatedContract.getUnregisteredTenant().getId() != null) {
             logger.info("Updating unregistered tenant with ID: {}", updatedContract.getUnregisteredTenant().getId());
-            UnregisteredTenants unregisteredTenantUpdate = unregisteredTenantsRepository.findById(updatedContract.getUnregisteredTenant().getId())
+            UnregisteredTenants unregisteredTenantUpdate = unregisteredTenantsRepository
+                    .findById(updatedContract.getUnregisteredTenant().getId())
                     .orElseThrow(() -> {
-                        logger.error("Unregistered tenant not found: {}", updatedContract.getUnregisteredTenant().getId());
+                        logger.error("Unregistered tenant not found: {}",
+                                updatedContract.getUnregisteredTenant().getId());
                         return new Exception("Người thuê chưa đăng ký không tồn tại!");
                     });
             if (unregisteredTenantUpdate.getStatus() == null) {
@@ -380,7 +413,7 @@ public class ContractServiceImpl implements ContractService {
                 unregisteredTenantsRepository.save(unregisteredTenantUpdate);
             }
             contract.setUnregisteredTenant(unregisteredTenantUpdate);
-            contract.setTenant(null);
+            contract.setTenant(null); // Đảm bảo set null cho registered tenant
             logger.info("Unregistered tenant updated: {}", unregisteredTenantUpdate.getFullName());
         }
         if (updatedContract.getOwner() != null && updatedContract.getOwner().getUserId() != null) {
@@ -405,7 +438,8 @@ public class ContractServiceImpl implements ContractService {
     @Transactional
     public Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception {
         logger.info("=== START UPDATE CONTRACT FROM DTO ===");
-        logger.info("Updating contract with ID: {} from DTO with tenant type: {}", contractId, contractDto.getTenantType());
+        logger.info("Updating contract with ID: {} from DTO with tenant type: {}", contractId,
+                contractDto.getTenantType());
 
         // Validate contractId
         if (contractId == null || contractId <= 0) {
@@ -425,10 +459,12 @@ public class ContractServiceImpl implements ContractService {
 
         // Cập nhật tenant phone (nếu có)
         if (contractDto.getTenantType() != null) {
-            if ("REGISTERED".equals(contractDto.getTenantType()) && contractDto.getTenant() != null && contractDto.getTenant().getPhone() != null) {
+            if ("REGISTERED".equals(contractDto.getTenantType()) && contractDto.getTenant() != null
+                    && contractDto.getTenant().getPhone() != null) {
                 contract.setTenantPhone(contractDto.getTenant().getPhone());
                 logger.info("Updated tenant phone: {}", contract.getTenantPhone());
-            } else if ("UNREGISTERED".equals(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null && contractDto.getUnregisteredTenant().getPhone() != null) {
+            } else if ("UNREGISTERED".equals(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null
+                    && contractDto.getUnregisteredTenant().getPhone() != null) {
                 contract.setTenantPhone(contractDto.getUnregisteredTenant().getPhone());
                 logger.info("Updated tenant phone: {}", contract.getTenantPhone());
             }
@@ -449,7 +485,8 @@ public class ContractServiceImpl implements ContractService {
             if (contractDto.getTerms().getEndDate() != null) {
                 contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
                 logger.info("Updated end date: {}", contract.getEndDate());
-            } else if (contractDto.getTerms().getDuration() != null && contractDto.getTerms().getDuration() > 0 && contract.getStartDate() != null) {
+            } else if (contractDto.getTerms().getDuration() != null && contractDto.getTerms().getDuration() > 0
+                    && contract.getStartDate() != null) {
                 contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
                 LocalDate startDate = contract.getStartDate().toLocalDate();
                 contract.setEndDate(Date.valueOf(startDate.plusMonths(contractDto.getTerms().getDuration())));
@@ -482,7 +519,8 @@ public class ContractServiceImpl implements ContractService {
                     logger.info("Updated status: {}", contract.getStatus());
                 } else {
                     logger.error("Invalid status transition from {} to {}", contract.getStatus(), newStatus);
-                    throw new IllegalArgumentException("Không thể chuyển trạng thái từ " + getStatusLabel(contract.getStatus()) + " sang " + getStatusLabel(newStatus));
+                    throw new IllegalArgumentException("Không thể chuyển trạng thái từ "
+                            + getStatusLabel(contract.getStatus()) + " sang " + getStatusLabel(newStatus));
                 }
             } catch (IllegalArgumentException e) {
                 logger.error("Invalid status: {}", contractDto.getStatus());
@@ -493,7 +531,8 @@ public class ContractServiceImpl implements ContractService {
         // Cập nhật owner (nếu có)
         if (contractDto.getOwner() != null && contractDto.getOwner().getCccdNumber() != null) {
             logger.info("Searching for owner with CCCD: {}", contractDto.getOwner().getCccdNumber());
-            Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByCccdNumber(contractDto.getOwner().getCccdNumber());
+            Optional<UserCccd> ownerCccdOpt = userCccdRepository
+                    .findByCccdNumber(contractDto.getOwner().getCccdNumber());
             if (ownerCccdOpt.isPresent()) {
                 Users owner = ownerCccdOpt.get().getUser();
                 if (owner.getRole() == Users.Role.OWNER) {
@@ -510,7 +549,8 @@ public class ContractServiceImpl implements ContractService {
 
         // Cập nhật tenant (nếu có)
         if (contractDto.getTenantType() != null) {
-            if ("REGISTERED".equals(contractDto.getTenantType()) && contractDto.getTenant() != null && contractDto.getTenant().getPhone() != null) {
+            if ("REGISTERED".equals(contractDto.getTenantType()) && contractDto.getTenant() != null
+                    && contractDto.getTenant().getPhone() != null) {
                 logger.info("Finding tenant with phone: {}", contractDto.getTenant().getPhone());
                 Optional<Users> tenantOpt = userRepository.findByPhone(contractDto.getTenant().getPhone());
                 if (tenantOpt.isPresent()) {
@@ -526,28 +566,36 @@ public class ContractServiceImpl implements ContractService {
                         tenant.setBirthday(new java.sql.Date(contractDto.getTenant().getBirthday().getTime()));
                     }
                     if (contractDto.getTenant().getStreet() != null || contractDto.getTenant().getWard() != null ||
-                            contractDto.getTenant().getDistrict() != null || contractDto.getTenant().getProvince() != null) {
+                            contractDto.getTenant().getDistrict() != null
+                            || contractDto.getTenant().getProvince() != null) {
                         StringBuilder addressBuilder = new StringBuilder();
-                        if (contractDto.getTenant().getStreet() != null) addressBuilder.append(contractDto.getTenant().getStreet());
-                        if (contractDto.getTenant().getWard() != null) addressBuilder.append(", ").append(contractDto.getTenant().getWard());
-                        if (contractDto.getTenant().getDistrict() != null) addressBuilder.append(", ").append(contractDto.getTenant().getDistrict());
-                        if (contractDto.getTenant().getProvince() != null) addressBuilder.append(", ").append(contractDto.getTenant().getProvince());
+                        if (contractDto.getTenant().getStreet() != null)
+                            addressBuilder.append(contractDto.getTenant().getStreet());
+                        if (contractDto.getTenant().getWard() != null)
+                            addressBuilder.append(", ").append(contractDto.getTenant().getWard());
+                        if (contractDto.getTenant().getDistrict() != null)
+                            addressBuilder.append(", ").append(contractDto.getTenant().getDistrict());
+                        if (contractDto.getTenant().getProvince() != null)
+                            addressBuilder.append(", ").append(contractDto.getTenant().getProvince());
                         if (addressBuilder.length() > 0) {
                             tenant.setAddress(addressBuilder.toString());
                         }
                     }
                     userRepository.save(tenant);
                     contract.setTenant(tenant);
-                    contract.setUnregisteredTenant(null);
+                    contract.setUnregisteredTenant(null); // Đảm bảo clear unregistered tenant nếu chuyển sang registered
                     logger.info("Updated registered tenant: {}", tenant.getFullname());
                 } else {
                     logger.warn("Tenant not found with phone: {}, skipping update", contractDto.getTenant().getPhone());
                 }
-            } else if ("UNREGISTERED".equals(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null && contractDto.getUnregisteredTenant().getPhone() != null) {
-                logger.info("Updating/creating unregistered tenant with phone: {}", contractDto.getUnregisteredTenant().getPhone());
-                UnregisteredTenants unregisteredTenant = unregisteredTenantsRepository.findByPhone(contractDto.getUnregisteredTenant().getPhone())
+            } else if ("UNREGISTERED".equals(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null
+                    && contractDto.getUnregisteredTenant().getPhone() != null) {
+                logger.info("Updating/creating unregistered tenant with phone: {}",
+                        contractDto.getUnregisteredTenant().getPhone());
+                UnregisteredTenants unregisteredTenant = unregisteredTenantsRepository
+                        .findByPhone(contractDto.getUnregisteredTenant().getPhone())
                         .orElse(new UnregisteredTenants());
-                unregisteredTenant.setUser(contract.getOwner());
+                unregisteredTenant.setUser(contract.getOwner()); // Associate with owner
                 if (contractDto.getUnregisteredTenant().getFullName() != null) {
                     unregisteredTenant.setFullName(contractDto.getUnregisteredTenant().getFullName());
                 }
@@ -564,7 +612,8 @@ public class ContractServiceImpl implements ContractService {
                     unregisteredTenant.setIssuePlace(contractDto.getUnregisteredTenant().getIssuePlace());
                 }
                 if (contractDto.getUnregisteredTenant().getBirthday() != null) {
-                    unregisteredTenant.setBirthday(new java.sql.Date(contractDto.getUnregisteredTenant().getBirthday().getTime()));
+                    unregisteredTenant.setBirthday(
+                            new java.sql.Date(contractDto.getUnregisteredTenant().getBirthday().getTime()));
                 }
                 if (contractDto.getUnregisteredTenant().getCccdFrontUrl() != null) {
                     unregisteredTenant.setCccdFrontUrl(contractDto.getUnregisteredTenant().getCccdFrontUrl());
@@ -572,13 +621,19 @@ public class ContractServiceImpl implements ContractService {
                 if (contractDto.getUnregisteredTenant().getCccdBackUrl() != null) {
                     unregisteredTenant.setCccdBackUrl(contractDto.getUnregisteredTenant().getCccdBackUrl());
                 }
-                if (contractDto.getUnregisteredTenant().getStreet() != null || contractDto.getUnregisteredTenant().getWard() != null ||
-                        contractDto.getUnregisteredTenant().getDistrict() != null || contractDto.getUnregisteredTenant().getProvince() != null) {
+                if (contractDto.getUnregisteredTenant().getStreet() != null
+                        || contractDto.getUnregisteredTenant().getWard() != null ||
+                        contractDto.getUnregisteredTenant().getDistrict() != null
+                        || contractDto.getUnregisteredTenant().getProvince() != null) {
                     StringBuilder addressBuilder = new StringBuilder();
-                    if (contractDto.getUnregisteredTenant().getStreet() != null) addressBuilder.append(contractDto.getUnregisteredTenant().getStreet());
-                    if (contractDto.getUnregisteredTenant().getWard() != null) addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getWard());
-                    if (contractDto.getUnregisteredTenant().getDistrict() != null) addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getDistrict());
-                    if (contractDto.getUnregisteredTenant().getProvince() != null) addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getProvince());
+                    if (contractDto.getUnregisteredTenant().getStreet() != null)
+                        addressBuilder.append(contractDto.getUnregisteredTenant().getStreet());
+                    if (contractDto.getUnregisteredTenant().getWard() != null)
+                        addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getWard());
+                    if (contractDto.getUnregisteredTenant().getDistrict() != null)
+                        addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getDistrict());
+                    if (contractDto.getUnregisteredTenant().getProvince() != null)
+                        addressBuilder.append(", ").append(contractDto.getUnregisteredTenant().getProvince());
                     if (addressBuilder.length() > 0) {
                         unregisteredTenant.setAddress(addressBuilder.toString());
                     }
@@ -586,7 +641,7 @@ public class ContractServiceImpl implements ContractService {
                 unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
                 unregisteredTenantsRepository.save(unregisteredTenant);
                 contract.setUnregisteredTenant(unregisteredTenant);
-                contract.setTenant(null);
+                contract.setTenant(null); // Đảm bảo clear registered tenant nếu chuyển sang unregistered
                 logger.info("Updated unregistered tenant: {}", unregisteredTenant.getFullName());
             }
         }
@@ -655,19 +710,25 @@ public class ContractServiceImpl implements ContractService {
     @Override
     public List<Contracts> findContractsByTenantName(String name) {
         logger.info("Finding contracts by tenant name: {}", name);
-        return contractRepository.findByTenantName(name);
+        List<Contracts> foundContracts = contractRepository.findByTenantName(name);
+        foundContracts.addAll(contractRepository.findByUnregisteredTenantName(name));
+        return foundContracts.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
     public List<Contracts> findContractsByTenantPhone(String phone) {
         logger.info("Finding contracts by tenant phone: {}", phone);
-        return contractRepository.findByTenantPhone(phone);
+        List<Contracts> foundContracts = contractRepository.findByTenantPhone(phone);
+        foundContracts.addAll(contractRepository.findByUnregisteredTenantPhone(phone));
+        return foundContracts.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
     public List<Contracts> findContractsByTenantCccd(String cccd) {
         logger.info("Finding contracts by tenant CCCD: {}", cccd);
-        return contractRepository.findByTenantCccd(cccd);
+        List<Contracts> foundContracts = contractRepository.findByTenantCccd(cccd);
+        foundContracts.addAll(contractRepository.findByUnregisteredTenantCccd(cccd));
+        return foundContracts.stream().distinct().collect(Collectors.toList());
     }
 
     @Override
@@ -771,27 +832,27 @@ public class ContractServiceImpl implements ContractService {
 
     @Override
     @Transactional
-    public void updateStatus(Long contractId, String newStatusString) {
+    public void updateStatus(Integer contractId, String newStatusString) {
         logger.info("🔄 === SERVICE: UPDATE STATUS ===");
         logger.info("📝 Contract ID: {}", contractId);
         logger.info("📝 New Status String: '{}'", newStatusString);
 
         try {
-            // 🔄 CONVERT STRING TO ENUM
+            // Chuyển đổi chuỗi trạng thái thành enum
             Contracts.Status newStatus;
             try {
                 newStatus = Contracts.Status.valueOf(newStatusString.toUpperCase());
                 logger.info("✅ Converted to enum: {}", newStatus);
             } catch (IllegalArgumentException e) {
                 logger.error("❌ Status không hợp lệ: '{}'", newStatusString);
-                logger.error("❌ Các status cho phép: {}", java.util.Arrays.toString(Contracts.Status.values()));
+                logger.error("❌ Các status cho phép: {}", Arrays.toString(Contracts.Status.values()));
                 throw new IllegalArgumentException("Status không hợp lệ: " + newStatusString +
-                        ". Các giá trị cho phép: " + java.util.Arrays.toString(Contracts.Status.values()));
+                        ". Các giá trị cho phép: " + Arrays.toString(Contracts.Status.values()));
             }
 
-            // 🔍 TÌM HỢP ĐỒNG
+            // Tìm hợp đồng theo ID
             logger.info("🔍 Tìm hợp đồng với ID: {}", contractId);
-            Optional<Contracts> contractOpt = contractRepository.findById(Math.toIntExact(contractId));
+            Optional<Contracts> contractOpt = contractRepository.findById(contractId);
 
             if (contractOpt.isEmpty()) {
                 logger.error("❌ Không tìm thấy hợp đồng với ID: {}", contractId);
@@ -802,43 +863,67 @@ public class ContractServiceImpl implements ContractService {
             logger.info("✅ Tìm thấy hợp đồng: ID={}, Status hiện tại={}",
                     contract.getContractId(), contract.getStatus());
 
-            // 🔄 CẬP NHẬT STATUS
+            // Kiểm tra chuyển đổi trạng thái hợp lệ
             Contracts.Status oldStatus = contract.getStatus();
-            contract.setStatus(newStatus);
+            if (!isValidStatusTransition(oldStatus, newStatus)) {
+                logger.error("❌ Chuyển đổi trạng thái không hợp lệ: {} -> {}", oldStatus, newStatus);
+                throw new IllegalArgumentException(
+                        "Chuyển đổi trạng thái từ " + oldStatus + " sang " + newStatus + " không được phép!");
+            }
 
+            // Cập nhật trạng thái
+            contract.setStatus(newStatus);
+            logger.info("🔄 Cập nhật trạng thái hợp đồng: {} -> {}", oldStatus, newStatus);
+
+            // Lưu hợp đồng
             logger.info("🔄 Lưu hợp đồng với status mới...");
             Contracts savedContract = contractRepository.save(contract);
 
-            logger.info("✅ Cập nhật thành công! {} -> {}",
-                    oldStatus, savedContract.getStatus());
+            logger.info("✅ Cập nhật thành công! {} -> {}", oldStatus, savedContract.getStatus());
 
         } catch (IllegalArgumentException e) {
             logger.error("❌ IllegalArgumentException: {}", e.getMessage());
-            throw e; // Re-throw để Controller xử lý
-
+            throw e;
         } catch (Exception e) {
-            logger.error("❌ Lỗi trong service updateStatus: ", e);
+            logger.error("❌ Unexpected Exception: ", e);
             throw new RuntimeException("Lỗi cập nhật trạng thái hợp đồng: " + e.getMessage(), e);
         }
     }
-    // 🔍 TÌM HỢP ĐỒNG THEO ID
+
+    private boolean isValidStatusTransition(Contracts.Status oldStatus, Contracts.Status newStatus) {
+        if (oldStatus == newStatus) {
+            logger.info("🔄 Trạng thái không thay đổi: {}", oldStatus);
+            return true; // Cho phép giữ nguyên trạng thái
+        }
+        switch (oldStatus) {
+            case DRAFT:
+                return newStatus == Contracts.Status.ACTIVE; // Chỉ cho phép DRAFT -> ACTIVE
+            case ACTIVE:
+                return newStatus == Contracts.Status.TERMINATED || newStatus == Contracts.Status.EXPIRED; // ACTIVE -> TERMINATED hoặc EXPIRED
+            case TERMINATED:
+            case EXPIRED:
+                return false; // Không cho phép chuyển từ TERMINATED hoặc EXPIRED sang trạng thái khác
+            default:
+                logger.warn("⚠️ Trạng thái cũ không xác định: {}", oldStatus);
+                return false;
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
-    public Contracts getContractById(Long contractId) {
+    public Contracts getContractById(Integer contractId) {
         logger.info("🔍 Service: Tìm hợp đồng với ID: {}", contractId);
-        return contractRepository.findById(Math.toIntExact(contractId))
+        return contractRepository.findById(contractId)
                 .orElseThrow(() -> {
                     logger.warn("⚠️ Không tìm thấy hợp đồng với ID: {}", contractId);
                     return new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId);
                 });
     }
 
-    // 🔄 CHUYỂN ĐỔI STRING THÀNH ENUM STATUS
     private Contracts.Status parseStatusFromString(String statusString) {
         logger.info("🔄 Parse status string: '{}'", statusString);
 
         try {
-            // Chuyển đổi các giá trị phổ biến
             switch (statusString.toUpperCase()) {
                 case "DRAFT":
                 case "BAN_NHAP":
@@ -859,7 +944,6 @@ public class ContractServiceImpl implements ContractService {
                     return Contracts.Status.EXPIRED;
 
                 default:
-                    // Thử parse trực tiếp từ enum
                     return Contracts.Status.valueOf(statusString.toUpperCase());
             }
         } catch (IllegalArgumentException e) {
@@ -869,7 +953,6 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-    // 🔧 METHOD BỔ SUNG
     public List<String> getAllValidStatuses() {
         return java.util.Arrays.stream(Contracts.Status.values())
                 .map(Enum::name)
@@ -885,15 +968,12 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
-
-
-    // 🔄 KIỂM TRA LOGIC CHUYỂN ĐỔI TRẠNG THÁI
     private boolean canChangeStatus(Contracts.Status currentStatus, Contracts.Status newStatus) {
         logger.info("🔄 Kiểm tra chuyển đổi: {} -> {}", currentStatus, newStatus);
 
-        if (currentStatus == null) return true;
+        if (currentStatus == null)
+            return true;
 
-        // Logic chuyển đổi trạng thái theo enum
         switch (currentStatus) {
             case DRAFT:
                 return Arrays.asList(Contracts.Status.ACTIVE, Contracts.Status.TERMINATED)
@@ -914,9 +994,10 @@ public class ContractServiceImpl implements ContractService {
                 return false;
         }
     }
-    // 🏷️ LẤY NHÃN TRẠNG THÁI TIẾNG VIỆT
+
     private String getStatusLabel(Contracts.Status status) {
-        if (status == null) return "Không xác định";
+        if (status == null)
+            return "Không xác định";
 
         switch (status) {
             case DRAFT:
@@ -937,44 +1018,33 @@ public class ContractServiceImpl implements ContractService {
                 .map(contract -> {
                     ContractListDto dto = new ContractListDto();
 
-                    // ID hợp đồng
                     dto.setContractId(contract.getContractId() != null
                             ? contract.getContractId().longValue()
                             : null);
 
-                    // Ngày bắt đầu
                     dto.setStartDate(contract.getStartDate() != null
                             ? contract.getStartDate().toLocalDate()
                             : null);
 
-                    // Tên khách thuê
                     dto.setTenantName(Optional.ofNullable(contract.getTenant())
                             .map(Users::getFullname)
                             .orElse(Optional.ofNullable(contract.getUnregisteredTenant())
                                     .map(UnregisteredTenants::getFullName)
                                     .orElse("Chưa xác định")));
 
-                    // Ngày kết thúc
                     LocalDate endDate = calculateEndDate(contract);
                     dto.setEndDate(endDate);
 
-
-                    // Số điện thoại
                     dto.setTenantPhone(getTenantPhone(contract));
 
-                    // Trạng thái
                     dto.setStatus(Optional.ofNullable(contract.getStatus())
                             .map(Enum::toString)
                             .orElse("UNKNOWN"));
-
-
 
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
-
-
 
     private LocalDate calculateEndDate(Contracts contract) {
         if (contract.getEndDate() != null) {
@@ -989,20 +1059,17 @@ public class ContractServiceImpl implements ContractService {
         return null;
     }
 
-
     private String getTenantPhone(Contracts contract) {
         try {
-            // Kiểm tra tenant đã đăng ký
             if (contract.getTenant() != null && contract.getTenant().getPhone() != null) {
                 return contract.getTenant().getPhone();
             }
 
-            // Kiểm tra unregistered tenant
             if (contract.getUnregisteredTenant() != null && contract.getUnregisteredTenant().getPhone() != null) {
                 return contract.getUnregisteredTenant().getPhone();
             }
 
-            return ""; // Trả về chuỗi rỗng nếu không có số điện thoại
+            return "";
 
         } catch (Exception e) {
             logger.error("Error getting tenant phone for contract {}: {}",
@@ -1010,13 +1077,12 @@ public class ContractServiceImpl implements ContractService {
             return "";
         }
     }
-    // Tìm phòng theo ID tenant
+
     public Rooms findRoomByTenantId(Long tenantId) {
         Contracts contract = contractRepository.findByTenantId(tenantId)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy hợp đồng cho tenant ID: " + tenantId));
 
-        // Kiểm tra trạng thái hợp đồng
         if (contract.getStatus() != Contracts.Status.ACTIVE) {
             throw new ResourceNotFoundException("Hợp đồng không còn hiệu lực");
         }
@@ -1024,16 +1090,218 @@ public class ContractServiceImpl implements ContractService {
         return contract.getRoom();
     }
 
+    @Override
+    public List<Contracts> getMyContracts() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
 
-    // @Override
-    // public List<Contracts> getMyContracts() {
-    //    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    //     String email = authentication.getName();
+        Users user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
 
-    //     Users user = userRepository.findByEmail(email)
-    //             .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+        return contractRepository.findByOwnerId(user.getUserId());
+    }
 
-    //     // Lấy danh sách hợp đồng của chủ trọ
-    //    return contractRepository.findByOwnerId(user.getUserId());
-    // }
+    private Users handleRegisteredTenant(ContractDto.Tenant tenantDto) {
+        logger.info("=== SERVICE: Handling Registered Tenant ===");
+        if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
+            throw new IllegalArgumentException("Số điện thoại người thuê không được để trống!");
+        }
+        Users tenant = userRepository.findByPhone(tenantDto.getPhone())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy người thuê với SĐT: " + tenantDto.getPhone()));
+
+        return tenant;
+    }
+
+    private UnregisteredTenants handleUnregisteredTenant(
+            ContractDto.UnregisteredTenant tenantDto,
+            Users owner,
+            MultipartFile cccdFrontFile,
+            MultipartFile cccdBackFile) {
+        logger.info("=== SERVICE: Handling Unregistered Tenant ===");
+        if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
+            throw new IllegalArgumentException("Số điện thoại người bảo hộ không được để trống!");
+        }
+
+        UnregisteredTenants unregisteredTenant = new UnregisteredTenants();
+        unregisteredTenant.setUser(owner);
+        unregisteredTenant.setFullName(tenantDto.getFullName());
+        unregisteredTenant.setPhone(tenantDto.getPhone());
+        unregisteredTenant.setCccdNumber(tenantDto.getCccdNumber());
+        unregisteredTenant.setIssueDate(tenantDto.getIssueDate());
+        unregisteredTenant.setIssuePlace(tenantDto.getIssuePlace());
+        unregisteredTenant.setBirthday(tenantDto.getBirthday());
+
+        StringBuilder newAddress = new StringBuilder();
+        if (StringUtils.hasText(tenantDto.getStreet())) newAddress.append(tenantDto.getStreet());
+        if (StringUtils.hasText(tenantDto.getWard())) newAddress.append(", ").append(tenantDto.getWard());
+        if (StringUtils.hasText(tenantDto.getDistrict())) newAddress.append(", ").append(tenantDto.getDistrict());
+        if (StringUtils.hasText(tenantDto.getProvince())) newAddress.append(", ").append(tenantDto.getProvince());
+        if (!newAddress.toString().isEmpty()) {
+            unregisteredTenant.setAddress(newAddress.toString());
+        }
+
+        if (cccdFrontFile != null && !cccdFrontFile.isEmpty()) {
+            unregisteredTenant.setCccdFrontUrl(saveFile(cccdFrontFile));
+        }
+        if (cccdBackFile != null && !cccdBackFile.isEmpty()) {
+            unregisteredTenant.setCccdBackUrl(saveFile(cccdBackFile));
+        }
+        unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
+
+        return unregisteredTenantsRepository.save(unregisteredTenant);
+    }
+
+    private String saveFile(MultipartFile file) {
+        logger.info("Saving file");
+        if (file == null || file.isEmpty()) {
+            logger.warn("File is null or empty, returning null");
+            return null;
+        }
+        try {
+            String originalFilename = file.getOriginalFilename();
+            logger.info("Original filename: {}", originalFilename);
+
+            if (originalFilename != null && !isValidFileType(originalFilename)) {
+                logger.error("Invalid file type: {}", originalFilename);
+                throw new IllegalArgumentException("Chỉ cho phép file ảnh (jpg, jpeg, png)!");
+            }
+
+            String safeFileName = System.currentTimeMillis() + "_" +
+                    originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_");
+            logger.info("Generated safe file name: {}", safeFileName);
+
+            String uploadDir = "Uploads/";
+            Path uploadPath = Paths.get(uploadDir);
+            logger.info("Creating upload directory if not exists: {}", uploadDir);
+            Files.createDirectories(uploadPath);
+
+            Path filePath = uploadPath.resolve(safeFileName);
+            Files.copy(file.getInputStream(), filePath);
+            logger.info("File copied to: {}", filePath);
+
+            String fileUrl = uploadDir + safeFileName;
+            logger.info("File saved successfully: {}", fileUrl);
+            return fileUrl;
+        } catch (Exception e) {
+            logger.error("Error saving file: {}", e.getMessage(), e);
+            throw new IllegalArgumentException("Lỗi khi lưu file: " + e.getMessage());
+        }
+    }
+
+    private boolean isValidFileType(String fileName) {
+        logger.info("Validating file type for: {}", fileName);
+        String[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
+        boolean isValid = Arrays.stream(allowedExtensions)
+                .anyMatch(ext -> fileName.toLowerCase().endsWith(ext));
+        logger.info("File type validation result: {}", isValid);
+        return isValid;
+    }
+
+@Override
+@Transactional
+public Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant,
+                                UnregisteredTenants unregisteredTenant) throws Exception {
+    logger.info("=== BẮT ĐẦU TẠO HỢP ĐỒNG TỪ DTO (Legacy Method) ===");
+    logger.info("Tạo hợp đồng mới từ DTO với loại người thuê: {}", contractDto.getTenantType());
+
+    // 1. Lấy và xác thực Owner (Chủ trọ)
+    Users owner = userRepository.findByCccdOrPhone(ownerCccd, null) // Giả định service.findByCccdOrPhone có thể dùng cho ownerCccd
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin chủ trọ với CCCD: " + ownerCccd));
+    logger.info("Chủ trọ được tìm thấy: {}", owner.getFullname());
+
+    // 2. Lấy và xác thực Phòng trọ
+    Rooms room = roomRepository.findById(contractDto.getRoom().getRoomId())
+            .orElseThrow(() -> new ResourceNotFoundException("Phòng trọ không tồn tại!"));
+    
+    if (room.getStatus() != RoomStatus.unactive) { // Chỉ cho phép tạo hợp đồng cho phòng đang "unactive" (trống)
+        throw new IllegalStateException("Phòng này hiện đã được thuê hoặc không khả dụng.");
+    }
+
+    // 3. Xử lý tiện ích phòng (nếu có)
+    if (contractDto.getRoom().getUtilityIds() != null && !contractDto.getRoom().getUtilityIds().isEmpty()) {
+        Set<Utility> utilities = utilityRepository.findByUtilityIdIn(contractDto.getRoom().getUtilityIds());
+        room.setUtilities(utilities);
+        logger.info("SERVICE: Đã gán {} tiện ích cho phòng ID {}.", utilities.size(), room.getRoomId());
+    } else {
+        room.getUtilities().clear(); // Xóa tất cả tiện ích cũ nếu không có tiện ích mới được chọn
+        logger.info("SERVICE: Đã xóa hết tiện ích cho phòng ID {}.", room.getRoomId());
+    }
+
+    // Xác định người thuê cuối cùng và số điện thoại của họ
+    String finalTenantPhone = null;
+    Users actualTenant = null;
+    UnregisteredTenants actualUnregisteredTenant = null;
+
+    if (unregisteredTenant != null && StringUtils.hasText(unregisteredTenant.getFullName())) {
+        logger.info("SERVICE: Đang sử dụng thông tin Người bảo hộ/Thuê mới được cung cấp.");
+        // Nếu unregisteredTenant đã được tạo/xử lý từ trước (ví dụ ở tầng Controller)
+        // thì ta sử dụng đối tượng này.
+        // Đảm bảo nó được lưu nếu chưa.
+        if (unregisteredTenant.getId() == null) { // Nếu đây là một đối tượng mới chưa được lưu
+             unregisteredTenant.setUser(owner); // Đảm bảo người bảo hộ được liên kết với chủ trọ
+             if (unregisteredTenant.getStatus() == null) {
+                unregisteredTenant.setStatus(UnregisteredTenants.Status.ACTIVE);
+            }
+            unregisteredTenantsRepository.save(unregisteredTenant);
+        }
+        actualUnregisteredTenant = unregisteredTenant;
+        finalTenantPhone = actualUnregisteredTenant.getPhone();
+    } else if (tenant != null) {
+        logger.info("SERVICE: Đang sử dụng thông tin Người thuê đã đăng ký được cung cấp.");
+        // Nếu tenant đã được tìm thấy/xử lý từ trước (ví dụ ở tầng Controller)
+        actualTenant = tenant;
+        finalTenantPhone = actualTenant.getPhone();
+    } else {
+        logger.error("Không có thông tin người thuê (đã đăng ký hoặc chưa đăng ký) hợp lệ.");
+        throw new IllegalArgumentException("Phải cung cấp thông tin người thuê hợp lệ!");
+    }
+
+
+    // 4. Tạo và lưu đối tượng Hợp đồng
+    Contracts contract = new Contracts();
+    contract.setOwner(owner);
+    contract.setRoom(room);
+    contract.setTenant(actualTenant); // Gán người thuê đã đăng ký (có thể là null)
+    contract.setUnregisteredTenant(actualUnregisteredTenant); // Gán người bảo hộ (có thể là null)
+    contract.setTenantPhone(finalTenantPhone); // Gán số điện thoại của người thuê chính
+
+    // Điền các thông tin còn lại từ DTO
+    contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
+    contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
+    contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
+    contract.setPrice(contractDto.getTerms().getPrice().floatValue());
+    contract.setDeposit(contractDto.getTerms().getDeposit().floatValue());
+    contract.setDuration(Float.valueOf(contractDto.getTerms().getDuration()));
+    contract.setStatus(Contracts.Status.valueOf(contractDto.getStatus().toUpperCase()));
+    contract.setTerms(contractDto.getTerms().getTerms());
+    contract.setCreatedAt(new java.sql.Date(System.currentTimeMillis()));
+
+    if (contractDto.getPaymentMethod() != null) {
+        contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
+    }
+    if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
+        logger.info("SERVICE: Tìm thấy {} người ở. Đang xử lý...", contractDto.getResidents().size());
+        for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
+            Resident resident = new Resident();
+            resident.setFullName(residentDto.getFullName());
+            resident.setBirthYear(residentDto.getBirthYear());
+            resident.setPhone(residentDto.getPhone());
+            resident.setCccdNumber(residentDto.getCccdNumber());
+            resident.setContract(contract); // **QUAN TRỌNG**: Liên kết người ở với hợp đồng này
+            
+            contract.getResidents().add(resident); // Thêm vào danh sách của hợp đồng
+        }
+    }
+    
+    Contracts savedContract = contractRepository.save(contract);
+    
+    // 5. Cập nhật trạng thái phòng
+    room.setStatus(RoomStatus.active);
+    roomRepository.save(room);
+
+    logger.info("SERVICE: Đã tạo hợp đồng ID {} thành công.", savedContract.getContractId());
+    return savedContract;
+}
+
+  
 }

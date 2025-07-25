@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 @Repository
 public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
@@ -27,7 +27,7 @@ public interface UserCccdRepository extends JpaRepository<UserCccd, Integer> {
     @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
     Optional<UserCccd> findByUserId(@Param("userId") Integer userId);
 
-     
+     boolean existsByCccdNumber(String cccdNumber);
 
 
    
