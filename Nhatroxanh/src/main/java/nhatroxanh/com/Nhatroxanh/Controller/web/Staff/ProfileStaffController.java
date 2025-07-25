@@ -87,7 +87,6 @@ public class ProfileStaffController {
             model.addAttribute("cccd", cccd);
 
             return "staff/profile";
-
         } catch (Exception e) {
             model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải thông tin: " + e.getMessage());
             return "error/500";
@@ -101,7 +100,6 @@ public class ProfileStaffController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model,
             RedirectAttributes redirectAttributes) {
-
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -165,7 +163,6 @@ public class ProfileStaffController {
                     // Upload new avatar
                     String avatarPath = fileUploadService.uploadFile(avatarFile, "");
                     user.setAvatar(avatarPath);
-
                 } catch (IOException e) {
                     model.addAttribute("errorMessage", "Không thể upload ảnh đại diện: " + e.getMessage());
                     model.addAttribute("user", user);
@@ -224,7 +221,6 @@ public class ProfileStaffController {
 
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật thông tin thành công!");
             return "redirect:/nhan-vien/profile-nhan-vien";
-
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/nhan-vien/profile-nhan-vien";

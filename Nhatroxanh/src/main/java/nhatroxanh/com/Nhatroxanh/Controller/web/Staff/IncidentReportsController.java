@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.IncidentReportsRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 
 @Controller
 @RequestMapping("/nhan-vien")
@@ -25,6 +27,9 @@ public class IncidentReportsController {
 
     @Autowired
     private IncidentReportsRepository incidentReportsRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/khieu-nai")
     public String viewReports(@RequestParam(defaultValue = "0") int page,
@@ -77,6 +82,16 @@ public class IncidentReportsController {
             }
 
             incidentReportsRepository.save(report);
+
+            Users user = report.getUser();
+            String to = user.getEmail();
+            if (to != null && !to.isBlank()) {
+                if (statusEnum == IncidentReports.IncidentStatus.DANG_XU_LY) {
+                    emailService.sendIncidentProcessingEmail(to, report);
+                } else if (statusEnum == IncidentReports.IncidentStatus.DA_XU_LY) {
+                    emailService.sendIncidentResolvedEmail(to, report);
+                }
+            }
 
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
         } else {

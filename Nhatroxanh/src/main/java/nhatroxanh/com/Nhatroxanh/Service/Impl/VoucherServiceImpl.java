@@ -153,14 +153,15 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
-    public Page<Vouchers> searchVouchers(String keyword, Pageable pageable) {
-        return voucherRepository.searchVouchers(keyword, pageable);
+    public Page<Vouchers> searchVouchers(Users user, String keyword, Pageable pageable) {
+        return voucherRepository.searchVouchers(user, keyword, pageable);
     }
 
     @Override
     public void createVoucherHost(Vouchers voucher, Integer ownerId) {
         Hostel hostel = voucher.getHostel();
-        if (hostel == null || !hostel.getOwner().getUserId().equals(ownerId)) {
+
+        if (hostel != null && !hostel.getOwner().getUserId().equals(ownerId)) {
             throw new IllegalArgumentException("Khu trọ không thuộc quyền quản lý của bạn.");
         }
 
@@ -168,11 +169,12 @@ public class VoucherServiceImpl implements VoucherService {
             throw new IllegalArgumentException("Mã voucher đã tồn tại.");
         }
 
-        if (voucher.getDiscountValue() <= 0) {
-            throw new IllegalArgumentException("Giá trị giảm giá phải lớn hơn 0.");
+        if (voucher.getDiscountValue() <= 0 || voucher.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Giá trị và số lượng phải lớn hơn 0.");
         }
-        if (voucher.getQuantity() <= 0) {
-            throw new IllegalArgumentException("Số lượng voucher phải lớn hơn 0.");
+
+        if (voucher.getStartDate().after(voucher.getEndDate())) {
+            throw new IllegalArgumentException("Ngày bắt đầu phải trước ngày kết thúc.");
         }
 
         voucherRepository.save(voucher);
@@ -186,10 +188,12 @@ public class VoucherServiceImpl implements VoucherService {
     @Override
     public Page<Vouchers> getVouchersByOwnerIdWithFilters(Integer ownerId, String searchQuery, String statusFilter,
             Pageable pageable) {
-        if (searchQuery != null && !searchQuery.isEmpty()) {
-            searchQuery = "%" + searchQuery.toLowerCase() + "%";
-        }
+        // Chuẩn hóa searchQuery cho truy vấn SQL LIKE
+        String normalizedSearchQuery = (searchQuery != null && !searchQuery.isEmpty())
+                ? "%" + searchQuery.toLowerCase() + "%"
+                : null;
 
+        // Xử lý statusFilter
         Boolean status = null;
         if ("active".equalsIgnoreCase(statusFilter)) {
             status = true;
@@ -197,7 +201,8 @@ public class VoucherServiceImpl implements VoucherService {
             status = false;
         }
 
-        return voucherRepository.findByUserUserIdWithFilters(ownerId, searchQuery, status, pageable);
+        // Gọi repository với tham số đã chuẩn hóa
+        return voucherRepository.findByUserUserIdWithFilters(ownerId, normalizedSearchQuery, status, pageable);
     }
 
     @Override
@@ -251,8 +256,9 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setDescription(description != null ? description.trim() : voucher.getDescription());
         voucher.setStatus(status != null ? status : voucher.getStatus());
 
-        // Xử lý hostel nếu được gửi lên
-        if (hostelId != null) {
+        if (hostelId == -1) {
+            voucher.setHostel(null);
+        } else {
             Hostel hostel = hostelService.getHostelById(hostelId)
                     .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
             if (!hostel.getOwner().getUserId().equals(hostId)) {
@@ -260,7 +266,6 @@ public class VoucherServiceImpl implements VoucherService {
             }
             voucher.setHostel(hostel);
         }
-
         voucherRepository.save(voucher);
     }
 
@@ -307,6 +312,11 @@ public class VoucherServiceImpl implements VoucherService {
                 }
             }
         }
+    }
+
+    @Override
+    public Page<Vouchers> searchVouchersByStatus(Users user, String keyword, Boolean status, Pageable pageable) {
+        return voucherRepository.searchVouchersByStatus(user, keyword, status, pageable);
     }
 
 }

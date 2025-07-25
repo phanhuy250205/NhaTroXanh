@@ -13,6 +13,7 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
@@ -51,8 +52,16 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private AddressRepository addressRepository;
+
     @Autowired
     private FileUploadService fileUploadService;
+
+    @Autowired
+    private UserCccdRepository userCccdReponsitory;
+
+    @Autowired
+    private EmailService emailService;
+
     @Override
     @Transactional
     public Users registerNewUser(UserRequest userRequest) {
@@ -72,6 +81,7 @@ public class UserServiceImpl implements UserService {
         newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         newUser.setEnabled(false);
         newUser.setRole(Users.Role.CUSTOMER);
+        newUser.setStatus(Users.Status.APPROVED);
         newUser.setCreatedAt(LocalDateTime.now());
 
         Users savedUser = userRepository.save(newUser);
@@ -81,9 +91,9 @@ public class UserServiceImpl implements UserService {
         return savedUser;
     }
 
-    @Override
     @Transactional
-    public Users registerOwner(UserOwnerRequest userOwnerRequest) {
+    public Users registerOwner(UserOwnerRequest userOwnerRequest, MultipartFile frontImage, MultipartFile backImage)
+            throws IOException {
         logger.info("Registering new owner with email: {}", userOwnerRequest.getEmail());
 
         // Kiểm tra email trùng lặp
@@ -98,12 +108,20 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
 
+        // Kiểm tra số CCCD trùng lặp
+        if (userCccdReponsitory.findByCccdNumber(userOwnerRequest.getCccdNumber()).isPresent()) {
+            logger.error("CCCD number already exists: {}", userOwnerRequest.getCccdNumber());
+            throw new RuntimeException("Số CCCD đã được sử dụng!");
+        }
+
         // Tạo user mới
         Users newUser = new Users();
         newUser.setFullname(userOwnerRequest.getFullName());
         newUser.setEmail(userOwnerRequest.getEmail());
         newUser.setPhone(userOwnerRequest.getPhoneNumber());
         newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
+        newUser.setGender(Boolean.parseBoolean(userOwnerRequest.getGender()));
+        newUser.setAddress(userOwnerRequest.getAddress());
 
         // Xử lý ngày sinh
         if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
@@ -119,6 +137,29 @@ public class UserServiceImpl implements UserService {
         newUser.setEnabled(false);
         newUser.setCreatedAt(LocalDateTime.now());
 
+        // Xử lý CCCD
+        UserCccd userCccd = new UserCccd();
+        userCccd.setCccdNumber(userOwnerRequest.getCccdNumber());
+        userCccd.setIssuePlace(userOwnerRequest.getIssuePlace());
+        try {
+            userCccd.setIssueDate(Date.valueOf(userOwnerRequest.getIssueDate()));
+        } catch (IllegalArgumentException e) {
+            logger.error("Invalid issue date format: {}", userOwnerRequest.getIssueDate(), e);
+            throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
+        }
+
+        // Xử lý ảnh CCCD
+        if (frontImage != null && !frontImage.isEmpty()) {
+            String frontImageUrl = fileUploadService.uploadFile(frontImage, "");
+            userCccd.setFrontImageUrl(frontImageUrl);
+        }
+        if (backImage != null && !backImage.isEmpty()) {
+            String backImageUrl = fileUploadService.uploadFile(backImage, "");
+            userCccd.setBackImageUrl(backImageUrl);
+        }
+
+        userCccd.setUser(newUser);
+        newUser.setUserCccd(userCccd);
 
         // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
@@ -128,7 +169,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-
     public Users findOwnerByCccdOrPhone(Authentication authentication, String cccd, String phone) {
         logger.info("Finding owner with CCCD: {} or phone: {}", cccd, phone);
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -236,7 +276,12 @@ public class UserServiceImpl implements UserService {
             keyword = null;
         }
 
-        return userRepository.searchOwners(Users.Role.OWNER, keyword, enabled, pageable);
+        return userRepository.searchOwners(
+                Users.Role.OWNER,
+                Users.Status.APPROVED,
+                keyword,
+                enabled,
+                pageable);
     }
 
     public Page<Users> getStaffUsers(int page, int size) {
@@ -272,6 +317,7 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
+
        @Override
 @Transactional
 public void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage) {
@@ -303,5 +349,46 @@ public void completeOwnerRegistration(Integer userId, Boolean gender, String ccc
         throw new RuntimeException("Lỗi khi tải ảnh lên: " + e.getMessage());
     }
 }
+
+    public Page<Users> getPendingOwners(int page, int size, String search) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        if (search != null && !search.isEmpty()) {
+            return userRepository.findPendingOwnersBySearch(Users.Role.OWNER, Users.Status.PENDING, search, pageable);
+        }
+        return userRepository.findByRoleAndStatus(Users.Role.OWNER, Users.Status.PENDING, pageable);
+    }
+
+    @Transactional
+    public void approveOwner(int id) {
+        Users user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + id));
+        if (!Users.Role.OWNER.equals(user.getRole()) || !Users.Status.PENDING.equals(user.getStatus())) {
+            throw new RuntimeException("Người dùng không hợp lệ để phê duyệt.");
+        }
+        user.setStatus(Users.Status.APPROVED);
+        user.setEnabled(true);
+        userRepository.save(user);
+        emailService.sendOwnerApprovalEmail(user.getEmail(), user.getFullname());
+        logger.info("Approved owner with ID: {}", id);
+    }
+
+    public void rejectOwner(int id) {
+        Optional<Users> optionalUser = userRepository.findById(id);
+        if (optionalUser.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy người dùng để từ chối.");
+        }
+
+        Users user = optionalUser.get();
+        if (user.getRole() != Users.Role.OWNER || user.getStatus() != Users.Status.PENDING) {
+            throw new RuntimeException("Người dùng không hợp lệ để từ chối.");
+        }
+        emailService.sendOwnerRejectionEmail(user.getEmail(), user.getFullname());
+        UserCccd userCccd = userCccdRepository.findByUser(user);
+        if (userCccd != null) {
+            userCccdRepository.delete(userCccd);
+        }
+        userRepository.delete(user);
+    }
+
 
 }

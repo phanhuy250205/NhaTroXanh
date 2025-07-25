@@ -13,6 +13,8 @@ import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.itextpdf.io.exceptions.IOException;
+
 import java.util.Optional;
 
 public interface UserService {
@@ -36,8 +38,10 @@ public interface UserService {
      *
      * @param userOwnerRequest Đối tượng chứa thông tin đăng ký của chủ trọ.
      * @return Đối tượng Users sau khi đã được lưu.
+     * @throws java.io.IOException 
      */
-    Users registerOwner(UserOwnerRequest userOwnerRequest);
+    Users registerOwner(UserOwnerRequest userOwnerRequest, MultipartFile frontImage, MultipartFile backImage)
+            throws IOException, java.io.IOException;
 
     /**
      * Tìm người dùng dựa trên username.
@@ -65,6 +69,7 @@ public interface UserService {
     // List<Users> getAllCustomers();
 
     Page<Users> getAllCustomers(int page, int size);
+
     Optional<Users> findByEmail(String email);
 
     Page<Users> getAllOwner(int page, int size);
@@ -80,5 +85,13 @@ public interface UserService {
 
 
     Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status);
+
+
+    Page<Users> getPendingOwners(int page, int size, String search);
+
+    void approveOwner(int id);
+
+    void rejectOwner(int id);
+
 
 }

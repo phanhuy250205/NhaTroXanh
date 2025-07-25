@@ -163,6 +163,9 @@ public class ContractDto {
         this.terms = terms;
     }
 
+
+
+
     public static class Owner {
         private Integer userId; // ✅ THÊM FIELD NÀY
         private String fullName;

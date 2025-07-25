@@ -10,6 +10,8 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 import jakarta.mail.util.ByteArrayDataSource;
 import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,6 +134,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
+
     public void sendContractEmail(String to, String customerName, byte[] pdfContent, String contractNumber) throws Exception {
         logger.info("🔧 MANUAL MULTIPART APPROACH");
 
@@ -411,6 +414,110 @@ public class EmailServiceImpl implements EmailService {
             System.err.println("❌ Error sending HTML email: " + e.getMessage());
             throw new RuntimeException("Không thể gửi email: " + e.getMessage());
         }
+    }
+
+    public void sendVoucherDeactivationEmail(Vouchers voucher) {
+        Users creator = voucher.getUser();
+
+        if (creator == null || creator.getEmail() == null) {
+            throw new IllegalArgumentException("Voucher không có người tạo hoặc email không hợp lệ.");
+        }
+
+        String to = creator.getEmail();
+        String subject = "Voucher " + voucher.getCode() + " đã hết hạn hoặc hết số lượng";
+        String content = String.format("""
+                Xin chào %s,
+
+                Voucher bạn tạo với mã [%s] đã bị vô hiệu hóa vì đã hết hạn hoặc hết số lượng sử dụng.
+
+                Thông tin:
+                - Tên khuyến mãi: %s
+                - Mã voucher: %s
+                - Thời gian áp dụng: %s → %s
+                - Số lượng còn lại: %d
+                - Trạng thái mới: Ngừng hoạt động
+
+                Vui lòng kiểm tra lại hệ thống nếu cần gia hạn hoặc tạo mới.
+
+                Trân trọng,
+                Hệ thống Nhà trọ Xanh
+                """,
+                creator.getFullname(),
+                voucher.getCode(),
+                voucher.getTitle(),
+                voucher.getStartDate().toString(),
+                voucher.getEndDate().toString(),
+                voucher.getQuantity());
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(content);
+
+        mailSender.send(message);
+    }
+
+    @Override
+    public void sendPostApprovedEmail(String to, String fullname, String postTitle) {
+        String subject = "Bài đăng của bạn đã được phê duyệt";
+        String content = String.format("""
+                <p>Chào %s,</p>
+                <p>Bài đăng <strong>%s</strong> của bạn đã được phê duyệt và hiện đang hiển thị trên hệ thống.</p>
+                <p>Cảm ơn bạn đã sử dụng Nhà Trọ Xanh!</p>
+                """, fullname, postTitle);
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendPostRejectedEmail(String to, String fullname, String postTitle) {
+        String subject = "Bài đăng của bạn đã bị từ chối";
+        String content = String.format("""
+                <p>Chào %s,</p>
+                <p>Rất tiếc! Bài đăng <strong>%s</strong> của bạn đã bị từ chối.</p>
+                <p>Vui lòng kiểm tra lại nội dung và gửi lại nếu cần thiết.</p>
+                <p>Trân trọng,<br>Nhà Trọ Xanh</p>
+                """, fullname, postTitle);
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendOwnerApprovalEmail(String to, String fullname) {
+        String subject = "Yêu cầu đăng ký chủ trọ đã được phê duyệt";
+        String content = String.format(
+                """
+                        <p>Chào %s,</p>
+                        <p>Chúc mừng! Yêu cầu đăng ký làm <strong>chủ trọ</strong> của bạn đã được <strong>phê duyệt</strong>.</p>
+                        <p>Bạn có thể đăng nhập và bắt đầu sử dụng chức năng quản lý phòng trọ.</p>
+                        <p>Trân trọng,<br>Nhà Trọ Xanh</p>
+                        """,
+                fullname);
+
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendOwnerRejectionEmail(String to, String fullname) {
+        String subject = "Yêu cầu đăng ký chủ trọ bị từ chối";
+        String content = String.format("""
+                <p>Chào %s,</p>
+                <p>Rất tiếc! Yêu cầu đăng ký làm <strong>chủ trọ</strong> của bạn đã bị <strong>từ chối</strong>.</p>
+                <p>Nếu bạn cần hỗ trợ thêm, vui lòng liên hệ quản trị viên hệ thống.</p>
+                <p>Trân trọng,<br>Nhà Trọ Xanh</p>
+                """, fullname);
+
+        sendHtmlMail(to, subject, content);
+    }
+
+    @Override
+    public void sendNewPasswordEmail(String to, String fullname, String newPassword) {
+        String subject = "Mật khẩu mới của bạn";
+        String content = "<p>Chào " + fullname + ",</p>" +
+                "<p>Mật khẩu mới của bạn là: <b>" + newPassword + "</b></p>" +
+                "<p>Vui lòng sử dụng mật khẩu này để đăng nhập và đổi mật khẩu trong hệ thống nếu cần.</p>" +
+                "<p>Trân trọng,<br>Nhà Trọ Xanh</p>";
+
+        sendHtmlMail(to, subject, content);
+
     }
 
 }

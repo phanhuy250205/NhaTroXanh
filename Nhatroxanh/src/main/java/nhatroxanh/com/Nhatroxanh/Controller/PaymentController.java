@@ -39,7 +39,6 @@ public class PaymentController {
         if (status == null || status.isEmpty()) {
             return null;
         }
-
         switch (status.toLowerCase()) {
             case "paid":
                 return PaymentStatus.ĐÃ_THANH_TOÁN;
@@ -163,7 +162,6 @@ public class PaymentController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-
             List<PaymentResponseDto> recentPayments = paymentService.getRecentPaymentsByOwnerId(ownerId);
             return ResponseEntity.ok(recentPayments);
 
@@ -350,20 +348,17 @@ public class PaymentController {
             String[] monthYear = month.split("-");
             int year = Integer.parseInt(monthYear[0]);
             int monthNum = Integer.parseInt(monthYear[1]);
-
             LocalDate dueDate = LocalDate.of(year, monthNum, 10);
             String formattedMonth = String.format("%02d/%d", monthNum, year);
 
             // Tạo PaymentRequestDto
             List<PaymentRequestDto.PaymentDetailDto> details = new ArrayList<>();
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền phòng")
                     .quantity(1)
                     .unitPrice(roomFee)
                     .amount(roomFee)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền điện")
                     .quantity(electricityUsage)
@@ -372,7 +367,6 @@ public class PaymentController {
                     .previousReading(electricityPrev)
                     .currentReading(electricityCurr)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền nước")
                     .quantity(waterUsage)
@@ -381,14 +375,12 @@ public class PaymentController {
                     .previousReading(waterPrev)
                     .currentReading(waterCurr)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền rác")
                     .quantity(1)
                     .unitPrice(trashFee)
                     .amount(trashFee)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền wifi")
                     .quantity(1)

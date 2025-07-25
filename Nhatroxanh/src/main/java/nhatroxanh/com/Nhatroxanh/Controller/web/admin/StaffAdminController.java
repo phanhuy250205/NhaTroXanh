@@ -120,6 +120,7 @@ public class StaffAdminController {
         newUser.setPhone(phone);
         newUser.setPassword(passwordEncoder.encode(password));
         newUser.setRole(Users.Role.STAFF);
+        newUser.setStatus(Users.Status.APPROVED);
         newUser.setEnabled(true);
         newUser.setCreatedAt(LocalDateTime.now());
 

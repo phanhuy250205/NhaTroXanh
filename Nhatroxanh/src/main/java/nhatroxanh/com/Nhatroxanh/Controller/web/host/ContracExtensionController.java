@@ -95,6 +95,7 @@ public class ContracExtensionController {
 
                 Contracts contract = req.getContract();
                 contract.setEndDate(req.getRequestedExtendDate());
+                contract.setStatus(Contracts.Status.ACTIVE);
                 contractsRepository.save(contract);
                 extensionRequestRepository.save(req);
 

@@ -19,6 +19,8 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.entity.ExtensionRequests;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
@@ -136,6 +138,7 @@ public class TenantServiceImpl implements TenantService {
                 .contractStatus(contract.getStatus().name())
                 .roomName(room.getNamerooms())
                 .hostelName(hostel.getName())
+                .userId(tenant.getUserId()) // 👈 QUAN TRỌNG: thêm dòng này để fix lỗi bạn gặp
                 .userFullName(tenant.getFullname())
                 .userGender(tenant.getGender())
                 .userPhone(tenant.getPhone())
@@ -143,7 +146,9 @@ public class TenantServiceImpl implements TenantService {
                 .userCccdNumber(cccdNumber)
                 .userCccdMasked(maskCccd(cccdNumber))
                 .userIssuePlace(issuePlace)
+                .enabled(tenant.isEnabled())
                 .build();
+
     }
 
     @Override
@@ -484,6 +489,53 @@ public class TenantServiceImpl implements TenantService {
                 .build();
 
         extensionRequestRepository.save(request);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable) {
+        return contractRepository.getTenantSummaryByOwnerWithFilters(ownerId, keyword, pageable);
+    }
+
+    @Override
+    public List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId) {
+        return contractRepository.findRoomHistoryByTenantId(tenantId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TenantDetailDTO getTenantDetailByUserId(Integer userId) {
+        Users tenant = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + userId));
+
+        Contracts contract = contractRepository.findTopByTenantOrderByContractIdDesc(tenant)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng của người thuê"));
+
+        Rooms room = contract.getRoom();
+        Hostel hostel = room.getHostel();
+        UserCccd userCccd = tenant.getUserCccd();
+
+        String cccdNumber = (userCccd != null) ? userCccd.getCccdNumber() : "Chưa có";
+        String issuePlace = (userCccd != null) ? userCccd.getIssuePlace() : "Chưa có";
+
+        return TenantDetailDTO.builder()
+                .contractId(contract.getContractId())
+                .startDate(contract.getStartDate())
+                .endDate(contract.getEndDate())
+                .terms(contract.getTerms())
+                .contractStatus(contract.getStatus().name())
+                .roomName(room.getNamerooms())
+                .hostelName(hostel.getName())
+                .userId(tenant.getUserId())
+                .userFullName(tenant.getFullname())
+                .userGender(tenant.getGender())
+                .userPhone(tenant.getPhone())
+                .userBirthday(tenant.getBirthday())
+                .userCccdNumber(cccdNumber)
+                .userCccdMasked(maskCccd(cccdNumber))
+                .userIssuePlace(issuePlace)
+                .enabled(tenant.isEnabled())
+                .build();
     }
 
 }

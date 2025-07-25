@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 import java.sql.Date;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 
 public interface EmailService {
     void sendExtensionApprovalEmail(String to, String fullname, String contractCode, Date newEndDate);
@@ -36,5 +37,17 @@ public interface EmailService {
     // ✅ METHOD MỚI GỬI HTML
     void sendContractHtml(String recipientEmail, String recipientName, String subject, String contractHtml);
 
+
+    void sendVoucherDeactivationEmail(Vouchers voucher);
+
+    void sendPostApprovedEmail(String to, String fullname, String postTitle);
+
+    void sendPostRejectedEmail(String to, String fullname, String postTitle);
+
+    void sendOwnerApprovalEmail(String to, String fullname);
+
+    void sendOwnerRejectionEmail(String to, String fullname);
+
+    void sendNewPasswordEmail(String to, String fullname, String newPassword);
 
 }

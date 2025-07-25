@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.Staff;
 
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.CategoryService;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.PostService;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
 import nhatroxanh.com.Nhatroxanh.Model.entity.*;
@@ -42,6 +43,9 @@ public class StaffPostController {
 
     @Autowired
     private HostelRepository hostelRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping
     public String showPostManagement(
@@ -102,6 +106,14 @@ public class StaffPostController {
 
         try {
             postService.approvePost(postId, userDetails.getUser());
+
+            // Gửi email
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy bài đăng để gửi email."));
+            Users user = post.getUser();
+            if (user.getEmail() != null && !user.getEmail().isBlank()) {
+                emailService.sendPostApprovedEmail(user.getEmail(), user.getFullname(), post.getTitle());
+            }
             redirectAttributes.addFlashAttribute("successMessage", "Bài đăng đã được duyệt!");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -197,6 +209,11 @@ public class StaffPostController {
             post.setApprovalStatus(ApprovalStatus.REJECTED);
             post.setApprovedBy(userDetails.getUser());
             postRepository.save(post);
+
+            Users user = post.getUser();
+            if (user.getEmail() != null && !user.getEmail().isBlank()) {
+                emailService.sendPostRejectedEmail(user.getEmail(), user.getFullname(), post.getTitle());
+            }
 
             redirectAttributes.addFlashAttribute("successMessage", "Đã từ chối bài đăng!");
         } catch (Exception e) {

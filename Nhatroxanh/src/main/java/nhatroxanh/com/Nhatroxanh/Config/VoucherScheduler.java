@@ -8,45 +8,65 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import jakarta.transaction.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Component
 public class VoucherScheduler {
 
-    @Autowired
-    private VoucherRepository voucherRepository;
+    private static final Logger logger = LoggerFactory.getLogger(VoucherScheduler.class);
 
-    @Autowired
-    private EmailService emailService;
+    private final VoucherRepository voucherRepository;
+    private final EmailService emailService;
 
-    // Chạy mỗi ngày lúc 0h (theo múi giờ Việt Nam)
-    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Ho_Chi_Minh")
-    public void checkAndUpdateVoucherStatus() {
-        List<Vouchers> activeVouchers = voucherRepository.findByStatus(true);
-        Date today = Date.valueOf(LocalDate.now());
+    public VoucherScheduler(VoucherRepository voucherRepository, EmailService emailService) {
+        this.voucherRepository = voucherRepository;
+        this.emailService = emailService;
+    }
 
-        for (Vouchers voucher : activeVouchers) {
-            boolean expired = voucher.getEndDate() != null && voucher.getEndDate().before(today);
-            boolean outOfStock = voucher.getQuantity() != null && voucher.getQuantity() == 0;
+    @Scheduled(cron = "0 */1 * * * *") // chạy mỗi phút
+    @Transactional
+    public void autoDisableExpiredOrEmptyVouchers() {
+        logger.info("🔁 [VoucherScheduler] Bắt đầu kiểm tra voucher hết hạn hoặc hết số lượng...");
 
-            if (expired || outOfStock) {
+        List<Vouchers> vouchers = voucherRepository.findByStatus(true);
+        LocalDate today = LocalDate.now();
+
+        for (Vouchers voucher : vouchers) {
+            // Tránh NullPointerException
+            LocalDate endDate = voucher.getEndDate() != null ? voucher.getEndDate().toLocalDate() : null;
+            Integer quantity = voucher.getQuantity();
+
+            boolean isExpired = endDate != null && !endDate.isAfter(today); // endDate <= today
+            boolean isOutOfQuantity = quantity == null || quantity == 0;
+
+            if (isExpired || isOutOfQuantity) {
+                logger.info("⚠️ Voucher [{}] hết hạn hoặc hết số lượng. Đang cập nhật trạng thái...",
+                        voucher.getCode());
+
                 voucher.setStatus(false);
                 voucherRepository.save(voucher);
 
-                String reason = expired ? "Voucher đã hết hạn" : "Voucher đã hết số lượng";
-
+                // Gửi email thông báo
                 try {
-                    emailService.sendVoucherDeactivatedEmail(
-                            voucher.getUser().getEmail(),
-                            voucher.getUser().getFullname(),
-                            voucher.getTitle(),
-                            reason);
+                    emailService.sendVoucherDeactivationEmail(voucher);
+                    logger.info("📧 Đã gửi mail thông báo vô hiệu hóa cho voucher [{}]", voucher.getCode());
                 } catch (Exception e) {
-                    System.err.println("Không thể gửi email cho voucher ID " + voucher.getId() + ": " + e.getMessage());
+                    logger.error("❌ Lỗi khi gửi email cho voucher [{}]: {}", voucher.getCode(), e.getMessage());
                 }
             }
         }
+
+        logger.info("✅ [VoucherScheduler] Đã kiểm tra và xử lý tất cả voucher.");
     }
+
 }

@@ -431,25 +431,22 @@
             <td>
               <span class="status-badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill fw-semibold"
                 th:classappend="
-          ${tenant.contractStatus.name() == 'ACTIVE'} ? ' bg-success text-white' :
-          (${tenant.contractStatus.name() == 'EXPIRED'} ? ' bg-warning text-dark' :
-          (${tenant.contractStatus.name() == 'TERMINATED'} ? ' bg-danger text-white' : ' bg-secondary'))">
+      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? ' bg-success text-white' :
+      (${tenant.contractStatus.name() == 'TERMINATED'} ? ' bg-danger text-white' : ' bg-secondary')">
 
                 <i th:class="
-      ${tenant.contractStatus.name() == 'ACTIVE'} ? 'fas fa-door-open' :
-      (${tenant.contractStatus.name() == 'EXPIRED'} ? 'fas fa-clock' :
-      (${tenant.contractStatus.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-question-circle'))">
+      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? 'fas fa-door-open' :
+      (${tenant.contractStatus.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-question-circle')">
                 </i>
 
                 <span th:switch="${tenant.contractStatus.name()}">
                   <span th:case="'ACTIVE'">Đang thuê</span>
-                  <span th:case="'EXPIRED'">Sắp hết hạn</span>
+                  <span th:case="'EXPIRED'">Đang thuê</span>
                   <span th:case="'TERMINATED'">Ngừng thuê</span>
                   <span th:case="*">Không xác định</span>
                 </span>
               </span>
             </td>
-
           </tr>
         </tbody>
       </table>

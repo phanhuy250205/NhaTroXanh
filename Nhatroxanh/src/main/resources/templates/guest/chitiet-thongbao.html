@@ -9,7 +9,9 @@
     <title>Thông Báo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+        integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <style>
         body {
@@ -379,48 +381,157 @@
         }
 
         @media (max-width: 768px) {
-            .wrapper-container-notifications { padding: 12px; }
-            .primary-heading-notifications { font-size: 22px; }
-            .secondary-text-notifications { font-size: 13px; }
-            .header-section-notifications { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .return-button-notifications { padding: 10px 20px; font-size: 13px; align-self: flex-start; }
-            .notification-card-header { padding: 16px; flex-direction: column; align-items: flex-start; gap: 12px; }
-            .notification-card-title { font-size: 15px; margin-bottom: 8px; }
-            .notification-card-meta { gap: 8px; font-size: 11px; }
-            .notification-card-meta span { gap: 3px; }
-            .notification-card-toggle { align-self: flex-end; margin-top: -20px; }
-            .notification-card-body { padding: 16px; }
-            .menu-tabs-notifications { padding: 0 8px; }
-            .menu-tabs-notifications .tab-link-notifications { padding: 14px 16px; font-size: 12px; gap: 4px; }
-            .data-layout-notifications { gap: 12px; }
-            .data-block-notifications { padding: 14px; }
-            .data-title-notifications { font-size: 14px; gap: 6px; }
-            .data-content-notifications { font-size: 12px; }
-            .payment-record-notifications { padding: 14px; }
-            .payment-summary-notifications { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .payment-value-notifications { font-size: 15px; }
-            .payment-button-notifications { padding: 10px 20px; font-size: 13px; }
+            .wrapper-container-notifications {
+                padding: 12px;
+            }
+
+            .primary-heading-notifications {
+                font-size: 22px;
+            }
+
+            .secondary-text-notifications {
+                font-size: 13px;
+            }
+
+            .header-section-notifications {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .return-button-notifications {
+                padding: 10px 20px;
+                font-size: 13px;
+                align-self: flex-start;
+            }
+
+            .notification-card-header {
+                padding: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .notification-card-title {
+                font-size: 15px;
+                margin-bottom: 8px;
+            }
+
+            .notification-card-meta {
+                gap: 8px;
+                font-size: 11px;
+            }
+
+            .notification-card-meta span {
+                gap: 3px;
+            }
+
+            .notification-card-toggle {
+                align-self: flex-end;
+                margin-top: -20px;
+            }
+
+            .notification-card-body {
+                padding: 16px;
+            }
+
+            .menu-tabs-notifications {
+                padding: 0 8px;
+            }
+
+            .menu-tabs-notifications .tab-link-notifications {
+                padding: 14px 16px;
+                font-size: 12px;
+                gap: 4px;
+            }
+
+            .data-layout-notifications {
+                gap: 12px;
+            }
+
+            .data-block-notifications {
+                padding: 14px;
+            }
+
+            .data-title-notifications {
+                font-size: 14px;
+                gap: 6px;
+            }
+
+            .data-content-notifications {
+                font-size: 12px;
+            }
+
+            .payment-record-notifications {
+                padding: 14px;
+            }
+
+            .payment-summary-notifications {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .payment-value-notifications {
+                font-size: 15px;
+            }
+
+            .payment-button-notifications {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
         }
 
         @media (max-width: 480px) {
-            .wrapper-container-notifications { padding: 8px; }
-            .primary-heading-notifications { font-size: 20px; }
-            .notification-card-header { padding: 14px; }
-            .notification-card-body { padding: 14px; }
-            .menu-tabs-notifications .tab-link-notifications { padding: 12px 14px; font-size: 11px; }
+            .wrapper-container-notifications {
+                padding: 8px;
+            }
+
+            .primary-heading-notifications {
+                font-size: 20px;
+            }
+
+            .notification-card-header {
+                padding: 14px;
+            }
+
+            .notification-card-body {
+                padding: 14px;
+            }
+
+            .menu-tabs-notifications .tab-link-notifications {
+                padding: 12px 14px;
+                font-size: 11px;
+            }
         }
 
         @media (min-width: 1024px) {
-            .data-layout-notifications { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-            .payment-info-notifications { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .data-layout-notifications {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+
+            .payment-info-notifications {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
         }
 
-        * { -webkit-tap-highlight-color: transparent; }
-        .notification-card-header, .tab-link-notifications, .return-button-notifications, .payment-button-notifications {
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .notification-card-header,
+        .tab-link-notifications,
+        .return-button-notifications,
+        .payment-button-notifications {
             touch-action: manipulation;
         }
 
-        .tab-link-notifications:focus, .return-button-notifications:focus, .notification-card-header:focus, .payment-button-notifications:focus {
+        .tab-link-notifications:focus,
+        .return-button-notifications:focus,
+        .notification-card-header:focus,
+        .payment-button-notifications:focus {
             outline: 2px solid #3e83cc;
             outline-offset: 2px;
         }
@@ -445,7 +556,8 @@
         <div class="navigation-wrapper-notifications">
             <ul class="menu-tabs-notifications" role="tablist">
                 <li class="tab-item-notifications" role="presentation">
-                    <button class="tab-link-notifications active-tab-notifications" data-target="all-notifications" type="button" role="tab">
+                    <button class="tab-link-notifications active-tab-notifications" data-target="all-notifications"
+                        type="button" role="tab">
                         <i class="fas fa-bell"></i> Tất cả
                     </button>
                 </li>
@@ -664,7 +776,7 @@
                             <h3 class="notification-card-title">
                                 ${notification.title || 'Không có tiêu đề'}
                                 ${notification.type === 'PAYMENT' && paymentDetails && paymentDetails.status === 'PENDING' ?
-                                '<span class="unpaid-status-badge">Chưa thanh toán</span>' : ''}
+                        '<span class="unpaid-status-badge">Chưa thanh toán</span>' : ''}
                             </h3>
                             <div class="notification-card-meta">
                                 <span><i class="fas fa-clock"></i> ${formatDate(notification.createAt) || 'Không có ngày'}</span>
@@ -679,7 +791,7 @@
                     <div class="notification-card-content" id="${cardId}">
                         <div class="notification-card-body">
                             ${notification.type === 'PAYMENT' && paymentDetails ? renderPaymentNotification(paymentDetails, notification.room) :
-                            `<div class="message-body-notifications">
+                        `<div class="message-body-notifications">
                                 <h4><i class="fas fa-info-circle" style="color: #3e83cc;"></i> Thông tin chi tiết</h4>
                                 <p>${notification.message || 'Không có nội dung'}</p>
                                 ${notification.room ? `
@@ -708,12 +820,12 @@
             function parsePaymentNotification(notification) {
                 try {
                     const message = notification.message;
-                    
+
                     // Check if this is a success notification
                     if (message.includes('thanh toán thành công') || message.includes('Bạn đã thanh toán thành công')) {
                         // Parse success notification
                         const successMatch = message.match(/Bạn đã thanh toán thành công hóa đơn #(\d+) cho phòng ([^\s]+) tại ([^.]+)\. Tháng: ([^.]+)\. Số tiền: ([^.]+)\. Phương thức: ([^.]+)\./);
-                        
+
                         if (successMatch) {
                             return {
                                 invoiceId: successMatch[1],
@@ -726,7 +838,7 @@
                                 details: []
                             };
                         }
-                        
+
                         // Fallback for success messages that don't match the pattern
                         const fallbackMatch = message.match(/hóa đơn #(\d+)/);
                         if (fallbackMatch) {
@@ -750,7 +862,7 @@
                             };
                         }
                     }
-                    
+
                     console.warn('No match for payment notification:', message);
                     return null;
                 } catch (e) {
@@ -764,7 +876,7 @@
                 const roomId = room?.roomId || '';
                 const hostelId = room?.hostel?.id || '';
                 const addressId = room?.hostel?.address?.id || '';
-                
+
                 // Handle success notifications
                 if (paymentDetails.status === 'SUCCESS') {
                     return `
@@ -810,7 +922,7 @@
                         </div>
                     `;
                 }
-                
+
                 // Handle pending notifications
                 return `
                     <div class="message-body-notifications">
@@ -916,7 +1028,7 @@
             }
 
             // Toggle notification card
-            window.toggleNotificationCard = function(cardId) {
+            window.toggleNotificationCard = function (cardId) {
                 const content = document.getElementById(cardId);
                 const toggleId = cardId.replace('notif-card-', 'toggle-card-');
                 const toggle = document.getElementById(toggleId);
@@ -936,7 +1048,7 @@
             };
 
             // Handle payment with additional parameters
-            window.handlePayment = function(invoiceId, total, roomId, hostelId, addressId) {
+            window.handlePayment = function (invoiceId, total, roomId, hostelId, addressId) {
                 console.log("Redirecting to: /thanh-toan?invoiceId=" + invoiceId + "&room_id=" + roomId + "&hostel_id=" + hostelId + "&address_id=" + addressId + " at 03:25 PM +07, July 14, 2025");
                 const button = event.target.closest('.payment-button-notifications');
                 if (!button) {
