@@ -838,17 +838,19 @@ public class ContractServiceImpl implements ContractService {
         logger.info("📝 New Status String: '{}'", newStatusString);
 
         try {
+            // Chuyển đổi chuỗi trạng thái thành enum
             Contracts.Status newStatus;
             try {
                 newStatus = Contracts.Status.valueOf(newStatusString.toUpperCase());
                 logger.info("✅ Converted to enum: {}", newStatus);
             } catch (IllegalArgumentException e) {
                 logger.error("❌ Status không hợp lệ: '{}'", newStatusString);
-                logger.error("❌ Các status cho phép: {}", java.util.Arrays.toString(Contracts.Status.values()));
+                logger.error("❌ Các status cho phép: {}", Arrays.toString(Contracts.Status.values()));
                 throw new IllegalArgumentException("Status không hợp lệ: " + newStatusString +
-                        ". Các giá trị cho phép: " + java.util.Arrays.toString(Contracts.Status.values()));
+                        ". Các giá trị cho phép: " + Arrays.toString(Contracts.Status.values()));
             }
 
+            // Tìm hợp đồng theo ID
             logger.info("🔍 Tìm hợp đồng với ID: {}", contractId);
             Optional<Contracts> contractOpt = contractRepository.findById(contractId);
 
@@ -861,22 +863,49 @@ public class ContractServiceImpl implements ContractService {
             logger.info("✅ Tìm thấy hợp đồng: ID={}, Status hiện tại={}",
                     contract.getContractId(), contract.getStatus());
 
+            // Kiểm tra chuyển đổi trạng thái hợp lệ
             Contracts.Status oldStatus = contract.getStatus();
-            contract.setStatus(newStatus);
+            if (!isValidStatusTransition(oldStatus, newStatus)) {
+                logger.error("❌ Chuyển đổi trạng thái không hợp lệ: {} -> {}", oldStatus, newStatus);
+                throw new IllegalArgumentException(
+                        "Chuyển đổi trạng thái từ " + oldStatus + " sang " + newStatus + " không được phép!");
+            }
 
+            // Cập nhật trạng thái
+            contract.setStatus(newStatus);
+            logger.info("🔄 Cập nhật trạng thái hợp đồng: {} -> {}", oldStatus, newStatus);
+
+            // Lưu hợp đồng
             logger.info("🔄 Lưu hợp đồng với status mới...");
             Contracts savedContract = contractRepository.save(contract);
 
-            logger.info("✅ Cập nhật thành công! {} -> {}",
-                    oldStatus, savedContract.getStatus());
+            logger.info("✅ Cập nhật thành công! {} -> {}", oldStatus, savedContract.getStatus());
 
         } catch (IllegalArgumentException e) {
             logger.error("❌ IllegalArgumentException: {}", e.getMessage());
             throw e;
-
         } catch (Exception e) {
             logger.error("❌ Unexpected Exception: ", e);
             throw new RuntimeException("Lỗi cập nhật trạng thái hợp đồng: " + e.getMessage(), e);
+        }
+    }
+
+    private boolean isValidStatusTransition(Contracts.Status oldStatus, Contracts.Status newStatus) {
+        if (oldStatus == newStatus) {
+            logger.info("🔄 Trạng thái không thay đổi: {}", oldStatus);
+            return true; // Cho phép giữ nguyên trạng thái
+        }
+        switch (oldStatus) {
+            case DRAFT:
+                return newStatus == Contracts.Status.ACTIVE; // Chỉ cho phép DRAFT -> ACTIVE
+            case ACTIVE:
+                return newStatus == Contracts.Status.TERMINATED || newStatus == Contracts.Status.EXPIRED; // ACTIVE -> TERMINATED hoặc EXPIRED
+            case TERMINATED:
+            case EXPIRED:
+                return false; // Không cho phép chuyển từ TERMINATED hoặc EXPIRED sang trạng thái khác
+            default:
+                logger.warn("⚠️ Trạng thái cũ không xác định: {}", oldStatus);
+                return false;
         }
     }
 

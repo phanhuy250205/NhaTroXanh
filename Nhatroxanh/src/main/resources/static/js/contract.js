@@ -21,10 +21,26 @@ window.NhaTroContract = {
         return this.loadProvinces() // Load provinces ngay từ đầu
             .then(() => {
                 console.log("Provinces loaded successfully");
-                const contractId = window.location.pathname.split('/').pop();
+
+                // ✅ SỬA CÁCH LẤY CONTRACT ID
+                const pathParts = window.location.pathname.split('/');
+                console.log("Path parts:", pathParts);
+
+                // Tìm ID số trong URL path
+                let contractId = null;
+                for (let i = pathParts.length - 1; i >= 0; i--) {
+                    const part = pathParts[i];
+                    // Kiểm tra nếu là số và không phải là "form", "edit", "create"
+                    if (part && !isNaN(part) && !['form', 'edit', 'create', 'new'].includes(part.toLowerCase())) {
+                        contractId = parseInt(part);
+                        break;
+                    }
+                }
+
                 console.log("Contract ID from URL:", contractId);
 
-                if (contractId) {
+                // ✅ CHỈ GỌI API KHI CÓ ID HỢP LỆ
+                if (contractId && contractId > 0) {
                     return fetch(`/api/contracts/edit-data/${contractId}`, {
                         method: 'GET',
                         headers: {
@@ -53,6 +69,9 @@ window.NhaTroContract = {
                             console.error("Error fetching contract data:", error);
                             this.showNotification("Lỗi khi tải dữ liệu hợp đồng: " + error.message, "error");
                         });
+                } else {
+                    console.log("No valid contract ID found, skipping data load (create mode)");
+                    return Promise.resolve();
                 }
             })
             .catch(error => {
@@ -60,6 +79,7 @@ window.NhaTroContract = {
                 this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố: " + error.message, "error");
             });
     },
+
 
     // New method to setup terms management
     setupTermsManagement() {
@@ -1135,116 +1155,349 @@ window.NhaTroContract = {
     },
 
     // 4. SỬA HÀM FILL TENANT FIELDS - thêm debug và đảm bảo load provinces trước
-async fillTenantFields(tenant) {
-    console.log("Filling tenant fields with data:", JSON.stringify(tenant, null, 2));
+    async fillTenantFields(tenant) {
+        console.log("Filling tenant fields with data:", JSON.stringify(tenant, null, 2));
 
-    // Đảm bảo provinces đã được load trước khi cố gắng set dropdowns
-    await this.loadProvinces().catch(error => {
-        console.error("Error reloading provinces:", error);
-        this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố: " + error.message, "error");
-    });
+        try {
+            // ✅ BƯỚC 1: Đảm bảo provinces được load và đợi DOM update
+            await this.ensureProvincesLoaded();
 
-    // Cập nhật các trường hiển thị (div/span) và hidden input của người thuê chính
-    document.getElementById("tenant-name-display").textContent = tenant.fullName || "........................";
-    document.getElementById("tenant-phone-display").textContent = tenant.phone || "........................";
-    document.getElementById("tenant-id-display").textContent = tenant.cccdNumber || "........................";
-    document.getElementById("tenant-dob-display").textContent = this.formatDate(tenant.birthday) || "........................";
-    document.getElementById("tenant-id-date-display").textContent = this.formatDate(tenant.issueDate) || "........................";
-    document.getElementById("tenant-id-place-display").textContent = tenant.issuePlace || "........................";
-    document.getElementById("tenant-email-display").textContent = tenant.email || "........................";
+            // ✅ BƯỚC 2: Điền dữ liệu cơ bản trước
+            this.fillBasicTenantInfo(tenant);
 
-    document.getElementById("tenant-name").value = tenant.fullName || "";
-    document.getElementById("tenant-phone").value = tenant.phone || "";
-    document.getElementById("tenant-id").value = tenant.cccdNumber || "";
-    document.getElementById("tenant-dob").value = tenant.birthday || "";
-    document.getElementById("tenant-id-date").value = tenant.issueDate || "";
-    document.getElementById("tenant-id-place").value = tenant.issuePlace || "";
-    document.getElementById("tenant-email").value = tenant.email || "";
+            // ✅ BƯỚC 3: Xử lý địa chỉ với proper error handling
+            if (tenant.province) {
+                await this.fillTenantAddress(tenant);
+            }
 
-    // Xử lý địa chỉ
-    const fullAddressDisplay = this.buildAddressString(tenant.street, tenant.ward, tenant.district, tenant.province);
-    document.getElementById("tenant-address-display").textContent = fullAddressDisplay || "........................";
-    document.getElementById("tenant-street").value = tenant.street || "";
+            // ✅ BƯỚC 4: Xử lý ảnh CCCD
+            this.fillTenantImages(tenant);
 
-    // Load và set giá trị cho các dropdown địa chỉ (province, district, ward)
-    const tenantProvinceSelect = document.getElementById("tenant-province");
-    if (tenantProvinceSelect && tenant.province) {
-        const pCode = await this.mapProvinceNameToCode(tenant.province);
-        if (pCode) {
-            tenantProvinceSelect.value = pCode;
-            await this.loadDistricts(pCode, "tenant-district", "tenant-ward");
-            const tenantDistrictSelect = document.getElementById("tenant-district");
-            if (tenantDistrictSelect && tenant.district) {
-                const dCode = await this.mapDistrictNameToCode(pCode, tenant.district);
-                if (dCode) {
-                    tenantDistrictSelect.value = dCode;
-                    await this.loadWards(dCode, "tenant-ward");
-                    const tenantWardSelect = document.getElementById("tenant-ward");
-                    if (tenantWardSelect && tenant.ward) {
-                        const wCode = await this.mapWardNameToCode(dCode, tenant.ward, pCode);
-                        if (wCode) {
-                            tenantWardSelect.value = wCode;
-                        }
-                    }
+            // ✅ BƯỚC 5: Xử lý trạng thái tenant type
+            this.handleTenantTypeStatus(tenant);
+
+            // ✅ BƯỚC 6: Cập nhật preview cuối cùng
+            this.updateAllPreview();
+
+        } catch (error) {
+            console.error("Error filling tenant fields:", error);
+            this.showNotification("Lỗi khi điền thông tin người thuê: " + error.message, "error");
+        }
+    },
+
+    // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
+    handleTenantTypeStatus(tenant) {
+        console.log("🏷️ Handling tenant type status...");
+
+        try {
+            const guardianDisplayContainer = document.getElementById("guardian-display-container");
+            const guardianDisplayName = document.getElementById("guardian-display-name");
+            const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
+            const tenantTypeSelect = document.getElementById("tenantType");
+            const btnEditGuardian = document.getElementById("btn-edit-guardian");
+            const btnDeleteGuardian = document.getElementById("btn-delete-guardian");
+
+            // ✅ KIỂM TRA CÁC ELEMENTS QUAN TRỌNG
+            const requiredElements = {
+                guardianDisplayContainer,
+                btnAddCustomerHost,
+                tenantTypeSelect
+            };
+
+            const missingElements = Object.entries(requiredElements)
+                .filter(([name, element]) => !element)
+                .map(([name]) => name);
+
+            if (missingElements.length > 0) {
+                console.warn("❌ Missing tenant type elements:", missingElements);
+                return;
+            }
+
+            // ✅ XỬ LÝ LOGIC TENANT TYPE
+            if (tenant.id && typeof tenant.id === 'number') {
+                // Unregistered tenant
+                this.unregisteredTenantData = { ...tenant };
+
+                if (guardianDisplayContainer) {
+                    $('#guardian-display-container').removeClass('d-none').show();
                 }
+
+                if (guardianDisplayName) {
+                    guardianDisplayName.textContent = tenant.fullName;
+                }
+
+                if (btnAddCustomerHost) {
+                    $('#btn-add-customer-host').hide();
+                }
+
+                tenantTypeSelect.value = "UNREGISTERED";
+
+                // ✅ GẮN LISTENERS CHO NÚT SỬA/XÓA (NẾU TỒN TẠI)
+                if (btnEditGuardian) {
+                    $('#btn-edit-guardian').off('click').on('click', () => {
+                        this.openEditCustomerModal(this.unregisteredTenantData);
+                    });
+                }
+
+                if (btnDeleteGuardian) {
+                    $('#btn-delete-guardian').off('click').on('click', () => {
+                        this.clearUnregisteredTenantData();
+                    });
+                }
+
+                console.log("✅ Set as UNREGISTERED tenant");
+
+            } else {
+                // Registered tenant
+                this.unregisteredTenantData = null;
+
+                if (guardianDisplayContainer) {
+                    $('#guardian-display-container').hide();
+                }
+
+                if (btnAddCustomerHost) {
+                    $('#btn-add-customer-host').show();
+                }
+
+                tenantTypeSelect.value = "REGISTERED";
+
+                console.log("✅ Set as REGISTERED tenant");
+            }
+
+        } catch (error) {
+            console.error("❌ Error handling tenant type status:", error);
+            this.showNotification("Lỗi khi xử lý trạng thái tenant: " + error.message, "error");
+        }
+    },
+
+    // ✅ HÀM PHỤ: Xử lý ảnh CCCD với validation
+    fillTenantImages(tenant) {
+        console.log("🖼️ Filling tenant images...");
+
+        const frontPreview = document.getElementById("cccd-front-preview");
+        const backPreview = document.getElementById("cccd-back-preview");
+
+        // ✅ KIỂM TRA ELEMENTS TỒN TẠI
+        if (!frontPreview) {
+            console.warn("❌ cccd-front-preview element not found");
+            return;
+        }
+
+        if (!backPreview) {
+            console.warn("❌ cccd-back-preview element not found");
+            return;
+        }
+
+        try {
+            frontPreview.innerHTML = ''; // Xóa nội dung cũ
+            backPreview.innerHTML = ''; // Xóa nội dung cũ
+
+            const baseUrl = window.location.origin;
+            const cccdFrontUrl = tenant.cccdFrontUrl ?
+                `${baseUrl}${tenant.cccdFrontUrl.startsWith('/') ? '' : '/'}${tenant.cccdFrontUrl.replace(/ /g, '%20')}` : null;
+            const cccdBackUrl = tenant.cccdBackUrl ?
+                `${baseUrl}${tenant.cccdBackUrl.startsWith('/') ? '' : '/'}${tenant.cccdBackUrl.replace(/ /g, '%20')}` : null;
+
+            if (cccdFrontUrl) {
+                frontPreview.innerHTML = `<img src="${cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                console.log("✅ CCCD front image set");
+            } else {
+                frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
+            }
+
+            if (cccdBackUrl) {
+                backPreview.innerHTML = `<img src="${cccdBackUrl}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                console.log("✅ CCCD back image set");
+            } else {
+                backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+            }
+
+        } catch (error) {
+            console.error("❌ Error filling tenant images:", error);
+            this.showNotification("Lỗi khi hiển thị ảnh CCCD: " + error.message, "error");
+        }
+    },
+
+// ✅ HÀM PHỤ: Đảm bảo provinces được load
+    async ensureProvincesLoaded() {
+        const tenantProvinceSelect = document.getElementById("tenant-province");
+
+        if (!tenantProvinceSelect || tenantProvinceSelect.options.length <= 1) {
+            console.log("Loading provinces...");
+            await this.loadProvinces();
+
+            // ✅ QUAN TRỌNG: Đợi DOM update
+            await new Promise(resolve => setTimeout(resolve, 200));
+
+            // Kiểm tra lại
+            if (tenantProvinceSelect.options.length <= 1) {
+                throw new Error("Không thể tải danh sách tỉnh/thành phố");
             }
         }
-    }
-    // Gán giá trị cho các hidden input sau khi dropdown đã được set
-    document.getElementById("tenant-ward").value = tenant.ward || ""; // Value của select
-    document.getElementById("tenant-district").value = tenant.district || ""; // Value của select
-    document.getElementById("tenant-province").value = tenant.province || ""; // Value của select
 
+        console.log("✅ Provinces ready with", tenantProvinceSelect.options.length, "options");
+    },
 
-    // Xử lý ảnh CCCD
-    const frontPreview = document.getElementById("cccd-front-preview");
-    const backPreview = document.getElementById("cccd-back-preview");
+// ✅ HÀM PHỤ: Điền thông tin cơ bản
+    // ✅ HÀM PHỤ: Điền thông tin cơ bản với validation
+    fillBasicTenantInfo(tenant) {
+        console.log("🔍 Filling basic tenant info...");
 
-    frontPreview.innerHTML = ''; // Xóa nội dung cũ
-    backPreview.innerHTML = ''; // Xóa nội dung cũ
+        // ✅ DANH SÁCH TẤT CẢ ELEMENTS CẦN KIỂM TRA
+        const elementMappings = [
 
-    const baseUrl = window.location.origin;
-    const cccdFrontUrl = tenant.cccdFrontUrl ? `${baseUrl}${tenant.cccdFrontUrl.startsWith('/') ? '' : '/'}${tenant.cccdFrontUrl.replace(/ /g, '%20')}` : null;
-    const cccdBackUrl = tenant.cccdBackUrl ? `${baseUrl}${tenant.cccdBackUrl.startsWith('/') ? '' : '/'}${tenant.cccdBackUrl.replace(/ /g, '%20')}` : null;
+            // Input elements
+            { id: "tenant-name", value: tenant.fullName, type: "input" },
+            { id: "tenant-phone", value: tenant.phone, type: "input" },
+            { id: "tenant-id", value: tenant.cccdNumber, type: "input" },
+            { id: "tenant-dob", value: tenant.birthday, type: "input" },
+            { id: "tenant-id-date", value: tenant.issueDate, type: "input" },
+            { id: "tenant-id-place", value: tenant.issuePlace, type: "input" },
+            { id: "tenant-email", value: tenant.email, type: "input" },
+            { id: "tenant-street", value: tenant.street, type: "input" }
+        ];
 
-    if (cccdFrontUrl) {
-        frontPreview.innerHTML = `<img src="${cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
-    }
+        // ✅ KIỂM TRA VÀ SET GIÁ TRỊ CHO TỪNG ELEMENT
+        const missingElements = [];
 
-    if (cccdBackUrl) {
-        backPreview.innerHTML = `<img src="${cccdBackUrl}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
-    }
+        elementMappings.forEach(mapping => {
+            const element = document.getElementById(mapping.id);
 
-    // Cập nhật trạng thái hiển thị của khung người bảo hộ (guardian-display-container)
-    // và nút "Thêm người bảo hộ" (btn-add-customer-host)
-    if (tenant.id && typeof tenant.id === 'number') { // Giả định unregistered tenant có ID số
-        this.unregisteredTenantData = { ...tenant }; // Lưu vào biến tạm thời
-        $('#guardian-display-container').removeClass('d-none').show();
-        $('#guardian-display-name').text(tenant.fullName);
-        $('#btn-add-customer-host').hide();
-        $('#tenantType').val("UNREGISTERED");
+            if (!element) {
+                missingElements.push(mapping.id);
+                console.warn(`❌ Element not found: ${mapping.id}`);
+                return;
+            }
 
-        // Gắn lại listeners cho nút sửa/xóa
-        $('#btn-edit-guardian').off('click').on('click', () => {
-            this.openEditCustomerModal(this.unregisteredTenantData);
+            try {
+                if (mapping.type === "display") {
+                    element.textContent = mapping.value || "........................";
+                    console.log(`✅ Set display ${mapping.id}:`, mapping.value);
+                } else if (mapping.type === "input") {
+                    element.value = mapping.value || "";
+                    console.log(`✅ Set input ${mapping.id}:`, mapping.value);
+                }
+            } catch (error) {
+                console.error(`❌ Error setting ${mapping.id}:`, error);
+            }
         });
-        $('#btn-delete-guardian').off('click').on('click', () => {
-            this.clearUnregisteredTenantData();
-        });
 
-    } else { // Nếu là registered tenant (hoặc chưa có tenant nào được chọn)
-        this.unregisteredTenantData = null; // Xóa dữ liệu tạm thời
-        $('#guardian-display-container').hide();
-        $('#btn-add-customer-host').show();
-        $('#tenantType').val("REGISTERED");
-    }
+        // ✅ BÁO CÁO CÁC ELEMENTS THIẾU
+        if (missingElements.length > 0) {
+            console.error("❌ Missing elements in DOM:", missingElements);
+            this.showNotification(
+                `Một số trường hiển thị không tồn tại: ${missingElements.join(', ')}. Vui lòng kiểm tra HTML.`,
+                "warning"
+            );
+        }
 
-    this.updateAllPreview(); // Cập nhật toàn bộ phần preview hợp đồng
-},
+        console.log("✅ Basic tenant info filled successfully");
+    },
+
+// ✅ HÀM PHỤ: Xử lý địa chỉ với proper validation
+    async fillTenantAddress(tenant) {
+        const tenantProvinceSelect = document.getElementById("tenant-province");
+
+        if (!tenantProvinceSelect) {
+            throw new Error("Không tìm thấy dropdown tỉnh/thành phố");
+        }
+
+        try {
+            // ✅ XỬ LÝ PROVINCE
+            const provinceCode = await this.mapProvinceNameToCode(tenant.province);
+            console.log("Province code mapped:", provinceCode);
+
+            if (provinceCode) {
+                // ✅ KIỂM TRA OPTION TỒN TẠI TRƯỚC KHI SET
+                const provinceOption = tenantProvinceSelect.querySelector(`option[value="${provinceCode}"]`);
+                if (!provinceOption) {
+                    console.warn("Province option not found:", provinceCode);
+                    this.showNotification(`Không tìm thấy tỉnh: ${tenant.province}`, "warning");
+                    return;
+                }
+
+                tenantProvinceSelect.value = provinceCode;
+                console.log("✅ Province set successfully");
+
+                // ✅ XỬ LÝ DISTRICT
+                if (tenant.district) {
+                    await this.loadDistricts(provinceCode, "tenant-district", "tenant-ward");
+                    await this.fillTenantDistrict(tenant, provinceCode);
+                }
+            } else {
+                console.warn("Could not map province name to code:", tenant.province);
+                this.showNotification(`Không thể ánh xạ tỉnh: ${tenant.province}`, "warning");
+            }
+
+        } catch (error) {
+            console.error("Error filling tenant address:", error);
+            throw new Error("Lỗi khi xử lý địa chỉ: " + error.message);
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý district và ward
+    async fillTenantDistrict(tenant, provinceCode) {
+        const tenantDistrictSelect = document.getElementById("tenant-district");
+
+        if (!tenantDistrictSelect || !tenant.district) return;
+
+        try {
+            const districtCode = await this.mapDistrictNameToCode(provinceCode, tenant.district);
+            console.log("District code mapped:", districtCode);
+
+            if (districtCode) {
+                // ✅ ĐỢI DISTRICTS LOAD XONG
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const districtOption = tenantDistrictSelect.querySelector(`option[value="${districtCode}"]`);
+                if (districtOption) {
+                    tenantDistrictSelect.value = districtCode;
+                    console.log("✅ District set successfully");
+
+                    // ✅ XỬ LÝ WARD
+                    if (tenant.ward) {
+                        await this.loadWards(districtCode, "tenant-ward");
+                        await this.fillTenantWard(tenant, districtCode, provinceCode);
+                    }
+                } else {
+                    console.warn("District option not found:", districtCode);
+                }
+            }
+        } catch (error) {
+            console.error("Error filling district:", error);
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý ward
+    async fillTenantWard(tenant, districtCode, provinceCode) {
+        const tenantWardSelect = document.getElementById("tenant-ward");
+
+        if (!tenantWardSelect || !tenant.ward) return;
+
+        try {
+            const wardCode = await this.mapWardNameToCode(districtCode, tenant.ward, provinceCode);
+            console.log("Ward code mapped:", wardCode);
+
+            if (wardCode) {
+                // ✅ ĐỢI WARDS LOAD XONG
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const wardOption = tenantWardSelect.querySelector(`option[value="${wardCode}"]`);
+                if (wardOption) {
+                    tenantWardSelect.value = wardCode;
+                    console.log("✅ Ward set successfully");
+                } else {
+                    console.warn("Ward option not found:", wardCode);
+                }
+            }
+        } catch (error) {
+            console.error("Error filling ward:", error);
+        }
+    },
+
+
+
+
     openEditCustomerModal(data) {
         const modalElement = document.getElementById("addCustomerModal-host");
         const modal = new bootstrap.Modal(modalElement);
@@ -1721,6 +1974,18 @@ async fillTenantFields(tenant) {
         console.log(`querySelector result:`, foundOption ? "Found" : "Not found");
         console.log(`Current selected value: "${select.value}"`);
         console.log(`=== END DEBUG ===`);
+    },
+    buildAddressString(street, ward, district, province) {
+        console.log("🏠 Building address string...");
+
+        const addressParts = [street, ward, district, province]
+            .filter(part => part && part.trim() !== "")
+            .map(part => part.trim());
+
+        const fullAddress = addressParts.join(", ");
+        console.log("✅ Built address:", fullAddress);
+
+        return fullAddress || "Chưa có thông tin địa chỉ";
     },
 
 // Hàm chuyển đổi định dạng ngày

@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Model.Dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -429,7 +430,10 @@ public class ContractDto {
         private Long userId; // ✅ THÊM FIELD NÀY
         private String fullName;
         private String phone;
-        private String cccdNumber;
+        @NotNull(message = "Số CCCD không được để trống")
+        @Pattern(regexp = "\\d{12}", message = "Số CCCD phải có 12 chữ số")
+        private String cccdNumber; // Số CCCD đầy đủ
+        private String maskedCccdNumber; // Số CCCD bị che để hiển thị
         private String email;
         private Date issueDate;
         private String issuePlace;
@@ -441,6 +445,15 @@ public class ContractDto {
         private String cccdFrontUrl;
         private String cccdBackUrl;
         private String fullCccdNumber;
+
+
+        public String getMaskedCccdNumber() {
+            return maskedCccdNumber;
+        }
+
+        public void setMaskedCccdNumber(String maskedCccdNumber) {
+            this.maskedCccdNumber = maskedCccdNumber;
+        }
 
         public String getFullCccdNumber() {
             return fullCccdNumber;

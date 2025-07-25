@@ -236,35 +236,14 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
-    // @GetMapping("/chu-tro/dang-tin")
-    // public String dangtin() {
-    // return "host/bai-dang-host";
-    // }
 
-    // @GetMapping("/chu-tro/bai-dang")
-    // public String quanlyhopdong() {
-    // return "host/quan-ly-bai-dang";
-    // }
-
-    // @GetMapping("/chu-tro/Qlthue-tra")
-    // public String chitietbaidang() {
-    // return "guest/quan-ly-thue-tra";
-    // }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
 
-    // @GetMapping("/khach-thue/quan-ly-thue-tra")
-    // public String quanLyThueTra() {
-    // return "guest/quan-ly-thue-tra";
-    // }
 
-    // @GetMapping("/khach-thue/chitiet-phongthue")
-    // public String chiTietPhongThue() {
-    // return "guest/chitiet-phongthue";
-    // }
     @GetMapping("/khach-thue/thanh-toan")
     public String thanhToan() {
         return "guest/thanh-toan";
@@ -300,9 +279,5 @@ public class DemoController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
                 .getUserId();
     }
-
-    // @GetMapping("/chu-tro/sua-bai-dang")
-    // public String chitiethopdong() {
-    // return "host/sua-bai-dang";
 
 }

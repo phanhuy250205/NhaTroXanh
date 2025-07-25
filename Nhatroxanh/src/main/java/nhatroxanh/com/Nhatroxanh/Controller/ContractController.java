@@ -566,6 +566,8 @@ public class ContractController {
                     return newCccd;
                 });
 
+        userCccd.setCccdNumber(tenantDto.getCccdNumber()); // Sử dụng CCCD đầy đủ
+
         if (StringUtils.hasText(tenantDto.getCccdNumber()))
             userCccd.setCccdNumber(tenantDto.getCccdNumber());
         if (tenantDto.getIssueDate() != null)
@@ -1175,12 +1177,14 @@ public class ContractController {
                 tenantData.put("birthday", user.getBirthday() != null ? user.getBirthday().toString() : null);
 
                 if (tenantCccd != null) {
-                    tenantData.put("cccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber()));
+                    tenantData.put("cccdNumber", tenantCccd.getCccdNumber()); // Số CCCD đầy đủ
+                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị che
                     tenantData.put("issueDate",
                             tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
                 } else {
                     tenantData.put("cccdNumber", "");
+                    tenantData.put("maskedCccdNumber", "");
                     tenantData.put("issueDate", null);
                     tenantData.put("issuePlace", "");
                 }
@@ -1437,17 +1441,21 @@ public class ContractController {
     public ResponseEntity<?> updateContract(
             @PathVariable Integer contractId,
             @RequestBody ContractDto contractDto,
-
             Authentication authentication) {
+        logger.info("🔄 === BẮT ĐẦU UPDATE CONTRACT ===");
+        logger.info("📝 Contract ID: {}", contractId);
+        logger.info("📝 Contract DTO: status={}, tenantType={}",
+                contractDto.getStatus(), contractDto.getTenantType());
+
         Map<String, Object> response = new HashMap<>();
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-            logger.info("Authenticated user ID: {}", ownerId);
+            logger.info("👤 Authenticated user ID: {}", ownerId);
 
             Optional<Contracts> contractOptional = contractService.findContractById(contractId);
             if (!contractOptional.isPresent()) {
-                logger.error("Contract {} not found", contractId);
+                logger.error("❌ Contract {} not found", contractId);
                 response.put("success", false);
                 response.put("message", "Hợp đồng không tồn tại!");
                 return ResponseEntity.status(404).body(response);
@@ -1455,10 +1463,45 @@ public class ContractController {
 
             Contracts contract = contractOptional.get();
             if (!contract.getOwner().getUserId().equals(ownerId)) {
-                logger.error("User {} does not own contract {}", ownerId, contractId);
+                logger.error("❌ User {} does not own contract {}", ownerId, contractId);
                 response.put("success", false);
                 response.put("message", "Bạn không có quyền cập nhật hợp đồng này!");
                 return ResponseEntity.status(403).body(response);
+            }
+
+            // Kiểm tra số CCCD
+            if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getTenant() != null) {
+                String cccdNumber = contractDto.getTenant().getCccdNumber();
+                logger.info("🔍 Tenant CCCD: {}", cccdNumber);
+                if (cccdNumber == null || !cccdNumber.matches("\\d{12}")) {
+                    logger.error("❌ Invalid tenant CCCD: {}", cccdNumber);
+                    response.put("success", false);
+                    response.put("message", "Số CCCD của người thuê phải là 12 chữ số!");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null) {
+                String cccdNumber = contractDto.getUnregisteredTenant().getCccdNumber();
+                logger.info("🔍 Unregistered Tenant CCCD: {}", cccdNumber);
+                if (cccdNumber == null || !cccdNumber.matches("\\d{12}")) {
+                    logger.error("❌ Invalid unregistered tenant CCCD: {}", cccdNumber);
+                    response.put("success", false);
+                    response.put("message", "Số CCCD của người bảo hộ phải là 12 chữ số!");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            } else {
+                logger.error("❌ Invalid tenant data: tenantType={}, tenant={}, unregisteredTenant={}",
+                        contractDto.getTenantType(), contractDto.getTenant(), contractDto.getUnregisteredTenant());
+                response.put("success", false);
+                response.put("message", "Phải cung cấp thông tin người thuê hợp lệ!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra trạng thái hợp đồng
+            if (contractDto.getStatus() == null || !contractDto.getStatus().matches("DRAFT|ACTIVE|TERMINATED|EXPIRED")) {
+                logger.error("❌ Invalid status: {}", contractDto.getStatus());
+                response.put("success", false);
+                response.put("message", "Trạng thái hợp đồng không hợp lệ. Các giá trị cho phép: DRAFT, ACTIVE, TERMINATED, EXPIRED");
+                return ResponseEntity.badRequest().body(response);
             }
 
             if (contractDto.getRoom() != null && contractDto.getRoom().getRoomId() != null) {
@@ -1487,16 +1530,16 @@ public class ContractController {
             response.put("success", true);
             response.put("message", "Cập nhật hợp đồng thành công!");
             response.put("contractId", updatedContract.getContractId());
-            logger.info("Contract updated successfully: ID={}", updatedContract.getContractId());
+            logger.info("✅ Contract updated successfully: ID={}", updatedContract.getContractId());
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
-            logger.error("Invalid data: {}", e.getMessage());
+            logger.error("❌ Invalid data: {}", e.getMessage());
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            logger.error("Error updating contract: {}", e.getMessage(), e);
+            logger.error("❌ Error updating contract: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Lỗi khi cập nhật hợp đồng: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
@@ -1658,6 +1701,92 @@ public class ContractController {
         }
     }
 
+
+
+    @PostMapping(value = "/update-cccd-image", consumes = {"multipart/form-data"})
+    @PreAuthorize("hasRole('OWNER')")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateCccdImage(
+            @RequestParam(value = "cccdNumber") String cccdNumber,
+            @RequestParam(value = "cccdFront", required = false) MultipartFile cccdFront,
+            @RequestParam(value = "cccdBack", required = false) MultipartFile cccdBack,
+            Authentication authentication) {
+
+        logger.info("=== BẮT ĐẦU CẬP NHẬT ẢNH CCCD ===");
+        logger.info("CCCD Number: {}", cccdNumber);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Kiểm tra quyền chủ trọ
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            String ownerCccd = userDetails.getCccd();
+            logger.info("CCCD chủ trọ từ xác thực: {}", ownerCccd);
+
+            Users owner = userService.findOwnerByCccdOrPhone(authentication, ownerCccd, null);
+            if (owner == null) {
+                logger.error("Không tìm thấy chủ trọ với CCCD: {}", ownerCccd);
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ!");
+            }
+
+            // Kiểm tra số CCCD
+            if (!StringUtils.hasText(cccdNumber)) {
+                logger.error("Số CCCD không được để trống");
+                throw new IllegalArgumentException("Số CCCD không được để trống!");
+            }
+
+            // Tìm UserCccd
+            UserCccd tenantCccd = userCccdRepository.findByCccdNumber(cccdNumber)
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy CCCD: " + cccdNumber));
+            logger.info("Tìm thấy UserCccd, ID: {}", tenantCccd.getId());
+
+            String cccdFrontUrl = null;
+            String cccdBackUrl = null;
+
+            // Xử lý ảnh mặt trước
+            if (cccdFront != null && !cccdFront.isEmpty()) {
+                // Xóa ảnh mặt trước cũ
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.FRONT);
+                // Lưu ảnh mặt trước mới
+                Image cccdFrontImage = imageService.saveImage(cccdFront, "cccd", tenantCccd, Image.ImageType.FRONT);
+                cccdFrontUrl = cccdFrontImage.getUrl();
+                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(), cccdFrontUrl);
+            }
+
+            // Xử lý ảnh mặt sau
+            if (cccdBack != null && !cccdBack.isEmpty()) {
+                // Xóa ảnh mặt sau cũ
+                imageService.deleteImagesByUserCccdAndType(Long.valueOf(tenantCccd.getId()), Image.ImageType.BACK);
+                // Lưu ảnh mặt sau mới
+                Image cccdBackImage = imageService.saveImage(cccdBack, "cccd", tenantCccd, Image.ImageType.BACK);
+                cccdBackUrl = cccdBackImage.getUrl();
+                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(), cccdBackUrl);
+            }
+
+            response.put("success", true);
+            response.put("cccdFrontUrl", cccdFrontUrl);
+            response.put("cccdBackUrl", cccdBackUrl);
+            response.put("cccdId", tenantCccd.getId());
+            response.put("message", "Cập nhật ảnh CCCD thành công!");
+            return ResponseEntity.ok(response);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("Lỗi dữ liệu không hợp lệ: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (IOException e) {
+            logger.error("Lỗi khi tải lên ảnh: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi tải lên ảnh: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        } catch (Exception e) {
+            logger.error("Lỗi khi cập nhật ảnh CCCD: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi cập nhật ảnh CCCD: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
     private boolean isValidFileType(String fileName) {
         logger.info("Validating file type for: {}", fileName);
         String[] allowedExtensions = { ".jpg", ".jpeg", ".png" };
@@ -1727,9 +1856,11 @@ public class ContractController {
     }
 
     @PostMapping("/hop-dong/update-status/{contractId}")
+    @PreAuthorize("hasRole('OWNER')") // Đảm bảo chỉ OWNER được gọi endpoint
     public ResponseEntity<Map<String, Object>> updateContractStatus(
             @PathVariable Integer contractId,
-            @RequestBody Map<String, String> request) {
+            @RequestBody Map<String, String> request,
+            Authentication authentication) {
 
         logger.info("🔄 === BẮT ĐẦU UPDATE CONTRACT STATUS ===");
         logger.info("📝 Contract ID: {}", contractId);
@@ -1738,6 +1869,30 @@ public class ContractController {
         Map<String, Object> response = new HashMap<>();
 
         try {
+            // Lấy thông tin người dùng từ authentication
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            logger.info("👤 Authenticated user ID: {}", ownerId);
+
+            // Kiểm tra hợp đồng tồn tại và thuộc về owner
+            Optional<Contracts> contractOpt = contractService.findContractById(contractId);
+            if (contractOpt.isEmpty()) {
+                logger.error("❌ Không tìm thấy hợp đồng với ID: {}", contractId);
+                response.put("success", false);
+                response.put("message", "Không tìm thấy hợp đồng với ID: " + contractId);
+                response.put("validStatuses", Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+
+            Contracts contract = contractOpt.get();
+            if (!contract.getOwner().getUserId().equals(ownerId)) {
+                logger.error("❌ User {} không có quyền cập nhật hợp đồng {}", ownerId, contractId);
+                response.put("success", false);
+                response.put("message", "Bạn không có quyền cập nhật trạng thái hợp đồng này!");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+            }
+
+            // Lấy trạng thái mới từ request
             String newStatus = request.get("status");
             logger.info("📊 Status từ request: '{}'", newStatus);
 
@@ -1745,24 +1900,15 @@ public class ContractController {
                 logger.error("❌ Status is null or empty!");
                 response.put("success", false);
                 response.put("message", "Trạng thái không được để trống");
-                response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+                response.put("validStatuses", Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
                 return ResponseEntity.badRequest().body(response);
             }
 
-            try {
-                Contracts.Status.valueOf(newStatus.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                logger.error("❌ Status không hợp lệ: '{}'", newStatus);
-                response.put("success", false);
-                response.put("message", "Trạng thái không hợp lệ: " + newStatus);
-                response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
-                return ResponseEntity.badRequest().body(response);
-            }
-
+            // Gọi service để cập nhật trạng thái
             logger.info("🔄 Gọi contractService.updateStatus({}, '{}')", contractId, newStatus);
             contractService.updateStatus(contractId, newStatus);
 
-            logger.info("✅ Cập nhật thành công!");
+            logger.info("✅ Cập nhật trạng thái hợp đồng thành công: {} -> {}", contract.getStatus(), newStatus.toUpperCase());
             response.put("success", true);
             response.put("message", "Cập nhật trạng thái hợp đồng thành công");
             response.put("contractId", contractId);
@@ -1774,13 +1920,13 @@ public class ContractController {
             logger.error("❌ IllegalArgumentException: {}", e.getMessage());
             response.put("success", false);
             response.put("message", e.getMessage());
-            response.put("validStatuses", java.util.Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
+            response.put("validStatuses", Arrays.asList("DRAFT", "ACTIVE", "TERMINATED", "EXPIRED"));
             return ResponseEntity.badRequest().body(response);
 
         } catch (Exception e) {
             logger.error("❌ Unexpected Exception: ", e);
             response.put("success", false);
-            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            response.put("message", "Lỗi hệ thống khi cập nhật trạng thái hợp đồng: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
@@ -2245,7 +2391,8 @@ public class ContractController {
 
                 UserCccd cccd = user.getUserCccd();
                 if (cccd != null) {
-                    tenant.setCccdNumber(cccd.getCccdNumber());
+                    tenant.setCccdNumber(cccd.getCccdNumber()); // Số CCCD đầy đủ
+                    tenant.setMaskedCccdNumber(cccdUtils.maskCccd(cccd.getCccdNumber())); // Số CCCD bị che
                     tenant.setIssueDate(cccd.getIssueDate());
                     tenant.setIssuePlace(cccd.getIssuePlace() != null ? cccd.getIssuePlace() : "");
 
@@ -2552,6 +2699,182 @@ public class ContractController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/send-email-html")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendContractEmailHtml(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String recipientEmail = (String) request.get("recipientEmail");
+            String recipientName = (String) request.get("recipientName");
+            String contractHtml = (String) request.get("contractHtml");
+            String subject = (String) request.get("subject");
+
+            // Validate
+            if (recipientEmail == null || contractHtml == null) {
+                response.put("success", false);
+                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // ✅ GỬI EMAIL VỚI HTML CONTENT
+            emailService.sendContractHtml(recipientEmail, recipientName, subject, contractHtml);
+
+            response.put("success", true);
+            response.put("message", "Hợp đồng đã được gửi thành công qua email");
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email HTML: " + e.getMessage());
+            e.printStackTrace();
+
+            response.put("success", false);
+            response.put("message", "Lỗi gửi email: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+    // ✅ THÊM METHOD NÀY VÀO CONTROLLER
+    private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
+        // Kiểm tra email từ request trước
+        Object emailObj = requestData.get("email");
+        if (emailObj != null && !emailObj.toString().trim().isEmpty()) {
+            return emailObj.toString().trim();
+        }
+
+        // Nếu không có trong request, lấy từ tenant trong contract
+        if (contract.getTenant() != null && contract.getTenant().getEmail() != null) {
+            return contract.getTenant().getEmail();
+        }
+
+        // Nếu vẫn không có, thử lấy từ các field khác
+        if (contract.getTenant().getEmail() != null) {
+            return contract.getTenant().getEmail();
+        }
+
+        return null;
+    }
+
+
+    // ✅ ENDPOINT SEND PDF VIA EMAIL
+    @PostMapping("/send-email-pdf")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            String recipientEmail = (String) request.get("recipientEmail");
+            String recipientName = (String) request.get("recipientName");
+            String contractHtml = (String) request.get("contractHtml");
+            String subject = (String) request.get("subject");
+            String contractId = (String) request.get("contractId");
+
+            // ✅ VALIDATE
+            if (recipientEmail == null || contractHtml == null) {
+                response.put("success", false);
+                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            System.out.println("📧 Generating PDF and sending email to: " + recipientEmail);
+
+            // ✅ GENERATE PDF FROM HTML
+            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+
+            // ✅ CREATE FILE NAME
+            String fileName = String.format("HopDong_%s_%s",
+                    recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
+                    contractId != null ? contractId : System.currentTimeMillis()
+            );
+
+            // ✅ SEND EMAIL WITH PDF ATTACHMENT
+            emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
+
+            response.put("success", true);
+            response.put("message", "Hợp đồng PDF đã được gửi thành công qua email");
+            response.put("fileName", fileName + ".pdf");
+            response.put("recipientEmail", recipientEmail);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi gửi email PDF: " + e.getMessage());
+            e.printStackTrace();
+
+            response.put("success", false);
+            response.put("message", "Lỗi gửi email: " + e.getMessage());
+            return ResponseEntity.status(500).body(response);
+        }
+    }
+
+
+
+    @PostMapping("/generate-pdf")
+    public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
+        try {
+            String contractHtml = (String) request.get("contractHtml");
+            String fileName = (String) request.get("fileName");
+
+            if (contractHtml == null || contractHtml.trim().isEmpty()) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            if (fileName == null || fileName.trim().isEmpty()) {
+                fileName = "contract_" + System.currentTimeMillis();
+            }
+
+            // Generate PDF
+            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+
+            // ✅ VALIDATE PDF
+            if (pdfBytes == null || pdfBytes.length == 0) {
+                return ResponseEntity.status(500).build();
+            }
+
+            // ✅ SỬA LẠI HEADERS
+            HttpHeaders headers = new HttpHeaders();
+
+            // ✅ SET CONTENT TYPE ĐÚNG
+            headers.add("Content-Type", "application/pdf");
+
+            // ✅ INLINE ĐỂ PREVIEW ĐƯỢC (thay vì attachment)
+            headers.add("Content-Disposition", "inline; filename=\"" + fileName + ".pdf\"");
+
+            // ✅ THÊM CÁC HEADERS KHÁC
+            headers.setContentLength(pdfBytes.length);
+            headers.add("Accept-Ranges", "bytes");
+            headers.add("Cache-Control", "private, max-age=0");
+
+            System.out.println("✅ PDF Response Headers:");
+            System.out.println("📄 Content-Type: application/pdf");
+            System.out.println("📁 Filename: " + fileName + ".pdf");
+            System.out.println("📊 Size: " + pdfBytes.length + " bytes");
+
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(pdfBytes);
+
+        } catch (Exception e) {
+            System.err.println("❌ Error: " + e.getMessage());
+            return ResponseEntity.status(500).build();
+        }
+    }
+
+
+
+    // ✅ NỘI DUNG EMAIL CHO PDF
+    private String createEmailBodyForPDF(Contracts contract) {
+        return "Xin chào " + contract.getTenant().getFullname() + ",\n\n" +
+                "Đính kèm là file PDF hợp đồng thuê trọ phòng " + contract.getRoom().getNamerooms() + ".\n\n" +
+                "Vui lòng kiểm tra và liên hệ nếu có thắc mắc.\n\n" +
+                "Trân trọng!\n" +
+                "Ban quản lý";
+    }
+
+
 
     // KHÔI PHỤC: checkGuardianDuplicates endpoint
     @GetMapping("/check-guardian-duplicates")

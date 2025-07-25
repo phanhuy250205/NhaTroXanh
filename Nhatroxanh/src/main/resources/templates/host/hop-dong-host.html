@@ -271,12 +271,14 @@
                 <!-- Form Column -->
                 <div class="col-lg-7">
 
-                    <form
-                        th:action="${isEditMode} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}"
-                        method="post" enctype="multipart/form-data" th:object="${contract}" novalidate
-                        id="contractForm">
+                    <!-- ✅ SỬA DÒNG 274 -->
+                    <form th:action="${(isEditMode != null and isEditMode == true) and (contractId != null)} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}"
+                          method="post" enctype="multipart/form-data" th:object="${contract}" novalidate
+                          id="contractForm">
 
-                        <th:if test="${isEditMode}">
+
+
+                    <th:if test="${isEditMode}">
                             <input type="hidden" name="_method" value="PUT" />
                         </th:if>
                         <!-- Basic Info Card -->
@@ -306,13 +308,11 @@
                                             Trạng thái <span class="text-danger">*</span>
                                         </label>
                                         <select class="form-select" id="contract-status" th:field="*{status}" required>
-                                            <option value="">Trạng thái</option>
-                                            <option value="DRAFT" th:selected="${contract.status == 'DRAFT'}">Dự thảo
-                                            </option>
-                                            <option value="active" th:selected="${contract.status == 'active'}">Đang
-                                                hiệu lực</option>
-                                            <option value="expired" th:selected="${contract.status == 'expired'}">Hết
-                                                hiệu lực</option>
+                                            <option value="">Chọn trạng thái</option>
+                                            <option value="DRAFT">Bản nháp</option>
+                                            <option value="ACTIVE">Đang hiệu lực</option>
+                                            <option value="TERMINATED">Đã Chấm Dứt</option>
+                                            <option value="EXPIRED">Hết Hạn</option>
                                         </select>
                                     </div>
                                 </div>
@@ -400,9 +400,9 @@
                                             Số CMND/CCCD <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" name="tenant.cccdNumber" id="tenant-id"
-                                            required pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
-                                            placeholder="123****789" th:field="*{tenant.cccdNumber}">
-                                        <!--                                    <input type="hidden" id="tenant-full-cccd-number" name="tenant.fullCccdNumber" th:field="*{tenant.fullCccdNumber}">-->
+                                               required pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
+                                               placeholder="123****789" th:field="*{tenant.maskedCccdNumber}">
+                                        <input type="hidden" th:field="*{tenant.cccdNumber}" id="tenant-cccd-number">
                                     </div>
 
                                     <div class="col-md-5">
@@ -429,7 +429,7 @@
                                         <select class="form-select" id="tenant-province" th:field="*{tenant.province}"
                                             required>
                                             <option value="">Tỉnh/Thành phố</option>
-                                            <option th:value="${tenant.province}" th:text="${contract.tenant.province}"
+                                            <option th:value="*{tenant.province}" th:text="${contract.tenant.province}"
                                                 th:if="${contract.tenant.province != null}"></option>
                                             <!-- Options sẽ được điền động bằng JavaScript -->
                                         </select>
@@ -442,7 +442,7 @@
                                         <select class="form-select" id="tenant-district" th:field="*{tenant.district}"
                                             required>
                                             <option value="">Quận/Huyện</option>
-                                            <option th:value="${tenant.district}" th:text="${contract.tenant.district}"
+                                            <option th:value="*{tenant.district}" th:text="${contract.tenant.district}"
                                                 th:if="${contract.tenant.district != null}"></option>
                                         </select>
                                     </div>
@@ -453,7 +453,7 @@
                                         </label>
                                         <select class="form-select" id="tenant-ward" th:field="*{tenant.ward}" required>
                                             <option value="">Phường/Xã</option>
-                                            <option th:value="${tenant.ward}" th:text="${contract.tenant.ward}"
+                                            <option th:value="*{tenant.ward}" th:text="${contract.tenant.ward}"
                                                 th:if="${contract.tenant.ward != null}"></option>
                                         </select>
                                     </div>
@@ -1321,7 +1321,7 @@
                         console.log('🔍 Filtered rooms:', filteredRooms);  // Debug
 
                         if (filteredRooms.length === 0) {
-                            roomOptions += '<option value="">Không có phòng unactive</option>';
+                            roomOptions += '<option value="">Phòng Hiện tại đã hết </option>';
                         } else {
                             filteredRooms.forEach(room => {
                                 const province = room.province ? (room.province.includes('Đà Nẵng') ? 'Đà Nẵng' : room.province) : 'Đà Nẵng';
