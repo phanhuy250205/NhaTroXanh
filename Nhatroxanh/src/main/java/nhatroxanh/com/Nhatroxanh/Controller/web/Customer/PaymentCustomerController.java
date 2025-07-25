@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.validator.internal.util.Contracts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,10 +19,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.DetailPayments;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.DetailPayments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 
 @Controller
@@ -82,11 +82,11 @@ public class PaymentCustomerController {
                     item.getUnitPrice(),
                     item.getAmountUnitPrice())).toList());
 
-            Contracts contract = payment.getContract();
+            nhatroxanh.com.Nhatroxanh.Model.entity.Contracts contract = payment.getContract();
             if (contract == null) {
                 throw new RuntimeException("Hợp đồng không tồn tại cho hóa đơn ID: " + paymentId);
             }
-            Rooms room = contract.getRoom();
+            nhatroxanh.com.Nhatroxanh.Model.entity.Rooms room = contract.getRoom();
             if (room == null || room.getHostel() == null) {
                 throw new RuntimeException("Phòng hoặc nhà trọ không tồn tại cho hóa đơn ID: " + paymentId);
             }

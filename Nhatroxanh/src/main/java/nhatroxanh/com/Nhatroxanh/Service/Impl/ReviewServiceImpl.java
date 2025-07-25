@@ -1,6 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
 import nhatroxanh.com.Nhatroxanh.Repository.ReviewRepository;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;

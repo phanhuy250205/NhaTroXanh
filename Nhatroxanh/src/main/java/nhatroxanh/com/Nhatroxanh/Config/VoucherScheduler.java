@@ -1,7 +1,15 @@
 package nhatroxanh.com.Nhatroxanh.Config;
 
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
 import jakarta.transaction.Transactional;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.slf4j.Logger;

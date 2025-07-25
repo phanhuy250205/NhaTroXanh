@@ -8,9 +8,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.VoucherDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.VoucherStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.VoucherStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 
 public interface VoucherService {

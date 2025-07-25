@@ -10,10 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -117,10 +117,19 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "ORDER BY u.createdAt ASC")
     Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
 
+
+    @Query("SELECT u FROM Users u " +
+           "LEFT JOIN u.userCccd uc " + // LEFT JOIN với UserCccd
+           "WHERE (uc.cccdNumber = :cccd OR :cccd IS NULL) " + // Tìm theo CCCD nếu cccd không null
+           "AND (u.phone = :phone OR :phone IS NULL)")        // Tìm theo Phone nếu phone không null
+    Optional<Users> findByCccdOrPhone(@Param("cccd") String cccd, @Param("phone") String phone);
+
+
     Page<Users> findByRoleAndStatus(Users.Role role, Users.Status status, Pageable pageable);
 
     @Query("SELECT u FROM Users u WHERE u.role = :role AND u.status = :status AND (LOWER(u.fullname) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<Users> findPendingOwnersBySearch(@Param("role") Users.Role role, @Param("status") Users.Status status,
             @Param("search") String search, Pageable pageable);
+
 
 }

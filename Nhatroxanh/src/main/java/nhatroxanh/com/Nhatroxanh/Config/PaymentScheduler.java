@@ -2,7 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
 import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;

@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Gọi đến URL xử lý đăng nhập của Spring Security
             fetch("/login-processing", {
                 method: "POST",
-                headers: {
+                headers: {  
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: formData,

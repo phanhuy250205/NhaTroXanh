@@ -1,7 +1,7 @@
 
 package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
 
 import org.springframework.beans.factory.annotation.Autowired;

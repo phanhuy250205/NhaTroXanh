@@ -1,8 +1,10 @@
 package nhatroxanh.com.Nhatroxanh.Config;
 
-import io.github.cdimascio.dotenv.Dotenv;
+
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.annotation.Configuration;
+
+import io.github.cdimascio.dotenv.Dotenv;
 
 @Configuration
 public class EnvConfig {

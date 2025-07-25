@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
                                 "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**",
                                 "/vnpay/**",
-                                "/tat-ca-phong-tro","/khach-thue/lich-su-thanh-toan")
+                                "/tat-ca-phong-tro")
                         .permitAll()
                         .requestMatchers("/dang-ky-chi-tiet", "/hoan-tat-dang-ky").permitAll()
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
@@ -76,8 +76,8 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login-processing")
                         .usernameParameter("username") // <-- Sửa lại tên parameter cho đúng với JS
                         .passwordParameter("password")
-                        .successHandler(customLoginSuccessHandler) // <-- CHỈ GIỮ LẠI HANDLER NÀY
-                        .failureHandler((request, response, exception) -> { // Giữ nguyên failureHandler
+                        .successHandler(customLoginSuccessHandler) // <-- ĐÃ SỬA: Chỉ giữ lại trình xử lý đúng
+                        .failureHandler((request, response, exception) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("text/plain; charset=UTF-8");
                             response.getWriter().write("Tên đăng nhập hoặc mật khẩu không chính xác.");

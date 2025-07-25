@@ -15,8 +15,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;

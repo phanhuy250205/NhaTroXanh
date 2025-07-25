@@ -19,8 +19,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.HostInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
@@ -185,9 +185,11 @@ public class HostProfileController {
     }
 
     @PostMapping("/chi-tiet-khach-thue/update")
+
     public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
             @RequestParam("status") Boolean newStatus,
             RedirectAttributes redirectAttributes) {
+
 
         try {
             tenantService.updateContractStatus(contractId, newStatus);
