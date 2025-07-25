@@ -63,9 +63,9 @@ public class Payments {
 
     public enum PaymentMethod {
         TIỀN_MẶT,
-        BANK,
         VNPAY,
-        MOMO
+        MOMO,
+        ZALOPAY
     }
     
 }

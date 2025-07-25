@@ -52,25 +52,20 @@ public class StaffVoucherController {
     @GetMapping
     public String showVoucherList(
             Model model,
-            @AuthenticationPrincipal CustomUserDetails currentUserDetails, // <-- lấy người đăng nhập
+            @AuthenticationPrincipal CustomUserDetails currentUserDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String statusFilter,
             @RequestParam(required = false) String sortBy) {
 
-        // Lấy entity Users từ CustomUserDetails
         Users currentUser = currentUserDetails.getUser();
-
-        // Thiết lập sắp xếp
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         if ("oldest".equalsIgnoreCase(sortBy)) {
             sort = Sort.by(Sort.Direction.ASC, "createdAt");
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);
-
-        // Xác định trạng thái nếu có filter
         Boolean status = null;
         if ("Hoạt động".equalsIgnoreCase(statusFilter)) {
             status = true;
@@ -79,8 +74,6 @@ public class StaffVoucherController {
         }
 
         Page<Vouchers> vouchers;
-
-        // Truy vấn dữ liệu phù hợp theo các trường hợp lọc
         if (search != null && !search.trim().isEmpty()) {
             if (status != null) {
                 vouchers = voucherRepository.searchVouchersByStatus(currentUser, search.trim(), status, pageable);
@@ -95,7 +88,6 @@ public class StaffVoucherController {
             }
         }
 
-        // Truyền dữ liệu ra view
         model.addAttribute("vouchers", vouchers);
         model.addAttribute("page", page);
         model.addAttribute("search", search);
@@ -110,7 +102,6 @@ public class StaffVoucherController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirect) {
-        // Kiểm tra giá trị giảm giá không vượt quá 10% giá trị tối thiểu
         double maxDiscount = voucher.getMinAmount() * 0.1;
         if (voucher.getDiscountValue() > maxDiscount) {
             bindingResult.rejectValue("discountValue", "error.discountValue",
@@ -189,7 +180,6 @@ public class StaffVoucherController {
             BindingResult bindingResult,
             RedirectAttributes redirect,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
-        // Kiểm tra giá trị giảm giá không vượt quá 10% giá trị tối thiểu
         double maxDiscount = updatedVoucher.getMinAmount() * 0.1;
         if (updatedVoucher.getDiscountValue() > maxDiscount) {
             bindingResult.rejectValue("discountValue", "error.discountValue",
@@ -276,5 +266,25 @@ public class StaffVoucherController {
         Map<String, String> response = new HashMap<>();
         response.put("code", voucherService.generateUniqueVoucherCode());
         return response;
+    }
+
+    @PostMapping("/gui-thong-bao/{id}")
+    public String sendVoucherNotification(@PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirect) {
+        try {
+            Vouchers voucher = voucherRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
+
+            if (!voucher.getUser().getUserId().equals(userDetails.getUserId())) {
+                throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
+            }
+
+            voucherService.sendVoucherNotification(voucher, userDetails);
+            redirect.addFlashAttribute("successMessage", "Gửi thông báo voucher thành công!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("errorMessage", "Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+        return "redirect:/nhan-vien/khuyen-mai";
     }
 }

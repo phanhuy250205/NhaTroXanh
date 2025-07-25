@@ -61,7 +61,7 @@ public class SecurityConfig {
                                 "/uploads/**")
                         .permitAll()
                         .requestMatchers("/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
-                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**",
+                                "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher", "/momo/**","/zalopay/**",
                                 "/vnpay/**",
                                 "/tat-ca-phong-tro")
                         .permitAll()

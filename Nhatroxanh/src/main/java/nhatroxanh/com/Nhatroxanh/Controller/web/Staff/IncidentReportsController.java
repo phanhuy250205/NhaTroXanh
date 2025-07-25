@@ -20,6 +20,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.IncidentReportsRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
+import nhatroxanh.com.Nhatroxanh.Service.IncidentReportsService;
 
 @Controller
 @RequestMapping("/nhan-vien")
@@ -30,6 +31,9 @@ public class IncidentReportsController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private IncidentReportsService incidentReportsService;
 
     @GetMapping("/khieu-nai")
     public String viewReports(@RequestParam(defaultValue = "0") int page,
@@ -69,33 +73,20 @@ public class IncidentReportsController {
             @RequestParam("status") String newStatus,
             RedirectAttributes redirectAttributes) {
 
-        Optional<IncidentReports> optional = incidentReportsRepository.findById(reportId);
-
-        if (optional.isPresent()) {
-            IncidentReports report = optional.get();
-
+        try {
+            // Create updated incident with new status
+            IncidentReports updatedIncident = new IncidentReports();
             IncidentReports.IncidentStatus statusEnum = IncidentReports.IncidentStatus.valueOf(newStatus);
-            report.setStatus(statusEnum);
+            updatedIncident.setStatus(statusEnum);
 
-            if (statusEnum == IncidentReports.IncidentStatus.DANG_XU_LY && report.getResolvedAt() == null) {
-                report.setResolvedAt(new java.sql.Date(System.currentTimeMillis()));
-            }
-
-            incidentReportsRepository.save(report);
-
-            Users user = report.getUser();
-            String to = user.getEmail();
-            if (to != null && !to.isBlank()) {
-                if (statusEnum == IncidentReports.IncidentStatus.DANG_XU_LY) {
-                    emailService.sendIncidentProcessingEmail(to, report);
-                } else if (statusEnum == IncidentReports.IncidentStatus.DA_XU_LY) {
-                    emailService.sendIncidentResolvedEmail(to, report);
-                }
-            }
+            // Use service layer to update incident (this will trigger notifications)
+            incidentReportsService.updateIncident(reportId, updatedIncident);
 
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy báo cáo!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy báo cáo hoặc trạng thái không hợp lệ!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật trạng thái!");
         }
 
         return "redirect:/nhan-vien/chi-tiet-khieu-nai/" + reportId;

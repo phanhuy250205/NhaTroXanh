@@ -352,6 +352,17 @@
             transform: scale(1.05);
         }
 
+        .action-btn-notify {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .action-btn-notify:hover {
+            background: var(--warning-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
         /* Modal Styles */
         .modal-content {
             border: none;
@@ -669,6 +680,13 @@
                                         th:onclick="'window.location.href=\'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id} + '\';'">
                                         <i class="fas fa-edit"></i>
                                     </button>
+                                    <form th:action="@{/nhan-vien/khuyen-mai/gui-thong-bao/{id}(id=${voucher.id})}" method="post"
+                                        class="send-notification-form" th:data-id="${voucher.id}" style="display: inline;">
+                                        <button type="submit" class="btn action-btn action-btn-notify" 
+                                                title="Gửi thông báo voucher đến người dùng">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    </form>
                                     <form th:action="@{/nhan-vien/khuyen-mai/xoa/{id}(id=${voucher.id})}" method="post"
                                         th:object="${voucher}" class="delete-voucher-form" th:data-id="${voucher.id}">
                                         <button type="submit" class="btn action-btn action-btn-delete">
@@ -994,6 +1012,41 @@
                         cancelButtonText: 'Hủy'
                     }).then((result) => {
                         if (result.isConfirmed) {
+                            form.submit(); // Gửi form nếu người dùng xác nhận
+                        }
+                    });
+                });
+            });
+
+            // Handle send notification forms
+            const notificationForms = document.querySelectorAll('.send-notification-form');
+
+            notificationForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Ngăn submit mặc định
+
+                    Swal.fire({
+                        title: 'Gửi thông báo voucher?',
+                        text: "Thông báo voucher sẽ được gửi đến tất cả người dùng phù hợp!",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f59e0b',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Gửi thông báo',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading state
+                            Swal.fire({
+                                title: 'Đang gửi thông báo...',
+                                text: 'Vui lòng đợi trong giây lát',
+                                icon: 'info',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
                             form.submit(); // Gửi form nếu người dùng xác nhận
                         }
                     });

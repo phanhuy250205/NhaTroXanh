@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
@@ -40,7 +41,6 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
     String findAddressByUserId(@Param("userId") Integer userId);
 
-    // Hoặc nếu bạn muốn join trực tiếp từ Users
     @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
     Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
 
@@ -97,11 +97,9 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.phone = :phone AND u.userId <> :userId")
     boolean existsByPhoneAndNotUserId(@Param("phone") String phone, @Param("userId") Integer userId);
 
-    // Tìm staff có thông tin ngân hàng đầy đủ
     @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL")
     Optional<Users> findByRoleAndEnabledAndBankAccountIsNotNull(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
 
-    // Tìm staff đang hoạt động có thông tin ngân hàng đầy đủ để tạo QR
     @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
            "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
            "AND u.accountHolderName IS NOT NULL " +
@@ -109,7 +107,6 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "ORDER BY u.createdAt ASC")
     List<Users> findActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
 
-    // Tìm staff đang hoạt động có thông tin ngân hàng đầy đủ (lấy 1 record đầu tiên)
     @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
            "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
            "AND u.accountHolderName IS NOT NULL " +
@@ -131,5 +128,18 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     Page<Users> findPendingOwnersBySearch(@Param("role") Users.Role role, @Param("status") Users.Status status,
             @Param("search") String search, Pageable pageable);
 
+    @Query("SELECT DISTINCT u FROM Users u " +
+           "LEFT JOIN FETCH u.rentedContracts c " +
+           "LEFT JOIN FETCH c.room r " +
+           "LEFT JOIN FETCH r.hostel h " +
+           "WHERE h.hostelId = :hostelId")
+    List<Users> findByHostelId(@Param("hostelId") Integer hostelId);
 
+     @Query("SELECT DISTINCT u FROM Users u " +
+           "LEFT JOIN FETCH u.rentedContracts c " +
+           "LEFT JOIN FETCH c.room r " +
+           "LEFT JOIN FETCH r.hostel h " +
+           "WHERE h.hostelId = :hostelId AND u.role = :role")
+    List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
+        List<Users> findByRole(String role);
 }

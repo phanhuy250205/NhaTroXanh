@@ -27,6 +27,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 import jakarta.transaction.Transactional;
 
 @Controller
@@ -46,6 +47,9 @@ public class ProfileAdminController {
 
     @Autowired
     private RoomsRepository roomsRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping
     public String showProfile(@AuthenticationPrincipal CustomUserDetails currentUser, Model model) {

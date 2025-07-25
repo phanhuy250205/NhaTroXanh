@@ -501,7 +501,7 @@ public class PayController {
         switch (method) {
             case VNPAY: return "VNPay";
             case MOMO: return "MoMo";
-            case BANK: return "Ngân hàng";
+            case ZALOPAY: return "ZaloPay";
             case TIỀN_MẶT: return "Tiền mặt";
             default: return method.toString();
         }
