@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}"></head>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Hệ thống Quản lý Trọ</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --info-color: #8e44ad;
+            --light-bg: #f8f9fa;
+            --dark-text: #3e83cc;
+            --border-color: #dee2e6;
+        }
+
+
+        .top-navbar {
+            background: white;
+            padding: clamp(10px, 2vw, 15px) clamp(15px, 3vw, 30px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: clamp(20px, 3vw, 30px);
+        }
+
+        .page-title {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .breadcrumb-custom {
+            background: none;
+            padding: 0;
+            margin: 0;
+            font-size: clamp(12px, 2vw, 14px);
+        }
+
+        .stats-container {
+            padding: clamp(10px, 2vw, 15px) clamp(15px, 3vw, 30px);
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: clamp(15px, 3vw, 25px);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            border: none;
+            transition: all 0.3s ease;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--secondary-color);
+        }
+
+        .stat-card.revenue::before {
+            background: var(--success-color);
+        }
+
+        .stat-card.rooms::before {
+            background: var(--secondary-color);
+        }
+
+        .stat-card.users::before {
+            background: var(--warning-color);
+        }
+
+        .stat-card.rentals::before {
+            background: var(--info-color);
+        }
+
+        .stat-card.complaints::before {
+            background: var(--accent-color);
+        }
+
+        .stat-icon {
+            width: clamp(50px, 8vw, 70px);
+            height: clamp(50px, 8vw, 70px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(1.5rem, 3vw, 2rem);
+            color: white;
+            margin-bottom: clamp(10px, 2vw, 20px);
+        }
+
+        .stat-icon.revenue {
+            background: linear-gradient(135deg, var(--success-color), #2ecc71);
+        }
+
+        .stat-icon.rooms {
+            background: linear-gradient(135deg, var(--secondary-color), #5dade2);
+        }
+
+        .stat-icon.users {
+            background: linear-gradient(135deg, var(--warning-color), #f7dc6f);
+        }
+
+        .stat-icon.rentals {
+            background: linear-gradient(135deg, var(--info-color), #bb8fce);
+        }
+
+        .stat-icon.complaints {
+            background: linear-gradient(135deg, var(--accent-color), #ec7063);
+        }
+
+        .stat-number {
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            font-weight: 700;
+            margin: 0;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            color: #7f8c8d;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            padding: clamp(3px, 1vw, 5px) clamp(6px, 1.5vw, 10px);
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 1.5vw, 0.9rem);
+            font-weight: 600;
+            margin-top: clamp(5px, 1vw, 10px);
+        }
+
+        .stat-change.positive {
+            background: #d5f4e6;
+            color: var(--success-color);
+        }
+
+        .stat-change.negative {
+            background: #fadbd8;
+            color: var(--accent-color);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: clamp(10px, 2vw, 20px);
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+            margin-top: clamp(15px, 2vw, 20px);
+            position: relative;
+            width: 100%;
+            min-width: 200px;
+            /* Prevent charts from becoming too small */
+            height: auto;
+        }
+
+        .chart-container canvas {
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .chart-title {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: clamp(8px, 1.5vw, 15px);
+            text-align: center;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: clamp(10px, 1.5vw, 15px);
+            margin-bottom: clamp(20px, 3vw, 30px);
+        }
+
+        .chart-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: clamp(10px, 1.5vw, 20px);
+            margin-top: clamp(15px, 2vw, 20px);
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1400px) {
+            .chart-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .chart-container {
+                min-width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chart-row {
+                grid-template-columns: 1fr;
+            }
+            .chart-container {
+                min-width: 100%;
+                padding: 10px;
+            }
+
+            .stats-container {
+                padding: 10px;
+            }
+
+            .top-navbar {
+                padding: 10px 15px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+
+            .stat-number {
+                font-size: 1.8rem;
+            }
+
+            .stat-label {
+                font-size: 0.9rem;
+            }
+
+            .chart-title {
+                font-size: 1.1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .breadcrumb-custom {
+                font-size: 12px;
+            }
+
+            .chart-container {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{/layouts/sidebar-admin}"></div>
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <div class="top-navbar">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="page-title">Thống kê tổng quan</h1>
+
+            </div>
+        </div>
+        <div class="stats-container">
+            <!-- Quick Stats Cards -->
+            <div class="quick-stats">
+                <!-- Doanh thu tổng -->
+                <div class="stat-card revenue">
+                    <div class="stat-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h2 class="stat-number" th:text="${#numbers.formatDecimal(stats.totalRevenue, 1, 2)} + 'M'"></h2>
+                    <p class="stat-label">Doanh thu tổng (VNĐ)</p>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +12.5% so với tháng trước
+                    </span>
+                </div>
+
+                <!-- Số lượng phòng -->
+                <div class="stat-card rooms">
+                    <div class="stat-icon rooms">
+                        <i class="fas fa-door-open"></i>
+                    </div>
+                    <h2 class="stat-number" th:text="${stats.totalRooms}"></h2>
+                    <p class="stat-label">Tổng số phòng</p>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +5 phòng mới
+                    </span>
+                </div>
+
+                <!-- Số lượng người dùng -->
+                <div class="stat-card users">
+                    <div class="stat-icon users">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h2 class="stat-number" th:text="${stats.totalUsers}"></h2>
+                    <p class="stat-label">Số người dùng</p>
+                    <span class="stat-change positive">
+                        <i class="fas fa-arrow-up"></i> +8.2% tăng trưởng
+                    </span>
+                </div>
+
+                <!-- Hợp đồng thuê -->
+                <div class="stat-card rentals">
+                    <div class="stat-icon rentals">
+                        <i class="fas fa-file-contract"></i>
+                    </div>
+                    <h2 class="stat-number" th:text="${stats.totalContracts}"></h2>
+                    <p class="stat-label">Hợp đồng thuê trả</p>
+                    <span class="stat-change negative">
+                        <i class="fas fa-arrow-down"></i> -2.1% so với tháng trước
+                    </span>
+                </div>
+
+                <!-- Khiếu nại, sự cố -->
+                <div class="stat-card complaints">
+                    <div class="stat-icon complaints">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                    <h2 class="stat-number" th:text="${stats.totalIncidents}"></h2>
+                    <p class="stat-label">Khiếu nại & Sự cố</p>
+                    <span class="stat-change negative">
+                        <i class="fas fa-arrow-up"></i> +3 khiếu nại mới
+                    </span>
+                </div>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="chart-row">
+                <!-- Revenue Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Biểu đồ Doanh thu 12 tháng</h3>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+
+                <!-- Room Occupancy Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Tỷ lệ lấp đầy phòng</h3>
+                    <canvas id="occupancyChart"></canvas>
+                </div>
+
+                <!-- User Growth Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Tăng trưởng người dùng</h3>
+                    <canvas id="userGrowthChart"></canvas>
+                </div>
+
+                <!-- Complaints Chart -->
+                <div class="chart-container">
+                    <h3 class="chart-title">Phân bố khiếu nại theo loại</h3>
+                    <canvas id="complaintsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script th:inline="javascript">
+        // Biểu đồ Doanh thu 12 tháng
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        const revenueLabels = /*[[${stats.revenueChart.labels}]]*/[];
+        const revenueData = /*[[${stats.revenueChart.data}]]*/[];
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: revenueLabels,
+                datasets: [{
+                    label: 'Doanh thu (Triệu VNĐ)',
+                    data: revenueData,
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: value => value + 'M'
+                        }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ tỷ lệ lấp đầy phòng
+        const occupancyCtx = document.getElementById('occupancyChart').getContext('2d');
+        const occupancyData = /*[[${ stats.occupancyChart }]]*/[];
+        new Chart(occupancyCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(occupancyData),
+                datasets: [{
+                    data: Object.values(occupancyData),
+                    backgroundColor: ['#3498db', '#f39c12', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+
+        // Biểu đồ tăng trưởng người dùng
+        const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+        const userGrowthData = /*[[${ stats.userGrowthChart }]]*/[];
+        new Chart(userGrowthCtx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(userGrowthData),
+                datasets: [{
+                    label: 'Người dùng mới',
+                    data: Object.values(userGrowthData),
+                    backgroundColor: '#f39c12',
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Biểu đồ phân bố khiếu nại theo loại
+        const complaintsCtx = document.getElementById('complaintsChart').getContext('2d');
+        const complaintsData = /*[[${ stats.complaintsChart }]]*/[];
+        new Chart(complaintsCtx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(complaintsData),
+                datasets: [{
+                    data: Object.values(complaintsData),
+                    backgroundColor: ['#e74c3c', '#8e44ad', '#f39c12', '#3498db', '#95a5a6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                aspectRatio: 1.5,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,305 @@
+/* Forgot Password Modal Styles */
+.forgot-password-modal-overlay-guest {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-modal-overlay-guest.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.forgot-password-modal-guest {
+    background: linear-gradient(135deg, #c3f6ff 0%, #69c2e8 100%);
+    border-radius: 10px;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.forgot-password-modal-guest .logo-transparent-guest {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%;
+    z-index: -20;
+    opacity: 0.1;
+}
+
+.forgot-password-modal-overlay-guest.show .forgot-password-modal-guest {
+    transform: scale(1);
+}
+
+.forgot-password-modal-header-guest {
+    position: relative;
+    padding: 20px 20px 0;
+}
+
+.forgot-password-modal-close-guest {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.forgot-password-modal-close-guest:hover {
+    background-color: rgba(255, 0, 0, 0.85);
+    box-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.forgot-password-modal-content-guest {
+    padding: 20px 30px 30px;
+}
+
+.forgot-password-greeting-guest h3 {
+    color: #333;
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 5px 0;
+}
+
+.forgot-password-greeting-guest h2 {
+    color: #333;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 30px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.forgot-password-form-guest {
+    border-radius: 10px;
+    width: 100%;
+    background-color: #ffffff67;
+    padding: 20px;
+}
+
+.forgot-password-modal-guest .logo-forgot-password-guest {
+    width: 120px;
+    z-index: -10;
+    position: absolute;
+    right: 50px;
+    top: 40px;
+}
+
+.forgot-password-modal-guest .form-group-guest {
+    margin-bottom: 25px;
+}
+
+.forgot-password-modal-guest .input-wrapper-guest {
+    position: relative;
+    background-color: rgba(136, 215, 255, 0.151);
+    border-radius: 8px;
+    border: 1px solid #4e4e4e;
+    overflow: hidden;
+}
+
+.forgot-password-modal-guest .input-icon-guest {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    font-size: 16px;
+    z-index: 2;
+}
+
+.form-control-forgot-password-guest {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    color: #333;
+    outline: none;
+}
+
+.form-control-forgot-password-guest::placeholder {
+    color: #686868;
+}
+
+.forgot-password-buttons-guest {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.btn-forgot-password-submit-guest {
+    width: 100%;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-forgot-password-submit-guest:hover {
+    background-color: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+.btn-back-to-login-guest {
+    width: 100%;
+    background-color: transparent;
+    color: #c72c2c;
+    border: 2px solid #c72c2c;
+    padding: 12px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background-color: #fbeeee79;
+}
+
+.btn-back-to-login-guest:hover {
+    background-color: #fbe2e294;
+    color: #c72c2c;
+}
+
+.forgot-password-info-guest {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 4px solid #4a90e2;
+}
+
+.forgot-password-info-guest p {
+    margin: 0;
+    font-size: 13px;
+    color: #333;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.forgot-password-info-guest i {
+    color: #4a90e2;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.alert-guest {
+    padding: 10px 15px;
+    border-radius: 5px;
+    font-weight: 500;
+}
+
+.alert-danger-guest {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.alert-success-guest {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+/* Animation for form elements */
+.forgot-password-modal-guest .input-wrapper-guest {
+    transition: all 0.3s ease;
+}
+
+.forgot-password-modal-guest .input-wrapper-guest:focus-within {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+}
+
+.form-control-forgot-password-guest:focus {
+    outline: none;
+}
+
+/* Loading state for submit button */
+.btn-forgot-password-submit-guest.loading {
+    position: relative;
+    color: transparent;
+}
+
+.btn-forgot-password-submit-guest.loading::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin-guest 1s linear infinite;
+}
+
+@keyframes spin-guest {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .forgot-password-modal-guest {
+        width: 95%;
+        margin: 20px;
+    }
+
+    .forgot-password-modal-content-guest {
+        padding: 15px 20px 25px;
+    }
+
+    .forgot-password-greeting-guest h2 {
+        font-size: 20px;
+    }
+
+    .form-control-forgot-password-guest {
+        padding: 12px 12px 12px 40px;
+    }
+
+    .btn-forgot-password-submit-guest {
+        padding: 12px;
+    }
+}

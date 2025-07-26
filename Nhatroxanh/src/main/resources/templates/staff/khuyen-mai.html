@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <title>Quản lý Voucher</title>
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --secondary-color: #6c757d;
+            --success-color: #22c55e;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --info-color: #3b82f6;
+            --light-color: #f8fafc;
+            --dark-color: #1e293b;
+        }
+
+
+
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            width: 350px;
+        }
+
+        .notification {
+            margin-bottom: 10px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            overflow: hidden;
+            border: none;
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, var(--success-color), #16a34a);
+            color: white;
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+            color: white;
+        }
+
+        .notification.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+            color: white;
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, var(--info-color), #2563eb);
+            color: white;
+        }
+
+        .notification-header {
+            padding: 1rem 1.25rem 0.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notification-body {
+            padding: 0 1.25rem 1rem;
+            font-size: 0.9rem;
+            opacity: 0.95;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Header Styles */
+        .page-header {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.75rem;
+            margin: 0;
+        }
+
+        .btn-create {
+            background: linear-gradient(135deg, var(--primary-color), #2563eb);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+            color: white;
+        }
+
+        /* Search and Filter Section */
+        .search-filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 2rem;
+        }
+
+        .search-input-group {
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-group .form-control {
+            border: none;
+            padding: 0.75rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .search-input-group .btn {
+            border: none;
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .filter-select {
+            border-radius: 50px;
+            border: 2px solid #e5e7eb;
+            padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+            font-size: 0.9rem;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .filter-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .filter-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--secondary-color);
+            z-index: 10;
+        }
+
+        /* Custom Tabs */
+        .custom-tabs {
+            border: none;
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 16px;
+            padding: 0.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .custom-tab {
+            border: none;
+            background: transparent;
+            color: var(--secondary-color);
+            padding: 0.75rem 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+
+        .custom-tab:hover {
+            background: rgba(62, 131, 204, 0.1);
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .custom-tab.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        /* Voucher Cards */
+        .voucher-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s ease;
+            overflow: hidden;
+            border: none;
+            position: relative;
+        }
+
+        .voucher-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #2563eb);
+        }
+
+        .voucher-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .voucher-card-body {
+            padding: 1.5rem;
+        }
+
+        .voucher-title {
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .voucher-info {
+            margin-bottom: 0.75rem;
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .voucher-info i {
+            width: 20px;
+            color: var(--primary-color);
+            margin-right: 0.75rem;
+        }
+
+        .voucher-info-value {
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-active {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-expired {
+            background: rgba(107, 114, 128, 0.1);
+            color: var(--secondary-color);
+        }
+
+        .status-inactive {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-color);
+        }
+
+        /* Action Buttons */
+        .action-btn {
+            width: 44px;
+            /* hoặc 40px tùy bạn */
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 16px;
+            padding: 0;
+            border: 2px solid;
+            background-color: white;
+            transition: all 0.3s ease;
+        }
+
+
+        .action-btn-edit {
+            border-color: var(--info-color);
+            color: var(--info-color);
+        }
+
+        .action-btn-edit:hover {
+            background: var(--info-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-delete {
+            border-color: var(--danger-color);
+            color: var(--danger-color);
+        }
+
+        .action-btn-delete:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-approve {
+            border-color: var(--success-color);
+            color: var(--success-color);
+        }
+
+        .action-btn-approve:hover {
+            background: var(--success-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-reject {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .action-btn-reject:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .action-btn-notify {
+            border-color: var(--warning-color);
+            color: var(--warning-color);
+        }
+
+        .action-btn-notify:hover {
+            background: var(--warning-color);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border: none;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border: none;
+            padding: 1.5rem 1.5rem 0;
+        }
+
+        .modal-title {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-section {
+            background: var(--light-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control,
+        .form-select {
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        /* Status Toggle Button */
+        .status-toggle-btn {
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .status-toggle-active {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-toggle-inactive {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .status-toggle-expired {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-content {
+            padding: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 1rem;
+            }
+
+            .notification-container {
+                width: calc(100% - 2rem);
+                left: 1rem;
+                right: 1rem;
+            }
+
+            .page-header {
+                text-align: center;
+            }
+
+
+            .custom-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .text-danger {
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="notification-container"></div>
+    <div class="main-content">
+        <!-- Header -->
+        <div class="page-header d-flex justify-content-between align-items-center mb-3">
+            <h4 class="page-title">
+                <i class="fa-solid fa-gift me-2"></i> Quản lý Voucher
+            </h4>
+            <button class="btn btn-create" data-bs-toggle="modal" data-bs-target="#internalVoucherModal">
+                <i class="fa fa-plus me-2"></i> Tạo Voucher
+            </button>
+        </div>
+
+        <div class="search-filter-section">
+            <form th:action="@{/nhan-vien/khuyen-mai}" method="get">
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <div class="input-group search-input-group">
+                            <input type="text" class="form-control ms-3" name="search" th:value="${search}"
+                                placeholder="Tìm kiếm voucher...">
+                            <button class="btn ms-2" type="submit">
+                                <i class="fa fa-magnifying-glass"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6 d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
+                        <div class="position-relative">
+                            <i class="fa fa-filter filter-icon"></i>
+                            <select class="form-select filter-select" name="statusFilter">
+                                <option value="">Trạng thái</option>
+                                <option value="Hoạt động" th:selected="${statusFilter == 'Hoạt động'}">Hoạt động
+                                </option>
+                                <option value="Ngừng hoạt động" th:selected="${statusFilter == 'Ngừng hoạt động'}">Ngừng
+                                    hoạt động</option>
+                            </select>
+                        </div>
+
+                        <div class="position-relative">
+                            <i class="fa fa-calendar-alt filter-icon"></i>
+                            <select class="form-select filter-select" name="sortBy">
+                                <option value="">Ngày</option>
+                                <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
+                                <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
+        <ul class="nav custom-tabs" id="voucherTabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link custom-tab active" id="manage-tab" data-bs-toggle="tab" href="#manage" role="tab"
+                    aria-controls="manage" aria-selected="true">
+                    <i class="fas fa-cogs me-2"></i>Quản lý voucher
+                </a>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="voucherTabsContent">
+
+            <div class="tab-pane fade show active" id="manage" role="tabpanel" aria-labelledby="manage-tab">
+                <div class="row" id="voucherList">
+                    <div th:each="voucher : ${vouchers.content}" class="col-lg-4 col-md-6 mb-4">
+                        <div class="card voucher-card h-100">
+                            <div class="card-body voucher-card-body d-flex flex-column">
+                                <h5 class="voucher-title">
+                                    <i class="fas fa-gift me-2 text-warning"></i>
+                                    <span th:text="${voucher.title}">Tiêu đề</span>
+                                </h5>
+
+                                <div class="voucher-info"><i class="fas fa-user"></i> Người tạo:
+                                    <span class="voucher-info-value" th:text="${voucher.user.fullname}"></span>
+                                </div>
+
+                                <div class="voucher-info"><i class="fas fa-tag"></i> Mã:
+                                    <span class="voucher-info-value" th:text="${voucher.code}"></span>
+                                </div>
+
+                                <div class="voucher-info"><i class="fas fa-clock"></i> Thời gian:
+                                    <span class="voucher-info-value"
+                                        th:text="${#dates.format(voucher.startDate, 'dd/MM/yyyy')} + ' - ' + ${#dates.format(voucher.endDate, 'dd/MM/yyyy')}"></span>
+                                </div>
+
+                                <div class="voucher-info"><i class="fas fa-percent"></i> Giảm:
+                                    <span class="voucher-info-value" th:text="${voucher.formattedDiscount}"></span>
+                                </div>
+
+                                <div class="voucher-info"><i class="fas fa-wallet"></i> Đơn tối thiểu:
+                                    <span class="voucher-info-value"
+                                        th:text="${#numbers.formatDecimal(voucher.minAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                                </div>
+
+                                <div class="voucher-info"><i class="fas fa-check-circle"></i> Trạng thái:
+                                    <span
+                                        th:classappend="${voucher.status} ? 'status-badge status-active' : 'status-badge status-inactive'">
+                                        <i class="fas fa-check"></i>
+                                        <span th:text="${voucher.status} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></span>
+                                    </span>
+                                </div>
+
+                                <div class="voucher-info mb-3"><i class="fas fa-chart-bar"></i> Số lượng:
+                                    <span class="voucher-info-value" th:text="${voucher.quantity}"></span>
+                                </div>
+
+                                <div class="mt-auto d-flex justify-content-end gap-2">
+                                    <button type="button" class="action-btn action-btn-edit"
+                                        th:onclick="'window.location.href=\'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id} + '\';'">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form th:action="@{/nhan-vien/khuyen-mai/gui-thong-bao/{id}(id=${voucher.id})}" method="post"
+                                        class="send-notification-form" th:data-id="${voucher.id}" style="display: inline;">
+                                        <button type="submit" class="btn action-btn action-btn-notify" 
+                                                title="Gửi thông báo voucher đến người dùng">
+                                            <i class="fas fa-bell"></i>
+                                        </button>
+                                    </form>
+                                    <form th:action="@{/nhan-vien/khuyen-mai/xoa/{id}(id=${voucher.id})}" method="post"
+                                        th:object="${voucher}" class="delete-voucher-form" th:data-id="${voucher.id}">
+                                        <button type="submit" class="btn action-btn action-btn-delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pagination-container d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${vouchers.first} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/khuyen-mai(page=${vouchers.number - 1}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}">&laquo;</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, vouchers.totalPages - 1)}"
+                            th:classappend="${i == vouchers.number} ? 'active'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/khuyen-mai(page=${i}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}"
+                                th:text="${i + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${vouchers.last} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/nhan-vien/khuyen-mai(page=${vouchers.number + 1}, search=${search}, statusFilter=${statusFilter}, sortBy=${sortBy})}">&raquo;</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="internalVoucherModal" tabindex="-1" aria-labelledby="internalVoucherLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold" id="internalVoucherLabel">
+                        <i class="fa fa-star text-warning me-2"></i> Tạo Voucher Nội Bộ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body px-4 pb-4">
+                    <form th:action="@{/nhan-vien/khuyen-mai/tao}" th:object="${voucher}" method="post"
+                        id="createInternalVoucherForm">
+
+                        <div class="mb-3">
+                            <label class="form-label">Tên chương trình</label>
+                            <input type="text" class="form-control" th:field="*{title}" name="title"
+                                placeholder="VD: Tặng 5% cho người thuê mới">
+                            <div class="text-danger" id="error-title"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mã voucher</label>
+                            <input type="text" class="form-control text-uppercase" th:field="*{code}" name="code"
+                                placeholder="VD: NHANVIEN5">
+                            <div class="text-danger" th:errors="*{code}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Giá trị giảm</label>
+                            <input type="number" class="form-control" th:field="*{discountValue}" name="discountValue"
+                                placeholder="VD: 5 hoặc 50000">
+                            <div class="text-danger" id="error-discountValue"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" th:field="*{description}" name="description"></textarea>
+                            <div class="text-danger" id="error-description"></div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày bắt đầu</label>
+                                <input type="date" class="form-control" th:field="*{startDate}" name="startDate">
+                                <div class="text-danger" id="error-startDate"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Ngày kết thúc</label>
+                                <input type="date" class="form-control" th:field="*{endDate}" name="endDate">
+                                <div class="text-danger" id="error-endDate"></div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Đơn tối thiểu (VNĐ)</label>
+                                <input type="number" class="form-control" th:field="*{minAmount}" name="minAmount"
+                                    placeholder="VD: 1000000">
+                                <div class="text-danger" id="error-minAmount"></div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số lượng</label>
+                                <input type="number" class="form-control" th:field="*{quantity}" name="quantity"
+                                    placeholder="VD: 50">
+                                <div class="text-danger" id="error-quantity"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label d-block">Trạng thái voucher</label>
+                            <input type="hidden" th:field="*{status}" id="statusInputInternal" />
+                            <button type="button" id="statusBtnInternal" class="btn status-toggle-btn"
+                                th:classappend="${voucher.status} ? 'status-toggle-active' : 'status-toggle-inactive'">
+                                <i class="fas me-2"
+                                    th:classappend="${voucher.status} ? 'fa-check-circle' : 'fa-times-circle'"></i>
+                                <span th:text="${voucher.status} ? 'Đang áp dụng' : 'Ngừng áp dụng'">Đang áp dụng</span>
+                            </button>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-success fw-bold px-4">Tạo voucher</button>
+                            <button type="reset" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const statuses = [
+            {
+                text: 'Đang áp dụng',
+                class: 'status-toggle-active',
+                icon: 'fas fa-check-circle',
+                value: true
+            },
+            {
+                text: 'Ngừng áp dụng',
+                class: 'status-toggle-inactive',
+                icon: 'fas fa-ban',
+                value: false
+            }
+        ];
+
+        class StatusManager {
+            constructor(buttonId, hiddenInputName, defaultValue = true) {
+                this.statusBtn = document.getElementById(buttonId);
+                this.hiddenInput = document.querySelector(`input[name="${hiddenInputName}"]`);
+                this.currentStatus = statuses.findIndex(s => s.value === defaultValue);
+                this.statusBtn.addEventListener('click', this.toggleStatus.bind(this));
+                this.updateStatusDisplay();
+            }
+
+            toggleStatus(e) {
+                e.preventDefault();
+                this.currentStatus = (this.currentStatus + 1) % statuses.length;
+                this.updateStatusDisplay();
+            }
+
+            updateStatusDisplay() {
+                const status = statuses[this.currentStatus];
+                this.statusBtn.className = `btn status-toggle-btn ${status.class}`;
+                this.statusBtn.innerHTML = `<i class="${status.icon} me-2"></i> ${status.text}`;
+                this.hiddenInput.value = status.value;
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            new StatusManager("statusBtnInternal", "status", true);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterSelects = document.querySelectorAll('.filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function () {
+                    this.closest('form').submit();
+                });
+            });
+
+            const searchForm = document.querySelector('.search-filter-section form');
+            const searchInput = document.querySelector('.search-input-group input');
+            const searchButton = document.querySelector('.search-input-group button');
+
+            searchButton.addEventListener('click', function (e) {
+                e.preventDefault();
+                searchForm.submit();
+            });
+
+            searchInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.submit();
+                }
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("createInternalVoucherForm");
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault(); // Ngăn form submit nếu có lỗi
+                clearErrors();
+
+                let isValid = true;
+
+                const title = form.querySelector('[name="title"]');
+                const code = form.querySelector('[name="code"]');
+                const discount = form.querySelector('[name="discountValue"]');
+                const description = form.querySelector('[name="description"]');
+                const startDate = form.querySelector('[name="startDate"]');
+                const endDate = form.querySelector('[name="endDate"]');
+                const quantity = form.querySelector('[name="quantity"]');
+                const minAmount = form.querySelector('[name="minAmount"]');
+
+                // Kiểm tra rỗng hoặc sai logic
+                if (!title.value.trim()) {
+                    showError("title", "Tên chương trình không được để trống");
+                    isValid = false;
+                }
+
+                if (!code.value.trim()) {
+                    showError("code", "Mã voucher không được để trống");
+                    isValid = false;
+                }
+
+                if (!discount.value || parseFloat(discount.value) <= 0) {
+                    showError("discountValue", "Giá trị giảm phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (!description.value.trim()) {
+                    showError("description", "Mô tả không được để trống");
+                    isValid = false;
+                }
+
+                if (!startDate.value) {
+                    showError("startDate", "Ngày bắt đầu không được để trống");
+                    isValid = false;
+                }
+
+                if (!endDate.value) {
+                    showError("endDate", "Ngày kết thúc không được để trống");
+                    isValid = false;
+                }
+
+                if (startDate.value && endDate.value && new Date(startDate.value) > new Date(endDate.value)) {
+                    showError("endDate", "Ngày kết thúc phải sau ngày bắt đầu");
+                    isValid = false;
+                }
+
+                if (!minAmount.value || parseFloat(minAmount.value) <= 0) {
+                    showError("minAmount", "Đơn tối thiểu phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (!quantity.value || parseInt(quantity.value) <= 0) {
+                    showError("quantity", "Số lượng phải lớn hơn 0");
+                    isValid = false;
+                }
+
+                if (isValid) {
+                    form.submit(); // Submit nếu hợp lệ
+                } else {
+                    const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
+                    modal.show(); // Mở lại modal nếu có lỗi
+                }
+            });
+
+            function showError(fieldName, message) {
+                const errorDiv = document.getElementById("error-" + fieldName);
+                const input = form.querySelector('[name="' + fieldName + '"]');
+
+                if (errorDiv) {
+                    errorDiv.innerText = message;
+                    errorDiv.style.display = "block";
+                }
+
+                if (input) {
+                    input.classList.add("is-invalid");
+                }
+            }
+
+            function clearErrors() {
+                const errorDivs = document.querySelectorAll(".text-danger");
+                errorDivs.forEach(div => div.innerText = "");
+
+                const inputs = document.querySelectorAll(".form-control");
+                inputs.forEach(input => input.classList.remove("is-invalid"));
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const deleteForms = document.querySelectorAll('.delete-voucher-form');
+
+            deleteForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Ngăn submit mặc định
+
+                    Swal.fire({
+                        title: 'Bạn chắc chắn?',
+                        text: "Hành động này sẽ xóa voucher vĩnh viễn!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit(); // Gửi form nếu người dùng xác nhận
+                        }
+                    });
+                });
+            });
+
+            // Handle send notification forms
+            const notificationForms = document.querySelectorAll('.send-notification-form');
+
+            notificationForms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault(); // Ngăn submit mặc định
+
+                    Swal.fire({
+                        title: 'Gửi thông báo voucher?',
+                        text: "Thông báo voucher sẽ được gửi đến tất cả người dùng phù hợp!",
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#f59e0b',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Gửi thông báo',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Show loading state
+                            Swal.fire({
+                                title: 'Đang gửi thông báo...',
+                                text: 'Vui lòng đợi trong giây lát',
+                                icon: 'info',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            form.submit(); // Gửi form nếu người dùng xác nhận
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

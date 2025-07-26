@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản lý bài đăng</title>
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+  <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+
+  <style>
+    :root {
+      --primary-blue: #3b82f6;
+      --primary-blue-dark: #2563eb;
+      --primary-blue-light: #60a5fa;
+      --success-green: #10b981;
+      --success-green-dark: #059669;
+      --warning-orange: #f59e0b;
+      --warning-orange-dark: #d97706;
+      --danger-red: #ef4444;
+      --danger-red-dark: #dc2626;
+      --dark-color: #1e293b;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+      --border-radius: 12px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body {
+      background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--dark-color);
+      line-height: 1.6;
+    }
+
+    .main-content {
+      padding: 2rem;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header Section */
+    .mb-4 h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--dark-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .mb-4 p {
+      color: var(--gray-500);
+      font-size: 0.95rem;
+    }
+
+    /* Search and Filter Section */
+    .row.g-3 {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-control,
+    .form-select {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--border-radius);
+      padding: 0.75rem 1rem;
+      font-size: 0.95rem;
+      transition: var(--transition);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      border: none;
+      border-radius: var(--border-radius);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      transition: var(--transition);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-blue-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .listing-card {
+      border-radius: var(--border-radius);
+      background-color: white;
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      transition: var(--transition);
+      border: 1px solid var(--gray-200);
+      position: relative;
+    }
+
+    .listing-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .listing-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: var(--transition);
+    }
+
+    .listing-card:hover img {
+      transform: scale(1.03);
+    }
+
+    .status {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      z-index: 1;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .da-duyet {
+      background-color: var(--success-green);
+    }
+
+    .chua-duyet {
+      background-color: var(--warning-orange);
+    }
+
+    .bi-an {
+      background-color: var(--danger-red);
+    }
+
+    .listing-body {
+      padding: 1.25rem;
+    }
+
+    .listing-body h5 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--dark-color);
+      transition: var(--transition);
+    }
+
+    .listing-body h5:hover {
+      color: var(--primary-blue);
+    }
+
+    .listing-body p {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: var(--gray-600);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .listing-body p strong {
+      color: var(--gray-700);
+      font-weight: 600;
+      min-width: 70px;
+    }
+
+    .listing-footer {
+      padding: 1rem 1.25rem;
+      border-top: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    /* Buttons */
+    .btn-edit-host,
+    .btn-delete-host {
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .btn-edit-host {
+      background-color: var(--primary-blue);
+      color: white;
+      box-shadow: 0 2px 5px rgba(59, 130, 246, 0.2);
+    }
+
+    .btn-edit-host:hover {
+      background-color: var(--primary-blue-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-delete-host {
+      background-color: var(--danger-red);
+      color: white;
+      box-shadow: 0 2px 5px rgba(239, 68, 68, 0.2);
+    }
+
+    .btn-delete-host:hover {
+      background-color: var(--danger-red-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+    }
+
+    /* Alerts */
+    .alert {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 1rem 1.5rem;
+      margin-bottom: 1rem;
+      border-radius: var(--border-radius);
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      width: 350px;
+      max-width: 90%;
+      z-index: 1000;
+      border-left: 4px solid;
+    }
+
+    .alert-success {
+      background-color: rgba(16, 185, 129, 0.1);
+      color: var(--success-green-dark);
+      border-color: var(--success-green);
+    }
+
+    .alert-error {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger-red-dark);
+      border-color: var(--danger-red);
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: inherit;
+      opacity: 0.7;
+      transition: var(--transition);
+      padding: 0;
+      margin-left: 0.75rem;
+    }
+
+    .close-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .alert.fade-out {
+      animation: fadeOut 0.3s ease forwards;
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    /* Pagination */
+    .custom-pagination {
+      margin-top: 2.5rem;
+    }
+
+    .pagination {
+      gap: 0.5rem;
+    }
+
+    .page-item .page-link {
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 0.5rem 0.9rem;
+      color: var(--primary-blue);
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    .page-item .page-link:hover {
+      background-color: var(--gray-100);
+      border-color: var(--gray-300);
+    }
+
+    .page-item.active .page-link {
+      background-color: var(--primary-blue);
+      border-color: var(--primary-blue);
+      color: white;
+    }
+
+    .page-item.disabled .page-link {
+      color: var(--gray-400);
+      pointer-events: none;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 1200px) {
+      .listing-body p {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .listing-body p strong {
+        min-width: auto;
+        margin-bottom: 0.25rem;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .main-content {
+        padding: 1.5rem;
+      }
+
+      .row-cols-md-2 .listing-card img {
+        height: 180px;
+      }
+
+      .listing-body {
+        padding: 1rem;
+      }
+
+      .listing-footer {
+        padding: 0.75rem 1rem;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding: 1.25rem;
+      }
+
+      .mb-4 h2 {
+        font-size: 1.5rem;
+      }
+
+      .row.g-3>div {
+        margin-bottom: 1rem;
+      }
+
+      .btn-edit-host,
+      .btn-delete-host {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      .alert {
+        width: calc(100% - 40px);
+        right: 20px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-content {
+        padding: 1rem;
+      }
+
+      .listing-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+      }
+
+      .btn-edit-host,
+      .btn-delete-host {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .pagination {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+
+  <div class="main-content">
+    <div th:if="${message}" class="alert alert-success" role="alert">
+      <span th:text="${message}"></span>
+      <button type="button" class="close-btn">×</button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error" role="alert">
+      <span th:text="${errorMessage}"></span>
+      <button type="button" class="close-btn">×</button>
+    </div>
+    <div class="mb-4">
+      <h2 class="fw-bold">Quản lý bài đăng</h2>
+      <p class="text-muted">Xem và chỉnh sửa các bài đăng của bạn</p>
+    </div>
+    <form method="get" th:action="@{/chu-tro/bai-dang/tim-kiem}">
+      <div class="row g-3 align-items-center mb-2">
+        <div class="col-md-4">
+          <input type="text" class="form-control" name="keyword" placeholder="Tìm kiếm bài đăng..."
+            th:value="${keyword}">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="status">
+            <option value="">Trạng thái</option>
+            <option value="APPROVED" th:selected="${status?.name() == 'APPROVED'}">Đã duyệt</option>
+            <option value="PENDING" th:selected="${status?.name() == 'PENDING'}">Chờ duyệt</option>
+            <option value="REJECTED" th:selected="${status?.name() == 'REJECTED'}">Từ chối duyệt</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="categoryId">
+            <option value="">Danh mục</option>
+            <option th:each="c : ${categories}" th:value="${c.categoryId}" th:text="${c.name}"
+              th:selected="${categoryId == c.categoryId}">
+            </option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" name="sort">
+            <option value="">Sắp xếp theo</option>
+            <option value="newest" th:selected="${sort == 'newest'}">Mới nhất</option>
+            <option value="oldest" th:selected="${sort == 'oldest'}">Cũ nhất</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <button type="submit" class="btn btn-primary w-100">Lọc</button>
+        </div>
+      </div>
+    </form>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+      <div class="col" th:each="post : ${posts}">
+        <div class="listing-card position-relative">
+          <span class="status" th:classappend="
+                ${post.approvalStatus != null and post.approvalStatus.name() == 'APPROVED'} ? ' da-duyet' :
+                (${post.approvalStatus.name() == 'PENDING'} ? ' chua-duyet' :
+                (${post.approvalStatus.name() == 'REJECTED'} ? ' bi-an' : ''))" th:text="
+                ${post.approvalStatus != null and post.approvalStatus.name() == 'APPROVED'} ? 'Đã duyệt' :
+                (${post.approvalStatus.name() == 'PENDING'} ? 'Chờ duyệt' :
+                (${post.approvalStatus.name() == 'REJECTED'} ? 'Từ chối duyệt' : 'Không xác định'))">
+          </span>
+          <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}">
+            <img
+              th:src="${post.images != null and !post.images.isEmpty() ? post.images[0].url : '/images/cards/default.jpg'}"
+              alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
+          </a>
+          <div class="listing-body">
+            <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}" style="text-decoration: none; color: black;">
+              <h5 class="fw-semibold" th:text="${post.title}">Tiêu đề bài đăng</h5>
+            </a>
+            <p><strong>Từ:</strong>
+              <span th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}"></span>đ/tháng
+            </p>
+            <p>
+              <strong>Diện tích:</strong>
+              <span th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'"></span>
+            </p>
+            <p> <strong>Diện tích:</strong>
+              <span
+                th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">
+              </span>
+            </p>
+            <p><strong>Mô tả:</strong>
+              <span th:with="desc=${#strings.length(post.description) > 100} ?
+                          ${#strings.substring(post.description, 0, 100)} + '...' :
+                          ${post.description}" th:utext="${#strings.replace(desc, '\n', '<br/>')}">
+              </span>
+            </p>
+
+          </div>
+          <div class="listing-footer">
+            <a class="btn-edit-host text-decoration-none" th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}">
+              <i class="fas fa-edit"></i> Chỉnh sửa
+            </a>
+            <form th:action="@{'/chu-tro/xoa-bai-dang/' + ${post.postId}}" method="post" class="delete-form">
+              <button type="submit" class="btn-delete-host delete-btn"><i class="fas fa-trash"></i> Xóa bài</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="custom-pagination mt-4">
+      <ul class="pagination justify-content-center">
+        <li class="page-item" th:classappend="${posts.first} ? 'disabled'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${currentPage - 1}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}">
+            «
+          </a>
+        </li>
+
+        <li class="page-item" th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
+          th:classappend="${i == currentPage} ? 'active'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${i}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}"
+            th:text="${i + 1}">1</a>
+        </li>
+
+        <li class="page-item" th:classappend="${posts.last} ? 'disabled'">
+          <a class="page-link"
+            th:href="@{/chu-tro/bai-dang/tim-kiem(page=${currentPage + 1}, keyword=${keyword}, categoryId=${categoryId}, status=${status}, sort=${sort})}">
+            »
+          </a>
+        </li>
+      </ul>
+    </div>
+
+
+    <script th:src="@{/js/sidebar.js}"></script>
+    <script>
+      document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault();
+          const form = this.closest('.delete-form');
+          Swal.fire({
+            title: "Bạn có chắc chắn muốn xóa?",
+            text: "Hành động này không thể hoàn tác!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              form.submit();
+            }
+          });
+        });
+      });
+      // Xử lý đóng thông báo
+      document.querySelectorAll('.close-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const alert = this.closest('.alert');
+          alert.classList.add('fade-out');
+          setTimeout(() => alert.remove(), 300);
+        });
+      });
+
+      // Tự động ẩn thông báo sau 5 giây
+      document.querySelectorAll('.alert').forEach(alert => {
+        setTimeout(() => {
+          alert.classList.add('fade-out');
+          setTimeout(() => alert.remove(), 300);
+        }, 5000);
+      });
+    </script>
+  </div>
+</body>
+
+</html>

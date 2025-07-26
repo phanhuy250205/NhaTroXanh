@@ -166,6 +166,15 @@
     color: #686868;
 }
 
+/* Validation styles for phone input */
+.form-control-register[type="tel"]:invalid {
+    border-color: #e74c3c;
+}
+
+.form-control-register[type="tel"]:valid {
+    border-color: #27ae60;
+}
+
 .password-toggle {
     position: absolute;
     right: 15px;
@@ -284,7 +293,7 @@
 }
 
 /* Responsive Design */
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .register-modal {
         width: 95%;
         margin: 20px;
@@ -306,14 +315,39 @@
         padding: 12px;
     }
 
+    /* Stack form fields vertically on mobile */
     .form-row {
         flex-direction: column;
         gap: 0;
     }
+}
 
-    .account-type-options {
-        flex-direction: column;
-        gap: 10px;
+@media (max-width: 480px) {
+    .register-modal {
+        width: 95%;
+        margin: 10px;
+    }
+
+    .register-modal-content {
+        padding: 15px 15px 25px;
+    }
+
+    .register-greeting h3 {
+        font-size: 16px;
+    }
+
+    .register-greeting h2 {
+        font-size: 18px;
+    }
+
+    .form-control-register {
+        font-size: 14px;
+        padding: 10px 10px 10px 40px;
+    }
+
+    .input-icon {
+        font-size: 14px;
+        left: 12px;
     }
 }
 

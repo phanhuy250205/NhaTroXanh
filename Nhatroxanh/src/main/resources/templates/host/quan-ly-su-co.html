@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý khiếu nại và sự cố</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <style>
+        :root {
+            --primary-color: #3e83cc;
+            --primary-light: #e8f2ff;
+            --primary-dark: #2c6ba0;
+            --success-color: #28a745;
+            --info-color: #17a2b8;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.08);
+            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.12);
+            --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --border-radius: 12px;
+            --border-radius-lg: 16px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--primary-light) 0%, #f1f8ff 50%, var(--light-bg) 100%);
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .main-container {
+            margin-left: 100px;
+            width: calc(100% - 100px);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .header-section-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.5rem 0;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow-heavy);
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+        }
+
+        .header-section-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
+        .header-title-host {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-container {
+            width: 100%;
+            max-width: none;
+            padding: 0 2rem;
+            margin: 0;
+        }
+
+        .search-container-host {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-medium);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input-host {
+            border: 2px solid #e9ecef;
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: var(--white);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
+        }
+
+        .search-input-host:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(62, 131, 204, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.06);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .btn-search-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: var(--transition);
+            color: white;
+            box-shadow: var(--shadow-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-search-host:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1e4f73 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: white;
+        }
+
+        .btn-search-host:active {
+            transform: translateY(0);
+        }
+
+        .table-container-host {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .table-header-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .table-header-host th {
+            border: none;
+            padding: 1.25rem 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            position: relative;
+        }
+
+        .table-header-host th::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .table tbody tr {
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .table tbody tr:hover {
+            background: linear-gradient(90deg, rgba(62, 131, 204, 0.03) 0%, rgba(62, 131, 204, 0.08) 50%, rgba(62, 131, 204, 0.03) 100%);
+            transform: scale(1.005);
+            box-shadow: inset 0 0 0 1px rgba(62, 131, 204, 0.1);
+        }
+
+        .table td {
+            padding: 1rem 1rem;
+            vertical-align: middle;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .status-badge-host {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-light);
+        }
+
+        .status-processed-host {
+            background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+            color: white;
+        }
+
+        .status-processing-host {
+            background: linear-gradient(135deg, var(--info-color) 0%, #117a8b 100%);
+            color: white;
+        }
+
+        .priority-badge-host {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .priority-high-host {
+            background: linear-gradient(135deg, var(--danger-color) 0%, #bd2130 100%);
+            color: white;
+        }
+
+        .priority-medium-host {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #e0a800 100%);
+            color: #212529;
+        }
+
+        .priority-low-host {
+            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
+            color: white;
+        }
+
+        .btn-detail-host {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border: none;
+            border-radius: var(--border-radius);
+            padding: 0.6rem 1.25rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow-light);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-detail-host:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1e4f73 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .pagination-container-host {
+            display: flex;
+            justify-content: center;
+            margin-top: 3rem;
+            padding-bottom: 2rem;
+        }
+
+        .page-link {
+            color: var(--primary-color);
+            border: 2px solid rgba(62, 131, 204, 0.2);
+            border-radius: var(--border-radius);
+            margin: 0 0.25rem;
+            padding: 0.6rem 1rem;
+            transition: var(--transition);
+            font-weight: 600;
+            background: var(--white);
+            box-shadow: var(--shadow-light);
+            font-size: 0.9rem;
+        }
+
+        .page-link:hover {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .page-item.active .page-link {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            border-color: var(--primary-color);
+            color: white;
+            box-shadow: var(--shadow-medium);
+        }
+
+        .fade-in-host {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .main-container {
+                margin-left: 80px;
+                width: calc(100% - 80px);
+            }
+            .content-container {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 13px;
+            }
+
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .header-title-host {
+                font-size: 1.8rem;
+            }
+
+            .content-container {
+                padding: 0 1rem;
+            }
+
+            .search-container-host {
+                padding: 1.25rem;
+            }
+
+            .table-container-host {
+                margin: 0 -1rem;
+                border-radius: 0;
+            }
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-back {
+            background-color: #4b97e3;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-back i {
+            font-size: 16px;
+        }
+
+        .btn-back:hover {
+            background-color: #3b579a;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <div class="main-container">
+        <div class="header-section-host">
+            <div class="content-container">
+                <h1 class="header-title-host text-center fade-in-host">Quản lý khiếu nại và sự cố</h1>
+            </div>
+        </div>
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
+
+        <div class="content-container">
+            <!-- Search Form -->
+            <button type="button" onclick="goBack()" class="btn-back mb-3">
+                <i class="fas fa-arrow-left"></i> Quay lại
+            </button>
+
+            <div class="search-container-host fade-in-host">
+                <form th:action="@{/chu-tro/quan-ly-su-co}" method="get" class="row g-3">
+                    <div class="col-lg-10">
+                        <input type="text" class="form-control search-input-host" name="search" th:value="${search}"
+                            placeholder="Tìm kiếm theo tên, loại sự cố, khu trọ...">
+                    </div>
+                    <div class="col-lg-2">
+                        <button type="submit" class="btn btn-search-host w-100">
+                            <i class="fas fa-search me-2"></i>TÌM KIẾM
+                        </button>
+                    </div>
+                    <input type="hidden" name="page" th:value="${currentPage}">
+                    <input type="hidden" name="size" th:value="${pageSize}">
+                </form>
+            </div>
+
+            <!-- Incident List Table -->
+            <div class="table-container-host fade-in-host">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-header-host">
+                            <tr>
+                                <th>ID</th>
+                                <th>NGƯỜI GỬI</th>
+                                <th>LOẠI SỰ CỐ</th>
+                                <th>MỨC ĐỘ</th>
+                                <th>KHU TRỌ</th>
+                                <th>THỜI GIAN</th>
+                                <th>TRẠNG THÁI</th>
+                                <th>HÀNH ĐỘNG</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="incident : ${incidents}">
+                                <td><strong th:text="${incident.reportId}"></strong></td>
+                                <td th:text="${incident.user.fullname}"></td>
+                                <td th:text="${incident.incidentType}"></td>
+                                <td>
+                                    <span th:classappend="
+        ${incident.level.name() == 'CAO'} ? ' priority-high-host' :
+        (${incident.level.name() == 'TRUNG_BINH'} ? ' priority-medium-host' : ' priority-low-host')"
+                                        class="priority-badge-host">
+
+                                        <i class="fas fa-circle"></i>
+
+                                        <span th:switch="${incident.level.name()}">
+                                            <span th:case="'CAO'">Cao</span>
+                                            <span th:case="'TRUNG_BINH'">Trung bình</span>
+                                            <span th:case="'THAP'">Thấp</span>
+                                        </span>
+                                    </span>
+
+                                </td>
+                                <td th:text="${incident.room.hostel.name}"></td>
+                                <td th:text="${#dates.format(incident.reportedAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30
+                                </td>
+                                <td>
+                                    <span
+                                        th:classappend="${incident.status.name() == 'DA_XU_LY'} ? 'status-processed-host' : 'status-processing-host'"
+                                        class="status-badge-host">
+
+                                        <i
+                                            th:class="${incident.status.name() == 'DA_XU_LY'} ? 'fas fa-check' : 'fas fa-clock'"></i>
+
+                                        <span th:switch="${incident.status.name()}">
+                                            <span th:case="'CHUA_XU_LY'">Chưa xử lý</span>
+                                            <span th:case="'DANG_XU_LY'">Đang xử lý</span>
+                                            <span th:case="'DA_XU_LY'">Đã xử lý</span>
+                                        </span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a th:href="@{/chu-tro/quan-ly-su-co/{id}(id=${incident.reportId},search=${search},page=${currentPage})}"
+                                        class="btn btn-detail-host">
+                                        <i class="fas fa-eye me-1"></i> Xem chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(incidents)}">
+                                <td colspan="8" class="text-center">Không tìm thấy khiếu nại nào.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-container-host" th:if="${totalPages > 1}">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${currentPage - 1},size=${pageSize})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${i == currentPage} ? 'active'" class="page-item">
+                            <a class="page-link"
+                                th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${i},size=${pageSize})}"
+                                th:text="${i + 1}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <a class="page-link"
+                                th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${currentPage + 1},size=${pageSize})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+    <script src="/js/sidebar.js"></script>
+</body>
+
+</html>

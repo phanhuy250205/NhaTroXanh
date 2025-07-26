@@ -1,18 +1,17 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.util.List;
+import java.util.Optional;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+// ✅ Interface KHÔNG có @Service và @Autowired
+public interface RoomsService {
+    List<Rooms> findAllRooms();
+    List<ContractDto.Room> getRoomsByOwnerId(Integer ownerId);
+    List<ContractDto.Room> getRoomsByHostelId(Integer hostelId);
+    List<Rooms> findByHostelId(Integer hostelId); // ✅ THÊM METHOD NÀY
+    Optional<Rooms> findById(Integer id);
+    Rooms save(Rooms room);
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
-@Service
-public class RoomsService {
-    @Autowired
-    private RoomsRepository roomsRepository;
-
-    public List<Rooms> findAllRooms() {
-        return roomsRepository.findAll();
-    }
 }

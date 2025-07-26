@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:replace="~{/layouts/head}">
+    <title>Nhà Trọ Xanh</title>
+</head>
+
+<body class="thongtintro">
+    <!-- SIDEBAR -->
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+
+    <!-- Main Content -->
+    <div class="main-content-host" id="mainContentHost">
+        <div class="content-container-host">
+            <!-- Header Section -->
+            <div class="page-header-host">
+                <h1 class="page-title-host">QUẢN LÝ THÔNG TIN TRỌ</h1>
+                <a th:href="@{/chu-tro/them-khu-tro}" style="text-decoration: none;">
+                    <button class="btn-primary-host" id="addNewAreaHost">
+                        <i class="fas fa-plus"></i>
+                        Thêm khu trọ mới
+                    </button>
+                </a>
+
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section-host">
+                <div class="search-container-host">
+                    <input type="text" class="search-input-host" placeholder="Tìm kiếm..." id="searchInputHost">
+                    <button class="btn-search-host" id="searchButtonHost">
+                        TÌM KIẾM
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-container-host">
+                <table class="data-table-host" id="dataTableHost">
+                    <thead class="table-header-host">
+                        <tr>
+                            <th class="table-th-host">ID</th>
+                            <th class="table-th-host">Khu trọ</th>
+                            <th class="table-th-host">Trạng thái</th>
+                            <th class="table-th-host">Hoạt động</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-body-host" id="tableBodyHost">
+                        <tr class="table-row-host" th:each="hostel : ${hostels}">
+                            <td class="table-td-host" th:text="${hostel.hostelId}">1</td>
+                            <td class="table-td-host" th:text="${hostel.name}">Tên khu trọ</td>
+                            <td class="table-td-host">
+                                <span th:classappend="${hostel.status} ? 'status-active-host' : 'status-inactive-host'"
+                                    th:text="${hostel.status} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                    Trạng thái
+                                </span>
+                            </td>
+                            <td class="table-td-host">
+                                <div class="action-btns-host">
+                                    <a th:href="@{'/chu-tro/them-khu-tro?id=' + ${hostel.hostelId}}">
+                                        <button class="buttons-edit-host" title="Chỉnh sửa">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </a>
+                                    <form th:action="@{/chu-tro/xoa-khu-tro}" method="post" style="display:inline;">
+                                        <input type="hidden" name="hostelId" th:value="${hostel.hostelId}" />
+                                        <button type="submit" class="btn-delete-host" title="Xóa">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

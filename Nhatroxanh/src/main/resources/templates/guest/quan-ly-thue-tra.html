@@ -1,0 +1,1922 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head th:replace="~{/layouts/head}">
+    <title>Quản Lý Thuê Trả Phòng</title>
+</head>
+
+<head>
+    <style>
+        .rental-body-guest {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .main-container-guest {
+            padding: 20px;
+            transition: margin-left 0.3s ease;
+        }
+
+        .page-header-guest {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title-guest {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+        }
+
+        .page-subtitle-guest {
+            font-size: 14px;
+            color: #6b7280;
+            margin: 4px 0 0 0;
+            font-weight: 500;
+        }
+
+        .section-card-guest {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            transition: all 0.2s ease;
+            overflow: visible;
+        }
+
+        .section-header-guest {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 16px 20px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 15px 15px 0 0;
+            font-size: 16px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .room-info-grid-guest {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .room-card-guest {
+            background: white;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            overflow: visible;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .room-card-guest:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .room-card-header-guest {
+            background: #5598df3e;
+            color: #4389D3;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .room-title-guest {
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .status-badge-guest {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+
+        .status-active-guest {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .room-info-guest {
+            padding: 20px;
+            margin-bottom: 18px;
+        }
+
+        .info-grid-guest {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+
+        .info-item-guest {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+            font-size: 14px;
+        }
+
+        .info-item-guest:last-child {
+            border-bottom: none;
+        }
+
+        .info-label-guest {
+            font-weight: 600;
+            color: #3e83cc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-value-guest {
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .price-highlight-guest {
+            color: #FF8000;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .stats-card-guest {
+            background: white;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.1);
+        }
+
+        .stats-icon-guest {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .stats-title-guest {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid-guest {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .stats-item-guest {
+            text-align: center;
+        }
+
+        .stats-number-guest {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stats-label-guest {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        .table-section-guest {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            overflow: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .table-container-guest {
+            overflow-x: auto;
+        }
+
+        .rental-table-guest {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .rental-table-guest thead {
+            background: #D6E6F7;
+            color: #3e83cc;
+        }
+
+        .rental-table-guest th {
+            padding: 16px 12px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .rental-table-guest td {
+            padding: 16px 12px;
+            border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .rental-table-guest tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .rental-table-guest tbody tr:hover {
+            background: rgba(62, 131, 204, 0.02);
+        }
+
+        .rental-table-guest tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .room-info-cell-guest {
+            text-align: left;
+        }
+
+        .room-name-guest {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .room-type-guest {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .status-completed-guest {
+            background: #10b981;
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        }
+
+        .action-btn-guest {
+            background: #3e83cc;
+            color: white;
+            border: 1px solid #3e83cc;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            text-decoration: none;
+            margin: 0 4px;
+            min-width: 100px;
+            justify-content: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .action-btn-guest:hover {
+            background: #549eed;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.3);
+            text-decoration: none;
+        }
+
+        .btn-outline-guest {
+            background: transparent;
+            color: #3e83cc;
+            border: 1px solid #3e83cc;
+        }
+
+        .btn-outline-guest:hover {
+            background: #3e83cc;
+            color: white;
+        }
+
+        .btn-danger-guest {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: white;
+        }
+
+        .btn-danger-guest:hover {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: white;
+        }
+
+        .room-actions-guest {
+            background: rgba(62, 131, 204, 0.02);
+            padding: 15px 20px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            min-height: 60px;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .room-note-guest {
+            font-size: 12px;
+            color: #6b7280;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .room-buttons-guest {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .pagination-guest {
+            background: rgba(62, 131, 204, 0.02);
+            padding: 16px 20px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .pagination-info-guest {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .pagination-controls-guest {
+            display: flex;
+            gap: 8px;
+        }
+
+        .page-btn-guest {
+            padding: 6px 12px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            background: white;
+            color: #3e83cc;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .page-btn-guest:hover {
+            background: #3e83cc;
+            color: white;
+            text-decoration: none;
+        }
+
+        .page-btn-guest.active {
+            background: #3e83cc;
+            color: white;
+        }
+
+        .page-btn-guest.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 15px;
+            max-width: 680px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(62, 131, 204, 0.3);
+            transform: scale(0.8) translateY(20px);
+            transition: all 0.3s ease;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .modal-container::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+            display: none;
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 22px 26px;
+            border-radius: 15px 15px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0;
+        }
+
+        .modal-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 17px;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 26px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 9px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            background: rgba(62, 131, 204, 0.02);
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3e83cc;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 110px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .modal-footer {
+            padding: 22px 26px;
+            border-top: 1px solid rgba(62, 131, 204, 0.1);
+            display: flex;
+            gap: 14px;
+            justify-content: flex-end;
+            background: rgba(62, 131, 204, 0.02);
+            border-radius: 0 0 20px 20px;
+        }
+
+        .modal-btn {
+            padding: 13px 26px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        .modal-btn-primary {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+        }
+
+        .modal-btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+        }
+
+        .modal-btn-secondary {
+            background: transparent;
+            color: #6b7280;
+            border: 2px solid rgba(107, 114, 128, 0.2);
+        }
+
+        .modal-btn-secondary:hover {
+            background: #f9fafb;
+            color: #374151;
+            border-color: rgba(107, 114, 128, 0.3);
+        }
+
+        .room-info-modal {
+            background: rgba(62, 131, 204, 0.05);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 22px;
+            margin-bottom: 22px;
+        }
+
+        .room-info-modal h4 {
+            color: #3e83cc;
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 16px 0;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .room-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 26px;
+            font-size: 14px;
+        }
+
+        .room-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .room-detail-label {
+            color: #6b7280;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .room-detail-value {
+            color: #1f2937;
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .room-detail-price {
+            color: #FF8000;
+        }
+
+        /* Rating Modal Styles */
+        .rating-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rating-stars {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 16px 0;
+        }
+
+        .star {
+            font-size: 32px;
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #fbbf24;
+            transform: scale(1.1);
+        }
+
+        .rating-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #3e83cc;
+            margin-top: 12px;
+        }
+
+        .rating-categories {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .rating-category {
+            background: rgba(62, 131, 204, 0.05);
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .category-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-stars {
+            display: flex;
+            gap: 4px;
+        }
+
+        .category-stars .star {
+            font-size: 20px;
+        }
+
+        /* ===== IMPROVED RESPONSIVE TABLE STYLES ===== */
+        /* Mobile Card Layout - Hidden by default */
+        .mobile-cards-container {
+            display: none;
+        }
+
+        .rental-card-mobile {
+            background: white;
+            border: 1px solid rgba(62, 131, 204, 0.1);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .rental-card-mobile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.2);
+        }
+
+        .rental-card-header {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rental-card-number {
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .rental-card-status {
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .rental-card-body {
+            padding: 16px;
+        }
+
+        .rental-card-room {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+        }
+
+        .rental-card-room-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .rental-card-room-type {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .rental-card-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .rental-card-info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .rental-card-info-label {
+            font-size: 11px;
+            color: #6b7280;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .rental-card-info-value {
+            font-size: 13px;
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .rental-card-price {
+            color: #FF8000;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .rental-card-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .rental-card-actions .action-btn-guest {
+            flex: 1;
+            min-width: auto;
+            font-size: 11px;
+            padding: 8px 12px;
+            margin: 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container-guest {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-container-guest {
+                padding: 12px;
+                padding-top: 70px;
+                width: 100%;
+            }
+
+            .room-info-grid-guest {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .info-grid-guest {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid-guest {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .room-actions-guest {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .room-note-guest {
+                text-align: center;
+                min-width: auto;
+            }
+
+            .room-buttons-guest {
+                justify-content: center;
+            }
+
+            .rating-categories {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container-guest {
+                padding: 10px;
+            }
+
+            .page-title-guest {
+                font-size: 24px;
+            }
+
+            .section-card-guest {
+                padding: 16px;
+            }
+
+            /* Hide desktop table, show mobile cards */
+            .table-container-guest {
+                display: none;
+            }
+
+            .mobile-cards-container {
+                display: block;
+                padding: 20px;
+            }
+
+            .modal-container {
+                width: 95%;
+                margin: 10px;
+                max-width: 95vw;
+            }
+
+            .modal-body {
+                padding: 22px;
+            }
+
+            .room-details {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .room-detail-item {
+                padding: 9px 0;
+                border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+            }
+            .room-detail-item:last-child {
+                border-bottom: none;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+                padding: 18px 22px;
+            }
+
+            .modal-btn {
+                width: 100%;
+                padding: 11px 22px;
+                font-size: 14px;
+            }
+
+            .rating-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-container-guest {
+                padding: 8px;
+            }
+
+            .page-title-guest {
+                font-size: 20px;
+            }
+
+            .section-card-guest {
+                padding: 12px;
+            }
+
+            .mobile-cards-container {
+                padding: 12px;
+            }
+
+            .rental-card-info {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .rental-card-actions {
+                flex-direction: column;
+            }
+
+            .rental-card-actions .action-btn-guest {
+                width: 100%;
+            }
+        }
+
+        /* Custom scrollbar */
+        .table-container-guest::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .table-container-guest::-webkit-scrollbar-track {
+            background: rgba(62, 131, 204, 0.1);
+            border-radius: 3px;
+        }
+
+        .table-container-guest::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            border-radius: 3px;
+        }
+
+        .table-container-guest::-webkit-scrollbar-thumb:hover {
+            background: #549eed;
+        }
+
+        .room-stats-layout {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .room-list-guest {
+            flex: 1 1 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .room-card-guest {
+            background: #f4f8fc;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-card-guest {
+            flex: 0 0 28%;
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .stats-icon-guest {
+            font-size: 24px;
+            color: #3e83cc;
+            margin-bottom: 10px;
+        }
+
+        .stats-title-guest {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+
+        .stats-grid-guest {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .stats-item-guest {
+            flex: 1;
+        }
+
+        .stats-number-guest {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .stats-label-guest {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Responsive cho mobile */
+        @media (max-width: 768px) {
+            .room-stats-layout {
+                flex-direction: column;
+            }
+
+            .room-list-guest,
+            .stats-card-guest {
+                flex: 1 1 100%;
+            }
+        }
+
+        .status-badge-guest {
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-draft-guest {
+            background-color: #ffeaa7;
+            color: #d35400;
+        }
+
+        .status-active-guest {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        .status-terminated-guest {
+            background-color: #fab1a0;
+            color: #d63031;
+        }
+
+        .status-completed-guest {
+            background-color: #dfe6e9;
+            color: #2d3436;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .status-badge-guest {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            text-transform: capitalize;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-draft-guest {
+            background-color: #9e9e9e;
+            /* xám */
+        }
+
+        .status-active-guest {
+            background-color: #28a745;
+            /* xanh lá */
+        }
+
+        .status-terminated-guest {
+            background-color: #dc3545;
+            /* đỏ */
+        }
+
+        .status-completed-guest {
+            background-color: #007bff;
+            /* xanh dương */
+        }
+
+        .status-badge-guest i {
+            font-size: 14px;
+        }
+
+        .status-pending-expiration-guest {
+            background-color: #ffc107;
+            /* Màu vàng Bootstrap */
+            color: #000;
+            /* Chữ đen để dễ đọc */
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-expired-guest {
+            background-color: #ffc107;
+            /* vàng */
+            color: #212529;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+
+<body class="rental-body-guest">
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <div class="main-container-guest" id="main-content">
+        <div class="page-header-guest">
+            <div>
+                <h1 class="page-title-guest">Quản Lý Thuê Trả Phòng</h1>
+                <p class="page-subtitle-guest">Theo dõi và quản lý các phòng thuê của bạn một cách hiệu quả</p>
+            </div>
+        </div>
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
+        <div class="section-card-guest">
+            <h2 class="section-header-guest">
+                <i class="fas fa-key"></i> Phòng Đang Thuê
+            </h2>
+            <div class="room-stats-layout">
+                <!-- Cột trái: Danh sách phòng -->
+                <div class="room-list-guest">
+                    <div th:each="contract : ${activeContracts}" class="room-card-guest">
+                        <div class="room-card-header-guest">
+                            <h5 class="room-title-guest"
+                                th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">
+                                Phòng 101 - Căn hộ
+                            </h5>
+                            <span class="status-badge-guest" th:classappend="
+    ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
+    (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+    (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' :
+    (${contract.status.name() == 'EXPIRED'} ? ' status-pending-expiration-guest' : ' status-completed-guest')))">
+                                <i th:class="
+        ${contract.status.name() == 'DRAFT'} ? 'fas fa-pencil-alt' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' :
+        (${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' : 'fas fa-check-circle')))">
+                                </i>
+                                <span th:text="
+        ${contract.status.name() == 'DRAFT'} ? 'Chưa xác nhận' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' :
+        (${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' : 'Đã hoàn thành')))">
+                                    Đã hoàn thành
+                                </span>
+                            </span>
+                        </div>
+                        <div class="room-info-guest">
+                            <div class="info-grid-guest">
+                                <div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-calendar-alt"></i> Ngày
+                                            thuê:</span>
+                                        <span class="info-value-guest"
+                                            th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">01/06/2025</span>
+                                    </div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-calendar-check"></i> Ngày hết
+                                            hạn:</span>
+                                        <span class="info-value-guest"
+                                            th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">31/12/2025</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-dollar-sign"></i> Giá
+                                            thuê:</span>
+                                        <span class="info-value-guest price-highlight-guest"
+                                            th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                            15,000,000 VNĐ/tháng
+                                        </span>
+                                    </div>
+                                    <div class="info-item-guest">
+                                        <span class="info-label-guest"><i class="fas fa-users"></i> Số người ở :</span>
+                                        <span class="info-value-guest"
+                                            th:text="${contract.room.max_tenants} + ' người'">2 người</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="room-actions-guest">
+                            <small class="room-note-guest"><i class="fas fa-info-circle"></i> Nhấn để xem chi tiết
+                                phòng</small>
+                            <div class="room-buttons-guest">
+                                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract.contractId})}">
+                                    <button class="action-btn-guest"><i class="fas fa-edit"></i> Xem chi tiết</button>
+                                </a>
+                                <a class="action-btn-guest btn-danger-guest"
+                                    th:href="@{'/khach-thue/tra-phong/' + ${contract.contractId}}">
+                                    <i class="fas fa-sign-out-alt"></i> Trả phòng
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Thống kê -->
+                <div class="stats-card-guest">
+                    <div class="stats-icon-guest">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="stats-title-guest">Thống Kê Nhanh</h5>
+                    <div class="stats-grid-guest">
+                        <div class="stats-item-guest">
+                            <div class="stats-number-guest" style="color: #3e83cc;" th:text="${quickStats.activeRooms}">
+                                3</div>
+                            <div class="stats-label-guest">Phòng đang thuê</div>
+                        </div>
+                        <div class="stats-item-guest">
+                            <div class="stats-number-guest" style="color: #10b981;"
+                                th:text="${quickStats.totalRentals}">5</div>
+                            <div class="stats-label-guest">Lần thuê trước</div>
+                        </div>
+                    </div>
+                    <div class="stats-item-guest">
+                        <div class="stats-number-guest price-highlight-guest"
+                            th:text="${#numbers.formatDecimal(quickStats.totalCostThisMonth,0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                            6,000,000 VNĐ
+                        </div>
+                        <div class="stats-label-guest">Tổng chi phí tháng này</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch Sử Thuê Phòng -->
+        <div class="table-section-guest">
+            <!-- Title -->
+            <div class="section-title-guest">
+                <i class="fas fa-history"></i>
+                Lịch Sử Thuê Phòng
+            </div>
+
+            <!-- Table Desktop -->
+            <div class="table-container-guest">
+                <table class="rental-table-guest">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Phòng</th>
+                            <th>Ngày thuê</th>
+                            <th>Ngày trả</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <!-- <th>Thao tác</th> -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="contract, iter : ${contractHistory}">
+                            <td th:text="${iter.index + 1 + currentPage * size}">1</td>
+                            <td>
+                                <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205
+                                    - Standard</div>
+                                <div th:text="${contract.room.description}">2 giường đơn</div>
+                            </td>
+                            <td th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">--</td>
+                            <td th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">--</td>
+                            <td>
+                                <span class="price-highlight-guest"
+                                    th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                                    2,000,000 VNĐ
+                                </span>
+                            </td>
+                            <td>
+                                <span class="status-badge-guest" th:classappend="
+        ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
+        (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+        (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))">
+
+                                    <i th:class="
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
+
+                                    <span th:text="
+        ${contract.status.name() == 'EXPIRED'} ? 'Sắp hết hạn' :
+        (${contract.status.name() == 'ACTIVE'} ? 'Đang thuê' :
+        (${contract.status.name() == 'TERMINATED'} ? 'Đã trả phòng' : 'Đã hoàn thành'))">
+                                        Đã hoàn thành
+                                    </span>
+                                </span>
+                            </td>
+                            <!-- <td>
+                                <button class="action-btn-guest"
+                                    th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
+                                    <i class="fas fa-eye"></i> Xem
+                                </button>
+                                <button class="action-btn-guest btn-outline-guest"
+                                    th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
+                                    <i class="fas fa-download"></i> Tải
+                                </button>
+                            </td> -->
+                        </tr>
+                        <tr th:if="${contractHistory.size() == 0}">
+                            <td colspan="7" class="text-center">Không có hợp đồng nào.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="mobile-cards-container">
+                <div th:each="contract, iter : ${contractHistory}" class="rental-card-mobile">
+                    <div class="rental-card-header">
+                        <div th:text="'#' + ${iter.index + 1 + currentPage * size}">#1</div>
+                        <div class="status-badge-guest" th:classappend="
+    ${contract.status.name() == 'EXPIRED'} ? ' status-expired-guest' :
+    (${contract.status.name() == 'ACTIVE'} ? ' status-active-guest' :
+    (${contract.status.name() == 'TERMINATED'} ? ' status-terminated-guest' : ' status-completed-guest'))"
+                            th:switch="${contract.status.name()}">
+                            <i th:class="
+        ${contract.status.name() == 'EXPIRED'} ? 'fas fa-exclamation-triangle' :
+        (${contract.status.name() == 'ACTIVE'} ? 'fas fa-door-open' :
+        (${contract.status.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-check-circle'))"></i>
+
+                            <span th:case="'EXPIRED'">Sắp hết hạn</span>
+                            <span th:case="'ACTIVE'">Đang thuê</span>
+                            <span th:case="'TERMINATED'">Đã trả phòng</span>
+                            <span th:case="*">Không xác định</span>
+                        </div>
+                    </div>
+                    <div class="rental-card-body">
+                        <div class="rental-card-room">
+                            <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205 -
+                                Standard</div>
+                            <div th:text="${contract.room.description}">2 giường đơn</div>
+                        </div>
+                        <div class="rental-card-info">
+                            <div>
+                                <span>Ngày thuê:</span>
+                                <span th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">--</span>
+                            </div>
+                            <div>
+                                <span>Ngày trả:</span>
+                                <span th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">--</span>
+                            </div>
+                            <div>
+                                <span>Tổng tiền:</span>
+                                <span
+                                    th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">2,000,000
+                                    VNĐ</span>
+                            </div>
+                        </div>
+                        <!-- <div class="rental-card-actions">
+                            <button class="action-btn-guest"
+                                th:onclick="'openContractDetailModal(' + ${contract.contractId} + ')'">
+                                <i class="fas fa-eye"></i> Xem
+                            </button>
+                            <button class="action-btn-guest btn-outline-guest"
+                                th:onclick="'downloadContractAsPDF(' + ${contract.contractId} + ')'">
+                                <i class="fas fa-download"></i> Tải
+                            </button>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination-guest">
+                <div class="pagination-info-guest">
+                    <span th:text="'Hiển thị ' + ${totalItems} + ' kết quả'">Hiển thị 0 kết quả</span>
+                </div>
+                <div class="pagination-controls-guest" th:if="${totalItems > 0}">
+                    <a th:if="${currentPage > 0}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage - 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang trước">Trước</a>
+                    <span th:if="${currentPage == 0}" class="page-btn-guest disabled" aria-disabled="true">Trước</span>
+                    <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${i}, size=${size})}" th:text="${i + 1}"
+                        th:classappend="${i == currentPage} ? 'active' : ''" class="page-btn-guest"
+                        th:attr="aria-label='Trang ' + ${i + 1}"></a>
+                    <a th:if="${currentPage < totalPages - 1}"
+                        th:href="@{/khach-thue/quan-ly-thue-tra(page=${currentPage + 1}, size=${size})}"
+                        class="page-btn-guest" aria-label="Trang sau">Sau</a>
+                    <span th:if="${currentPage == totalPages - 1}" class="page-btn-guest disabled"
+                        aria-disabled="true">Sau</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function formatDate(dateStr) {
+            if (!dateStr) return 'N/A';
+            const date = new Date(dateStr);
+            return isNaN(date) ? 'N/A' : date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatCurrency(amount) {
+            return amount ? amount.toLocaleString('vi-VN') + ' VNĐ' : 'N/A';
+        }
+
+        function openContractDetailModal(contractId) {
+            fetch(`/khach-thue/chi-tiet-hop-dong/${contractId}/json`)
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    const content = `
+                        <div class="contract-detail-header-guest">
+                            <div class="contract-id-badge-guest">
+                                <i class="fas fa-file-alt"></i>
+                                <span>Mã hợp đồng: #CT${contractId}</span>
+                            </div>
+                            <div class="contract-actions-header-guest">
+                                <button class="contract-action-btn-guest" onclick="downloadContractAsPDF(${contractId})">
+                                    <i class="fas fa-download"></i> Tải file hợp đồng
+                                </button>
+                                <button class="contract-action-btn-guest" onclick="printContract()">
+                                    <i class="fas fa-print"></i> In
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-blue-guest">
+                            <h4 class="contract-section-title-blue-guest">
+                                <i class="fas fa-info-circle"></i> Thông tin tổng quan
+                            </h4>
+                            <div class="contract-general-info-guest">
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Ngày ký hợp đồng</span>
+                                    <div class="contract-date-value-guest">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(data.startDate)}</span>
+                                    </div>
+                                </div>
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Ngày hết hạn</span>
+                                    <div class="contract-date-value-guest">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>${formatDate(data.endDate)}</span>
+                                    </div>
+                                </div>
+                                <div class="contract-date-item-guest">
+                                    <span class="contract-date-label-guest">Thời hạn hợp đồng</span>
+                                    <div class="contract-duration-value-guest">${data.duration} tháng</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest">
+                            <h4 class="contract-section-title-guest">
+                                <i class="fas fa-home"></i> Thông tin phòng trọ
+                            </h4>
+                            <div class="contract-property-info-guest">
+                                <div class="contract-property-row-guest">
+                                    <div class="contract-property-item-guest">
+                                        <span class="contract-property-label-guest">Địa chỉ</span>
+                                        <span class="contract-property-value-guest">
+                                            ${data.room.hostel.address ?
+                            `${data.room.hostel.address.street}, ${data.room.hostel.address.ward.name}, ${data.room.hostel.address.ward.district.name}, ${data.room.hostel.address.ward.district.province.name}`
+                            : 'Chưa xác định'}
+                                        </span>
+                                    </div>
+                                    <div class="contract-property-item-guest">
+                                        <span class="contract-property-label-guest">Diện tích</span>
+                                        <span class="contract-property-value-guest">${data.room.acreage} m²</span>
+                                    </div>
+                                </div>
+                                <div class="contract-property-utilities-guest">
+                                    <span class="contract-property-label-guest">Tiện ích có sẵn phòng</span>
+                                    <ul class="contract-utilities-list-guest">
+                                        ${data.room.utilities && data.room.utilities.length > 0 ?
+                            data.room.utilities.map(utility => `
+                                                <li class="contract-utility-item-guest">
+                                                    <i class="fas fa-check-circle"></i>
+                                                    <span>${utility.name || 'Tiện ích không xác định'}</span>
+                                                </li>
+                                            `).join('')
+                            : '<p class="text-muted">Phòng này hiện không có tiện ích nào.</p>'}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest">
+                            <h4 class="contract-section-title-guest">
+                                <i class="fas fa-dollar-sign"></i> Điều khoản tài chính
+                            </h4>
+                            <div class="contract-financial-grid-guest">
+                                <div class="contract-financial-card-guest contract-rental-card-guest">
+                                    <div class="contract-financial-label-guest">Tiền thuê hàng tháng</div>
+                                    <div class="contract-financial-amount-guest">${formatCurrency(data.price)}</div>
+                                    <div class="contract-financial-note-guest">Thanh toán vào ngày 1 hàng tháng</div>
+                                </div>
+                                <div class="contract-financial-card-guest contract-deposit-card-guest">
+                                    <div class="contract-financial-label-guest">Tiền cọc đặt cọc</div>
+                                    <div class="contract-financial-amount-guest">${formatCurrency(data.deposit)}</div>
+                                    <div class="contract-financial-note-guest">Hoàn trả khi kết thúc hợp đồng</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-parties-section-guest">
+                            <div class="contract-party-card-guest">
+                                <h4 class="contract-party-title-guest">
+                                    <i class="fas fa-user-tie"></i> Thông tin chủ nhà (Bên cho thuê)
+                                </h4>
+                                <div class="contract-party-details-guest">
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Họ tên</span>
+                                        <span class="contract-party-value-guest">${data.owner.fullname}</span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Số điện thoại</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-phone"></i>
+                                            <span>${data.owner.phone}</span>
+                                        </span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Email</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>${data.owner.email}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="contract-party-card-guest">
+                                <h4 class="contract-party-title-guest">
+                                    <i class="fas fa-user"></i> Thông tin người thuê (Bên thuê)
+                                </h4>
+                                <div class="contract-party-details-guest">
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Họ tên</span>
+                                        <span class="contract-party-value-guest">${data.tenant ? data.tenant.fullname : 'Chưa xác định'}</span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Số điện thoại</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-phone"></i>
+                                            <span>${data.tenant ? data.tenant.phone : 'Chưa xác định'}</span>
+                                        </span>
+                                    </div>
+                                    <div class="contract-party-field-guest">
+                                        <span class="contract-party-label-guest">Email</span>
+                                        <span class="contract-party-value-guest">
+                                            <i class="fas fa-envelope"></i>
+                                            <span>${data.tenant ? data.tenant.email : 'Chưa xác định'}</span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="contract-section-guest p-3 rounded shadow-sm" style="background-color: #f9f9f9;">
+                            <h4 class="contract-section-title-guest mb-3" style="font-weight: 600; color: #2c3e50;">
+                                <i class="fas fa-list-ul me-2 text-primary"></i> Điều khoản và điều kiện
+                            </h4>
+                            <pre class="contract-terms-box">${data.terms || 'Không có điều khoản'}</pre>
+                        </div>
+
+                        <div class="contract-signature-section-guest">
+                            <div class="contract-signature-card-guest">
+                                <h5 class="contract-signature-title-guest">CHỮ KÝ BÊN CHO THUÊ</h5>
+                                <div class="contract-signature-date-guest">Ngày ký: ${formatDate(data.startDate)}</div>
+                                <div class="contract-signature-name-guest">${data.owner.fullname}</div>
+                                <div class="contract-signature-placeholder-guest">(Chữ ký)</div>
+                            </div>
+                            <div class="contract-signature-card-guest">
+                                <h5 class="contract-signature-title-guest">CHỮ KÝ BÊN THUÊ</h5>
+                                <div class="contract-signature-date-guest">Ngày ký: ${formatDate(data.startDate)}</div>
+                                <div class="contract-signature-name-guest">${data.tenant ? data.tenant.fullname : 'Chưa xác định'}</div>
+                                <div class="contract-signature-placeholder-guest">(Chữ ký)</div>
+                            </div>
+                        </div>
+
+                        <div class="contract-footer-note-guest">
+                            <p>Hợp đồng này được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.</p>
+                            <p>Ngày lập: ${formatDate(data.startDate)}</p>
+                        </div>
+                    `;
+                    document.getElementById('contractDetailContent').innerHTML = content;
+                    document.getElementById('downloadContractBtn').setAttribute('onclick', `downloadContractAsPDF(${contractId})`);
+                    document.getElementById('contractDetailModal').classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                })
+                .catch(error => {
+                    console.error('Error fetching contract details:', error);
+                    showToast('error', 'Đã xảy ra lỗi khi tải chi tiết hợp đồng.');
+                });
+        }
+
+        function closeContractDetailModal() {
+            document.getElementById('contractDetailModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+            document.getElementById('contractDetailContent').innerHTML = '';
+        }
+
+        function downloadContractAsPDF(contractId) {
+            const element = document.getElementById('contractDetailContent');
+            if (!element.innerHTML) {
+                openContractDetailModal(contractId);
+                setTimeout(() => generatePDF(contractId), 500);
+            } else {
+                generatePDF(contractId);
+            }
+        }
+
+        function generatePDF(contractId) {
+            const element = document.getElementById('contractDetailContent');
+            const opt = {
+                margin: 0.5,
+                filename: `HopDong_${contractId}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save()
+                .then(() => {
+                    showToast('success', 'Tải hợp đồng thành công!');
+                })
+                .catch(error => {
+                    console.error('Error generating PDF:', error);
+                    showToast('error', 'Đã xảy ra lỗi khi tạo PDF.');
+                });
+        }
+
+        function printContract() {
+            const content = document.getElementById('contractDetailContent').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>In Hợp Đồng</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            ${document.querySelector('style').innerText}
+                        </style>
+                    </head>
+                    <body>
+                        ${content}
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function showToast(type, message) {
+            const toastContainer = document.querySelector('.custom-toast-container');
+            const toast = document.createElement('div');
+            toast.className = `custom-toast ${type}`;
+            toast.innerHTML = `
+                <i class="toast-icon fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span class="toast-message">${message}</span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            `;
+            toastContainer.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+            toast.querySelector('.toast-close').addEventListener('click', () => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+
+        // Giữ nguyên các hàm liên quan đến rating
+        function openRatingModal(roomId, roomName) {
+            const modal = document.getElementById('ratingModal');
+            document.getElementById('ratingRoomId').value = roomId;
+            document.getElementById('rating-room-name').textContent = roomName;
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            initializeRatingSystem();
+        }
+
+        function closeRatingModal() {
+            const modal = document.getElementById('ratingModal');
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+            resetRating();
+        }
+
+        function initializeRatingSystem() {
+            const stars = document.querySelectorAll('#overallRating .star');
+            stars.forEach((star, index) => {
+                star.addEventListener('click', () => setRating(index + 1));
+                star.addEventListener('mouseover', () => highlightStars(stars, index + 1));
+                star.addEventListener('mouseout', () => highlightStars(stars, currentRating));
+            });
+        }
+
+        function setRating(rating) {
+            currentRating = rating;
+            document.getElementById('overallRatingValue').value = rating;
+            const stars = document.querySelectorAll('#overallRating .star');
+            highlightStars(stars, rating);
+            document.getElementById('overallRatingText').textContent = ratingTexts[rating];
+        }
+
+        function highlightStars(stars, rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        function resetRating() {
+            currentRating = 0;
+            document.getElementById('overallRatingValue').value = '';
+            document.getElementById('ratingComment').value = '';
+            document.getElementById('overallRatingText').textContent = 'Chọn số sao để đánh giá';
+            const stars = document.querySelectorAll('#overallRating .star');
+            stars.forEach(star => star.classList.remove('active'));
+        }
+
+        function submitRating() {
+            const ratingForm = document.getElementById('ratingForm');
+            if (currentRating === 0) {
+                showToast('error', 'Vui lòng chọn điểm đánh giá!');
+                return;
+            }
+            if (ratingForm.checkValidity()) {
+                ratingForm.submit();
+            } else {
+                showToast('error', 'Vui lòng điền đầy đủ thông tin bắt buộc!');
+            }
+        }
+
+        function skipRating() {
+            if (confirm('Bạn có chắc chắn muốn bỏ qua đánh giá không?')) {
+                closeRatingModal();
+            }
+        }
+
+        // Xử lý toast và sự kiện đóng modal
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+
+        document.getElementById('contractDetailModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeContractDetailModal();
+            }
+        });
+
+        document.getElementById('ratingModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeRatingModal();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') {
+                closeContractDetailModal();
+                closeRatingModal();
+            }
+        });
+    </script>
+</body>
+</html>
