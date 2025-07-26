@@ -48,7 +48,7 @@ public interface EmailService {
 
     void sendOwnerRejectionEmail(String to, String fullname);
 
+    void sendSimpleEmail(String to, String subject, String body);
     void sendNewPasswordEmail(String to, String fullname, String newPassword);
 
-    void sendSimpleEmail(String to, String subject, String body);
 }

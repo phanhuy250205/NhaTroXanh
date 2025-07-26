@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.VoucherDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
@@ -302,16 +303,18 @@ public class VoucherServiceImpl implements VoucherService {
     public void sendVoucherNotification(Vouchers voucher, CustomUserDetails userDetails) {
         List<Users> recipients;
         if (voucher.getHostel() != null) {
-            recipients = userRepository.findByHostelId(voucher.getHostel().getHostelId());
+            recipients = userRepository.findByHostelIdAndRole(voucher.getHostel().getHostelId(), Users.Role.CUSTOMER);
         } else {
-            recipients = userRepository.findAll();
+            recipients = userRepository.findByRole("CUSTOMER");
         }
 
         for (Users recipient : recipients) {
             Notification notification = new Notification();
             notification.setUser(recipient);
             notification.setTitle("Khuyến mãi mới: " + voucher.getTitle());
-            notification.setMessage("Sử dụng mã voucher " + voucher.getCode() + " để được giảm " + voucher.getDiscountValue() + " VNĐ cho đơn tối thiểu " + voucher.getMinAmount() + " VNĐ. Hạn sử dụng đến " + voucher.getEndDate() + ".");
+            notification.setMessage("Sử dụng mã voucher " + voucher.getCode() + " để được giảm "
+                    + voucher.getDiscountValue() + " VNĐ cho đơn tối thiểu " + voucher.getMinAmount()
+                    + " VNĐ. Hạn sử dụng đến " + voucher.getEndDate() + ".");
             notification.setType(Notification.NotificationType.PROMOTION);
             notification.setIsRead(false);
             notification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));

@@ -1,6 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-
 import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;

@@ -159,10 +159,8 @@ public class ProfileGuest {
             user.setEmail(dto.getEmail());
             user.setAddress(dto.getAddress());
 
-            // Handle CCCD
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-                // Mã hóa số CCCD
                 String encryptedCccd = encryptionService.encrypt(trimmedCccd);
                 Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {

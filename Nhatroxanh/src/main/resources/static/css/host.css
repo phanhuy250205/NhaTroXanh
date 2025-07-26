@@ -674,9 +674,9 @@
 }
 
 .bg-danger {
-  background: #fef2f2 !important;
-  color: #991b1b !important;
-  border-left: 4px solid #ef4444 !important;
+  background: #fef2f2 ;
+  color: #991b1b ;
+  border-left: 4px solid #ef4444 ;
 }
 
 /* Highlight styles */

@@ -276,7 +276,7 @@ public class TenantServiceImpl implements TenantService {
             throw new RuntimeException("Unauthorized action");
         }
 
-        contract.setEndDate(returnDate);
+        contract.setRequestedReturnDate(returnDate);
         contract.setReturnReason(reason);
         contract.setReturnStatus(Contracts.ReturnStatus.PENDING);
 

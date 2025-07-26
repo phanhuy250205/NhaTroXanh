@@ -556,12 +556,6 @@
         <div class="navigation-wrapper-notifications">
             <ul class="menu-tabs-notifications" role="tablist">
                 <li class="tab-item-notifications" role="presentation">
-                    <button class="tab-link-notifications active-tab-notifications" data-target="all-notifications"
-                        type="button" role="tab">
-                        <i class="fas fa-bell"></i> Tất cả
-                    </button>
-                </li>
-                <li class="tab-item-notifications" role="presentation">
                     <button class="tab-link-notifications" data-target="lodging-notifications" type="button" role="tab">
                         <i class="fas fa-home"></i> Hoạt động trọ
                     </button>
@@ -585,10 +579,8 @@
         </div>
 
         <div class="content-panels-notifications">
-            <div class="panel-section-notifications show-panel-notifications" id="all-notifications" role="tabpanel">
-                <div class="notification-list-container" id="all-notifications-list"></div>
-            </div>
-            <div class="panel-section-notifications" id="lodging-notifications" role="tabpanel">
+            <div class="panel-section-notifications show-panel-notifications active" id="lodging-notifications"
+                role="tabpanel">
                 <div class="notification-list-container" id="lodging-notifications-list"></div>
             </div>
             <div class="panel-section-notifications" id="finance-notifications" role="tabpanel">
@@ -691,7 +683,6 @@
                         }
 
                         const containers = {
-                            all: document.getElementById('all-notifications-list'),
                             lodging: document.getElementById('lodging-notifications-list'),
                             finance: document.getElementById('finance-notifications-list'),
                             deals: document.getElementById('deals-notifications-list'),
@@ -717,9 +708,9 @@
                                 console.warn('Invalid notification:', notification);
                                 return;
                             }
-                            const tabId = typeToTab[notification.type] || 'all-notifications-list';
+                            const tabId = typeToTab[notification.type] || 'lodging-notifications';
                             const container = document.getElementById(tabId);
-                            const allContainer = document.getElementById('all-notifications-list');
+                            const allContainer = document.getElementById('lodging-notifications');
 
                             if (!container || !allContainer) {
                                 console.error('Tab container not found for tabId:', tabId);
@@ -828,10 +819,16 @@
 
             // Helper function to format currency values as Vietnamese currency (VND)
             function formatCurrency(value) {
-                if (!value) return '0';
-                const num = parseFloat(value);
+                if (!value) return '0 VNĐ';
+                const num = parseFloat(value.replace(/[^0-9.,]/g, '').replace(',', '.'));
                 if (isNaN(num)) return value;
-                return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num);
+
+                // Check if the number is a whole number
+                if (Number.isInteger(num)) {
+                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num) + ' VNĐ';
+                } else {
+                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + ' VNĐ';
+                }
             }
 
             // Helper function to render PAYMENT notification content
@@ -917,7 +914,7 @@
                     <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
                     <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
                     <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
-                    <strong>Giá phòng:</strong> ${room.price || '0'} 
+                    <strong>Giá phòng:</strong> ${room.price || '0 VNĐ'}
                 </div>
             </div>`;
                 }
@@ -1016,11 +1013,7 @@
                         }
                     }
 
-
-                    return null;
                 } catch (e) {
-                    console.error('Error parsing PAYMENT notification:', e, notification.message);
-                    return null;
                 }
             }
 
