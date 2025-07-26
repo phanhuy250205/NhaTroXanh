@@ -1,15 +1,14 @@
 package nhatroxanh.com.Nhatroxanh.Model.entity;
 
+// Dòng này rất quan trọng
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// Bỏ @Data, thay bằng các annotation cụ thể
 @Getter
 @Setter
 @Builder
@@ -53,43 +52,40 @@ public class Rooms {
     @Column(name = "price")
     private Float price;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-        name = "RoomUtilities",
-        joinColumns = @JoinColumn(name = "room_id"),
-        inverseJoinColumns = @JoinColumn(name = "utility_id")
-    )
+    // 🔥🔥🔥 CÁCH SỬA LỖI: Thêm cascade = {CascadeType.PERSIST, CascadeType.MERGE} 🔥🔥🔥
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "room_utility", joinColumns = @JoinColumn(name = "room_id"), inverseJoinColumns = @JoinColumn(name = "utility_id"))
     private Set<Utility> utilities = new HashSet<>();
 
     @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Image> images;
 
-    // --- PHẦN SỬA LỖI ---
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         Rooms rooms = (Rooms) o;
-        // Chỉ so sánh dựa trên ID
         return roomId != null && roomId.equals(rooms.roomId);
     }
 
     @Override
     public int hashCode() {
-        // Chỉ băm dựa trên ID
         return Objects.hash(roomId);
     }
 
     @Override
     public String toString() {
-        // toString an toàn, không in các đối tượng liên quan trực tiếp để tránh vòng lặp
         return "Rooms{" +
                 "roomId=" + roomId +
                 ", hostelId=" + (hostel != null ? hostel.getHostelId() : "null") +
                 ", namerooms='" + namerooms + '\'' +
                 ", status=" + status +
-                ", utilityIds=" + (utilities != null ? utilities.stream().map(Utility::getUtilityId).collect(Collectors.toList()) : "[]") +
+                ", utilityIds="
+                + (utilities != null ? utilities.stream().map(Utility::getUtilityId).collect(Collectors.toList())
+                        : "[]")
+                +
                 '}';
     }
 }

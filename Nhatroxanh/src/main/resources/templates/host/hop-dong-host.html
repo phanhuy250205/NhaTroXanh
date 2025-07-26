@@ -272,13 +272,14 @@
                 <div class="col-lg-7">
 
                     <!-- ✅ SỬA DÒNG 274 -->
-                    <form th:action="${(isEditMode != null and isEditMode == true) and (contractId != null)} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}"
-                          method="post" enctype="multipart/form-data" th:object="${contract}" novalidate
-                          id="contractForm">
+                    <form
+                        th:action="${(isEditMode != null and isEditMode == true) and (contractId != null)} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}"
+                        method="post" enctype="multipart/form-data" th:object="${contract}" novalidate
+                        id="contractForm">
 
 
 
-                    <th:if test="${isEditMode}">
+                        <th:if test="${isEditMode}">
                             <input type="hidden" name="_method" value="PUT" />
                         </th:if>
                         <!-- Basic Info Card -->
@@ -400,8 +401,8 @@
                                             Số CMND/CCCD <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" name="tenant.cccdNumber" id="tenant-id"
-                                               required pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
-                                               placeholder="123****789" th:field="*{tenant.maskedCccdNumber}">
+                                            required pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
+                                            placeholder="123****789" th:field="*{tenant.maskedCccdNumber}">
                                         <input type="hidden" th:field="*{tenant.cccdNumber}" id="tenant-cccd-number">
                                     </div>
 
@@ -735,38 +736,18 @@
                                     <!-- Amenities Section -->
                                     <div class="col-12">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <label class="form-label">Tiện ích</label>
-                                            <button type="button"
-                                                class="btn btn-outline-primary btn-sm nha-tro-host-btn-add-amenity"
-                                                id="btn-add-amenity-host" data-bs-toggle="modal"
-                                                data-bs-target="#addAmenityModal-host">
-                                                <i class="fa fa-plus me-1"></i> Thêm tiện ích
-                                            </button>
+                                            <label class="form-label mb-0">Tiện ích có sẵn</label>
                                         </div>
                                         <div class="nha-tro-amenities" id="amenities-list-host">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="wifi">
-                                                <label class="form-check-label" for="wifi">Wifi</label>
+                                            <div th:if="${allUtilities == null or #lists.isEmpty(allUtilities)}"
+                                                class="text-muted fst-italic">
+                                                Không có tiện ích nào được định nghĩa trong hệ thống.
                                             </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="ac">
-                                                <label class="form-check-label" for="ac">Máy lạnh</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="fridge">
-                                                <label class="form-check-label" for="fridge">Tủ lạnh</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="kitchen">
-                                                <label class="form-check-label" for="kitchen">Bếp</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="parking">
-                                                <label class="form-check-label" for="parking">Chỗ để xe</label>
-                                            </div>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="security">
-                                                <label class="form-check-label" for="security">Camera an ninh</label>
+                                            <div th:each="util : ${allUtilities}" class="form-check form-check-inline">
+                                                <input class="form-check-input" type="checkbox" name="utilityIds"
+                                                    th:id="'utility-' + ${util.utilityId}" th:value="${util.utilityId}">
+                                                <label class="form-check-label" th:for="'utility-' + ${util.utilityId}"
+                                                    th:text="${util.name}"></label>
                                             </div>
                                         </div>
                                     </div>

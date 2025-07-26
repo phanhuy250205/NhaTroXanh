@@ -20,7 +20,6 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
             "ORDER BY u.name ASC")
     List<Utility> findUtilitiesWithActivePosts();
 
-    Set<Utility> findByUtilityIdIn(Set<Integer> utilityIds);
-
+    Set<Utility> findByUtilityIdIn(List<Integer> utilityIds);
     Optional<Utility> findByNameIgnoreCase(String name);
 }

@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.entity;
 
 import java.util.HashSet;
+import java.util.Objects; // <-- Thêm import này
 import java.util.Set;
 
 import jakarta.persistence.Column;
@@ -12,13 +13,15 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;   // <-- Sửa
 import lombok.NoArgsConstructor;
+import lombok.Setter;   // <-- Sửa
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Data
+@Getter // <-- Sửa: Dùng Getter và Setter riêng thay cho @Data
+@Setter // <-- Sửa
 @Entity
 @Table(name = "Utilities")
 public class Utility {
@@ -34,4 +37,21 @@ public class Utility {
 
     @ManyToMany(mappedBy = "utilities")
     private Set<Post> posts = new HashSet<>();
+    
+    // 🔥 BẮT ĐẦU PHẦN SỬA LỖI 🔥
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Utility utility = (Utility) o;
+        // Chỉ so sánh dựa trên ID, và đảm bảo ID không null
+        return utilityId != null && utilityId.equals(utility.utilityId);
+    }
+
+    @Override
+    public int hashCode() {
+        // Chỉ băm (hash) dựa trên ID
+        return Objects.hash(utilityId);
+    }
+    // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
 }
