@@ -786,16 +786,16 @@
                                         </label>
                                         <select class="form-select" id="payment-method" required>
                                             <option value="">Chọn phương thức</option>
-                                            <option value="cash">Tiền mặt</option>
-                                            <option value="transfer">Chuyển khoản</option>
+                                            <option value="TIEN_MAT">Tiền mặt</option>
+                                            <option value="BANK">Chuyển khoản</option>
                                         </select>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label class="form-label">
-                                            Ngày thanh toán hàng tháng <span class="text-danger">*</span>
-                                        </label>
-                                        <input type="text" class="form-control" id="payment-date" required
+                                        <label class="form-label" for="payment-date">Ngày thanh toán hàng tháng <span
+                                                class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="payment-date"
+                                            th:field="*{terms.paymentDateDescription}" required
                                             placeholder="Ví dụ: Ngày 5 hằng tháng">
                                     </div>
 

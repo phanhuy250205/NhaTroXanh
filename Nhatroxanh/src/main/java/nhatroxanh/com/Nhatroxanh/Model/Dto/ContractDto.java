@@ -32,7 +32,6 @@ public class ContractDto {
     private String tenantAddress;
     private PaymentMethod paymentMethod;
     private List<ResidentDto> residents = new ArrayList<>();
-    private String paymentDate;
 
     public List<ResidentDto> getResidents() {
         return residents;
@@ -40,14 +39,6 @@ public class ContractDto {
 
     public void setResidents(List<ResidentDto> residents) {
         this.residents = residents;
-    }
-
-    public String getPaymentDate() {
-        return paymentDate;
-    }
-
-    public void setPaymentDate(String paymentDate) {
-        this.paymentDate = paymentDate;
     }
 
     public ContractDto() {
@@ -733,7 +724,16 @@ public class ContractDto {
         private LocalDate endDate;
         private String terms;
         private Integer duration;
-        private String paymentDate;
+        private String paymentDateDescription; // Đổi từ paymentDate thành paymentDateDescription
+
+        // Getter và Setter
+        public String getPaymentDateDescription() {
+            return paymentDateDescription;
+        }
+
+        public void setPaymentDateDescription(String paymentDateDescription) {
+            this.paymentDateDescription = paymentDateDescription;
+        }
 
         public Terms() {
             this.startDate = LocalDate.now();
@@ -801,13 +801,7 @@ public class ContractDto {
             calculateEndDate();
         }
 
-        public String getPaymentDate() { // <--- GETTER CẦN THIẾT
-            return paymentDate;
-        }
-
-        public void setPaymentDate(String paymentDate) { // <--- SETTER CẦN THIẾT
-            this.paymentDate = paymentDate;
-        }
+       
 
         // Helper method to calculate end date
         private void calculateEndDate() {

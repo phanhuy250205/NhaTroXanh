@@ -2494,6 +2494,17 @@ public class ContractController {
         terms.setTerms(contract.getTerms());
         dto.setTerms(terms);
 
+        // ✅ Bắt đầu code mới tại đây để ánh xạ các trường mới
+        if (contract.getPaymentMethod() != null) {
+            dto.setPaymentMethod(ContractDto.PaymentMethod.valueOf(contract.getPaymentMethod().name()));
+            System.out.println("✅ Mapped payment method: " + contract.getPaymentMethod().name());
+        }
+        if (StringUtils.hasText(contract.getPaymentDateDescription())) {
+            terms.setPaymentDateDescription(contract.getPaymentDateDescription());
+            System.out.println("✅ Mapped payment date description: " + contract.getPaymentDateDescription());
+        }
+        // ✅ Kết thúc code mới
+
         System.out.println("✅ Contract DTO conversion completed successfully");
         return dto;
     }

@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 import java.sql.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -43,6 +42,9 @@ public class Contracts {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_date_description", length = 255)
+    private String paymentDateDescription;
 
     @Column(name = "contract_date", nullable = false)
     private Date contractDate;
@@ -84,10 +86,9 @@ public class Contracts {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payments> payments;
 
-
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Resident> residents = new HashSet<>();
-    
+
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED
     }
