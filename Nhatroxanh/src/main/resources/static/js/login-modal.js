@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData,
             })
                 .then((response) => {
-                    if (response.ok) {
+                    if (response.ok) { 
                         // 4. THÀNH CÔNG: Tải lại trang để cập nhật thanh điều hướng
                         window.location.reload()
                     } else {

@@ -2,6 +2,7 @@ package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -14,6 +15,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
@@ -58,6 +60,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserCccdRepository userCccdReponsitory;
+
+    @Autowired
+    private EncryptionService encryptionService;
 
     @Autowired
     private EmailService emailService;
@@ -109,61 +114,131 @@ public class UserServiceImpl implements UserService {
         }
 
         // Kiểm tra số CCCD trùng lặp
-        if (userCccdReponsitory.findByCccdNumber(userOwnerRequest.getCccdNumber()).isPresent()) {
-            logger.error("CCCD number already exists: {}", userOwnerRequest.getCccdNumber());
-            throw new RuntimeException("Số CCCD đã được sử dụng!");
+        if (userOwnerRequest.getCccdNumber() != null && !userOwnerRequest.getCccdNumber().trim().isEmpty()) {
+            try {
+                String encryptedCccd = encryptionService.encrypt(userOwnerRequest.getCccdNumber().trim());
+                if (userCccdRepository.findByCccdNumber(encryptedCccd).isPresent()) {
+                    logger.error("CCCD number already exists: {}", userOwnerRequest.getCccdNumber());
+                    throw new RuntimeException("Số CCCD đã được sử dụng!");
+                }
+            } catch (Exception e) {
+                logger.error("Error encrypting CCCD: {}", e.getMessage());
+                throw new RuntimeException("Lỗi khi mã hóa CCCD: " + e.getMessage());
+            }
         }
 
-        // Tạo user mới
-        Users newUser = new Users();
-        newUser.setFullname(userOwnerRequest.getFullName());
-        newUser.setEmail(userOwnerRequest.getEmail());
-        newUser.setPhone(userOwnerRequest.getPhoneNumber());
-        newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
-        newUser.setGender(Boolean.parseBoolean(userOwnerRequest.getGender()));
-        newUser.setAddress(userOwnerRequest.getAddress());
+        // Validate front image
+        if (frontImage == null || frontImage.isEmpty()) {
+            logger.error("Front image is missing");
+            throw new RuntimeException("Vui lòng chọn ảnh CCCD mặt trước.");
+        }
+        if (!frontImage.getContentType().startsWith("image/")) {
+            logger.error("Invalid front image type: {}", frontImage.getContentType());
+            throw new RuntimeException("Ảnh CCCD mặt trước phải là file ảnh (JPG, PNG).");
+        }
+        if (frontImage.getSize() > 5 * 1024 * 1024) {
+            logger.error("Front image size exceeds 5MB");
+            throw new RuntimeException("Kích thước ảnh CCCD mặt trước không được vượt quá 5MB.");
+        }
 
-        // Xử lý ngày sinh
+        // Validate back image
+        if (backImage == null || backImage.isEmpty()) {
+            logger.error("Back image is missing");
+            throw new RuntimeException("Vui lòng chọn ảnh CCCD mặt sau.");
+        }
+        if (!backImage.getContentType().startsWith("image/")) {
+            logger.error("Invalid back image type: {}", backImage.getContentType());
+            throw new RuntimeException("Ảnh CCCD mặt sau phải là file ảnh (JPG, PNG).");
+        }
+        if (backImage.getSize() > 5 * 1024 * 1024) {
+            logger.error("Back image size exceeds 5MB");
+            throw new RuntimeException("Kích thước ảnh CCCD mặt sau không được vượt quá 5MB.");
+        }
+
+        // Validate birth date and issue date
         if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
             try {
-                newUser.setBirthday(Date.valueOf(userOwnerRequest.getBirthDate()));
-            } catch (IllegalArgumentException e) {
+                LocalDate birthDate = LocalDate.parse(userOwnerRequest.getBirthDate());
+                LocalDate today = LocalDate.now();
+                int age = today.getYear() - birthDate.getYear();
+                if (age < 18) {
+                    logger.error("User is under 18: {}", userOwnerRequest.getBirthDate());
+                    throw new RuntimeException("Bạn phải đủ 18 tuổi để đăng ký.");
+                }
+            } catch (Exception e) {
                 logger.error("Invalid birth date format: {}", userOwnerRequest.getBirthDate(), e);
                 throw new RuntimeException("Định dạng ngày sinh không hợp lệ: " + userOwnerRequest.getBirthDate());
             }
         }
 
+        if (userOwnerRequest.getIssueDate() != null && !userOwnerRequest.getIssueDate().isEmpty() &&
+                userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
+            try {
+                LocalDate issueDate = LocalDate.parse(userOwnerRequest.getIssueDate());
+                LocalDate birthDate = LocalDate.parse(userOwnerRequest.getBirthDate());
+                LocalDate today = LocalDate.now();
+                if (issueDate.isBefore(birthDate)) {
+                    logger.error("Issue date is before birth date: {}", userOwnerRequest.getIssueDate());
+                    throw new RuntimeException("Ngày cấp CCCD phải sau ngày sinh.");
+                }
+                if (issueDate.isAfter(today)) {
+                    logger.error("Issue date is in the future: {}", userOwnerRequest.getIssueDate());
+                    throw new RuntimeException("Ngày cấp CCCD không được là tương lai.");
+                }
+            } catch (Exception e) {
+                logger.error("Invalid issue date format: {}", userOwnerRequest.getIssueDate(), e);
+                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
+            }
+        }
+
+        // Tạo user mới
+        Users newUser = new Users();
+        newUser.setFullname(userOwnerRequest.getFullName().trim());
+        newUser.setEmail(userOwnerRequest.getEmail().trim());
+        newUser.setPhone(userOwnerRequest.getPhoneNumber().trim());
+        newUser.setPassword(passwordEncoder.encode(userOwnerRequest.getPassword()));
+        newUser.setGender(
+                userOwnerRequest.getGender() != null ? Boolean.parseBoolean(userOwnerRequest.getGender()) : null);
+        newUser.setAddress(userOwnerRequest.getAddress() != null ? userOwnerRequest.getAddress().trim() : null);
+        if (userOwnerRequest.getBirthDate() != null && !userOwnerRequest.getBirthDate().isEmpty()) {
+            newUser.setBirthday(Date.valueOf(userOwnerRequest.getBirthDate()));
+        }
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(false);
         newUser.setCreatedAt(LocalDateTime.now());
 
         // Xử lý CCCD
-        UserCccd userCccd = new UserCccd();
-        userCccd.setCccdNumber(userOwnerRequest.getCccdNumber());
-        userCccd.setIssuePlace(userOwnerRequest.getIssuePlace());
-        try {
-            userCccd.setIssueDate(Date.valueOf(userOwnerRequest.getIssueDate()));
-        } catch (IllegalArgumentException e) {
-            logger.error("Invalid issue date format: {}", userOwnerRequest.getIssueDate(), e);
-            throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userOwnerRequest.getIssueDate());
-        }
+        UserCccd userCccd = null;
+        if (userOwnerRequest.getCccdNumber() != null && !userOwnerRequest.getCccdNumber().trim().isEmpty()) {
+            userCccd = new UserCccd();
+            try {
+                userCccd.setCccdNumber(encryptionService.encrypt(userOwnerRequest.getCccdNumber().trim()));
+            } catch (Exception e) {
+                logger.error("Error encrypting CCCD: {}", e.getMessage());
+                throw new RuntimeException("Lỗi khi mã hóa CCCD: " + e.getMessage());
+            }
+            userCccd.setIssuePlace(
+                    userOwnerRequest.getIssuePlace() != null ? userOwnerRequest.getIssuePlace().trim() : null);
+            if (userOwnerRequest.getIssueDate() != null && !userOwnerRequest.getIssueDate().isEmpty()) {
+                userCccd.setIssueDate(Date.valueOf(userOwnerRequest.getIssueDate()));
+            }
+            userCccd.setUser(newUser);
 
-        // Xử lý ảnh CCCD
-        if (frontImage != null && !frontImage.isEmpty()) {
+            // Xử lý ảnh CCCD
             String frontImageUrl = fileUploadService.uploadFile(frontImage, "");
             userCccd.setFrontImageUrl(frontImageUrl);
-        }
-        if (backImage != null && !backImage.isEmpty()) {
             String backImageUrl = fileUploadService.uploadFile(backImage, "");
             userCccd.setBackImageUrl(backImageUrl);
         }
 
-        userCccd.setUser(newUser);
+        // Liên kết CCCD với user
         newUser.setUserCccd(userCccd);
 
         // Lưu user vào cơ sở dữ liệu
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new owner with ID: {}", savedUser.getUserId());
+
+        // TODO: Gửi email xác thực cho savedUser.getEmail()
 
         return savedUser;
     }

@@ -16,7 +16,6 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.entity.VoucherStatus;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;

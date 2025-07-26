@@ -44,6 +44,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ExtensionRequestRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import java.util.Map;
 import java.util.Optional;
@@ -83,6 +84,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private ExtensionRequestRepository extensionRequestRepository;
+
+         @Autowired
+    private EncryptionService encryptionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -272,7 +276,7 @@ public class TenantServiceImpl implements TenantService {
             throw new RuntimeException("Unauthorized action");
         }
 
-        contract.setEndDate(returnDate);
+        contract.setRequestedReturnDate(returnDate);
         contract.setReturnReason(reason);
         contract.setReturnStatus(Contracts.ReturnStatus.PENDING);
 
@@ -514,6 +518,14 @@ public class TenantServiceImpl implements TenantService {
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
         UserCccd userCccd = tenant.getUserCccd();
+        if (userCccd != null && userCccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(userCccd.getCccdNumber());
+                userCccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                throw new RuntimeException("Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
 
         String cccdNumber = (userCccd != null) ? userCccd.getCccdNumber() : "Chưa có";
         String issuePlace = (userCccd != null) ? userCccd.getIssuePlace() : "Chưa có";

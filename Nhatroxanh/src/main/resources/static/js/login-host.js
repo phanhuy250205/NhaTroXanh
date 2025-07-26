@@ -90,3 +90,34 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 })
+document.addEventListener("DOMContentLoaded", function () {
+        const modalOverlay = document.getElementById("forgotPasswordModalOverlayGuest");
+        const openModalBtn = document.getElementById("forgotPasswordBtnGuest");
+        const closeModalBtn = document.getElementById("forgotPasswordModalCloseGuest");
+        const backToLoginBtn = document.getElementById("backToLoginBtnGuest");
+
+        if (openModalBtn && modalOverlay) {
+            openModalBtn.addEventListener("click", function () {
+                modalOverlay.classList.add("show");
+            });
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", function () {
+                modalOverlay.style.display = "none";
+            });
+        }
+
+        if (backToLoginBtn) {
+            backToLoginBtn.addEventListener("click", function () {
+                modalOverlay.style.display = "none";
+            });
+        }
+
+        // Đóng modal khi nhấn ra ngoài
+        window.addEventListener("click", function (event) {
+            if (event.target === modalOverlay) {
+                modalOverlay.style.display = "none";
+            }
+        });
+    });

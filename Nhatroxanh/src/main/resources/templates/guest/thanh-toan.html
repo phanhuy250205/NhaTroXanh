@@ -91,7 +91,7 @@
                             </div>
                             <div class="info-item-guest">
                                 <div class="status-badge-guest" th:classappend="${status == 'PENDING' ? 'status-pending-guest' : status == 'OVERDUE' ? 'status-overdue-guest' : 'status-paid-guest'}">
-                                    <i class="fas" th:class="'fa-' + (${status == 'PENDING' ? 'clock' : status == 'OVERDUE' ? 'exclamation-triangle' : 'check'})"></i>
+                                    <i th:class="'fas fa-' + (${status == 'PENDING' ? 'clock' : status == 'OVERDUE' ? 'exclamation-triangle' : 'check'})"></i>
                                     <span th:text="${status == 'PENDING' ? 'Chưa thanh toán' : status == 'OVERDUE' ? 'Quá hạn' : 'Đã thanh toán'}"></span>
                                 </div>
                             </div>

@@ -579,7 +579,8 @@
         </div>
 
         <div class="content-panels-notifications">
-            <div class="panel-section-notifications show-panel-notifications active" id="lodging-notifications" role="tabpanel">
+            <div class="panel-section-notifications show-panel-notifications active" id="lodging-notifications"
+                role="tabpanel">
                 <div class="notification-list-container" id="lodging-notifications-list"></div>
             </div>
             <div class="panel-section-notifications" id="finance-notifications" role="tabpanel">
@@ -1012,10 +1013,7 @@
                         }
                     }
 
-                    return null;
                 } catch (e) {
-                    console.error('Error parsing PAYMENT notification:', e, notification.message);
-                    return null;
                 }
             }
 

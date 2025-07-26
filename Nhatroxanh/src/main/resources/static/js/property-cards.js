@@ -41,21 +41,27 @@ document.addEventListener("DOMContentLoaded", () => {
     })
 
     // Contact button functionality
-    const contactButtons = document.querySelectorAll(".btn-contact")
+    const contactButtons = document.querySelectorAll(".btn-contact");
+
     contactButtons.forEach((button) => {
         button.addEventListener("click", function (e) {
-            e.preventDefault()
-            createRipple(e, this)
+            e.preventDefault();
+            createRipple(e, this); // hiệu ứng ripple
 
-            // Get property title
-            const card = this.closest(".property-card")
-            const title = card.querySelector(".property-title").textContent
+            const phone = this.getAttribute("data-phone");
+            const card = this.closest(".property-card");
+            const title = card.querySelector(".property-title").textContent;
 
             setTimeout(() => {
-                alert(`Liên hệ cho thuê: ${title}\nSố điện thoại: 0123 456 789`)
-            }, 200)
-        })
-    })
+                if (phone && phone.trim() !== '') {
+                    window.location.href = `tel:${phone}`; // nếu muốn gọi trực tiếp
+                } else {
+                    alert(`Không có số điện thoại cho phòng "${title}"`);
+                }
+            }, 200);
+        });
+    });
+
 
     // View detail button functionality
     // const viewButtons = document.querySelectorAll(".btn-view")
