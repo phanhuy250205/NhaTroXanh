@@ -215,6 +215,7 @@ public class ContractController {
             initializeModelAttributes(model, contract);
             logger.info("Contract form initialized successfully for owner: {}", user.getFullname());
             model.addAttribute("allUtilities", utilityRepository.findAll());
+
             return "host/hop-dong-host";
 
         } catch (Exception e) {
@@ -223,6 +224,7 @@ public class ContractController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             model.addAttribute("hostels", hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId()));
             initializeModelAttributes(model, contract);
+
             return "host/hop-dong-host";
         }
     }
@@ -327,24 +329,9 @@ public class ContractController {
     @PostMapping // Endpoint để tạo hợp đồng mới
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> createContract(
-            @RequestParam("contract") String contractDtoJson, // Nhận ContractDto dưới dạng JSON string
-            @RequestParam(value = "cccdFrontFile", required = false) MultipartFile cccdFrontFile, // File CCCD của người
-                                                                                                  // thuê chính (nếu là
-                                                                                                  // registered tenant)
-            @RequestParam(value = "cccdBackFile", required = false) MultipartFile cccdBackFile, // File CCCD của người
-                                                                                                // thuê chính
-            @RequestParam(value = "unregisteredTenantCccdFrontFile", required = false) MultipartFile unregisteredTenantCccdFrontFile, // File
-                                                                                                                                      // CCCD
-                                                                                                                                      // của
-                                                                                                                                      // người
-                                                                                                                                      // bảo
-                                                                                                                                      // hộ
-            @RequestParam(value = "unregisteredTenantCccdBackFile", required = false) MultipartFile unregisteredTenantCccdBackFile, // File
-                                                                                                                                    // CCCD
-                                                                                                                                    // của
-                                                                                                                                    // người
-                                                                                                                                    // bảo
-                                                                                                                                    // hộ
+            @RequestParam("contract") String contractDtoJson,
+            @RequestParam(value = "cccdFrontFile", required = false) MultipartFile cccdFrontFile,
+            @RequestParam(value = "cccdBackFile", required = false) MultipartFile cccdBackFile,
             Authentication authentication) {
 
         logger.info("--- CONTROLLER: Nhận yêu cầu tạo hợp đồng ---");
@@ -353,11 +340,15 @@ public class ContractController {
         try {
             // Bước 1: Parse ContractDto từ JSON string
             ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); // Bỏ qua các trường không
-                                                                                              // xác định
-            objectMapper.registerModule(new JavaTimeModule()); // Đăng ký module cho LocalDate, etc.
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            objectMapper.registerModule(new JavaTimeModule());
             ContractDto contractDto = objectMapper.readValue(contractDtoJson, ContractDto.class);
-
+            if (contractDto != null && contractDto.getRoom() != null) {
+                logger.info("CONTROLLER: Dữ liệu tiện ích nhận được trong DTO là: {}",
+                        contractDto.getRoom().getUtilityIds());
+            } else {
+                logger.info("CONTROLLER: DTO hoặc thông tin phòng (room) bị null.");
+            }
             // Các validation cơ bản
             if (contractDto == null) {
                 throw new IllegalArgumentException("Dữ liệu hợp đồng không hợp lệ.");
@@ -379,33 +370,44 @@ public class ContractController {
             if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())
                     && contractDto.getUnregisteredTenant() != null) {
                 logger.info("Xử lý Người bảo hộ mới...");
-                // Tạo hoặc cập nhật UnregisteredTenant từ DTO.
-                // Hàm handleUnregisteredTenant sẽ không còn nhận MultipartFile nữa,
-                // mà sẽ nhận trực tiếp URL ảnh nếu có hoặc lưu file nếu được truyền vào từ hàm
-                // gọi.
-                // Ở đây, ta sẽ truyền file ảnh vào handleUnregisteredTenant.
                 unregisteredTenant = handleUnregisteredTenantData(contractDto.getUnregisteredTenant(), owner,
-                        unregisteredTenantCccdFrontFile, unregisteredTenantCccdBackFile);
+                        cccdFrontFile, cccdBackFile);
                 finalTenantPhone = unregisteredTenant.getPhone();
 
             } else if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getTenant() != null) {
                 logger.info("Xử lý Người thuê đã đăng ký...");
                 registeredTenant = handleRegisteredTenantData(contractDto.getTenant(),
-                        cccdFrontFile, cccdBackFile); // Truyền file CCCD cho Registered Tenant
+                        cccdFrontFile, cccdBackFile);
                 finalTenantPhone = registeredTenant.getPhone();
             } else {
                 throw new IllegalArgumentException("Phải cung cấp thông tin người thuê hợp lệ!");
             }
 
-            // Bước 3: Kiểm tra và cập nhật trạng thái phòng
+            // 🔥 SỬA LỖI: Xử lý utilities trước khi save room
             Rooms room = roomsRepository.findById(contractDto.getRoom().getRoomId())
                     .orElseThrow(() -> new ResourceNotFoundException("Phòng trọ không tồn tại!"));
 
             if (room.getStatus() != RoomStatus.unactive) {
                 throw new IllegalStateException("Phòng này đã được thuê hoặc không khả dụng.");
             }
-            room.setStatus(RoomStatus.active); // Đặt trạng thái phòng là 'active' khi tạo hợp đồng
-            roomsRepository.save(room); // Lưu trạng thái phòng đã cập nhật
+
+            if (contractDto.getRoom().getUtilityIds() != null && !contractDto.getRoom().getUtilityIds().isEmpty()) {
+                logger.info("CONTROLLER: Xử lý {} tiện ích cho room ID: {}",
+                        contractDto.getRoom().getUtilityIds().size(), room.getRoomId());
+
+                room.getUtilities().clear(); // Clear utilities cũ
+
+                List<Utility> utilities = utilityRepository.findAllById(contractDto.getRoom().getUtilityIds());
+                room.getUtilities().addAll(utilities); // Add new
+
+                logger.info("CONTROLLER: Đã thêm {} tiện ích mới vào room.", utilities.size());
+            } else {
+                logger.warn("CONTROLLER: Không có tiện ích nào. Clear utilities.");
+                room.getUtilities().clear();
+            }
+
+            room.setStatus(RoomStatus.active);
+            roomsRepository.save(room); // Save room sẽ insert room_utility
 
             // Bước 4: Tạo đối tượng Contracts và lưu
             Contracts contract = new Contracts();
@@ -415,10 +417,9 @@ public class ContractController {
             contract.setUnregisteredTenant(unregisteredTenant);
             contract.setTenantPhone(finalTenantPhone);
 
-            // Điền các thông tin hợp đồng từ DTO
             contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
             contract.setStartDate(Date.valueOf(contractDto.getTerms().getStartDate()));
-            // Tính toán endDate dựa trên startDate và duration nếu endDate null
+
             if (contractDto.getTerms().getEndDate() != null) {
                 contract.setEndDate(Date.valueOf(contractDto.getTerms().getEndDate()));
             } else if (contractDto.getTerms().getDuration() != null) {
@@ -440,7 +441,6 @@ public class ContractController {
                 contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
             }
 
-            // Xử lý Residents (người ở cùng)
             if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
                 for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
                     Resident resident = new Resident();
@@ -448,8 +448,7 @@ public class ContractController {
                     resident.setBirthYear(residentDto.getBirthYear());
                     resident.setPhone(residentDto.getPhone());
                     resident.setCccdNumber(residentDto.getCccdNumber());
-
-                    resident.setContract(contract); // Liên kết người ở với hợp đồng
+                    resident.setContract(contract);
                     contract.getResidents().add(resident);
                 }
             }
@@ -577,7 +576,7 @@ public class ContractController {
             userCccd.setIssuePlace(tenantDto.getIssuePlace());
 
         if (cccdFrontFile != null && !cccdFrontFile.isEmpty()) {
-         
+
             String newFrontUrl = fileUploadService.uploadFile(cccdFrontFile, "cccd");
             userCccd.setFrontImageUrl(newFrontUrl); // <--- SỬA TẠI ĐÂY
             logger.info("Updated CCCD Front with new file: {}", newFrontUrl);
@@ -594,7 +593,7 @@ public class ContractController {
 
         // SỬA TÊN PHƯƠNG THỨC SETTER cho backImageUrl
         if (cccdBackFile != null && !cccdBackFile.isEmpty()) {
-        
+
             String newBackUrl = fileUploadService.uploadFile(cccdBackFile, "cccd");
             userCccd.setBackImageUrl(newBackUrl); // <--- SỬA TẠI ĐÂY
             logger.info("Updated CCCD Back with new file: {}", newBackUrl);
@@ -1172,6 +1171,7 @@ public class ContractController {
 
                 UserCccd tenantCccd = userService.findUserCccdByUserId(user.getUserId());
                 Map<String, Object> tenantData = new HashMap<>();
+                tenantData.put("userId", user.getUserId());
                 tenantData.put("fullName", user.getFullname());
                 tenantData.put("phone", user.getPhone());
                 tenantData.put("email", user.getEmail() != null ? user.getEmail() : "");
@@ -1179,7 +1179,8 @@ public class ContractController {
 
                 if (tenantCccd != null) {
                     tenantData.put("cccdNumber", tenantCccd.getCccdNumber()); // Số CCCD đầy đủ
-                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị che
+                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị
+                                                                                                        // che
                     tenantData.put("issueDate",
                             tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
@@ -1480,7 +1481,8 @@ public class ContractController {
                     response.put("message", "Số CCCD của người thuê phải là 12 chữ số!");
                     return ResponseEntity.badRequest().body(response);
                 }
-            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && contractDto.getUnregisteredTenant() != null) {
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())
+                    && contractDto.getUnregisteredTenant() != null) {
                 String cccdNumber = contractDto.getUnregisteredTenant().getCccdNumber();
                 logger.info("🔍 Unregistered Tenant CCCD: {}", cccdNumber);
                 if (cccdNumber == null || !cccdNumber.matches("\\d{12}")) {
@@ -1498,10 +1500,12 @@ public class ContractController {
             }
 
             // Kiểm tra trạng thái hợp đồng
-            if (contractDto.getStatus() == null || !contractDto.getStatus().matches("DRAFT|ACTIVE|TERMINATED|EXPIRED")) {
+            if (contractDto.getStatus() == null
+                    || !contractDto.getStatus().matches("DRAFT|ACTIVE|TERMINATED|EXPIRED")) {
                 logger.error("❌ Invalid status: {}", contractDto.getStatus());
                 response.put("success", false);
-                response.put("message", "Trạng thái hợp đồng không hợp lệ. Các giá trị cho phép: DRAFT, ACTIVE, TERMINATED, EXPIRED");
+                response.put("message",
+                        "Trạng thái hợp đồng không hợp lệ. Các giá trị cho phép: DRAFT, ACTIVE, TERMINATED, EXPIRED");
                 return ResponseEntity.badRequest().body(response);
             }
 
@@ -1702,9 +1706,7 @@ public class ContractController {
         }
     }
 
-
-
-    @PostMapping(value = "/update-cccd-image", consumes = {"multipart/form-data"})
+    @PostMapping(value = "/update-cccd-image", consumes = { "multipart/form-data" })
     @PreAuthorize("hasRole('OWNER')")
     @Transactional
     public ResponseEntity<Map<String, Object>> updateCccdImage(
@@ -1750,7 +1752,8 @@ public class ContractController {
                 // Lưu ảnh mặt trước mới
                 Image cccdFrontImage = imageService.saveImage(cccdFront, "cccd", tenantCccd, Image.ImageType.FRONT);
                 cccdFrontUrl = cccdFrontImage.getUrl();
-                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(), cccdFrontUrl);
+                logger.info("Cập nhật ảnh CCCD mặt trước thành công, ID: {}, URL: {}", cccdFrontImage.getId(),
+                        cccdFrontUrl);
             }
 
             // Xử lý ảnh mặt sau
@@ -1760,7 +1763,8 @@ public class ContractController {
                 // Lưu ảnh mặt sau mới
                 Image cccdBackImage = imageService.saveImage(cccdBack, "cccd", tenantCccd, Image.ImageType.BACK);
                 cccdBackUrl = cccdBackImage.getUrl();
-                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(), cccdBackUrl);
+                logger.info("Cập nhật ảnh CCCD mặt sau thành công, ID: {}, URL: {}", cccdBackImage.getId(),
+                        cccdBackUrl);
             }
 
             response.put("success", true);
@@ -1909,7 +1913,8 @@ public class ContractController {
             logger.info("🔄 Gọi contractService.updateStatus({}, '{}')", contractId, newStatus);
             contractService.updateStatus(contractId, newStatus);
 
-            logger.info("✅ Cập nhật trạng thái hợp đồng thành công: {} -> {}", contract.getStatus(), newStatus.toUpperCase());
+            logger.info("✅ Cập nhật trạng thái hợp đồng thành công: {} -> {}", contract.getStatus(),
+                    newStatus.toUpperCase());
             response.put("success", true);
             response.put("message", "Cập nhật trạng thái hợp đồng thành công");
             response.put("contractId", contractId);
@@ -2360,74 +2365,48 @@ public class ContractController {
         }
         dto.setStatus(String.valueOf(contract.getStatus()));
 
+        // Xử lý Registered Tenant (người thuê đã đăng ký)
         if (contract.getTenant() != null) {
             ContractDto.Tenant tenant = new ContractDto.Tenant();
             Users user = contract.getTenant();
 
-            if (user != null) {
-                tenant.setUserId(Long.valueOf(user.getUserId()));
-                tenant.setFullName(user.getFullname());
-                tenant.setPhone(user.getPhone());
-                tenant.setEmail(user.getEmail() != null ? user.getEmail() : "");
-                tenant.setBirthday(user.getBirthday());
+            tenant.setUserId(Long.valueOf(user.getUserId()));
+            tenant.setFullName(user.getFullname());
+            tenant.setPhone(user.getPhone());
+            tenant.setEmail(user.getEmail() != null ? user.getEmail() : "");
+            tenant.setBirthday(user.getBirthday());
 
-                String address = user.getAddress();
-                logger.info("Tenant address for userId {}: {}", user.getUserId(), address);
-                if (StringUtils.hasText(address)) {
-                    Map<String, String> addressParts = parseAddress(address);
-                    tenant.setStreet(addressParts.getOrDefault("street", ""));
-                    tenant.setWard(addressParts.getOrDefault("ward", ""));
-                    tenant.setDistrict(addressParts.getOrDefault("district", ""));
-                    tenant.setProvince(addressParts.getOrDefault("province", ""));
-                    logger.info("Parsed tenant address: street={}, ward={}, district={}, province={}",
-                            addressParts.get("street"), addressParts.get("ward"),
-                            addressParts.get("district"), addressParts.get("province"));
-                } else {
-                    logger.warn("No address found for tenant with userId: {}", user.getUserId());
-                    tenant.setStreet("");
-                    tenant.setWard("");
-                    tenant.setDistrict("");
-                    tenant.setProvince("");
-                }
-
-                UserCccd cccd = user.getUserCccd();
-                if (cccd != null) {
-                    tenant.setCccdNumber(cccd.getCccdNumber()); // Số CCCD đầy đủ
-                    tenant.setMaskedCccdNumber(cccdUtils.maskCccd(cccd.getCccdNumber())); // Số CCCD bị che
-                    tenant.setIssueDate(cccd.getIssueDate());
-                    tenant.setIssuePlace(cccd.getIssuePlace() != null ? cccd.getIssuePlace() : "");
-
-                    List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
-                    if (images.isEmpty()) {
-                        logger.warn("No images found for userCccdId: {}", cccd.getId());
-                    } else {
-                        logger.info("Found {} images for userCccdId: {}", images.size(), cccd.getId());
-                        for (Image image : images) {
-                            logger.info("Image ID: {}, Type: {}, URL: {}", image.getId(), image.getType(),
-                                    image.getUrl());
-                            String imageUrl = image.getUrl().startsWith("/uploads/cccd/") ? image.getUrl()
-                                    : "/uploads/cccd" + image.getUrl().replace("/uploads", "");
-                            if (image.getType() == Image.ImageType.FRONT) {
-                                tenant.setCccdFrontUrl(imageUrl);
-                            } else if (image.getType() == Image.ImageType.BACK) {
-                                tenant.setCccdBackUrl(imageUrl);
-                            }
-                        }
-                    }
-                } else {
-                    logger.warn("No UserCccd found for tenant userId: {}", user.getUserId());
-                    tenant.setCccdNumber("");
-                    tenant.setIssueDate(null);
-                    tenant.setIssuePlace("");
-                }
-
-                dto.setTenant(tenant);
-                dto.setTenantType("REGISTERED");
-                System.out.println("✅ Mapped registered tenant: " + user.getFullname());
+            String address = user.getAddress();
+            if (StringUtils.hasText(address)) {
+                Map<String, String> addressParts = parseAddress(address);
+                tenant.setStreet(addressParts.getOrDefault("street", ""));
+                tenant.setWard(addressParts.getOrDefault("ward", ""));
+                tenant.setDistrict(addressParts.getOrDefault("district", ""));
+                tenant.setProvince(addressParts.getOrDefault("province", ""));
             }
+
+            UserCccd cccd = user.getUserCccd();
+            if (cccd != null) {
+                tenant.setCccdNumber(cccd.getCccdNumber());
+                tenant.setMaskedCccdNumber(cccdUtils.maskCccd(cccd.getCccdNumber()));
+                tenant.setIssueDate(cccd.getIssueDate());
+                tenant.setIssuePlace(cccd.getIssuePlace());
+
+                // Lấy ảnh từ thực thể Image liên kết với UserCccd
+                if (StringUtils.hasText(cccd.getFrontImageUrl())) {
+                    tenant.setCccdFrontUrl(cccd.getFrontImageUrl());
+                }
+                if (StringUtils.hasText(cccd.getBackImageUrl())) {
+                    tenant.setCccdBackUrl(cccd.getBackImageUrl());
+                }
+            }
+
+            dto.setTenant(tenant);
+            dto.setTenantType("REGISTERED");
+            System.out.println("✅ Mapped registered tenant: " + user.getFullname());
         }
 
-        // KHÔI PHỤC: Map unregistered tenant
+        // Xử lý Unregistered Tenant (người bảo hộ)
         if (contract.getUnregisteredTenant() != null) {
             ContractDto.UnregisteredTenant unregTenant = new ContractDto.UnregisteredTenant();
             UnregisteredTenants unregUser = contract.getUnregisteredTenant();
@@ -2440,34 +2419,22 @@ public class ContractController {
             unregTenant.setBirthday(unregUser.getBirthday());
 
             String address = unregUser.getAddress();
-            logger.info("Address for unregistered tenant with ID {}: {}", unregUser.getId(), address);
             if (StringUtils.hasText(address)) {
                 Map<String, String> addressParts = parseAddress(address);
                 unregTenant.setStreet(addressParts.getOrDefault("street", ""));
                 unregTenant.setWard(addressParts.getOrDefault("ward", ""));
                 unregTenant.setDistrict(addressParts.getOrDefault("district", ""));
                 unregTenant.setProvince(addressParts.getOrDefault("province", ""));
-            } else {
-                logger.warn("No address found for unregistered tenant with ID: {}", unregUser.getId());
-                unregTenant.setStreet("");
-                unregTenant.setWard("");
-                unregTenant.setDistrict("");
-                unregTenant.setProvince("");
             }
 
-            List<Image> images = imageService.findByUserCccdId(Long.valueOf(unregUser.getId()));
-            if (images.isEmpty()) {
-                logger.warn("No images found for unregistered tenant userCccdId: {}", unregUser.getId());
-            } else {
-                logger.info("Found {} images for unregistered tenant userCccdId: {}", images.size(), unregUser.getId());
-                for (Image image : images) {
-                    logger.info("Image ID: {}, Type: {}, URL: {}", image.getId(), image.getType(), image.getUrl());
-                    if (image.getType() == Image.ImageType.FRONT) {
-                        unregTenant.setCccdFrontUrl(image.getUrl());
-                    } else if (image.getType() == Image.ImageType.BACK) {
-                        unregTenant.setCccdBackUrl(image.getUrl());
-                    }
-                }
+            // 🔥 PHẦN SỬA LỖI: Lấy URL ảnh trực tiếp từ đối tượng UnregisteredTenants
+            if (StringUtils.hasText(unregUser.getCccdFrontUrl())) {
+                unregTenant.setCccdFrontUrl(unregUser.getCccdFrontUrl());
+                logger.info("Mapped Unregistered Tenant Front CCCD URL: {}", unregUser.getCccdFrontUrl());
+            }
+            if (StringUtils.hasText(unregUser.getCccdBackUrl())) {
+                unregTenant.setCccdBackUrl(unregUser.getCccdBackUrl());
+                logger.info("Mapped Unregistered Tenant Back CCCD URL: {}", unregUser.getCccdBackUrl());
             }
 
             dto.setUnregisteredTenant(unregTenant);
@@ -2475,130 +2442,68 @@ public class ContractController {
             System.out.println("✅ Mapped unregistered tenant: " + unregUser.getFullName());
         }
 
+        // Xử lý Owner (Chủ trọ)
         if (contract.getOwner() != null) {
             ContractDto.Owner owner = new ContractDto.Owner();
             Users user = contract.getOwner();
 
-            if (user != null) {
-                owner.setUserId(user.getUserId());
-                owner.setFullName(user.getFullname());
-                owner.setPhone(user.getPhone());
-                owner.setEmail(user.getEmail());
-                owner.setBirthday(user.getBirthday());
-                owner.setBankAccount(user.getBankAccount());
+            owner.setUserId(user.getUserId());
+            owner.setFullName(user.getFullname());
+            owner.setPhone(user.getPhone());
+            owner.setEmail(user.getEmail());
+            owner.setBirthday(user.getBirthday());
+            owner.setBankAccount(user.getBankAccount());
 
-                String address = user.getAddress();
-                logger.info("Address for owner with userId {}: {}", user.getUserId(), address);
-                if (StringUtils.hasText(address)) {
-                    Map<String, String> addressParts = parseAddress(address);
-                    owner.setStreet(addressParts.getOrDefault("street", ""));
-                    owner.setWard(addressParts.getOrDefault("ward", ""));
-                    owner.setDistrict(addressParts.getOrDefault("district", ""));
-                    owner.setProvince(addressParts.getOrDefault("province", ""));
-                } else {
-                    logger.warn("No address found for owner with userId: {}", user.getUserId());
-                    owner.setStreet("");
-                    owner.setWard("");
-                    owner.setDistrict("");
-                    owner.setProvince("");
-                }
-
-                UserCccd cccd = user.getUserCccd();
-                if (cccd != null) {
-                    owner.setCccdNumber(cccd.getCccdNumber());
-                    owner.setIssueDate(cccd.getIssueDate());
-                    owner.setIssuePlace(cccd.getIssuePlace());
-                } else {
-                    owner.setCccdNumber("");
-                    owner.setIssueDate(null);
-                    owner.setIssuePlace("");
-                }
-
-                dto.setOwner(owner);
-                System.out.println("✅ Mapped owner: " + user.getFullname());
+            String address = user.getAddress();
+            if (StringUtils.hasText(address)) {
+                Map<String, String> addressParts = parseAddress(address);
+                owner.setStreet(addressParts.getOrDefault("street", ""));
+                owner.setWard(addressParts.getOrDefault("ward", ""));
+                owner.setDistrict(addressParts.getOrDefault("district", ""));
+                owner.setProvince(addressParts.getOrDefault("province", ""));
             }
+
+            UserCccd cccd = user.getUserCccd();
+            if (cccd != null) {
+                owner.setCccdNumber(cccd.getCccdNumber());
+                owner.setIssueDate(cccd.getIssueDate());
+                owner.setIssuePlace(cccd.getIssuePlace());
+            }
+
+            dto.setOwner(owner);
         }
 
+        // Xử lý Room (Phòng trọ)
         if (contract.getRoom() != null) {
-            ContractDto.Room room = new ContractDto.Room();
-            Rooms roomEntity = contract.getRoom();
-
-            room.setRoomId(roomEntity.getRoomId());
-            room.setRoomName(roomEntity.getNamerooms());
-            room.setArea(roomEntity.getAcreage());
-            room.setPrice(roomEntity.getPrice());
-            room.setStatus(roomEntity.getStatus().name());
-
-            if (roomEntity.getHostel() != null) {
-                room.setHostelId(roomEntity.getHostel().getHostelId());
-                room.setHostelName(roomEntity.getHostel().getName());
-                System.out.println("✅ Room hostel info - ID: " + roomEntity.getHostel().getHostelId() +
-                        ", Name: " + roomEntity.getHostel().getName());
-            } else {
-                System.out.println("⚠️ WARNING: Room has no hostel information!");
-            }
-
-            if (roomEntity.getHostel() != null
-                    && StringUtils.hasText(String.valueOf(roomEntity.getHostel().getAddress()))) {
-                String hostelAddress = String.valueOf(roomEntity.getHostel().getAddress());
-                room.setAddress(hostelAddress);
-
-                Map<String, String> addressParts = parseAddress(hostelAddress);
-                room.setStreet(addressParts.getOrDefault("street", ""));
-                room.setWard(addressParts.getOrDefault("ward", ""));
-                room.setDistrict(addressParts.getOrDefault("district", ""));
-                room.setProvince(addressParts.getOrDefault("province", ""));
-                System.out.println("✅ Room address from hostel: " + hostelAddress);
-            } else if (StringUtils.hasText(roomEntity.getAddress())) {
-                String roomAddress = roomEntity.getAddress();
-                room.setAddress(roomAddress);
-
-                Map<String, String> addressParts = parseAddress(roomAddress);
-                room.setStreet(addressParts.getOrDefault("street", ""));
-                room.setWard(addressParts.getOrDefault("ward", ""));
-                room.setDistrict(addressParts.getOrDefault("district", ""));
-                room.setProvince(addressParts.getOrDefault("province", ""));
-                System.out.println("✅ Room address from room: " + roomAddress);
-            } else {
-                System.out.println("⚠️ WARNING: No address found for room!");
-                room.setAddress("");
-                room.setStreet("");
-                room.setWard("");
-                room.setDistrict("");
-                room.setProvince("");
-            }
-
-            dto.setRoom(room);
-            System.out.println("✅ Mapped room: " + roomEntity.getNamerooms() +
-                    " (ID: " + roomEntity.getRoomId() +
-                    ", HostelID: " + (roomEntity.getHostel() != null ? roomEntity.getHostel().getHostelId() : "NULL")
-                    + ")");
+            dto.setRoom(convertRoomToDto(contract.getRoom()));
         }
 
+        // Xử lý Terms (Điều khoản)
         ContractDto.Terms terms = new ContractDto.Terms();
-
         if (contract.getStartDate() != null) {
             terms.setStartDate(contract.getStartDate().toLocalDate());
         }
         if (contract.getEndDate() != null) {
             terms.setEndDate(contract.getEndDate().toLocalDate());
         }
-
         terms.setPrice(contract.getPrice() != null ? Double.valueOf(contract.getPrice()) : 0.0);
         terms.setDeposit(contract.getDeposit() != null ? Double.valueOf(contract.getDeposit()) : 0.0);
-
-        if (contract.getStartDate() != null && contract.getEndDate() != null) {
-            LocalDate startDate = contract.getStartDate().toLocalDate();
-            LocalDate endDate = contract.getEndDate().toLocalDate();
-            long monthsBetween = ChronoUnit.MONTHS.between(startDate, endDate);
-            terms.setDuration((int) monthsBetween);
-            System.out.println("✅ Calculated duration: " + monthsBetween + " months");
+        if (contract.getDuration() != null) {
+            terms.setDuration(contract.getDuration().intValue());
         }
-
         terms.setTerms(contract.getTerms());
-
         dto.setTerms(terms);
-        System.out.println("✅ Mapped terms - Price: " + terms.getPrice() + ", Deposit: " + terms.getDeposit());
+
+        // ✅ Bắt đầu code mới tại đây để ánh xạ các trường mới
+        if (contract.getPaymentMethod() != null) {
+            dto.setPaymentMethod(ContractDto.PaymentMethod.valueOf(contract.getPaymentMethod().name()));
+            System.out.println("✅ Mapped payment method: " + contract.getPaymentMethod().name());
+        }
+        if (StringUtils.hasText(contract.getPaymentDateDescription())) {
+            terms.setPaymentDateDescription(contract.getPaymentDateDescription());
+            System.out.println("✅ Mapped payment date description: " + contract.getPaymentDateDescription());
+        }
+        // ✅ Kết thúc code mới
 
         System.out.println("✅ Contract DTO conversion completed successfully");
         return dto;
@@ -2737,7 +2642,6 @@ public class ContractController {
         }
     }
 
-
     // ✅ THÊM METHOD NÀY VÀO CONTROLLER
     private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
         // Kiểm tra email từ request trước
@@ -2758,7 +2662,6 @@ public class ContractController {
 
         return null;
     }
-
 
     // ✅ ENDPOINT SEND PDF VIA EMAIL
     @PostMapping("/send-email-pdf")
@@ -2788,8 +2691,7 @@ public class ContractController {
             // ✅ CREATE FILE NAME
             String fileName = String.format("HopDong_%s_%s",
                     recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
-                    contractId != null ? contractId : System.currentTimeMillis()
-            );
+                    contractId != null ? contractId : System.currentTimeMillis());
 
             // ✅ SEND EMAIL WITH PDF ATTACHMENT
             emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
@@ -2810,8 +2712,6 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
-
 
     @PostMapping("/generate-pdf")
     public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
@@ -2864,8 +2764,6 @@ public class ContractController {
         }
     }
 
-
-
     // ✅ NỘI DUNG EMAIL CHO PDF
     private String createEmailBodyForPDF(Contracts contract) {
         return "Xin chào " + contract.getTenant().getFullname() + ",\n\n" +
@@ -2874,8 +2772,6 @@ public class ContractController {
                 "Trân trọng!\n" +
                 "Ban quản lý";
     }
-
-
 
     // KHÔI PHỤC: checkGuardianDuplicates endpoint
     @GetMapping("/check-guardian-duplicates")
