@@ -31,6 +31,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 
@@ -51,6 +52,9 @@ public class ProfileStaffController {
     @Autowired
     private FileUploadService fileUploadService;
 
+    @Autowired
+    private EncryptionService encryptionService; // Thêm service mã hóa
+
     @GetMapping("/profile-nhan-vien")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
@@ -68,17 +72,22 @@ public class ProfileStaffController {
             dto.setGender(user.getGender());
             dto.setEmail(user.getEmail());
             dto.setAddress(user.getAddress());
-            
-            // Set bank account information
             dto.setBankId(user.getBankId());
             dto.setBankName(user.getBankName());
             dto.setBankAccount(user.getBankAccount());
             dto.setAccountHolderName(user.getAccountHolderName());
 
-            if (cccd != null) {
-                dto.setCccdNumber(cccd.getCccdNumber());
-                dto.setIssueDate(cccd.getIssueDate());
-                dto.setIssuePlace(cccd.getIssuePlace());
+            // Giải mã CCCD để hiển thị
+            if (cccd != null && cccd.getCccdNumber() != null) {
+                try {
+                    String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                    dto.setCccdNumber(decryptedCccd);
+                    dto.setIssueDate(cccd.getIssueDate());
+                    dto.setIssuePlace(cccd.getIssuePlace());
+                } catch (Exception e) {
+                    model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+                    dto.setCccdNumber(null); // Đặt null để tránh hiển thị sai
+                }
             }
 
             model.addAttribute("hostInfo", dto);
@@ -184,9 +193,9 @@ public class ProfileStaffController {
 
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-
-                // Kiểm tra CCCD đã tồn tại chưa
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                // Mã hóa số CCCD
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
@@ -203,7 +212,7 @@ public class ProfileStaffController {
                     cccd.setUser(user);
                 }
 
-                cccd.setCccdNumber(trimmedCccd);
+                cccd.setCccdNumber(encryptedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
@@ -227,9 +236,6 @@ public class ProfileStaffController {
         }
     }
 
-    /**
-     * Update bank account information for staff
-     */
     @PostMapping("/update-bank-account")
     @Transactional
     @ResponseBody
@@ -239,9 +245,9 @@ public class ProfileStaffController {
             @RequestParam("bankName") String bankName,
             @RequestParam("bankAccount") String bankAccount,
             @RequestParam("accountHolderName") String accountHolderName) {
-        
+
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -283,9 +289,9 @@ public class ProfileStaffController {
 
             response.put("success", true);
             response.put("message", "Cập nhật thông tin ngân hàng thành công");
-            
+
             log.info("Bank account updated successfully for staff user {}", user.getUserId());
-            
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {

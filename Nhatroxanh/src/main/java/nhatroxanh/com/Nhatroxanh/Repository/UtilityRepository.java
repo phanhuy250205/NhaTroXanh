@@ -22,4 +22,9 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
 
     Set<Utility> findByUtilityIdIn(List<Integer> utilityIds);
     Optional<Utility> findByNameIgnoreCase(String name);
+
+    @Query("SELECT u FROM Utility u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Utility> searchByName(String keyword);
+
+    
 }

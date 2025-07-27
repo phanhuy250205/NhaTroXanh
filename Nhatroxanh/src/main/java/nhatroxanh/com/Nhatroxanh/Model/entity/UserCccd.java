@@ -34,7 +34,7 @@ public class UserCccd {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "cccd_number", length = 20, nullable = false, unique = true)
+    @Column(name = "cccd_number", length = 255, nullable = false, unique = true)
     private String cccdNumber;
 
     @Column(name = "issue_date")

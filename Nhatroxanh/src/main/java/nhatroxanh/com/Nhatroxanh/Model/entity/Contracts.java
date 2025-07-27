@@ -89,6 +89,10 @@ public class Contracts {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Resident> residents = new HashSet<>();
 
+    // Thêm dòng này vào class Contracts
+    @Column(name = "requested_return_date")
+    private Date requestedReturnDate;
+
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED
     }

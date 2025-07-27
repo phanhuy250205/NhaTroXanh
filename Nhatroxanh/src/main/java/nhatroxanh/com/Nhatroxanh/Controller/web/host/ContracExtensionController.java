@@ -155,7 +155,13 @@ public class ContracExtensionController {
             if (!contract.getOwner().getUserId().equals(userDetails.getUser().getUserId())) {
                 throw new RuntimeException("Không có quyền duyệt hợp đồng này.");
             }
+            // ✅ Lấy ngày trả từ trường tạm
+            Date returnDate = contract.getRequestedReturnDate();
+            if (returnDate == null) {
+                throw new RuntimeException("Không có ngày yêu cầu trả phòng.");
+            }
 
+            contract.setEndDate(returnDate);
             contract.setStatus(Contracts.Status.TERMINATED);
             contract.setReturnStatus(Contracts.ReturnStatus.APPROVED);
 

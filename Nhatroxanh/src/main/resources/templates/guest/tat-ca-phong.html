@@ -179,43 +179,75 @@
     </div>
 
     <script>
-        // Auto-apply filter when inputs change
-        document.addEventListener('change', function (e) {
-            if (e.target.matches('input[name="utilities"], input[name="area"], #sortBy')) {
-                console.log('Filter input changed:', e.target);
-                applyFilter();
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('✅ DOM Loaded');
+
+            const filterBtn = document.getElementById('filter-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const sortSelect = document.getElementById('sortBy');
+
+            // === GÁN SỰ KIỆN NÚT LỌC ===
+            if (filterBtn) {
+                filterBtn.addEventListener('click', function () {
+                    console.log('🟢 Filter button clicked');
+                    applyFilter();
+                });
+            } else {
+                console.error('⛔ Không tìm thấy nút lọc (#filter-btn)');
             }
+
+            // === GÁN SỰ KIỆN NÚT RESET ===
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function () {
+                    console.log('🟡 Reset button clicked');
+                    resetFilter();
+                });
+            } else {
+                console.error('⛔ Không tìm thấy nút reset (#reset-btn)');
+            }
+
+            // === SỰ KIỆN THAY ĐỔI SẮP XẾP ===
+            if (sortSelect) {
+                sortSelect.addEventListener('change', function () {
+                    console.log('📊 Sort changed to:', this.value);
+                    applyFilter(0); // Reset về trang đầu khi sort
+                });
+            }
+
+            // === TỰ ĐỘNG LỌC KHI THAY ĐỔI INPUT (TỪY CHỌN) ===
+            // Bỏ comment dòng dưới nếu muốn tự động lọc khi thay đổi
+            // document.addEventListener('change', function (e) {
+            //     if (e.target.matches('input[name="utilities"], input[name="area"]')) {
+            //         console.log('🔄 Filter input changed:', e.target);
+            //         applyFilter();
+            //     }
+            // });
+
+            // === GỌI BAN ĐẦU ===
+            console.log('Province Code:', provinceCode);
+            console.log('District Code:', districtCode);
+            console.log('Ward Code:', wardCode);
+
+            applyFilter();
         });
 
-        // Manual filter button
-        const filterBtn = document.getElementById('filter-btn');
-        if (filterBtn) {
-            filterBtn.addEventListener('click', function () {
-                console.log('Filter button clicked');
-                applyFilter();
-            });
-        } else {
-            console.error('Filter button not found');
-        }
-
-        // Reset filter button
-        const resetBtn = document.getElementById('reset-btn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', function () {
-                console.log('Reset button clicked');
-                resetFilter();
-            });
-        } else {
-            console.error('Reset button not found');
-        }
-
         function applyFilter(page = 0) {
+            console.log('🔍 Applying filter for page:', page);
+
+            // Hiển thị loading
+            showLoading(true);
+
+            // Lấy giá trị sort
             const selectedSort = document.getElementById('sortBy')?.value || 'latest';
-            const priceRange = document.getElementById('priceRange')?.value?.trim() || '';
-            const provinceCode = document.getElementById('province')?.value?.trim();
-            const districtCode = document.getElementById('district')?.value?.trim();
-            const wardCode = document.getElementById('ward')?.value?.trim();
-            const searchTerm = document.getElementById('searchInput')?.value?.trim();
+            const priceRange = document.querySelector('input[name="price"]:checked')?.value || '';
+
+            // Lấy giá trị location
+            const provinceCode = document.getElementById('provinceSelect')?.value?.trim();
+            const districtCode = document.getElementById('districtSelect')?.value?.trim();
+            const wardCode = document.getElementById('wardSelect')?.value?.trim();
+
+            // Lấy từ khóa tìm kiếm (nếu có)
+            const searchTerm = document.getElementById('searchInput')?.value?.trim() || '';
 
             let minPrice = null;
             let maxPrice = null;
@@ -226,24 +258,34 @@
                 case '3_5m': minPrice = 3000000; maxPrice = 5000000; break;
                 case 'over_5m': minPrice = 5000000; break;
             }
-
-            // Diện tích
+            // Lấy giá trị diện tích
             let minArea = null;
             let maxArea = null;
             const areaValue = document.querySelector('input[name="area"]:checked')?.value;
-            if (areaValue) {
-                const [min, max] = areaValue.split('-');
-                minArea = min !== '' ? parseInt(min) : null;
-                maxArea = max !== '' ? parseInt(max) : null;
+            console.log('Selected area:', areaValue);
+
+            if (areaValue && areaValue !== 'all') {
+                const parts = areaValue.split('-');
+                if (parts.length === 2) {
+                    minArea = parts[0] !== '' ? parseInt(parts[0]) : null;
+                    maxArea = parts[1] !== '' ? parseInt(parts[1]) : null;
+                }
             }
 
-            // Tiện ích
+            // Lấy tiện ích đã chọn
             const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
-                .map(cb => cb.value);
+                .map(cb => parseInt(cb.value));
 
+            console.log('Filter params:', {
+                page, selectedSort, minArea, maxArea, selectedUtilities,
+                provinceCode, districtCode, wardCode, searchTerm
+            });
+
+            // Tạo URL với params
             const url = new URL('/api/filter-all-posts', window.location.origin);
             url.searchParams.append('page', page);
             url.searchParams.append('sort', selectedSort);
+
             if (minPrice !== null) url.searchParams.append('minPrice', minPrice);
             if (maxPrice !== null) url.searchParams.append('maxPrice', maxPrice);
             if (provinceCode) url.searchParams.append('provinceCode', provinceCode);
@@ -252,39 +294,66 @@
             if (searchTerm) url.searchParams.append('searchTerm', searchTerm);
             if (minArea !== null) url.searchParams.append('minArea', minArea);
             if (maxArea !== null) url.searchParams.append('maxArea', maxArea);
-            if (selectedUtilities.length > 0) {
-                selectedUtilities.forEach(id => url.searchParams.append('utilities', id));
-            }
+
+            // Thêm utilities vào URL
+            selectedUtilities.forEach(id => {
+                url.searchParams.append('utilities', id);
+            });
+
+            console.log('🌐 Request URL:', url.toString());
 
             fetch(url.toString())
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('✅ Filter response:', data);
+                    showLoading(false);
                     displayPosts(data.content);
                     updatePostCount(data.totalElements);
                     updatePagination(data.number, data.totalPages);
                 })
                 .catch(error => {
-                    console.error('Lỗi khi lọc bài đăng:', error);
+                    console.error('❌ Lỗi khi lọc bài đăng:', error);
+                    showLoading(false);
+                    showError('Có lỗi xảy ra khi tải dữ liệu. Vui lòng thử lại.');
                 });
         }
 
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const postsContainer = document.getElementById('postsContainer');
+            const noResults = document.getElementById('noResults');
 
+            if (loading) {
+                loading.style.display = show ? 'block' : 'none';
+            }
+            if (show) {
+                if (postsContainer) postsContainer.style.display = 'none';
+                if (noResults) noResults.style.display = 'none';
+            }
+        }
 
         function displayPosts(posts) {
             const postsContainer = document.getElementById('postsContainer');
             const noResults = document.getElementById('noResults');
 
             if (!postsContainer || !noResults) {
-                console.error('Posts container or no results element not found');
+                console.error('❌ Posts container or no results element not found');
                 return;
             }
 
             if (!posts || posts.length === 0) {
+                console.log('📭 No posts found');
                 postsContainer.style.display = 'none';
                 noResults.style.display = 'block';
                 return;
             }
 
+            console.log('📋 Displaying', posts.length, 'posts');
             postsContainer.innerHTML = posts.map(post => createPostCard(post)).join('');
             postsContainer.style.display = 'block';
             noResults.style.display = 'none';
@@ -295,56 +364,77 @@
                 ? post.images[0].url
                 : '/images/no-image.jpg';
 
-            const address = post.address
-                ? `${post.address.street || ''}${post.address.street ? ', ' : ''}${post.address.ward?.name || ''}${post.address.ward?.name ? ', ' : ''}${post.address.ward?.district?.name || ''}${post.address.ward?.district?.name ? ', ' : ''}${post.address.ward?.district?.province?.name || ''}`
-                : 'Địa chỉ chưa cập nhật';
+            // Tạo địa chỉ an toàn
+            let address = 'Địa chỉ chưa cập nhật';
+            if (post.address) {
+                const parts = [];
+                if (post.address.street) parts.push(post.address.street);
+                if (post.address.ward?.name) parts.push(post.address.ward.name);
+                if (post.address.ward?.district?.name) parts.push(post.address.ward.district.name);
+                if (post.address.ward?.district?.province?.name) parts.push(post.address.ward.district.province.name);
+                if (parts.length > 0) {
+                    address = parts.join(', ');
+                }
+            }
 
             const formattedDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : '';
 
             return `
-                <div class="post-card mb-3 d-flex">
-                    <div class="post-img position-relative">
-                        <a href="/chi-tiet/${post.postId}">
-                            <img src="${imageUrl}" alt="Phòng trọ" class="img-fluid" onerror="this.src='/images/no-image.jpg'" />
+        <div class="post-card mb-3 d-flex">
+            <div class="post-img position-relative">
+                <a href="/chi-tiet/${post.postId}">
+                    <img src="${imageUrl}" alt="Phòng trọ" class="img-fluid" onerror="this.src='/images/no-image.jpg'" />
+                </a>
+                <button class="btn-favorite" data-post-id="${post.postId}">
+                    <i class="far fa-heart"></i>
+                </button>
+            </div>
+            <div class="post-info ps-3 d-flex flex-column justify-content-between">
+                <div>
+                    <h6 class="fw-bold mb-1">
+                        <a href="/chi-tiet/${post.postId}" class="text-dark text-decoration-none hover-text-primary">
+                            ${escapeHtml(post.title || 'Không có tiêu đề')}
                         </a>
-                        <button class="btn-favorite" data-post-id="${post.postId}">
-                            <i class="far fa-heart"></i>
-                        </button>
+                    </h6>
+                    <div class="text-muted small mb-1">
+                        <span class="text-dark">Từ</span>
+                        <span class="text-danger fw-bold">
+                            ${formatPrice(post.price)} VNĐ
+                        </span>
+                        <span class="text-muted">/tháng</span>
                     </div>
-                    <div class="post-info ps-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="fw-bold mb-1">
-                                <a href="/chi-tiet/${post.postId}" class="text-dark text-decoration-none hover-text-primary">
-                                    ${post.title}
-                                </a>
-                            </h6>
-                            <div class="text-muted small mb-1">
-                                <span class="text-dark">Từ</span>
-                                <span class="text-danger fw-bold">
-                                    ${formatPrice(post.price)} VNĐ
-                                </span>
-                                <span class="text-muted">/tháng</span>
-                            </div>
-                            <div class="d-flex gap-2 mb-2">
-                                <span class="badge bg-light border text-dark small px-2">${post.area}m²</span>
-                                <span class="badge bg-primary text-white small px-2">${post.category?.name || ''}</span>
-                            </div>
-                            <div class="text-muted small">
-                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-                                ${address}
-                            </div>
-                            <div class="text-muted small mt-1">
-                                <i class="fas fa-clock me-1"></i>
-                                ${formattedDate}
-                            </div>
-                        </div>
+                    <div class="d-flex gap-2 mb-2">
+                        <span class="badge bg-light border text-dark small px-2">${post.area || 0}m²</span>
+                        <span class="badge bg-primary text-white small px-2">${escapeHtml(post.category?.name || 'Chưa phân loại')}</span>
+                    </div>
+                    <div class="text-muted small">
+                        <i class="fas fa-map-marker-alt me-1 text-danger"></i>
+                        ${escapeHtml(address)}
+                    </div>
+                    <div class="text-muted small mt-1">
+                        <i class="fas fa-clock me-1"></i>
+                        ${formattedDate}
                     </div>
                 </div>
-            `;
+            </div>
+        </div>
+    `;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function (m) { return map[m]; });
         }
 
         function formatPrice(price) {
-            if (!price) return '0';
+            if (!price || price === 0) return '0';
             return new Intl.NumberFormat('vi-VN').format(price);
         }
 
@@ -353,43 +443,87 @@
             if (totalPostsCount) {
                 totalPostsCount.textContent = count || 0;
             } else {
-                console.error('Total posts count element not found');
+                console.error('❌ Total posts count element not found');
             }
         }
 
         function updatePagination(currentPage, totalPages) {
             const pagination = document.getElementById('pagination');
             if (!pagination) {
-                console.error('Pagination element not found');
+                console.error('❌ Pagination element not found');
                 return;
             }
 
             pagination.innerHTML = '';
 
+            if (totalPages <= 1) {
+                return; // Không hiển thị pagination nếu chỉ có 1 trang
+            }
+
             // Previous button
             const prevLi = document.createElement('li');
             prevLi.className = `page-item ${currentPage === 0 ? 'disabled' : ''}`;
-            prevLi.innerHTML = `<a class="page-link" href="#" onclick="applyFilter(${currentPage - 1})">Trước</a>`;
+            prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(${currentPage - 1})">Trước</a>`;
             pagination.appendChild(prevLi);
 
-            // Page numbers
-            for (let i = 0; i < totalPages; i++) {
+            // Page numbers (hiển thị tối đa 5 trang)
+            const startPage = Math.max(0, currentPage - 2);
+            const endPage = Math.min(totalPages - 1, currentPage + 2);
+
+            if (startPage > 0) {
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(0)">1</a>`;
+                pagination.appendChild(li);
+
+                if (startPage > 1) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<span class="page-link">...</span>';
+                    pagination.appendChild(dots);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
                 const li = document.createElement('li');
                 li.className = `page-item ${currentPage === i ? 'active' : ''}`;
-                li.innerHTML = `<a class="page-link" href="#" onclick="applyFilter(${i})">${i + 1}</a>`;
+                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(${i})">${i + 1}</a>`;
+                pagination.appendChild(li);
+            }
+
+            if (endPage < totalPages - 1) {
+                if (endPage < totalPages - 2) {
+                    const dots = document.createElement('li');
+                    dots.className = 'page-item disabled';
+                    dots.innerHTML = '<span class="page-link">...</span>';
+                    pagination.appendChild(dots);
+                }
+
+                const li = document.createElement('li');
+                li.className = 'page-item';
+                li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(${totalPages - 1})">${totalPages}</a>`;
                 pagination.appendChild(li);
             }
 
             // Next button
             const nextLi = document.createElement('li');
             nextLi.className = `page-item ${currentPage === totalPages - 1 ? 'disabled' : ''}`;
-            nextLi.innerHTML = `<a class="page-link" href="#" onclick="applyFilter(${currentPage + 1})">Sau</a>`;
+            nextLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(${currentPage + 1})">Sau</a>`;
             pagination.appendChild(nextLi);
         }
 
         function resetFilter() {
+            console.log('🔄 Resetting filters');
+
+            // Reset utilities checkboxes
             const utilities = document.querySelectorAll('input[name="utilities"]');
+            utilities.forEach(checkbox => checkbox.checked = false);
+
+            // Reset area radio
             const areaAll = document.getElementById('area_all');
+            if (areaAll) areaAll.checked = true;
+
+            // Reset other filters
             const priceRange = document.getElementById('priceRange');
             const province = document.getElementById('province');
             const district = document.getElementById('district');
@@ -397,14 +531,7 @@
             const searchInput = document.getElementById('searchInput');
             const sortBy = document.getElementById('sortBy');
 
-            if (!utilities || !areaAll || !priceRange || !sortBy) {
-                console.error('Filter elements not found for reset');
-                return;
-            }
-
-            utilities.forEach(checkbox => checkbox.checked = false);
-            areaAll.checked = true;
-            priceRange.value = '';
+            if (priceRange) priceRange.value = '';
             if (province) province.value = '';
             if (district) {
                 district.value = '';
@@ -415,31 +542,29 @@
                 ward.disabled = true;
             }
             if (searchInput) searchInput.value = '';
-            sortBy.value = 'latest';
+            if (sortBy) sortBy.value = 'latest';
 
-            console.log('Filters reset');
-            applyFilter();
+            console.log('✅ Filters reset, applying filter');
+            applyFilter(0);
         }
 
         function showError(message) {
             const postsContainer = document.getElementById('postsContainer');
             const debugInfo = document.getElementById('debugInfo');
-            if (!postsContainer || !debugInfo) {
-                console.error('Posts container or debug info element not found');
-                return;
+            const noResults = document.getElementById('noResults');
+
+            if (debugInfo) {
+                debugInfo.style.display = 'block';
+                debugInfo.className = 'alert alert-danger';
+                debugInfo.innerHTML = `❌ ${message}`;
             }
 
-            debugInfo.style.display = 'block';
-            debugInfo.className = 'alert alert-danger';
-            debugInfo.innerHTML = `Lỗi: ${message}`;
-            postsContainer.style.display = 'none';
+            if (postsContainer) postsContainer.style.display = 'none';
+            if (noResults) noResults.style.display = 'none';
+
+            console.error('❌ Error:', message);
         }
 
-        // Initial load
-        document.addEventListener('DOMContentLoaded', function () {
-            console.log('Page loaded, triggering initial applyFilter');
-            applyFilter();
-        });
     </script>
 
     <!-- Include favorite handler -->

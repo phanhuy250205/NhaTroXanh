@@ -36,7 +36,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
                     redirectURL = "/nhan-vien/bai-dang";
                     break;
                 case "ROLE_ADMIN":
-                    redirectURL = "/admin/dashboard";
+                    redirectURL = "/admin/thong-ke";
                     break;
                 case "ROLE_CUSTOMER":
                     redirectURL = "/trang-chu"; 

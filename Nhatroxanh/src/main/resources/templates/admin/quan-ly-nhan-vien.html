@@ -433,13 +433,13 @@
 
         /* Modal Footer */
         .modal-footer {
-            padding: 1rem 2rem;
+            padding: 1rem 1rem;
             border-top: 1px solid var(--border-color);
             background: #f8f9fa;
         }
 
         .modal-footer .btn {
-            padding: 0.75rem 1.5rem;
+            padding: 0.5rem 1.5rem;
             border-radius: 10px;
             font-weight: 600;
             transition: all 0.3s ease;
@@ -518,6 +518,7 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            margin: 0 auto;
         }
 
         #viewEmployeeModal .btn-primary {
@@ -981,7 +982,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên</h5>
+                        <h5 class="modal-title text-white"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên</h5>
                         <a th:href="@{/admin/quan-ly-nhan-vien(page=${currentPage})}" class="btn-close"></a>
                     </div>
                     <div class="modal-body">
@@ -990,6 +991,8 @@
                                 <img th:src="${staffDetail.avatar}" class="img-fluid rounded-circle mb-3"
                                     style="width: 200px; height: 200px; object-fit: cover;">
                                 <h4 th:text="${staffDetail.fullname}" class="mb-1"></h4>
+                                <p class="text-muted" th:text="${staffDetail.email}"></p>
+                                </p>
                                 <form th:action="@{/admin/quan-ly-nhan-vien/toggle-enable}" method="post">
                                     <input type="hidden" name="userId" th:value="${staffDetail.userId}" />
                                     <button type="submit" class="btn-disable-staff"
@@ -1001,40 +1004,51 @@
                                 </form>
                             </div>
                             <div class="col-md-8">
-                                <h5 class="mb-4">Thông tin cá nhân</h5>
+                                <h4 class="mb-4">Thông tin cá nhân</h4>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <p><strong>Email:</strong> <span th:text="${staffDetail.email}"></span></p>
+                                        <label for="phone" class="form-label"> <i class="fas fa-phone me-1"></i> <strong>Số điện thoại:</strong></label>
+                                        <input type="text" id="phone" name="phone" th:value="${staffDetail.phone}"
+                                            class="form-control" disabled />
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Phone:</strong> <span th:text="${staffDetail.phone}"></span></p>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <p><strong>Giới tính:</strong>
-                                            <span
-                                                th:text="${staffDetail.gender == true ? 'Nam' : (staffDetail.gender == false ? 'Nữ' : '---')}">---</span>
-                                        </p>
+                                        <label class="form-label"><i class="fas fa-venus-mars me-1"></i> <strong>Giới tính:</strong></label>
+                                        <input type="text" id="cccdNumber" name="cccdNumber"
+                                            th:value="${staffDetail.gender == true ? 'Nam' : (staffDetail.gender == false ? 'Nữ' : '---')}" class="form-control" disabled/>
                                     </div>
 
                                     <div class="col-md-6">
-                                        <p><strong>Ngày sinh:</strong> <span th:text="${staffDetail.birthday}"></span>
-                                        </p>
+                                        <label for="birthday" class="form-label"><i class="fas fa-birthday-cake me-1"></i> <strong>Ngày sinh:</strong></label>
+                                        <input type="date" id="birthday" name="birthday"
+                                            th:value="${#dates.format(staffDetail.birthday, 'yyyy-MM-dd')}"
+                                            class="form-control" disabled />
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>CCCD:</strong> <span
-                                                th:text="${staffDetail.userCccd?.cccdNumber}">--- </span></p>
+                                        <label for="cccdNumber" class="form-label"><i class="fas fa-id-card me-1"></i> <strong>Số CCCD:</strong></label>
+                                        <input type="text" id="cccdNumber" name="cccdNumber"
+                                            th:value="${cccd != null ? cccd.cccdNumber : ''}" class="form-control" disabled/>
                                     </div>
+
+                                    <!-- Ngày cấp -->
                                     <div class="col-md-6">
-                                        <p><strong>Ngày cấp:</strong> <span
-                                                th:text="${staffDetail.userCccd?.issueDate}">--- </span></p>
+                                        <label for="issueDate" class="form-label"><i class="fas fa-calendar-alt me-1"></i> <strong>Ngày cấp:</strong></label>
+                                        <input type="date" id="issueDate" name="issueDate"
+                                            th:value="${cccd != null && cccd.issueDate != null ? #dates.format(cccd.issueDate, 'yyyy-MM-dd') : ''}"
+                                            class="form-control" disabled />
                                     </div>
+
+                                    <!-- Nơi cấp -->
                                     <div class="col-md-6">
-                                        <p><strong>Nơi cấp:</strong> <span
-                                                th:text="${staffDetail.userCccd?.issuePlace}">--- </span></p>
+                                        <label for="issuePlace" class="form-label"><i class="fas fa-map-marker-alt me-1"></i> <strong>Nơi cấp:</strong></label>
+                                        <input type="text" id="issuePlace" name="issuePlace"
+                                            th:value="${cccd != null ? cccd.issuePlace : ''}" class="form-control" disabled />
                                     </div>
+
+                                    <!-- Địa chỉ -->
                                     <div class="col-12">
-                                        <p><strong>Địa chỉ:</strong> <span th:text="${staffDetail.address}">---</span>
-                                        </p>
+                                        <label for="address" class="form-label"><i class="fas fa-home me-1"></i> <strong>Địa chỉ:</strong></label>
+                                        <input type="text" id="address" name="address" th:value="${staffDetail.address}"
+                                            class="form-control" disabled />
                                     </div>
                                 </div>
                             </div>
