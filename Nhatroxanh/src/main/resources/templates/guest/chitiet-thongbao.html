@@ -340,6 +340,9 @@
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px solid rgba(62, 131, 204, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
 
         .payment-button-notifications {
@@ -371,6 +374,77 @@
             transform: translateY(0);
         }
 
+        /* Contract Button Styles */
+        .contract-button-notifications {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .contract-button-notifications:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .contract-button-notifications:active {
+            transform: translateY(0);
+        }
+
+        /* Download Button Styles */
+        .download-button-notifications {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .download-button-notifications:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+        .download-button-notifications:active {
+            transform: translateY(0);
+        }
+
+        .sent-status-badge {
+            background: #10b981;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
         .unpaid-status-badge {
             background: rgb(214, 3, 3);
             color: #ffffff;
@@ -380,6 +454,17 @@
             font-weight: 600;
             margin-left: 8px;
             border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .pending-status-badge {
+            background: #f59e0b;
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 8px;
+            border: 1px solid rgba(245, 158, 11, 0.2);
         }
 
         /* Offer Banner */
@@ -439,6 +524,66 @@
         }
 
         .offer-description-notifications p {
+            margin-bottom: 8px;
+        }
+
+        /* Contract Banner */
+        .contract-banner-notifications {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contract-banner-notifications::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .contract-top-notifications {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+            gap: 15px;
+        }
+
+        .contract-name-notifications {
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+            flex: 1;
+            line-height: 1.3;
+        }
+
+        .contract-badge-notifications {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .contract-description-notifications {
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .contract-description-notifications p {
             margin-bottom: 8px;
         }
 
@@ -606,26 +751,33 @@
                 font-size: 15px;
             }
 
-            .payment-button-notifications {
-                padding: 10px 20px;
-                font-size: 13px;
+            .payment-button-container {
+                flex-direction: column;
+                gap: 8px;
             }
 
-            .offer-banner-notifications {
+            .payment-button-notifications, .contract-button-notifications, .download-button-notifications {
+                padding: 10px 20px;
+                font-size: 13px;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .offer-banner-notifications, .contract-banner-notifications {
                 padding: 16px;
             }
 
-            .offer-top-notifications {
+            .offer-top-notifications, .contract-top-notifications {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 10px;
             }
 
-            .offer-name-notifications {
+            .offer-name-notifications, .contract-name-notifications {
                 font-size: 15px;
             }
 
-            .offer-description-notifications {
+            .offer-description-notifications, .contract-description-notifications {
                 font-size: 13px;
             }
 
@@ -686,7 +838,7 @@
                 font-size: 11px;
             }
 
-            .offer-banner-notifications {
+            .offer-banner-notifications, .contract-banner-notifications {
                 padding: 14px;
             }
 
@@ -706,6 +858,11 @@
                 grid-template-columns: repeat(2, 1fr);
                 gap: 15px;
             }
+
+            .payment-button-container {
+                flex-direction: row;
+                justify-content: flex-start;
+            }
         }
 
         /* Smooth animations */
@@ -724,7 +881,9 @@
         .tab-link-notifications:focus,
         .return-button-notifications:focus,
         .notification-card-header:focus,
-        .payment-button-notifications:focus {
+        .payment-button-notifications:focus,
+        .contract-button-notifications:focus,
+        .download-button-notifications:focus {
             outline: 2px solid #3e83cc;
             outline-offset: 2px;
         }
@@ -766,6 +925,11 @@
                     </button>
                 </li>
                 <li class="tab-item-notifications" role="presentation">
+                    <button class="tab-link-notifications" data-target="contract-notifications" type="button" role="tab">
+                        <i class="fas fa-file-contract"></i> Hợp đồng
+                    </button>
+                </li>
+                <li class="tab-item-notifications" role="presentation">
                     <button class="tab-link-notifications" data-target="deals-notifications" type="button" role="tab">
                         <i class="fas fa-gift"></i> Khuyến mãi
                     </button>
@@ -783,6 +947,100 @@
             <!-- All Notifications Tab -->
             <div class="panel-section-notifications show-panel-notifications" id="all-notifications" role="tabpanel">
                 <div class="notification-list-container">
+                    <!-- Contract Notification in All Tab -->
+                    <div class="notification-card-item">
+                        <div class="notification-card-header" onclick="toggleNotificationCard('all-notif-card-contract')">
+                            <div class="notification-card-info">
+                                <h3 class="notification-card-title">
+                                    Thông báo ký hợp đồng thuê phòng
+                                    <span class="pending-status-badge">Chờ ký</span>
+                                </h3>
+                                <div class="notification-card-meta">
+                                    <span><i class="fas fa-clock"></i> 02/01/2025 - 09:00</span>
+                                    <span><i class="fas fa-tag"></i> Hợp đồng</span>
+                                    <span><i class="fas fa-user"></i> Quản lý</span>
+                                </div>
+                            </div>
+                            <div class="notification-card-toggle" id="all-toggle-card-contract">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="notification-card-content" id="all-notif-card-contract">
+                            <div class="notification-card-body">
+                                <div class="contract-banner-notifications">
+                                    <div class="contract-top-notifications">
+                                        <h3 class="contract-name-notifications">Hợp đồng thuê phòng A101</h3>
+                                        <div class="contract-badge-notifications">Chờ ký</div>
+                                    </div>
+                                    <div class="contract-description-notifications">
+                                        <p><strong>Loại hợp đồng:</strong> Thuê phòng trọ dài hạn</p>
+                                        <p><strong>Thời hạn:</strong> 12 tháng (01/02/2025 - 31/01/2026)</p>
+                                        <p><strong>Giá thuê:</strong> 1,200,000 VNĐ/tháng</p>
+                                        <p><strong>Hạn ký:</strong> 07/01/2025</p>
+                                        <p><strong>Trạng thái:</strong> Đã soạn thảo, chờ ký kết</p>
+                                    </div>
+                                </div>
+
+                                <div class="message-body-notifications">
+                                    <h4><i class="fas fa-file-contract" style="color: #10b981;"></i> Thông tin hợp đồng</h4>
+                                    <p>Hợp đồng thuê phòng A101 đã được soạn thảo hoàn tất và sẵn sàng để ký kết. Vui lòng xem xét và ký hợp đồng trước ngày 07/01/2025.</p>
+
+                                    <div class="data-layout-notifications">
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-home"></i>
+                                                Thông tin phòng
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Phòng:</strong> A101 - Deluxe<br>
+                                                <strong>Loại phòng:</strong> King Size<br>
+                                                <strong>Diện tích:</strong> 25m²<br>
+                                                <strong>Đầy đủ tiện nghi:</strong> Điều hòa, tủ lạnh, giường, tủ quần áo
+                                            </div>
+                                        </div>
+
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Thời hạn hợp đồng
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Ngày bắt đầu:</strong> 01/02/2025<br>
+                                                <strong>Ngày kết thúc:</strong> 31/01/2026<br>
+                                                <strong>Thời hạn:</strong> 12 tháng<br>
+                                                <strong style="color: #dc2626;">Hạn ký:</strong> 07/01/2025
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="payment-record-notifications">
+                                    <div class="payment-summary-notifications">
+                                        <div class="payment-label-notifications">Hợp đồng thuê phòng A101</div>
+                                        <div class="payment-value-notifications" style="color: #10b981;">1,200,000 VNĐ/tháng</div>
+                                    </div>
+                                    <div class="payment-info-notifications">
+                                        <div><strong>Mã hợp đồng:</strong> HD-A101-2025001</div>
+                                        <div><strong>Ngày tạo:</strong> 02/01/2025</div>
+                                        <div><strong>Trạng thái:</strong> <span style="color: #f59e0b;">Chờ ký kết</span></div>
+                                        <div><strong>Hạn ký:</strong> <span style="color: #dc2626;">07/01/2025</span></div>
+                                    </div>
+                                    
+                                    <div class="payment-button-container">
+                                        <button class="contract-button-notifications" onclick="handleContractSigning('HD-A101-2025001')">
+                                            <i class="fas fa-pen-nib"></i>
+                                            Ký hợp đồng ngay
+                                        </button>
+                                        <button class="download-button-notifications" onclick="handleContractDownload('HD-A101-2025001')">
+                                            <i class="fas fa-download"></i>
+                                            Tải hợp đồng
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Notification 1: Payment Success -->
                     <div class="notification-card-item">
                         <div class="notification-card-header" onclick="toggleNotificationCard('all-notif-card-1')">
@@ -1230,6 +1488,199 @@
                 </div>
             </div>
 
+            <!-- Contract Notifications Tab -->
+            <div class="panel-section-notifications" id="contract-notifications" role="tabpanel">
+                <div class="notification-list-container">
+                    <!-- NEW: Contract Download Notification -->
+                    <div class="notification-card-item">
+                        <div class="notification-card-header" onclick="toggleNotificationCard('contract-notif-card-download')">
+                            <div class="notification-card-info">
+                                <h3 class="notification-card-title">
+                                    Gửi hợp đồng thuê phòng A101 hoàn tất
+                                    <span class="sent-status-badge">Đã gửi</span>
+                                </h3>
+                                <div class="notification-card-meta">
+                                    <span><i class="fas fa-clock"></i> 03/01/2025 - 14:30</span>
+                                    <span><i class="fas fa-tag"></i> Hợp đồng</span>
+                                    <span><i class="fas fa-user"></i> Quản lý</span>
+                                </div>
+                            </div>
+                            <div class="notification-card-toggle" id="contract-toggle-card-download">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="notification-card-content" id="contract-notif-card-download">
+                            <div class="notification-card-body">
+                                <div class="contract-banner-notifications">
+                                    <div class="contract-top-notifications">
+                                        <h3 class="contract-name-notifications">Hợp đồng thuê phòng A101 - Hoàn tất</h3>
+                                        <div class="contract-badge-notifications">Đã gửi</div>
+                                    </div>
+                                    <div class="contract-description-notifications">
+                                        <p><strong>Loại hợp đồng:</strong> Thuê phòng trọ dài hạn</p>
+                                        <p><strong>Thời hạn:</strong> 12 tháng (01/02/2025 - 31/01/2026)</p>
+                                        <p><strong>Giá thuê:</strong> 1,200,000 VNĐ/tháng</p>
+                                        <p><strong>Ngày ký:</strong> 03/01/2025</p>
+                                        <p><strong>Trạng thái:</strong> Hoàn tất, đã gửi bản PDF</p>
+                                    </div>
+                                </div>
+
+                                <div class="message-body-notifications">
+                                    <h4><i class="fas fa-file-pdf" style="color: #dc2626;"></i> Hợp đồng đã hoàn tất</h4>
+                                    <p>Hợp đồng thuê phòng A101 đã được ký kết hoàn tất và được gửi đến bạn dưới dạng file PDF. Bạn có thể tải xuống hợp đồng để lưu trữ và tham khảo.</p>
+
+                                    <div class="data-layout-notifications">
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-home"></i>
+                                                Thông tin phòng
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Phòng:</strong> A101 - Deluxe<br>
+                                                <strong>Loại phòng:</strong> King Size<br>
+                                                <strong>Diện tích:</strong> 25m²<br>
+                                                <strong>Đầy đủ tiện nghi:</strong> Điều hòa, tủ lạnh, giường, tủ quần áo
+                                            </div>
+                                        </div>
+
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-calendar-check"></i>
+                                                Thông tin ký kết
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Ngày ký:</strong> 03/01/2025<br>
+                                                <strong>Bên cho thuê:</strong> Công ty TNHH Nhà Trọ ABC<br>
+                                                <strong>Bên thuê:</strong> Nguyễn Văn A<br>
+                                                <strong style="color: #10b981;">Trạng thái:</strong> Hoàn tất
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="payment-record-notifications">
+                                    <div class="payment-summary-notifications">
+                                        <div class="payment-label-notifications">Hợp đồng thuê phòng A101 - PDF</div>
+                                        <div class="payment-value-notifications" style="color: #10b981;">Sẵn sàng tải</div>
+                                    </div>
+                                    <div class="payment-info-notifications">
+                                        <div><strong>Mã hợp đồng:</strong> HD-A101-2025001</div>
+                                        <div><strong>Ngày ký:</strong> 03/01/2025</div>
+                                        <div><strong>Trạng thái:</strong> <span style="color: #10b981;">Hoàn tất</span></div>
+                                        <div><strong>File PDF:</strong> <span style="color: #3b82f6;">HD-A101-2025001.pdf</span></div>
+                                    </div>
+                                    
+                                    <div class="payment-button-container">
+                                        <button class="contract-button-notifications" onclick="handleContractView('HD-A101-2025001')">
+                                            <i class="fas fa-eye"></i>
+                                            Xem hợp đồng
+                                        </button>
+                                        <button class="download-button-notifications" onclick="handleContractDownload('HD-A101-2025001')">
+                                            <i class="fas fa-download"></i>
+                                            Tải hợp đồng
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contract Notification -->
+                    <div class="notification-card-item">
+                        <div class="notification-card-header" onclick="toggleNotificationCard('contract-notif-card-1')">
+                            <div class="notification-card-info">
+                                <h3 class="notification-card-title">
+                                    Thông báo ký hợp đồng thuê phòng
+                                    <span class="pending-status-badge">Chờ ký</span>
+                                </h3>
+                                <div class="notification-card-meta">
+                                    <span><i class="fas fa-clock"></i> 02/01/2025 - 09:00</span>
+                                    <span><i class="fas fa-tag"></i> Hợp đồng</span>
+                                    <span><i class="fas fa-user"></i> Quản lý</span>
+                                </div>
+                            </div>
+                            <div class="notification-card-toggle" id="contract-toggle-card-1">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                        <div class="notification-card-content" id="contract-notif-card-1">
+                            <div class="notification-card-body">
+                                <div class="contract-banner-notifications">
+                                    <div class="contract-top-notifications">
+                                        <h3 class="contract-name-notifications">Hợp đồng thuê phòng A101</h3>
+                                        <div class="contract-badge-notifications">Chờ ký</div>
+                                    </div>
+                                    <div class="contract-description-notifications">
+                                        <p><strong>Loại hợp đồng:</strong> Thuê phòng trọ dài hạn</p>
+                                        <p><strong>Thời hạn:</strong> 12 tháng (01/02/2025 - 31/01/2026)</p>
+                                        <p><strong>Giá thuê:</strong> 1,200,000 VNĐ/tháng</p>
+                                        <p><strong>Hạn ký:</strong> 07/01/2025</p>
+                                        <p><strong>Trạng thái:</strong> Đã soạn thảo, chờ ký kết</p>
+                                    </div>
+                                </div>
+
+                                <div class="message-body-notifications">
+                                    <h4><i class="fas fa-file-contract" style="color: #10b981;"></i> Thông tin hợp đồng</h4>
+                                    <p>Hợp đồng thuê phòng A101 đã được soạn thảo hoàn tất và sẵn sàng để ký kết. Vui lòng xem xét và ký hợp đồng trước ngày 07/01/2025.</p>
+
+                                    <div class="data-layout-notifications">
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-home"></i>
+                                                Thông tin phòng
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Phòng:</strong> A101 - Deluxe<br>
+                                                <strong>Loại phòng:</strong> King Size<br>
+                                                <strong>Diện tích:</strong> 25m²<br>
+                                                <strong>Đầy đủ tiện nghi:</strong> Điều hòa, tủ lạnh, giường, tủ quần áo
+                                            </div>
+                                        </div>
+
+                                        <div class="data-block-notifications">
+                                            <div class="data-title-notifications">
+                                                <i class="fas fa-calendar-alt"></i>
+                                                Thời hạn hợp đồng
+                                            </div>
+                                            <div class="data-content-notifications">
+                                                <strong>Ngày bắt đầu:</strong> 01/02/2025<br>
+                                                <strong>Ngày kết thúc:</strong> 31/01/2026<br>
+                                                <strong>Thời hạn:</strong> 12 tháng<br>
+                                                <strong style="color: #dc2626;">Hạn ký:</strong> 07/01/2025
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="payment-record-notifications">
+                                    <div class="payment-summary-notifications">
+                                        <div class="payment-label-notifications">Hợp đồng thuê phòng A101</div>
+                                        <div class="payment-value-notifications" style="color: #10b981;">1,200,000 VNĐ/tháng</div>
+                                    </div>
+                                    <div class="payment-info-notifications">
+                                        <div><strong>Mã hợp đồng:</strong> HD-A101-2025001</div>
+                                        <div><strong>Ngày tạo:</strong> 02/01/2025</div>
+                                        <div><strong>Trạng thái:</strong> <span style="color: #f59e0b;">Chờ ký kết</span></div>
+                                        <div><strong>Hạn ký:</strong> <span style="color: #dc2626;">07/01/2025</span></div>
+                                    </div>
+                                    
+                                    <div class="payment-button-container">
+                                        <button class="contract-button-notifications" onclick="handleContractSigning('HD-A101-2025001')">
+                                            <i class="fas fa-pen-nib"></i>
+                                            Ký hợp đồng ngay
+                                        </button>
+                                        <button class="download-button-notifications" onclick="handleContractDownload('HD-A101-2025001')">
+                                            <i class="fas fa-download"></i>
+                                            Tải hợp đồng
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Deals Notifications Tab -->
             <div class="panel-section-notifications" id="deals-notifications" role="tabpanel">
                 <div class="notification-list-container">
@@ -1357,6 +1808,75 @@
             }, 2000);
         }
 
+        // Contract signing handling function
+        function handleContractSigning(contractId) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            button.disabled = true;
+
+            // Simulate contract signing processing
+            setTimeout(() => {
+                // Show confirmation and redirect to contract signing page
+                if (confirm(`Bạn có muốn chuyển đến trang ký hợp đồng ${contractId} không?`)) {
+                    // In a real application, redirect to contract signing page
+                    window.location.href = `/ky-hopdong`;
+                } else {
+                    // Reset button state if user cancels
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }, 1500);
+        }
+
+        // NEW: Contract view handling function
+        function handleContractView(contractId) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+            button.disabled = true;
+
+            // Simulate contract view processing
+            setTimeout(() => {
+                // Show contract in a new window or modal
+                alert(`Đang mở hợp đồng ${contractId} để xem chi tiết`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // In a real application, open contract in new tab or modal
+                // window.open(`/contract/view/${contractId}`, '_blank');
+            }, 1500);
+        }
+
+        // Contract download handling function
+        function handleContractDownload(contractId) {
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
+            button.disabled = true;
+
+            // Simulate download processing
+            setTimeout(() => {
+                // Show success message
+                alert(`Đang tải xuống hợp đồng ${contractId}.pdf`);
+                
+                // Reset button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // In a real application, trigger file download
+                // const link = document.createElement('a');
+                // link.href = `/contract/download/${contractId}`;
+                // link.download = `${contractId}.pdf`;
+                // link.click();
+            }, 2000);
+        }
+
         // Main tab switching functionality
         document.addEventListener('DOMContentLoaded', function() {
             const tabLinks = document.querySelectorAll('.tab-link-notifications');
@@ -1409,7 +1929,7 @@
         // Touch optimization for mobile
         document.addEventListener('DOMContentLoaded', function() {
             // Add touch feedback for interactive elements
-            const interactiveElements = document.querySelectorAll('.notification-card-header, .tab-link-notifications, .return-button-notifications, .payment-button-notifications');
+            const interactiveElements = document.querySelectorAll('.notification-card-header, .tab-link-notifications, .return-button-notifications, .payment-button-notifications, .contract-button-notifications, .download-button-notifications');
             
             interactiveElements.forEach(element => {
                 element.addEventListener('touchstart', function() {

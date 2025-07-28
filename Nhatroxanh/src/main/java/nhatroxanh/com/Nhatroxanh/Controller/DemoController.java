@@ -127,6 +127,10 @@ public class DemoController {
     public String notifications() {
         return "guest/chitiet-thongbao";
     }
+    @GetMapping("/ky-hopdong")
+    public String kyHopDong() {
+        return "guest/ky-hopdong";
+    }
     @GetMapping("/infor-chutro")
     public String chutro() {
         return "host/infor-chutro";
@@ -142,5 +146,9 @@ public class DemoController {
     @GetMapping("/duyet-rut-tien")
     public String duyetRutTien() {
         return "staff/duyet-ruttien";
+    }
+    @GetMapping("/dang-ky-host")
+    public String dangKyHost() {
+        return "auth/new-register-host";
     }
 }

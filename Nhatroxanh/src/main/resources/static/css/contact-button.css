@@ -1,0 +1,372 @@
+/* Custom CSS cho Contact Widget */
+.contact-widget {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 1000;
+}
+
+/* Main Contact Button */
+.contact-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2E86C1, #1B4F72);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(46, 134, 193, 0.4);
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(46, 134, 193, 0.6);
+    background: linear-gradient(135deg, #3498DB, #2E86C1);
+}
+
+.contact-btn.active {
+    transform: rotate(135deg) scale(1.1);
+    background: linear-gradient(135deg, #E74C3C, #C0392B);
+    box-shadow: 0 8px 35px rgba(231, 76, 60, 0.6);
+}
+
+.contact-btn.closing {
+    transform: rotate(90deg) scale(0.9);
+    background: linear-gradient(135deg, #F39C12, #E67E22);
+    transition: all 0.3s ease;
+}
+
+.contact-btn.active:hover {
+    background: linear-gradient(135deg, #EC7063, #E74C3C);
+}
+
+/* Contact Menu */
+.contact-menu {
+    position: absolute;
+    bottom: 80px;
+    right: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(50px) scale(0) rotate(180deg);
+    transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    transform-origin: bottom right;
+    filter: blur(10px);
+}
+
+.contact-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1) rotate(0deg);
+    filter: blur(0px);
+}
+
+.contact-menu.closing {
+    opacity: 0;
+    visibility: visible;
+    transform: translateY(30px) scale(0.5) rotate(-90deg);
+    filter: blur(5px);
+    transition: all 0.5s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.contact-item {
+    margin-bottom: 15px;
+    transform: translateX(120px) rotateY(90deg) scale(0);
+    opacity: 0;
+    transition: all 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    filter: blur(8px);
+}
+
+.contact-menu.show .contact-item {
+    transform: translateX(0) rotateY(0deg) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+}
+
+.contact-menu.closing .contact-item {
+    transform: translateX(80px) rotateY(-45deg) scale(0.3);
+    opacity: 0;
+    filter: blur(6px);
+    transition: all 0.4s cubic-bezier(0.55, 0.085, 0.68, 0.53);
+}
+
+.contact-menu.show .contact-item:nth-child(1) {
+    transition-delay: 0.1s;
+    animation: slideInBounce 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s both;
+}
+
+.contact-menu.show .contact-item:nth-child(2) {
+    transition-delay: 0.25s;
+    animation: slideInBounce 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.25s both;
+}
+
+.contact-menu.show .contact-item:nth-child(3) {
+    transition-delay: 0.4s;
+    animation: slideInBounce 0.9s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.4s both;
+}
+
+.contact-menu.closing .contact-item:nth-child(3) {
+    transition-delay: 0s;
+}
+
+.contact-menu.closing .contact-item:nth-child(2) {
+    transition-delay: 0.1s;
+}
+
+.contact-menu.closing .contact-item:nth-child(1) {
+    transition-delay: 0.2s;
+}
+
+.contact-link-btn {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 12px 20px;
+    border-radius: 30px;
+    text-decoration: none;
+    color: #2C3E50;
+    font-weight: 500;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    min-width: 180px;
+    border-left: 4px solid transparent;
+}
+
+.contact-link-btn:hover {
+    transform: translateY(-5px) scale(1.05) rotateZ(-2deg);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    color: white;
+    text-decoration: none;
+    animation: wiggle 0.5s ease-in-out;
+}
+
+/* Zalo Styling */
+.contact-link-btn.zalo {
+    border-left-color: #0068FF;
+}
+
+.contact-link-btn.zalo:hover {
+    background: linear-gradient(135deg, #0068FF, #0052CC);
+}
+
+/* Facebook Styling */
+.contact-link-btn.facebook {
+    border-left-color: #1877F2;
+}
+
+.contact-link-btn.facebook:hover {
+    background: linear-gradient(135deg, #1877F2, #166FE5);
+}
+
+/* Phone Styling */
+.contact-link-btn.phone {
+    border-left-color: #27AE60;
+}
+
+.contact-link-btn.phone:hover {
+    background: linear-gradient(135deg, #27AE60, #229954);
+}
+
+.contact-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 12px;
+    font-size: 16px;
+    background: #F8F9FA;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+.contact-link-btn.zalo .contact-icon {
+    background: #E3F2FD;
+    color: #0068FF;
+}
+
+.contact-link-btn.facebook .contact-icon {
+    background: #E3F2FD;
+    color: #1877F2;
+}
+
+.contact-link-btn.phone .contact-icon {
+    background: #E8F5E8;
+    color: #27AE60;
+}
+
+.contact-link-btn:hover .contact-icon {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: scale(1.1);
+}
+
+.contact-text {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .contact-widget {
+        bottom: 20px;
+        right: 20px;
+    }
+    
+    .contact-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 20px;
+    }
+    
+    .contact-link-btn {
+        min-width: 150px;
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+    
+    .contact-icon {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
+}
+
+/* Animation keyframes */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(46, 134, 193, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(46, 134, 193, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(46, 134, 193, 0);
+    }
+}
+
+.contact-btn::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2E86C1, #1B4F72);
+    z-index: -1;
+    animation: pulse 2s infinite, rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes wiggle {
+    0%, 100% {
+        transform: translateY(-5px) scale(1.05) rotateZ(-2deg);
+    }
+    25% {
+        transform: translateY(-5px) scale(1.05) rotateZ(2deg);
+    }
+    50% {
+        transform: translateY(-5px) scale(1.05) rotateZ(-1deg);
+    }
+    75% {
+        transform: translateY(-5px) scale(1.05) rotateZ(1deg);
+    }
+}
+
+@keyframes slideInBounce {
+    0% {
+        transform: translateX(150px) rotateY(180deg) scale(0);
+        opacity: 0;
+        filter: blur(15px);
+    }
+    30% {
+        transform: translateX(-20px) rotateY(-10deg) scale(1.2);
+        opacity: 0.7;
+        filter: blur(5px);
+    }
+    60% {
+        transform: translateX(10px) rotateY(5deg) scale(0.9);
+        opacity: 0.9;
+        filter: blur(2px);
+    }
+    80% {
+        transform: translateX(-5px) rotateY(-2deg) scale(1.05);
+        opacity: 1;
+        filter: blur(0px);
+    }
+    100% {
+        transform: translateX(0) rotateY(0deg) scale(1);
+        opacity: 1;
+        filter: blur(0px);
+    }
+}
+
+@keyframes slideOutBounce {
+    0% {
+        transform: translateX(0) rotateY(0deg) scale(1);
+        opacity: 1;
+        filter: blur(0px);
+    }
+    20% {
+        transform: translateX(-10px) rotateY(15deg) scale(1.1);
+        opacity: 0.8;
+        filter: blur(2px);
+    }
+    50% {
+        transform: translateX(30px) rotateY(-30deg) scale(0.7);
+        opacity: 0.4;
+        filter: blur(8px);
+    }
+    100% {
+        transform: translateX(100px) rotateY(-90deg) scale(0);
+        opacity: 0;
+        filter: blur(15px);
+    }
+}
+
+/* Demo content styling */
+body {
+    background: linear-gradient(135deg, #F8F9FA, #E9ECEF);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.card-body {
+    padding: 2rem;
+}
+
+.lead {
+    color: #5D6D7E;
+}
+
+/* Zalo icon fix (since Font Awesome doesn't have official Zalo icon) */
+.fa-zalo::before {
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    font-style: normal;
+}
+
+
+
