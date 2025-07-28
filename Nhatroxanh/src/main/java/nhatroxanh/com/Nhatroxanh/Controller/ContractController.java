@@ -413,8 +413,18 @@ public class ContractController {
             Contracts contract = new Contracts();
             contract.setOwner(owner);
             contract.setRoom(room);
-            contract.setTenant(registeredTenant);
-            contract.setUnregisteredTenant(unregisteredTenant);
+            // ✅ CODE MỚI (SỬA LỖI)
+            if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
+                contract.setTenant(registeredTenant);
+                contract.setUnregisteredTenant(null);
+                logger.info("✅ Set REGISTERED tenant: {}", registeredTenant.getFullname());
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
+                contract.setTenant(null);  // ← QUAN TRỌNG: Set null cho registered tenant
+                contract.setUnregisteredTenant(unregisteredTenant);
+                logger.info("✅ Set UNREGISTERED tenant: {}", unregisteredTenant.getFullName());
+            } else {
+                throw new IllegalArgumentException("Loại người thuê không hợp lệ: " + contractDto.getTenantType());
+            }
             contract.setTenantPhone(finalTenantPhone);
 
             contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
@@ -1509,28 +1519,61 @@ public class ContractController {
                 return ResponseEntity.badRequest().body(response);
             }
 
+            // Kiểm tra và xử lý phòng
             if (contractDto.getRoom() != null && contractDto.getRoom().getRoomId() != null) {
                 logger.info("=== VALIDATE AND GET ROOM ===");
                 logger.info("Searching for room with ID: {}", contractDto.getRoom().getRoomId());
-                Optional<Rooms> room = roomsService.findById(contractDto.getRoom().getRoomId());
-                if (room.isEmpty()) {
+                Optional<Rooms> roomOptional = roomsService.findById(contractDto.getRoom().getRoomId());
+                if (roomOptional.isEmpty()) {
                     logger.error("Room not found: {}", contractDto.getRoom().getRoomId());
                     response.put("success", false);
                     response.put("message", "Phòng không tồn tại!");
                     return ResponseEntity.status(404).body(response);
                 }
-                logger.info("Room found: ID={}, Name={}, Status={}", room.get().getRoomId(), room.get().getNamerooms(),
-                        room.get().getStatus());
-                if (!room.get().getRoomId().equals(contract.getRoom().getRoomId())
-                        && !room.get().getStatus().equals(RoomStatus.unactive)) {
-                    logger.error("Room is not available. Current status: {}", room.get().getStatus());
+
+                Rooms room = roomOptional.get();
+                logger.info("Room found: ID={}, Name={}, Status={}",
+                        room.getRoomId(), room.getNamerooms(), room.getStatus());
+
+                if (!room.getRoomId().equals(contract.getRoom().getRoomId())
+                        && !room.getStatus().equals(RoomStatus.unactive)) {
+                    logger.error("Room is not available. Current status: {}", room.getStatus());
                     response.put("success", false);
                     response.put("message",
-                            "Phòng đã được thuê hoặc không khả dụng! Trạng thái hiện tại: " + room.get().getStatus());
+                            "Phòng đã được thuê hoặc không khả dụng! Trạng thái hiện tại: " + room.getStatus());
                     return ResponseEntity.badRequest().body(response);
                 }
+
+                // Xử lý tiện ích
+                if (contractDto.getRoom().getUtilityIds() != null) {
+                    logger.info("🛠️ Processing {} utilities for room ID: {}",
+                            contractDto.getRoom().getUtilityIds().size(), room.getRoomId());
+
+                    // Xóa tất cả tiện ích hiện tại
+                    room.getUtilities().clear();
+                    roomsRepository.save(room); // Lưu để xóa bản ghi trong room_utility
+
+                    // Thêm tiện ích mới
+                    if (!contractDto.getRoom().getUtilityIds().isEmpty()) {
+                        List<Utility> utilities = utilityRepository.findAllById(contractDto.getRoom().getUtilityIds());
+                        if (utilities.size() != contractDto.getRoom().getUtilityIds().size()) {
+                            logger.warn("❌ Some utilityIds are invalid: {}", contractDto.getRoom().getUtilityIds());
+                            throw new IllegalArgumentException("Một số tiện ích không tồn tại!");
+                        }
+                        room.getUtilities().addAll(utilities);
+                        logger.info("🛠️ Added {} new utilities to room ID: {}", utilities.size(), room.getRoomId());
+                    } else {
+                        logger.info("🛠️ No utilities selected, room has no utilities.");
+                    }
+                    roomsRepository.save(room); // Lưu phòng và tiện ích mới
+                } else {
+                    logger.info("🛠️ No utilityIds provided, keeping existing utilities.");
+                }
+
+                contract.setRoom(room);
             }
 
+            // Cập nhật hợp đồng
             Contracts updatedContract = contractService.updateContract(contractId, contractDto);
             response.put("success", true);
             response.put("message", "Cập nhật hợp đồng thành công!");
@@ -1550,7 +1593,6 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
     @PutMapping("/update-owner")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateOwner(
@@ -2262,6 +2304,17 @@ public class ContractController {
         dto.setArea(room.getAcreage());
         dto.setPrice(room.getPrice());
         dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "UNKNOWN");
+        // Ánh xạ utilities
+        if (room.getUtilities() != null && !room.getUtilities().isEmpty()) {
+            List<Integer> utilityIds = room.getUtilities().stream()
+                    .map(Utility::getUtilityId)
+                    .collect(Collectors.toList());
+            dto.setUtilityIds(utilityIds);
+            logger.info("🛠️ Mapped {} utilities for room ID: {}", utilityIds.size(), room.getRoomId());
+        } else {
+            dto.setUtilityIds(new ArrayList<>());
+            logger.info("🛠️ No utilities found for room ID: {}", room.getRoomId());
+        }
 
         if (room.getHostel() != null) {
             dto.setHostelId(room.getHostel().getHostelId());

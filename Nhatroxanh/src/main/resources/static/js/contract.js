@@ -950,8 +950,8 @@ window.NhaTroContract = {
                 if (!utilityResponse.ok) throw new Error("Lỗi khi lấy tiện ích phòng.");
                 const utilities = await utilityResponse.json();
 
-                // 1. Bỏ tick tất cả các checkbox trước khi xử lý
-                document.querySelectorAll('#amenities-list-host input[name="utilityIds"]').forEach(checkbox => {
+                // Bỏ check tất cả checkbox
+                document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
                     checkbox.checked = false;
                 });
 
@@ -2732,9 +2732,9 @@ buildContractData(roomIdNumber, roomSelect) {
             status: selectedOption.dataset.status || undefined
         };
 
-        // 🔥 THU THẬP DANH SÁCH TIỆN ÍCH ĐÃ CHỌN 🔥
+        // Thu thập tiện ích
         const selectedUtilityIds = [];
-        document.querySelectorAll('#amenities-list-host input[name="utilityIds"]:checked').forEach(checkbox => {
+        document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]:checked').forEach(checkbox => {
             selectedUtilityIds.push(parseInt(checkbox.value));
         });
 

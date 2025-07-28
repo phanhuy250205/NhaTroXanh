@@ -740,14 +740,17 @@
                                         </div>
                                         <div class="nha-tro-amenities" id="amenities-list-host">
                                             <div th:if="${allUtilities == null or #lists.isEmpty(allUtilities)}"
-                                                class="text-muted fst-italic">
+                                                 class="text-muted fst-italic">
                                                 Không có tiện ích nào được định nghĩa trong hệ thống.
                                             </div>
                                             <div th:each="util : ${allUtilities}" class="form-check form-check-inline">
-                                                <input class="form-check-input" type="checkbox" name="utilityIds"
-                                                    th:id="'utility-' + ${util.utilityId}" th:value="${util.utilityId}">
+                                                <input class="form-check-input" type="checkbox"
+                                                       name="contract.room.utilityIds"
+                                                       th:id="'utility-' + ${util.utilityId}"
+                                                       th:value="${util.utilityId}"
+                                                       th:checked="${contract.room.utilityIds != null and contract.room.utilityIds.contains(util.utilityId)}">
                                                 <label class="form-check-label" th:for="'utility-' + ${util.utilityId}"
-                                                    th:text="${util.name}"></label>
+                                                       th:text="${util.name}"></label>
                                             </div>
                                         </div>
                                     </div>
