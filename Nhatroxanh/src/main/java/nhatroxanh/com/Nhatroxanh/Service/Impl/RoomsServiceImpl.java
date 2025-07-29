@@ -60,19 +60,19 @@ public class RoomsServiceImpl implements RoomsService {
     }
 
     @Override
+    @Transactional
     public List<ContractDto.Room> getRoomsByHostelId(Integer hostelId) {
-        logger.info("Fetching rooms for hostelId: {}", hostelId);
         if (hostelId == null) {
-            logger.error("hostelId is null");
+            logger.warn("Hostel ID is null, returning empty list");
             return new ArrayList<>();
         }
-
+        logger.info("Fetching rooms for hostelId: {}", hostelId);
         List<Rooms> rooms = roomsRepository.findByHostelId(hostelId);
-        logger.info("Found {} rooms in database", rooms.size());
+        logger.debug("Found {} rooms in database", rooms.size());
         List<ContractDto.Room> result = rooms.stream()
                 .map(this::convertToRoomDto)
                 .collect(Collectors.toList());
-        logger.info("Returning {} rooms", result.size());
+        logger.debug("Returning {} rooms", result.size());
         return result;
     }
 
@@ -112,7 +112,7 @@ public class RoomsServiceImpl implements RoomsService {
         roomDto.setRoomName(room.getNamerooms());
         roomDto.setArea(room.getAcreage());
         roomDto.setPrice(room.getPrice());
-        roomDto.setStatus(room.getStatus() != null ? room.getStatus().name() : null);
+        roomDto.setStatus(room.getStatus() != null ? room.getStatus().name().toLowerCase() : "unactive");
         roomDto.setHostelId(room.getHostel() != null ? room.getHostel().getHostelId() : null);
         roomDto.setHostelName(room.getHostel() != null ? room.getHostel().getName() : null);
         roomDto.setMaxTenants(room.getMax_tenants());

@@ -2,6 +2,58 @@
 <html lang="en">
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
+    <style>
+        .chart-container-modern {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.chart-title-modern {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.chart-wrapper-modern {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.chart-canvas-container {
+    flex: 1;
+    max-width: 400px;
+}
+
+.chart-legend-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.legend-item-modern {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.legend-color-modern {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+}
+
+.legend-available { background-color: #10b981; }
+.legend-occupied { background-color: #ef4444; }
+.legend-maintenance { background-color: #f59e0b; }
+
+.legend-text-modern {
+    font-size: 0.875rem;
+    color: #374151;
+}
+    </style>
 </head>
 <body class="phongtro">
     <div th:replace="~{/layouts/sidebar-host}"></div>
@@ -78,11 +130,11 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select status-filter-host" id="statusFilterHost">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="unactive">Trống</option>
-                                    <option value="active">Đã thuê</option>
-                                    <option value="repair">Bảo trì</option>
+                                <select class="form-select status-filter-host" id="statusFilterHost" onchange="filterByHostelAndStatus()">
+                                    <option value="" th:selected="${selectedStatus == null or selectedStatus == ''}">Tất cả trạng thái</option>
+                                    <option value="unactive" th:selected="${selectedStatus == 'unactive'}">Trống</option>
+                                    <option value="active" th:selected="${selectedStatus == 'active'}">Đã thuê</option>
+                                    <option value="repair" th:selected="${selectedStatus == 'repair'}">Bảo trì</option>
                                 </select>
                             </div>
                         </div>
@@ -122,7 +174,7 @@
                                                 <form th:action="@{/chu-tro/xoa-phong/{roomId}(roomId=${room.roomId})}" method="post" style="display:inline;">
                                                     <input type="hidden" name="hostelId" th:value="${hostelId}">
                                                     <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn có chắc muốn xóa phòng này?')">
-                                                        <i class="fas fa-trash"></i> Xóa
+                                                        <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
                                             </div>
@@ -284,7 +336,7 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Tổng phòng</div>
-                                    <div class="stat-number-modern" id="totalRoomsCount">0</div>
+                                    <div class="stat-number-modern" id="totalRoomsCount" th:text="${totalRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
@@ -300,7 +352,7 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng trống</div>
-                                    <div class="stat-number-modern" id="availableRoomsCount">0</div>
+                                    <div class="stat-number-modern" id="availableRoomsCount" th:text="${availableRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
@@ -321,7 +373,7 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng đã thuê</div>
-                                    <div class="stat-number-modern" id="occupiedRoomsCount">0</div>
+                                    <div class="stat-number-modern" id="occupiedRoomsCount" th:text="${occupiedRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
@@ -346,7 +398,7 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng bảo trì</div>
-                                    <div class="stat-number-modern" id="maintenanceRoomsCount">0</div>
+                                    <div class="stat-number-modern" id="maintenanceRoomsCount" th:text="${maintenanceRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
@@ -421,8 +473,9 @@
             </div>
         </div>
     </div>
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        
         function resetForm() {
             const form = document.getElementById("addRoomFormHost");
             form.reset();
@@ -480,7 +533,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    console.log("Data from API:", data); // Log dữ liệu để kiểm tra
+                    console.log("Data from API:", data); 
                     const form = document.getElementById("addRoomFormHost");
                     form.action = "/chu-tro/cap-nhat-phong";
                     document.getElementById("submitBtnText").textContent = "Cập nhật phòng";

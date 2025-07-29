@@ -3,7 +3,70 @@ const RoomManagementUI = (function() {
     'use strict';
     
     let isInitialized = false;
+
+    let roomChart = null; // Biến để lưu đối tượng Chart.js
     
+    // Initialize chart
+function initializeChart() {
+    const ctx = document.getElementById('roomStatusChart')?.getContext('2d');
+    if (!ctx) {
+        console.warn("Canvas for roomStatusChart not found");
+        return;
+    }
+
+    // Lấy dữ liệu từ HTML (được truyền từ Thymeleaf)
+    const availableRooms = parseInt(document.getElementById('availableRoomsCount')?.textContent) || 0;
+    const occupiedRooms = parseInt(document.getElementById('occupiedRoomsCount')?.textContent) || 0;
+    const maintenanceRooms = parseInt(document.getElementById('maintenanceRoomsCount')?.textContent) || 0;
+
+    // Kiểm tra nếu không có dữ liệu
+    if (availableRooms === 0 && occupiedRooms === 0 && maintenanceRooms === 0) {
+        ctx.canvas.parentNode.innerHTML = '<div class="alert alert-info">Không có dữ liệu phòng để hiển thị biểu đồ.</div>';
+        return;
+    }
+
+    // Hủy biểu đồ cũ nếu đã tồn tại
+    if (window.roomChart) {
+        window.roomChart.destroy();
+    }
+
+    // Tạo dữ liệu cho biểu đồ
+    const data = {
+        labels: ['Phòng trống', 'Phòng đã thuê', 'Phòng bảo trì'],
+        datasets: [{
+            data: [availableRooms, occupiedRooms, maintenanceRooms],
+            backgroundColor: ['#10b981', '#ef4444', '#f59e0b'],
+            borderColor: ['#ffffff', '#ffffff', '#ffffff'],
+            borderWidth: 1
+        }]
+    };
+
+    // Khởi tạo biểu đồ Chart.js
+    window.roomChart = new Chart(ctx, {
+        type: 'pie',
+        data: data,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false // Tắt legend mặc định vì đã có legend tùy chỉnh
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${label}: ${value} phòng (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
     // Initialize basic UI functionality
     function initializeUI() {
         if (isInitialized) return;
@@ -22,6 +85,8 @@ const RoomManagementUI = (function() {
         });
         
         isInitialized = true;
+
+        initializeChart();
     }
     // Initialize tabs functionality
     function initializeTabs() {
@@ -56,6 +121,9 @@ const RoomManagementUI = (function() {
                         targetPane.style.opacity = "1";
                         targetPane.style.transform = "translateY(0)";
                     }, 50);
+                    if (targetId === '#status-management-host') {
+                        initializeChart();
+                    }
                 }
 
                 console.log("Tab switched to:", targetId);
@@ -79,9 +147,9 @@ const RoomManagementUI = (function() {
                 const roomName = row.querySelector('.room-name-host')?.textContent.toLowerCase() || '';
                 const price = row.querySelector('.price-host')?.textContent || '';
                 const statusBadge = row.querySelector('.status-badge-host');
-                const roomStatus = statusBadge ? statusBadge.className.includes('status-available') ? 'available' : 
-                                                statusBadge.className.includes('status-occupied') ? 'occupied' : 
-                                                statusBadge.className.includes('status-maintenance') ? 'maintenance' : '' : '';
+                const roomStatus = statusBadge ? statusBadge.className.includes('status-available-host') ? 'unactive' : 
+                                                statusBadge.className.includes('status-occupied-host') ? 'active' : 
+                                                statusBadge.className.includes('status-maintenance-host') ? 'repair' : '' : '';
 
                 const matchesSearch = !searchTerm || 
                     roomName.includes(searchTerm) || 
