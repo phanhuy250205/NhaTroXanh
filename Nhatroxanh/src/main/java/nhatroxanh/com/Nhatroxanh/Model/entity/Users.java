@@ -10,19 +10,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-
-
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
-
-
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -41,8 +28,18 @@ import lombok.ToString;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 
 @Data
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Users {
+
+    public enum AuthProvider {
+        LOCAL, GOOGLE, FACEBOOK
+    }
+
+    // Thêm trường provider
+    @Enumerated(EnumType.STRING)
+    @Column(name = "auth_provider")
+    @Builder.Default
+    private AuthProvider authProvider = AuthProvider.LOCAL;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -54,7 +51,7 @@ public class Users {
     @JsonIgnore
     private List<Notification> notifications;
 
-    @Column(name = "password", nullable = false, length = 256)
+    @Column(name = "password", nullable = true, length = 256)
     @JsonIgnore
     private String password;
 
@@ -115,7 +112,6 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
-
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private UserCccd userCccd;
@@ -132,7 +128,6 @@ public class Users {
     @JsonIgnore
     private List<Vouchers> vouchers;
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
@@ -145,7 +140,7 @@ public class Users {
         throw new UnsupportedOperationException("Unimplemented method 'orElse'");
     }
 
-    public enum Status  {
+    public enum Status {
         PENDING, APPROVED, REJECTED
     }
 
