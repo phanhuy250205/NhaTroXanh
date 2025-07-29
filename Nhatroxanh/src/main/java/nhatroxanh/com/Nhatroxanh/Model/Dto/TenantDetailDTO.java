@@ -22,13 +22,15 @@ public class TenantDetailDTO {
     // Thông tin Phòng
     private String roomName;
     private String hostelName;
-    
+
     // Thông tin Khách thuê
+    private Integer userId;
     private String userFullName;
     private Boolean userGender;
     private String userPhone;
     private Date userBirthday;
     private String userCccdNumber;
-    private String userCccdMasked; 
-    private String userIssuePlace; 
+    private String userCccdMasked;
+    private String userIssuePlace;
+    private Boolean enabled;
 }

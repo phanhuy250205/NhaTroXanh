@@ -66,8 +66,7 @@
                         Tạo tài khoản mới để quản lý phòng trọ của bạn
                     </p>
 
-                    <form id="registerForm" novalidate class="needs-validation-custom">
-                        <!-- Hàng 1: Họ tên + Ngày sinh -->
+                    <form id="registerForm" novalidate class="needs-validation-custom" enctype="multipart/form-data">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="fullName">Họ và tên</label>
@@ -88,7 +87,6 @@
                             </div>
                         </div>
 
-                        <!-- Hàng 2: Email + Số điện thoại -->
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="email">Email</label>
@@ -106,10 +104,11 @@
                                 <div class="error-message">
                                     Vui lòng nhập số điện thoại hợp lệ.
                                 </div>
+                                <div id="phoneNumberInfo" class="field-info"
+                                    style="display: none; color: green; font-size: 12px; margin-left: 8px;"></div>
                             </div>
                         </div>
 
-                        <!-- Hàng 3: Mật khẩu + Xác nhận mật khẩu -->
                         <div class="form-row">
                             <div class="form-group password-wrapper">
                                 <label for="password">Mật khẩu</label>
@@ -129,6 +128,120 @@
                                     <i class="fa-solid fa-eye-slash"></i>
                                 </button>
                                 <div class="error-message">Mật khẩu xác nhận không khớp.</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="gender">Giới tính</label>
+                                <select class="form-control" id="gender" name="gender" required>
+                                    <option value="" disabled selected>Chọn giới tính</option>
+                                    <option value="true">Nam</option>
+                                    <option value="false">Nữ</option>
+                                </select>
+                                <div class="error-message">
+                                    Vui lòng chọn giới tính.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="cccdNumber">Số CCCD</label>
+                                <input type="text" class="form-control" id="cccdNumber" name="cccdNumber"
+                                    placeholder="Nhập số CCCD" required />
+                                <div class="error-message">
+                                    Vui lòng nhập số CCCD hợp lệ (12 số).
+                                </div>
+                                <div id="cccdNumberInfo" class="field-info"
+                                    style="display: none; color: green;font-size: 12px; margin-left: 8px;"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="issuePlace">Nơi cấp CCCD</label>
+                                <input type="text" class="form-control" id="issuePlace" name="issuePlace"
+                                    placeholder="Nhập nơi cấp CCCD" required />
+                                <div class="error-message">
+                                    Vui lòng nhập nơi cấp CCCD.
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="issueDate">Ngày cấp CCCD</label>
+                                <input type="date" class="form-control" id="issueDate" name="issueDate"
+                                    placeholder="dd/mm/yyyy" required />
+                                <div class="error-message">
+                                    Vui lòng nhập ngày cấp CCCD.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="frontImage">Ảnh CCCD mặt trước</label>
+                                <input type="file" class="form-control" id="frontImage" name="frontImage"
+                                    accept="image/*" required />
+                                <div class="error-message">
+                                    Vui lòng chọn ảnh CCCD mặt trước.
+                                </div>
+                                <div class="image-preview">
+                                    <img id="frontImagePreview" src="#" alt="Ảnh CCCD mặt trước"
+                                        style="display: none; max-width: 100%; max-height: 200px;margin-left: 11px;margin-top: 5px;" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="backImage">Ảnh CCCD mặt sau</label>
+                                <input type="file" class="form-control" id="backImage" name="backImage" accept="image/*"
+                                    required />
+                                <div class="error-message">
+                                    Vui lòng chọn ảnh CCCD mặt sau.
+                                </div>
+                                <div class="image-preview">
+                                    <img id="backImagePreview" src="#" alt="Ảnh CCCD mặt sau"
+                                        style="display: none; max-width: 100%; max-height: 200px;margin-left: 11px;margin-top: 5px;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hàng 7: Địa chỉ -->
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="province">Tỉnh/Thành phố</label>
+                                <select class="form-control" id="province" name="province" required>
+                                    <option value="" disabled selected>Chọn tỉnh/thành phố</option>
+                                </select>
+                                <div class="error-message">
+                                    Vui lòng chọn tỉnh/thành phố.
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="district">Quận/Huyện</label>
+                                <select class="form-control" id="district" name="district" required disabled>
+                                    <option value="" disabled selected>Chọn quận/huyện</option>
+                                </select>
+                                <div class="error-message">
+                                    Vui lòng chọn quận/huyện.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="ward">Phường/Xã</label>
+                                <select class="form-control" id="ward" name="ward" required disabled>
+                                    <option value="" disabled selected>Chọn phường/xã</option>
+                                </select>
+                                <div class="error-message">
+                                    Vui lòng chọn phường/xã.
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="addressDetail">Địa chỉ chi tiết</label>
+                                <input type="text" class="form-control" id="addressDetail" name="addressDetail"
+                                    placeholder="Nhập địa chỉ chi tiết (số nhà, đường, ...)" required />
+                                <div class="error-message">
+                                    Vui lòng nhập địa chỉ chi tiết.
+                                </div>
                             </div>
                         </div>
 
@@ -159,7 +272,7 @@
     </div>
 
     <script th:src="@{/js/register-host.js}"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

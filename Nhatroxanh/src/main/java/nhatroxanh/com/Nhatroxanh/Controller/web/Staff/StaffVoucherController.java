@@ -15,11 +15,12 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.VoucherService;
 
 import java.sql.Date;
@@ -30,13 +31,15 @@ import java.util.Map;
 @Controller
 @RequestMapping("/nhan-vien/khuyen-mai")
 public class StaffVoucherController {
-
+    private static final Logger logger = LoggerFactory.getLogger(StaffVoucherController.class);
     @Autowired
     private VoucherService voucherService;
     @Autowired
     private VoucherRepository voucherRepository;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private EmailService emailService;
 
     @ModelAttribute("voucher")
     public Vouchers initVoucher() {
@@ -47,21 +50,23 @@ public class StaffVoucherController {
     }
 
     @GetMapping
-    public String showVoucherList(Model model,
+    public String showVoucherList(
+            Model model,
+            @AuthenticationPrincipal CustomUserDetails currentUserDetails,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "6") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String statusFilter,
             @RequestParam(required = false) String sortBy) {
 
+        Users currentUser = currentUserDetails.getUser();
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        if ("oldest".equals(sortBy)) {
+        if ("oldest".equalsIgnoreCase(sortBy)) {
             sort = Sort.by(Sort.Direction.ASC, "createdAt");
         }
 
         Pageable pageable = PageRequest.of(page, size, sort);
         Boolean status = null;
-
         if ("Hoạt động".equalsIgnoreCase(statusFilter)) {
             status = true;
         } else if ("Ngừng hoạt động".equalsIgnoreCase(statusFilter)) {
@@ -71,14 +76,16 @@ public class StaffVoucherController {
         Page<Vouchers> vouchers;
         if (search != null && !search.trim().isEmpty()) {
             if (status != null) {
-                vouchers = voucherRepository.searchVouchersByStatus(search, status, pageable);
+                vouchers = voucherRepository.searchVouchersByStatus(currentUser, search.trim(), status, pageable);
             } else {
-                vouchers = voucherRepository.searchVouchers(search, pageable);
+                vouchers = voucherRepository.searchVouchers(currentUser, search.trim(), pageable);
             }
         } else {
-            vouchers = (status != null)
-                    ? voucherRepository.findByStatus(status, pageable)
-                    : voucherRepository.findAll(pageable);
+            if (status != null) {
+                vouchers = voucherRepository.findByUserAndStatus(currentUser, status, pageable);
+            } else {
+                vouchers = voucherRepository.findByUser(currentUser, pageable);
+            }
         }
 
         model.addAttribute("vouchers", vouchers);
@@ -95,8 +102,14 @@ public class StaffVoucherController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirect) {
+        double maxDiscount = voucher.getMinAmount() * 0.1;
+        if (voucher.getDiscountValue() > maxDiscount) {
+            bindingResult.rejectValue("discountValue", "error.discountValue",
+                    "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu (" + maxDiscount + " VNĐ).");
+        }
+
         if (bindingResult.hasErrors()) {
-            redirect.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ!");
+            redirect.addFlashAttribute("errorMessage", "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu");
             redirect.addFlashAttribute("voucher", voucher);
             return "redirect:/nhan-vien/khuyen-mai";
         }
@@ -113,8 +126,24 @@ public class StaffVoucherController {
             voucher.setUser(user);
             voucher.setCreatedAt(Date.valueOf(LocalDate.now()));
 
-            if (voucher.getEndDate().before(new Date(System.currentTimeMillis())) || voucher.getQuantity() == 0) {
+            Date today = Date.valueOf(LocalDate.now());
+            boolean isExpired = voucher.getEndDate() != null && voucher.getEndDate().before(today);
+            boolean isOutOfStock = voucher.getQuantity() != null && voucher.getQuantity() == 0;
+            if (isExpired || isOutOfStock) {
                 voucher.setStatus(false);
+                if (isExpired && user.getEmail() != null && !user.getEmail().isEmpty()) {
+                    String reason = "Voucher đã hết hạn vào ngày " + voucher.getEndDate();
+                    emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(), voucher.getTitle(),
+                            reason);
+                    logger.info("Đã gửi email thông báo hết hạn cho voucher {} đến {}", voucher.getCode(),
+                            user.getEmail());
+                } else if (isOutOfStock && user.getEmail() != null && !user.getEmail().isEmpty()) {
+                    String reason = "Voucher đã hết số lượng";
+                    emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(), voucher.getTitle(),
+                            reason);
+                    logger.info("Đã gửi email thông báo hết số lượng cho voucher {} đến {}", voucher.getCode(),
+                            user.getEmail());
+                }
             } else {
                 voucher.setStatus(true);
             }
@@ -151,9 +180,14 @@ public class StaffVoucherController {
             BindingResult bindingResult,
             RedirectAttributes redirect,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        double maxDiscount = updatedVoucher.getMinAmount() * 0.1;
+        if (updatedVoucher.getDiscountValue() > maxDiscount) {
+            bindingResult.rejectValue("discountValue", "error.discountValue",
+                    "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu (" + maxDiscount + " VNĐ).");
+        }
 
         if (bindingResult.hasErrors()) {
-            redirect.addFlashAttribute("errorMessage", "Dữ liệu không hợp lệ!");
+            redirect.addFlashAttribute("errorMessage", "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu");
             return "redirect:/nhan-vien/khuyen-mai/cap-nhat/" + id;
         }
 
@@ -179,10 +213,30 @@ public class StaffVoucherController {
             voucher.setMinAmount(updatedVoucher.getMinAmount());
             voucher.setQuantity(updatedVoucher.getQuantity());
 
-            Date today = new Date(System.currentTimeMillis());
-            boolean expired = voucher.getEndDate().before(today);
-            boolean out = voucher.getQuantity() == 0;
-            voucher.setStatus(!expired && !out);
+            Date today = Date.valueOf(LocalDate.now());
+            boolean isExpired = voucher.getEndDate() != null && voucher.getEndDate().before(today);
+            boolean isOutOfStock = voucher.getQuantity() != null && voucher.getQuantity() == 0;
+            boolean wasActive = voucher.getStatus();
+            if (isExpired || isOutOfStock) {
+                voucher.setStatus(false);
+                if (wasActive && isExpired && voucher.getUser().getEmail() != null
+                        && !voucher.getUser().getEmail().isEmpty()) {
+                    String reason = "Voucher đã hết hạn vào ngày " + voucher.getEndDate();
+                    emailService.sendVoucherDeactivatedEmail(voucher.getUser().getEmail(),
+                            voucher.getUser().getFullname(), voucher.getTitle(), reason);
+                    logger.info("Đã gửi email thông báo hết hạn cho voucher {} đến {}", voucher.getCode(),
+                            voucher.getUser().getEmail());
+                } else if (wasActive && isOutOfStock && voucher.getUser().getEmail() != null
+                        && !voucher.getUser().getEmail().isEmpty()) {
+                    String reason = "Voucher đã hết số lượng";
+                    emailService.sendVoucherDeactivatedEmail(voucher.getUser().getEmail(),
+                            voucher.getUser().getFullname(), voucher.getTitle(), reason);
+                    logger.info("Đã gửi email thông báo hết số lượng cho voucher {} đến {}", voucher.getCode(),
+                            voucher.getUser().getEmail());
+                }
+            } else {
+                voucher.setStatus(true);
+            }
 
             voucherRepository.save(voucher);
             redirect.addFlashAttribute("successMessage", "Cập nhật thành công!");
@@ -212,5 +266,25 @@ public class StaffVoucherController {
         Map<String, String> response = new HashMap<>();
         response.put("code", voucherService.generateUniqueVoucherCode());
         return response;
+    }
+
+    @PostMapping("/gui-thong-bao/{id}")
+    public String sendVoucherNotification(@PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirect) {
+        try {
+            Vouchers voucher = voucherRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
+
+            if (!voucher.getUser().getUserId().equals(userDetails.getUserId())) {
+                throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
+            }
+
+            voucherService.sendVoucherNotification(voucher, userDetails);
+            redirect.addFlashAttribute("successMessage", "Gửi thông báo voucher thành công!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("errorMessage", "Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+        return "redirect:/nhan-vien/khuyen-mai";
     }
 }

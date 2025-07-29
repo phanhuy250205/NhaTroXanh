@@ -20,4 +20,14 @@ public class HostController {
     public String themKhuTroHost() {
         return "host/themkhutro";
     }
+
+    @GetMapping("/nap-tien")
+    public String napTien() {
+        return "redirect:/host/wallet/nap-tien";
+    }
+
+    @GetMapping("/rut-tien")
+    public String rutTien() {
+        return "redirect:/host/wallet/rut-tien";
+    }
 }

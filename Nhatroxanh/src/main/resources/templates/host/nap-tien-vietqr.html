@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nạp Tiền Tài Khoản - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #3498DB;
+            --light-blue: #5DADE2;
+            --dark-blue: #2980B9;
+            --bg-blue: #EBF5FB;
+            --text-blue: #2471A3;
+            --hover-blue: #AED6F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --danger-red: #E74C3C;
+            --light-gray: #F8F9FA;
+            --border-color: #E9ECEF;
+            --shadow-light: 0 2px 10px rgba(52, 152, 219, 0.08);
+            --shadow-medium: 0 4px 20px rgba(52, 152, 219, 0.12);
+            --shadow-heavy: 0 8px 30px rgba(52, 152, 219, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fbff 0%, #ebf3fd 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .main-container-host {
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            margin-left: 100px;
+        }
+
+        /* Header Section */
+        .header-section-host {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-section-host::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+        }
+
+        .header-content-host {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title-host {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle-host {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Main Content Grid */
+        .content-grid-host {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Left Column */
+        .left-column-host {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Right Column - Sidebar */
+        .right-column-host {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Card Styles */
+        .card-host {
+            background: white;
+            border-radius: 16px;
+            border: none;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--primary-blue);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card-host:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .card-header-host {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card-title-host {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body-host {
+            padding: 1.5rem;
+        }
+
+        /* Balance Display */
+        .balance-display-host {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-blue), white);
+            border-radius: 15px;
+            border: 2px solid var(--primary-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .balance-label-host {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .balance-amount-host {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-status-host {
+            font-size: 0.8rem;
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        /* Amount Selection */
+        .amount-selection-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .amount-option-host {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .amount-option-host:hover {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, white 0%, var(--bg-blue) 100%);
+            transform: translateY(-2px);
+        }
+
+        .amount-option-host.active-host {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--bg-blue) 0%, white 100%);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .amount-value-host {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            margin-bottom: 0.25rem;
+        }
+
+        .amount-label-host {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        /* Custom Amount Input */
+        .custom-amount-host {
+            margin-bottom: 1.5rem;
+        }
+
+        .amount-input-host {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .amount-input-host:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        /* Payment Methods */
+        .payment-methods-host {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .payment-option-host {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+        }
+
+        .payment-option-host:hover {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, white 0%, var(--bg-blue) 100%);
+            transform: translateX(5px);
+        }
+
+        .payment-option-host.active-host {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--bg-blue) 0%, white 100%);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .payment-header-host {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-radio-host {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-blue);
+        }
+
+        .payment-icon-host {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .payment-info-host h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-blue);
+        }
+
+        .payment-info-host p {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        /* Action Buttons */
+        .action-buttons-host {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-host {
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary-host {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .btn-primary-host:hover {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-outline-host {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-outline-host:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Loading Animation */
+        .loading-host {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* QR Modal Styles */
+        .qr-code-container {
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .content-grid-host {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .right-column-host {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container-host {
+                padding: 1rem;
+                margin-left: 0;
+            }
+
+            .header-title-host {
+                font-size: 1.5rem;
+            }
+
+            .amount-selection-host {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons-host {
+                flex-direction: column;
+            }
+
+            .btn-host {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .balance-amount-host {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+    <div class="main-container-host">
+        <!-- Header Section -->
+        <div class="header-section-host">
+            <div class="header-content-host">
+                <h1 class="header-title-host">
+                    <i class="fas fa-wallet me-3"></i>
+                    Nạp Tiền Tài Khoản
+                </h1>
+                <p class="header-subtitle-host">Quản lý tài chính và nạp tiền vào tài khoản chủ trọ</p>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid-host">
+            <!-- Left Column -->
+            <div class="left-column-host">
+                <!-- Top-up Amount Selection -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Chọn Số Tiền Nạp
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="amount-selection-host">
+                            <div class="amount-option-host" onclick="selectAmount(100000)">
+                                <div class="amount-value-host">100,000 VNĐ</div>
+                                <div class="amount-label-host">Cơ bản</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(500000)">
+                                <div class="amount-value-host">500,000 VNĐ</div>
+                                <div class="amount-label-host">Phổ biến</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(1000000)">
+                                <div class="amount-value-host">1,000,000 VNĐ</div>
+                                <div class="amount-label-host">Tiết kiệm</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(2000000)">
+                                <div class="amount-value-host">2,000,000 VNĐ</div>
+                                <div class="amount-label-host">Ưu đãi</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(5000000)">
+                                <div class="amount-value-host">5,000,000 VNĐ</div>
+                                <div class="amount-label-host">VIP</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(10000000)">
+                                <div class="amount-value-host">10,000,000 VNĐ</div>
+                                <div class="amount-label-host">Premium</div>
+                            </div>
+                        </div>
+
+                        <div class="custom-amount-host">
+                            <label class="form-label-host">Hoặc nhập số tiền tùy chỉnh:</label>
+                            <input type="number" class="amount-input-host" id="customAmount" placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-credit-card"></i>
+                            Phương Thức Thanh Toán
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="payment-methods-host">
+                            <!-- VietQR -->
+                            <div class="payment-option-host" onclick="selectPaymentMethod('vietqr')">
+                                <div class="payment-header-host">
+                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr" class="payment-radio-host">
+                                    <div class="payment-icon-host">
+                                        <i class="fas fa-qrcode"></i>
+                                    </div>
+                                    <div class="payment-info-host">
+                                        <h5>VietQR</h5>
+                                        <p>Thanh toán nhanh chóng qua mã QR ngân hàng</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bank Transfer -->
+                            <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
+                                <div class="payment-header-host">
+                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank" class="payment-radio-host">
+                                    <div class="payment-icon-host">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="payment-info-host">
+                                        <h5>Chuyển Khoản Ngân Hàng</h5>
+                                        <p>Chuyển khoản trực tiếp từ tài khoản ngân hàng</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons-host">
+                            <button class="btn-host btn-primary-host" onclick="processTopup()" id="topupBtn-host">
+                                <i class="fas fa-plus-circle"></i>
+                                Nạp Tiền Ngay
+                            </button>
+                            <a th:href="@{/host/dashboard}" class="btn-host btn-outline-host">
+                                <i class="fas fa-arrow-left"></i>
+                                Quay Lại
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Sidebar -->
+            <div class="right-column-host">
+                <!-- Current Balance -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-piggy-bank"></i>
+                            Số Dư Hiện Tại
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="balance-display-host">
+                            <div class="balance-label-host">Số dư tài khoản</div>
+                            <div class="balance-amount-host" id="currentBalance-host" 
+                                 th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ</div>
+                            <div class="balance-status-host">
+                                <i class="fas fa-check-circle"></i>
+                                Tài khoản hoạt động bình thường
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Info -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-headset"></i>
+                            Hỗ Trợ Khách Hàng
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="payment-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Hotline 24/7</h6>
+                                    <p class="mb-0 text-muted small">1900.1234 (miễn phí)</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="payment-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Email hỗ trợ</h6>
+                                    <p class="mb-0 text-muted small">support@phongtro.com</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+    <script>
+        let selectedAmount = 0;
+        let selectedPaymentMethod = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBalanceDisplay();
+        });
+
+        function selectAmount(amount) {
+            selectedAmount = amount;
+            
+            // Remove active class from all amount options
+            document.querySelectorAll('.amount-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            // Add active class to selected amount
+            event.currentTarget.classList.add('active-host');
+            
+            // Clear custom amount input
+            document.getElementById('customAmount').value = '';
+            
+            updateSummary();
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Remove active class from all payment methods
+            document.querySelectorAll('.payment-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            // Add active class to selected method
+            event.currentTarget.classList.add('active-host');
+            
+            // Check the radio button
+            document.getElementById(method + '-host').checked = true;
+        }
+
+        function updateSummary() {
+            console.log('Selected amount:', selectedAmount);
+        }
+
+        function updateBalanceDisplay() {
+            const balanceElement = document.getElementById('currentBalance-host');
+            const currentBalanceText = balanceElement.textContent;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount).replace('₫', 'VNĐ');
+        }
+
+        function processTopup() {
+            const customAmount = document.getElementById('customAmount').value;
+            const finalAmount = customAmount ? parseInt(customAmount) : selectedAmount;
+            const topupBtn = document.getElementById('topupBtn-host');
+            
+            // Validation
+            if (!finalAmount || finalAmount < 50000) {
+                showAlert('Vui lòng chọn hoặc nhập số tiền nạp (tối thiểu 50,000 VNĐ)!', 'warning');
+                return;
+            }
+            
+            if (finalAmount > 50000000) {
+                showAlert('Số tiền nạp không được vượt quá 50,000,000 VNĐ!', 'warning');
+                return;
+            }
+            
+            if (!selectedPaymentMethod) {
+                showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
+                return;
+            }
+            
+            let message = `Xác nhận nạp ${formatCurrency(finalAmount)} bằng `;
+            
+            switch(selectedPaymentMethod) {
+                case 'bank':
+                    message += 'chuyển khoản ngân hàng?';
+                    break;
+                case 'vietqr':
+                    message += 'VietQR?';
+                    break;
+                default:
+                    message += 'phương thức đã chọn?';
+                    break;
+            }
+            
+            if (confirm(message)) {
+                // Show loading state
+                topupBtn.innerHTML = '<span class="loading-host me-2"></span>Đang xử lý giao dịch...';
+                topupBtn.disabled = true;
+                
+                // Process payment based on selected method
+                if (selectedPaymentMethod === 'vietqr') {
+                    processVietQRPayment(finalAmount);
+                } else if (selectedPaymentMethod === 'bank') {
+                    processDepositRequest(finalAmount, 'bank');
+                } else {
+                    processDepositRequest(finalAmount, selectedPaymentMethod);
+                }
+            }
+        }
+
+        function processVietQRPayment(amount) {
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('description', 'Nạp tiền vào tài khoản chủ trọ');
+
+            fetch('/host/wallet/vietqr-payment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.qrCodeUrl) {
+                    // Show QR code modal for payment
+                    showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
+                } else {
+                    resetButton();
+                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resetButton();
+                showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+            });
+        }
+
+        function showVietQRModal(qrCodeUrl, amount, transactionId) {
+            // Create modal HTML
+            const modalHtml = `
+                <div class="modal fade" id="vietqrModal" tabindex="-1" aria-labelledby="vietqrModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="vietqrModalLabel">
+                                    <i class="fas fa-qrcode me-2"></i>
+                                    Thanh toán VietQR
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <div class="mb-3">
+                                    <h6>Số tiền: <span class="text-primary">${formatCurrency(amount)}</span></h6>
+                                    <p class="text-muted">Mã giao dịch: ${transactionId}</p>
+                                </div>
+                                <div class="qr-code-container mb-3">
+                                    <img src="${qrCodeUrl}" alt="VietQR Code" class="img-fluid" style="max-width: 300px;">
+                                </div>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Hướng dẫn thanh toán:</strong><br>
+                                    1. Mở ứng dụng ngân hàng trên điện thoại<br>
+                                    2. Quét mã QR hoặc chụp ảnh mã QR<br>
+                                    3. Kiểm tra thông tin và xác nhận thanh toán<br>
+                                    4. Sau khi thanh toán thành công, số dư sẽ được cập nhật tự động
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <button type="button" class="btn btn-primary" onclick="checkPaymentStatus('${transactionId}')">
+                                    <i class="fas fa-sync-alt me-2"></i>
+                                    Kiểm tra thanh toán
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;

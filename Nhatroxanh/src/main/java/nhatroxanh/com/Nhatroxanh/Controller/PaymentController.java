@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentRequestDto;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentMethod;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments.PaymentStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.PaymentService;
 
@@ -39,7 +39,6 @@ public class PaymentController {
         if (status == null || status.isEmpty()) {
             return null;
         }
-
         switch (status.toLowerCase()) {
             case "paid":
                 return PaymentStatus.ĐÃ_THANH_TOÁN;
@@ -163,7 +162,6 @@ public class PaymentController {
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-
             List<PaymentResponseDto> recentPayments = paymentService.getRecentPaymentsByOwnerId(ownerId);
             return ResponseEntity.ok(recentPayments);
 
@@ -285,8 +283,9 @@ public class PaymentController {
             Integer ownerId = userDetails.getUserId();
 
             List<Map<String, Object>> contracts = paymentService.getAvailableContractsForPayment(ownerId);
+            // Thêm log để debug
+            log.info("Available contracts for owner {}: {}", ownerId, contracts);
             return ResponseEntity.ok(contracts);
-
         } catch (Exception e) {
             log.error("Error getting available contracts: ", e);
             return ResponseEntity.badRequest().build();
@@ -349,20 +348,17 @@ public class PaymentController {
             String[] monthYear = month.split("-");
             int year = Integer.parseInt(monthYear[0]);
             int monthNum = Integer.parseInt(monthYear[1]);
-
             LocalDate dueDate = LocalDate.of(year, monthNum, 10);
             String formattedMonth = String.format("%02d/%d", monthNum, year);
 
             // Tạo PaymentRequestDto
             List<PaymentRequestDto.PaymentDetailDto> details = new ArrayList<>();
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền phòng")
                     .quantity(1)
                     .unitPrice(roomFee)
                     .amount(roomFee)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền điện")
                     .quantity(electricityUsage)
@@ -371,7 +367,6 @@ public class PaymentController {
                     .previousReading(electricityPrev)
                     .currentReading(electricityCurr)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền nước")
                     .quantity(waterUsage)
@@ -380,14 +375,12 @@ public class PaymentController {
                     .previousReading(waterPrev)
                     .currentReading(waterCurr)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền rác")
                     .quantity(1)
                     .unitPrice(trashFee)
                     .amount(trashFee)
                     .build());
-
             details.add(PaymentRequestDto.PaymentDetailDto.builder()
                     .itemName("Tiền wifi")
                     .quantity(1)
@@ -427,6 +420,53 @@ public class PaymentController {
         }
 
         return "redirect:/chu-tro/thanh-toan";
+    }
+
+    /**
+     * Gửi tất cả hóa đơn chưa thanh toán hoặc quá hạn đến người thuê
+     */
+    @PostMapping("/send-unpaid")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendUnpaidInvoices(Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            // Lấy danh sách hóa đơn chưa thanh toán hoặc quá hạn
+            List<PaymentResponseDto> unpaidPayments = paymentService.getPaymentsByOwnerIdAndStatus(ownerId, PaymentStatus.CHƯA_THANH_TOÁN);
+            List<PaymentResponseDto> overduePayments = paymentService.getPaymentsByOwnerIdAndStatus(ownerId, PaymentStatus.QUÁ_HẠN_THANH_TOÁN);
+
+            List<PaymentResponseDto> paymentsToSend = new ArrayList<>();
+            paymentsToSend.addAll(unpaidPayments);
+            paymentsToSend.addAll(overduePayments);
+
+            if (paymentsToSend.isEmpty()) {
+                response.put("success", true);
+                response.put("message", "Không có hóa đơn chưa thanh toán hoặc quá hạn để gửi");
+                response.put("sentCount", 0);
+                return ResponseEntity.ok(response);
+            }
+
+            // Gửi từng hóa đơn đến người thuê
+            int sentCount = paymentService.sendInvoicesToTenants(paymentsToSend);
+
+            log.info("Successfully sent {} unpaid/overdue invoices for owner {}", sentCount, ownerId);
+
+            response.put("success", true);
+            response.put("message", "Gửi " + sentCount + " hóa đơn thành công");
+            response.put("sentCount", sentCount);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error sending unpaid invoices: ", e);
+            response.put("success", false);
+            response.put("message", "Lỗi gửi hóa đơn: " + e.getMessage());
+            response.put("sentCount", 0);
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @DeleteMapping("/{id}")

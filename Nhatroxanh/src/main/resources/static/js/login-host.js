@@ -2,7 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show/hide password toggle - xử lý tất cả password toggles
     const passwordToggles = document.querySelectorAll(".password-toggle-host")
     const loginForm = document.getElementById("loginFormHost");
-    
+
     if (loginForm) {
         // Lắng nghe sự kiện submit của form
         loginForm.addEventListener("submit", function (event) {
@@ -15,18 +15,25 @@ document.addEventListener("DOMContentLoaded", () => {
             const formData = new URLSearchParams();
             formData.append("username", usernameOrEmail); // Tên param phải khớp với SecurityConfig
             formData.append("password", password);
-             if (rememberMe) {
+            if (rememberMe) {
                 // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
             // Gọi đến URL xử lý đăng nhập của Spring Security
+<<<<<<< HEAD
             fetch("/login-processing", { 
                 method: "POST",
                 headers: {
+=======
+            fetch("/login-processing", {
+                method: "POST",
+                headers: {  
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: formData,
             })
+<<<<<<< HEAD
             .then(response => {
                 if (response.ok) { // Nếu status 200 -> thành công
                     // Chuyển hướng đến trang dashboard
@@ -39,10 +46,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Lỗi đăng nhập:", error);
                 alert(error.message);
             });
+=======
+                .then(async response => {
+                    if (response.ok) {
+                        const data = await response.json(); // Lấy redirectUrl từ backend
+                        window.location.href = data.redirectUrl; // Chuyển trang
+                    } else {
+                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi đăng nhập:", error);
+                    alert(error.message);
+                });
+
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
         });
     }
 
-     passwordToggles.forEach((toggle) => {
+    passwordToggles.forEach((toggle) => {
         toggle.addEventListener("click", function () {
             const passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"]')
 
@@ -89,3 +111,34 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 })
+document.addEventListener("DOMContentLoaded", function () {
+        const modalOverlay = document.getElementById("forgotPasswordModalOverlayGuest");
+        const openModalBtn = document.getElementById("forgotPasswordBtnGuest");
+        const closeModalBtn = document.getElementById("forgotPasswordModalCloseGuest");
+        const backToLoginBtn = document.getElementById("backToLoginBtnGuest");
+
+        if (openModalBtn && modalOverlay) {
+            openModalBtn.addEventListener("click", function () {
+                modalOverlay.classList.add("show");
+            });
+        }
+
+        if (closeModalBtn) {
+            closeModalBtn.addEventListener("click", function () {
+                modalOverlay.style.display = "none";
+            });
+        }
+
+        if (backToLoginBtn) {
+            backToLoginBtn.addEventListener("click", function () {
+                modalOverlay.style.display = "none";
+            });
+        }
+
+        // Đóng modal khi nhấn ra ngoài
+        window.addEventListener("click", function (event) {
+            if (event.target === modalOverlay) {
+                modalOverlay.style.display = "none";
+            }
+        });
+    });

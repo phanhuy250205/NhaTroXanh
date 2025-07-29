@@ -5,18 +5,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
-import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
-@Service
+// ✅ Interface KHÔNG có @Service và @Autowired
 public interface RoomsService {
-
-
     List<Rooms> findAllRooms();
-
     List<ContractDto.Room> getRoomsByOwnerId(Integer ownerId);
     List<ContractDto.Room> getRoomsByHostelId(Integer hostelId); 
     Optional<Rooms> findById(Integer id);

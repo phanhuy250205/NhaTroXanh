@@ -9,14 +9,16 @@
     import org.springframework.stereotype.Service;
     import org.springframework.transaction.annotation.Transactional;
 
-    import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
-    import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-    import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-    import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-    import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
-    import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
-    import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
-    import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
+import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.WardRepository;
+import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 
     @Service
     @Transactional

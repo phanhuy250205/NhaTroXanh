@@ -145,6 +145,7 @@
       gap: 12px;
       padding: 8px 16px;
     }
+
     .form-status-update .form-label-host {
       margin-bottom: 0;
       font-size: 14px;
@@ -1291,11 +1292,8 @@
     <div class="content-section-host">
       <div class="description-section-host">
         <h2 class="section-title-host">Mô tả chi tiết</h2>
-        <p class="description-text-host" th:text="${post.description != null ? post.description : 'Chưa có mô tả'}">
-          Phòng trọ cao cấp tại trung tâm thành phố Đà Nẵng, gần các trường đại học và khu vực thương mại sầm uất.
-          Phòng được thiết kế hiện đại, đầy đủ nội thất cao cấp, tạo không gian sống thoải mái và tiện nghi cho người
-          thuê.
-        </p>
+        <p class="description-text-host" th:utext="${post.description != null ? post.description : 'Chưa có mô tả'}">
+
         <div class="details-grid-host">
           <div class="details-card-host">
             <h3 class="details-card-title-host">

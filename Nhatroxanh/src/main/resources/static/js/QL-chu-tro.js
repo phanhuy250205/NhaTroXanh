@@ -1,443 +1,428 @@
-// Dữ liệu mẫu cho modal chi tiết (nhập cứng)
-const detailData = {
-    1: {
-        name: "Nguyễn Văn A",
-        birthDate: "17/09/1990",
-        gender: "Nam",
-        cccd: "001234567890",
-        cccdDate: "15/01/2020",
-        cccdPlace: "Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư",
-        phone: "0987654321",
-        email: "nguyenvana@email.com",
-        address: "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM",
-        job: "Kỹ sư phần mềm",
-        workplace: "Công ty TNHH ABC Technology",
-        documents: [
-            { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
-            { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
-        ],
-    },
-    2: {
-        name: "Trần Thị B",
-        birthDate: "25/03/1995",
-        gender: "Nữ",
-        cccd: "001234567891",
-        cccdDate: "20/05/2021",
-        cccdPlace: "Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư",
-        phone: "0123456789",
-        email: "tranthib@email.com",
-        address: "456 Đường DEF, Phường UVW, Quận 2, TP.HCM",
-        job: "Nhân viên văn phòng",
-        workplace: "Công ty Cổ phần XYZ",
-        documents: [
-            { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
-            { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
-        ],
-    },
-    3: {
-        name: "Lê Minh C",
-        birthDate: "12/11/1988",
-        gender: "Nam",
-        cccd: "001234567892",
-        cccdDate: "10/03/2019",
-        cccdPlace: "Cục Cảnh sát ĐKQL cư trú và DLQG về dân cư",
-        phone: "0369852147",
-        email: "leminhc@email.com",
-        address: "789 Đường GHI, Phường RST, Quận 3, TP.HCM",
-        job: "Giáo viên",
-        workplace: "Trường THPT ABC",
-        documents: [
-            { type: "CCCD mặt trước", url: "/placeholder.svg?height=300&width=400" },
-            { type: "CCCD mặt sau", url: "/placeholder.svg?height=300&width=400" },
-        ],
-    },
-}
-
-let isDropdownOpen = false
-let currentDetailId = null
-let pendingAction = null
-
-// Import Bootstrap
-const bootstrap = window.bootstrap
-
-// Initialize page
 document.addEventListener("DOMContentLoaded", () => {
-    setupEventListeners()
-})
+    // Initialize page
+    setupEventListeners();
+    loadPendingOwners();
+});
 
 function setupEventListeners() {
     // Search on Enter key for landlord tab
-    const searchInput = document.getElementById("searchInput")
+    const searchInput = document.getElementById("searchInput");
     if (searchInput) {
         searchInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                performSearch()
+                performSearch();
             }
-        })
+        });
     }
 
     // Search on Enter key for approval tab
-    const searchInputApproval = document.getElementById("searchInputApproval")
+    const searchInputApproval = document.getElementById("searchInputApproval");
     if (searchInputApproval) {
         searchInputApproval.addEventListener("keypress", (e) => {
             if (e.key === "Enter") {
-                performApprovalSearch()
+                performApprovalSearch();
             }
-        })
+        });
     }
 
     // Close dropdown when clicking outside
     document.addEventListener("click", (event) => {
-        const filterDropdown = document.querySelector(".filter-dropdown-staff")
-        const dropdown = document.getElementById("filterDropdown")
+        const filterDropdown = document.querySelector(".filter-dropdown-staff");
+        const dropdown = document.getElementById("filterDropdown");
 
         if (filterDropdown && !filterDropdown.contains(event.target) && isDropdownOpen) {
-            toggleFilterDropdown()
+            toggleFilterDropdown();
         }
-    })
+    });
 
     // Setup detail modal buttons
-    const approveDetailBtn = document.getElementById("approveDetailBtn")
-    const rejectDetailBtn = document.getElementById("rejectDetailBtn")
+    const approveDetailBtn = document.getElementById("approveDetailBtn");
+    const rejectDetailBtn = document.getElementById("rejectDetailBtn");
 
     if (approveDetailBtn) {
         approveDetailBtn.addEventListener("click", () => {
             if (currentDetailId) {
-                showConfirmationModal(currentDetailId, "approve")
+                showConfirmationModal(currentDetailId, "approve");
             }
-        })
+        });
     }
 
     if (rejectDetailBtn) {
         rejectDetailBtn.addEventListener("click", () => {
             if (currentDetailId) {
-                showConfirmationModal(currentDetailId, "reject")
+                showConfirmationModal(currentDetailId, "reject");
             }
-        })
+        });
     }
+}
+
+let isDropdownOpen = false;
+let currentDetailId = null;
+let pendingAction = null;
+const bootstrap = window.bootstrap;
+
+function loadPendingOwners() {
+    fetch("/nhan-vien/api/pending-owners", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+    })
+        .then(response => response.json())
+        .then(data => {
+            const registrationGrid = document.getElementById("registrationGrid");
+            registrationGrid.innerHTML = "";
+            data.forEach(user => {
+                const card = document.createElement("div");
+                card.className = "registration-card-staff";
+                card.setAttribute("data-id", user.userId);
+                card.innerHTML = `
+                <div class="card-header-staff">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Thông tin người dùng</span>
+                    </div>
+                </div>
+                <div class="card-body-staff">
+                    <div class="form-group-staff">
+                        <label class="form-label-staff">Họ và tên</label>
+                        <input type="text" class="form-input-staff" value="${user.fullname || ''}" disabled>
+                    </div>
+                    <div class="form-group-staff">
+                        <label class="form-label-staff">Ngày sinh</label>
+                        <input type="text" class="form-input-staff" value="${user.birthday || ''}" disabled>
+                    </div>
+                    <div class="form-group-staff">
+                        <label class="form-label-staff">Số điện thoại</label>
+                        <input type="text" class="form-input-staff" value="${user.phone || ''}" disabled>
+                    </div>
+                    <div class="form-group-staff">
+                        <label class="form-label-staff">Giới tính</label>
+                        <div class="gender-group-staff">
+                            <div class="gender-option-staff">
+                                <input type="radio" id="male${user.userId}" name="gender${user.userId}" class="gender-radio-staff" ${user.gender ? 'checked' : ''} disabled>
+                                <label for="male${user.userId}" class="gender-label-staff">Nam</label>
+                            </div>
+                            <div class="gender-option-staff">
+                                <input type="radio" id="female${user.userId}" name="gender${user.userId}" class="gender-radio-staff" ${!user.gender ? 'checked' : ''} disabled>
+                                <label for="female${user.userId}" class="gender-label-staff">Nữ</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-actions-staff">
+                        <button class="view-detail-btn-staff" onclick="showDetailModal(${user.userId})">
+                            <i class="fas fa-eye"></i>
+                            Xem chi tiết
+                        </button>
+                    </div>
+                </div>
+            `;
+                registrationGrid.appendChild(card);
+            });
+        })
+        .catch(error => {
+            console.error("Error loading pending owners:", error);
+            showErrorMessage("Không thể tải danh sách chủ trọ chờ duyệt.");
+        });
 }
 
 // Tab switching functionality
 function switchTab(tabIndex, element) {
-    // Remove active class from all tabs
     document.querySelectorAll(".custom-tab-staff").forEach((tab) => {
-        tab.classList.remove("active")
-    })
-
-    // Add active class to clicked tab
-    element.classList.add("active")
-
-    // Hide all tab content panels
+        tab.classList.remove("active");
+    });
+    element.classList.add("active");
     document.querySelectorAll(".tab-content-panel-staff").forEach((panel) => {
-        panel.classList.add("hidden")
-    })
-
-    // Show selected tab content
-    document.getElementById(`tab-content-${tabIndex}`).classList.remove("hidden")
+        panel.classList.add("hidden");
+    });
+    document.getElementById(`tab-content-${tabIndex}`).classList.remove("hidden");
 }
 
 // Filter dropdown functionality for landlord tab
 function toggleFilterDropdown() {
-    const dropdown = document.getElementById("filterDropdown")
-    const chevron = document.getElementById("filterChevron")
-    const filterBtn = document.querySelector(".filter-btn-staff")
+    const dropdown = document.getElementById("filterDropdown");
+    const chevron = document.getElementById("filterChevron");
+    const filterBtn = document.querySelector(".filter-btn-staff");
 
-    if (!dropdown || !chevron || !filterBtn) return
+    if (!dropdown || !chevron || !filterBtn) return;
 
-    isDropdownOpen = !isDropdownOpen
+    isDropdownOpen = !isDropdownOpen;
 
     if (isDropdownOpen) {
-        dropdown.classList.add("show")
-        chevron.style.transform = "rotate(180deg)"
-        filterBtn.classList.add("active")
+        dropdown.classList.add("show");
+        chevron.style.transform = "rotate(180deg)";
+        filterBtn.classList.add("active");
     } else {
-        dropdown.classList.remove("show")
-        chevron.style.transform = "rotate(0deg)"
-        filterBtn.classList.remove("active")
+        dropdown.classList.remove("show");
+        chevron.style.transform = "rotate(0deg)";
+        filterBtn.classList.remove("active");
     }
 }
 
 function selectFilter(filterValue, element) {
-    // Remove selected class from all options
     document.querySelectorAll(".filter-option-staff").forEach((option) => {
-        option.classList.remove("selected")
-    })
-
-    // Add selected class to clicked option
-    element.classList.add("selected")
-
-    // Update filter text
-    const filterText = document.getElementById("filterText")
+        option.classList.remove("selected");
+    });
+    element.classList.add("selected");
+    const filterText = document.getElementById("filterText");
     const filterTexts = {
         all: "Tất cả",
         active: "Hoạt động",
         inactive: "Vô hiệu hóa",
-    }
-
+    };
     if (filterText) {
-        filterText.textContent = filterTexts[filterValue]
+        filterText.textContent = filterTexts[filterValue];
     }
-
-    // Close dropdown
-    toggleFilterDropdown()
-
-    // Apply filter to table rows
-    const tableRows = document.querySelectorAll("#tableBody tr")
-    let visibleCount = 0
-
-    tableRows.forEach((row) => {
-        const status = row.getAttribute("data-status")
-        if (filterValue === "all" || status === filterValue) {
-            row.style.display = ""
-            visibleCount++
-        } else {
-            row.style.display = "none"
-        }
-    })
-
-    // Show feedback
-    showSuccessMessage(`Đã lọc: ${visibleCount} kết quả cho "${filterTexts[filterValue]}"`)
+    toggleFilterDropdown();
+    // Apply filter via server-side (reload page with filter param)
+    window.location.href = `/nhan-vien/chu-tro?statusFilter=${filterValue}`;
 }
 
 // Search functionality for landlord tab
 function performSearch() {
-    const searchInput = document.getElementById("searchInput")
-    if (!searchInput) return
-
-    const searchTerm = searchInput.value.toLowerCase().trim()
-    const tableRows = document.querySelectorAll("#tableBody tr")
-    let visibleCount = 0
-
-    tableRows.forEach((row) => {
-        const cells = row.querySelectorAll("td")
-        if (cells.length > 0) {
-            const name = cells[1].textContent.toLowerCase()
-            const email = cells[2].textContent.toLowerCase()
-            const phone = cells[3].textContent.toLowerCase()
-
-            if (searchTerm === "" || name.includes(searchTerm) || email.includes(searchTerm) || phone.includes(searchTerm)) {
-                row.style.display = ""
-                visibleCount++
-            } else {
-                row.style.display = "none"
-            }
-        }
-    })
-
-    // Show search feedback
-    showSuccessMessage(`Tìm thấy ${visibleCount} kết quả`)
+    const searchInput = document.getElementById("searchInput");
+    if (!searchInput) return;
+    const searchTerm = searchInput.value.trim();
+    // Redirect to server-side search
+    window.location.href = `/nhan-vien/chu-tro?search=${encodeURIComponent(searchTerm)}`;
 }
 
 // Search functionality for approval tab
 function performApprovalSearch() {
-    const searchInput = document.getElementById("searchInputApproval")
-    if (!searchInput) return
+    const searchInput = document.getElementById("searchInputApproval");
+    if (!searchInput) return;
 
-    const searchTerm = searchInput.value.toLowerCase().trim()
-    const cards = document.querySelectorAll(".registration-card-staff")
+    const searchTerm = searchInput.value.toLowerCase().trim();
+    const cards = document.querySelectorAll(".registration-card-staff");
 
-    let visibleCount = 0
+    let visibleCount = 0;
 
     cards.forEach((card) => {
-        const nameInput = card.querySelector(".form-input-staff")
-        const phoneInput = card.querySelectorAll(".form-input-staff")[2] // Phone is the 3rd input
+        const nameInput = card.querySelector(".form-input-staff");
+        const phoneInput = card.querySelectorAll(".form-input-staff")[2];
 
         if (nameInput && phoneInput) {
-            const name = nameInput.value.toLowerCase()
-            const phone = phoneInput.value.toLowerCase()
+            const name = nameInput.value.toLowerCase();
+            const phone = phoneInput.value.toLowerCase();
 
             if (searchTerm === "" || name.includes(searchTerm) || phone.includes(searchTerm)) {
-                card.style.display = "block"
-                visibleCount++
+                card.style.display = "block";
+                visibleCount++;
             } else {
-                card.style.display = "none"
+                card.style.display = "none";
             }
         }
-    })
+    });
 
-    showSuccessMessage(`Tìm thấy ${visibleCount} kết quả`)
+    showSuccessMessage(`Tìm thấy ${visibleCount} kết quả`);
 }
 
 // Show detail modal
 function showDetailModal(id) {
-    const registration = detailData[id]
-    if (!registration) return
+    fetch(`/nhan-vien/api/owner-detail/${id}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" }
+    })
+        .then(response => response.json())
+        .then(data => {
+            currentDetailId = id;
 
-    currentDetailId = id
+            // Populate modal with data
+            document.getElementById("detailName").textContent = data.user.fullname || "-";
+            document.getElementById("detailBirthDate").textContent = data.user.birthday || "-";
+            document.getElementById("detailGender").textContent = data.user.gender ? "Nam" : "Nữ";
+            document.getElementById("detailCccd").textContent = data.cccd?.cccdNumber || "-";
+            document.getElementById("detailCccdDate").textContent = data.cccd?.issueDate || "-";
+            document.getElementById("detailCccdPlace").textContent = data.cccd?.issuePlace || "-";
+            document.getElementById("detailPhone").textContent = data.user.phone || "-";
+            document.getElementById("detailEmail").textContent = data.user.email || "-";
+            document.getElementById("detailAddress").textContent = data.user.address || "-";
 
-    // Populate modal with data
-    document.getElementById("detailName").textContent = registration.name
-    document.getElementById("detailBirthDate").textContent = registration.birthDate
-    document.getElementById("detailGender").textContent = registration.gender
-    document.getElementById("detailCccd").textContent = registration.cccd
-    document.getElementById("detailCccdDate").textContent = registration.cccdDate
-    document.getElementById("detailCccdPlace").textContent = registration.cccdPlace
-    document.getElementById("detailPhone").textContent = registration.phone
-    document.getElementById("detailEmail").textContent = registration.email
-    document.getElementById("detailAddress").textContent = registration.address
-    document.getElementById("detailJob").textContent = registration.job
-    document.getElementById("detailWorkplace").textContent = registration.workplace
-    
-    // Populate document images
-    const documentImages = document.getElementById("documentImages")
-    documentImages.innerHTML = registration.documents
-        .map(
-            (doc) => `
-        <div class="document-image-item-staff" onclick="showImageModal('${doc.url}')">
-            <img src="${doc.url}" alt="${doc.type}">
-            <div class="document-image-overlay-staff">
-                <i class="fas fa-search-plus"></i>
-            </div>
-            <div class="document-image-label-staff">${doc.type}</div>
-        </div>
-    `,
-        )
-        .join("")
+            // Populate document images
+            const documentImages = document.getElementById("documentImages");
+            documentImages.innerHTML = "";
+            if (data.cccd?.frontImageUrl) {
+                documentImages.innerHTML += `
+                <div class="document-image-item-staff" onclick="showImageModal('${data.cccd.frontImageUrl}')">
+                    <img src="${data.cccd.frontImageUrl}" alt="CCCD mặt trước">
+                    <div class="document-image-overlay-staff">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <div class="document-image-label-staff">CCCD mặt trước</div>
+                </div>
+            `;
+            }
+            if (data.cccd?.backImageUrl) {
+                documentImages.innerHTML += `
+                <div class="document-image-item-staff" onclick="showImageModal('${data.cccd.backImageUrl}')">
+                    <img src="${data.cccd.backImageUrl}" alt="CCCD mặt sau">
+                    <div class="document-image-overlay-staff">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <div class="document-image-label-staff">CCCD mặt sau</div>
+                </div>
+            `;
+            }
 
-    // Show modal
-    const modal = document.getElementById("detailModal")
-    if (modal) {
-        new bootstrap.Modal(modal).show()
-    }
+            // Show modal
+            const modal = document.getElementById("detailModal");
+            if (modal) {
+                new bootstrap.Modal(modal).show();
+            }
+        })
+        .catch(error => {
+            console.error("Error loading owner details:", error);
+            showErrorMessage("Không thể tải chi tiết chủ trọ.");
+        });
 }
 
 // Show image modal
 function showImageModal(imageUrl) {
-    const modalImage = document.getElementById("modalImage")
-    modalImage.src = imageUrl
+    const modalImage = document.getElementById("modalImage");
+    modalImage.src = imageUrl;
 
-    const modal = document.getElementById("imageModal")
+    const modal = document.getElementById("imageModal");
     if (modal) {
-        new bootstrap.Modal(modal).show()
+        new bootstrap.Modal(modal).show();
     }
 }
 
 // Show confirmation modal
 function showConfirmationModal(id, action) {
-    const registration = detailData[id]
-    if (!registration) return
+    fetch(`/nhan-vien/chi-tiet-chu-tro/${id}`)
+        .then(response => response.json())
+        .then(data => {
+            const modal = document.getElementById("confirmationModal");
+            if (modal) {
+                const modalInstance = new bootstrap.Modal(modal);
+                const modalTitle = document.getElementById("modalTitle");
+                const modalMessage = document.getElementById("modalMessage");
+                const confirmBtn = document.getElementById("confirmBtn");
 
-    const modal = document.getElementById("confirmationModal")
-    if (modal) {
-        const modalInstance = new bootstrap.Modal(modal)
-        const modalTitle = document.getElementById("modalTitle")
-        const modalMessage = document.getElementById("modalMessage")
-        const confirmBtn = document.getElementById("confirmBtn")
+                pendingAction = { id, action };
 
-        pendingAction = { id, action }
+                if (action === "approve") {
+                    modalTitle.textContent = "Xác nhận phê duyệt";
+                    modalMessage.textContent = `Bạn có chắc chắn muốn phê duyệt đăng ký của "${data.user.fullname}"?`;
+                    confirmBtn.textContent = "Phê duyệt";
+                    confirmBtn.className = "btn btn-success";
+                    confirmBtn.onclick = confirmApproval;
+                } else {
+                    modalTitle.textContent = "Xác nhận từ chối";
+                    modalMessage.textContent = `Bạn có chắc chắn muốn từ chối đăng ký của "${data.user.fullname}"?`;
+                    confirmBtn.textContent = "Từ chối";
+                    confirmBtn.className = "btn btn-danger";
+                    confirmBtn.onclick = confirmRejection;
+                }
 
-        if (action === "approve") {
-            modalTitle.textContent = "Xác nhận phê duyệt"
-            modalMessage.textContent = `Bạn có chắc chắn muốn phê duyệt đăng ký của "${registration.name}"?`
-            confirmBtn.textContent = "Phê duyệt"
-            confirmBtn.className = "btn btn-success"
-            confirmBtn.onclick = confirmApproval
-        } else {
-            modalTitle.textContent = "Xác nhận từ chối"
-            modalMessage.textContent = `Bạn có chắc chắn muốn từ chối đăng ký của "${registration.name}"?`
-            confirmBtn.textContent = "Từ chối"
-            confirmBtn.className = "btn btn-danger"
-            confirmBtn.onclick = confirmRejection
-        }
-
-        modalInstance.show()
-    }
+                modalInstance.show();
+            }
+        })
+        .catch(error => {
+            console.error("Error loading owner name for confirmation:", error);
+            showErrorMessage("Không thể tải thông tin để xác nhận.");
+        });
 }
 
 // Confirm approval
 function confirmApproval() {
-    if (!pendingAction || pendingAction.action !== "approve") return
+    if (!pendingAction || pendingAction.action !== "approve") return;
 
-    const id = pendingAction.id
-    const registration = detailData[id]
+    const id = pendingAction.id;
 
-    if (registration) {
-        // Show success message
-        showSuccessMessage(`Đã phê duyệt đăng ký của ${registration.name}`)
-
-        // Hide the card
-        const card = document.querySelector(`[data-id="${id}"]`)
-        if (card) {
-            card.style.display = "none"
-        }
-
-        // Close detail modal
-        const detailModal = document.getElementById("detailModal")
-        if (detailModal) {
-            bootstrap.Modal.getInstance(detailModal).hide()
-        }
-    }
-
-    // Close confirmation modal
-    const modal = document.getElementById("confirmationModal")
-    if (modal) {
-        bootstrap.Modal.getInstance(modal).hide()
-    }
-
-    pendingAction = null
-    currentDetailId = null
+    fetch(`/nhan-vien/api/approve-owner/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            return response.text().then(text => { throw new Error(text || "Lỗi không xác định."); });
+        })
+        .then(message => {
+            showSuccessMessage(message);
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                card.style.display = "none";
+            }
+            const detailModal = document.getElementById("detailModal");
+            if (detailModal) {
+                bootstrap.Modal.getInstance(detailModal).hide();
+            }
+            const modal = document.getElementById("confirmationModal");
+            if (modal) {
+                bootstrap.Modal.getInstance(modal).hide();
+            }
+        })
+        .catch(error => {
+            console.error("Error approving owner:", error);
+            showErrorMessage(error.message);
+        })
+        .finally(() => {
+            pendingAction = null;
+            currentDetailId = null;
+        });
 }
 
 // Confirm rejection
 function confirmRejection() {
-    if (!pendingAction || pendingAction.action !== "reject") return
+    if (!pendingAction || pendingAction.action !== "reject") return;
 
-    const id = pendingAction.id
-    const registration = detailData[id]
+    const id = pendingAction.id;
 
-    if (registration) {
-        // Show error message
-        showErrorMessage(`Đã từ chối đăng ký của ${registration.name}`)
-
-        // Hide the card
-        const card = document.querySelector(`[data-id="${id}"]`)
-        if (card) {
-            card.style.display = "none"
-        }
-
-        // Close detail modal
-        const detailModal = document.getElementById("detailModal")
-        if (detailModal) {
-            bootstrap.Modal.getInstance(detailModal).hide()
-        }
-    }
-
-    // Close confirmation modal
-    const modal = document.getElementById("confirmationModal")
-    if (modal) {
-        bootstrap.Modal.getInstance(modal).hide()
-    }
-
-    pendingAction = null
-    currentDetailId = null
-}
-
-// View details functionality for landlord tab
-function viewDetails(id) {
-    showSuccessMessage(`Xem chi tiết chủ trọ ID: ${id}`)
-    // Here you would typically navigate to a detail page
+    fetch(`/nhan-vien/api/reject-owner/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+    })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            }
+            return response.text().then(text => { throw new Error(text || "Lỗi không xác định."); });
+        })
+        .then(message => {
+            showErrorMessage(message);
+            const card = document.querySelector(`[data-id="${id}"]`);
+            if (card) {
+                card.style.display = "none";
+            }
+            const detailModal = document.getElementById("detailModal");
+            if (detailModal) {
+                bootstrap.Modal.getInstance(detailModal).hide();
+            }
+            const modal = document.getElementById("confirmationModal");
+            if (modal) {
+                bootstrap.Modal.getInstance(modal).hide();
+            }
+        })
+        .catch(error => {
+            console.error("Error rejecting owner:", error);
+            showErrorMessage(error.message);
+        })
+        .finally(() => {
+            pendingAction = null;
+            currentDetailId = null;
+        });
 }
 
 // Show success message
 function showSuccessMessage(message) {
-    const successMsg = document.createElement("div")
-    successMsg.className = "success-message-staff"
-    successMsg.innerHTML = `<i class="fas fa-check"></i> ${message}`
-    document.body.appendChild(successMsg)
+    const successMsg = document.createElement("div");
+    successMsg.className = "success-message-staff";
+    successMsg.innerHTML = `<i class="fas fa-check"></i> ${message}`;
+    document.body.appendChild(successMsg);
 
     setTimeout(() => {
-        successMsg.remove()
-    }, 3000)
+        successMsg.remove();
+    }, 3000);
 }
 
 // Show error message
 function showErrorMessage(message) {
-    const errorMsg = document.createElement("div")
-    errorMsg.className = "error-message-staff"
-    errorMsg.innerHTML = `<i class="fas fa-times"></i> ${message}`
-    document.body.appendChild(errorMsg)
+    const errorMsg = document.createElement("div");
+    errorMsg.className = "error-message-staff";
+    errorMsg.innerHTML = `<i class="fas fa-times"></i> ${message}`;
+    document.body.appendChild(errorMsg);
 
     setTimeout(() => {
-        errorMsg.remove()
-    }, 3000)
+        errorMsg.remove();
+    }, 3000);
 }

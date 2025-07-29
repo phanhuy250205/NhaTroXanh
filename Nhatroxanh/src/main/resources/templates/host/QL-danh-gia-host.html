@@ -639,9 +639,15 @@
                              data-comment=${review.comment}">
                         <i class="fas fa-eye me-1"></i>Xem
                       </button>
-                      <button class="btn btn-outline-danger btn-sm">
-                        <i class="fas fa-trash me-1"></i>Xóa
-                      </button>
+                      <!-- Nút xóa trong danh sách đánh giá -->
+                      <form th:id="'deleteForm-' + ${review.reviewId}"
+                        th:action="@{/chu-tro/danh-gia/delete/{id}(id=${review.reviewId})}" method="post">
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                          th:onclick="'confirmDelete(' + ${review.reviewId} + ')'">
+                          <i class="fas fa-trash me-1"></i>Xóa
+                        </button>
+                      </form>
+
                     </div>
                   </div>
 
@@ -710,9 +716,15 @@
                              data-comment=${review.comment}">
                         <i class="fas fa-eye me-1"></i>Xem
                       </button>
-                      <button class="btn btn-outline-danger btn-sm">
-                        <i class="fas fa-trash me-1"></i>Xóa
-                      </button>
+                      <!-- Nút xóa trong danh sách đánh giá -->
+                      <form th:id="'deleteForm-' + ${review.reviewId}"
+                        th:action="@{/chu-tro/danh-gia/delete/{id}(id=${review.reviewId})}" method="post">
+                        <button type="button" class="btn btn-outline-danger btn-sm"
+                          th:onclick="'confirmDelete(' + ${review.reviewId} + ')'">
+                          <i class="fas fa-trash me-1"></i>Xóa
+                        </button>
+                      </form>
+
                     </div>
                   </div>
 
@@ -772,7 +784,7 @@
       </div>
     </div>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -861,6 +873,22 @@
         });
       });
     });
+    function confirmDelete(reviewId) {
+      Swal.fire({
+        title: 'Bạn có chắc chắn?',
+        text: "Xóa đánh giá này không thể hoàn tác!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#6c757d',
+        confirmButtonText: 'Xóa',
+        cancelButtonText: 'Hủy'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          document.getElementById('deleteForm-' + reviewId).submit();
+        }
+      });
+    }
   </script>
 
 </body>

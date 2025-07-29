@@ -10,8 +10,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.VoucherStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.VoucherStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 
 public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         // 1. Tìm tất cả voucher đang hoạt động (status = true)
@@ -34,25 +35,45 @@ public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         @Query("SELECT v FROM Vouchers v WHERE v.hostel.id = :hostelId AND v.status = true")
         List<Vouchers> findActiveVouchersByHostelId(@Param("hostelId") Integer hostelId);
 
-
         // 8. Tìm các voucher đã hết hạn
         @Query("SELECT v FROM Vouchers v WHERE v.endDate < CURRENT_DATE")
         List<Vouchers> findExpiredVouchers();
 
-        @Query("SELECT v FROM Vouchers v WHERE " +
-                        "(:keyword IS NULL OR LOWER(v.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                        "OR LOWER(v.code) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-                        "AND (:status IS NULL OR v.status = :status)")
-        Page<Vouchers> searchVouchersByStatus(
+        @Query("SELECT v FROM Vouchers v WHERE v.user = :user AND " +
+                        "(LOWER(v.code) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(v.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Vouchers> searchVouchers(@Param("user") Users user,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
+
+        // Tìm kiếm theo từ khóa, user và trạng thái
+        @Query("SELECT v FROM Vouchers v WHERE v.user = :user AND v.status = :status AND " +
+                        "(LOWER(v.code) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+                        "OR LOWER(v.title) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Vouchers> searchVouchersByStatus(@Param("user") Users user,
                         @Param("keyword") String keyword,
                         @Param("status") Boolean status,
                         Pageable pageable);
 
-        @Query("SELECT v FROM Vouchers v WHERE " +
-                        "(:keyword IS NULL OR LOWER(v.title) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-                        "OR LOWER(v.code) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-        Page<Vouchers> searchVouchers(
-                        @Param("keyword") String keyword,
+        List<Vouchers> findByUserUserId(Integer userId);
+
+        @Query("SELECT v FROM Vouchers v WHERE v.user.userId = :userId " +
+                        "AND (:searchQuery IS NULL OR LOWER(v.title) LIKE :searchQuery OR LOWER(v.code) LIKE :searchQuery) "
+                        +
+                        "AND (:status IS NULL OR v.status = :status)")
+        Page<Vouchers> findByUserUserIdWithFilters(
+                        @Param("userId") Integer userId,
+                        @Param("searchQuery") String searchQuery,
+                        @Param("status") Boolean status,
                         Pageable pageable);
-        
+
+        @Query("SELECT COUNT(v) > 0 FROM Vouchers v WHERE LOWER(TRIM(v.code)) = LOWER(TRIM(:code)) AND v.id != :id")
+        boolean existsByCodeAndNotId(@Param("code") String code, @Param("id") Integer id);
+
+        List<Vouchers> findByStatus(boolean status);
+
+        Page<Vouchers> findByUserAndStatus(Users user, Boolean status, Pageable pageable);
+
+        Page<Vouchers> findByUser(Users user, Pageable pageable);
+
 }

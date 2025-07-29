@@ -1,0 +1,48 @@
+<!-- Forgot Password Modal -->
+<div class="forgot-password-modal-overlay-guest" id="forgotPasswordModalOverlayGuest">
+    <div class="forgot-password-modal-guest">
+        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent-guest" alt="">
+        <div class="forgot-password-modal-header-guest">
+            <button class="forgot-password-modal-close-guest" id="forgotPasswordModalCloseGuest">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="forgot-password-modal-content-guest">
+            <div class="forgot-password-greeting-guest">
+                <h3>Khôi phục mật khẩu của bạn</h3>
+                <h2>Nhập thông tin đầy đủ
+                    <span class="house-icons-guest">
+                        <img class="logo-forgot-password-guest d-none d-md-block" th:src="@{/images/logo/nhatroxanh.png}" alt="">
+                    </span>
+                </h2>
+            </div>
+
+            <form class="forgot-password-form-guest" id="forgotPasswordFormGuest">
+                <div id="forgot-password-error-message-guest" class="alert-guest alert-danger-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+                <div id="forgot-password-success-message-guest" class="alert-guest alert-success-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                <div class="form-group-guest">
+                    <div class="input-wrapper-guest">
+                        <i class="fas fa-envelope input-icon-guest"></i>
+                        <input type="email" id="forgotPasswordContactGuest" class="form-control-forgot-password-guest" placeholder="Nhập email cần khôi phục mật khẩu" required>
+                    </div>
+                </div>
+
+                <div class="forgot-password-buttons-guest">
+                    <button type="submit" class="btn-forgot-password-submit-guest">
+                        GỬI YÊU CẦU
+                    </button>
+                    
+                    <button type="button" class="btn-back-to-login-guest" id="backToLoginBtnGuest">
+                        <i class="fas fa-arrow-left"></i>
+                        Quay lại đăng nhập
+                    </button>
+                </div>
+                <div class="forgot-password-info-guest">
+                    <p><i class="fas fa-info-circle"></i> Chúng tôi sẽ gửi liên kết khôi phục mật khẩu đến email của bạn.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -65,7 +65,7 @@ public class FileUploadService {
         System.out.println("🟢 Ảnh đã lưu vào: " + filePath.toString());
 
         // 📤 Trả về đường dẫn web
-        return "/uploads/" + subFolder + fileName;
+        return "/uploads/"  + fileName;
     }
 
     /**
@@ -79,19 +79,28 @@ public class FileUploadService {
             return false;
         }
         String absolutePath = ROOT_DIR + "/src/main/resources/static" + filePath;
+        String backupPath = ROOT_DIR + "/src/main/resources/static/uploads/backup/" + filePath.substring(filePath.lastIndexOf("/") + 1);
 
         File file = new File(absolutePath);
         if (file.exists()) {
-            boolean deleted = file.delete();
-            if (deleted) {
-                System.out.println("🟢 Đã xóa file: " + absolutePath);
-            } else {
-                System.out.println("❌ Không thể xóa file: " + absolutePath);
+            // Di chuyển file vào thư mục backup
+            File backupDir = new File(backupPath).getParentFile();
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
             }
-            return deleted;
+            boolean moved = file.renameTo(new File(backupPath));
+            if (moved) {
+                System.out.println("🟢 Đã di chuyển file vào backup: " + backupPath);
+                return true;
+            } else {
+                System.out.println("❌ Không thể di chuyển file: " + absolutePath);
+                return false;
+            }
         } else {
             System.out.println("⚠ File không tồn tại: " + absolutePath);
             return false;
         }
     }
+
+
 }

@@ -671,7 +671,6 @@ const ImageUploader = (function() {
             timeout = setTimeout(later, wait);
         };
     }
-    
     // Initialize when DOM is ready
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeAll);
@@ -679,6 +678,5 @@ const ImageUploader = (function() {
         initializeAll();
     }
 })();
-
 // Expose necessary functions to global scope
 window.RoomManagementUI = RoomManagementUI;

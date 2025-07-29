@@ -31,7 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Controller.web.HomeController;
-import nhatroxanh.com.Nhatroxanh.Model.enity.*;
+import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.*;
@@ -117,7 +117,7 @@ public class PostController {
 
     @PostMapping("/xoa-bai-dang/{postId}")
     public String deletePost(@PathVariable Integer postId, @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
+                             RedirectAttributes redirectAttributes) {
         try {
             Integer userId = userDetails.getUser().getUserId();
             Post post = postService.getPostById(postId);
@@ -176,8 +176,8 @@ public class PostController {
 
     @PostMapping("/cap-nhat-trang-thai")
     public String updatePostStatus(@RequestParam("postId") Integer postId,
-            @RequestParam("status") Boolean status,
-            RedirectAttributes redirectAttributes) {
+                                   @RequestParam("status") Boolean status,
+                                   RedirectAttributes redirectAttributes) {
         Post post = postService.getPostById(postId);
         if (post == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy bài đăng.");
@@ -318,7 +318,7 @@ public class PostController {
 
     @GetMapping("/sua-bai-dang/{postId}")
     public String showEditPostForm(@PathVariable Integer postId, Model model,
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
+                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         try {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new IllegalArgumentException("Bài đăng không tồn tại với ID: " + postId));

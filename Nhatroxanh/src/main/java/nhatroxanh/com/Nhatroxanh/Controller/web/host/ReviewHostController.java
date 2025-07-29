@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import lombok.RequiredArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.ReviewRepository;
 
 @Controller
@@ -166,13 +166,19 @@ public class ReviewHostController {
 
     @PostMapping("/delete/{id}")
     public String deleteReview(@PathVariable("id") Integer reviewId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
-            reviewService.deleteReviewById(reviewId);
-            redirectAttributes.addFlashAttribute("success", "Xóa đánh giá thành công!");
+            // Kiểm tra quyền (tùy chọn)
+            reviewService.deleteReviewById(reviewId, userDetails.getUser().getUserId());
+            redirectAttributes.addFlashAttribute("successMessage", "Xóa đánh giá thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        } catch (SecurityException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền xóa đánh giá này.");
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Không thể xóa đánh giá. Có lỗi xảy ra.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể xóa đánh giá. Có lỗi xảy ra.");
         }
         return "redirect:/chu-tro/danh-gia";
     }

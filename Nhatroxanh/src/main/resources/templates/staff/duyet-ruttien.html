@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyệt Yêu Cầu Rút Tiền - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3498DB;
+            --light-blue: #5DADE2;
+            --dark-blue: #2980B9;
+            --bg-blue: #EBF5FB;
+            --text-blue: #2471A3;
+            --hover-blue: #AED6F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --danger-red: #E74C3C;
+            --light-gray: #F8F9FA;
+            --border-color: #E9ECEF;
+            --shadow-light: 0 2px 10px rgba(52, 152, 219, 0.08);
+            --shadow-medium: 0 4px 20px rgba(52, 152, 219, 0.12);
+            --shadow-heavy: 0 8px 30px rgba(52, 152, 219, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fbff 0%, #ebf3fd 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .main-container-host {
+            margin-left: 100px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* Header Section */
+        .header-section-host {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-section-host::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+        }
+
+        .header-content-host {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title-host {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle-host {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .breadcrumb-nav-host {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-nav-host a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb-nav-host a:hover {
+            color: white;
+        }
+
+        /* Stats Overview */
+        .stats-overview-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card-host {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card-host:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .stat-card-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .stat-pending-host::before {
+            background: linear-gradient(135deg, var(--warning-orange), #e67e22);
+        }
+
+        .stat-approved-host::before {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+        }
+
+        .stat-rejected-host::before {
+            background: linear-gradient(135deg, var(--danger-red), #e74c3c);
+        }
+
+        .stat-total-host::before {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .stat-icon-host {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .stat-pending-host .stat-icon-host {
+            background: linear-gradient(135deg, var(--warning-orange), #e67e22);
+        }
+
+        .stat-approved-host .stat-icon-host {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+        }
+
+        .stat-rejected-host .stat-icon-host {
+            background: linear-gradient(135deg, var(--danger-red), #e74c3c);
+        }
+
+        .stat-content-host {
+            flex: 1;
+        }
+
+        .stat-number-host {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            margin: 0;
+            line-height: 1;
+        }
+
+        .stat-label-host {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        /* Card Styles */
+        .card-host {
+            background: white;
+            border-radius: 16px;
+            border: none;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .card-host:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .card-header-host {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card-title-host {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-count-host {
+            background: linear-gradient(135deg, var(--warning-orange), #e67e22);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: auto;
+        }
+
+        .card-body-host {
+            padding: 1.5rem;
+        }
+
+        /* Form Controls */
+        .form-label-host {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control-host {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-control-host:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        /* Request Items */
+        .requests-list-host {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .request-item-host {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 249, 250, 0.8));
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .request-item-host:hover {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .request-item-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(135deg, var(--warning-orange), #e67e22);
+        }
+
+        .request-header-host {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            gap: 1rem;
+        }
+
+        .requester-info-host {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .requester-avatar-host {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .requester-details-host {
+            flex: 1;
+        }
+
+        .requester-name-host {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .requester-info-text-host {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .request-time-host {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .request-amount-host {
+            text-align: right;
+        }
+
+        .amount-value-host {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Status Badges */
+        .status-badge-host {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending-host {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-success-host {
+            background: linear-gradient(135deg, #d4edda, #00b894);
+            color: #155724;
+            border: 1px solid #00b894;
+        }
+
+        .status-failed-host {
+            background: linear-gradient(135deg, #f8d7da, #e17055);
+            color: #721c24;
+            border: 1px solid #e17055;
+        }
+
+        /* Request Details */
+        .request-details-host {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-row-host {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .detail-item-host {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            min-width: 200px;
+        }
+
+        .detail-item-host.full-width-host {
+            min-width: 100%;
+        }
+
+        .detail-item-host i {
+            color: var(--primary-blue);
+            width: 16px;
+        }
+
+        .detail-label-host {
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .detail-value-host {
+            font-weight: 600;
+            color: var(--text-blue);
+        }
+
+        /* Request Actions */
+        .request-actions-host {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+            flex-wrap: wrap;
+        }
+
+        /* Button Styles */
+        .btn-host {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary-host {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .btn-primary-host:hover {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-outline-host {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-outline-host:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-success-host {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+            color: white;
+        }
+
+        .btn-success-host:hover {
+            background: linear-gradient(135deg, #229954, var(--success-green));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-danger-host {
+            background: linear-gradient(135deg, var(--danger-red), #e74c3c);
+            color: white;
+        }
+
+        .btn-danger-host:hover {
+            background: linear-gradient(135deg, #c0392b, var(--danger-red));
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn-info-host {
+            background: linear-gradient(135deg, #17a2b8, #20c997);
+            color: white;
+        }
+
+        .btn-info-host:hover {
+            background: linear-gradient(135deg, #138496, #17a2b8);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+        }
+
+        .btn-mini-host {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.75rem;
+            border-radius: 6px;
+        }
+
+        /* History Table */
+        .history-table-host {
+            width: 100%;
+            margin: 0;
+        }
+
+        .history-table-host thead {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .history-table-host th {
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            border: none;
+        }
+
+        .history-table-host td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 0.9rem;
+            vertical-align: middle;
+        }
+
+        .history-table-host tbody tr:hover {
+            background: var(--bg-blue);
+        }
+
+        .requester-mini-host {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .requester-mini-avatar-host {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .requester-mini-name-host {
+            font-weight: 600;
+            color: var(--text-blue);
+            font-size: 0.9rem;
+        }
+
+        .requester-mini-id-host {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        /* Modal Styles */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(3px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .custom-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-modal {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 550px;
+            width: 90%;
+            overflow: hidden;
+            transform: scale(0.8) translateY(-30px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-modal-overlay.show .custom-modal {
+            transform: scale(1) translateY(0);
+        }
+
+        .custom-modal-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+            padding: 1rem 1.5rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .custom-modal-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="10" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="20" r="0.8" fill="rgba(255,255,255,0.1)"/><circle cx="70" cy="80" r="1.2" fill="rgba(255,255,255,0.1)"/></svg>');
+        }
+
+        .custom-modal-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem auto;
+            font-size: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .custom-modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .custom-modal-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+
+        .custom-modal-body {
+            padding: 1rem 1.5rem;
+        }
+
+        .custom-modal-input-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .custom-modal-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .custom-modal-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .custom-modal-input:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .custom-modal-footer {
+            padding: 0.75rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .custom-modal-btn {
+            flex: 1;
+            padding: 0.6rem 1.25rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .custom-modal-btn.primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .custom-modal-btn.primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .custom-modal-btn.secondary {
+            background: #f8f9fa;
+            color: #6c757d;
+            border: 2px solid #e9ecef;
+        }
+
+        .custom-modal-btn.secondary:hover {
+            background: #e9ecef;
+        }
+
+        .custom-modal-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Approval Details */
+        .approval-details-host {
+            background: var(--bg-blue);
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .approval-item-host {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .approval-item-host:last-child {
+            margin-bottom: 0;
+        }
+
+        .approval-label-host {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6c757d;
+        }
+
+        .approval-value-host {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-blue);
+        }
+
+        /* Custom Alert */
+        .custom-alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10005;
+            bottom: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .custom-alert-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .custom-alert {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            max-width: 400px;
+            width: 90%;
+            overflow: hidden;
+            transform: scale(0.7) translateY(-20px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .custom-alert-overlay.show .custom-alert {
+            transform: scale(1) translateY(0);
+        }
+
+        .custom-alert-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #f1f3f4;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .custom-alert-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .custom-alert-icon.success {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+        }
+
+        .custom-alert-icon.warning {
+            background: linear-gradient(135deg, var(--warning-orange), #e67e22);
+        }
+
+        .custom-alert-icon.danger {
+            background: linear-gradient(135deg, var(--danger-red), #e74c3c);
+        }
+
+        .custom-alert-icon.info {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .custom-alert-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .custom-alert-body {
+            padding: 1.5rem;
+            color: #5a6c7d;
+            line-height: 1.6;
+        }
+
+        .custom-alert-footer {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .custom-alert-btn {
+            padding: 0.5rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+        }
+
+        .custom-alert-btn.primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .custom-alert-btn.primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        /* Loading Animation */
+        .modal-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container-host {
+                padding: 1.5rem;
+            }
+            
+            .stats-overview-host {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container-host {
+                padding: 1rem;
+            }
+
+            .header-title-host {
+                font-size: 1.5rem;
+            }
+
+            .request-header-host {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .request-amount-host {
+                text-align: left;
+                width: 100%;
+            }
+
+            .detail-row-host {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .detail-item-host {
+                min-width: auto;
+            }
+
+            .request-actions-host {
+                justify-content: flex-start;
+            }
+
+            .btn-host {
+                font-size: 0.8rem;
+                padding: 0.5rem 0.75rem;
+            }
+
+            .stat-number-host {
+                font-size: 1.5rem;
+            }
+
+            .custom-modal {
+                max-width: 95%;
+            }
+
+            .custom-modal-body {
+                padding: 1.25rem;
+            }
+
+            .custom-modal-footer {
+                padding: 0.75rem 1.25rem 1.25rem 1.25rem;
+                flex-direction: column;
+            }
+
+            .history-table-host {
+                font-size: 0.8rem;
+            }
+
+            .history-table-host th,
+            .history-table-host td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-overview-host {
+                grid-template-columns: 1fr;
+            }
+
+            .requester-info-host {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .requester-avatar-host {
+                width: 50px;
+                height: 50px;
+            }
+
+            .amount-value-host {
+                font-size: 1.2rem;
+            }
+
+            .request-actions-host {
+                flex-direction: column;
+            }
+
+            .btn-host {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Smooth Animations */
+        .request-item-host {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Focus states for accessibility */
+        .btn-host:focus,
+        .form-control-host:focus,
+        .custom-modal-btn:focus {
+            outline: 2px solid var(--primary-blue);
+            outline-offset: 2px;
+        }
+
+        /* Print styles */
+        @media print {
+            .request-actions-host,
+            .custom-modal-overlay,
+            .custom-alert-overlay {
+                display: none !important;
+            }
+            
+            .main-container-host {
+                padding: 0;
+            }
+            
+            .card-host {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container-host">
+        <!-- Header Section -->
+        <div class="header-section-host">
+            <div class="header-content-host">
+                <h1 class="header-title-host">
+                    <i class="fas fa-tasks me-3"></i>
+                    Duyệt Nạp Rút Tiền
+                </h1>
+                <p class="header-subtitle-host">Quản lý và xử lý các yêu cầu nạp tiền và rút tiền từ chủ trọ</p>
+            </div>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="card-host mb-4">
+            <div class="card-body-host">
+                <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="withdrawal-tab" data-bs-toggle="tab" data-bs-target="#withdrawal" type="button" role="tab">
+                            <i class="fas fa-minus-circle me-2"></i>
+                            Duyệt Rút Tiền
+                            <span class="badge bg-warning ms-2">3</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="deposit-tab" data-bs-toggle="tab" data-bs-target="#deposit" type="button" role="tab">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            Duyệt Nạp Tiền
+                            <span class="badge bg-info ms-2">2</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Stats Overview -->
+        <div class="stats-overview-host">
+            <div class="stat-card-host stat-pending-host">
+                <div class="stat-icon-host">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content-host">
+                    <h3 class="stat-number-host">3</h3>
+                    <p class="stat-label-host">Chờ duyệt</p>
+                </div>
+            </div>
+            <div class="stat-card-host stat-approved-host">
+                <div class="stat-icon-host">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content-host">
+                    <h3 class="stat-number-host">45</h3>
+                    <p class="stat-label-host">Đã duyệt</p>
+                </div>
+            </div>
+            <div class="stat-card-host stat-rejected-host">
+                <div class="stat-icon-host">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="stat-content-host">
+                    <h3 class="stat-number-host">3</h3>
+                    <p class="stat-label-host">Từ chối</p>
+                </div>
+            </div>
+            <div class="stat-card-host stat-total-host">
+                <div class="stat-icon-host">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-content-host">
+                    <h3 class="stat-number-host">125.5M</h3>
+                    <p class="stat-label-host">Tổng tiền (VNĐ)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Requests -->
+        <div class="card-host">
+            <div class="card-header-host">
+                <h3 class="card-title-host">
+                    <i class="fas fa-hourglass-half"></i>
+                    Yêu Cầu Chờ Duyệt
+                    <span class="badge-count-host ms-auto">3</span>
+                </h3>
+            </div>
+            <div class="card-body-host">
+                <div class="requests-list-host">
+                    <!-- Request Item 1 -->
+                    <div class="request-item-host" data-status="pending">
+                        <div class="request-header-host">
+                            <div class="requester-info-host">
+                                <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <div class="requester-details-host">
+                                    <h5 class="requester-name-host">Nguyễn Văn An</h5>
+                                    <p class="requester-info-text-host">Chủ trọ</p>
+                                    <p class="request-time-host">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        15/12/2024 14:30
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="request-amount-host">
+                                <div class="amount-value-host">2,500,000 VNĐ</div>
+                                <div class="status-badge-host status-pending-host">
+                                    <i class="fas fa-clock"></i>
+                                    Chờ duyệt
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-details-host">
+                            <div class="detail-row-host">
+                                <div class="detail-item-host full-width-host">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <span class="detail-label-host">Ghi chú:</span>
+                                    <span class="detail-value-host">Rút tiền hoa hồng tháng 12</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-actions-host">
+                            <button class="btn-host btn-success-host" onclick="showApprovalModal('REQ001')">
+                                <i class="fas fa-check"></i>
+                                Duyệt
+                            </button>
+                            <button class="btn-host btn-danger-host" onclick="showRejectionModal('REQ001')">
+                                <i class="fas fa-times"></i>
+                                Từ chối
+                            </button>
+                            <button class="btn-host btn-info-host" onclick="viewDetails('REQ001')">
+                                <i class="fas fa-eye"></i>
+                                Chi tiết
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Request Item 2 -->
+                    <div class="request-item-host" data-status="pending">
+                        <div class="request-header-host">
+                            <div class="requester-info-host">
+                                <img src="https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <div class="requester-details-host">
+                                    <h5 class="requester-name-host">Trần Thị Bình</h5>
+                                    <p class="requester-info-text-host">Chủ trọ</p>
+                                    <p class="request-time-host">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        15/12/2024 10:15
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="request-amount-host">
+                                <div class="amount-value-host">1,800,000 VNĐ</div>
+                                <div class="status-badge-host status-pending-host">
+                                    <i class="fas fa-clock"></i>
+                                    Chờ duyệt
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-details-host">
+                            <div class="detail-row-host">
+                                <div class="detail-item-host full-width-host">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <span class="detail-label-host">Ghi chú:</span>
+                                    <span class="detail-value-host">Rút tiền lợi nhuận từ việc cho thuê phòng</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-actions-host">
+                            <button class="btn-host btn-success-host" onclick="showApprovalModal('REQ002')">
+                                <i class="fas fa-check"></i>
+                                Duyệt
+                            </button>
+                            <button class="btn-host btn-danger-host" onclick="showRejectionModal('REQ002')">
+                                <i class="fas fa-times"></i>
+                                Từ chối
+                            </button>
+                            <button class="btn-host btn-info-host" onclick="viewDetails('REQ002')">
+                                <i class="fas fa-eye"></i>
+                                Chi tiết
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Request Item 3 -->
+                    <div class="request-item-host" data-status="pending">
+                        <div class="request-header-host">
+                            <div class="requester-info-host">
+                                <img src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <div class="requester-details-host">
+                                    <h5 class="requester-name-host">Lê Minh Cường</h5>
+                                    <p class="requester-info-text-host">Chủ trọ</p>
+                                    <p class="request-time-host">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        14/12/2024 16:45
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="request-amount-host">
+                                <div class="amount-value-host">3,200,000 VNĐ</div>
+                                <div class="status-badge-host status-pending-host">
+                                    <i class="fas fa-clock"></i>
+                                    Chờ duyệt
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-details-host">
+                            <div class="detail-row-host">
+                                <div class="detail-item-host full-width-host">
+                                    <i class="fas fa-sticky-note"></i>
+                                    <span class="detail-label-host">Ghi chú:</span>
+                                    <span class="detail-value-host">Chi phí sửa chữa và đầu tư cải thiện phòng trọ</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="request-actions-host">
+                            <button class="btn-host btn-success-host" onclick="showApprovalModal('REQ003')">
+                                <i class="fas fa-check"></i>
+                                Duyệt
+                            </button>
+                            <button class="btn-host btn-danger-host" onclick="showRejectionModal('REQ003')">
+                                <i class="fas fa-times"></i>
+                                Từ chối
+                            </button>
+                            <button class="btn-host btn-info-host" onclick="viewDetails('REQ003')">
+                                <i class="fas fa-eye"></i>
+                                Chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Processed Requests -->
+        <div class="card-host">
+            <div class="card-header-host">
+                <h3 class="card-title-host">
+                    <i class="fas fa-history"></i>
+                    Lịch Sử Xử Lý Gần Đây
+                </h3>
+            </div>
+            <div class="card-body-host">
+                <div class="table-responsive">
+                    <table class="history-table-host">
+                        <thead>
+                            <tr>
+                                <th>Chủ trọ</th>
+                                <th>Mã giao dịch</th>
+                                <th>Số tiền</th>
+                                <th>Ngân hàng</th>
+                                <th>Trạng thái</th>
+                                <th>Xử lý bởi</th>
+                                <th>Ngày xử lý</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="requester-mini-host">
+                                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <div>
+                                            <div class="requester-mini-name-host">Phạm Văn Đức</div>
+                                            <div class="requester-mini-id-host">CT004</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><strong>WTH001234568</strong></td>
+                                <td><strong style="color: var(--success-green);">2,000,000 VNĐ</strong></td>
+                                <td><i class="fas fa-university text-primary me-1"></i> Vietcombank</td>
+                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã duyệt</span></td>
+                                <td>Nguyễn Thu Hà</td>
+                                <td>15/12/2024 13:15</td>
+                                <td>
+                                    <button class="btn-mini-host btn-info-host" onclick="viewDetails('WTH001234568')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="requester-mini-host">
+                                        <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <div>
+                                            <div class="requester-mini-name-host">Võ Thị Lan</div>
+                                            <div class="requester-mini-id-host">CT005</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><strong>WTH001234567</strong></td>
+                                <td><strong style="color: var(--success-green);">1,500,000 VNĐ</strong></td>
+                                <td><i class="fas fa-university text-primary me-1"></i> Techcombank</td>
+                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã duyệt</span></td>
+                                <td>Trần Minh Tâm</td>
+                                <td>14/12/2024 11:30</td>
+                                <td>
+                                    <button class="btn-mini-host btn-info-host" onclick="viewDetails('WTH001234567')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="requester-mini-host">
+                                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <div>
+                                            <div class="requester-mini-name-host">Hoàng Minh Tuấn</div>
+                                            <div class="requester-mini-id-host">CT006</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td><strong>WTH001234566</strong></td>
+                                <td><strong style="color: var(--danger-red);">800,000 VNĐ</strong></td>
+                                <td><i class="fas fa-university text-primary me-1"></i> ACB</td>
+                                <td><span class="status-badge-host status-failed-host"><i class="fas fa-times"></i> Từ chối</span></td>
+                                <td>Nguyễn Thu Hà</td>
+                                <td>13/12/2024 16:20</td>
+                                <td>
+                                    <button class="btn-mini-host btn-info-host" onclick="viewDetails('WTH001234566')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Modal -->
+    <div class="custom-modal-overlay" id="approvalModal-host">
+        <div class="custom-modal">
+            <div class="custom-modal-header">
+                <div class="custom-modal-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 class="custom-modal-title">Xác Nhận Duyệt Rút Tiền</h3>
+                <p class="custom-modal-subtitle">Bạn có chắc chắn muốn duyệt yêu cầu rút tiền này?</p>
+            </div>
+            <div class="custom-modal-body">
+                <div class="approval-details-host">
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Mã giao dịch:</span>
+                        <span class="approval-value-host" id="approvalRequestId-host">REQ001</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Số tiền:</span>
+                        <span class="approval-value-host" id="approvalAmount-host">2,500,000 VNĐ</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Ngân hàng:</span>
+                        <span class="approval-value-host" id="approvalBank-host">Vietcombank</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Số tài khoản:</span>
+                        <span class="approval-value-host" id="approvalAccountNumber-host">1234567890</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Chủ tài khoản:</span>
+                        <span class="approval-value-host" id="approvalAccountName-host">NGUYEN VAN AN</span>
+                    </div>
+                </div>
+                
+                <div class="custom-modal-input-group">
+                    <label class="custom-modal-label">Ghi chú xử lý (tùy chọn)</label>
+                    <textarea class="custom-modal-input" id="approvalNote-host" rows="2" placeholder="Nhập ghi chú về việc duyệt yêu cầu này..."></textarea>
+                </div>
+                
+                <div style="text-align: center; color: #6c757d; font-size: 0.8rem;">
+                    <i class="fas fa-info-circle" style="color: var(--primary-blue); margin-right: 0.5rem;"></i>
+                    Sau khi duyệt, tiền sẽ được chuyển vào tài khoản chủ trọ trong 5-10 phút
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button class="custom-modal-btn secondary" onclick="closeApprovalModal()">Hủy bỏ</button>
+                <button class="custom-modal-btn primary" onclick="confirmApproval()" id="confirmApprovalBtn-host">
+                    <i class="fas fa-check"></i>
+                    Duyệt yêu cầu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="custom-modal-overlay" id="rejectionModal-host">
+        <div class="custom-modal">
+            <div class="custom-modal-header" style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
+                <div class="custom-modal-icon">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h3 class="custom-modal-title">Từ Chối Yêu Cầu Rút Tiền</h3>
+                <p class="custom-modal-subtitle">Vui lòng nhập lý do từ chối yêu cầu này</p>
+            </div>
+            <div class="custom-modal-body">
+                <div class="custom-modal-input-group">
+                    <label class="custom-modal-label">Mã giao dịch</label>
+                    <input type="text" class="custom-modal-input" id="rejectionRequestId-host" readonly>
+                </div>
+                
+                <div class="custom-modal-input-group">
+                    <label class="custom-modal-label">Lý do từ chối *</label>
+                    <select class="custom-modal-input" id="rejectionReason-host">
+                        <option value="">Chọn lý do từ chối</option>
+                        <option value="insufficient_balance">Số dư tài khoản không đủ</option>
+                        <option value="invalid_bank_info">Thông tin ngân hàng không hợp lệ</option>
+                        <option value="duplicate_request">Yêu cầu trùng lặp</option>
+                        <option value="policy_violation">Vi phạm chính sách rút tiền</option>
+                        <option value="suspicious_activity">Hoạt động đáng ngờ</option>
+                        <option value="other">Lý do khác</option>
+                    </select>
+                </div>
+                
+                <div class="custom-modal-input-group">
+                    <label class="custom-modal-label">Ghi chú chi tiết *</label>
+                    <textarea class="custom-modal-input" id="rejectionNote-host" rows="3" placeholder="Nhập mô tả chi tiết lý do từ chối yêu cầu..." required></textarea>
+                </div>
+                
+                <div style="text-align: center; color: #6c757d; font-size: 0.8rem;">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--warning-orange); margin-right: 0.5rem;"></i>
+                    Chủ trọ sẽ nhận được thông báo từ chối kèm lý do
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button class="custom-modal-btn secondary" onclick="closeRejectionModal()">Hủy bỏ</button>
+                <button class="custom-modal-btn primary" onclick="confirmRejection()" id="confirmRejectionBtn-host" style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
+                    <i class="fas fa-times"></i>
+                    Từ chối yêu cầu
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div class="custom-modal-overlay" id="detailsModal-host">
+        <div class="custom-modal" style="max-width: 450px;">
+            <div class="custom-modal-header">
+                <div class="custom-modal-icon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h3 class="custom-modal-title">Chi Tiết Yêu Cầu Rút Tiền</h3>
+                <p class="custom-modal-subtitle">Thông tin đầy đủ về yêu cầu rút tiền</p>
+            </div>
+            <div class="custom-modal-body">
+                <div class="details-content-host" id="detailsContent-host">
+                    <!-- Details will be populated here -->
+                </div>
+            </div>
+            <div class="custom-modal-footer">
+                <button class="custom-modal-btn secondary" onclick="closeDetailsModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Overlay -->
+    <div class="custom-alert-overlay" id="alertOverlay-host">
+        <div class="custom-alert">
+            <div class="custom-alert-header">
+                <div class="custom-alert-icon" id="alertIcon-host">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <div>
+                    <h4 class="custom-alert-title" id="alertTitle-host">Thông báo</h4>
+                </div>
+            </div>
+            <div class="custom-alert-body" id="alertMessage-host">
+                Nội dung thông báo
+            </div>
+            <div class="custom-alert-footer">
+                <button class="custom-alert-btn primary" onclick="closeAlert()">Đồng ý</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables
+        let currentRequestId = '';
+        let currentRequestAmount = 0;
+
+        // Sample data for modal operations - simplified to only what's needed for modal functionality
+        const requestDetails = {
+            'REQ001': {
+                id: 'REQ001',
+                requesterName: 'Nguyễn Văn An',
+                requesterId: 'CT001',
+                amount: 2500000,
+                bank: 'Vietcombank',
+                accountNumber: '1234567890',
+                accountName: 'NGUYEN VAN AN',
+                branch: 'Chi nhánh Hà Nội',
+                note: 'Rút tiền hoa hồng tháng 12',
+                requestTime: '2024-12-15T14:30:00',
+                status: 'pending'
+            },
+            'REQ002': {
+                id: 'REQ002',
+                requesterName: 'Trần Thị Bình',
+                requesterId: 'CT002',
+                amount: 1800000,
+                bank: 'Techcombank',
+                accountNumber: '9876543210',
+                accountName: 'TRAN THI BINH',
+                branch: 'Chi nhánh TP.HCM',
+                note: 'Rút tiền lợi nhuận từ việc cho thuê phòng',
+                requestTime: '2024-12-15T10:15:00',
+                status: 'pending'
+            },
+            'REQ003': {
+                id: 'REQ003',
+                requesterName: 'Lê Minh Cường',
+                requesterId: 'CT003',
+                amount: 3200000,
+                bank: 'BIDV',
+                accountNumber: '5555666677',
+                accountName: 'LE MINH CUONG',
+                branch: 'Chi nhánh Đà Nẵng',
+                note: 'Chi phí sửa chữa và đầu tư cải thiện phòng trọ',
+                requestTime: '2024-12-14T16:45:00',
+                status: 'pending'
+            }
+        };
+
+        // Format amount for display
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount).replace('₫', 'VNĐ');
+        }
+
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Alert System
+        function showAlert(message, type = 'info', title = 'Thông báo') {
+            const overlay = document.getElementById('alertOverlay-host');
+            const alertIcon = document.getElementById('alertIcon-host');
+            const alertTitle = document.getElementById('alertTitle-host');
+            const alertMessage = document.getElementById('alertMessage-host');
+
+            // Set icon and style based on type
+            alertIcon.className = 'custom-alert-icon ' + type;
+            switch(type) {
+                case 'success':
+                    alertIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
+                    break;
+                case 'warning':
+                    alertIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    break;
+                case 'danger':
+                    alertIcon.innerHTML = '<i class="fas fa-times-circle"></i>';
+                    break;
+                default:
+                    alertIcon.innerHTML = '<i class="fas fa-info-circle"></i>';
+            }
+
+            alertTitle.textContent = title;
+            alertMessage.textContent = message;
+            
+            overlay.classList.add('show');
+        }
+
+        function closeAlert() {
+            const overlay = document.getElementById('alertOverlay-host');
+            overlay.classList.remove('show');
+        }
+
+        // Approval Modal
+        function showApprovalModal(requestId) {
+            currentRequestId = requestId;
+            
+            // Get request details from requestDetails object
+            const request = requestDetails[requestId];
+            if (!request) return;
+            
+            currentRequestAmount = request.amount;
+            
+            const modal = document.getElementById('approvalModal-host');
+            document.getElementById('approvalRequestId-host').textContent = requestId;
+            document.getElementById('approvalAmount-host').textContent = formatCurrency(request.amount);
+            document.getElementById('approvalBank-host').textContent = request.bank;
+            document.getElementById('approvalAccountNumber-host').textContent = request.accountNumber;
+            document.getElementById('approvalAccountName-host').textContent = request.accountName;
+            document.getElementById('approvalNote-host').value = '';
+            
+            modal.classList.add('show');
+        }
+
+        function closeApprovalModal() {
+            const modal = document.getElementById('approvalModal-host');
+            modal.classList.remove('show');
+            
+            // Reset button state
+            const confirmBtn = document.getElementById('confirmApprovalBtn-host');
+            confirmBtn.innerHTML = '<i class="fas fa-check"></i> Duyệt yêu cầu';
+            confirmBtn.disabled = false;
+        }
+
+        function confirmApproval() {
+            const note = document.getElementById('approvalNote-host').value;
+            const confirmBtn = document.getElementById('confirmApprovalBtn-host');
+            
+            // Show loading state
+            confirmBtn.innerHTML = '<span class="modal-loading"></span> Đang xử lý...';
+            confirmBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                closeApprovalModal();
+                
+                showAlert(
+                    `Đã duyệt thành công yêu cầu ${currentRequestId}. Tiền sẽ được chuyển vào tài khoản của chủ trọ trong 5-10 phút.`, 
+                    'success', 
+                    'Duyệt thành công'
+                );
+            }, 2000);
+        }
+
+        // Rejection Modal
+        function showRejectionModal(requestId) {
+            currentRequestId = requestId;
+            
+            const modal = document.getElementById('rejectionModal-host');
+            document.getElementById('rejectionRequestId-host').value = requestId;
+            document.getElementById('rejectionReason-host').value = '';
+            document.getElementById('rejectionNote-host').value = '';
+            
+            modal.classList.add('show');
+        }
+
+        function closeRejectionModal() {
+            const modal = document.getElementById('rejectionModal-host');
+            modal.classList.remove('show');
+            
+            // Reset button state
+            const confirmBtn = document.getElementById('confirmRejectionBtn-host');
+            confirmBtn.innerHTML = '<i class="fas fa-times"></i> Từ chối yêu cầu';
+            confirmBtn.disabled = false;
+        }
+
+        function confirmRejection() {
+            const reason = document.getElementById('rejectionReason-host').value;
+            const note = document.getElementById('rejectionNote-host').value;
+            const confirmBtn = document.getElementById('confirmRejectionBtn-host');
+            
+            if (!reason) {
+                showAlert('Vui lòng chọn lý do từ chối!', 'warning');
+                return;
+            }
+            
+            if (!note.trim()) {
+                showAlert('Vui lòng nhập ghi chú chi tiết!', 'warning');
+                return;
+            }
+            
+            // Show loading state
+            confirmBtn.innerHTML = '<span class="modal-loading"></span> Đang xử lý...';
+            confirmBtn.disabled = true;
+            
+            // Simulate API call
+            setTimeout(() => {
+                closeRejectionModal();
+                
+                showAlert(
+                    `Đã từ chối yêu cầu ${currentRequestId}. Chủ trọ sẽ nhận được thông báo từ chối kèm lý do.`, 
+                    'success', 
+                    'Từ chối thành công'
+                );
+            }, 2000);
+        }
+
+        // Details Modal
+        function viewDetails(requestId) {
+            const request = requestDetails[requestId];
+            if (!request) return;
+            
+            const modal = document.getElementById('detailsModal-host');
+            const detailsContent = document.getElementById('detailsContent-host');
+            
+            detailsContent.innerHTML = `
+                <div class="approval-details-host">
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Mã giao dịch:</span>
+                        <span class="approval-value-host">${request.id}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Chủ trọ:</span>
+                        <span class="approval-value-host">${request.requesterName}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Số tiền:</span>
+                        <span class="approval-value-host">${formatCurrency(request.amount)}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Ngân hàng:</span>
+                        <span class="approval-value-host">${request.bank}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Số tài khoản:</span>
+                        <span class="approval-value-host">${request.accountNumber}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Chủ tài khoản:</span>
+                        <span class="approval-value-host">${request.accountName}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Chi nhánh:</span>
+                        <span class="approval-value-host">${request.branch || 'Không có'}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Thời gian yêu cầu:</span>
+                        <span class="approval-value-host">${formatDateTime(request.requestTime)}</span>
+                    </div>
+                    <div class="approval-item-host">
+                        <span class="approval-label-host">Trạng thái:</span>
+                        <span class="approval-value-host">
+                            <span class="status-badge-host status-pending-host">
+                                Chờ duyệt
+                            </span>
+                        </span>
+                    </div>
+                </div>
+                <div class="custom-modal-input-group">
+                    <label class="custom-modal-label">Ghi chú từ chủ trọ</label>
+                    <div style="background: #f8f9fa; padding: 0.75rem; border-radius: 8px; color: #6c757d; font-size: 0.85rem;">
+                        ${request.note || 'Không có ghi chú'}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+
+        function closeDetailsModal() {
+            const modal = document.getElementById('detailsModal-host');
+            modal.classList.remove('show');
+        }
+
+        // Modal event handlers
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('custom-modal-overlay')) {
+                if (e.target.id === 'approvalModal-host') {
+                    closeApprovalModal();
+                } else if (e.target.id === 'rejectionModal-host') {
+                    closeRejectionModal();
+                } else if (e.target.id === 'detailsModal-host') {
+                    closeDetailsModal();
+                }
+            }
+            
+            if (e.target.classList.contains('custom-alert-overlay')) {
+                closeAlert();
+            }
+        });
+
+        // Handle Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                if (document.getElementById('approvalModal-host').classList.contains('show')) {
+                    closeApprovalModal();
+                } else if (document.getElementById('rejectionModal-host').classList.contains('show')) {
+                    closeRejectionModal();
+                } else if (document.getElementById('detailsModal-host').classList.contains('show')) {
+                    closeDetailsModal();
+                } else if (document.getElementById('alertOverlay-host').classList.contains('show')) {
+                    closeAlert();
+                }
+            }
+        });
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    
+
     <style>
         .tenant-detail-body-host {
             font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -222,7 +223,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            margin-top: 8px;
+            margin-top: -2px;
         }
 
         .status-active-host {
@@ -605,7 +606,6 @@
             }
         }
 
-        /* Custom scrollbar */
         .modal-content-host::-webkit-scrollbar {
             width: 6px;
         }
@@ -623,14 +623,110 @@
         .modal-content-host::-webkit-scrollbar-thumb:hover {
             background: #549eed;
         }
+
+        .status-active-host {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-warning-host {
+            background-color: #ffc107;
+            color: black;
+        }
+
+        .status-inactive-host {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .custom-toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1055;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .custom-toast {
+            display: flex;
+            align-items: center;
+            background-color: #e6f7f0;
+            color: #1a2e05;
+            padding: 12px 16px;
+            border-left: 5px solid #10b981;
+            border-radius: 10px;
+            min-width: 320px;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            font-size: 15px;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .custom-toast.error {
+            background-color: #fff0f0;
+            border-left-color: #ef4444;
+            color: #7f1d1d;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 18px;
+            color: #10b981;
+        }
+
+        .custom-toast.error .toast-icon {
+            color: #ef4444;
+        }
+
+        .toast-message {
+            flex: 1;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #333;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn-lg-custom {
+            padding: 0.75rem 1.5rem;
+            font-size: 1.25rem;
+        }
     </style>
 </head>
+
 <body class="tenant-detail-body-host">
-    <!-- SIDEBAR -->
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
+<<<<<<< HEAD
     <div class="main-container-host" id="main-content">
         <div class="page-header-host">
+=======
+    <div class="main-container-host" id="main-content" th:if="${tenant != null}" th:object="${tenant}">
+        <div class="page-header-host d-flex justify-content-between align-items-center">
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
             <div>
                 <a href="/chu-tro/quan-ly-khach-thue" class="back-link-host">
                     <i class="bi bi-arrow-left"></i>
@@ -638,6 +734,7 @@
                 </a>
                 <h1 class="page-title-host">Chi tiết khách thuê</h1>
             </div>
+<<<<<<< HEAD
             <button class="edit-btn-host" onclick="showEditModal()">
                 <i class="fas fa-edit"></i>
                 Chỉnh sửa
@@ -645,6 +742,33 @@
         </div>
 
         <!-- Personal Information Section -->
+=======
+
+            <form th:action="@{/chu-tro/khach-thue/kich-hoat}" method="post" class="ms-auto">
+                <input type="hidden" name="userId" th:value="${tenant.userId}" />
+                <input type="hidden" name="contractId" th:value="${tenant.contractId}" />
+                <button type="submit" class="btn btn-md d-flex align-items-center gap-1"
+                    th:classappend="${tenant.enabled} ? 'btn-danger' : 'btn-success'">
+                    <i class="bi" th:classappend="${tenant.enabled} ? 'bi-x-circle' : 'bi-check-circle'"></i>
+                    <span th:text="${tenant.enabled} ? 'Vô hiệu hóa' : 'Kích hoạt lại'"></span>
+                </button>
+            </form>
+        </div>
+
+        <div class="custom-toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
+
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
         <div class="info-section-host">
             <h3 class="section-header-host">
                 <i class="fas fa-user"></i>
@@ -660,12 +784,23 @@
                         <label class="form-label-host">Giới tính</label>
                         <div class="gender-group-host">
                             <div class="radio-group-host">
+<<<<<<< HEAD
                                 <input type="radio" class="radio-input-host" name="gioiTinh" id="nam" checked disabled>
                                 <label class="radio-label-host" for="nam">Nam</label>
                             </div>
                             <div class="radio-group-host">
                                 <input type="radio" class="radio-input-host" name="gioiTinh" id="nu" disabled>
                                 <label class="radio-label-host" for="nu">Nữ</label>
+=======
+                                <input type="radio" class="radio-input-host" name="gioiTinh"
+                                    th:checked="*{userGender == true}" disabled>
+                                <label class="radio-label-host">Nam</label>
+                            </div>
+                            <div class="radio-group-host">
+                                <input type="radio" class="radio-input-host" name="gioiTinh"
+                                    th:checked="*{userGender == false}" disabled>
+                                <label class="radio-label-host">Nữ</label>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                             </div>
                         </div>
                     </div>
@@ -677,7 +812,13 @@
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày sinh</label>
+<<<<<<< HEAD
                         <input type="text" class="form-control-host" value="17/09/1990" disabled>
+=======
+                        <input type="text" class="form-control-host"
+                            th:value="*{userBirthday != null ? #dates.format(userBirthday, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Nơi cấp</label>
@@ -691,16 +832,22 @@
             </div>
         </div>
 
+<<<<<<< HEAD
         <!-- Rental Information Section -->
         <div class="info-section-host">
             <h3 class="section-header-host">
                 <i class="fas fa-home"></i>
                 Thông tin thuê trọ
             </h3>
+=======
+        <div th:each="item : ${rentalHistory}" class="info-section-host">
+            <h3 class="section-header-host"><i class="fas fa-home"></i> Thông tin thuê trọ</h3>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
             <div class="section-content-host">
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Khu trọ</label>
+<<<<<<< HEAD
                         <input type="text" class="form-control-host" value="KTX A1" disabled>
                     </div>
                     <div class="form-group-host">
@@ -712,28 +859,72 @@
                         <span id="trangThai" class="status-badge-host status-active-host">
                             <i class="fas fa-check-circle"></i>
                             Đang thuê
+=======
+                        <input type="text" class="form-control-host" th:value="${item.hostelName}" disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Phòng</label>
+                        <input type="text" class="form-control-host" th:value="${item.roomName}" disabled>
+                    </div>
+                    <div class="form-group-host status-container-host">
+                        <label class="form-label-host">Trạng thái Hợp đồng</label>
+                        <span th:switch="${item.status}" class="status-badge-host">
+                            <span th:case="'ACTIVE'" class="status-badge-host status-active-host">
+                                <i class="fas fa-check-circle"></i> Đang thuê
+                            </span>
+                            <span th:case="'EXPIRED'" class="status-badge-host status-warning-host">
+                                <i class="fas fa-exclamation-circle"></i> Sắp hết hạn
+                            </span>
+                            <span th:case="'TERMINATED'" class="status-badge-host status-inactive-host">
+                                <i class="fas fa-times-circle"></i> Đã hủy
+                            </span>
+                            <span th:case="*">
+                                <i class="fas fa-question-circle"></i> Không xác định
+                            </span>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                         </span>
                     </div>
+
                 </div>
+
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày bắt đầu</label>
+<<<<<<< HEAD
                         <input type="text" class="form-control-host" value="17/09/2024" disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày kết thúc</label>
                         <input type="text" class="form-control-host" value="17/09/2025" disabled>
+=======
+                        <input type="text" class="form-control-host"
+                            th:value="${item.startDate != null ? #dates.format(item.startDate, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
+                    </div>
+                    <div class="form-group-host">
+                        <label class="form-label-host">Ngày kết thúc</label>
+                        <input type="text" class="form-control-host"
+                            th:value="${item.endDate != null ? #dates.format(item.endDate, 'dd/MM/yyyy') : 'N/A'}"
+                            disabled>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                 </div>
+
                 <div class="form-row-host">
                     <div class="form-group-host">
+<<<<<<< HEAD
                         <label class="form-label-host">Ghi chú</label>
                         <textarea class="form-textarea-host" disabled>Khách thuê đúng hạn, không có vấn đề gì.</textarea>
+=======
+                        <label class="form-label-host">Điều khoản hợp đồng</label>
+                        <textarea class="form-textarea-host" disabled th:text="${item.terms}"></textarea>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                 </div>
             </div>
         </div>
     </div>
+<<<<<<< HEAD
 
     <!-- Edit Modal -->
     <div id="editModal" class="modal-overlay-host">
@@ -848,10 +1039,13 @@
     </div>
 
     <!-- Bootstrap JS -->
+=======
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
 
     <script>
+<<<<<<< HEAD
         function showEditModal() {
             const modal = document.getElementById('editModal');
             modal.classList.add('show');
@@ -924,6 +1118,27 @@
             }
         `;
         document.head.appendChild(style);
+=======
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+        function showEditModal() { document.getElementById('editModal').classList.add('show'); }
+        function hideEditModal() { document.getElementById('editModal').classList.remove('show'); }
+        document.getElementById('editModal').addEventListener('click', function (e) { if (e.target === this) { hideEditModal(); } });
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     </script>
 </body>
+
 </html>

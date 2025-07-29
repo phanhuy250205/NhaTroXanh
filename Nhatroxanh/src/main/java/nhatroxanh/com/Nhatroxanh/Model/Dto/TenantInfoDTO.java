@@ -4,6 +4,8 @@ import java.sql.Date; // <-- Quan trọng: import java.sql.Date
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
+
 
 @Data
 @NoArgsConstructor
@@ -17,5 +19,5 @@ public class TenantInfoDTO {
     private String roomName; 
     private Date moveInDate;
     private Date endDate;
-    private Boolean contractStatus;
+    private Status contractStatus;
 }

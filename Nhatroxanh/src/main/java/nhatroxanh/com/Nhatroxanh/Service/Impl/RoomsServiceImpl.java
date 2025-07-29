@@ -1,28 +1,31 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Ward;
-import nhatroxanh.com.Nhatroxanh.Model.enity.District;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.District;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UtilityRepository;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
+import nhatroxanh.com.Nhatroxanh.Util.AddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,6 +79,11 @@ public class RoomsServiceImpl implements RoomsService {
         return result;
     }
 
+    // @Override
+    // public List<Rooms> findByHostelId(Integer hostelId) {
+    //     return roomsRepository.findByHostel_HostelId(hostelId);
+    // }
+
     @Override
     public Rooms save(Rooms room) {
         logger.info("Saving room: {}", room.getNamerooms());
@@ -105,7 +113,9 @@ public class RoomsServiceImpl implements RoomsService {
         }
         return roomsRepository.findUtilitiesByRoomId(roomId);
     }
-
+    public Rooms findRoomById(Integer roomId) {
+        return roomsRepository.findById(roomId).orElse(null);
+    }
     private ContractDto.Room convertToRoomDto(Rooms room) {
         ContractDto.Room roomDto = new ContractDto.Room();
         roomDto.setRoomId(room.getRoomId());
@@ -135,6 +145,11 @@ public class RoomsServiceImpl implements RoomsService {
             String fullAddress = addressParts.isEmpty() ? "" : String.join(", ", addressParts);
             roomDto.setAddress(fullAddress);
         } else {
+            logger.warn("No address found for room with roomId: {}", room.getRoomId());
+            roomDto.setStreet("");
+            roomDto.setWard("");
+            roomDto.setDistrict("");
+            roomDto.setProvince("");
             roomDto.setAddress("");
         }
 

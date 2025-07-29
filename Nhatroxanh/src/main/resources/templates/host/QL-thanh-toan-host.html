@@ -12,7 +12,11 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<<<<<<< HEAD
   
+=======
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
   <style>
     :root {
       --primary-color: #3498db;
@@ -388,6 +392,79 @@
       margin: 0;
     }
 
+<<<<<<< HEAD
+=======
+    /* Pagination Styles */
+    .pagination-section {
+      padding: 1.5rem;
+      background: var(--light-bg);
+      border-top: 1px solid #e2e8f0;
+    }
+
+    .pagination-info {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+
+    .pagination-custom {
+      gap: 0.25rem;
+    }
+
+    .pagination-custom .page-link {
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--primary-color);
+      font-weight: 500;
+      transition: all 0.2s ease;
+      margin: 0 2px;
+    }
+
+    .pagination-custom .page-link:hover {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .pagination-custom .page-item.active .page-link {
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      color: white;
+      box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    }
+
+    .pagination-custom .page-item.disabled .page-link {
+      color: #94a3b8;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+    }
+
+    .pagination-custom .page-item.disabled span {
+      color: #94a3b8;
+      background: #f8fafc;
+      border-color: #e2e8f0;
+      cursor: not-allowed;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin: 0 2px;
+    }
+
+    .swal2-popup {
+      border-radius: 10px;
+    }
+
+    .swal2-confirm,
+    .swal2-cancel {
+      border-radius: 20px;
+      padding: 8px 20px;
+      color: #ffff;
+      background: #3E83CC;
+    }
+
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     @media (max-width: 768px) {
       .main-container {
         margin: 0 10px;
@@ -511,10 +588,57 @@
                     <option value="double">Phòng đôi</option>
                   </select>
                 </div>
+<<<<<<< HEAD
                 <div class="col-auto">
                   <button class="btn btn-search" onclick="performSearch()">
                     <i class="fas fa-search me-2"></i>Tìm kiếm
                   </button>
+=======
+              </div>
+
+              <!-- Filter and Actions -->
+              <div class="col-12 col-lg-7">
+                <div class="row g-2 align-items-center">
+                  <!-- Filter Icon -->
+                  <div class="col-auto d-none d-md-block">
+                    <i class="fas fa-filter filter-icon"></i>
+                  </div>
+
+                  <!-- Status Filter -->
+                  <div class="col-12 col-sm-6 col-md-3 col-lg">
+                    <select class="form-select filter-select" id="statusFilter">
+                      <option value="">Tất cả trạng thái</option>
+                      <option value="paid">Đã thanh toán</option>
+                      <option value="unpaid">Chưa thanh toán</option>
+                    </select>
+                  </div>
+
+                  <!-- Search Button -->
+                  <div class="col-6 col-sm-3 col-md-auto">
+                    <button class="btn btn-search w-100" onclick="performSearch()">
+                      <i class="fas fa-search d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-md-inline">Tìm kiếm</span>
+                    </button>
+                  </div>
+
+                  <!-- Create Invoice Button -->
+                  <div class="col-6 col-sm-3 col-md-auto">
+                    <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#createInvoiceModal">
+                      <i class="fas fa-plus-circle d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-md-inline">Tạo mới</span>
+                    </button>
+                  </div>
+
+                  <!-- Send Invoice Button -->
+                  <div class="col-12 col-sm-6 col-md-auto">
+                    <button class="btn btn-warning w-100" onclick="sendUnpaidInvoices()" id="send-invoices-btn"
+                      aria-label="Gửi hóa đơn chưa thanh toán">
+                      <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                      <i class="fas fa-paper-plane d-md-inline me-0 me-md-2"></i>
+                      <span class="d-none d-sm-inline">Gửi hóa đơn</span>
+                    </button>
+                  </div>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                 </div>
               </div>
             </div>
@@ -767,8 +891,113 @@
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
+<<<<<<< HEAD
           <button type="button" class="btn btn-success" onclick="downloadInvoice()">
             <i class="fas fa-download me-2"></i>Tải xuống
+=======
+          <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
+            <i class="fas fa-trash me-2"></i>Xóa
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+            onclick="document.querySelector('.modal-backdrop').remove();">
+            <i class="fas fa-times me-2"></i>Đóng
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Invoice Modal -->
+  <div class="modal fade" id="createInvoiceModal" tabindex="-1" aria-labelledby="createInvoiceModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createInvoiceModalLabel">
+            <i class="fas fa-file-invoice-dollar"></i>
+            Tạo hóa đơn mới
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createInvoiceForm" th:action="@{/api/payments/create-form}" method="post">
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="invoiceRoomSelect" class="form-label">Phòng</label>
+                <select class="form-select" id="invoiceRoomSelect" name="contractId" required>
+                  <option value="">Chọn phòng</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label for="invoiceMonthInput" class="form-label">Tháng/Năm</label>
+                <input type="month" class="form-control" id="invoiceMonthInput" name="month" value="2025-06" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="roomFeeInput" class="form-label">Tiền phòng (VNĐ)</label>
+                <input type="number" class="form-control" id="roomFeeInput" name="roomFee" required>
+              </div>
+              <div class="col-md-6">
+                <label for="wifiFeeInput" class="form-label">Tiền Wifi (VNĐ)</label>
+                <input type="number" class="form-control" id="wifiFeeInput" name="wifiFee" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="electricityPrevInput" class="form-label">Chỉ số điện cũ (kWh)</label>
+                <input type="number" class="form-control" id="electricityPrevInput" name="electricityPrev" required>
+              </div>
+              <div class="col-md-6">
+                <label for="electricityCurrInput" class="form-label">Chỉ số điện mới (kWh)</label>
+                <input type="number" class="form-control" id="electricityCurrInput" name="electricityCurr" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="electricityUnitPriceInput" class="form-label">Đơn giá điện (VNĐ/kWh)</label>
+                <input type="number" class="form-control" id="electricityUnitPriceInput" name="electricityUnitPrice"
+                  required>
+              </div>
+              <div class="col-md-6">
+                <label for="waterUnitPriceInput" class="form-label">Đơn giá nước (VNĐ/m³)</label>
+                <input type="number" class="form-control" id="waterUnitPriceInput" name="waterUnitPrice" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="waterPrevInput" class="form-label">Chỉ số nước cũ (m³)</label>
+                <input type="number" class="form-control" id="waterPrevInput" name="waterPrev" required>
+              </div>
+              <div class="col-md-6">
+                <label for="waterCurrInput" class="form-label">Chỉ số nước mới (m³)</label>
+                <input type="number" class="form-control" id="waterCurrInput" name="waterCurr" required>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="trashFeeInput" class="form-label">Tiền rác (VNĐ)</label>
+                <input type="number" class="form-control" id="trashFeeInput" name="trashFee" required>
+              </div>
+              <div class="col-md-6">
+                <label for="otherFeeInput" class="form-label">Phí khác (VNĐ)</label>
+                <input type="number" class="form-control" id="otherFeeInput" name="otherFee">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="notesInput" class="form-label">Ghi chú</label>
+              <textarea class="form-control" id="notesInput" name="notes" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+
+          <button type="button" class="btn btn-primary" onclick="createNewInvoice()">
+            <i class="fas fa-plus me-2"></i>Tạo hóa đơn
+          </button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="removeModalBackdrop()">
+            <i class="fas fa-times me-2"></i>Hủy
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
           </button>
         </div>
       </div>
@@ -777,6 +1006,7 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<<<<<<< HEAD
   
   <script>
     // Toast functions
@@ -790,6 +1020,11 @@
       });
       toast.show();
     }
+=======
+  <script th:src="@{/js/payment-management.js}"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
+</body>
+>>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
 
     // Search functionality
     function performSearch() {

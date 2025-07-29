@@ -7,7 +7,7 @@ import java.util.Set;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 
 public interface UtilityRepository extends JpaRepository<Utility, Integer> {
     @Query("SELECT u FROM Utility u ORDER BY u.name ASC")
@@ -21,9 +21,11 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
             
     List<Utility> findUtilitiesWithActivePosts();
 
-    Set<Utility> findByUtilityIdIn(Set<Integer> utilityIds);
-
+    Set<Utility> findByUtilityIdIn(List<Integer> utilityIds);
     Optional<Utility> findByNameIgnoreCase(String name);
+
+    @Query("SELECT u FROM Utility u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+    List<Utility> searchByName(String keyword);
 
     Optional<Utility> findByName(String name);
 }

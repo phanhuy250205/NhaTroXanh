@@ -1,18 +1,19 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Address;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserOwnerRequest;
 import nhatroxanh.com.Nhatroxanh.Model.request.UserRequest;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.itextpdf.io.exceptions.IOException;
 
 import java.util.Optional;
 
@@ -37,8 +38,10 @@ public interface UserService {
      *
      * @param userOwnerRequest Đối tượng chứa thông tin đăng ký của chủ trọ.
      * @return Đối tượng Users sau khi đã được lưu.
+     * @throws java.io.IOException 
      */
-    Users registerOwner(UserOwnerRequest userOwnerRequest);
+    Users registerOwner(UserOwnerRequest userOwnerRequest, MultipartFile frontImage, MultipartFile backImage)
+            throws IOException, java.io.IOException;
 
     /**
      * Tìm người dùng dựa trên username.
@@ -67,6 +70,8 @@ public interface UserService {
 
     Page<Users> getAllCustomers(int page, int size);
 
+    Optional<Users> findByEmail(String email);
+
     Page<Users> getAllOwner(int page, int size);
 
     Page<Users> getFilteredOwners(String keyword, String statusFilter, int page, int size);
@@ -75,5 +80,18 @@ public interface UserService {
 
     Users getById(Integer id);
 
+    void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage);
+    
+
+
     Page<Users> searchAndFilterStaffUsers(int page, int size, String keyword, String status);
+
+
+    Page<Users> getPendingOwners(int page, int size, String search);
+
+    void approveOwner(int id);
+
+    void rejectOwner(int id);
+
+
 }

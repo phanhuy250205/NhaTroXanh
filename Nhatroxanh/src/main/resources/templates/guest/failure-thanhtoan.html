@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head th:replace="~{/layouts/head}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<head>
+    <title>Thanh Toán Thất Bại - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/css/failure-thanhtoan.css}">
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+    <div class="payment-failure-container-guest">
+        <!-- Failure Header -->
+        <div class="payment-failure-header-guest">
+            <div class="payment-failure-icon-wrapper-guest">
+                <i class="fas fa-times-circle payment-failure-icon-guest"></i>
+            </div>
+            <h1 class="payment-failure-title-guest">Thanh Toán Thất Bại!</h1>
+            <p class="payment-failure-subtitle-guest" th:text="${errorMessage ?: 'Giao dịch không thể hoàn tất. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.'}">
+                Giao dịch không thể hoàn tất. Vui lòng thử lại hoặc chọn phương thức thanh toán khác.
+            </p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="payment-content-wrapper-guest">
+            <!-- Transaction Info -->
+            <div class="payment-transaction-info-guest" th:if="${invoiceId}">
+                <div class="payment-info-header-guest">
+                    <h2 class="payment-info-title-guest">
+                        <i class="fas fa-info-circle"></i>
+                        Thông Tin Giao Dịch
+                    </h2>
+                </div>
+                
+                <div class="payment-info-content-guest">
+                    <div class="payment-info-grid-guest">
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-hashtag"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Mã hóa đơn</span>
+                                <span class="payment-info-value-guest" th:text="${invoiceId}">INV-001</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest" th:if="${roomName}">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Phòng</span>
+                                <span class="payment-info-value-guest" th:text="${roomName}">A101</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest" th:if="${month}">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Kỳ thanh toán</span>
+                                <span class="payment-info-value-guest" th:text="${month}">Tháng 12/2024</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest" th:if="${totalAmount}">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Số tiền</span>
+                                <span class="payment-info-value-guest" th:text="${totalAmount}">3,930,000 VNĐ</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Thời gian</span>
+                                <span class="payment-info-value-guest" id="currentTime">--</span>
+                            </div>
+                        </div>
+
+                        <div class="payment-info-item-guest">
+                            <div class="payment-info-icon-guest">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="payment-info-details-guest">
+                                <span class="payment-info-label-guest">Trạng thái</span>
+                                <span class="payment-status-failed-guest">Thất bại</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error Details -->
+            <div class="payment-error-details-guest" th:if="${errorDetails}">
+                <div class="payment-error-header-guest">
+                    <h3 class="payment-error-title-guest">
+                        <i class="fas fa-bug"></i>
+                        Chi Tiết Lỗi
+                    </h3>
+                </div>
+                <div class="payment-error-content-guest">
+                    <p class="payment-error-message-guest" th:text="${errorDetails}">Chi tiết lỗi sẽ hiển thị ở đây</p>
+                </div>
+            </div>
+
+            <!-- Possible Reasons -->
+            <div class="payment-reasons-section-guest">
+                <div class="payment-reasons-header-guest">
+                    <h3 class="payment-reasons-title-guest">
+                        <i class="fas fa-question-circle"></i>
+                        Nguyên Nhân Có Thể
+                    </h3>
+                </div>
+                <div class="payment-reasons-content-guest">
+                    <div class="payment-reason-item-guest">
+                        <div class="payment-reason-icon-guest">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="payment-reason-text-guest">
+                            <h4>Kết nối mạng không ổn định</h4>
+                            <p>Kiểm tra kết nối internet và thử lại</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-reason-item-guest">
+                        <div class="payment-reason-icon-guest">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <div class="payment-reason-text-guest">
+                            <h4>Thông tin thanh toán không hợp lệ</h4>
+                            <p>Kiểm tra số dư tài khoản hoặc thông tin thẻ</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-reason-item-guest">
+                        <div class="payment-reason-icon-guest">
+                            <i class="fas fa-server"></i>
+                        </div>
+                        <div class="payment-reason-text-guest">
+                            <h4>Lỗi hệ thống tạm thời</h4>
+                            <p>Hệ thống đang bảo trì hoặc quá tải</p>
+                        </div>
+                    </div>
+
+                    <div class="payment-reason-item-guest">
+                        <div class="payment-reason-icon-guest">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="payment-reason-text-guest">
+                            <h4>Phiên giao dịch hết hạn</h4>
+                            <p>Thời gian thanh toán đã quá hạn</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="payment-action-section-guest">
+                <!-- <button class="payment-btn-guest payment-btn-primary-guest" th:onclick="'window.location.href=\'/thanh-toan?invoiceId=' + ${invoiceId} + '\''">
+                    <i class="fas fa-redo"></i>
+                    Thử Lại Thanh Toán
+                </button> -->
+                <button class="payment-btn-guest payment-btn-secondary-guest" onclick="window.location.href='/'">
+                    <i class="fas fa-home"></i>
+                    Quay lại Trang chủ
+                </button>
+                <button class="payment-btn-guest payment-btn-outline-guest" onclick="contactSupport()">
+                    <i class="fas fa-headset"></i>
+                    Liên Hệ Hỗ Trợ
+                </button>
+            </div>
+
+            <!-- Support Info -->
+            <div class="payment-support-info-guest">
+                <div class="payment-support-card-guest">
+                    <div class="payment-support-icon-guest">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="payment-support-content-guest">
+                        <h4>Hotline hỗ trợ</h4>
+                        <p><strong>0123.456.789</strong></p>
+                        <span>Hoạt động 24/7</span>
+                    </div>
+                </div>
+
+                <div class="payment-support-card-guest">
+                    <div class="payment-support-icon-guest">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="payment-support-content-guest">
+                        <h4>Email hỗ trợ</h4>
+                        <p><strong>support@nhatroxanh.com</strong></p>
+                        <span>Phản hồi trong 2-4 giờ</span>
+                    </div>
+                </div>
+
+                <div class="payment-support-card-guest">
+                    <div class="payment-support-icon-guest">
+                        <i class="fab fa-facebook-messenger"></i>
+                    </div>
+                    <div class="payment-support-content-guest">
+                        <h4>Chat trực tuyến</h4>
+                        <p><strong>Messenger</strong></p>
+                        <span>Phản hồi ngay lập tức</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <script>
+        // Set current time
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const timeString = now.toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('currentTime').textContent = timeString;
+
+            // Add entrance animations
+            const elements = document.querySelectorAll('.payment-info-item-guest, .payment-reason-item-guest');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = (index * 0.1) + 's';
+                el.classList.add('payment-fade-in-up-guest');
+            });
+        });
+
+        function contactSupport() {
+            // You can customize this to open a support chat, redirect to contact page, etc.
+            alert('Đang chuyển đến trang hỗ trợ...');
+            // window.location.href = '/contact-support';
+        }
+
+        // Auto retry after 30 seconds (optional)
+        let retryCountdown = 30;
+        function startRetryCountdown() {
+            const retryBtn = document.querySelector('.payment-btn-primary-guest');
+            const originalText = retryBtn.innerHTML;
+            
+            const countdown = setInterval(() => {
+                retryBtn.innerHTML = `<i class="fas fa-redo"></i> Thử Lại Thanh Toán (${retryCountdown}s)`;
+                retryCountdown--;
+                
+                if (retryCountdown < 0) {
+                    clearInterval(countdown);
+                    retryBtn.innerHTML = originalText;
+                }
+            }, 1000);
+        }
+
+        // Uncomment to enable auto retry countdown
+        // setTimeout(startRetryCountdown, 2000);
+    </script>
+</body>
+</html>

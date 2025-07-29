@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duyệt Nạp Rút Tiền - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #3498DB;
+            --light-blue: #5DADE2;
+            --dark-blue: #2980B9;
+            --bg-blue: #EBF5FB;
+            --text-blue: #2471A3;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --danger-red: #E74C3C;
+            --light-gray: #F8F9FA;
+            --border-color: #E9ECEF;
+            --shadow-light: 0 2px 10px rgba(52, 152, 219, 0.08);
+            --shadow-medium: 0 4px 20px rgba(52, 152, 219, 0.12);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fbff 0%, #ebf3fd 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .main-container {
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            margin-left: 100px;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        /* Filter Section */
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-blue);
+        }
+
+        .form-control {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-red), #e74c3c);
+            color: white;
+        }
+
+        /* Transaction Table */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-header {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .table-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transaction-table {
+            width: 100%;
+            margin: 0;
+        }
+
+        .transaction-table thead {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .transaction-table th {
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            border: none;
+        }
+
+        .transaction-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 0.9rem;
+        }
+
+        .transaction-table tbody tr:hover {
+            background: var(--bg-blue);
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-approved {
+            background: linear-gradient(135deg, #d4edda, #00b894);
+            color: #155724;
+            border: 1px solid #00b894;
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #f8d7da, #e17055);
+            color: #721c24;
+            border: 1px solid #e17055;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #d1ecf1, #17a2b8);
+            color: #0c5460;
+            border: 1px solid #17a2b8;
+        }
+
+        /* Type Badges */
+        .type-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .type-deposit {
+            background: linear-gradient(135deg, #d4edda, #28a745);
+            color: #155724;
+        }
+
+        .type-withdrawal {
+            background: linear-gradient(135deg, #f8d7da, #dc3545);
+            color: #721c24;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+            border-radius: 16px 16px 0 0;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+        }
+
+        .btn-close {
+            filter: invert(1);
+        }
+
+        /* Pagination */
+        .pagination {
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            color: var(--primary-blue);
+            border: 1px solid var(--border-color);
+            padding: 0.75rem 1rem;
+        }
+
+        .page-link:hover {
+            background-color: var(--bg-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .page-item.active .page-link {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+                margin-left: 0;
+            }
+
+            .header-title {
+                font-size: 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .transaction-table {
+                font-size: 0.8rem;
+            }
+
+            .transaction-table th,
+            .transaction-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-container">
+        <!-- Header Section -->
+        <div class="header-section">
+            <div class="header-content">
+                <h1 class="header-title">
+                    <i class="fas fa-clipboard-check me-3"></i>
+                    Duyệt Nạp Rút Tiền
+                </h1>
+                <p class="header-subtitle">Quản lý và xử lý các yêu cầu nạp rút tiền từ chủ trọ</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${error}">Có lỗi xảy ra</span>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${totalPending != null ? totalPending : 0}">0</div>
+                <div class="stat-label">Tổng chờ duyệt</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${pendingDeposits != null ? pendingDeposits : 0}">0</div>
+                <div class="stat-label">Nạp tiền chờ duyệt</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
+                        <i class="fas fa-minus-circle"></i>
+                    </div>
+                </div>
+                <div class="stat-value" th:text="${pendingWithdrawals != null ? pendingWithdrawals : 0}">0</div>
+                <div class="stat-label">Rút tiền chờ duyệt</div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <form th:action="@{/staff/transactions/search}" method="get">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label class="form-label">Tìm kiếm</label>
+                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" 
+                               placeholder="Tìm theo tên, mô tả...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Loại giao dịch</label>
+                        <select class="form-control" name="type">
+                            <option value="">Tất cả</option>
+                            <option value="DEPOSIT" th:selected="${selectedType == 'DEPOSIT'}">Nạp tiền</option>
+                            <option value="WITHDRAWAL" th:selected="${selectedType == 'WITHDRAWAL'}">Rút tiền</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Trạng thái</label>
+                        <select class="form-control" name="status">
+                            <option value="">Tất cả</option>
+                            <option value="PENDING" th:selected="${selectedStatus == 'PENDING'}">Chờ duyệt</option>
+                            <option value="APPROVED" th:selected="${selectedStatus == 'APPROVED'}">Đã duyệt</option>
+                            <option value="REJECTED" th:selected="${selectedStatus == 'REJECTED'}">Từ chối</option>
+                            <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">Hoàn thành</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                            Tìm kiếm
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Transaction Table -->
+        <div class="table-container">
+            <div class="table-header">
+                <h3 class="table-title">
+                    <i class="fas fa-list"></i>
+                    Danh Sách Giao Dịch
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="transaction-table">
+                    <thead>
+                        <tr>
+                            <th>Mã GD</th>
+                            <th>Chủ trọ</th>
+                            <th>Loại</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="transaction : ${transactions != null ? transactions.content : {}}">
+                            <td>
+                                <strong th:text="${transaction.transactionReference ?: 'N/A'}">TXN123456</strong>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong th:text="${transaction.user != null ? transaction.user.fullname : 'N/A'}">Nguyễn Văn A</strong>
+                                    <br>
+                                    <small class="text-muted" th:text="${transaction.user != null ? transaction.user.phone : 'N/A'}">0123456789</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="type-badge" 
+                                      th:classappend="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'type-deposit' : 'type-withdrawal'">
+                                    <i th:class="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'fas fa-plus' : 'fas fa-minus'"></i>
+                                    <span th:text="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'Nạp tiền' : 'Rút tiền'">Nạp tiền</span>
+                                </span>
+                            </td>
+                            <td>
+                                <strong th:text="${transaction.amount != null ? (#numbers.formatInteger(transaction.amount, 0, 'COMMA') + ' VNĐ') : '0 VNĐ'}">1,000,000 VNĐ</strong>
+                            </td>
+                            <td>
+                                <span class="status-badge" 
+                                      th:classappend="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'status-pending' : 
+                                                     (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'status-approved' : 
+                                                     (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'status-rejected' : 'status-completed'))">
+                                    <i th:class="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'fas fa-clock' : 
+                                                 (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'fas fa-check' : 
+                                                 (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'fas fa-times' : 'fas fa-check-double'))"></i>
+                                    <span th:text="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'Chờ duyệt' : 
+                                                   (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'Đã duyệt' : 
+                                                   (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'Từ chối' : 'Hoàn thành'))">Chờ duyệt</span>
+                                </span>
+                            </td>
+                            <td>
+                                <small th:text="${transaction.createdAt != null ? #temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">15/12/2024 14:30</small>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}" 
+                                            class="btn btn-success btn-sm" 
+                                            th:onclick="'approveTransaction(' + ${transaction.transactionId} + ')'">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}" 
+                                            class="btn btn-danger btn-sm" 
+                                            th:onclick="'rejectTransaction(' + ${transaction.transactionId} + ')'">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-sm" 
+                                            th:onclick="'viewTransactionDetail(' + ${transaction.transactionId} + ')'">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <!-- Fallback row when no data -->
+                        <tr th:if="${transactions == null || transactions.content == null || transactions.content.empty}">
+                            <td colspan="7" class="text-center text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Không có giao dịch nào
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav th:if="${transactions != null && transactions.totalPages > 1}">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${transactions.first} ? 'disabled'">
+                    <a class="page-link" th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number - 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                
+                <li th:each="pageNum : ${#numbers.sequence(0, transactions.totalPages - 1)}" 
+                    class="page-item" 
+                    th:classappend="${pageNum == transactions.number} ? 'active'">
+                    <a class="page-link" 
+                       th:href="@{/staff/transactions/duyet-nap-rut(page=${pageNum}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}"
+                       th:text="${pageNum + 1}">1</a>
+                </li>
+                
+                <li class="page-item" th:classappend="${transactions.last} ? 'disabled'">
+                    <a class="page-link" th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number + 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Approval Modal -->
+    <div class="modal fade" id="approvalModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Xác nhận duyệt giao dịch
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn duyệt giao dịch này không?</p>
+                    <div class="form-group">
+                        <label for="approvalNote">Ghi chú (tùy chọn):</label>
+                        <textarea class="form-control" id="approvalNote" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-success" onclick="confirmApproval()">
+                        <i class="fas fa-check"></i> Duyệt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal fade" id="rejectionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Từ chối giao dịch
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Vui lòng nhập lý do từ chối giao dịch:</p>
+                    <div class="form-group">
+                        <label for="rejectionReason">Lý do từ chối *:</label>
+                        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Nhập lý do từ chối..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmRejection()">
+                        <i class="fas fa-times"></i> Từ chối
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Chi tiết giao dịch
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="transactionDetailContent">
+                    <!-- Content will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+    <script>
+        let currentTransactionId = null;
+
+        function approveTransaction(transactionId) {
+            currentTransactionId = transactionId;
+            const modal = new bootstrap.Modal(document.getElementById('approvalModal'));
+            modal.show();
+        }
+
+        function rejectTransaction(transactionId) {
+            currentTransactionId = transactionId;
+            const modal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+            modal.show();
+        }
+
+        function confirmApproval() {
+            const note = document.getElementById('approvalNote').value;
+            
+            fetch(`/staff/transactions/approve/${currentTransactionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `approvalNote=${encodeURIComponent(note)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Giao dịch đã được duyệt thành công!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi duyệt giao dịch!');
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
+        }
+
+        function confirmRejection() {
+            const reason = document.getElementById('rejectionReason').value;
+            
+            if (!reason.trim()) {
+                alert('Vui lòng nhập lý do từ chối!');
+                return;
+            }
+            
+            fetch(`/staff/transactions/reject/${currentTransactionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `rejectionReason=${encodeURIComponent(reason)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Giao dịch đã được từ chối!');
+                    location.reload();
+                } else {
+                    alert('Có lỗi xảy ra: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi từ chối giao dịch!');
+            });
+
+            bootstrap.Modal.getInstance(document.getElementById('rejectionModal')).hide();
+        }
+
+        function viewTransactionDetail(transactionId) {
+            fetch(`/staff/transactions/detail/${transactionId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const transaction = data.transaction;
+                    let content = '<div class="row">';
+                    content += '<div class="col-md-6">';
+                    content += '<h6>Thông tin giao dịch</h6>';
+                    content += '<p><strong>Mã giao dịch:</strong> ' + (transaction.transactionReference || 'N/A') + '</p>';
+                    content += '<p><strong>Loại:</strong> ' + (transaction.transactionType === 'DEPOSIT' ? 'Nạp tiền' : 'Rút tiền') + '</p>';
+                    content += '<p><strong>Số tiền:</strong> ' + new Intl.NumberFormat('vi-VN').format(transaction.amount || 0) + ' VNĐ</p>';
+                    content += '<p><strong>Trạng thái:</strong> ' + getStatusText(transaction.status) + '</p>';
+                    content += '<p><strong>Ngày tạo:</strong> ' + new Date(transaction.createdAt).toLocaleString('vi-VN') + '</p>';
+                    content += '</div>';
+                    content += '<div class="col-md-6">';
+                    content += '<h6>Thông tin người dùng</h6>';
+                    content += '<p><strong>Tên:</strong> ' + (transaction.user ? transaction.user.fullname : 'N/A') + '</p>';
+                    content += '<p><strong>Điện thoại:</strong> ' + (transaction.user ? transaction.user.phone : 'N/A') + '</p>';
+                    content += '<p><strong>Email:</strong> ' + (transaction.user && transaction.user.email ? transaction.user.email : 'N/A') + '</p>';
+                    content += '</div>';
+                    content += '</div>';
+                    
+                    if (transaction.bankName) {
+                        content += '<div class="row mt-3">';
+                        content += '<div class="col-12">';
+                        content += '<h6>Thông tin ngân hàng</h6>';
+                        content += '<p><strong>Ngân hàng:</strong> ' + transaction.bankName + '</p>';
+                        content += '<p><strong>Số tài khoản:</strong> ' + (transaction.accountNumber || 'N/A') + '</p>';
+                        content += '<p><strong>Chủ tài khoản:</strong> ' + (transaction.accountHolderName || 'N/A') + '</p>';
+                        content += '</div>';
+                        content += '</div>';
+                    }
+                    
+                    if (transaction.description) {
+                        content += '<div class="row mt-3">';
+                        content += '<div class="col-12">';
+                        content += '<h6>Mô tả</h6>';
+                        content += '<p>' + transaction.description + '</p>';
+                        content += '</div>';
+                        content += '</div>';
+                    }
+                    
+                    document.getElementById('transactionDetailContent').innerHTML = content;
+                    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                    modal.show();
+                } else {
+                    alert('Không thể lấy thông tin giao dịch!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi lấy thông tin giao dịch!');
+            });
+        }
+
+        function getStatusText(status) {
+            switch(status) {
+                case 'PENDING': return 'Chờ duyệt';
+                case 'APPROVED': return 'Đã duyệt';
+                case 'REJECTED': return 'Từ chối';
+                case 'COMPLETED': return 'Hoàn thành';
+                default: return status;
+            }
+        }
+    </script>
+</body>
+</html>

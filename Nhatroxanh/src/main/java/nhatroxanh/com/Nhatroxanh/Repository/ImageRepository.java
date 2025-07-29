@@ -5,9 +5,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 
 @Repository
 public interface ImageRepository extends JpaRepository<Image, Integer> {
@@ -18,4 +18,7 @@ public interface ImageRepository extends JpaRepository<Image, Integer> {
     void deleteByPost(Post post);
 
     List<Image> findByRoom(Rooms room);
+    List<Image> findByUserCccdId(Long userCccdId);
+
+    List<Image> findByUserCccdIdAndType(Long userCccdId, Image.ImageType type);
 }

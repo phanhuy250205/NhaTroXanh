@@ -9,7 +9,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
 
 public interface ReviewRepository extends JpaRepository<Review, Integer> {
     List<Review> findByPostPostIdOrderByCreatedAtDesc(Integer postId);
@@ -40,4 +41,6 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
 
     @Query("SELECT r FROM Review r WHERE r.room.hostel.id = :hostelId")
     List<Review> getReviewsByHostelId(@Param("hostelId") Integer hostelId);
+
+    boolean existsByContract(Contracts contract);
 }

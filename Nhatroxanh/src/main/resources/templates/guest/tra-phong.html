@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/layouts/head :: head}">
+    <title>Trả Phòng | Nhà Trọ Xanh</title>
+</head>
+<style>
+    .return-room-page {
+        --rr-primary: #4361ee;
+        --rr-primary-light: #e6f3ff;
+        --rr-secondary: #3a0ca3;
+        --rr-success: #4cc9f0;
+        --rr-warning: #f8961e;
+        --rr-danger: #f72585;
+        --rr-light: #f8f9fa;
+        --rr-dark: #212529;
+        --rr-border: #dee2e6;
+        --rr-radius: 12px;
+        --rr-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        --rr-font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
+
+    /* RESET CỤC BỘ */
+    .return-room-page .rr-container * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: var(--rr-font);
+    }
+
+    /* LAYOUT CHÍNH */
+    .return-room-page .rr-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+        min-height: calc(100vh - 180px);
+    }
+
+    /* CARD STYLES */
+    .return-room-page .rr-card {
+        background: white;
+        border-radius: var(--rr-radius);
+        box-shadow: var(--rr-shadow);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        border: 1px solid var(--rr-border);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .return-room-page .rr-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+    }
+
+    .return-room-page .rr-header {
+        background: linear-gradient(135deg, var(--rr-primary), var(--rr-secondary));
+        color: white;
+        padding: 1.5rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .return-room-page .rr-body {
+        padding: 2rem;
+    }
+
+    /* THÔNG TIN PHÒNG */
+    .return-room-page .rr-room-info {
+        background-color: var(--rr-primary-light);
+        border-left: 4px solid var(--rr-primary);
+        border-radius: var(--rr-radius);
+        padding: 1.75rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .return-room-page .rr-room-info::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: radial-gradient(circle, rgba(67, 97, 238, 0.1) 0%, rgba(67, 97, 238, 0) 70%);
+    }
+
+    .return-room-page .rr-room-info h4 {
+        color: var(--rr-primary);
+        margin-bottom: 1.5rem;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: relative;
+    }
+
+    .return-room-page .rr-room-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.25rem;
+    }
+
+    .return-room-page .rr-room-detail {
+        margin-bottom: 0.5rem;
+    }
+
+    .return-room-page .rr-detail-label {
+        color: #6c757d;
+        font-size: 0.875rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+
+    .return-room-page .rr-detail-value {
+        color: var(--rr-dark);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .return-room-page .rr-price-highlight {
+        color: var(--rr-warning);
+        font-weight: 700;
+        font-size: 1.05rem;
+    }
+
+    /* FORM STYLES */
+    .return-room-page .rr-form-group {
+        margin-bottom: 1.75rem;
+    }
+
+    .return-room-page .rr-form-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+    .return-room-page .rr-form-control {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        border: 1px solid var(--rr-border);
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background-color: white;
+    }
+
+    .return-room-page .rr-form-control:focus {
+        border-color: var(--rr-primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        outline: none;
+    }
+
+    .return-room-page .rr-form-textarea {
+        min-height: 120px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* BUTTONS */
+    .return-room-page .rr-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 1.75rem;
+        border-top: 1px solid var(--rr-border);
+    }
+
+    .return-room-page .rr-btn {
+        padding: 0.875rem 1.75rem;
+        border-radius: 0.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.95rem;
+    }
+
+    .return-room-page .rr-btn-primary {
+        background: linear-gradient(135deg, var(--rr-primary), var(--rr-secondary));
+        color: white;
+    }
+
+    .return-room-page .rr-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(67, 97, 238, 0.3);
+    }
+
+    .return-room-page .rr-btn-secondary {
+        background: white;
+        border: 1px solid var(--rr-border);
+        color: #6c757d;
+    }
+
+    .return-room-page .rr-btn-secondary:hover {
+        background: #f8f9fa;
+        color: #495057;
+        border-color: #ced4da;
+    }
+
+    /* TOAST NOTIFICATION */
+    .return-room-page .rr-toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 350px;
+        width: 100%;
+    }
+
+    .return-room-page .rr-toast-item {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        opacity: 1;
+        transition: opacity 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .return-room-page .rr-toast-item::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .return-room-page .rr-toast-success {
+        background: var(--rr-success);
+        color: white;
+    }
+
+    .return-room-page .rr-toast-error {
+        background: var(--rr-danger);
+        color: white;
+    }
+
+    .return-room-page .rr-toast-icon {
+        font-size: 1.25rem;
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .return-room-page .rr-toast-message {
+        flex-grow: 1;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .return-room-page .rr-toast-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.25rem;
+        cursor: pointer;
+        margin-left: 1rem;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .return-room-page .rr-toast-close:hover {
+        opacity: 1;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        .return-room-page .rr-container {
+            padding: 0 0.75rem;
+            margin: 1rem auto;
+        }
+
+        .return-room-page .rr-body {
+            padding: 1.5rem;
+        }
+
+        .return-room-page .rr-room-details {
+            grid-template-columns: 1fr;
+        }
+
+        .return-room-page .rr-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .return-room-page .rr-btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    /* ANIMATIONS */
+    @keyframes rrFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .return-room-page .rr-card {
+        animation: rrFadeIn 0.5s ease-out;
+    }
+
+    /* FIX FONT AWESOME */
+    .return-room-page .fas,
+    .return-room-page .far,
+    .return-room-page .fab {
+        font-family: 'Font Awesome 6 Free' !important;
+        font-weight: 900 !important;
+    }
+
+    /* Đặc biệt cho các icon trong form */
+    .return-room-page .rr-header i,
+    .return-room-page .rr-room-info i,
+    .return-room-page .rr-form-label i {
+        font-family: 'Font Awesome 6 Free' !important;
+        font-weight: 900 !important;
+        font-style: normal;
+    }
+</style>
+
+<body class="return-room-page">
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <!-- Toast Notifications -->
+    <div class="rr-toast">
+        <div th:if="${successMessage}" class="rr-toast-item rr-toast-success">
+            <i class="fas fa-check-circle rr-toast-icon"></i>
+            <span class="rr-toast-message" th:text="${successMessage}"></span>
+            <button class="rr-toast-close" aria-label="Đóng">×</button>
+        </div>
+        <div th:if="${errorMessage}" class="rr-toast-item rr-toast-error">
+            <i class="fas fa-exclamation-circle rr-toast-icon"></i>
+            <span class="rr-toast-message" th:text="${errorMessage}"></span>
+            <button class="rr-toast-close" aria-label="Đóng">×</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="rr-container">
+        <div class="rr-card">
+            <div class="rr-header">
+                <i class="fas fa-sign-out-alt fa-fw"></i>
+                <span>Yêu Cầu Trả Phòng</span>
+            </div>
+
+            <div class="rr-body">
+                <div class="rr-room-info">
+                    <h4>
+                        <i class="fas fa-door-open"></i>
+                        <span>Thông Tin Phòng Đang Thuê</span>
+                    </h4>
+
+                    <div class="rr-room-details">
+                        <div class="rr-room-detail">
+                            <div class="rr-detail-label">Số phòng:</div>
+                            <div class="rr-detail-value" th:text="${contract.room.namerooms}"></div>
+                        </div>
+
+                        <div class="rr-room-detail">
+                            <div class="rr-detail-label">Loại phòng:</div>
+                            <div class="rr-detail-value" th:text="${contract.room.category.name}"></div>
+                        </div>
+
+                        <div class="rr-room-detail">
+                            <div class="rr-detail-label">Ngày bắt đầu:</div>
+                            <div class="rr-detail-value" th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}">
+                            </div>
+                        </div>
+
+                        <div class="rr-room-detail">
+                            <div class="rr-detail-label">Ngày kết thúc:</div>
+                            <div class="rr-detail-value" th:text="${#dates.format(contract.endDate, 'dd/MM/yyyy')}">
+                            </div>
+                        </div>
+
+                        <div class="rr-room-detail">
+                            <div class="rr-detail-label">Giá thuê:</div>
+                            <div class="rr-detail-value rr-price-highlight"
+                                th:text="${#numbers.formatDecimal(contract.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng'}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form class="rr-form" method="POST"
+                    th:action="@{/khach-thue/tra-phong/{id}(id=${contract.contractId})}">
+                    <div class="rr-form-group">
+                        <label class="rr-form-label" for="returnDate">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>Ngày trả phòng</span>
+                        </label>
+                        <input type="date" id="returnDate" name="returnDate" class="rr-form-control" required
+                            th:min="${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}">
+                    </div>
+
+                    <div class="rr-form-group">
+                        <label class="rr-form-label" for="returnReason">
+                            <i class="fas fa-comment-dots"></i>
+                            <span>Lý do trả phòng</span>
+                        </label>
+                        <textarea id="returnReason" name="returnReason" class="rr-form-control rr-form-textarea"
+                            placeholder="Nhập lý do trả phòng (nếu có)..."></textarea>
+                    </div>
+
+                    <div class="rr-actions">
+                        <a th:href="@{/khach-thue/quan-ly-thue-tra}" class="rr-btn rr-btn-secondary text-decoration-none">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Quay lại</span>
+                        </a>
+                        <button type="submit" class="rr-btn rr-btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>Gửi yêu cầu</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <script>
+        // Toast notification handling
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close toast when click X button
+            document.querySelectorAll('.rr-toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.rr-toast-item');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+
+            // Auto-hide toasts after 5 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.rr-toast-item').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 5000);
+
+            // Set minimum date for return date (today)
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('returnDate').min = today;
+            document.getElementById('returnDate').valueAsDate = new Date();
+        });
+    </script>
+</body>
+
+</html>

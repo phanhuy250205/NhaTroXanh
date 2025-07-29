@@ -1,7 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.UnregisteredTenants;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
 
 import java.util.Optional;
 
@@ -9,4 +10,6 @@ public interface UnregisteredTenantsRepository  extends JpaRepository<Unregister
 
     Optional<UnregisteredTenants> findByCccdNumber(String cccdNumber);
     Optional<UnregisteredTenants> findByPhone(String phone);
+    boolean existsByPhone(String phone);
+    boolean existsByCccdNumber(String cccdNumber);
 }

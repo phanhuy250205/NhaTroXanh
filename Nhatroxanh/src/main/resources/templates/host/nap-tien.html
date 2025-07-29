@@ -1,0 +1,1823 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nạp Tiền Tài Khoản - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-blue: #3498DB;
+            --light-blue: #5DADE2;
+            --dark-blue: #2980B9;
+            --bg-blue: #EBF5FB;
+            --text-blue: #2471A3;
+            --hover-blue: #AED6F1;
+            --success-green: #27AE60;
+            --warning-orange: #F39C12;
+            --danger-red: #E74C3C;
+            --light-gray: #F8F9FA;
+            --border-color: #E9ECEF;
+            --shadow-light: 0 2px 10px rgba(52, 152, 219, 0.08);
+            --shadow-medium: 0 4px 20px rgba(52, 152, 219, 0.12);
+            --shadow-heavy: 0 8px 30px rgba(52, 152, 219, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f8fbff 0%, #ebf3fd 100%);
+            color: #2c3e50;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .main-container-host {
+            /* max-width: 1400px; */
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            margin-left: 100px;
+        }
+
+        /* Header Section */
+        .header-section-host {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--light-blue) 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section-host::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(50%, -50%);
+        }
+
+        .header-section-host::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 150px;
+            height: 150px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            transform: translate(-50%, 50%);
+        }
+
+        .header-content-host {
+            position: relative;
+            z-index: 2;
+        }
+
+        .header-title-host {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-subtitle-host {
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .breadcrumb-nav-host {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb-nav-host a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .breadcrumb-nav-host a:hover {
+            color: white;
+        }
+
+        /* Main Content Grid */
+        .content-grid-host {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Left Column */
+        .left-column-host {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Right Column - Sidebar */
+        .right-column-host {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        /* Card Styles */
+        .card-host {
+            background: white;
+            border-radius: 16px;
+            border: none;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--primary-blue);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card-host:hover {
+            box-shadow: var(--shadow-medium);
+            transform: translateY(-2px);
+        }
+
+        .card-header-host {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .card-title-host {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-blue);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-body-host {
+            padding: 1.5rem;
+        }
+
+        .info-item-host {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .info-item-host:hover {
+            background: white;
+            box-shadow: var(--shadow-light);
+        }
+
+        .info-icon-host {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .info-content-host h6 {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .info-content-host p {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-blue);
+        }
+
+        /* Balance Display */
+        .balance-display-host {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--bg-blue), white);
+            border-radius: 15px;
+            border: 2px solid var(--primary-blue);
+            margin-bottom: 1.5rem;
+        }
+
+        .balance-label-host {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .balance-amount-host {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .balance-status-host {
+            font-size: 0.8rem;
+            color: var(--success-green);
+            font-weight: 500;
+        }
+
+        /* Top-up Amount Selection */
+        .amount-selection-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .amount-option-host {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .amount-option-host:hover {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, white 0%, var(--bg-blue) 100%);
+            transform: translateY(-2px);
+        }
+
+        .amount-option-host.active-host {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--bg-blue) 0%, white 100%);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .amount-value-host {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            margin-bottom: 0.25rem;
+        }
+
+        .amount-label-host {
+            font-size: 0.75rem;
+            color: #6c757d;
+        }
+
+        .amount-bonus-host {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--warning-orange);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        /* Custom Amount Input */
+        .custom-amount-host {
+            margin-bottom: 1.5rem;
+        }
+
+        .amount-input-host {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .amount-input-host:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        /* Payment Methods */
+        .payment-methods-host {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .payment-option-host {
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: white;
+        }
+
+        .payment-option-host:hover {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, white 0%, var(--bg-blue) 100%);
+            transform: translateX(5px);
+        }
+
+        .payment-option-host.active-host {
+            border-color: var(--primary-blue);
+            background: linear-gradient(135deg, var(--bg-blue) 0%, white 100%);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .payment-header-host {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .payment-radio-host {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--primary-blue);
+        }
+
+        .payment-icon-host {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+        }
+
+        .payment-info-host h5 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            color: var(--text-blue);
+        }
+
+        .payment-info-host p {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin: 0;
+        }
+
+        /* Wallet Options */
+        .wallet-options-host {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(52, 152, 219, 0.05);
+            border-radius: 8px;
+            border: 1px dashed var(--primary-blue);
+            animation: slideDown 0.3s ease;
+        }
+
+        .wallet-grid-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .wallet-item-host {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-item-host:hover {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-light);
+        }
+
+        .wallet-item-host.active-host {
+            border-color: var(--primary-blue);
+            background: var(--bg-blue);
+        }
+
+        .wallet-logo-host {
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        /* Transaction History */
+        .history-table-host {
+            width: 100%;
+            margin: 0;
+        }
+
+        .history-table-host thead {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .history-table-host th {
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-align: left;
+            border: none;
+        }
+
+        .history-table-host td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f3f4;
+            font-size: 0.9rem;
+        }
+
+        .history-table-host tbody tr:hover {
+            background: var(--bg-blue);
+        }
+
+        /* Status Badge */
+        .status-badge-host {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-success-host {
+            background: linear-gradient(135deg, #d4edda, #00b894);
+            color: #155724;
+            border: 1px solid #00b894;
+        }
+
+        .status-pending-host {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-failed-host {
+            background: linear-gradient(135deg, #f8d7da, #e17055);
+            color: #721c24;
+            border: 1px solid #e17055;
+        }
+
+        /* Action Buttons */
+        .action-buttons-host {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-host {
+            padding: 0.75rem 2rem;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary-host {
+            background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));
+            color: white;
+        }
+
+        .btn-primary-host:hover {
+            background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(52, 152, 219, 0.3);
+        }
+
+        .btn-outline-host {
+            background: white;
+            color: var(--primary-blue);
+            border: 2px solid var(--primary-blue);
+        }
+
+        .btn-outline-host:hover {
+            background: var(--primary-blue);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-success-host {
+            background: linear-gradient(135deg, var(--success-green), #2ecc71);
+            color: white;
+        }
+
+        /* Loading Animation */
+        .loading-host {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        /* Form Controls */
+        .form-group-host {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-label-host {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-blue);
+        }
+
+        .form-control-host {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control-host:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            outline: none;
+        }
+
+        /* Quick Actions */
+        .quick-actions-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quick-action-host {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-action-host:hover {
+            border-color: var(--primary-blue);
+            box-shadow: var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        .quick-action-icon-host {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .content-grid-host {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .right-column-host {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container-host {
+                padding: 1rem;
+            }
+
+            .header-title-host {
+                font-size: 1.5rem;
+            }
+
+            .amount-selection-host {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .wallet-grid-host {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons-host {
+                flex-direction: column;
+            }
+
+            .btn-host {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .balance-amount-host {
+                font-size: 1.5rem;
+            }
+
+            .quick-actions-host {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header-section-host {
+                padding: 1.5rem;
+            }
+
+            .card-body-host {
+                padding: 1rem;
+            }
+
+            .payment-option-host {
+                padding: 1rem;
+            }
+
+            .amount-selection-host {
+                grid-template-columns: 1fr;
+            }
+
+            .balance-amount-host {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Additional Styles for Host-specific features */
+        .revenue-stats-host {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card-host {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card-host:hover {
+            box-shadow: var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        .stat-icon-host {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .stat-value-host {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label-host {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{/layouts/sidebar-host}"></div>
+    <div class="main-container-host">
+        <!-- Header Section -->
+        <div class="header-section-host">
+            <div class="header-content-host">
+                <h1 class="header-title-host">
+                    <i class="fas fa-wallet me-3"></i>
+                    Nạp Tiền Tài Khoản
+                </h1>
+                <p class="header-subtitle-host">Quản lý tài chính và nạp tiền vào tài khoản chủ trọ</p>
+                <!-- <div class="breadcrumb-nav-host">
+                    <a href="/"><i class="fas fa-home"></i> Trang chủ</a>
+                    <span class="mx-2">/</span>
+                    <a href="/dashboard">Dashboard</a>
+                    <span class="mx-2">/</span>
+                    <span>Nạp tiền</span>
+                </div> -->
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid-host">
+            <!-- Left Column -->
+            <div class="left-column-host">
+                <!-- Account Information
+                <div class="card-host account-info-card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-user-tie"></i>
+                            Thông Tin Tài Khoản
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="account-info-grid-host">
+                            <div class="info-item-host">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="info-content-host">
+                                    <h6>Chủ tài khoản</h6>
+                                    <p>Nguyễn Văn A</p>
+                                </div>
+                            </div>
+                            <div class="info-item-host">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
+                                    <i class="fas fa-id-card"></i>
+                                </div>
+                                <div class="info-content-host">
+                                    <h6>Mã tài khoản</h6>
+                                    <p>HOST001234</p>
+                                </div>
+                            </div>
+                            <div class="info-item-host">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
+                                    <i class="fas fa-building"></i>
+                                </div>
+                                <div class="info-content-host">
+                                    <h6>Số phòng quản lý</h6>
+                                    <p>12 phòng</p>
+                                </div>
+                            </div>
+                            <div class="info-item-host">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="info-content-host">
+                                    <h6>Ngày tham gia</h6>
+                                    <p>15/03/2023</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+
+                <!-- Top-up Amount Selection -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-money-bill-wave"></i>
+                            Chọn Số Tiền Nạp
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="amount-selection-host">
+                            <div class="amount-option-host" onclick="selectAmount(100000)">
+                                <div class="amount-value-host">100,000 VNĐ</div>
+                                <div class="amount-label-host">Cơ bản</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(500000)">
+                                <div class="amount-value-host">500,000 VNĐ</div>
+                                <div class="amount-label-host">Phổ biến</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(1000000)">
+                                <div class="amount-value-host">1,000,000 VNĐ</div>
+                                <div class="amount-label-host">Tiết kiệm</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(2000000)">
+                                <div class="amount-value-host">2,000,000 VNĐ</div>
+                                <div class="amount-label-host">Ưu đãi</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(5000000)">
+                                <div class="amount-value-host">5,000,000 VNĐ</div>
+                                <div class="amount-label-host">VIP</div>
+                            </div>
+                            <div class="amount-option-host" onclick="selectAmount(10000000)">
+                                <div class="amount-value-host">10,000,000 VNĐ</div>
+                                <div class="amount-label-host">Premium</div>
+                            </div>
+                        </div>
+
+                        <div class="custom-amount-host">
+                            <label class="form-label-host">Hoặc nhập số tiền tùy chỉnh:</label>
+                            <input type="number" class="amount-input-host" id="customAmount" placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-credit-card"></i>
+                            Phương Thức Thanh Toán
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="payment-methods-host">
+                            <!-- Bank Transfer -->
+                            <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
+                                <div class="payment-header-host">
+                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank" class="payment-radio-host">
+                                    <div class="payment-icon-host">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="payment-info-host">
+                                        <h5>Chuyển Khoản Ngân Hàng</h5>
+                                        <p>Chuyển khoản trực tiếp từ tài khoản ngân hàng</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- VietQR -->
+                            <div class="payment-option-host" onclick="selectPaymentMethod('vietqr')">
+                                <div class="payment-header-host">
+                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr" class="payment-radio-host">
+                                    <div class="payment-icon-host">
+                                        <i class="fas fa-qrcode"></i>
+                                    </div>
+                                    <div class="payment-info-host">
+                                        <h5>VietQR</h5>
+                                        <p>Thanh toán nhanh chóng qua mã QR ngân hàng</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Credit Card -->
+                            <!-- <div class="payment-option-host" onclick="selectPaymentMethod('card')">
+                                <div class="payment-header-host">
+                                    <input type="radio" name="payment_method_host" id="card-host" value="card" class="payment-radio-host">
+                                    <div class="payment-icon-host">
+                                        <i class="fas fa-credit-card"></i>
+                                    </div>
+                                    <div class="payment-info-host">
+                                        <h5>Thẻ Tín Dụng/Ghi Nợ</h5>
+                                        <p>Thanh toán bằng thẻ Visa, MasterCard, JCB</p>
+                                    </div>
+                                </div>
+                            </div> -->
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons-host">
+                            <button class="btn-host btn-primary-host" onclick="processTopup()" id="topupBtn-host">
+                                <i class="fas fa-plus-circle"></i>
+                                Nạp Tiền Ngay
+                            </button>
+                            <a th:href="@{/host/dashboard}" class="btn-host btn-outline-host">
+                                <i class="fas fa-arrow-left"></i>
+                                Quay Lại
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Sidebar -->
+            <div class="right-column-host">
+                <!-- Current Balance -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-piggy-bank"></i>
+                            Số Dư Hiện Tại
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="balance-display-host">
+                            <div class="balance-label-host">Số dư tài khoản</div>
+                            <div class="balance-amount-host" id="currentBalance-host" 
+                                 th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ</div>
+                            <div class="balance-status-host">
+                                <i class="fas fa-check-circle"></i>
+                                Tài khoản hoạt động bình thường
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                
+
+                <!-- Quick Actions -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-bolt"></i>
+                            Thao Tác Nhanh
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="quick-actions-host">
+                            <div class="quick-action-host" onclick="viewTransactionHistory()">
+                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Lịch sử giao dịch</h6>
+                                    <p class="mb-0 text-muted small">Xem chi tiết các giao dịch</p>
+                                </div>
+                            </div>
+                            <div class="quick-action-host" onclick="downloadStatement()">
+                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Tải sao kê</h6>
+                                    <p class="mb-0 text-muted small">Xuất báo cáo tài chính</p>
+                                </div>
+                            </div>
+                            <div class="quick-action-host" onclick="setAutoTopup()">
+                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
+                                    <i class="fas fa-sync-alt"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Nạp tiền tự động</h6>
+                                    <p class="mb-0 text-muted small">Thiết lập nạp tiền định kỳ</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Info -->
+                <div class="card-host">
+                    <div class="card-header-host">
+                        <h3 class="card-title-host">
+                            <i class="fas fa-headset"></i>
+                            Hỗ Trợ Khách Hàng
+                        </h3>
+                    </div>
+                    <div class="card-body-host">
+                        <div class="d-flex flex-column gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
+                                    <i class="fas fa-phone"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Hotline 24/7</h6>
+                                    <p class="mb-0 text-muted small">1900.1234 (miễn phí)</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
+                                    <i class="fas fa-envelope"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Email hỗ trợ</h6>
+                                    <p class="mb-0 text-muted small">support@phongtro.com</p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22); width: 35px; height: 35px;">
+                                    <i class="fas fa-comments"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Chat trực tuyến</h6>
+                                    <p class="mb-0 text-muted small">Hỗ trợ tức thì 8:00 - 22:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="card-host">
+            <div class="card-header-host">
+                <h3 class="card-title-host">
+                    <i class="fas fa-history"></i>
+                    Lịch Sử Nạp Tiền Gần Đây
+                </h3>
+            </div>
+            <div class="card-body-host">
+                <div class="table-responsive">
+                    <table class="history-table-host">
+                        <thead>
+                            <tr>
+                                <th>Ngày giao dịch</th>
+                                <th>Mã giao dịch</th>
+                                <th>Số tiền</th>
+                                <th>Phương thức</th>
+                                <th>Trạng thái</th>
+                                <th>Ghi chú</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="deposit : ${recentDeposits}" th:if="${recentDeposits != null and !recentDeposits.empty}">
+                                <td>
+                                    <strong th:text="${#temporals.format(deposit.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30</strong>
+                                </td>
+                                <td th:text="${deposit.transactionReference}">TXN001234567</td>
+                                <td>
+                                    <strong style="color: var(--success-green);" 
+                                            th:text="'+' + ${#numbers.formatInteger(deposit.amount, 0, 'COMMA')} + ' VNĐ'">+1,000,000 VNĐ</strong>
+                                </td>
+                                <td>
+                                    <i class="fas fa-mobile-alt text-primary me-1" th:if="${deposit.paymentMethod == 'ewallet'}"></i>
+                                    <i class="fas fa-university text-primary me-1" th:if="${deposit.paymentMethod == 'bank'}"></i>
+                                    <i class="fas fa-credit-card text-primary me-1" th:if="${deposit.paymentMethod == 'card'}"></i>
+                                    <span th:text="${deposit.paymentMethod == 'ewallet'} ? 'Ví điện tử' : 
+                                                   (${deposit.paymentMethod == 'bank'} ? 'Ngân hàng' : 'Thẻ tín dụng')">VNPay</span>
+                                </td>
+                                <td>
+                                    <span class="status-badge-host" 
+                                          th:classappend="${deposit.status.name() == 'COMPLETED'} ? 'status-success-host' : 
+                                                         (${deposit.status.name() == 'PENDING'} ? 'status-pending-host' : 'status-failed-host')">
+                                        <i th:class="${deposit.status.name() == 'COMPLETED'} ? 'fas fa-check' : 
+                                                     (${deposit.status.name() == 'PENDING'} ? 'fas fa-clock' : 'fas fa-times')"></i>
+                                        <span th:text="${deposit.status.name() == 'COMPLETED'} ? 'Thành công' : 
+                                                       (${deposit.status.name() == 'PENDING'} ? 'Đang xử lý' : 'Thất bại')">Thành công</span>
+                                    </span>
+                                </td>
+                                <td th:text="${deposit.description ?: 'Nạp tiền thành công'}">Nạp tiền thành công</td>
+                            </tr>
+                            <!-- Fallback row when no data -->
+                            <tr th:if="${recentDeposits == null or recentDeposits.empty}">
+                                <td colspan="6" class="text-center text-muted">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Chưa có giao dịch nạp tiền nào
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+    <script>
+        let selectedAmount = 0;
+        let selectedPaymentMethod = '';
+        let selectedWallet = '';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            updateBalanceDisplay();
+        });
+
+        function selectAmount(amount) {
+            selectedAmount = amount;
+            
+            // Remove active class from all amount options
+            document.querySelectorAll('.amount-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            // Add active class to selected amount
+            event.currentTarget.classList.add('active-host');
+            
+            // Clear custom amount input
+            document.getElementById('customAmount').value = '';
+            
+            updateSummary();
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            
+            // Remove active class from all payment methods
+            document.querySelectorAll('.payment-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            // Add active class to selected method
+            event.currentTarget.classList.add('active-host');
+            
+            // Check the radio button
+            document.getElementById(method + '-host').checked = true;
+            
+        }
+
+        function selectWallet(wallet) {
+            event.stopPropagation();
+            selectedWallet = wallet;
+            
+            // Remove active class from all wallet options
+            document.querySelectorAll('.wallet-item-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            // Add active class to selected wallet
+            event.currentTarget.classList.add('active-host');
+            
+            // Check the radio button
+            document.getElementById(wallet + '-host').checked = true;
+        }
+
+        function updateSummary() {
+            // Update any summary displays if needed
+            console.log('Selected amount:', selectedAmount);
+        }
+
+        function updateBalanceDisplay() {
+            // Get current balance from server-side rendered data
+            const balanceElement = document.getElementById('currentBalance-host');
+            const currentBalanceText = balanceElement.textContent;
+            // Balance is already formatted by Thymeleaf, no need to reformat
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(amount).replace('₫', 'VNĐ');
+        }
+
+        function processTopup() {
+            const customAmount = document.getElementById('customAmount').value;
+            const finalAmount = customAmount ? parseInt(customAmount) : selectedAmount;
+            const topupBtn = document.getElementById('topupBtn-host');
+            
+            // Validation
+            if (!finalAmount || finalAmount < 50000) {
+                showAlert('Vui lòng chọn hoặc nhập số tiền nạp (tối thiểu 50,000 VNĐ)!', 'warning');
+                return;
+            }
+            
+            if (finalAmount > 50000000) {
+                showAlert('Số tiền nạp không được vượt quá 50,000,000 VNĐ!', 'warning');
+                return;
+            }
+            
+            if (!selectedPaymentMethod) {
+                showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
+                return;
+            }
+            
+            let message = `Xác nhận nạp ${formatCurrency(finalAmount)} bằng `;
+            
+            switch(selectedPaymentMethod) {
+                case 'bank':
+                    message += 'chuyển khoản ngân hàng?';
+                    break;
+                case 'vietqr':
+                    message += 'VietQR?';
+                    break;
+                case 'card':
+                    message += 'thẻ tín dụng/ghi nợ?';
+                    break;
+            }
+            
+            if (confirm(message)) {
+                // Show loading state
+                topupBtn.innerHTML = '<span class="loading-host me-2"></span>Đang xử lý giao dịch...';
+                topupBtn.disabled = true;
+                
+                // Process payment based on selected method
+                if (selectedPaymentMethod === 'vietqr') {
+                    processVietQRPayment(finalAmount);
+                } else if (selectedPaymentMethod === 'bank') {
+                    // Handle bank transfer (create deposit request)
+                    processDepositRequest(finalAmount, 'bank');
+                } else {
+                    // Handle other payment methods
+                    processDepositRequest(finalAmount, selectedPaymentMethod);
+                }
+            }
+        }
+
+        function processVietQRPayment(amount) {
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('description', 'Nạp tiền vào tài khoản chủ trọ');
+
+            fetch('/host/wallet/vietqr-payment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.qrCodeUrl) {
+                    // Show QR code modal for payment
+                    showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
+                } else {
+                    resetButton();
+                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resetButton();
+                showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+            });
+        }
+
+        function showVietQRModal(qrCodeUrl, amount, transactionId) {
+            // Create modal HTML with countdown timer and complete transaction button
+            const modalHtml = `
+                <div class="modal fade" id="vietqrModal" tabindex="-1" aria-labelledby="vietqrModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" data-transaction-id="${transactionId}">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary text-white">
+                                <h5 class="modal-title" id="vietqrModalLabel">
+                                    <i class="fas fa-qrcode me-2"></i>
+                                    Thanh toán VietQR
+                                </h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="cancelQRPayment()"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <!-- Countdown Timer -->
+                                <div class="alert alert-warning mb-3" id="countdownAlert">
+                                    <i class="fas fa-clock me-2"></i>
+                                    <strong>Thời gian còn lại: <span id="countdown">15:00</span></strong>
+                                    <br><small>Mã QR sẽ hết hạn sau thời gian trên</small>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h6>Số tiền: <span class="text-primary fw-bold">${formatCurrency(amount)}</span></h6>
+                                    <p class="text-muted">Mã giao dịch: <code>${transactionId}</code></p>
+                                </div>
+                                
+                                <div class="qr-code-container mb-3 p-3 border rounded">
+                                    <div id="qrCodeWrapper" class="text-center">
+                                        <img id="qrCodeImage" src="${qrCodeUrl}" alt="VietQR Code" class="img-fluid" 
+                                             style="max-width: 280px; border: 2px solid #dee2e6; border-radius: 8px;"
+                                             onload="handleQRLoad()" onerror="handleQRError()">
+                                        
+                                        <!-- Loading state -->
+                                        <div id="qrLoadingState" class="d-none">
+                                            <div class="spinner-border text-primary mb-2" role="status"></div>
+                                            <p class="text-muted">Đang tải mã QR...</p>
+                                        </div>
+                                        
+                                        <!-- Error state -->
+                                        <div id="qrErrorState" class="d-none">
+                                            <div class="alert alert-warning">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                                <strong>Không thể hiển thị mã QR</strong><br>
+                                                <small>Vui lòng thử làm mới hoặc liên hệ hỗ trợ</small>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="retryQRLoad()">
+                                                <i class="fas fa-sync-alt me-1"></i>Thử lại
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Hướng dẫn thanh toán:</strong><br>
+                                    1. Mở ứng dụng ngân hàng trên điện thoại<br>
+                                    2. Quét mã QR hoặc chụp ảnh mã QR<br>
+                                    3. Kiểm tra thông tin và xác nhận thanh toán<br>
+                                    4. Bấm nút "Hoàn thành giao dịch" bên dưới sau khi thanh toán
+                                </div>
+                                
+                                <!-- Payment Status -->
+                                <div id="paymentStatus" class="alert alert-secondary" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+                                    <span>Vui lòng chờ nhân viên xác nhận giao dịch...</span>
+                                </div>
+                            </div>
+                            <div class="modal-footer justify-content-between">
+                                <button type="button" class="btn btn-outline-danger" onclick="cancelQRPayment()">
+                                    <i class="fas fa-times me-2"></i>Hủy giao dịch
+                                </button>
+                                <div>
+                                    <button type="button" class="btn btn-success" id="completeTransactionBtn" onclick="completeTransaction('${transactionId}')">
+                                        <i class="fas fa-check-circle me-2"></i>Hoàn thành giao dịch
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Remove existing modal if any
+            const existingModal = document.getElementById('vietqrModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('vietqrModal'));
+            modal.show();
+            
+            // Start countdown timer (15 minutes = 900 seconds)
+            startCountdown(900);
+            
+            resetButton();
+        }
+
+        function checkPaymentStatus(transactionId) {
+            // This would typically check with the server for payment status
+            // For now, we'll just show a message
+            showAlert('Vui lòng kiểm tra số dư tài khoản sau khi thanh toán thành công', 'info');
+        }
+
+        function processDepositRequest(amount, paymentMethod) {
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('paymentMethod', paymentMethod);
+            formData.append('description', 'Yêu cầu nạp tiền vào tài khoản chủ trọ');
+
+            fetch('/host/wallet/nap-tien', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resetButton();
+                if (data.success) {
+                    showAlert(data.message, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    showAlert(data.message || 'Có lỗi xảy ra khi tạo yêu cầu nạp tiền', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resetButton();
+                showAlert('Có lỗi xảy ra khi gửi yêu cầu nạp tiền', 'error');
+            });
+        }
+
+        function resetButton() {
+            const topupBtn = document.getElementById('topupBtn-host');
+            topupBtn.innerHTML = '<i class="fas fa-plus-circle"></i> Nạp Tiền Ngay';
+            topupBtn.classList.remove('btn-success-host');
+            topupBtn.classList.add('btn-primary-host');
+            topupBtn.disabled = false;
+        }
+
+        function resetForm() {
+            selectedAmount = 0;
+            selectedPaymentMethod = '';
+            selectedWallet = '';
+            
+            document.querySelectorAll('.amount-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            document.querySelectorAll('.payment-option-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            document.querySelectorAll('.wallet-item-host').forEach(el => {
+                el.classList.remove('active-host');
+            });
+            
+            document.getElementById('customAmount').value = '';
+            document.getElementById('walletOptions-host').style.display = 'none';
+            
+            document.querySelectorAll('input[type="radio"]').forEach(el => {
+                el.checked = false;
+            });
+        }
+
+        function goBack() {
+            if (confirm('Bạn có chắc chắn muốn quay lại? Thông tin đã nhập sẽ không được lưu.')) {
+                window.history.back();
+            }
+        }
+
+        function viewTransactionHistory() {
+            alert('Chuyển đến trang lịch sử giao dịch...');
+        }
+
+        function downloadStatement() {
+            alert('Đang tải sao kê tài khoản...');
+        }
+
+        function setAutoTopup() {
+            alert('Chuyển đến trang thiết lập nạp tiền tự động...');
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Handle custom amount input
+        document.getElementById('customAmount').addEventListener('input', function() {
+            const customAmount = parseInt(this.value);
+            if (customAmount && customAmount >= 50000) {
+                selectedAmount = 0;
+                document.querySelectorAll('.amount-option-host').forEach(el => {
+                    el.classList.remove('active-host');
+                });
+            }
+        });
+
+        // Add click handlers for wallet selection
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.wallet-item-host')) {
+                const walletItem = e.target.closest('.wallet-item-host');
+                const radio = walletItem.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    selectWallet(radio.value);
+                }
+            }
+        });
+
+        // Prevent form submission on Enter key
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+
+        // Format number input
+        document.getElementById('customAmount').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value) {
+                this.value = parseInt(value);
+            }
+        });
+
+        // Countdown timer functions
+        let countdownInterval;
+        
+        function startCountdown(seconds) {
+            let timeLeft = seconds;
+            const countdownElement = document.getElementById('countdown');
+            const countdownAlert = document.getElementById('countdownAlert');
+            
+            countdownInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                
+                countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                
+                // Change color when time is running out
+                if (timeLeft <= 300) { // 5 minutes
+                    countdownAlert.classList.remove('alert-warning');
+                    countdownAlert.classList.add('alert-danger');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    expireQRCode();
+                    return;
+                }
+                
+                timeLeft--;
+            }, 1000);
+        }
+        
+        function expireQRCode() {
+            const countdownAlert = document.getElementById('countdownAlert');
+            countdownAlert.innerHTML = `
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Mã QR đã hết hạn!</strong>
+                <br><small>Vui lòng tạo mã QR mới để tiếp tục thanh toán</small>
+            `;
+            countdownAlert.classList.remove('alert-warning', 'alert-danger');
+            countdownAlert.classList.add('alert-danger');
+            
+            // Disable complete transaction button
+            const completeBtn = document.getElementById('completeTransactionBtn');
+            if (completeBtn) {
+                completeBtn.disabled = true;
+                completeBtn.innerHTML = '<i class="fas fa-clock me-2"></i>Đã hết hạn';
+            }
+        }
+        
+        function cancelQRPayment() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            
+            // Get transaction ID from modal
+            const modal = document.getElementById('vietqrModal');
+            const transactionId = modal ? modal.getAttribute('data-transaction-id') : null;
+            
+            if (transactionId) {
+                // Call API to cancel transaction
+                fetch('/host/wallet/cancel-transaction', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `transactionId=${transactionId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                    } else {
+                        showAlert(data.message || 'Có lỗi xảy ra khi hủy giao dịch', 'warning');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error cancelling transaction:', error);
+                    showAlert('Có lỗi xảy ra khi hủy giao dịch', 'error');
+                });
+            }
+            
+            // Close modal
+            const modalInstance = bootstrap.Modal.getInstance(modal);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+            
+            // Reset form to allow new deposit request
+            resetForm();
+        }
+        
+        function refreshQRCode(transactionId, amount) {
+            // Show loading state
+            const refreshBtn = event.currentTarget;
+            const originalContent = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tạo mới...';
+            refreshBtn.disabled = true;
+            
+            // Call API to create new QR code
+            const formData = new FormData();
+            formData.append('amount', amount);
+            formData.append('description', 'Nạp tiền vào tài khoản chủ trọ');
+
+            fetch('/host/wallet/vietqr-payment', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.qrCodeUrl) {
+                    // Update QR code image
+                    const qrImage = document.querySelector('#vietqrModal .qr-code-container img');
+                    if (qrImage) {
+                        qrImage.src = data.qrCodeUrl;
+                    }
+                    
+                    // Reset countdown
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                    }
+                    startCountdown(900); // 15 minutes
+                    
+                    // Reset countdown alert
+                    const countdownAlert = document.getElementById('countdownAlert');
+                    countdownAlert.innerHTML = `
+                        <i class="fas fa-clock me-2"></i>
+                        <strong>Thời gian còn lại: <span id="countdown">15:00</span></strong>
+                        <br><small>Mã QR sẽ hết hạn sau thời gian trên</small>
+                    `;
+                    countdownAlert.classList.remove('alert-danger');
+                    countdownAlert.classList.add('alert-warning');
+                    
+                    // Re-enable complete transaction button
+                    const completeBtn = document.getElementById('completeTransactionBtn');
+                    if (completeBtn) {
+                        completeBtn.disabled = false;
+                        completeBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Hoàn thành giao dịch';
+                    }
+                    
+                    showAlert('Mã QR đã được làm mới thành công', 'success');
+                } else {
+                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR mới', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('Có lỗi xảy ra khi tạo mã QR mới', 'error');
+            })
+            .finally(() => {
+                // Reset button state
+                refreshBtn.innerHTML = originalContent;
+                refreshBtn.disabled = false;
+            });
+        }
+        
+        function completeTransaction(transactionId) {
+            // Show confirmation
+            if (!confirm('Bạn đã hoàn thành thanh toán qua ngân hàng? Nhân viên sẽ xác nhận giao dịch của bạn.')) {
+                return;
+            }
+            
+            // Show loading state
+            const completeBtn = document.getElementById('completeTransactionBtn');
+            const originalContent = completeBtn.innerHTML;
+            completeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            completeBtn.disabled = true;
+            
+            // Show payment status
+            const paymentStatus = document.getElementById('paymentStatus');
+            paymentStatus.style.display = 'block';
+            
+            // Call API to mark transaction as completed (waiting for staff confirmation)
+            fetch('/host/wallet/vietqr-confirm', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `transactionId=${transactionId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update payment status
+                    paymentStatus.innerHTML = `
+                        <div class="text-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span>Giao dịch đã được ghi nhận! Số dư đã được cập nhật.</span>
+                        </div>
+                    `;
+                    paymentStatus.classList.remove('alert-secondary');
+                    paymentStatus.classList.add('alert-success');
+                    
+                    // Update button
+                    completeBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đã hoàn thành';
+                    completeBtn.classList.remove('btn-success');
+                    completeBtn.classList.add('btn-outline-success');
+                    
+                    // Stop countdown
+                    if (countdownInterval) {
+                        clearInterval(countdownInterval);
+                    }
+                    
+                    showAlert('Giao dịch đã được xác nhận thành công! Số dư đã được cập nhật.', 'success');
+                    
+                    // Auto close modal after 3 seconds
+                    setTimeout(() => {
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('vietqrModal'));
+                        if (modal) {
+                            modal.hide();
+                        }
+                        // Reload page to update balance
+                        window.location.reload();
+                    }, 3000);
+                    
+                } else {
+                    // Show error
+                    paymentStatus.innerHTML = `
+                        <div class="text-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span>${data.message || 'Có lỗi xảy ra khi xác nhận giao dịch'}</span>
+                        </div>
+                    `;
+                    paymentStatus.classList.remove('alert-secondary');
+                    paymentStatus.classList.add('alert-danger');
+                    
+                    // Reset button
+                    completeBtn.innerHTML = originalContent;
+                    completeBtn.disabled = false;
+                    
+                    showAlert(data.message || 'Có lỗi xảy ra khi xác nhận giao dịch', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                
+                // Show error
+                paymentStatus.innerHTML = `
+                    <div class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span>Có lỗi xảy ra khi kết nối với server</span>
+                    </div>
+                `;
+                paymentStatus.classList.remove('alert-secondary');
+                paymentStatus.classList.add('alert-danger');
+                
+                // Reset button
+                completeBtn.innerHTML = originalContent;
+                completeBtn.disabled = false;
+                
+                showAlert('Có lỗi xảy ra khi xác nhận giao dịch', 'error');
+            });
+        }
+
+        // QR Code handling functions
+        function handleQRLoad() {
+            console.log('QR Code loaded successfully');
+            const qrImage = document.getElementById('qrCodeImage');
+            const loadingState = document.getElementById('qrLoadingState');
+            const errorState = document.getElementById('qrErrorState');
+            
+            if (qrImage) qrImage.classList.remove('d-none');
+            if (loadingState) loadingState.classList.add('d-none');
+            if (errorState) errorState.classList.add('d-none');
+        }
+
+        function handleQRError() {
+            console.error('Failed to load QR Code');
+            const qrImage = document.getElementById('qrCodeImage');
+            const loadingState = document.getElementById('qrLoadingState');
+            const errorState = document.getElementById('qrErrorState');
+            
+            if (qrImage) qrImage.classList.add('d-none');
+            if (loadingState) loadingState.classList.add('d-none');
+            if (errorState) errorState.classList.remove('d-none');
+            
+            showAlert('Không thể tải mã QR. Vui lòng thử lại hoặc liên hệ hỗ trợ.', 'warning');
+        }
+
+        function retryQRLoad() {
+            const qrImage = document.getElementById('qrCodeImage');
+            const loadingState = document.getElementById('qrLoadingState');
+            const errorState = document.getElementById('qrErrorState');
+            
+            if (errorState) errorState.classList.add('d-none');
+            if (loadingState) loadingState.classList.remove('d-none');
+            
+            // Retry loading the QR image
+            if (qrImage && qrImage.src) {
+                // Force reload by adding timestamp
+                const originalSrc = qrImage.src.split('?')[0];
+                qrImage.src = originalSrc + '?t=' + new Date().getTime();
+            }
+        }
+
+        // Show loading state initially when creating QR
+        function showQRLoading() {
+            const qrImage = document.getElementById('qrCodeImage');
+            const loadingState = document.getElementById('qrLoadingState');
+            const errorState = document.getElementById('qrErrorState');
+            
+            if (qrImage) qrImage.classList.add('d-none');
+            if (loadingState) loadingState.classList.remove('d-none');
+            if (errorState) errorState.classList.add('d-none');
+        }
+    </script>
+</body>
+</html>
