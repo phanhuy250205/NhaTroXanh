@@ -219,10 +219,10 @@ public class DemoController {
 
 
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue")
-    public String chitietkhachthue() {
-        return "host/chi-tiet-khach-thue";
-    }
+    // @GetMapping("/chu-tro/chi-tiet-khach-thue")
+    // public String chitietkhachthue() {
+    //     return "host/chi-tiet-khach-thue";
+    // }
 
 
     @GetMapping("/khach-thue/thanh-toan")
@@ -261,7 +261,6 @@ public class DemoController {
         userRepository.save(tenant);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công.");
-        // ✅ chuyển hướng lại đúng trang chi tiết khách thuê
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
     }
 

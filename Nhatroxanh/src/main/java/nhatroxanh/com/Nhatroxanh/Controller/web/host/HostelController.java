@@ -18,7 +18,6 @@ import nhatroxanh.com.Nhatroxanh.Service.Impl.HostelServiceImpl;
 import java.util.HashMap;
 import java.util.List;
 
-
 @Controller
 public class HostelController {
 
@@ -32,25 +31,26 @@ public class HostelController {
     private RoomsService roomsService;
 
     @GetMapping("/chu-tro/thong-tin-tro")
-    public String hostthongtintro(Model model, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(value = "keyword", required = false) String keyword) {
-       try {
-        Integer ownerId = userDetails.getUser().getUserId();
-        List<Hostel> hostels;
+    public String hostthongtintro(Model model, @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam(value = "keyword", required = false) String keyword) {
+        try {
+            Integer ownerId = userDetails.getUser().getUserId();
+            List<Hostel> hostels;
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            hostels = hostelService.searchHostelsByOwnerIdAndName(ownerId, keyword);
-        } else {
-            hostels = hostelService.getHostelsByOwnerId(ownerId);
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                hostels = hostelService.searchHostelsByOwnerIdAndName(ownerId, keyword);
+            } else {
+                hostels = hostelService.getHostelsByOwnerId(ownerId);
+            }
+
+            model.addAttribute("hostels", hostels);
+            model.addAttribute("keyword", keyword); // giữ lại giá trị ô tìm kiếm
+            return "host/thongtintro";
+
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách khu trọ: " + e.getMessage());
+            return "host/thongtintro";
         }
-
-        model.addAttribute("hostels", hostels);
-        model.addAttribute("keyword", keyword); // giữ lại giá trị ô tìm kiếm
-        return "host/thongtintro";
-
-    } catch (Exception e) {
-        model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách khu trọ: " + e.getMessage());
-        return "host/thongtintro";
-    }
     }
 
     @GetMapping("/chu-tro/them-khu-tro")
@@ -61,18 +61,19 @@ public class HostelController {
 
     @PostMapping("/chu-tro/them-khu-tro")
     public String saveHostel(@ModelAttribute HostelDTO hostelDTO,
-                            @RequestParam("province") String provinceCode,
-                            @RequestParam("provinceName") String provinceName,
-                            @RequestParam("district") String districtCode,
-                            @RequestParam("districtName") String districtName,
-                            @RequestParam("ward") String wardCode,
-                            @RequestParam("wardName") String wardName,
-                            @RequestParam("street") String street,
-                            @RequestParam("houseNumber") String houseNumber,
-                            @AuthenticationPrincipal CustomUserDetails userDetails,
-                            RedirectAttributes redirectAttributes) {
+            @RequestParam("province") String provinceCode,
+            @RequestParam("provinceName") String provinceName,
+            @RequestParam("district") String districtCode,
+            @RequestParam("districtName") String districtName,
+            @RequestParam("ward") String wardCode,
+            @RequestParam("wardName") String wardName,
+            @RequestParam("street") String street,
+            @RequestParam("houseNumber") String houseNumber,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
         try {
-            System.out.println("Received: provinceName=" + provinceName + ", districtName=" + districtName + ", wardName=" + wardName + ", street=" + street + ", houseNumber=" + houseNumber);
+            System.out.println("Received: provinceName=" + provinceName + ", districtName=" + districtName
+                    + ", wardName=" + wardName + ", street=" + street + ", houseNumber=" + houseNumber);
             hostelDTO.setOwnerId(userDetails.getUser().getUserId());
             hostelDTO.setProvinceCode(provinceCode);
             hostelDTO.setProvinceName(provinceName);
@@ -113,18 +114,13 @@ public class HostelController {
             hostelDTO.setRoomNumber(hostel.getRoom_number());
             hostelDTO.setCreatedAt(hostel.getCreatedAt());
 
-            // Lấy địa chỉ từ database và phân tách
-            String address = hostel.getAddress() != null ? hostel.getAddress().getStreet() : "";
-            hostelDTO.parseAddress(address);
+            // Set address as a String
+            String address = hostel.getAddress() != null ? hostel.getAddress() : "";
+            hostelDTO.setAddress(address); // Assuming HostelDTO has a setAddress method
 
-            if (hostel.getAddress() != null && hostel.getAddress().getWard() != null) {
-                hostelDTO.setWardCode(hostel.getAddress().getWard().getCode());
-                hostelDTO.setWardName(hostel.getAddress().getWard().getName());
-                hostelDTO.setDistrictCode(hostel.getAddress().getWard().getDistrict().getCode());
-                hostelDTO.setDistrictName(hostel.getAddress().getWard().getDistrict().getName());
-                hostelDTO.setProvinceCode(hostel.getAddress().getWard().getDistrict().getProvince().getCode());
-                hostelDTO.setProvinceName(hostel.getAddress().getWard().getDistrict().getProvince().getName());
-            }
+            // If parseAddress is needed to split address into components, call it
+            // Example: hostelDTO.parseAddress(address); (uncomment if parseAddress exists
+            // and is needed)
 
             model.addAttribute("hostel", hostelDTO);
             return "host/themkhutro";
@@ -136,15 +132,15 @@ public class HostelController {
 
     @PostMapping("/chu-tro/cap-nhat-khu-tro")
     public String updateHostel(@ModelAttribute HostelDTO hostelDTO,
-                              @RequestParam("province") String provinceCode,
-                              @RequestParam("provinceName") String provinceName,
-                              @RequestParam("district") String districtCode,
-                              @RequestParam("districtName") String districtName,
-                              @RequestParam("ward") String wardCode,
-                              @RequestParam("wardName") String wardName,
-                              @RequestParam("street") String street,
-                              @RequestParam("houseNumber") String houseNumber,
-                              RedirectAttributes redirectAttributes) {
+            @RequestParam("province") String provinceCode,
+            @RequestParam("provinceName") String provinceName,
+            @RequestParam("district") String districtCode,
+            @RequestParam("districtName") String districtName,
+            @RequestParam("ward") String wardCode,
+            @RequestParam("wardName") String wardName,
+            @RequestParam("street") String street,
+            @RequestParam("houseNumber") String houseNumber,
+            RedirectAttributes redirectAttributes) {
         try {
             hostelDTO.setProvinceCode(provinceCode);
             hostelDTO.setProvinceName(provinceName);
@@ -180,5 +176,5 @@ public class HostelController {
         }
         return "redirect:/chu-tro/thong-tin-tro";
     }
-    
+
 }

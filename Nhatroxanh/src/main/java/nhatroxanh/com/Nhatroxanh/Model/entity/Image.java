@@ -42,7 +42,7 @@ public class Image {
     private UserCccd userCccd;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = true)
     private ImageType type;
 
     public enum ImageType {

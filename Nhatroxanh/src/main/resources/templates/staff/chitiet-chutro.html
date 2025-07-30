@@ -667,7 +667,7 @@
                             <td th:text="${hostel.hostelId}">1</td>
                             <td th:text="${hostel.name}">Tên khu trọ</td>
                             <td
-                                th:text="${hostel.address?.street + ', ' + hostel.address?.ward?.name + ', ' + hostel.address?.ward?.district?.name + ', ' + hostel.address?.ward?.district?.province?.name ?: 'Không xác định'}">
+                                th:text="${hostel.address}">
                                 Địa chỉ</td>
                             <td>
                                 <span class="table-status-badge-staff"

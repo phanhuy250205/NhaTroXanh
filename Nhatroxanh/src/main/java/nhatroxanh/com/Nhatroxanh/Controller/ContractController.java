@@ -19,6 +19,7 @@ import com.lowagie.text.StandardFonts;
 import jakarta.validation.Valid;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto.Room;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.*;
@@ -2255,102 +2256,65 @@ public class ContractController {
         }
     }
 
-    private ContractDto.Room convertRoomToDto(Rooms room) {
-        ContractDto.Room dto = new ContractDto.Room();
+    private Room convertRoomToDto(Rooms room) {
+        Room dto = new Room();
         dto.setRoomId(room.getRoomId());
         dto.setRoomName(room.getNamerooms());
         dto.setArea(room.getAcreage());
         dto.setPrice(room.getPrice());
-        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "UNKNOWN");
+        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "unactive");
 
         if (room.getHostel() != null) {
             dto.setHostelId(room.getHostel().getHostelId());
             dto.setHostelName(room.getHostel().getName());
-        }
+            String hostelAddress = room.getHostel().getAddress();
+            System.out.println("🏠 Hostel address: " + hostelAddress);
 
-        String roomAddress = room.getAddress();
+            if (hostelAddress != null && !hostelAddress.trim().isEmpty()) {
+                dto.setAddress(hostelAddress);
+                String[] addressParts = hostelAddress.split(",");
 
-        System.out.println("🏠 Room address: " + roomAddress);
+                if (addressParts.length >= 4) {
+                    dto.setStreet(addressParts[0].trim());
+                    dto.setWard(addressParts[1].trim());
+                    dto.setDistrict(addressParts[2].trim());
+                    dto.setProvince(addressParts[3].trim());
 
-        if (roomAddress != null && !roomAddress.trim().isEmpty()) {
-            dto.setAddress(roomAddress);
-
-            String[] addressParts = roomAddress.split(",");
-
-            if (addressParts.length >= 3) {
-                dto.setStreet(addressParts[0].trim());
-                dto.setWard(addressParts.length > 1 ? addressParts[1].trim() : "");
-                dto.setDistrict(addressParts.length > 2 ? addressParts[2].trim() : "");
-                dto.setProvince(addressParts.length > 3 ? addressParts[3].trim() : "");
-
-                System.out.println("✅ Parsed address:");
-                System.out.println("    - Street: " + dto.getStreet());
-                System.out.println("    - Ward: " + dto.getWard());
-                System.out.println("    - District: " + dto.getDistrict());
-                System.out.println("    - Province: " + dto.getProvince());
-            } else {
-                dto.setStreet(roomAddress);
-                dto.setWard("");
-                dto.setDistrict("");
-                dto.setProvince("");
-            }
-        } else {
-            if (room.getHostel() != null && room.getHostel().getAddress() != null) {
-                try {
-                    Address hostelAddress = room.getHostel().getAddress();
-                    StringBuilder addressBuilder = new StringBuilder();
-
-                    if (hostelAddress.getStreet() != null && !hostelAddress.getStreet().trim().isEmpty()) {
-                        addressBuilder.append(hostelAddress.getStreet());
-                    }
-
-                    if (hostelAddress.getWard() != null && hostelAddress.getWard().getName() != null) {
-                        if (addressBuilder.length() > 0)
-                            addressBuilder.append(", ");
-                        addressBuilder.append(hostelAddress.getWard().getName());
-                    }
-
-                    String fullAddress = addressBuilder.toString();
-                    if (!fullAddress.isEmpty()) {
-                        dto.setAddress(fullAddress);
-                        dto.setStreet(hostelAddress.getStreet() != null ? hostelAddress.getStreet() : "");
-                        dto.setWard(hostelAddress.getWard() != null && hostelAddress.getWard().getName() != null
-                                ? hostelAddress.getWard().getName()
-                                : "");
-                        dto.setDistrict("");
-                        dto.setProvince("");
-
-                        System.out.println("⚠️ Using hostel address entity: " + fullAddress);
-                    } else {
-                        dto.setAddress("Địa chỉ chưa cập nhật");
-                        dto.setStreet("");
-                        dto.setWard("");
-                        dto.setDistrict("");
-                        dto.setProvince("");
-                    }
-
-                } catch (Exception e) {
-                    System.out.println("❌ Error getting hostel address: " + e.getMessage());
-                    dto.setAddress("Địa chỉ chưa cập nhật");
-                    dto.setStreet("");
+                    System.out.println("✅ Parsed address:");
+                    System.out.println("    - Street: " + dto.getStreet());
+                    System.out.println("    - Ward: " + dto.getWard());
+                    System.out.println("    - District: " + dto.getDistrict());
+                    System.out.println("    - Province: " + dto.getProvince());
+                } else {
+                    System.out.println("⚠️ Incomplete address format: " + hostelAddress);
+                    dto.setStreet(hostelAddress);
                     dto.setWard("");
                     dto.setDistrict("");
                     dto.setProvince("");
                 }
             } else {
+                System.out.println("⚠️ Hostel address is null or empty");
                 dto.setAddress("Địa chỉ chưa cập nhật");
                 dto.setStreet("");
                 dto.setWard("");
                 dto.setDistrict("");
                 dto.setProvince("");
             }
+        } else {
+            System.out.println("⚠️ Hostel is null for room ID: " + room.getRoomId());
+            dto.setAddress("Địa chỉ chưa cập nhật");
+            dto.setStreet("");
+            dto.setWard("");
+            dto.setDistrict("");
+            dto.setProvince("");
         }
 
         dto.setIsCurrent(false);
 
         System.out.println("🏠 Converted room: " + dto.getRoomName() +
                 " - ID: " + dto.getRoomId() +
-                " - Address: " + dto.getAddress());
+                " - Address: " + dto.getAddress() +
+                " - Status: " + dto.getStatus());
 
         return dto;
     }

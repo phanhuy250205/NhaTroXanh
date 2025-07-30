@@ -10,57 +10,46 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 public interface HostelRepository extends JpaRepository<Hostel, Integer> {
 
-    
+        // Updated to remove JOIN FETCH on address, as it is now a String
+        @Query("SELECT h FROM Hostel h WHERE h.owner.userId = :ownerId")
+        List<Hostel> findByOwner_UserId(@Param("ownerId") Integer ownerId);
 
-    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE h.owner.userId = :ownerId")
-    List<Hostel> findByOwner_UserId(@Param("ownerId") Integer ownerId);
+        // Updated to remove JOIN FETCH on address, as it is now a String
+        @Query("SELECT h FROM Hostel h WHERE h.hostelId = :id")
+        Hostel findByIdWithAddress(@Param("id") Integer id);
 
-    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p WHERE h.hostelId = :id")
-    Hostel findByIdWithAddress(@Param("id") Integer id);
-    
-    int countByOwner(Users owner);
+        int countByOwner(Users owner);
 
-     @Query("SELECT h FROM Hostel h WHERE h.hostelId = :id OR LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
+        @Query("SELECT h FROM Hostel h WHERE h.hostelId = :id OR LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
         Page<Hostel> findByHostelIdOrNameContainingIgnoreCase(@Param("id") Integer id, @Param("keyword") String keyword,
                         Pageable pageable);
 
-    Page<Hostel> findByNameContainingIgnoreCase(String name, Pageable pageable);
-    
-    // SỬA LẠI: Sử dụng 'street' thay vì 'address'
-    List<Hostel> findByAddress_StreetContainingIgnoreCase(String street);
-    
-    // HOẶC sử dụng @Query để search linh hoạt hơn
-    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.address a LEFT JOIN FETCH a.ward w LEFT JOIN FETCH w.district d LEFT JOIN FETCH d.province p " +
-           "WHERE UPPER(a.street) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
-           "OR UPPER(w.name) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
-           "OR UPPER(d.name) LIKE UPPER(CONCAT('%', :keyword, '%')) " +
-           "OR UPPER(p.name) LIKE UPPER(CONCAT('%', :keyword, '%'))")
-    List<Hostel> findByAddressKeyword(@Param("keyword") String keyword);
+        Page<Hostel> findByNameContainingIgnoreCase(String name, Pageable pageable);
 
+        // Updated to search on the String address field
+        @Query("SELECT h FROM Hostel h WHERE UPPER(h.address) LIKE UPPER(CONCAT('%', :address, '%'))")
+        List<Hostel> findByAddressContainingIgnoreCase(@Param("address") String address);
 
-    List<Hostel> findByOwnerUserId(Integer userId);
+        // Updated to search on the String address field
+        @Query("SELECT h FROM Hostel h WHERE UPPER(h.address) LIKE UPPER(CONCAT('%', :keyword, '%'))")
+        List<Hostel> findByAddressKeyword(@Param("keyword") String keyword);
 
-    @Query("""
-            SELECT DISTINCT h FROM Hostel h
-            LEFT JOIN FETCH h.rooms r
-            WHERE h.hostelId = :hostelId AND (r IS NULL OR r.status = 'unactive')
-            """)
-    Optional<Hostel> findByIdWithRooms(@Param("hostelId") Integer hostelId);
+        List<Hostel> findByOwnerUserId(Integer userId);
 
+        @Query("SELECT DISTINCT h FROM Hostel h LEFT JOIN FETCH h.rooms r WHERE h.hostelId = :hostelId AND (r IS NULL OR r.status = 'unactive')")
+        Optional<Hostel> findByIdWithRooms(@Param("hostelId") Integer hostelId);
 
-    @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
-    long countHostelsByOwnerId(Integer ownerId);
+        @Query("SELECT COUNT(h) FROM Hostel h WHERE h.owner.userId = :ownerId")
+        long countHostelsByOwnerId(Integer ownerId);
 
-    @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.rooms WHERE h.owner.userId = :ownerId")
-    List<Hostel> findHostelsWithRoomsByOwnerId(@Param("ownerId") Integer ownerId);
+        @Query("SELECT h FROM Hostel h LEFT JOIN FETCH h.rooms WHERE h.owner.userId = :ownerId")
+        List<Hostel> findHostelsWithRoomsByOwnerId(@Param("ownerId") Integer ownerId);
 
-    List<Hostel> findByOwner(Users owner);
+        List<Hostel> findByOwner(Users owner);
 
-     List<Hostel> findByOwnerUserIdAndNameContainingIgnoreCase(Integer ownerId, String keyword);
-
+        List<Hostel> findByOwnerUserIdAndNameContainingIgnoreCase(Integer ownerId, String keyword);
 }

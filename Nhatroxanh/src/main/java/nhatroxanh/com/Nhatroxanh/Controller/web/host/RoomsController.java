@@ -98,11 +98,7 @@ public class RoomsController {
                         room.setRoomId(dto.getRoomId());
                         room.setNamerooms(dto.getRoomName());
                         room.setPrice(dto.getPrice());
-                        try {
-                            room.setStatus(RoomStatus.valueOf(dto.getStatus() != null ? dto.getStatus().toUpperCase() : "UNACTIVE"));
-                        } catch (IllegalArgumentException e) {
-                            room.setStatus(RoomStatus.unactive);
-                        }
+                       room.setStatus(RoomStatus.fromString(dto.getStatus()));
                         room.setAcreage(dto.getArea());
                         room.setMax_tenants(dto.getMaxTenants());
                         return room;
