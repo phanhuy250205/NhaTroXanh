@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -32,7 +32,8 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
+        // return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -69,7 +70,7 @@ public class SecurityConfig {
                         .requestMatchers("/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro").permitAll()
                         .requestMatchers("/chu-tro/**").hasRole("OWNER")
                         .requestMatchers("/nhan-vien/**").hasRole("STAFF")
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        // .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/dang-nhap-chu-tro")

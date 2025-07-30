@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     passwordToggles.forEach(toggle => {
-        toggle.addEventListener("click", function () {
+        toggle.addEventListener("click", function() {
             const wrapper = this.closest('.input-wrapper');
             const passwordInput = wrapper.querySelector('input');
             const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";

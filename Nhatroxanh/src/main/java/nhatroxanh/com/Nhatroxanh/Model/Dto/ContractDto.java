@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -32,20 +33,13 @@ public class ContractDto {
     private String tenantAddress;
     private PaymentMethod paymentMethod;
     private List<ResidentDto> residents = new ArrayList<>();
-    private String paymentDate;
+
     public List<ResidentDto> getResidents() {
         return residents;
     }
 
     public void setResidents(List<ResidentDto> residents) {
         this.residents = residents;
-    }
-    public String getPaymentDate() {
-        return paymentDate;
-    }
-
-    public void setPaymentDate(String paymentDate) {
-        this.paymentDate = paymentDate;
     }
 
     public ContractDto() {
@@ -163,9 +157,6 @@ public class ContractDto {
         this.terms = terms;
     }
 
-
-
-
     public static class Owner {
         private Integer userId; // ✅ THÊM FIELD NÀY
         private String fullName;
@@ -183,7 +174,6 @@ public class ContractDto {
         private String street;
 
         // Getters and setters
-
 
         public String getFullCccdNumber() {
             return fullCccdNumber;
@@ -449,7 +439,6 @@ public class ContractDto {
         private String cccdBackUrl;
         private String fullCccdNumber;
 
-
         public String getMaskedCccdNumber() {
             return maskedCccdNumber;
         }
@@ -587,10 +576,11 @@ public class ContractDto {
 
     public static class Room {
 
-        @JsonProperty("roomId") // Đảm bảo tên trường khớp
+        @JsonProperty("roomId")
         private Integer roomId;
         private String roomName;
         private Float area;
+        private Integer max_tenants; 
         private Float price;
         private String status;
         private Integer hostelId;
@@ -602,14 +592,13 @@ public class ContractDto {
         private String province; // Thêm trường province
         @JsonProperty("isCurrent") // ✅ THÊM ANNOTATION
         private Boolean isCurrent = false;
-        private Set<Integer> utilityIds;
-        // ✅ SỬA GETTER/SETTER
+        private List<Integer> utilityIds;
 
-        public Set<Integer> getUtilityIds() {
+        public List<Integer> getUtilityIds() {
             return utilityIds;
         }
 
-        public void setUtilityIds(Set<Integer> utilityIds) {
+        public void setUtilityIds(List<Integer> utilityIds) {
             this.utilityIds = utilityIds;
         }
 
@@ -635,6 +624,7 @@ public class ContractDto {
         // public void setCurrent(Boolean current) {
         // isCurrent = current;
         // }
+
 
         public String getProvince() {
             return province;
@@ -728,6 +718,9 @@ public class ContractDto {
             this.address = address;
         }
 
+        public Integer getMaxTenants() { return max_tenants; }
+        public void setMaxTenants(Integer maxTenants) { this.max_tenants = maxTenants; }
+
     }
 
     public static class Terms {
@@ -737,7 +730,17 @@ public class ContractDto {
         private LocalDate endDate;
         private String terms;
         private Integer duration;
-        private String paymentDate;
+        private String paymentDateDescription; // Đổi từ paymentDate thành paymentDateDescription
+
+        // Getter và Setter
+        public String getPaymentDateDescription() {
+            return paymentDateDescription;
+        }
+
+        public void setPaymentDateDescription(String paymentDateDescription) {
+            this.paymentDateDescription = paymentDateDescription;
+        }
+
         public Terms() {
             this.startDate = LocalDate.now();
         }
@@ -803,13 +806,8 @@ public class ContractDto {
             this.duration = duration;
             calculateEndDate();
         }
-         public String getPaymentDate() { // <--- GETTER CẦN THIẾT
-            return paymentDate;
-        }
 
-        public void setPaymentDate(String paymentDate) { // <--- SETTER CẦN THIẾT
-            this.paymentDate = paymentDate;
-        }
+       
 
         // Helper method to calculate end date
         private void calculateEndDate() {
@@ -829,6 +827,5 @@ public class ContractDto {
         private String phone;
         private String cccdNumber;
     }
-
 
 }
