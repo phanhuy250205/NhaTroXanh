@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -575,10 +576,11 @@ public class ContractDto {
 
     public static class Room {
 
-        @JsonProperty("roomId") // Đảm bảo tên trường khớp
+        @JsonProperty("roomId")
         private Integer roomId;
         private String roomName;
         private Float area;
+        private Integer max_tenants; 
         private Float price;
         private String status;
         private Integer hostelId;
@@ -622,6 +624,7 @@ public class ContractDto {
         // public void setCurrent(Boolean current) {
         // isCurrent = current;
         // }
+
 
         public String getProvince() {
             return province;
@@ -714,6 +717,9 @@ public class ContractDto {
         public void setAddress(String address) {
             this.address = address;
         }
+
+        public Integer getMaxTenants() { return max_tenants; }
+        public void setMaxTenants(Integer maxTenants) { this.max_tenants = maxTenants; }
 
     }
 

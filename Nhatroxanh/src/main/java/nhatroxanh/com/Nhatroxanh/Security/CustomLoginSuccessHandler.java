@@ -57,6 +57,8 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"Bạn không có quyền truy cập vào hệ thống này.\"}");
         }
+
+        response.sendRedirect(redirectURL);
     }
 }
 
