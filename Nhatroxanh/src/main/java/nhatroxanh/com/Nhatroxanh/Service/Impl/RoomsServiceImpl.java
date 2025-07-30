@@ -157,4 +157,8 @@ public class RoomsServiceImpl implements RoomsService {
         return roomDto;
     }
 
+    @Override
+    public List<Rooms> findByHostelId(Integer hostelId) {
+        return roomsRepository.findByHostelId(hostelId);
+    }
 }

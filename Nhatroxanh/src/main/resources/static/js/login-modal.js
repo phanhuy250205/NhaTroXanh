@@ -52,54 +52,18 @@ document.addEventListener("DOMContentLoaded", () => {
         loginForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
-<<<<<<< HEAD
-            const errorMessageDiv = document.getElementById("login-error-message");
-            errorMessageDiv.style.display = 'none'; // Ẩn thông báo lỗi cũ
-
-            // 1. Lấy dữ liệu từ form trong modal
-            const username = document.getElementById("loginUsername").value;
-            const password = document.getElementById("loginPassword").value;
-            const rememberMe = document.getElementById("rememberMe").checked;
-            // 2. Chuẩn bị dữ liệu dạng form-urlencoded để gửi cho Spring Security
-            const formData = new URLSearchParams();
-            formData.append('username', username); // Tên param phải là "username"
-=======
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
             const rememberMe = document.getElementById("rememberMe").checked;
 
             const formData = new URLSearchParams();
             formData.append('username', username);
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
             formData.append('password', password);
             if (rememberMe) {
                 formData.append('remember-me', 'on');
             }
 
             fetch('/login-processing', {
-<<<<<<< HEAD
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData
-            })
-            .then(response => {
-                if (response.ok) {
-                    // 4. THÀNH CÔNG: Tải lại trang để cập nhật thanh điều hướng
-                    window.location.reload();
-                } else {
-                    // 5. THẤT BẠI: Hiển thị lỗi
-                    throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                }
-            })
-            .catch(error => {
-                if(errorMessageDiv) {
-                    errorMessageDiv.textContent = error.message;
-                    errorMessageDiv.style.display = 'block';
-                } else {
-                    alert(error.message);
-                }
-            });
-=======
 
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -123,13 +87,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
 
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
         });
     }
 
 });
-<<<<<<< HEAD
-=======
 
 
 // Login Modal JavaScript - Updated with Forgot Password Link
@@ -351,4 +312,3 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     }
 })
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a

@@ -127,9 +127,9 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Email đã được sử dụng!");
         }
 
-        if (userOwnerRequest.getCccd() != null && !userOwnerRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userOwnerRequest.getCccd());
+        if (userOwnerRequest.getCccdNumber() != null && !userOwnerRequest.getCccdNumber().trim().isEmpty()) {
+            if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccdNumber()).isPresent()) {
+                logger.error("CCCD already exists: {}", userOwnerRequest.getCccdNumber());
                 throw new RuntimeException("Số CCCD đã được sử dụng!");
             }
         }

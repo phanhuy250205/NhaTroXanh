@@ -720,13 +720,8 @@
 <body class="tenant-detail-body-host">
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-<<<<<<< HEAD
-    <div class="main-container-host" id="main-content">
-        <div class="page-header-host">
-=======
     <div class="main-container-host" id="main-content" th:if="${tenant != null}" th:object="${tenant}">
         <div class="page-header-host d-flex justify-content-between align-items-center">
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
             <div>
                 <a href="/chu-tro/quan-ly-khach-thue" class="back-link-host">
                     <i class="bi bi-arrow-left"></i>
@@ -734,15 +729,6 @@
                 </a>
                 <h1 class="page-title-host">Chi tiết khách thuê</h1>
             </div>
-<<<<<<< HEAD
-            <button class="edit-btn-host" onclick="showEditModal()">
-                <i class="fas fa-edit"></i>
-                Chỉnh sửa
-            </button>
-        </div>
-
-        <!-- Personal Information Section -->
-=======
 
             <form th:action="@{/chu-tro/khach-thue/kich-hoat}" method="post" class="ms-auto">
                 <input type="hidden" name="userId" th:value="${tenant.userId}" />
@@ -768,7 +754,6 @@
             </div>
         </div>
 
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
         <div class="info-section-host">
             <h3 class="section-header-host">
                 <i class="fas fa-user"></i>
@@ -784,14 +769,6 @@
                         <label class="form-label-host">Giới tính</label>
                         <div class="gender-group-host">
                             <div class="radio-group-host">
-<<<<<<< HEAD
-                                <input type="radio" class="radio-input-host" name="gioiTinh" id="nam" checked disabled>
-                                <label class="radio-label-host" for="nam">Nam</label>
-                            </div>
-                            <div class="radio-group-host">
-                                <input type="radio" class="radio-input-host" name="gioiTinh" id="nu" disabled>
-                                <label class="radio-label-host" for="nu">Nữ</label>
-=======
                                 <input type="radio" class="radio-input-host" name="gioiTinh"
                                     th:checked="*{userGender == true}" disabled>
                                 <label class="radio-label-host">Nam</label>
@@ -800,7 +777,6 @@
                                 <input type="radio" class="radio-input-host" name="gioiTinh"
                                     th:checked="*{userGender == false}" disabled>
                                 <label class="radio-label-host">Nữ</label>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                             </div>
                         </div>
                     </div>
@@ -812,13 +788,9 @@
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày sinh</label>
-<<<<<<< HEAD
-                        <input type="text" class="form-control-host" value="17/09/1990" disabled>
-=======
                         <input type="text" class="form-control-host"
                             th:value="*{userBirthday != null ? #dates.format(userBirthday, 'dd/MM/yyyy') : 'N/A'}"
                             disabled>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Nơi cấp</label>
@@ -832,34 +804,12 @@
             </div>
         </div>
 
-<<<<<<< HEAD
-        <!-- Rental Information Section -->
-        <div class="info-section-host">
-            <h3 class="section-header-host">
-                <i class="fas fa-home"></i>
-                Thông tin thuê trọ
-            </h3>
-=======
         <div th:each="item : ${rentalHistory}" class="info-section-host">
             <h3 class="section-header-host"><i class="fas fa-home"></i> Thông tin thuê trọ</h3>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
             <div class="section-content-host">
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Khu trọ</label>
-<<<<<<< HEAD
-                        <input type="text" class="form-control-host" value="KTX A1" disabled>
-                    </div>
-                    <div class="form-group-host">
-                        <label class="form-label-host">ID Phòng</label>
-                        <input type="text" class="form-control-host" value="A101" disabled>
-                    </div>
-                    <div class="form-group-host status-container-host">
-                        <label class="form-label-host">Trạng thái</label>
-                        <span id="trangThai" class="status-badge-host status-active-host">
-                            <i class="fas fa-check-circle"></i>
-                            Đang thuê
-=======
                         <input type="text" class="form-control-host" th:value="${item.hostelName}" disabled>
                     </div>
                     <div class="form-group-host">
@@ -881,7 +831,6 @@
                             <span th:case="*">
                                 <i class="fas fa-question-circle"></i> Không xác định
                             </span>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                         </span>
                     </div>
 
@@ -890,13 +839,6 @@
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Ngày bắt đầu</label>
-<<<<<<< HEAD
-                        <input type="text" class="form-control-host" value="17/09/2024" disabled>
-                    </div>
-                    <div class="form-group-host">
-                        <label class="form-label-host">Ngày kết thúc</label>
-                        <input type="text" class="form-control-host" value="17/09/2025" disabled>
-=======
                         <input type="text" class="form-control-host"
                             th:value="${item.startDate != null ? #dates.format(item.startDate, 'dd/MM/yyyy') : 'N/A'}"
                             disabled>
@@ -906,219 +848,22 @@
                         <input type="text" class="form-control-host"
                             th:value="${item.endDate != null ? #dates.format(item.endDate, 'dd/MM/yyyy') : 'N/A'}"
                             disabled>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                 </div>
 
                 <div class="form-row-host">
                     <div class="form-group-host">
-<<<<<<< HEAD
-                        <label class="form-label-host">Ghi chú</label>
-                        <textarea class="form-textarea-host" disabled>Khách thuê đúng hạn, không có vấn đề gì.</textarea>
-=======
                         <label class="form-label-host">Điều khoản hợp đồng</label>
                         <textarea class="form-textarea-host" disabled th:text="${item.terms}"></textarea>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                     </div>
                 </div>
             </div>
         </div>
     </div>
-<<<<<<< HEAD
-
-    <!-- Edit Modal -->
-    <div id="editModal" class="modal-overlay-host">
-        <div class="modal-content-host">
-            <div class="modal-header-host">
-                <h4 class="modal-title-host">
-                    <i class="fas fa-edit"></i>
-                    Chỉnh sửa thông tin khách thuê
-                </h4>
-                <button class="close-btn-host" onclick="hideEditModal()">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div class="modal-body-host">
-                <!-- Personal Information Section -->
-                <div class="modal-section-host">
-                    <h5 class="modal-section-title-host">
-                        <i class="fas fa-user"></i>
-                        Thông tin cá nhân
-                    </h5>
-                    <div class="form-row-host">
-                        <div class="form-group-host">
-                            <label class="form-label-host">Họ và tên</label>
-                            <input type="text" class="form-control-edit-host" id="editHoVaTen" value="Nguyễn Văn An" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Giới tính</label>
-                            <div class="gender-group-host">
-                                <div class="radio-group-host">
-                                    <input type="radio" class="radio-input-host" name="editGioiTinh" id="editNam" checked disabled>
-                                    <label class="radio-label-host" for="editNam">Nam</label>
-                                </div>
-                                <div class="radio-group-host">
-                                    <input type="radio" class="radio-input-host" name="editGioiTinh" id="editNu" disabled>
-                                    <label class="radio-label-host" for="editNu">Nữ</label>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Số điện thoại</label>
-                            <input type="text" class="form-control-edit-host" id="editSoDienThoai" value="0123456789" disabled>
-                        </div>
-                    </div>
-                    <div class="form-row-host">
-                        <div class="form-group-host">
-                            <label class="form-label-host">Ngày sinh</label>
-                            <input type="text" class="form-control-edit-host" id="editNgaySinh" value="17/09/1990" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Nơi cấp</label>
-                            <input type="text" class="form-control-edit-host" id="editNoiCap" value="Công An Tỉnh Đà Nẵng" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">CCCD/CMND</label>
-                            <input type="text" class="form-control-edit-host" id="editCccdCmnd" value="123456789012" disabled>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Rental Information Section -->
-                <div class="modal-section-host">
-                    <h5 class="modal-section-title-host">
-                        <i class="fas fa-home"></i>
-                        Thông tin thuê trọ
-                    </h5>
-                    <div class="form-row-host">
-                        <div class="form-group-host">
-                            <label class="form-label-host">Khu trọ</label>
-                            <input type="text" class="form-control-edit-host" id="editKhuTro" value="KTX A1" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">ID Phòng</label>
-                            <input type="text" class="form-control-edit-host" id="editIdPhong" value="A101" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Trạng thái</label>
-                            <select class="form-select-edit-host" id="editTrangThai">
-                                <option value="Đang thuê" selected>Đang thuê</option>
-                                <option value="Đã trả phòng">Đã trả phòng</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-row-host">
-                        <div class="form-group-host">
-                            <label class="form-label-host">Ngày bắt đầu</label>
-                            <input type="text" class="form-control-edit-host" id="editNgayBatDau" value="17/09/2024" disabled>
-                        </div>
-                        <div class="form-group-host">
-                            <label class="form-label-host">Ngày kết thúc</label>
-                            <input type="text" class="form-control-edit-host" id="editNgayKetThuc" value="17/09/2025" disabled>
-                        </div>
-                    </div>
-                    <div class="form-row-host">
-                        <div class="form-group-host">
-                            <label class="form-label-host">Ghi chú</label>
-                            <textarea class="form-control-edit-host" id="editGhiChu" rows="3" disabled>Khách thuê đúng hạn, không có vấn đề gì.</textarea>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-actions-host">
-                <button class="btn-save-host" onclick="saveChanges()">
-                    <i class="fas fa-save"></i>
-                    Lưu thay đổi
-                </button>
-                <button class="btn-cancel-host" onclick="hideEditModal()">
-                    <i class="fas fa-times"></i>
-                    Hủy bỏ
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-=======
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
 
     <script>
-<<<<<<< HEAD
-        function showEditModal() {
-            const modal = document.getElementById('editModal');
-            modal.classList.add('show');
-            document.body.style.overflow = 'hidden';
-        }
-
-        function hideEditModal() {
-            const modal = document.getElementById('editModal');
-            modal.classList.remove('show');
-            document.body.style.overflow = 'auto';
-        }
-
-        function saveChanges() {
-            const newStatus = document.getElementById('editTrangThai').value;
-            const statusElement = document.getElementById('trangThai');
-            
-            // Update status display
-            statusElement.innerHTML = `
-                <i class="fas fa-${newStatus === 'Đang thuê' ? 'check-circle' : 'times-circle'}"></i>
-                ${newStatus}
-            `;
-            
-            // Update status class
-            statusElement.className = `status-badge-host ${newStatus === 'Đang thuê' ? 'status-active-host' : 'status-inactive-host'}`;
-            
-            // Show success message
-            const successMsg = document.createElement('div');
-            successMsg.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: #10b981;
-                color: white;
-                padding: 12px 20px;
-                border-radius: 8px;
-                font-weight: 600;
-                z-index: 9999;
-                box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-                animation: slideInRight 0.3s ease;
-            `;
-            successMsg.innerHTML = '<i class="fas fa-check"></i> Cập nhật thành công!';
-            document.body.appendChild(successMsg);
-            
-            setTimeout(() => {
-                successMsg.remove();
-            }, 3000);
-            
-            hideEditModal();
-        }
-
-        // Close modal when clicking outside
-        document.getElementById('editModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                hideEditModal();
-            }
-        });
-
-        // Add slide animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from {
-                    transform: translateX(100%);
-                    opacity: 0;
-                }
-                to {
-                    transform: translateX(0);
-                    opacity: 1;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-=======
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.toast-close').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -1137,7 +882,6 @@
         function showEditModal() { document.getElementById('editModal').classList.add('show'); }
         function hideEditModal() { document.getElementById('editModal').classList.remove('show'); }
         document.getElementById('editModal').addEventListener('click', function (e) { if (e.target === this) { hideEditModal(); } });
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     </script>
 </body>
 

@@ -195,11 +195,6 @@ public class DemoController {
         return "host/QL-thanh-toan-host";
     }
 
-    @GetMapping("/chu-tro/quan-ly-tro")
-    public String phongtro() {
-        return "host/phongtro";
-    }
-
     @GetMapping("/chu-tro/khach-thue")
     public String showTenantManagementPage(
             Model model,

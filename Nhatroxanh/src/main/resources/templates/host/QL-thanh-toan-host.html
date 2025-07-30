@@ -12,11 +12,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<<<<<<< HEAD
-  
-=======
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
   <style>
     :root {
       --primary-color: #3498db;
@@ -392,8 +388,6 @@
       margin: 0;
     }
 
-<<<<<<< HEAD
-=======
     /* Pagination Styles */
     .pagination-section {
       padding: 1.5rem;
@@ -464,7 +458,6 @@
       background: #3E83CC;
     }
 
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
     @media (max-width: 768px) {
       .main-container {
         margin: 0 10px;
@@ -588,12 +581,6 @@
                     <option value="double">Phòng đôi</option>
                   </select>
                 </div>
-<<<<<<< HEAD
-                <div class="col-auto">
-                  <button class="btn btn-search" onclick="performSearch()">
-                    <i class="fas fa-search me-2"></i>Tìm kiếm
-                  </button>
-=======
               </div>
 
               <!-- Filter and Actions -->
@@ -638,7 +625,6 @@
                       <span class="d-none d-sm-inline">Gửi hóa đơn</span>
                     </button>
                   </div>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
                 </div>
               </div>
             </div>
@@ -891,10 +877,6 @@
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
-<<<<<<< HEAD
-          <button type="button" class="btn btn-success" onclick="downloadInvoice()">
-            <i class="fas fa-download me-2"></i>Tải xuống
-=======
           <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
             <i class="fas fa-trash me-2"></i>Xóa
           </button>
@@ -997,7 +979,6 @@
           </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="removeModalBackdrop()">
             <i class="fas fa-times me-2"></i>Hủy
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
           </button>
         </div>
       </div>
@@ -1006,25 +987,9 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-<<<<<<< HEAD
-  
-  <script>
-    // Toast functions
-    function showToast(type, message) {
-      const toastElement = document.getElementById(type + 'Toast');
-      const messageElement = toastElement.querySelector('.toast-message');
-      messageElement.textContent = message;
-      
-      const toast = new bootstrap.Toast(toastElement, {
-        delay: 3000
-      });
-      toast.show();
-    }
-=======
   <script th:src="@{/js/payment-management.js}"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.all.min.js"></script>
 </body>
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
 
     // Search functionality
     function performSearch() {

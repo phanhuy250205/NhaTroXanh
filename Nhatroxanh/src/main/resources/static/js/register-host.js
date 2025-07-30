@@ -174,27 +174,6 @@ document.addEventListener("DOMContentLoaded", () => {
         registerForm.addEventListener("submit", function (event) {
             event.preventDefault();
             if (!validateForm()) return;
-<<<<<<< HEAD
-            // Lấy dữ liệu từ các input
-            const fullName = document.getElementById("fullName").value;
-            const email = document.getElementById("email").value;
-            const phoneNumber = document.getElementById("phoneNumber").value;
-            const password = document.getElementById("password").value;
-            const confirmPassword = document.getElementById("confirmPassword").value;
-            const agreeTerms = document.getElementById("agreeTerms").checked;
-            const birthDate = document.getElementById("birthDate") ? document.getElementById("birthDate").value : null;
-
-
-            if (password !== confirmPassword) {
-                alert("Mật khẩu và xác nhận mật khẩu không khớp!");
-                return;
-            }
-            if (!agreeTerms) {
-                alert("Bạn phải đồng ý với Điều khoản và Chính sách bảo mật.");
-                return;
-            }
-=======
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
 
             const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
             const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || "";
@@ -236,28 +215,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             fetch("/api/users/register-owner", {
-<<<<<<< HEAD
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userRequest),
-            })
-            .then(response => {
-                if (response.ok) {
-                    // ---- PHẦN THAY ĐỔI ----
-                    // 1. Thay đổi thông báo
-                    alert("Đăng ký thành công! Đang chuyển đến trang đăng nhập.");
-                    // 2. Chuyển hướng thẳng đến trang đăng nhập của chủ trọ
-                    window.location.href = '/dang-nhap-chu-tro'; 
-                    // -----------------------
-                } else {
-                    return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi đăng ký:", error);
-                alert("Đăng ký thất bại: " + error.message);
-            });
-=======
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userRequest),
@@ -284,7 +241,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.error("Lỗi đăng ký:", error);
         alert("Đăng ký thất bại: " + error.message);
     });
->>>>>>> 7951c7dbf32b78367d21a80e7febcd5bfc517b2a
         });
     }
 

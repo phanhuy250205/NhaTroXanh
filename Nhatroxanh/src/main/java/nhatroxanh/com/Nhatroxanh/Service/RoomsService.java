@@ -16,5 +16,6 @@ public interface RoomsService {
     Optional<Rooms> findById(Integer id);
     Rooms save(Rooms room);
     Set<Utility> getUtilitiesByRoomId(Integer roomId);
+    List<Rooms> findByHostelId(Integer hostelId);
 
 }
