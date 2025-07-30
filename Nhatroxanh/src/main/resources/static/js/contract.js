@@ -53,8 +53,7 @@ window.NhaTroContract = {
                             console.log("Contract data:", JSON.stringify(contract, null, 2));
                             window.contractData = contract; // Lưu dữ liệu toàn cục
 
-                            // 🔥 BẮT ĐẦU PHẦN SỬA LỖI 🔥
-                            // Sau khi tải dữ liệu xong, lập tức kiểm tra và điền thông tin cho tab đầu tiên
+                            // Xử lý tenant
                             if (contract.tenantType === "UNREGISTERED" && contract.unregisteredTenant) {
                                 console.log("Initial load: Filling unregistered tenant fields...");
                                 this.fillTenantFields(contract.unregisteredTenant);
@@ -62,7 +61,34 @@ window.NhaTroContract = {
                                 console.log("Initial load: Filling registered tenant fields...");
                                 this.fillTenantFields(contract.tenant);
                             }
-                            // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
+
+                            // 🔥 THÊM XỬ LÝ RESIDENTS 🔥
+                            if (contract.residents && Array.isArray(contract.residents) && contract.residents.length > 0) {
+                                console.log("🔍 Loading residents:", contract.residents);
+                                // Gán residents vào mảng toàn cục
+                                this.residents = contract.residents.map(res => ({
+                                    name: res.fullName,
+                                    birthYear: res.birthYear,
+                                    phone: res.phone || "",
+                                    id: res.cccdNumber || "",
+                                    notes: "" // Ghi chú không có trong DTO, để trống
+                                }));
+
+                                // Hiển thị residents trong UI
+                                this.residents.forEach(resident => {
+                                    this.addResidentToList(resident);
+                                });
+
+                                // Cập nhật số lượng và preview
+                                this.updateResidentsCount();
+                                this.updateResidentsPreview();
+                                console.log("✅ Loaded", this.residents.length, "residents into UI");
+                            } else {
+                                console.log("🔍 No residents found in contract data");
+                                this.residents = [];
+                                this.updateResidentsCount();
+                                this.updateResidentsPreview();
+                            }
 
                             console.log("🚀 Contract data saved, and initial form filled.");
                         });
@@ -295,6 +321,7 @@ window.NhaTroContract = {
             this.updateResidentsPreview()
         }
     },
+
 
     // Update residents in preview
     updateResidentsPreview() {
@@ -1138,8 +1165,7 @@ window.NhaTroContract = {
         }
     },
 
-    // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
-    // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
+
     // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
     handleTenantTypeStatus(tenant) {
         console.log("🏷️ Handling tenant type status...");
@@ -1206,36 +1232,59 @@ window.NhaTroContract = {
         const frontPreview = document.getElementById("cccd-front-preview");
         const backPreview = document.getElementById("cccd-back-preview");
 
-        // ✅ KIỂM TRA ELEMENTS TỒN TẠI
+        // Kiểm tra phần tử DOM
         if (!frontPreview) {
             console.warn("❌ cccd-front-preview element not found");
             return;
         }
-
         if (!backPreview) {
             console.warn("❌ cccd-back-preview element not found");
             return;
         }
 
         try {
-            frontPreview.innerHTML = ''; // Xóa nội dung cũ
-            backPreview.innerHTML = ''; // Xóa nội dung cũ
+            // Xóa nội dung cũ
+            frontPreview.innerHTML = '';
+            backPreview.innerHTML = '';
 
+            // Tạo base URL
             const baseUrl = window.location.origin;
             const cccdFrontUrl = tenant.cccdFrontUrl ?
-                `${baseUrl}${tenant.cccdFrontUrl.startsWith('/') ? '' : '/'}${tenant.cccdFrontUrl.replace(/ /g, '%20')}` : null;
+                `${baseUrl}${tenant.cccdFrontUrl.replace('/uploads/', '/uploads/cccd/')}` : null;
             const cccdBackUrl = tenant.cccdBackUrl ?
-                `${baseUrl}${tenant.cccdBackUrl.startsWith('/') ? '' : '/'}${tenant.cccdBackUrl.replace(/ /g, '%20')}` : null;
+                `${baseUrl}${tenant.cccdBackUrl.replace('/uploads/', '/uploads/cccd/')}` : null;
 
+            // Hàm tạo thẻ img với xử lý lỗi
+            const createImageElement = (url, alt) => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = alt;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '200px';
+                img.style.height = 'auto';
+                img.style.objectFit = 'contain';
+                img.style.borderRadius = '8px';
+                img.onerror = () => {
+                    console.error(`❌ Failed to load image: ${url}`);
+                    img.parentElement.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Không tải được ảnh</div>`;
+                    if (typeof this.showNotification === 'function') {
+                        this.showNotification(`Không tải được ảnh ${alt}`, 'error');
+                    }
+                };
+                return img;
+            };
+
+            // Hiển thị ảnh mặt trước
             if (cccdFrontUrl) {
-                frontPreview.innerHTML = `<img src="${cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                frontPreview.appendChild(createImageElement(cccdFrontUrl, 'CCCD Front'));
                 console.log("✅ CCCD front image set");
             } else {
                 frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
             }
 
+            // Hiển thị ảnh mặt sau
             if (cccdBackUrl) {
-                backPreview.innerHTML = `<img src="${cccdBackUrl}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                backPreview.appendChild(createImageElement(cccdBackUrl, 'CCCD Back'));
                 console.log("✅ CCCD back image set");
             } else {
                 backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
@@ -1243,7 +1292,9 @@ window.NhaTroContract = {
 
         } catch (error) {
             console.error("❌ Error filling tenant images:", error);
-            this.showNotification("Lỗi khi hiển thị ảnh CCCD: " + error.message, "error");
+            if (typeof this.showNotification === 'function') {
+                this.showNotification("Lỗi khi hiển thị ảnh CCCD: " + error.message, "error");
+            }
         }
     },
 
@@ -2718,196 +2769,208 @@ window.NhaTroContract = {
 
 
 
-buildContractData(roomIdNumber, roomSelect) {
-    const contractData = {};
+    buildContractData(roomIdNumber, roomSelect) {
+        const contractData = {};
 
-    // Room (chỉ gửi nếu người dùng chọn phòng mới)
-    if (roomIdNumber && roomSelect && roomSelect.selectedIndex >= 0) {
-        const selectedOption = roomSelect.options[roomSelect.selectedIndex];
-        contractData.room = {
-            roomId: roomIdNumber,
-            roomName: selectedOption.dataset.roomName || `Phòng ${roomIdNumber}`,
-            price: parseFloat(selectedOption.dataset.price) || undefined,
-            area: parseFloat(selectedOption.dataset.area) || undefined,
-            status: selectedOption.dataset.status || undefined
-        };
+        // Room (giữ nguyên)
+        if (roomIdNumber && roomSelect && roomSelect.selectedIndex >= 0) {
+            const selectedOption = roomSelect.options[roomSelect.selectedIndex];
+            contractData.room = {
+                roomId: roomIdNumber,
+                roomName: selectedOption.dataset.roomName || `Phòng ${roomIdNumber}`,
+                price: parseFloat(selectedOption.dataset.price) || undefined,
+                area: parseFloat(selectedOption.dataset.area) || undefined,
+                status: selectedOption.dataset.status || undefined
+            };
 
-        // Thu thập tiện ích
-        const selectedUtilityIds = [];
-        document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]:checked').forEach(checkbox => {
-            selectedUtilityIds.push(parseInt(checkbox.value));
-        });
+            // Thu thập tiện ích
+            const selectedUtilityIds = [];
+            document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]:checked').forEach(checkbox => {
+                selectedUtilityIds.push(parseInt(checkbox.value));
+            });
 
-        if (selectedUtilityIds.length > 0) {
-            contractData.room.utilityIds = selectedUtilityIds;
-            console.log("🛠️ Tiện ích đã chọn (IDs):", selectedUtilityIds);
-        }
-    }
-
-    // Contract basic info
-    const contractDate = document.getElementById("contract-date")?.value?.trim();
-    if (contractDate) contractData.contractDate = contractDate;
-
-    const contractStatus = document.getElementById("contract-status")?.value?.trim();
-    if (contractStatus) contractData.status = contractStatus;
-
-    // Terms
-    const terms = {};
-    const startDate = document.getElementById("start-date")?.value?.trim();
-    if (startDate) terms.startDate = startDate;
-
-    const duration = parseInt(document.getElementById("contract-duration")?.value);
-    if (!isNaN(duration) && duration > 0) terms.duration = duration;
-
-    const rentPrice = parseFloat(document.getElementById("rent-price")?.value);
-    if (!isNaN(rentPrice) && rentPrice > 0) terms.price = rentPrice;
-
-    const depositMonths = parseFloat(document.getElementById("deposit-months")?.value);
-    if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
-        terms.deposit = depositMonths * rentPrice;
-    }
-    if (terms.startDate && terms.duration) {
-        const start = new Date(terms.startDate);
-        start.setMonth(start.getMonth() + terms.duration);
-        terms.endDate = start.toISOString().split("T")[0];
-    }
-
-    const termsText = this.getContractTermsText ? this.getContractTermsText() : undefined;
-    if (termsText) terms.terms = termsText;
-
-    // ✅ BẮT ĐẦU PHẦN ĐÃ THÊM
-    // LẤY DỮ LIỆU PAYMENT METHOD VÀ DATE TỪ FORM VÀ GÁN VÀO contractData
-    const paymentMethod = document.getElementById("payment-method")?.value?.trim();
-    if (paymentMethod) contractData.paymentMethod = paymentMethod;
-
-    const paymentDate = document.getElementById("payment-date")?.value?.trim();
-    if (paymentDate) {
-        contractData.terms = contractData.terms || {};
-        contractData.terms.paymentDateDescription = paymentDate;
-    }
-    // ✅ KẾT THÚC PHẦN ĐÃ THÊM
-
-    if (Object.keys(terms).length > 0) contractData.terms = terms;
-
-    // Tenant
-    if (this.unregisteredTenantData) {
-        contractData.tenantType = "UNREGISTERED";
-        contractData.unregisteredTenant = { ...this.unregisteredTenantData };
-    } else {
-        contractData.tenantType = "REGISTERED";
-        const tenant = {};
-        const tenantPhone = document.getElementById("tenant-phone")?.value?.trim();
-        if (tenantPhone) tenant.phone = tenantPhone;
-
-        const tenantFullName = document.getElementById("tenant-name")?.value?.trim();
-        if (tenantFullName) tenant.fullName = tenantFullName;
-
-        const tenantCccd = document.getElementById("tenant-id")?.value?.trim();
-        if (tenantCccd) tenant.cccdNumber = tenantCccd;
-
-        const tenantBirthday = document.getElementById("tenant-dob")?.value?.trim();
-        if (tenantBirthday) tenant.birthday = tenantBirthday;
-
-        const tenantEmail = document.getElementById("tenant-email")?.value?.trim();
-        if (tenantEmail) tenant.email = tenantEmail;
-
-        const tenantStreet = document.getElementById("tenant-street")?.value?.trim();
-        if (tenantStreet) tenant.street = tenantStreet;
-
-        const tenantWard = document.getElementById("tenant-ward")?.options[document.getElementById("tenant-ward")?.selectedIndex]?.text?.trim();
-        if (tenantWard && tenantWard !== "Chọn Phường/Xã") tenant.ward = tenantWard;
-
-        const tenantDistrict = document.getElementById("tenant-district")?.options[document.getElementById("tenant-district")?.selectedIndex]?.text?.trim();
-        if (tenantDistrict && tenantDistrict !== "Chọn Quận/Huyện") tenant.district = tenantDistrict;
-
-        const tenantProvince = document.getElementById("tenant-province")?.options[document.getElementById("tenant-province")?.selectedIndex]?.text?.trim();
-        if (tenantProvince && tenantProvince !== "Chọn Tỉnh/Thành phố") tenant.province = tenantProvince;
-
-        const tenantIssueDate = document.getElementById("tenant-id-date")?.value?.trim();
-        if (tenantIssueDate) tenant.issueDate = tenantIssueDate;
-
-        const tenantIssuePlace = document.getElementById("tenant-id-place")?.value?.trim();
-        if (tenantIssuePlace) tenant.issuePlace = tenantIssuePlace;
-
-        const frontPreviewElement = document.getElementById('cccd-front-preview');
-        const frontImg = frontPreviewElement ? frontPreviewElement.querySelector('img') : null;
-        if (frontImg && frontImg.src) {
-            const relativePath = frontImg.src.replace(window.location.origin, '');
-            if (relativePath && !relativePath.includes('data:')) {
-                tenant.cccdFrontUrl = relativePath;
+            if (selectedUtilityIds.length > 0) {
+                contractData.room.utilityIds = selectedUtilityIds;
+                console.log("🛠️ Tiện ích đã chọn (IDs):", selectedUtilityIds);
             }
         }
 
-        const backPreviewElement = document.getElementById('cccd-back-preview');
-        const backImg = backPreviewElement ? backPreviewElement.querySelector('img') : null;
-        if (backImg && backImg.src) {
-            const relativePath = backImg.src.replace(window.location.origin, '');
-            if (relativePath && !relativePath.includes('data:')) {
-                tenant.cccdBackUrl = relativePath;
-            }
+        // ✅ SỬA: Contract Date - Lấy từ hidden input
+        const contractDateValue = document.getElementById("contract-date-value")?.value?.trim();
+        if (contractDateValue) {
+            contractData.contractDate = contractDateValue;
+            console.log("📅 Contract date from hidden input:", contractDateValue);
+        } else {
+            // Fallback
+            contractData.contractDate = new Date().toISOString().split('T')[0];
+            console.log("📅 Using current date as fallback:", contractData.contractDate);
         }
 
-        if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
-    }
+        const contractStatus = document.getElementById("contract-status")?.value?.trim();
+        if (contractStatus) contractData.status = contractStatus;
 
-    // Owner
-    const owner = {};
-    const ownerFullName = document.getElementById("owner-name")?.value?.trim();
-    if (ownerFullName) owner.fullName = ownerFullName;
+        // Terms
+        const terms = {};
+        const startDate = document.getElementById("start-date")?.value?.trim();
+        if (startDate) terms.startDate = startDate;
 
-    const ownerPhone = document.getElementById("owner-phone")?.value?.trim();
-    if (ownerPhone) owner.phone = ownerPhone;
+        const duration = parseInt(document.getElementById("contract-duration")?.value);
+        if (!isNaN(duration) && duration > 0) terms.duration = duration;
 
-    const ownerCccd = document.getElementById("owner-id")?.value?.trim();
-    if (ownerCccd) owner.cccdNumber = ownerCccd;
+        const rentPrice = parseFloat(document.getElementById("rent-price")?.value);
+        if (!isNaN(rentPrice) && rentPrice > 0) terms.price = rentPrice;
 
-    const ownerBirthday = document.getElementById("owner-dob")?.value?.trim();
-    if (ownerBirthday) owner.birthday = ownerBirthday;
+        const depositMonths = parseFloat(document.getElementById("deposit-months")?.value);
+        if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
+            terms.deposit = depositMonths * rentPrice;
+        }
 
-    const ownerEmail = document.getElementById("owner-email")?.value?.trim();
-    if (ownerEmail) owner.email = ownerEmail;
+        // Tính endDate
+        if (terms.startDate && terms.duration) {
+            const start = new Date(terms.startDate);
+            start.setMonth(start.getMonth() + terms.duration);
+            terms.endDate = start.toISOString().split("T")[0];
+        }
 
-    const ownerStreet = document.getElementById("owner-street")?.value?.trim();
-    if (ownerStreet) owner.street = ownerStreet;
+        const termsText = this.getContractTermsText ? this.getContractTermsText() : undefined;
+        if (termsText) terms.terms = termsText;
 
-    const ownerWard = document.getElementById("owner-ward")?.options[document.getElementById("owner-ward")?.selectedIndex]?.text?.trim();
-    if (ownerWard && ownerWard !== "Chọn Phường/Xã") owner.ward = ownerWard;
+        // Payment method và date
+        const paymentMethod = document.getElementById("payment-method")?.value?.trim();
+        if (paymentMethod) contractData.paymentMethod = paymentMethod;
 
-    const ownerDistrict = document.getElementById("owner-district")?.options[document.getElementById("owner-district")?.selectedIndex]?.text?.trim();
-    if (ownerDistrict && ownerDistrict !== "Chọn Quận/Huyện") owner.district = ownerDistrict;
+        const paymentDate = document.getElementById("payment-date")?.value?.trim();
+        if (paymentDate) {
+            terms.paymentDateDescription = paymentDate;
+            console.log("💳 Payment date description:", paymentDate);
+        }
 
-    const ownerProvince = document.getElementById("owner-province")?.options[document.getElementById("owner-province")?.selectedIndex]?.text?.trim();
-    if (ownerProvince && ownerProvince !== "Chọn Tỉnh/Thành phố") owner.province = ownerProvince;
+        if (Object.keys(terms).length > 0) {
+            contractData.terms = terms;
+        }
 
-    const ownerIssueDate = document.getElementById("owner-id-date")?.value?.trim();
-    if (ownerIssueDate) owner.issueDate = ownerIssueDate;
+        // Tenant (giữ nguyên code của bạn)
+        if (this.unregisteredTenantData) {
+            contractData.tenantType = "UNREGISTERED";
+            contractData.unregisteredTenant = { ...this.unregisteredTenantData };
+        } else {
+            contractData.tenantType = "REGISTERED";
+            const tenant = {};
 
-    const ownerIssuePlace = document.getElementById("owner-id-place")?.value?.trim();
-    if (ownerIssuePlace) owner.issuePlace = ownerIssuePlace;
+            const tenantPhone = document.getElementById("tenant-phone")?.value?.trim();
+            if (tenantPhone) tenant.phone = tenantPhone;
 
-    const ownerBankAccount = document.getElementById("owner-bankAccount")?.value?.trim();
-    if (ownerBankAccount) owner.bankAccount = ownerBankAccount;
+            const tenantFullName = document.getElementById("tenant-name")?.value?.trim();
+            if (tenantFullName) tenant.fullName = tenantFullName;
 
-    if (Object.keys(owner).length > 0) contractData.owner = owner;
+            const tenantCccd = document.getElementById("tenant-id")?.value?.trim();
+            if (tenantCccd) tenant.cccdNumber = tenantCccd;
 
-    // 🔥 THU THẬP DANH SÁCH NGƯỜI Ở CÙNG 🔥
-    if (this.residents && this.residents.length > 0) {
-        contractData.residents = this.residents.map(res => {
-            // Ánh xạ lại tên trường cho đúng với DTO ở backend
-            return {
+            const tenantBirthday = document.getElementById("tenant-dob")?.value?.trim();
+            if (tenantBirthday) tenant.birthday = tenantBirthday;
+
+            const tenantEmail = document.getElementById("tenant-email")?.value?.trim();
+            if (tenantEmail) tenant.email = tenantEmail;
+
+            const tenantStreet = document.getElementById("tenant-street")?.value?.trim();
+            if (tenantStreet) tenant.street = tenantStreet;
+
+            const tenantWard = document.getElementById("tenant-ward")?.options[document.getElementById("tenant-ward")?.selectedIndex]?.text?.trim();
+            if (tenantWard && tenantWard !== "Chọn Phường/Xã") tenant.ward = tenantWard;
+
+            const tenantDistrict = document.getElementById("tenant-district")?.options[document.getElementById("tenant-district")?.selectedIndex]?.text?.trim();
+            if (tenantDistrict && tenantDistrict !== "Chọn Quận/Huyện") tenant.district = tenantDistrict;
+
+            const tenantProvince = document.getElementById("tenant-province")?.options[document.getElementById("tenant-province")?.selectedIndex]?.text?.trim();
+            if (tenantProvince && tenantProvince !== "Chọn Tỉnh/Thành phố") tenant.province = tenantProvince;
+
+            const tenantIssueDate = document.getElementById("tenant-id-date")?.value?.trim();
+            if (tenantIssueDate) tenant.issueDate = tenantIssueDate;
+
+            const tenantIssuePlace = document.getElementById("tenant-id-place")?.value?.trim();
+            if (tenantIssuePlace) tenant.issuePlace = tenantIssuePlace;
+
+            // CCCD images
+            const frontPreviewElement = document.getElementById('cccd-front-preview');
+            const frontImg = frontPreviewElement ? frontPreviewElement.querySelector('img') : null;
+            if (frontImg && frontImg.src) {
+                const relativePath = frontImg.src.replace(window.location.origin, '');
+                if (relativePath && !relativePath.includes('data:')) {
+                    tenant.cccdFrontUrl = relativePath;
+                }
+            }
+
+            const backPreviewElement = document.getElementById('cccd-back-preview');
+            const backImg = backPreviewElement ? backPreviewElement.querySelector('img') : null;
+            if (backImg && backImg.src) {
+                const relativePath = backImg.src.replace(window.location.origin, '');
+                if (relativePath && !relativePath.includes('data:')) {
+                    tenant.cccdBackUrl = relativePath;
+                }
+            }
+
+            if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
+        }
+
+        // Owner (giữ nguyên code của bạn)
+        const owner = {};
+        const ownerFullName = document.getElementById("owner-name")?.value?.trim();
+        if (ownerFullName) owner.fullName = ownerFullName;
+
+        const ownerPhone = document.getElementById("owner-phone")?.value?.trim();
+        if (ownerPhone) owner.phone = ownerPhone;
+
+        const ownerCccd = document.getElementById("owner-id")?.value?.trim();
+        if (ownerCccd) owner.cccdNumber = ownerCccd;
+
+        const ownerBirthday = document.getElementById("owner-dob")?.value?.trim();
+        if (ownerBirthday) owner.birthday = ownerBirthday;
+
+        const ownerEmail = document.getElementById("owner-email")?.value?.trim();
+        if (ownerEmail) owner.email = ownerEmail;
+
+        const ownerStreet = document.getElementById("owner-street")?.value?.trim();
+        if (ownerStreet) owner.street = ownerStreet;
+
+        const ownerWard = document.getElementById("owner-ward")?.options[document.getElementById("owner-ward")?.selectedIndex]?.text?.trim();
+        if (ownerWard && ownerWard !== "Chọn Phường/Xã") owner.ward = ownerWard;
+
+        const ownerDistrict = document.getElementById("owner-district")?.options[document.getElementById("owner-district")?.selectedIndex]?.text?.trim();
+        if (ownerDistrict && ownerDistrict !== "Chọn Quận/Huyện") owner.district = ownerDistrict;
+
+        const ownerProvince = document.getElementById("owner-province")?.options[document.getElementById("owner-province")?.selectedIndex]?.text?.trim();
+        if (ownerProvince && ownerProvince !== "Chọn Tỉnh/Thành phố") owner.province = ownerProvince;
+
+        const ownerIssueDate = document.getElementById("owner-id-date")?.value?.trim();
+        if (ownerIssueDate) owner.issueDate = ownerIssueDate;
+
+        const ownerIssuePlace = document.getElementById("owner-id-place")?.value?.trim();
+        if (ownerIssuePlace) owner.issuePlace = ownerIssuePlace;
+
+        const ownerBankAccount = document.getElementById("owner-bankAccount")?.value?.trim();
+        if (ownerBankAccount) owner.bankAccount = ownerBankAccount;
+
+        if (Object.keys(owner).length > 0) contractData.owner = owner;
+
+        // Residents
+        if (this.residents && this.residents.length > 0) {
+            contractData.residents = this.residents.map(res => ({
                 fullName: res.name,
                 birthYear: res.birthYear,
                 phone: res.phone,
                 cccdNumber: res.id
-            };
-        });
-        console.log("👥 Đã thêm người ở cùng vào dữ liệu gửi đi:", contractData.residents);
-    }
+            }));
+            console.log("👥 Residents data:", contractData.residents);
+        }
 
-    console.log("=== FINAL CONTRACT DATA (before sending files) ===");
-    console.log(JSON.stringify(contractData, null, 2));
-    return contractData;
-},
+        console.log("=== FINAL CONTRACT DATA ===");
+        console.log("📅 Contract Date:", contractData.contractDate);
+        console.log(JSON.stringify(contractData, null, 2));
+        return contractData;
+    },
+
+
+
     getContractTermsText() {
         if (this.contractTerms && this.contractTerms.length > 0) {
             return this.contractTerms.map((term, index) =>
@@ -3081,35 +3144,113 @@ buildContractData(roomIdNumber, roomSelect) {
 
     // FIX: Thêm hàm addResidentToList
     addResidentToList(resident) {
-        const residentsList = document.getElementById("residents-list")
-        const noResidentsMessage = document.getElementById("no-residents-message")
+        const residentsList = document.getElementById("residents-list");
+        const noResidentsMessage = document.getElementById("no-residents-message");
 
         if (noResidentsMessage) {
-            noResidentsMessage.style.display = "none"
+            noResidentsMessage.style.display = "none";
         }
 
-        const residentId = "resident-" + Date.now()
-        const residentDiv = document.createElement("div")
-        residentDiv.className = "nha-tro-resident-item card mb-2"
+        const residentId = "resident-" + Date.now();
+        const residentDiv = document.createElement("div");
+        residentDiv.className = "nha-tro-resident-item card mb-2";
+        residentDiv.id = residentId;
+        residentDiv.dataset.residentId = residentId; // Lưu ID để chỉnh sửa
         residentDiv.innerHTML = `
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="mb-1">${resident.name}</h6>
-                        <small class="text-muted">Năm sinh: ${resident.birthYear}</small>
-                        ${resident.phone ? `<br><small class="text-muted">SĐT: ${resident.phone}</small>` : ""}
-                        ${resident.id ? `<br><small class="text-muted">CCCD: ${resident.id}</small>` : ""}
-                        ${resident.notes ? `<br><small class="text-muted">Ghi chú: ${resident.notes}</small>` : ""}
-                    </div>
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${this.escapeHtml(resident.name)}</h6>
+                    <small class="text-muted">Năm sinh: ${this.escapeHtml(resident.birthYear)}</small>
+                    ${resident.phone ? `<br><small class="text-muted">SĐT: ${this.escapeHtml(resident.phone)}</small>` : ""}
+                    ${resident.id ? `<br><small class="text-muted">CCCD: ${this.escapeHtml(resident.id)}</small>` : ""}
+                    ${resident.notes ? `<br><small class="text-muted">Ghi chú: ${this.escapeHtml(resident.notes)}</small>` : ""}
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="NhaTroContract.editResident('${residentId}')" title="Sửa người ở">
+                        <i class="fa fa-edit"></i>
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="NhaTroContract.removeResident('${residentId}')" title="Xóa người ở">
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
             </div>
-        `
-        residentDiv.id = residentId
+        </div>
+    `;
+        residentsList.appendChild(residentDiv);
+    },
 
-        residentsList.appendChild(residentDiv)
+    editResident(residentId) {
+        const residentElement = document.getElementById(residentId);
+        if (!residentElement) return;
+
+        const residentName = residentElement.querySelector("h6").textContent;
+        const resident = this.residents.find(r => r.name === residentName);
+        if (!resident) return;
+
+        // Mở modal và điền dữ liệu
+        const modalElement = document.getElementById("addResidentModal");
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        document.getElementById("resident-name").value = resident.name;
+        document.getElementById("resident-birth-year").value = resident.birthYear;
+        document.getElementById("resident-phone").value = resident.phone || "";
+        document.getElementById("resident-id").value = resident.id || "";
+        document.getElementById("resident-notes").value = resident.notes || "";
+
+        // Cập nhật nút lưu để chỉnh sửa
+        const saveButton = document.getElementById("btn-save-resident");
+        saveButton.textContent = "Cập nhật người ở";
+        const originalOnClick = saveButton.onclick;
+        saveButton.onclick = () => {
+            const updatedResident = {
+                name: document.getElementById("resident-name").value.trim(),
+                birthYear: document.getElementById("resident-birth-year").value,
+                phone: document.getElementById("resident-phone").value.trim(),
+                id: document.getElementById("resident-id").value.trim(),
+                notes: document.getElementById("resident-notes").value.trim()
+            };
+
+            if (!updatedResident.name || !updatedResident.birthYear) {
+                this.showNotification("Vui lòng nhập đầy đủ họ tên và năm sinh", "warning");
+                return;
+            }
+
+            // Cập nhật resident trong mảng
+            const index = this.residents.findIndex(r => r.name === resident.name);
+            if (index !== -1) {
+                this.residents[index] = updatedResident;
+            }
+
+            // Cập nhật UI
+            residentElement.querySelector(".card-body").innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${this.escapeHtml(updatedResident.name)}</h6>
+                    <small class="text-muted">Năm sinh: ${this.escapeHtml(updatedResident.birthYear)}</small>
+                    ${updatedResident.phone ? `<br><small class="text-muted">SĐT: ${this.escapeHtml(updatedResident.phone)}</small>` : ""}
+                    ${updatedResident.id ? `<br><small class="text-muted">CCCD: ${this.escapeHtml(updatedResident.id)}</small>` : ""}
+                    ${updatedResident.notes ? `<br><small class="text-muted">Ghi chú: ${this.escapeHtml(updatedResident.notes)}</small>` : ""}
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="NhaTroContract.editResident('${residentId}')" title="Sửa người ở">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="NhaTroContract.removeResident('${residentId}')" title="Xóa người ở">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+            this.updateResidentsPreview();
+            this.updateResidentsCount();
+            this.showNotification(`Đã cập nhật người ở "${updatedResident.name}"`, "success");
+            modal.hide();
+            saveButton.textContent = "Thêm người ở";
+            saveButton.onclick = originalOnClick; // Khôi phục hàm thêm mới
+        };
     },
 
     // FIX: Thêm hàm removeResident
@@ -3607,13 +3748,156 @@ buildContractData(roomIdNumber, roomSelect) {
         }, 10000)
     },
 }
+function updateContractPreview() {
+    // Lấy dữ liệu từ form
+    const contractData = collectContractData();
 
+    // Định dạng ngày ký hợp đồng
+    const signDate = contractData.contractDate
+        ? new Date(contractData.contractDate).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        })
+        : '........................';
 
+    // Cập nhật các trường trong preview
+    $('#preview-sign-date').text(signDate);
+    $('#preview-owner-name').text(contractData.ownerName || '........................');
+    $('#preview-owner-dob').text(contractData.ownerBirthday || '........................');
+    $('#preview-owner-id').text(contractData.ownerIdCard || '........................');
+    $('#preview-owner-id-date').text(contractData.ownerIdDate || '........................');
+    $('#preview-owner-id-place').text(contractData.ownerIdPlace || '........................');
+    $('#preview-owner-address').text(contractData.ownerAddress || '........................');
+    $('#preview-owner-phone').text(contractData.ownerPhone || '........................');
+    $('#preview-owner-signature').text(contractData.ownerName || '........................');
 
-// Khởi tạo preview
+    $('#preview-tenant-name').text(contractData.tenantName || '........................');
+    $('#preview-tenant-dob').text(contractData.tenantBirthday || '........................');
+    $('#preview-tenant-id').text(contractData.tenantIdCard || '........................');
+    $('#preview-tenant-id-date').text(contractData.tenantIdDate || '........................');
+    $('#preview-tenant-id-place').text(contractData.tenantIdPlace || '........................');
+    $('#preview-tenant-address').text(contractData.tenantAddress || '........................');
+    $('#preview-tenant-phone').text(contractData.tenantPhone || '........................');
+    $('#preview-tenant-signature').text(contractData.tenantName || '........................');
 
+    $('#preview-room-address').text(contractData.roomAddress || 'Ký túc xá chưa xác định');
+    $('#preview-room-number').text(contractData.roomNumber || '........................');
+    $('#preview-room-area').text(contractData.roomArea ? `${contractData.roomArea} m²` : '........................');
 
-// Trigger update khi switch tab
+    $('#preview-duration').text(contractData.contractDuration || '........................');
+    $('#preview-start-date').text(contractData.contractStartDate || '........................');
+
+    // Tính ngày kết thúc
+    let endDate = '........................';
+    if (contractData.contractStartDate && contractData.contractDuration) {
+        const start = new Date(contractData.contractStartDate);
+        start.setMonth(start.getMonth() + parseInt(contractData.contractDuration));
+        endDate = start.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
+    $('#preview-end-date').text(endDate);
+
+    // Cập nhật giá thuê
+    const monthlyRent = contractData.monthlyRent;
+    $('#preview-rent').text(!isNaN(monthlyRent) && monthlyRent > 0
+        ? new Intl.NumberFormat('vi-VN').format(monthlyRent) + ' VNĐ/tháng'
+        : '........................');
+
+    // Cập nhật thông tin thanh toán
+    const paymentMethodText = contractData.paymentMethod === 'TIEN_MAT' ? 'Tiền mặt' : contractData.paymentMethod === 'BANK' ? 'Chuyển khoản' : '';
+    const paymentInfo = contractData.paymentDate && paymentMethodText
+        ? `vào ngày ${contractData.paymentDate} hàng tháng bằng ${paymentMethodText}`
+        : '........................';
+    $('#preview-payment-date').text(paymentInfo);
+
+    $('#preview-deposit').text(!isNaN(contractData.deposit) && contractData.deposit > 0
+        ? new Intl.NumberFormat('vi-VN').format(contractData.deposit) + ' VNĐ'
+        : '........................');
+    $('#preview-deposit-months').text(contractData.depositMonths || '........................');
+
+    // Cập nhật danh sách người ở
+    const residents = $('#residents-list').children().not('#no-residents-message').map(function() {
+        return $(this).find('.resident-name').text();
+    }).get().join(', ') || '........................';
+    $('#preview-residents').text(residents);
+    $('#preview-residents-section').css('display', residents !== '........................' ? 'block' : 'none');
+
+    // Cập nhật tiện ích
+    const amenities = $('.nha-tro-amenities input:checked').map(function() {
+        return $(this).siblings('label').text();
+    }).get().join(', ') || '........................';
+    $('#preview-amenities').text(amenities);
+
+    // Cập nhật điều khoản chung
+    $('#preview-terms').text(contractData.terms || 'Không có điều khoản bổ sung.');
+
+    // Debug
+    console.log('🔍 Preview Sign Date:', signDate);
+    console.log('🔍 Preview Rent:', contractData.monthlyRent);
+    console.log('🔍 Preview Payment Info:', paymentInfo);
+    console.log('🔍 Preview Room Address:', contractData.roomAddress);
+}
+
+// Hàm debounce để tối ưu hiệu suất
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Thêm sự kiện input để cập nhật preview
+$(document).ready(function() {
+    const inputs = [
+        '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
+        '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',
+        '#room-number', '#room-area', '#room-street', '#room-ward', '#room-district', '#room-province',
+        '#contract-date', '#start-date', '#contract-duration', '#rent-price', '#payment-date', '#payment-method', '#deposit-months', '#terms-conditions'
+    ];
+
+    const debouncedUpdatePreview = debounce(updateContractPreview, 300);
+    inputs.forEach(selector => {
+        $(selector).on('input change', debouncedUpdatePreview);
+    });
+
+    // Cập nhật preview khi thêm/xóa người ở hoặc tiện ích
+    $('#btn-save-resident, .nha-tro-amenities input').on('click', debouncedUpdatePreview);
+
+    // Cập nhật preview ban đầu
+    updateContractPreview();
+});
+
+// Hàm debounce để tối ưu hiệu suất
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Thêm sự kiện input để cập nhật preview
+$(document).ready(function() {
+    const inputs = [
+        '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
+        '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',
+        '#room-number', '#room-area', '#room-street', '#room-ward', '#room-district', '#room-province',
+        '#contract-date', '#start-date', '#contract-duration', '#rent-price', '#payment-date', '#payment-method', '#deposit-months', '#terms-conditions'
+    ];
+
+    const debouncedUpdatePreview = debounce(updateContractPreview, 300);
+    inputs.forEach(selector => {
+        $(selector).on('input change', debouncedUpdatePreview);
+    });
+
+    // Cập nhật preview khi thêm/xóa người ở hoặc tiện ích
+    $('#btn-save-resident, .nha-tro-amenities input').on('click', debouncedUpdatePreview);
+
+    // Cập nhật preview ban đầu
+    updateContractPreview();
+});
+
 
 
 

@@ -29,7 +29,7 @@ public interface ContractService {
     @Transactional
     Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
 
-    Contracts updateContract(Integer contractId, Contracts updatedContract) throws IllegalArgumentException, Exception;
+    Contracts updateContract(Integer contractId, Contracts updatedContract , ContractDto contractDto) throws IllegalArgumentException, Exception;
 
     @Transactional
     Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception;

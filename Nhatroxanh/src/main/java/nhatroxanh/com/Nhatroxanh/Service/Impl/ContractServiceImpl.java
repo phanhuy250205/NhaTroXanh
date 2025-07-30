@@ -328,7 +328,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
 }
     @Override
     @Transactional
-    public Contracts updateContract(Integer contractId, Contracts updatedContract) throws Exception {
+    public Contracts updateContract(Integer contractId, Contracts updatedContract, ContractDto contractDto) throws Exception {
         logger.info("=== START UPDATE CONTRACT (Full Contract Object) ===");
         logger.info("Updating contract with ID: {}", contractId);
         logger.info("Updated contract data: {}", updatedContract);
@@ -345,6 +345,28 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
         }
 
         Contracts contract = existingContract.get();
+        // 🔥 XỬ LÝ PAYMENT METHOD TỪ DTO
+        if (contractDto.getPaymentMethod() != null) {
+            try {
+                Contracts.PaymentMethod entityPaymentMethod =
+                        Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name());
+                contract.setPaymentMethod(entityPaymentMethod);
+                logger.info("✅ Updated payment method from DTO: {}", entityPaymentMethod);
+            } catch (IllegalArgumentException e) {
+                logger.error("❌ Invalid payment method in DTO: {}", contractDto.getPaymentMethod());
+                throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ!");
+            }
+        }
+
+        // 🔥 XỬ LÝ PAYMENT DATE DESCRIPTION TỪ DTO
+        if (contractDto.getTerms() != null &&
+                contractDto.getTerms().getPaymentDateDescription() != null &&
+                !contractDto.getTerms().getPaymentDateDescription().trim().isEmpty()) {
+            contract.setPaymentDateDescription(contractDto.getTerms().getPaymentDateDescription());
+            logger.info("✅ Updated payment date description from DTO: {}",
+                    contractDto.getTerms().getPaymentDateDescription());
+        }
+
         logger.info("Current contract: {}", contract);
 
         // Bắt đầu cập nhật các trường mới

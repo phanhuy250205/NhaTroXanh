@@ -124,10 +124,14 @@ public class ContractController {
         if (contract == null) {
             contract = new ContractDto();
             contract.setContractDate(LocalDate.now());
+            logger.info("Contract was null, initialized new ContractDto with contractDate: {}", contract.getContractDate());
+        } else if (contract.getContractDate() == null) {
+            contract.setContractDate(LocalDate.now());
+            logger.info("ContractDate was null, set to: {}", contract.getContractDate());
         }
+
         logger.info("Initializing model with contract: {}, contractDate: {}", contract, contract.getContractDate());
         model.addAttribute("contract", contract);
-        model.addAttribute("contractDate", LocalDate.now());
         model.addAttribute("statusOptions", Arrays.stream(Contracts.Status.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
@@ -1573,6 +1577,49 @@ public class ContractController {
                 contract.setRoom(room);
             }
 
+            // Cập nhật payment method nếu có
+            if (contractDto.getPaymentMethod() != null) {
+                try {
+                    Contracts.PaymentMethod entityPaymentMethod =
+                            Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name());
+                    contract.setPaymentMethod(entityPaymentMethod);
+                    logger.info("✅ Updated payment method: {}", entityPaymentMethod);
+                } catch (IllegalArgumentException e) {
+                    logger.error("❌ Invalid payment method: {}", contractDto.getPaymentMethod());
+                    response.put("success", false);
+                    response.put("message", "Phương thức thanh toán không hợp lệ!");
+                    return ResponseEntity.badRequest().body(response);
+                }
+            }
+
+            // Cập nhật payment date description
+            if (contractDto.getTerms() != null &&
+                    StringUtils.hasText(contractDto.getTerms().getPaymentDateDescription())) {
+                contract.setPaymentDateDescription(contractDto.getTerms().getPaymentDateDescription());
+                logger.info("✅ Updated payment date description");
+            }
+
+            // 🔥 THÊM XỬ LÝ RESIDENTS
+//            // Xóa residents cũ
+//            residentRepository.deleteByContractId(contractId);
+            contract.getResidents().clear();
+
+            // Thêm residents mới từ DTO
+            if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
+                for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
+                    Resident resident = new Resident();
+                    resident.setFullName(residentDto.getFullName());
+                    resident.setBirthYear(residentDto.getBirthYear());
+                    resident.setPhone(residentDto.getPhone());
+                    resident.setCccdNumber(residentDto.getCccdNumber());
+                    resident.setContract(contract);
+                    contract.getResidents().add(resident);
+                }
+                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(), contractId);
+            } else {
+                logger.info("✅ No residents provided, cleared resident list for contract ID: {}", contractId);
+            }
+
             // Cập nhật hợp đồng
             Contracts updatedContract = contractService.updateContract(contractId, contractDto);
             response.put("success", true);
@@ -1717,7 +1764,15 @@ public class ContractController {
             logger.warn("File is null or empty, returning null");
             return null;
         }
+
         try {
+            // Kiểm tra kích thước file (ví dụ: tối đa 5MB)
+            long maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (file.getSize() > maxFileSize) {
+                logger.error("File size exceeds limit: {} bytes", file.getSize());
+                throw new IllegalArgumentException("Kích thước file vượt quá giới hạn (5MB)!");
+            }
+
             String originalFilename = file.getOriginalFilename();
             logger.info("Original filename: {}", originalFilename);
 
@@ -1726,23 +1781,42 @@ public class ContractController {
                 throw new IllegalArgumentException("Chỉ cho phép file ảnh (jpg, jpeg, png)!");
             }
 
-            String safeFileName = System.currentTimeMillis() + "_" +
+            // Tạo tên file duy nhất với UUID
+            String safeFileName = UUID.randomUUID().toString() + "_" +
                     originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_");
             logger.info("Generated safe file name: {}", safeFileName);
 
-            String uploadDir = "Uploads/";
+            // Sử dụng đường dẫn tương đối, tránh mã hóa cứng
+            String uploadDir = "uploads"; // Không có dấu / cuối
             Path uploadPath = Paths.get(uploadDir);
             logger.info("Creating upload directory if not exists: {}", uploadDir);
-            Files.createDirectories(uploadPath);
+
+            // Kiểm tra quyền ghi thư mục
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            if (!Files.isWritable(uploadPath)) {
+                logger.error("Upload directory is not writable: {}", uploadDir);
+                throw new IllegalArgumentException("Thư mục uploads không có quyền ghi!");
+            }
 
             Path filePath = uploadPath.resolve(safeFileName);
+
+            // Kiểm tra file đã tồn tại
+            if (Files.exists(filePath)) {
+                logger.warn("File already exists, generating new name: {}", filePath);
+                safeFileName = UUID.randomUUID().toString() + "_" + safeFileName;
+                filePath = uploadPath.resolve(safeFileName);
+            }
+
             Files.copy(file.getInputStream(), filePath);
             logger.info("File copied to: {}", filePath);
 
-            String fileUrl = uploadDir + safeFileName;
+            // Chuẩn hóa URL với dấu / đầu tiên
+            String fileUrl = "/uploads/" + safeFileName;
             logger.info("File saved successfully: {}", fileUrl);
             return fileUrl;
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error saving file: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Lỗi khi lưu file: " + e.getMessage());
         }
@@ -2097,6 +2171,15 @@ public class ContractController {
 
                 ContractDto contractDto = convertToContractDto(contract);
 
+                System.out.println("📅 Contract Date từ database: " + contract.getContractDate());
+                logger.info("Contract Date từ database cho contract ID {}: {}", contractId, contract.getContractDate());
+
+                // Chỉ set default nếu null, tránh ghi đè
+                if (contractDto.getContractDate() == null) {
+                    contractDto.setContractDate(LocalDate.now());
+                    logger.info("Set default contractDate to today for contract ID: {}", contractId);
+                }
+
                 List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
                 model.addAttribute("hostels", hostels);
                 System.out.println("🏢 Hostels loaded: " + hostels.size());
@@ -2153,7 +2236,13 @@ public class ContractController {
                 System.out.println("    - Current Room ID: " + currentRoomId);
                 System.out.println("    - Available Rooms: " + allRoomsForEdit.size());
                 System.out.println("    - Is Edit Mode: true");
+                System.out.println("    - Contract Date: " + contractDto.getContractDate());
+
                 model.addAttribute("allUtilities", utilityRepository.findAll());
+
+                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè contractDate
+                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra hàm này
+
                 return "host/hop-dong-host";
 
             } else {
@@ -2167,7 +2256,6 @@ public class ContractController {
             e.printStackTrace();
             logger.error("Error in edit contract form", e);
             model.addAttribute("error", "Lỗi khi tải hợp đồng: " + e.getMessage());
-
             return "redirect:/chu-tro/DS-hop-dong-host";
         }
     }
@@ -2413,8 +2501,12 @@ public class ContractController {
         ContractDto dto = new ContractDto();
         dto.setId(contract.getContractId());
 
+        // Đảm bảo map đúng contractDate
         if (contract.getContractDate() != null) {
             dto.setContractDate(contract.getContractDate().toLocalDate());
+            System.out.println("📅 Mapped contractDate: " + contract.getContractDate().toLocalDate());
+        } else {
+            System.out.println("⚠️ contractDate từ database là null");
         }
         dto.setStatus(String.valueOf(contract.getStatus()));
 
@@ -2445,12 +2537,16 @@ public class ContractController {
                 tenant.setIssueDate(cccd.getIssueDate());
                 tenant.setIssuePlace(cccd.getIssuePlace());
 
-                // Lấy ảnh từ thực thể Image liên kết với UserCccd
-                if (StringUtils.hasText(cccd.getFrontImageUrl())) {
-                    tenant.setCccdFrontUrl(cccd.getFrontImageUrl());
-                }
-                if (StringUtils.hasText(cccd.getBackImageUrl())) {
-                    tenant.setCccdBackUrl(cccd.getBackImageUrl());
+                // 🔥 SỬA LỖI: Lấy URL ảnh từ bảng images
+                List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
+                for (Image image : images) {
+                    if (image.getType() == Image.ImageType.FRONT) {
+                        tenant.setCccdFrontUrl(image.getUrl());
+                        logger.info("Mapped Registered Tenant Front CCCD URL: {}", image.getUrl());
+                    } else if (image.getType() == Image.ImageType.BACK) {
+                        tenant.setCccdBackUrl(image.getUrl());
+                        logger.info("Mapped Registered Tenant Back CCCD URL: {}", image.getUrl());
+                    }
                 }
             }
 
@@ -2480,7 +2576,7 @@ public class ContractController {
                 unregTenant.setProvince(addressParts.getOrDefault("province", ""));
             }
 
-            // 🔥 PHẦN SỬA LỖI: Lấy URL ảnh trực tiếp từ đối tượng UnregisteredTenants
+            // Lấy URL ảnh từ UnregisteredTenants
             if (StringUtils.hasText(unregUser.getCccdFrontUrl())) {
                 unregTenant.setCccdFrontUrl(unregUser.getCccdFrontUrl());
                 logger.info("Mapped Unregistered Tenant Front CCCD URL: {}", unregUser.getCccdFrontUrl());
@@ -2541,13 +2637,17 @@ public class ContractController {
         }
         terms.setPrice(contract.getPrice() != null ? Double.valueOf(contract.getPrice()) : 0.0);
         terms.setDeposit(contract.getDeposit() != null ? Double.valueOf(contract.getDeposit()) : 0.0);
+
+        // Thêm các trường đã format
+        terms.setFormattedPrice(ContractDto.formatVND(terms.getPrice()));
+        terms.setFormattedDeposit(ContractDto.formatVND(terms.getDeposit()));
         if (contract.getDuration() != null) {
             terms.setDuration(contract.getDuration().intValue());
         }
         terms.setTerms(contract.getTerms());
         dto.setTerms(terms);
 
-        // ✅ Bắt đầu code mới tại đây để ánh xạ các trường mới
+        // Xử lý Payment Method
         if (contract.getPaymentMethod() != null) {
             dto.setPaymentMethod(ContractDto.PaymentMethod.valueOf(contract.getPaymentMethod().name()));
             System.out.println("✅ Mapped payment method: " + contract.getPaymentMethod().name());
@@ -2556,7 +2656,25 @@ public class ContractController {
             terms.setPaymentDateDescription(contract.getPaymentDateDescription());
             System.out.println("✅ Mapped payment date description: " + contract.getPaymentDateDescription());
         }
-        // ✅ Kết thúc code mới
+
+        // Xử lý Residents
+        if (contract.getResidents() != null && !contract.getResidents().isEmpty()) {
+            List<ContractDto.ResidentDto> residentDtos = contract.getResidents().stream()
+                    .map(resident -> {
+                        ContractDto.ResidentDto residentDto = new ContractDto.ResidentDto();
+                        residentDto.setFullName(resident.getFullName());
+                        residentDto.setBirthYear(resident.getBirthYear());
+                        residentDto.setPhone(resident.getPhone());
+                        residentDto.setCccdNumber(resident.getCccdNumber());
+                        return residentDto;
+                    })
+                    .collect(Collectors.toList());
+            dto.setResidents(residentDtos);
+            System.out.println("✅ Mapped " + residentDtos.size() + " residents");
+        } else {
+            dto.setResidents(new ArrayList<>());
+            System.out.println("✅ No residents found, set empty list");
+        }
 
         System.out.println("✅ Contract DTO conversion completed successfully");
         return dto;
