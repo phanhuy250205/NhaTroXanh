@@ -87,7 +87,7 @@
                             <label for="emailPhone">Email hoặc Số điện
                                 thoại</label>
                             <input type="text" class="form-control" id="emailPhone" name="emailPhone"
-                                placeholder="Nhập email hoặc Số điện thoại của bạn" 
+                                placeholder="Nhập email hoặc Số điện thoại của bạn" required
                                 aria-describedby="emailPhoneHelp" />
                             <div class="invalid-feedback">
                                 Vui lòng nhập Email hoặc số điện thoại hợp
@@ -98,7 +98,7 @@
                         <div class="form-group password-wrapper">
                             <label for="password">Mật khẩu</label>
                             <input type="password" class="form-control" id="password" name="password"
-                                placeholder="Nhập mật khẩu"  aria-describedby="passwordHelp" />
+                                placeholder="Nhập mật khẩu" required aria-describedby="passwordHelp" />
                             <button type="button" class="password-toggle-host" aria-label="Hiện hoặc ẩn mật khẩu"
                                 tabindex="0">
                                 <i class="fa-solid fa-eye-slash"></i>
@@ -226,57 +226,63 @@
             </div>
         </div>
         <!-- Reset Password Modal -->
-<div class="reset-password-modal-overlay-guest" id="resetPasswordModalOverlayGuest">
-    <div class="reset-password-modal-guest">
-        <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent-guest" alt="">
-        <div class="reset-password-modal-header-guest">
-            <button class="reset-password-modal-close-guest" id="resetPasswordModalCloseGuest">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="reset-password-modal-content-guest">
-            <div class="reset-password-greeting-guest">
-                <p class="reset-password-title-guest">Đặt lại mật khẩu</p>
-                <h5>Nhập mật khẩu mới của bạn
-                    <span class="house-icons-guest">
-                        <img class="logo-reset-password-guest d-none" th:src="@{/images/logo/nhatroxanh.png}" alt="">
-                    </span>
-                </h5>
+        <div class="reset-password-modal-overlay-guest" id="resetPasswordModalOverlayGuest">
+            <div class="reset-password-modal-guest">
+                <img th:src="@{/images/logo/nhatroxanh(title).png}" class="logo-transparent-guest" alt="">
+                <div class="reset-password-modal-header-guest">
+                    <button class="reset-password-modal-close-guest" id="resetPasswordModalCloseGuest">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <div class="reset-password-modal-content-guest">
+                    <div class="reset-password-greeting-guest">
+                        <p class="reset-password-title-guest">Đặt lại mật khẩu</p>
+                        <h5>Nhập mật khẩu mới của bạn
+                            <span class="house-icons-guest">
+                                <img class="logo-reset-password-guest d-none" th:src="@{/images/logo/nhatroxanh.png}"
+                                    alt="">
+                            </span>
+                        </h5>
+                    </div>
+
+                    <form class="reset-password-form-guest" id="resetPasswordFormGuest">
+                        <div id="reset-password-error-message-guest" class="alert-guest alert-danger-guest"
+                            style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+                        <div id="reset-password-success-message-guest" class="alert-guest alert-success-guest"
+                            style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+
+                        <div class="form-group-guest">
+                            <div class="input-wrapper-guest">
+                                <i class="fas fa-lock input-icon-guest"></i>
+                                <input type="password" id="newPasswordInputGuest"
+                                    class="form-control-reset-password-guest" placeholder="Nhập mật khẩu mới" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group-guest">
+                            <div class="input-wrapper-guest">
+                                <i class="fas fa-lock input-icon-guest"></i>
+                                <input type="password" id="confirmPasswordInputGuest"
+                                    class="form-control-reset-password-guest" placeholder="Xác nhận mật khẩu mới"
+                                    required>
+                            </div>
+                        </div>
+
+                        <div class="reset-password-buttons-guest">
+                            <button type="submit" class="btn-reset-password-submit-guest">
+                                XÁC NHẬN
+                            </button>
+
+                            <button type="button" class="btn-back-to-login-guest" id="backToLoginFromResetBtnGuest">
+                                <i class="fas fa-arrow-left"></i>
+                                Quay lại đăng nhập
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            <form class="reset-password-form-guest" id="resetPasswordFormGuest">
-                <div id="reset-password-error-message-guest" class="alert-guest alert-danger-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
-                <div id="reset-password-success-message-guest" class="alert-guest alert-success-guest" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
-
-                <div class="form-group-guest">
-                    <div class="input-wrapper-guest">
-                        <i class="fas fa-lock input-icon-guest"></i>
-                        <input type="password" id="newPasswordInputGuest" class="form-control-reset-password-guest" placeholder="Nhập mật khẩu mới" required>
-                    </div>
-                </div>
-
-                <div class="form-group-guest">
-                    <div class="input-wrapper-guest">
-                        <i class="fas fa-lock input-icon-guest"></i>
-                        <input type="password" id="confirmPasswordInputGuest" class="form-control-reset-password-guest" placeholder="Xác nhận mật khẩu mới" required>
-                    </div>
-                </div>
-
-                <div class="reset-password-buttons-guest">
-                    <button type="submit" class="btn-reset-password-submit-guest">
-                        XÁC NHẬN
-                    </button>
-                    
-                    <button type="button" class="btn-back-to-login-guest" id="backToLoginFromResetBtnGuest">
-                        <i class="fas fa-arrow-left"></i>
-                        Quay lại đăng nhập
-                    </button>
-                </div>
-            </form>
         </div>
-    </div>
-</div>
 
         <script th:src="@{/js/login-host.js}"></script>
         <script th:src="@{/js/quenmk-modal.js}"></script>

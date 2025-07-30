@@ -47,7 +47,6 @@ public class RoomsServiceImpl implements RoomsService {
     @Autowired
     private ImageRepository imageRepository;
 
-
     @Override
     public List<Rooms> findAllRooms() {
         return roomsRepository.findAll();
@@ -81,7 +80,7 @@ public class RoomsServiceImpl implements RoomsService {
 
     // @Override
     // public List<Rooms> findByHostelId(Integer hostelId) {
-    //     return roomsRepository.findByHostel_HostelId(hostelId);
+    // return roomsRepository.findByHostel_HostelId(hostelId);
     // }
 
     @Override
@@ -113,9 +112,11 @@ public class RoomsServiceImpl implements RoomsService {
         }
         return roomsRepository.findUtilitiesByRoomId(roomId);
     }
+
     public Rooms findRoomById(Integer roomId) {
         return roomsRepository.findById(roomId).orElse(null);
     }
+
     private ContractDto.Room convertToRoomDto(Rooms room) {
         ContractDto.Room roomDto = new ContractDto.Room();
         roomDto.setRoomId(room.getRoomId());
@@ -127,30 +128,11 @@ public class RoomsServiceImpl implements RoomsService {
         roomDto.setHostelName(room.getHostel() != null ? room.getHostel().getName() : null);
         roomDto.setMaxTenants(room.getMax_tenants());
         // Xử lý địa chỉ đầy đủ
-        if (room.getHostel() != null && room.getHostel().getAddress() != null) {
-            Address address = room.getHostel().getAddress();
-            List<String> addressParts = new ArrayList<>();
-            if (address.getStreet() != null) {
-                addressParts.add(address.getStreet());
-            }
-            if (address.getWard() != null) {
-                addressParts.add(address.getWard().getName());
-                if (address.getWard().getDistrict() != null) {
-                    addressParts.add(address.getWard().getDistrict().getName());
-                    if (address.getWard().getDistrict().getProvince() != null) {
-                        addressParts.add(address.getWard().getDistrict().getProvince().getName());
-                    }
-                }
-            }
-            String fullAddress = addressParts.isEmpty() ? "" : String.join(", ", addressParts);
-            roomDto.setAddress(fullAddress);
+        Hostel hostel = room.getHostel();
+        if (hostel != null && hostel.getAddress() != null) {
+            roomDto.setAddress(hostel.getAddress()); // Vì hostel.getAddress() là String
         } else {
-            logger.warn("No address found for room with roomId: {}", room.getRoomId());
-            roomDto.setStreet("");
-            roomDto.setWard("");
-            roomDto.setDistrict("");
-            roomDto.setProvince("");
-            roomDto.setAddress("");
+            roomDto.setAddress(""); // hoặc bạn có thể ghi "Chưa cập nhật"
         }
 
         logger.info("Mapped room: {}", roomDto);

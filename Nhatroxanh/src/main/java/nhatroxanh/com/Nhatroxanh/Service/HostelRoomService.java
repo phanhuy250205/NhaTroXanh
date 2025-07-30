@@ -39,15 +39,11 @@ public class HostelRoomService {
         roomDto.setHostelId(room.getHostel().getHostelId());
         roomDto.setHostelName(room.getHostel().getName());
 
-        if (room.getHostel().getAddress() != null) {
-            String street = room.getHostel().getAddress().getStreet();
-            String ward = String.valueOf(room.getHostel().getAddress().getWard());
-            if (street != null && ward != null) {
-                String address = String.join(", ", street, ward);
-                roomDto.setAddress(address);
-            } else {
-                roomDto.setAddress(""); // Hoặc giá trị mặc định
-            }
+        String hostelAddress = room.getHostel().getAddress();
+        if (hostelAddress != null && !hostelAddress.isEmpty()) {
+            roomDto.setAddress(hostelAddress);
+        } else {
+            roomDto.setAddress(""); // hoặc "Chưa cập nhật"
         }
 
         return roomDto;

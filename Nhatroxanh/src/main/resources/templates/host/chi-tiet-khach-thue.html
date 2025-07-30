@@ -723,7 +723,7 @@
     <div class="main-container-host" id="main-content" th:if="${tenant != null}" th:object="${tenant}">
         <div class="page-header-host d-flex justify-content-between align-items-center">
             <div>
-                <a href="/chu-tro/quan-ly-khach-thue" class="back-link-host">
+                <a th:href="@{/chu-tro/khach-thue}" class="back-link-host">
                     <i class="bi bi-arrow-left"></i>
                     <span>Quay lại</span>
                 </a>
@@ -755,15 +755,12 @@
         </div>
 
         <div class="info-section-host">
-            <h3 class="section-header-host">
-                <i class="fas fa-user"></i>
-                Thông tin cá nhân
-            </h3>
+            <h3 class="section-header-host"><i class="fas fa-user"></i> Thông tin cá nhân</h3>
             <div class="section-content-host">
                 <div class="form-row-host">
                     <div class="form-group-host">
                         <label class="form-label-host">Họ và tên</label>
-                        <input type="text" class="form-control-host" value="Nguyễn Văn An" disabled>
+                        <input type="text" class="form-control-host" th:value="*{userFullName}" disabled>
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Giới tính</label>
@@ -782,7 +779,7 @@
                     </div>
                     <div class="form-group-host">
                         <label class="form-label-host">Số điện thoại</label>
-                        <input type="text" class="form-control-host" value="0123456789" disabled>
+                        <input type="text" class="form-control-host" th:value="*{userPhone}" disabled>
                     </div>
                 </div>
                 <div class="form-row-host">
@@ -793,12 +790,12 @@
                             disabled>
                     </div>
                     <div class="form-group-host">
-                        <label class="form-label-host">Nơi cấp</label>
-                        <input type="text" class="form-control-host" value="Công An Tỉnh Đà Nẵng" disabled>
+                        <label class="form-label-host">Nơi cấp CCCD</label>
+                        <input type="text" class="form-control-host" th:value="*{userIssuePlace}" disabled>
                     </div>
                     <div class="form-group-host">
-                        <label class="form-label-host">CCCD/CMND</label>
-                        <input type="text" class="form-control-host" value="123456789012" disabled>
+                        <label class="form-label-host">Số CCCD (đã mã hóa)</label>
+                        <input type="text" class="form-control-host" th:value="*{userCccdMasked}" disabled>
                     </div>
                 </div>
             </div>
@@ -862,7 +859,6 @@
     </div>
     <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/sidebar.js}"></script>
-
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.toast-close').forEach(btn => {

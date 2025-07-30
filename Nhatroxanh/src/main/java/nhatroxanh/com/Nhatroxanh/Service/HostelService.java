@@ -15,9 +15,9 @@ public interface  HostelService {
 
     Optional<Hostel> getHostelById(Integer id);
 
-    Hostel createHostel(HostelDTO hostelDTO);
+    void createHostel(HostelDTO hostelDTO);
 
-    Hostel updateHostel(HostelDTO hostelDTO);
+    void updateHostel(HostelDTO hostelDTO);
 
     void deleteHostel(Integer hostelId);
 

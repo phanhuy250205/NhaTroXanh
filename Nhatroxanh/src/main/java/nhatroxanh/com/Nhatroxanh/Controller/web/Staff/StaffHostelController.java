@@ -17,8 +17,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 
 @Controller
 @RequestMapping("/nhan-vien")
@@ -26,6 +29,10 @@ public class StaffHostelController {
 
     @Autowired
     private HostelRepository hostelRepository;
+    @Autowired
+    private UserCccdRepository userCccdRepository;
+    @Autowired
+    private EncryptionService encryptionService;
 
     @GetMapping("/thong-tin-tro")
     public String getHostels(@RequestParam(value = "keyword", required = false) String keyword,
@@ -72,11 +79,19 @@ public class StaffHostelController {
 
         Users owner = hostel.getOwner();
         List<Rooms> rooms = hostel.getRooms();
+        UserCccd cccd = userCccdRepository.findByUser(owner);
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                cccd.setCccdNumber(decryptedCccd); // Gán lại để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
 
         model.addAttribute("hostel", hostel);
         model.addAttribute("owner", owner);
         model.addAttribute("rooms", rooms);
-
         return "staff/detail-thong-tin-tro-staff";
     }
 
