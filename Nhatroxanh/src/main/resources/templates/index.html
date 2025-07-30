@@ -263,6 +263,45 @@
         </div>
     </section>
     <div th:replace="~{/layouts/footer}"></div>
+    <script>
+        function applySearch() {
+            // Lấy giá trị các bộ lọc
+            const provinceCode = document.getElementById("provinceSelect").value;
+            const districtCode = document.getElementById("districtSelect").value;
+            const wardCode = document.getElementById("wardSelect").value;
+
+            const searchTerm = document.getElementById("searchInput").value.trim();
+
+            const selectedPriceRadio = document.querySelector('input[name="price"]:checked');
+            const priceValue = selectedPriceRadio ? selectedPriceRadio.value : "";
+
+            // Tạo URL chuyển hướng
+            let url = "/tat-ca-phong-tro?";
+            const params = [];
+
+            if (provinceCode) params.push("provinceCode=" + encodeURIComponent(provinceCode));
+            if (districtCode) params.push("districtCode=" + encodeURIComponent(districtCode));
+            if (wardCode) params.push("wardCode=" + encodeURIComponent(wardCode));
+            if (searchTerm) params.push("search=" + encodeURIComponent(searchTerm));
+            if (priceValue) params.push("priceRange=" + encodeURIComponent(priceValue));
+
+            url += params.join("&");
+
+            // Điều hướng sang trang lọc kết quả
+            window.location.href = url;
+        }
+
+        // Nếu bạn muốn xử lý luôn khi nhấn "Tìm ngay" trong dropdown
+        function applyLocationFilter() {
+            applySearch(); // Gọi chung 1 hàm để đảm bảo logic giống nhau
+        }
+
+        // Nếu bạn muốn xử lý mức giá riêng
+        function applyPriceFilter() {
+            applySearch();
+        }
+    </script>
+
     <!-- Include favorite handler -->
     <script src="/js/favorite-handler.js"></script>
 </body>
