@@ -46,8 +46,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private OtpService otpService;
+    // @Autowired
+    // private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -75,10 +75,14 @@ public class UserServiceImpl implements UserService {
             logger.error("Email already exists: {}", userRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
-        if (userRepository.findByPhone(userRequest.getPhoneNumber()).isPresent()) {
-            logger.error("Phone number already exists: {}", userRequest.getPhoneNumber());
-            throw new RuntimeException("Số điện thoại đã được sử dụng!");
+
+        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
+            if (userCccdRepository.findByCccdNumber(userRequest.getCccd()).isPresent()) {
+                logger.error("CCCD already exists: {}", userRequest.getCccd());
+                throw new RuntimeException("Số CCCD đã được sử dụng!");
+            }
         }
+
         Users newUser = new Users();
         newUser.setFullname(userRequest.getFullName());
         newUser.setEmail(userRequest.getEmail());
@@ -91,7 +95,25 @@ public class UserServiceImpl implements UserService {
 
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
-        otpService.createAndSendOtp(savedUser);
+
+        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
+            UserCccd userCccd = new UserCccd();
+            userCccd.setUser(savedUser);
+            userCccd.setCccdNumber(userRequest.getCccd());
+            try {
+                if (userRequest.getIssueDate() != null && !userRequest.getIssueDate().isEmpty()) {
+                    userCccd.setIssueDate(Date.valueOf(userRequest.getIssueDate()));
+                }
+                userCccd.setIssuePlace(userRequest.getIssuePlace());
+                userCccdRepository.save(userCccd);
+                logger.info("Saved UserCccd for userId: {}", savedUser.getUserId());
+            } catch (IllegalArgumentException e) {
+                logger.error("Invalid CCCD issue date format: {}", userRequest.getIssueDate(), e);
+                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userRequest.getIssueDate());
+            }
+        }
+
+        // otpService.createAndSendOtp(savedUser);
 
         return savedUser;
     }
@@ -100,17 +122,16 @@ public class UserServiceImpl implements UserService {
     public Users registerOwner(UserOwnerRequest userOwnerRequest, MultipartFile frontImage, MultipartFile backImage)
             throws IOException {
         logger.info("Registering new owner with email: {}", userOwnerRequest.getEmail());
-
-        // Kiểm tra email trùng lặp
         if (userRepository.findByEmail(userOwnerRequest.getEmail()).isPresent()) {
             logger.error("Email already exists: {}", userOwnerRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
 
-        // Kiểm tra số điện thoại trùng lặp
-        if (userRepository.findByPhone(userOwnerRequest.getPhoneNumber()).isPresent()) {
-            logger.error("Phone number already exists: {}", userOwnerRequest.getPhoneNumber());
-            throw new RuntimeException("Số điện thoại đã được sử dụng!");
+        if (userOwnerRequest.getCccdNumber() != null && !userOwnerRequest.getCccdNumber().trim().isEmpty()) {
+            if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccdNumber()).isPresent()) {
+                logger.error("CCCD already exists: {}", userOwnerRequest.getCccdNumber());
+                throw new RuntimeException("Số CCCD đã được sử dụng!");
+            }
         }
 
         // Kiểm tra số CCCD trùng lặp

@@ -87,11 +87,12 @@ public class Contracts {
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payments> payments;
 
+    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Resident> residents = new HashSet<>();
+
+    // Thêm dòng này vào class Contracts
     @Column(name = "requested_return_date")
     private Date requestedReturnDate;
-
-    @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Resident> residents = new ArrayList<>();
 
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED

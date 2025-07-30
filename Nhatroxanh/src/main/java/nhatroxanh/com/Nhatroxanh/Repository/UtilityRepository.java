@@ -18,6 +18,7 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
             "WHERE p.status = true " +
             "AND p.approvalStatus = 'APPROVED' " +
             "ORDER BY u.name ASC")
+            
     List<Utility> findUtilitiesWithActivePosts();
 
     Set<Utility> findByUtilityIdIn(List<Integer> utilityIds);
@@ -26,5 +27,5 @@ public interface UtilityRepository extends JpaRepository<Utility, Integer> {
     @Query("SELECT u FROM Utility u WHERE LOWER(u.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Utility> searchByName(String keyword);
 
-    
+    Optional<Utility> findByName(String name);
 }

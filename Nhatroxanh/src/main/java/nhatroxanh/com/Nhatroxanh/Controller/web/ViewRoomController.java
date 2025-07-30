@@ -55,11 +55,23 @@ public class ViewRoomController {
             @RequestParam(value = "wardCode", required = false) String wardCode,
             @RequestParam(value = "priceRange", required = false) String priceRange,
             @RequestParam(value = "searchTerm", required = false) String searchTerm,
+            @RequestParam(value = "utilities", required = false) List<Integer> utilityIds, // ✅ Thêm utilities
+            @RequestParam(value = "minArea", required = false) Float minArea, // ✅ Thêm minArea
+            @RequestParam(value = "maxArea", required = false) Float maxArea, // ✅ Thêm maxArea
             @RequestParam(value = "page", defaultValue = "0") int page,
             Model model) {
 
         try {
             long startTime = System.currentTimeMillis();
+
+            // ✅ Thêm debug log
+            System.out.println("=== Category Filter Debug ===");
+            System.out.println("CategoryId: " + id);
+            System.out.println("MinArea: " + minArea + ", MaxArea: " + maxArea);
+            System.out.println("UtilityIds: " + utilityIds);
+            System.out.println("PriceRange: " + priceRange);
+            System.out.println("Sort: " + sort);
+
             List<Province> provinces = provinceRepository.findAll();
             List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
             model.addAttribute("provinces", provinces != null ? provinces : new ArrayList<>());
@@ -99,13 +111,17 @@ public class ViewRoomController {
             };
             Pageable pageable = PageRequest.of(page, pageSize, pageSort);
 
+            // ✅ Truyền đầy đủ parameters bao gồm minArea, maxArea, utilities
             Page<Post> postPage = postRepository.filterPostsWithAllConditions(
                     id, provinceCode, districtCode, wardCode,
-                    null, // utilities chưa lọc ở giao diện này
-                    null, null, // minArea, maxArea
+                    utilityIds, // ✅ Truyền utilities thay vì null
+                    minArea, maxArea, // ✅ Truyền minArea, maxArea thay vì null, null
                     minPrice, maxPrice,
                     searchTerm,
                     pageable);
+
+            // ✅ Thêm debug log kết quả
+            System.out.println("Query result: " + postPage.getTotalElements() + " posts found");
 
             model.addAttribute("category", category);
             model.addAttribute("posts", postPage.getContent());
@@ -119,6 +135,11 @@ public class ViewRoomController {
             model.addAttribute("selectedPriceRange", priceRange);
             model.addAttribute("searchTerm", searchTerm);
             model.addAttribute("selectedSort", sort);
+
+            // ✅ Thêm các attributes cho filter state
+            model.addAttribute("selectedUtilities", utilityIds);
+            model.addAttribute("selectedMinArea", minArea);
+            model.addAttribute("selectedMaxArea", maxArea);
 
             System.out.println("Posts fetched: " + postPage.getTotalElements() +
                     ", Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
@@ -299,8 +320,8 @@ public class ViewRoomController {
                     minPrice, maxPrice,
                     searchTerm,
                     pageable);
-
-            model.addAttribute("posts", postPage.getContent());
+            
+            model.addAttribute("posts", postPage.getContent()); 
             model.addAttribute("totalPosts", postPage.getTotalElements());
             model.addAttribute("currentPage", postPage.getNumber());
             model.addAttribute("totalPages", postPage.getTotalPages());

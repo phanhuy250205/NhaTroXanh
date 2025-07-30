@@ -55,7 +55,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (!user.isEnabled()) {
             throw new UsernameNotFoundException("Tài khoản chưa được kích hoạt");
         }
-        
+
         // if (user.getStatus() != Users.Status.APPROVED) {
         //     throw new UsernameNotFoundException("Tài khoản đang chờ duyệt");
         // }
