@@ -5,11 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
 
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,6 +43,9 @@ public class Contracts {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
+
+    @Column(name = "payment_date_description", length = 255)
+    private String paymentDateDescription;
 
     @Column(name = "contract_date", nullable = false)
     private Date contractDate;
@@ -78,15 +82,18 @@ public class Contracts {
     private String tenantPhone;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images;
+    private Set<Image> images = new HashSet<>();
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Payments> payments;
 
-
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Resident> residents = new ArrayList<>();
-    
+    private Set<Resident> residents = new HashSet<>();
+
+    // Thêm dòng này vào class Contracts
+    @Column(name = "requested_return_date")
+    private Date requestedReturnDate;
+
     public enum Status {
         DRAFT, ACTIVE, TERMINATED, EXPIRED
     }

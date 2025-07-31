@@ -42,7 +42,7 @@ public class Hostel {
 
     @Column(name = "room_number")
     private Integer room_number;
-    
+
     @Temporal(TemporalType.DATE)
     private Date createdAt;
 
@@ -52,8 +52,7 @@ public class Hostel {
 
     @OneToMany(mappedBy = "hostel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rooms> rooms = new ArrayList<>();
-    
-    @OneToOne
-    @JoinColumn(name = "address_id")
-    private Address address;
+
+    @Column(name = "address" , length = 255)
+    private String address;
 }
