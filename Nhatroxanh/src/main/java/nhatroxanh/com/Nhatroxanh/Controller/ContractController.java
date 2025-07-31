@@ -125,10 +125,14 @@ public class ContractController {
         if (contract == null) {
             contract = new ContractDto();
             contract.setContractDate(LocalDate.now());
+            logger.info("Contract was null, initialized new ContractDto with contractDate: {}", contract.getContractDate());
+        } else if (contract.getContractDate() == null) {
+            contract.setContractDate(LocalDate.now());
+            logger.info("ContractDate was null, set to: {}", contract.getContractDate());
         }
+
         logger.info("Initializing model with contract: {}, contractDate: {}", contract, contract.getContractDate());
         model.addAttribute("contract", contract);
-        model.addAttribute("contractDate", LocalDate.now());
         model.addAttribute("statusOptions", Arrays.stream(Contracts.Status.values())
                 .map(Enum::name)
                 .collect(Collectors.toList()));
@@ -414,8 +418,18 @@ public class ContractController {
             Contracts contract = new Contracts();
             contract.setOwner(owner);
             contract.setRoom(room);
-            contract.setTenant(registeredTenant);
-            contract.setUnregisteredTenant(unregisteredTenant);
+            // ✅ CODE MỚI (SỬA LỖI)
+            if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
+                contract.setTenant(registeredTenant);
+                contract.setUnregisteredTenant(null);
+                logger.info("✅ Set REGISTERED tenant: {}", registeredTenant.getFullname());
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
+                contract.setTenant(null);  // ← QUAN TRỌNG: Set null cho registered tenant
+                contract.setUnregisteredTenant(unregisteredTenant);
+                logger.info("✅ Set UNREGISTERED tenant: {}", unregisteredTenant.getFullName());
+            } else {
+                throw new IllegalArgumentException("Loại người thuê không hợp lệ: " + contractDto.getTenantType());
+            }
             contract.setTenantPhone(finalTenantPhone);
 
             contract.setContractDate(Date.valueOf(contractDto.getContractDate()));
@@ -1510,28 +1524,104 @@ public class ContractController {
                 return ResponseEntity.badRequest().body(response);
             }
 
+            // Kiểm tra và xử lý phòng
             if (contractDto.getRoom() != null && contractDto.getRoom().getRoomId() != null) {
                 logger.info("=== VALIDATE AND GET ROOM ===");
                 logger.info("Searching for room with ID: {}", contractDto.getRoom().getRoomId());
-                Optional<Rooms> room = roomsService.findById(contractDto.getRoom().getRoomId());
-                if (room.isEmpty()) {
+                Optional<Rooms> roomOptional = roomsService.findById(contractDto.getRoom().getRoomId());
+                if (roomOptional.isEmpty()) {
                     logger.error("Room not found: {}", contractDto.getRoom().getRoomId());
                     response.put("success", false);
                     response.put("message", "Phòng không tồn tại!");
                     return ResponseEntity.status(404).body(response);
                 }
-                logger.info("Room found: ID={}, Name={}, Status={}", room.get().getRoomId(), room.get().getNamerooms(),
-                        room.get().getStatus());
-                if (!room.get().getRoomId().equals(contract.getRoom().getRoomId())
-                        && !room.get().getStatus().equals(RoomStatus.unactive)) {
-                    logger.error("Room is not available. Current status: {}", room.get().getStatus());
+
+                Rooms room = roomOptional.get();
+                logger.info("Room found: ID={}, Name={}, Status={}",
+                        room.getRoomId(), room.getNamerooms(), room.getStatus());
+
+                if (!room.getRoomId().equals(contract.getRoom().getRoomId())
+                        && !room.getStatus().equals(RoomStatus.unactive)) {
+                    logger.error("Room is not available. Current status: {}", room.getStatus());
                     response.put("success", false);
                     response.put("message",
-                            "Phòng đã được thuê hoặc không khả dụng! Trạng thái hiện tại: " + room.get().getStatus());
+                            "Phòng đã được thuê hoặc không khả dụng! Trạng thái hiện tại: " + room.getStatus());
+                    return ResponseEntity.badRequest().body(response);
+                }
+
+                // Xử lý tiện ích
+                if (contractDto.getRoom().getUtilityIds() != null) {
+                    logger.info("🛠️ Processing {} utilities for room ID: {}",
+                            contractDto.getRoom().getUtilityIds().size(), room.getRoomId());
+
+                    // Xóa tất cả tiện ích hiện tại
+                    room.getUtilities().clear();
+                    roomsRepository.save(room); // Lưu để xóa bản ghi trong room_utility
+
+                    // Thêm tiện ích mới
+                    if (!contractDto.getRoom().getUtilityIds().isEmpty()) {
+                        List<Utility> utilities = utilityRepository.findAllById(contractDto.getRoom().getUtilityIds());
+                        if (utilities.size() != contractDto.getRoom().getUtilityIds().size()) {
+                            logger.warn("❌ Some utilityIds are invalid: {}", contractDto.getRoom().getUtilityIds());
+                            throw new IllegalArgumentException("Một số tiện ích không tồn tại!");
+                        }
+                        room.getUtilities().addAll(utilities);
+                        logger.info("🛠️ Added {} new utilities to room ID: {}", utilities.size(), room.getRoomId());
+                    } else {
+                        logger.info("🛠️ No utilities selected, room has no utilities.");
+                    }
+                    roomsRepository.save(room); // Lưu phòng và tiện ích mới
+                } else {
+                    logger.info("🛠️ No utilityIds provided, keeping existing utilities.");
+                }
+
+                contract.setRoom(room);
+            }
+
+            // Cập nhật payment method nếu có
+            if (contractDto.getPaymentMethod() != null) {
+                try {
+                    Contracts.PaymentMethod entityPaymentMethod =
+                            Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name());
+                    contract.setPaymentMethod(entityPaymentMethod);
+                    logger.info("✅ Updated payment method: {}", entityPaymentMethod);
+                } catch (IllegalArgumentException e) {
+                    logger.error("❌ Invalid payment method: {}", contractDto.getPaymentMethod());
+                    response.put("success", false);
+                    response.put("message", "Phương thức thanh toán không hợp lệ!");
                     return ResponseEntity.badRequest().body(response);
                 }
             }
 
+            // Cập nhật payment date description
+            if (contractDto.getTerms() != null &&
+                    StringUtils.hasText(contractDto.getTerms().getPaymentDateDescription())) {
+                contract.setPaymentDateDescription(contractDto.getTerms().getPaymentDateDescription());
+                logger.info("✅ Updated payment date description");
+            }
+
+            // 🔥 THÊM XỬ LÝ RESIDENTS
+//            // Xóa residents cũ
+//            residentRepository.deleteByContractId(contractId);
+            contract.getResidents().clear();
+
+            // Thêm residents mới từ DTO
+            if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
+                for (ContractDto.ResidentDto residentDto : contractDto.getResidents()) {
+                    Resident resident = new Resident();
+                    resident.setFullName(residentDto.getFullName());
+                    resident.setBirthYear(residentDto.getBirthYear());
+                    resident.setPhone(residentDto.getPhone());
+                    resident.setCccdNumber(residentDto.getCccdNumber());
+                    resident.setContract(contract);
+                    contract.getResidents().add(resident);
+                }
+                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(), contractId);
+            } else {
+                logger.info("✅ No residents provided, cleared resident list for contract ID: {}", contractId);
+            }
+
+            // Cập nhật hợp đồng
             Contracts updatedContract = contractService.updateContract(contractId, contractDto);
             response.put("success", true);
             response.put("message", "Cập nhật hợp đồng thành công!");
@@ -1551,7 +1641,6 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
     @PutMapping("/update-owner")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateOwner(
@@ -1628,6 +1717,7 @@ public class ContractController {
                 throw new IllegalArgumentException("Bạn không có quyền cập nhật phòng này!");
             }
 
+            // Cập nhật các thuộc tính của phòng
             if (roomDto.getNamerooms() != null) {
                 room.setNamerooms(roomDto.getNamerooms());
             }
@@ -1643,12 +1733,12 @@ public class ContractController {
             if (roomDto.getDescription() != null) {
                 room.setDescription(roomDto.getDescription());
             }
-            if (roomDto.getAddress() != null) {
-                room.setAddress(roomDto.getAddress());
-            }
             if (roomDto.getStatus() != null) {
                 room.setStatus(roomDto.getStatus());
             }
+
+            // Không xử lý roomDto.getAddress() vì cột address đã bị xóa trong bảng rooms
+            // Nếu cần cập nhật địa chỉ, nên sử dụng endpoint riêng cho Hostel
 
             Rooms updatedRoom = roomsService.save(room);
 
@@ -1676,7 +1766,15 @@ public class ContractController {
             logger.warn("File is null or empty, returning null");
             return null;
         }
+
         try {
+            // Kiểm tra kích thước file (ví dụ: tối đa 5MB)
+            long maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (file.getSize() > maxFileSize) {
+                logger.error("File size exceeds limit: {} bytes", file.getSize());
+                throw new IllegalArgumentException("Kích thước file vượt quá giới hạn (5MB)!");
+            }
+
             String originalFilename = file.getOriginalFilename();
             logger.info("Original filename: {}", originalFilename);
 
@@ -1685,23 +1783,42 @@ public class ContractController {
                 throw new IllegalArgumentException("Chỉ cho phép file ảnh (jpg, jpeg, png)!");
             }
 
-            String safeFileName = System.currentTimeMillis() + "_" +
+            // Tạo tên file duy nhất với UUID
+            String safeFileName = UUID.randomUUID().toString() + "_" +
                     originalFilename.replaceAll("[^a-zA-Z0-9.-]", "_");
             logger.info("Generated safe file name: {}", safeFileName);
 
-            String uploadDir = "Uploads/";
+            // Sử dụng đường dẫn tương đối, tránh mã hóa cứng
+            String uploadDir = "uploads"; // Không có dấu / cuối
             Path uploadPath = Paths.get(uploadDir);
             logger.info("Creating upload directory if not exists: {}", uploadDir);
-            Files.createDirectories(uploadPath);
+
+            // Kiểm tra quyền ghi thư mục
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            if (!Files.isWritable(uploadPath)) {
+                logger.error("Upload directory is not writable: {}", uploadDir);
+                throw new IllegalArgumentException("Thư mục uploads không có quyền ghi!");
+            }
 
             Path filePath = uploadPath.resolve(safeFileName);
+
+            // Kiểm tra file đã tồn tại
+            if (Files.exists(filePath)) {
+                logger.warn("File already exists, generating new name: {}", filePath);
+                safeFileName = UUID.randomUUID().toString() + "_" + safeFileName;
+                filePath = uploadPath.resolve(safeFileName);
+            }
+
             Files.copy(file.getInputStream(), filePath);
             logger.info("File copied to: {}", filePath);
 
-            String fileUrl = uploadDir + safeFileName;
+            // Chuẩn hóa URL với dấu / đầu tiên
+            String fileUrl = "/uploads/" + safeFileName;
             logger.info("File saved successfully: {}", fileUrl);
             return fileUrl;
-        } catch (Exception e) {
+        } catch (IOException e) {
             logger.error("Error saving file: {}", e.getMessage(), e);
             throw new IllegalArgumentException("Lỗi khi lưu file: " + e.getMessage());
         }
@@ -2056,6 +2173,15 @@ public class ContractController {
 
                 ContractDto contractDto = convertToContractDto(contract);
 
+                System.out.println("📅 Contract Date từ database: " + contract.getContractDate());
+                logger.info("Contract Date từ database cho contract ID {}: {}", contractId, contract.getContractDate());
+
+                // Chỉ set default nếu null, tránh ghi đè
+                if (contractDto.getContractDate() == null) {
+                    contractDto.setContractDate(LocalDate.now());
+                    logger.info("Set default contractDate to today for contract ID: {}", contractId);
+                }
+
                 List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
                 model.addAttribute("hostels", hostels);
                 System.out.println("🏢 Hostels loaded: " + hostels.size());
@@ -2112,7 +2238,13 @@ public class ContractController {
                 System.out.println("    - Current Room ID: " + currentRoomId);
                 System.out.println("    - Available Rooms: " + allRoomsForEdit.size());
                 System.out.println("    - Is Edit Mode: true");
+                System.out.println("    - Contract Date: " + contractDto.getContractDate());
+
                 model.addAttribute("allUtilities", utilityRepository.findAll());
+
+                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè contractDate
+                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra hàm này
+
                 return "host/hop-dong-host";
 
             } else {
@@ -2126,7 +2258,6 @@ public class ContractController {
             e.printStackTrace();
             logger.error("Error in edit contract form", e);
             model.addAttribute("error", "Lỗi khi tải hợp đồng: " + e.getMessage());
-
             return "redirect:/chu-tro/DS-hop-dong-host";
         }
     }
@@ -2256,65 +2387,80 @@ public class ContractController {
         }
     }
 
-    private Room convertRoomToDto(Rooms room) {
-        Room dto = new Room();
+    private ContractDto.Room convertRoomToDto(Rooms room) {
+        ContractDto.Room dto = new ContractDto.Room();
         dto.setRoomId(room.getRoomId());
         dto.setRoomName(room.getNamerooms());
         dto.setArea(room.getAcreage());
         dto.setPrice(room.getPrice());
-        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "unactive");
+        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "UNKNOWN");
+
+        // Ánh xạ utilities
+        if (room.getUtilities() != null && !room.getUtilities().isEmpty()) {
+            List<Integer> utilityIds = room.getUtilities().stream()
+                    .map(Utility::getUtilityId)
+                    .collect(Collectors.toList());
+            dto.setUtilityIds(utilityIds);
+            logger.info("🛠️ Mapped {} utilities for room ID: {}", utilityIds.size(), room.getRoomId());
+        } else {
+            dto.setUtilityIds(new ArrayList<>());
+            logger.info("🛠️ No utilities found for room ID: {}", room.getRoomId());
+        }
 
         if (room.getHostel() != null) {
             dto.setHostelId(room.getHostel().getHostelId());
             dto.setHostelName(room.getHostel().getName());
+
+            // Lấy địa chỉ từ Hostel
             String hostelAddress = room.getHostel().getAddress();
             System.out.println("🏠 Hostel address: " + hostelAddress);
 
             if (hostelAddress != null && !hostelAddress.trim().isEmpty()) {
                 dto.setAddress(hostelAddress);
+
+                // Phân tích địa chỉ
                 String[] addressParts = hostelAddress.split(",");
-
-                if (addressParts.length >= 4) {
+                if (addressParts.length >= 3) {
                     dto.setStreet(addressParts[0].trim());
-                    dto.setWard(addressParts[1].trim());
-                    dto.setDistrict(addressParts[2].trim());
-                    dto.setProvince(addressParts[3].trim());
+                    dto.setWard(addressParts.length > 1 ? addressParts[1].trim() : "");
+                    dto.setDistrict(addressParts.length > 2 ? addressParts[2].trim() : "");
+                    dto.setProvince(addressParts.length > 3 ? addressParts[3].trim() : "");
 
-                    System.out.println("✅ Parsed address:");
+                    System.out.println("✅ Parsed hostel address:");
                     System.out.println("    - Street: " + dto.getStreet());
                     System.out.println("    - Ward: " + dto.getWard());
                     System.out.println("    - District: " + dto.getDistrict());
                     System.out.println("    - Province: " + dto.getProvince());
                 } else {
-                    System.out.println("⚠️ Incomplete address format: " + hostelAddress);
                     dto.setStreet(hostelAddress);
                     dto.setWard("");
                     dto.setDistrict("");
                     dto.setProvince("");
                 }
             } else {
-                System.out.println("⚠️ Hostel address is null or empty");
-                dto.setAddress("Địa chỉ chưa cập nhật");
+                // Trường hợp địa chỉ của hostel null hoặc rỗng
+                dto.setAddress("Địa chỉ khu trọ chưa cập nhật");
                 dto.setStreet("");
                 dto.setWard("");
                 dto.setDistrict("");
                 dto.setProvince("");
+                System.out.println("⚠️ Hostel address is empty or null");
             }
         } else {
-            System.out.println("⚠️ Hostel is null for room ID: " + room.getRoomId());
-            dto.setAddress("Địa chỉ chưa cập nhật");
+            // Trường hợp phòng không thuộc khu trọ nào
+            dto.setAddress("Không tìm thấy khu trọ");
             dto.setStreet("");
             dto.setWard("");
             dto.setDistrict("");
             dto.setProvince("");
+            System.out.println("❌ No hostel found for room ID: " + room.getRoomId());
         }
 
         dto.setIsCurrent(false);
 
         System.out.println("🏠 Converted room: " + dto.getRoomName() +
                 " - ID: " + dto.getRoomId() +
-                " - Address: " + dto.getAddress() +
-                " - Status: " + dto.getStatus());
+                " - Address: " + dto.getAddress());
 
         return dto;
     }
@@ -2324,8 +2470,12 @@ public class ContractController {
         ContractDto dto = new ContractDto();
         dto.setId(contract.getContractId());
 
+        // Đảm bảo map đúng contractDate
         if (contract.getContractDate() != null) {
             dto.setContractDate(contract.getContractDate().toLocalDate());
+            System.out.println("📅 Mapped contractDate: " + contract.getContractDate().toLocalDate());
+        } else {
+            System.out.println("⚠️ contractDate từ database là null");
         }
         dto.setStatus(String.valueOf(contract.getStatus()));
 
@@ -2356,12 +2506,16 @@ public class ContractController {
                 tenant.setIssueDate(cccd.getIssueDate());
                 tenant.setIssuePlace(cccd.getIssuePlace());
 
-                // Lấy ảnh từ thực thể Image liên kết với UserCccd
-                if (StringUtils.hasText(cccd.getFrontImageUrl())) {
-                    tenant.setCccdFrontUrl(cccd.getFrontImageUrl());
-                }
-                if (StringUtils.hasText(cccd.getBackImageUrl())) {
-                    tenant.setCccdBackUrl(cccd.getBackImageUrl());
+                // 🔥 SỬA LỖI: Lấy URL ảnh từ bảng images
+                List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
+                for (Image image : images) {
+                    if (image.getType() == Image.ImageType.FRONT) {
+                        tenant.setCccdFrontUrl(image.getUrl());
+                        logger.info("Mapped Registered Tenant Front CCCD URL: {}", image.getUrl());
+                    } else if (image.getType() == Image.ImageType.BACK) {
+                        tenant.setCccdBackUrl(image.getUrl());
+                        logger.info("Mapped Registered Tenant Back CCCD URL: {}", image.getUrl());
+                    }
                 }
             }
 
@@ -2391,7 +2545,7 @@ public class ContractController {
                 unregTenant.setProvince(addressParts.getOrDefault("province", ""));
             }
 
-            // 🔥 PHẦN SỬA LỖI: Lấy URL ảnh trực tiếp từ đối tượng UnregisteredTenants
+            // Lấy URL ảnh từ UnregisteredTenants
             if (StringUtils.hasText(unregUser.getCccdFrontUrl())) {
                 unregTenant.setCccdFrontUrl(unregUser.getCccdFrontUrl());
                 logger.info("Mapped Unregistered Tenant Front CCCD URL: {}", unregUser.getCccdFrontUrl());
@@ -2452,13 +2606,17 @@ public class ContractController {
         }
         terms.setPrice(contract.getPrice() != null ? Double.valueOf(contract.getPrice()) : 0.0);
         terms.setDeposit(contract.getDeposit() != null ? Double.valueOf(contract.getDeposit()) : 0.0);
+
+        // Thêm các trường đã format
+        terms.setFormattedPrice(ContractDto.formatVND(terms.getPrice()));
+        terms.setFormattedDeposit(ContractDto.formatVND(terms.getDeposit()));
         if (contract.getDuration() != null) {
             terms.setDuration(contract.getDuration().intValue());
         }
         terms.setTerms(contract.getTerms());
         dto.setTerms(terms);
 
-        // ✅ Bắt đầu code mới tại đây để ánh xạ các trường mới
+        // Xử lý Payment Method
         if (contract.getPaymentMethod() != null) {
             dto.setPaymentMethod(ContractDto.PaymentMethod.valueOf(contract.getPaymentMethod().name()));
             System.out.println("✅ Mapped payment method: " + contract.getPaymentMethod().name());
@@ -2467,7 +2625,25 @@ public class ContractController {
             terms.setPaymentDateDescription(contract.getPaymentDateDescription());
             System.out.println("✅ Mapped payment date description: " + contract.getPaymentDateDescription());
         }
-        // ✅ Kết thúc code mới
+
+        // Xử lý Residents
+        if (contract.getResidents() != null && !contract.getResidents().isEmpty()) {
+            List<ContractDto.ResidentDto> residentDtos = contract.getResidents().stream()
+                    .map(resident -> {
+                        ContractDto.ResidentDto residentDto = new ContractDto.ResidentDto();
+                        residentDto.setFullName(resident.getFullName());
+                        residentDto.setBirthYear(resident.getBirthYear());
+                        residentDto.setPhone(resident.getPhone());
+                        residentDto.setCccdNumber(resident.getCccdNumber());
+                        return residentDto;
+                    })
+                    .collect(Collectors.toList());
+            dto.setResidents(residentDtos);
+            System.out.println("✅ Mapped " + residentDtos.size() + " residents");
+        } else {
+            dto.setResidents(new ArrayList<>());
+            System.out.println("✅ No residents found, set empty list");
+        }
 
         System.out.println("✅ Contract DTO conversion completed successfully");
         return dto;

@@ -40,8 +40,8 @@ public class Rooms {
     @Column(name = "status", nullable = false)
     private RoomStatus status;
 
-    @Column(name = "address", nullable = true)
-    private String address;
+//    @Column(name = "address", nullable = true)
+//    private String address;
 
     @Column(name = "acreage")
     private Float acreage;

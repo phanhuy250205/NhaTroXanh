@@ -26,7 +26,11 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c JOIN FETCH c.owner JOIN FETCH c.tenant WHERE c.owner.userId = :ownerId")
         List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
-        @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
+    @Query("SELECT c FROM Contracts c JOIN c.owner o WHERE o.userId = :ownerId")
+    Page<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+
+    @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
         List<Contracts> findByRoomId(@Param("roomId") Integer roomId);
 
         List<Contracts> findByTenantUserId(@Param("userId") Integer userId);
