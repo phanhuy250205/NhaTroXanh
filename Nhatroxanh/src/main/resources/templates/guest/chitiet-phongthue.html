@@ -511,12 +511,7 @@
                             </span>
                             <div class="contract-compact-content-guest">
                                 <span class="contract-compact-label-guest">Địa chỉ</span>
-                                <span th:text="${contract.room.hostel.address != null ? 
-      contract.room.hostel.address.street + ', ' + 
-      contract.room.hostel.address.ward.name + ', ' +
-      contract.room.hostel.address.ward.district.name + ', ' +
-      contract.room.hostel.address.ward.district.province.name 
-      : 'Chưa xác định'}">
+                                <span th:text="${contract.room.hostel.address}">
                                 </span>
 
                             </div>
@@ -762,12 +757,7 @@
                                 <div class="contract-property-row-guest">
                                     <div class="contract-property-item-guest">
                                         <span class="contract-property-label-guest">Địa chỉ</span>
-                                        <span class="contract-property-value-guest" th:text="${contract.room.hostel.address != null ? 
-      contract.room.hostel.address.street + ', ' + 
-      contract.room.hostel.address.ward.name + ', ' +
-      contract.room.hostel.address.ward.district.name + ', ' +
-      contract.room.hostel.address.ward.district.province.name 
-      : 'Chưa xác định'}">
+                                        <span class="contract-property-value-guest" th:text="${contract.room.hostel.address }">
                                         </span>
                                     </div>
                                     <div class="contract-property-item-guest">

@@ -16,14 +16,8 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
 
         // New method to fetch Room with Hostel, Address, Ward, District, and Province
-        @Query("SELECT r FROM Rooms r " +
-                        "LEFT JOIN FETCH r.hostel h " +
-                        "LEFT JOIN FETCH h.address a " +
-                        "LEFT JOIN FETCH a.ward w " +
-                        "LEFT JOIN FETCH w.district d " +
-                        "LEFT JOIN FETCH d.province p " +
-                        "WHERE r.roomId = :roomId")
-        Optional<Rooms> findByIdWithFullAddress(@Param("roomId") Integer roomId);
+        @Query("SELECT r FROM Rooms r LEFT JOIN FETCH r.hostel h WHERE r.roomId = :roomId")
+        Optional<Rooms> findByIdWithFullAddress(Integer roomId);
 
         // Existing methods
         @Query("SELECT r FROM Rooms r " +

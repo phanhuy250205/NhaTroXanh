@@ -31,10 +31,7 @@ public class HostelServiceImpl implements HostelService {
     private AddressRepository addressRepository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private WardRepository wardRepository;
+    private UserRepository usersRepository;
 
     @Override
     public List<Hostel> getHostelsByOwnerId(Integer ownerId) {
@@ -42,64 +39,45 @@ public class HostelServiceImpl implements HostelService {
     }
 
     @Override
-    public List<Hostel> getHostelsWithRoomsByOwnerId(Integer ownerId) {
-        return hostelRepository.findHostelsWithRoomsByOwnerId(ownerId);
-    }
-    @Override
     public Optional<Hostel> getHostelById(Integer id) {
         return hostelRepository.findById(id);
     }
 
     @Override
-    public Hostel createHostel(HostelDTO hostelDTO) {
-        Address address = createAddress(hostelDTO);
-        Users owner = userRepository.findById(hostelDTO.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy chủ trọ"));
-
-        Hostel hostel = Hostel.builder()
-                .name(hostelDTO.getName())
-                .description(hostelDTO.getDescription())
-                .status(hostelDTO.getStatus())
-                .room_number(hostelDTO.getRoomNumber())
-                .createdAt(Date.valueOf(LocalDate.now()))
-                .owner(owner)
-                .address(address)
-                .build();
-
-        return hostelRepository.save(hostel);
+    public List<Hostel> searchHostelsByOwnerIdAndName(Integer ownerId, String keyword) {
+        return hostelRepository.findByOwnerUserIdAndNameContainingIgnoreCase(ownerId, keyword);
     }
 
     @Override
-    public Hostel updateHostel(HostelDTO hostelDTO) {
-        Hostel existingHostel = hostelRepository.findById(hostelDTO.getHostelId())
+    public void createHostel(HostelDTO hostelDTO) {
+        Hostel hostel = new Hostel();
+        hostel.setName(hostelDTO.getName());
+        hostel.setDescription(hostelDTO.getDescription());
+        hostel.setStatus(hostelDTO.getStatus());
+        hostel.setRoom_number(hostelDTO.getRoomNumber());
+        hostel.setCreatedAt(Date.valueOf(LocalDate.now()));
+        hostel.setAddress(hostelDTO.getAddress());
+        Users owner = new Users();
+        owner.setUserId(hostelDTO.getOwnerId());
+        hostel.setOwner(owner);
+        hostelRepository.save(hostel);
+    }
+
+    @Override
+    public void updateHostel(HostelDTO hostelDTO) {
+        Hostel hostel = hostelRepository.findById(hostelDTO.getHostelId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khu trọ"));
-
-        Address address = existingHostel.getAddress();
-        if (address == null) {
-            address = createAddress(hostelDTO);
-        } else {
-            updateAddress(address, hostelDTO);
-        }
-
-        existingHostel.setName(hostelDTO.getName());
-        existingHostel.setDescription(hostelDTO.getDescription());
-        existingHostel.setStatus(hostelDTO.getStatus());
-        existingHostel.setRoom_number(hostelDTO.getRoomNumber());
-        existingHostel.setAddress(address);
-
-        return hostelRepository.save(existingHostel);
+        hostel.setName(hostelDTO.getName());
+        hostel.setDescription(hostelDTO.getDescription());
+        hostel.setStatus(hostelDTO.getStatus());
+        hostel.setRoom_number(hostelDTO.getRoomNumber());
+        hostel.setAddress(hostelDTO.getAddress()); // Cập nhật chuỗi địa chỉ
+        hostelRepository.save(hostel);
     }
 
     @Override
     public void deleteHostel(Integer hostelId) {
-        Hostel hostel = hostelRepository.findById(hostelId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy khu trọ"));
-
-        if (hostel.getAddress() != null) {
-            addressRepository.delete(hostel.getAddress());
-        }
-
-        hostelRepository.delete(hostel);
+        hostelRepository.deleteById(hostelId);
     }
 
     @Override
@@ -108,29 +86,15 @@ public class HostelServiceImpl implements HostelService {
     }
 
     private Address createAddress(HostelDTO hostelDTO) {
-        Ward ward = wardRepository.findById(Integer.parseInt(hostelDTO.getWard()))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phường/xã"));
-
-        String fullStreet = (hostelDTO.getHouseNumber() != null ? hostelDTO.getHouseNumber() + " " : "") +
-                (hostelDTO.getStreet() != null ? hostelDTO.getStreet() : "");
-
         Address address = Address.builder()
-                .street(fullStreet.trim())
-                .ward(ward)
+                .street(hostelDTO.getCombinedAddress())
                 .build();
-
         return addressRepository.save(address);
     }
 
-    private void updateAddress(Address address, HostelDTO hostelDTO) {
-        Ward ward = wardRepository.findById(Integer.parseInt(hostelDTO.getWard()))
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy phường/xã"));
-
-        String fullStreet = (hostelDTO.getHouseNumber() != null ? hostelDTO.getHouseNumber() + " " : "") +
-                (hostelDTO.getStreet() != null ? hostelDTO.getStreet() : "");
-
-        address.setStreet(fullStreet.trim());
-        address.setWard(ward);
-        addressRepository.save(address);
+    @Override
+    public List<Hostel> getHostelsWithRoomsByOwnerId(Integer ownerId) {
+        return hostelRepository.findHostelsWithRoomsByOwnerId(ownerId);
     }
+
 }

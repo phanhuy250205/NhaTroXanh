@@ -7,7 +7,7 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
-public interface    HostelService {
+public interface  HostelService {
 
     List<Hostel> getHostelsByOwnerId(Integer ownerId);
 
@@ -15,13 +15,13 @@ public interface    HostelService {
 
     Optional<Hostel> getHostelById(Integer id);
 
-    Hostel createHostel(HostelDTO hostelDTO);
+    void createHostel(HostelDTO hostelDTO);
 
-    Hostel updateHostel(HostelDTO hostelDTO);
+    void updateHostel(HostelDTO hostelDTO);
 
     void deleteHostel(Integer hostelId);
 
     int countByOwner(Users owner);
 
-
+    List<Hostel> searchHostelsByOwnerIdAndName(Integer ownerId, String keyword);
 }

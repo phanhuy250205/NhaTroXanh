@@ -108,7 +108,8 @@
     border-radius: 16px;
     box-shadow: 0 4px 20px rgba(0, 168, 255, 0.1);
     border: 2px solid rgba(0, 168, 255, 0.1);
-    margin: 0; /* Remove any margin that might cause misalignment */
+    margin: 0;
+    /* Remove any margin that might cause misalignment */
 }
 
 .search-input-host {
@@ -166,7 +167,8 @@
     position: relative;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    margin: 0; /* Remove any margin that might cause misalignment */
+    margin: 0;
+    /* Remove any margin that might cause misalignment */
 }
 
 .table-container-host::before {
@@ -207,24 +209,28 @@
 }
 
 /* Fixed column widths for better alignment */
-.table-th-host:nth-child(1) { 
-    width: 80px; 
+.table-th-host:nth-child(1) {
+    width: 80px;
     min-width: 80px;
 }
-.table-th-host:nth-child(2) { 
-    width: 250px; 
+
+.table-th-host:nth-child(2) {
+    width: 250px;
     min-width: 200px;
 }
-.table-th-host:nth-child(3) { 
-    width: 180px; 
+
+.table-th-host:nth-child(3) {
+    width: 180px;
     min-width: 150px;
 }
-.table-th-host:nth-child(4) { 
-    width: 150px; 
+
+.table-th-host:nth-child(4) {
+    width: 150px;
     min-width: 120px;
 }
-.table-th-host:nth-child(5) { 
-    width: 140px; 
+
+.table-th-host:nth-child(5) {
+    width: 140px;
     min-width: 120px;
 }
 
@@ -394,6 +400,7 @@
         opacity: 0;
         transform: translateY(-30px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -458,7 +465,6 @@
 /* Enhanced Form Styles */
 .form-host {
     display: flex;
-    flex-direction: column;
     gap: 24px;
 }
 
@@ -473,6 +479,12 @@
     color: #2c3e50;
     font-size: 15px;
     margin-bottom: 5px;
+}
+
+.btn-save-hosts {
+    float: right;
+    margin-bottom: 10px;
+    margin-right: 10px;
 }
 
 /* .form-input-host,
@@ -500,11 +512,11 @@
         margin-left: 80px;
         width: calc(100% - 80px);
     }
-    
+
     .content-container-host {
         padding: 25px 20px;
     }
-    
+
     .data-table-host {
         min-width: 750px;
     }
@@ -516,44 +528,44 @@
         padding-top: 70px;
         width: 100%;
     }
-    
+
     .content-container-host {
         padding: 20px 15px;
     }
-    
+
     .page-header-host {
         flex-direction: column;
         gap: 20px;
         align-items: stretch;
         padding: 0;
     }
-    
+
     .page-title-host {
         text-align: center;
         font-size: 28px;
         min-width: auto;
     }
-    
+
     .search-container-host {
         max-width: none;
         width: 100%;
     }
-    
+
     .table-container-host {
         border-radius: 16px;
         /* Remove negative margins that cause misalignment */
         margin: 0;
     }
-    
+
     .data-table-host {
         min-width: 700px;
     }
-    
+
     .table-th-host,
     .table-td-host {
         padding: 14px 12px;
     }
-    
+
     .modal-container-host {
         margin: 15px;
         width: calc(100% - 30px);
@@ -566,106 +578,106 @@
     .content-container-host {
         padding: 15px 10px;
     }
-    
+
     .page-title-host {
         font-size: 24px;
     }
-    
+
     .btn-primary-host {
         padding: 12px 20px;
         font-size: 14px;
         width: 100%;
         justify-content: center;
     }
-    
+
     .search-container-host {
         flex-direction: column;
         gap: 12px;
         padding: 12px;
         align-items: stretch;
     }
-    
+
     .search-input-host {
         width: 100%;
         padding: 12px 16px;
     }
-    
+
     .btn-search-host {
         width: 100%;
         padding: 12px 20px;
     }
-    
+
     .table-container-host {
         /* Keep consistent margins with search container */
         margin: 0;
         border-radius: 12px;
     }
-    
+
     .data-table-host {
         min-width: 650px;
         font-size: 14px;
     }
-    
+
     .table-th-host {
         padding: 12px 8px;
         font-size: 13px;
     }
-    
+
     .table-td-host {
         padding: 12px 8px;
         font-size: 14px;
     }
-    
+
     .table-td-host:nth-child(2) {
         padding-left: 12px;
         max-width: 200px;
     }
-    
+
     .status-badge-host {
         min-width: 80px;
         font-size: 11px;
         padding: 6px 10px;
     }
-    
+
     .buttons-edit-host,
     .btn-delete-host {
         width: 32px;
         height: 32px;
         font-size: 12px;
     }
-    
+
     .action-btns-host {
         gap: 6px;
     }
-    
+
     .modal-container-host {
         margin: 10px;
         width: calc(100% - 20px);
         border-radius: 12px;
         max-height: calc(100vh - 20px);
     }
-    
+
     .modal-header-host,
     .modal-body-host,
     .modal-footer-host {
         padding: 20px;
     }
-    
+
     .modal-title-host {
         font-size: 18px;
     }
-    
+
     .modal-footer-host {
         flex-direction: column;
         gap: 12px;
     }
-    
+
     .modal-footer-host .btn-primary-host,
     .modal-footer-host .btn-secondary-host {
         width: 100%;
         justify-content: center;
     }
-    
+
     .form-input-host,
     .form-select-host {
         padding: 12px 16px;
@@ -677,43 +689,43 @@
     .content-container-host {
         padding: 10px 5px;
     }
-    
+
     .page-title-host {
         font-size: 20px;
     }
-    
+
     .table-container-host {
         /* Keep consistent margins */
         margin: 0;
         border-radius: 8px;
     }
-    
+
     .data-table-host {
         min-width: 600px;
         font-size: 13px;
     }
-    
+
     .table-th-host {
         padding: 10px 6px;
         font-size: 12px;
     }
-    
+
     .table-td-host {
         padding: 10px 6px;
         font-size: 13px;
     }
-    
+
     .table-td-host:nth-child(2) {
         padding-left: 8px;
         max-width: 150px;
     }
-    
+
     .status-badge-host {
         min-width: 70px;
         font-size: 10px;
         padding: 4px 8px;
     }
-    
+
     .buttons-edit-host,
     .btn-delete-host {
         width: 28px;
@@ -757,9 +769,12 @@
 
 /* Loading Animation */
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -771,22 +786,23 @@
 
 /* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
+
     .btn-primary-host,
     .btn-secondary-host,
     .btn-search-host {
         min-height: 44px;
     }
-    
+
     .buttons-edit-host,
     .btn-delete-host {
         min-height: 36px;
         min-width: 36px;
     }
-    
+
     .table-row-host:hover {
         background-color: transparent;
     }
-    
+
     .table-row-host:active {
         background-color: rgba(0, 168, 255, 0.05);
     }
@@ -799,24 +815,24 @@
         width: 100%;
         background: white;
     }
-    
+
     .btn-primary-host,
     .btn-secondary-host,
     .btn-search-host,
     .action-btns-host {
         display: none;
     }
-    
+
     .table-container-host {
         box-shadow: none;
         border: 1px solid #ddd;
         overflow: visible;
     }
-    
+
     .data-table-host {
         min-width: auto;
     }
-    
+
     .modal-overlay-host {
         display: none !important;
     }

@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -12,9 +13,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 public class ContractDto {
@@ -575,10 +578,11 @@ public class ContractDto {
 
     public static class Room {
 
-        @JsonProperty("roomId") // Đảm bảo tên trường khớp
+        @JsonProperty("roomId")
         private Integer roomId;
         private String roomName;
         private Float area;
+        private Integer max_tenants; 
         private Float price;
         private String status;
         private Integer hostelId;
@@ -622,6 +626,7 @@ public class ContractDto {
         // public void setCurrent(Boolean current) {
         // isCurrent = current;
         // }
+
 
         public String getProvince() {
             return province;
@@ -715,6 +720,9 @@ public class ContractDto {
             this.address = address;
         }
 
+        public Integer getMaxTenants() { return max_tenants; }
+        public void setMaxTenants(Integer maxTenants) { this.max_tenants = maxTenants; }
+
     }
 
     public static class Terms {
@@ -725,6 +733,25 @@ public class ContractDto {
         private String terms;
         private Integer duration;
         private String paymentDateDescription; // Đổi từ paymentDate thành paymentDateDescription
+
+        private String formattedPrice; // Thêm trường này
+        private String formattedDeposit; // Thêm trường này
+
+        public String getFormattedPrice() {
+            return formattedPrice;
+        }
+
+        public void setFormattedPrice(String formattedPrice) {
+            this.formattedPrice = formattedPrice;
+        }
+
+        public String getFormattedDeposit() {
+            return formattedDeposit;
+        }
+
+        public void setFormattedDeposit(String formattedDeposit) {
+            this.formattedDeposit = formattedDeposit;
+        }
 
         // Getter và Setter
         public String getPaymentDateDescription() {
@@ -820,6 +847,25 @@ public class ContractDto {
         private String birthYear;
         private String phone;
         private String cccdNumber;
+    }
+
+    // Phương thức format tiền Việt Nam
+    public static String formatVND(Double amount) {
+        if (amount == null) {
+            return "0 VND";
+        }
+        NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+        return formatter.format(amount) + " VND";
+    }
+
+    // Getter cho price với format VND
+    public String getFormattedPrice() {
+        return formatVND(this.getTerms() != null ? this.getTerms().getPrice() : null);
+    }
+
+    // Getter cho deposit với format VND
+    public String getFormattedDeposit() {
+        return formatVND(this.getTerms() != null ? this.getTerms().getDeposit() : null);
     }
 
 }
