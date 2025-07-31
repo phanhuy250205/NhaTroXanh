@@ -1717,6 +1717,7 @@ public class ContractController {
                 throw new IllegalArgumentException("Bạn không có quyền cập nhật phòng này!");
             }
 
+            // Cập nhật các thuộc tính của phòng
             if (roomDto.getNamerooms() != null) {
                 room.setNamerooms(roomDto.getNamerooms());
             }
@@ -1732,12 +1733,12 @@ public class ContractController {
             if (roomDto.getDescription() != null) {
                 room.setDescription(roomDto.getDescription());
             }
-            if (roomDto.getAddress() != null) {
-                room.setAddress(roomDto.getAddress());
-            }
             if (roomDto.getStatus() != null) {
                 room.setStatus(roomDto.getStatus());
             }
+
+            // Không xử lý roomDto.getAddress() vì cột address đã bị xóa trong bảng rooms
+            // Nếu cần cập nhật địa chỉ, nên sử dụng endpoint riêng cho Hostel
 
             Rooms updatedRoom = roomsService.save(room);
 
@@ -2386,65 +2387,80 @@ public class ContractController {
         }
     }
 
-    private Room convertRoomToDto(Rooms room) {
-        Room dto = new Room();
+    private ContractDto.Room convertRoomToDto(Rooms room) {
+        ContractDto.Room dto = new ContractDto.Room();
         dto.setRoomId(room.getRoomId());
         dto.setRoomName(room.getNamerooms());
         dto.setArea(room.getAcreage());
         dto.setPrice(room.getPrice());
-        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "unactive");
+        dto.setStatus(room.getStatus() != null ? room.getStatus().name() : "UNKNOWN");
+
+        // Ánh xạ utilities
+        if (room.getUtilities() != null && !room.getUtilities().isEmpty()) {
+            List<Integer> utilityIds = room.getUtilities().stream()
+                    .map(Utility::getUtilityId)
+                    .collect(Collectors.toList());
+            dto.setUtilityIds(utilityIds);
+            logger.info("🛠️ Mapped {} utilities for room ID: {}", utilityIds.size(), room.getRoomId());
+        } else {
+            dto.setUtilityIds(new ArrayList<>());
+            logger.info("🛠️ No utilities found for room ID: {}", room.getRoomId());
+        }
 
         if (room.getHostel() != null) {
             dto.setHostelId(room.getHostel().getHostelId());
             dto.setHostelName(room.getHostel().getName());
+
+            // Lấy địa chỉ từ Hostel
             String hostelAddress = room.getHostel().getAddress();
             System.out.println("🏠 Hostel address: " + hostelAddress);
 
             if (hostelAddress != null && !hostelAddress.trim().isEmpty()) {
                 dto.setAddress(hostelAddress);
+
+                // Phân tích địa chỉ
                 String[] addressParts = hostelAddress.split(",");
-
-                if (addressParts.length >= 4) {
+                if (addressParts.length >= 3) {
                     dto.setStreet(addressParts[0].trim());
-                    dto.setWard(addressParts[1].trim());
-                    dto.setDistrict(addressParts[2].trim());
-                    dto.setProvince(addressParts[3].trim());
+                    dto.setWard(addressParts.length > 1 ? addressParts[1].trim() : "");
+                    dto.setDistrict(addressParts.length > 2 ? addressParts[2].trim() : "");
+                    dto.setProvince(addressParts.length > 3 ? addressParts[3].trim() : "");
 
-                    System.out.println("✅ Parsed address:");
+                    System.out.println("✅ Parsed hostel address:");
                     System.out.println("    - Street: " + dto.getStreet());
                     System.out.println("    - Ward: " + dto.getWard());
                     System.out.println("    - District: " + dto.getDistrict());
                     System.out.println("    - Province: " + dto.getProvince());
                 } else {
-                    System.out.println("⚠️ Incomplete address format: " + hostelAddress);
                     dto.setStreet(hostelAddress);
                     dto.setWard("");
                     dto.setDistrict("");
                     dto.setProvince("");
                 }
             } else {
-                System.out.println("⚠️ Hostel address is null or empty");
-                dto.setAddress("Địa chỉ chưa cập nhật");
+                // Trường hợp địa chỉ của hostel null hoặc rỗng
+                dto.setAddress("Địa chỉ khu trọ chưa cập nhật");
                 dto.setStreet("");
                 dto.setWard("");
                 dto.setDistrict("");
                 dto.setProvince("");
+                System.out.println("⚠️ Hostel address is empty or null");
             }
         } else {
-            System.out.println("⚠️ Hostel is null for room ID: " + room.getRoomId());
-            dto.setAddress("Địa chỉ chưa cập nhật");
+            // Trường hợp phòng không thuộc khu trọ nào
+            dto.setAddress("Không tìm thấy khu trọ");
             dto.setStreet("");
             dto.setWard("");
             dto.setDistrict("");
             dto.setProvince("");
+            System.out.println("❌ No hostel found for room ID: " + room.getRoomId());
         }
 
         dto.setIsCurrent(false);
 
         System.out.println("🏠 Converted room: " + dto.getRoomName() +
                 " - ID: " + dto.getRoomId() +
-                " - Address: " + dto.getAddress() +
-                " - Status: " + dto.getStatus());
+                " - Address: " + dto.getAddress());
 
         return dto;
     }
