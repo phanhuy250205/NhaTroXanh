@@ -75,5 +75,5 @@ public interface VoucherRepository extends JpaRepository<Vouchers, Integer> {
         Page<Vouchers> findByUserAndStatus(Users user, Boolean status, Pageable pageable);
 
         Page<Vouchers> findByUser(Users user, Pageable pageable);
-
+ 
 }

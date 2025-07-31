@@ -586,7 +586,7 @@
                     <div class="col-md-6 d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
                         <div class="position-relative">
                             <i class="fa fa-filter filter-icon"></i>
-                            <select class="form-select filter-select" name="statusFilter">
+                            <select class=" filter-select" name="statusFilter">
                                 <option value="">Trạng thái</option>
                                 <option value="Hoạt động" th:selected="${statusFilter == 'Hoạt động'}">Hoạt động
                                 </option>
@@ -597,7 +597,7 @@
 
                         <div class="position-relative">
                             <i class="fa fa-calendar-alt filter-icon"></i>
-                            <select class="form-select filter-select" name="sortBy">
+                            <select class="filter-select" name="sortBy">
                                 <option value="">Ngày</option>
                                 <option value="newest" th:selected="${sortBy == 'newest'}">Mới nhất</option>
                                 <option value="oldest" th:selected="${sortBy == 'oldest'}">Cũ nhất</option>

@@ -149,7 +149,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             Payments payment = Payments.builder()
                     .contract(contract)
-                    .totalAmount(totalAmount)
+                    .totalAmount(totalAmount.doubleValue())
                     .dueDate(request.getDueDate())
                     .paymentStatus(PaymentStatus.CHƯA_THANH_TOÁN)
                     .paymentMethod(request.getPaymentMethod())
@@ -188,7 +188,9 @@ public class PaymentServiceImpl implements PaymentService {
 
         payment.setPaymentStatus(status);
         if (status == PaymentStatus.ĐÃ_THANH_TOÁN) {
-            payment.setPaymentDate(Date.valueOf(LocalDate.now()));
+            payment.setPaymentDate(new Timestamp(System.currentTimeMillis()));
+        } else if (status == PaymentStatus.QUÁ_HẠN_THANH_TOÁN) {
+            payment.setPaymentDate(null); // Reset payment date if overdue
         }
 
         payment = paymentsRepository.save(payment);
@@ -560,6 +562,11 @@ public class PaymentServiceImpl implements PaymentService {
             month = String.format("%02d/%d", dueDate.getMonthValue(), dueDate.getYear());
         }
 
+        String paymentTime = payment.getPaymentDate() != null
+                ? payment.getPaymentDate().toLocalDateTime()
+                        .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm"))
+                : "N/A";
+
         List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(payment.getId());
         List<PaymentResponseDto.PaymentDetailResponseDto> detailDtos = details.stream()
                 .map(detail -> PaymentResponseDto.PaymentDetailResponseDto.builder()
@@ -583,6 +590,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .totalAmount(payment.getTotalAmount())
                 .dueDate(payment.getDueDate())
                 .paymentDate(payment.getPaymentDate())
+                .paymentTime(paymentTime)
                 .paymentStatus(payment.getPaymentStatus())
                 .paymentMethod(payment.getPaymentMethod())
                 .details(detailDtos)
@@ -635,4 +643,3 @@ public class PaymentServiceImpl implements PaymentService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + paymentId));
     }
 }
-

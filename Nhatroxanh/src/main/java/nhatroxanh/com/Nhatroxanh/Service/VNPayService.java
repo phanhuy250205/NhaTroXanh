@@ -15,6 +15,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -197,7 +198,7 @@ public class VNPayService {
                 // Payment successful
                 payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
                 payment.setPaymentMethod(Payments.PaymentMethod.VNPAY);
-                payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
+                payment.setPaymentDate(new Timestamp(System.currentTimeMillis()));
                 paymentsRepository.save(payment);
 
                 // Add money to landlord's balance and send notification
