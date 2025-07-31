@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // QUAN TRỌNG: Phải có dòng import này
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -20,8 +21,8 @@ public class CustomOidcUserService extends OidcUserService {
     private UserRepository userRepository;
 
     @Override
+    @Transactional // QUAN TRỌNG: Annotation này sẽ giải quyết vấn đề
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
-        // Lấy thông tin người dùng OIDC gốc từ Google
         OidcUser oidcUser = super.loadUser(userRequest);
         Map<String, Object> attributes = oidcUser.getAttributes();
 
@@ -29,13 +30,14 @@ public class CustomOidcUserService extends OidcUserService {
         String name = (String) attributes.get("name");
         String avatarUrl = (String) attributes.get("picture");
 
-        // Logic tạo hoặc cập nhật người dùng (giữ nguyên)
+        System.out.println("--- GOOGLE AVATAR URL NHẬN ĐƯỢC: " + avatarUrl + " ---");
+        
         Optional<Users> userOptional = userRepository.findByEmail(email);
         Users user;
         if (userOptional.isPresent()) {
             user = userOptional.get();
             user.setFullname(name);
-            user.setAvatar(avatarUrl);
+            user.setAvatar(avatarUrl); // Cập nhật avatar
             user.setAuthProvider(Users.AuthProvider.GOOGLE);
         } else {
             user = Users.builder()
@@ -49,11 +51,9 @@ public class CustomOidcUserService extends OidcUserService {
                     .balance(0.0)
                     .build();
         }
-        userRepository.save(user);
+        
+        userRepository.save(user); // Lệnh save này bây giờ sẽ được commit xuống CSDL
 
-        // ✅ SỬA LỖI TẠI ĐÂY:
-        // Trả về đối tượng CustomOAuth2UserDetails đã được tạo đúng cách,
-        // bao gồm cả các thông tin OIDC cần thiết.
         return new CustomOAuth2UserDetails(user, oidcUser.getAttributes(), oidcUser.getIdToken(), oidcUser.getUserInfo());
     }
 }

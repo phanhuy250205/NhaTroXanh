@@ -30,14 +30,10 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
     }
 
     protected String determineTargetUrl(Users user) {
-        // Lấy vai trò của người dùng
         if (user.getRole() == null) {
-            // Xử lý trường hợp role là null cho người dùng mới
             return "/trang-chu"; 
         }
         String role = user.getRole().name();
-
-        // Điều hướng dựa trên vai trò
         if (role.contains("OWNER")) {
             return "/chu-tro/tong-quan";
         } else if (role.contains("STAFF")) {
@@ -45,7 +41,6 @@ public class OAuth2LoginSuccessHandler extends SavedRequestAwareAuthenticationSu
         } else if (role.contains("ADMIN")) {
             return "/admin/thong-ke";
         }
-        // Trang mặc định cho CUSTOMER
         return "/trang-chu";
     }
 }
