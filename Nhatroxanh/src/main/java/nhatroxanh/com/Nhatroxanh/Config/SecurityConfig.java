@@ -68,31 +68,19 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                // ✅ GOM TẤT CẢ CÁC ĐƯỜNG DẪN PUBLIC VÀO MỘT CHỖ
                 .requestMatchers(
-                    // OAuth2 & Login/Register
                     "/login/oauth2/**", "/oauth2/**",
                     "/dang-ky-chi-tiet", "/hoan-tat-dang-ky",
                     "/dang-ky-chu-tro", "/dang-nhap-chu-tro", "/infor-chu-tro",
-
-                    // API công khai
                     "/api/users/**", "/api/**",
-
-                    // Trang công khai
                     "/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
                     "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher",
                     "/momo/**", "/zalopay/**", "/vnpay/**", "/tat-ca-phong-tro",
-
-                    // Các tài nguyên tĩnh (CSS, JS, Images)
                     "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**"
                 ).permitAll()
-
-                // Phân quyền theo vai trò
                 .requestMatchers("/chu-tro/**").hasRole("OWNER")
                 .requestMatchers("/nhan-vien/**").hasRole("STAFF")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-
-                // Tất cả các request còn lại phải xác thực
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

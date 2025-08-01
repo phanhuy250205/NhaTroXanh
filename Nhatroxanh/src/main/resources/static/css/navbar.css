@@ -1227,3 +1227,10 @@
     opacity: 1;
   }
 }
+.notification-item.notification-unread {
+    background-color: #eaf2ff; /* Màu nền xanh nhạt cho thông báo chưa đọc */
+}
+
+.notification-item.notification-unread:hover {
+    background-color: #dce8ff;
+}
