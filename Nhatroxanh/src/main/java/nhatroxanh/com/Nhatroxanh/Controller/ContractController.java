@@ -125,7 +125,8 @@ public class ContractController {
         if (contract == null) {
             contract = new ContractDto();
             contract.setContractDate(LocalDate.now());
-            logger.info("Contract was null, initialized new ContractDto with contractDate: {}", contract.getContractDate());
+            logger.info("Contract was null, initialized new ContractDto with contractDate: {}",
+                    contract.getContractDate());
         } else if (contract.getContractDate() == null) {
             contract.setContractDate(LocalDate.now());
             logger.info("ContractDate was null, set to: {}", contract.getContractDate());
@@ -424,7 +425,7 @@ public class ContractController {
                 contract.setUnregisteredTenant(null);
                 logger.info("✅ Set REGISTERED tenant: {}", registeredTenant.getFullname());
             } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
-                contract.setTenant(null);  // ← QUAN TRỌNG: Set null cho registered tenant
+                contract.setTenant(null); // ← QUAN TRỌNG: Set null cho registered tenant
                 contract.setUnregisteredTenant(unregisteredTenant);
                 logger.info("✅ Set UNREGISTERED tenant: {}", unregisteredTenant.getFullName());
             } else {
@@ -1581,8 +1582,8 @@ public class ContractController {
             // Cập nhật payment method nếu có
             if (contractDto.getPaymentMethod() != null) {
                 try {
-                    Contracts.PaymentMethod entityPaymentMethod =
-                            Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name());
+                    Contracts.PaymentMethod entityPaymentMethod = Contracts.PaymentMethod
+                            .valueOf(contractDto.getPaymentMethod().name());
                     contract.setPaymentMethod(entityPaymentMethod);
                     logger.info("✅ Updated payment method: {}", entityPaymentMethod);
                 } catch (IllegalArgumentException e) {
@@ -1601,8 +1602,8 @@ public class ContractController {
             }
 
             // 🔥 THÊM XỬ LÝ RESIDENTS
-//            // Xóa residents cũ
-//            residentRepository.deleteByContractId(contractId);
+            // // Xóa residents cũ
+            // residentRepository.deleteByContractId(contractId);
             contract.getResidents().clear();
 
             // Thêm residents mới từ DTO
@@ -1616,7 +1617,8 @@ public class ContractController {
                     resident.setContract(contract);
                     contract.getResidents().add(resident);
                 }
-                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(), contractId);
+                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(),
+                        contractId);
             } else {
                 logger.info("✅ No residents provided, cleared resident list for contract ID: {}", contractId);
             }
@@ -1641,6 +1643,7 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
     @PutMapping("/update-owner")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateOwner(
@@ -2242,8 +2245,10 @@ public class ContractController {
 
                 model.addAttribute("allUtilities", utilityRepository.findAll());
 
-                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè contractDate
-                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra hàm này
+                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè
+                // contractDate
+                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra
+                // hàm này
 
                 return "host/hop-dong-host";
 

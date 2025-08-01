@@ -1,7 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-
-
 import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
@@ -13,25 +11,24 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ContractService {
 
-
-
     @Transactional
     Contracts createContract(
             String tenantPhone, Integer roomId, Date contractDate, Date startDate,
             Date endDate, Float price, Float deposit, String terms,
-            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant , Integer duration) throws Exception;
+            Contracts.Status status, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant,
+            Integer duration) throws Exception;
 
     @Transactional
-    Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant, UnregisteredTenants unregisteredTenant) throws Exception;
+    Contracts createContract(ContractDto contractDto, String ownerCccd, Users tenant,
+            UnregisteredTenants unregisteredTenant) throws Exception;
 
-    Contracts updateContract(Integer contractId, Contracts updatedContract , ContractDto contractDto) throws IllegalArgumentException, Exception;
+    Contracts updateContract(Integer contractId, Contracts updatedContract, ContractDto contractDto)
+            throws IllegalArgumentException, Exception;
 
     @Transactional
     Contracts updateContract(Integer contractId, ContractDto contractDto) throws Exception;
@@ -40,13 +37,13 @@ public interface ContractService {
 
     Optional<Contracts> findContractById(Integer contractId);
 
-//    List<Contracts> findContractsByRoomId(Integer roomId);
+    List<Contracts> findContractsByRoomId(Integer roomId);
 
-//    List<Contracts> findContractsByTenantUserId(Integer tenantUserId);
+    List<Contracts> findContractsByTenantUserId(Integer tenantUserId);
 
-//    List<Contracts> findContractsByOwnerId(Integer ownerId);
+    List<Contracts> findContractsByOwnerId(Integer ownerId);
 
-//    List<Contracts> findContractsByStatus(Contracts.Status status);
+    List<Contracts> findContractsByStatus(Contracts.Status status);
 
     List<Contracts> findContractsByTenantName(String name);
 
@@ -58,18 +55,6 @@ public interface ContractService {
 
     List<Contracts> findContractsExpiringWithin30Days();
 
-    Page<ContractListDto> getAllContractsForList(Pageable pageable);
-
-    Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable);
-
-    Page<Contracts> findContractsByRoomId(Integer roomId, Pageable pageable);
-
-    Page<Contracts> findContractsByTenantUserId(Integer tenantUserId, Pageable pageable);
-
-    Page<Contracts> findContractsByOwnerId(Integer ownerId, Pageable pageable);
-
-    Page<Contracts> findContractsByStatus(Contracts.Status status, Pageable pageable);
-
     Optional<Contracts> findActiveContractByRoomId(Integer roomId);
 
     Long countContractsByOwnerId(Integer ownerId);
@@ -80,20 +65,21 @@ public interface ContractService {
 
     List<Contracts> findContractsByOwnerCccd(String cccd);
 
-
     // New methods for contract list
-//    List<ContractListDto> getAllContractsForList();
-//    List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
+    List<ContractListDto> getAllContractsForList();
+
+    List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
 
     void updateStatus(Integer contractId, String newStatus);
 
     Contracts getContractById(Integer contractId);
+
     // Thêm method mới để lấy phòng theo tenant ID
     Rooms findRoomByTenantId(Long tenantId);
 
+    List<Contracts> getMyContracts();
 
-     List<Contracts> getMyContracts();
-    Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
-    
-    
+    Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile,
+            MultipartFile cccdBackFile);
+
 }
