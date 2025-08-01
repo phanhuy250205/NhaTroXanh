@@ -39,6 +39,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -1921,30 +1924,33 @@ public class ContractController {
 
     @GetMapping("/list")
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Map<String, Object>> getContractsListApi(Authentication authentication) {
-        logger.info("Getting contracts list API for owner");
-
+    public ResponseEntity<Map<String, Object>> getContractsListApi(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size) {
+        logger.info("Getting contracts list API for owner with page: {}, size: {}", page, size);
         Map<String, Object> response = new HashMap<>();
-
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
-
-            List<ContractListDto> contractsList = contractService.getContractsListByOwnerId(ownerId);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<ContractListDto> contractPage = contractService.getContractsListByOwnerId(ownerId, pageable);
 
             response.put("success", true);
-            response.put("contracts", contractsList);
-            response.put("totalContracts", contractsList.size());
+            response.put("contracts", contractPage.getContent());
+            response.put("totalContracts", contractPage.getTotalElements());
+            response.put("totalPages", contractPage.getTotalPages());
+            response.put("currentPage", contractPage.getNumber());
             response.put("message", "Lấy danh sách hợp đồng thành công");
-
-            logger.info("API: Found {} contracts for owner ID: {}", contractsList.size(), ownerId);
+            logger.info("API: Found {} contracts for owner ID: {}", contractPage.getTotalElements(), ownerId);
             return ResponseEntity.ok(response);
-
         } catch (Exception e) {
             logger.error("Error getting contracts list API: {}", e.getMessage(), e);
             response.put("success", false);
             response.put("contracts", List.of());
             response.put("totalContracts", 0);
+            response.put("totalPages", 0);
+            response.put("currentPage", page);
             response.put("message", "Lỗi khi lấy danh sách hợp đồng: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }

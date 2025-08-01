@@ -40,13 +40,13 @@ public interface ContractService {
 
     Optional<Contracts> findContractById(Integer contractId);
 
-//    List<Contracts> findContractsByRoomId(Integer roomId);
+    List<Contracts> findContractsByRoomId(Integer roomId);
 
-//    List<Contracts> findContractsByTenantUserId(Integer tenantUserId);
+    List<Contracts> findContractsByTenantUserId(Integer tenantUserId);
 
-//    List<Contracts> findContractsByOwnerId(Integer ownerId);
+    List<Contracts> findContractsByOwnerId(Integer ownerId);
 
-//    List<Contracts> findContractsByStatus(Contracts.Status status);
+    List<Contracts> findContractsByStatus(Contracts.Status status);
 
     List<Contracts> findContractsByTenantName(String name);
 
@@ -57,18 +57,6 @@ public interface ContractService {
     List<Contracts> findContractsByDateRange(Date startDate, Date endDate);
 
     List<Contracts> findContractsExpiringWithin30Days();
-
-    Page<ContractListDto> getAllContractsForList(Pageable pageable);
-
-    Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable);
-
-    Page<Contracts> findContractsByRoomId(Integer roomId, Pageable pageable);
-
-    Page<Contracts> findContractsByTenantUserId(Integer tenantUserId, Pageable pageable);
-
-    Page<Contracts> findContractsByOwnerId(Integer ownerId, Pageable pageable);
-
-    Page<Contracts> findContractsByStatus(Contracts.Status status, Pageable pageable);
 
     Optional<Contracts> findActiveContractByRoomId(Integer roomId);
 
@@ -82,8 +70,8 @@ public interface ContractService {
 
 
     // New methods for contract list
-//    List<ContractListDto> getAllContractsForList();
-//    List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
+    List<ContractListDto> getAllContractsForList();
+    List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
 
     void updateStatus(Integer contractId, String newStatus);
 
@@ -92,8 +80,18 @@ public interface ContractService {
     Rooms findRoomByTenantId(Long tenantId);
 
 
-     List<Contracts> getMyContracts();
+    List<Contracts> getMyContracts();
     Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
-    
-    
+
+
+    // Các phương thức phân trang mới
+    Page<Contracts> findContractsByOwnerCccd(String cccd, Pageable pageable);
+
+    Page<Contracts> findContractsByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
+
+    Page<Contracts> findActiveContractsByOwnerId(Integer ownerId, Pageable pageable);
+
+    Page<Contracts> findContractsByRoomName(String roomName, Pageable pageable);
+    Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable);
+
 }
