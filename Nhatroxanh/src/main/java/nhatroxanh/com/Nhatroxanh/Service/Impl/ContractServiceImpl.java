@@ -270,7 +270,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
     if (contractDto.getPaymentMethod() != null) {
         contract.setPaymentMethod(Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name()));
     }
-    
+
     // ✅ Bắt đầu code mới: Lấy và lưu paymentDateDescription từ DTO
     if (contractDto.getTerms().getPaymentDateDescription() != null) {
         contract.setPaymentDateDescription(contractDto.getTerms().getPaymentDateDescription());
@@ -278,7 +278,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
                 contractDto.getTerms().getPaymentDateDescription());
     }
     // ✅ Kết thúc code mới
-    
+
     // Lưu người ở cùng
     if (contractDto.getResidents() != null && !contractDto.getResidents().isEmpty()) {
         logger.info("SERVICE: Tìm thấy {} người ở. Đang xử lý...", contractDto.getResidents().size());
@@ -293,7 +293,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
             resident.setContract(contract); // **QUAN TRỌNG**: Liên kết người ở với hợp đồng này
             residents.add(resident);
         }
-        contract.setResidents(residents); // Gán danh sách người ở vào hợp đồng
+        contract.setResidents((Set<Resident>) residents); // Gán danh sách người ở vào hợp đồng
     }
 
     // Lưu hợp đồng
@@ -304,7 +304,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
 }
     @Override
     @Transactional
-    public Contracts updateContract(Integer contractId, Contracts updatedContract) throws Exception {
+    public Contracts updateContract(Integer contractId, Contracts updatedContract, ContractDto contractDto) throws Exception {
         logger.info("=== START UPDATE CONTRACT (Full Contract Object) ===");
         logger.info("Updating contract with ID: {}", contractId);
 
@@ -677,25 +677,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
         return contractRepository.findById(contractId);
     }
 
-    @Override
-    public List<Contracts> findContractsByRoomId(Integer roomId) {
-        return contractRepository.findByRoomId(roomId);
-    }
 
-    @Override
-    public List<Contracts> findContractsByTenantUserId(Integer tenantUserId) {
-        return contractRepository.findByTenantUserId(tenantUserId);
-    }
-
-    @Override
-    public List<Contracts> findContractsByOwnerId(Integer ownerId) {
-        return contractRepository.findByOwnerId(ownerId);
-    }
-
-    @Override
-    public List<Contracts> findContractsByStatus(Contracts.Status status) {
-        return contractRepository.findByStatus(status);
-    }
 
     @Override
     public List<Contracts> findContractsByTenantName(String name) {
@@ -1305,7 +1287,7 @@ public Contracts createContractFromDto(ContractDto contractDto, Integer ownerId,
                 residents.add(resident);
             }
         }
-        contract.setResidents(residents);
+        contract.setResidents((List<Resident>) residents);
 
         Contracts savedContract = contractRepository.save(contract);
         logger.info("SERVICE: Đã tạo hợp đồng ID {} thành công.", savedContract.getContractId());
