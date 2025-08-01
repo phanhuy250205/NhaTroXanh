@@ -20,6 +20,11 @@
             <p class="payment-success-subtitle-guest">Cảm ơn bạn đã thanh toán đúng hạn. Giao dịch đã được xử lý thành công.</p>
         </div>
 
+        <!-- Error Message (if any) -->
+        <div th:if="${error != null}" class="payment-error-message-guest">
+            <p th:text="${error}"></p>
+        </div>
+
         <!-- Main Content -->
         <div class="payment-content-wrapper-guest">
             <!-- Transaction Summary -->
@@ -33,23 +38,13 @@
                 
                 <div class="payment-transaction-info-guest">
                     <div class="payment-info-grid-guest">
-                        <!-- <div class="payment-info-item-guest">
-                            <div class="payment-info-icon-guest payment-transaction-icon-guest">
-                                <i class="fas fa-hashtag"></i>
-                            </div>
-                            <div class="payment-info-content-guest">
-                                <span class="payment-info-label-guest">Mã giao dịch</span>
-                                <span class="payment-info-value-guest">TXN-20241205-001</span>
-                            </div>
-                        </div> -->
-
                         <div class="payment-info-item-guest">
                             <div class="payment-info-icon-guest payment-date-icon-guest">
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div class="payment-info-content-guest">
                                 <span class="payment-info-label-guest">Ngày thanh toán</span>
-                                <span class="payment-info-value-guest" th:text="${paymentDate}">05/12/2024</span>
+                                <span class="payment-info-value-guest" th:text="${paymentDate} ?: '--'"></span>
                             </div>
                         </div>
 
@@ -59,7 +54,7 @@
                             </div>
                             <div class="payment-info-content-guest">
                                 <span class="payment-info-label-guest">Thời gian</span>
-                                <span class="payment-info-value-guest" th:text="${paymentTime}">10:30 AM</span>
+                                <span class="payment-info-value-guest" th:text="${paymentTime} ?: '--'"></span>
                             </div>
                         </div>
 
@@ -69,7 +64,7 @@
                             </div>
                             <div class="payment-info-content-guest">
                                 <span class="payment-info-label-guest">Phương thức</span>
-                                <span class="payment-info-value-guest" th:text="${paymentMethod}">VNPay</span>
+                                <span class="payment-info-value-guest" th:text="${paymentMethod} ?: '--'"></span>
                             </div>
                         </div>
 
@@ -79,7 +74,7 @@
                             </div>
                             <div class="payment-info-content-guest">
                                 <span class="payment-info-label-guest">Phòng</span>
-                                <span class="payment-info-value-guest" th:text="${roomName}">A101</span>
+                                <span class="payment-info-value-guest" th:text="${roomName} ?: 'Không xác định'"></span>
                             </div>
                         </div>
 
@@ -89,7 +84,7 @@
                             </div>
                             <div class="payment-info-content-guest">
                                 <span class="payment-info-label-guest">Kỳ thanh toán</span>
-                                <span class="payment-info-value-guest" th:text="${month}">Tháng 12/2024</span>
+                                <span class="payment-info-value-guest" th:text="${month} ?: 'Không xác định'"></span>
                             </div>
                         </div>
                     </div>
@@ -98,7 +93,7 @@
                     <div class="payment-total-amount-section-guest">
                         <div class="payment-total-wrapper-guest">
                             <span class="payment-total-label-guest">Tổng số tiền đã thanh toán</span>
-                            <span class="payment-total-amount-guest" th:text="${totalAmount}">3,930,000 VNĐ</span>
+                            <span class="payment-total-amount-guest" th:text="${finalTotal} ?: '0 VNĐ'"></span>
                         </div>
                         <div class="payment-status-badge-guest">
                             <i class="fas fa-check-circle"></i>
@@ -125,10 +120,10 @@
                             </div>
                             <div class="payment-item-details-guest">
                                 <h4 class="payment-item-name-guest">Tiền phòng</h4>
-                                <p class="payment-item-description-guest" th:text="'Phòng ' + ${roomName} + ' - ' + ${month}">Phòng A101 - Tháng 12/2024</p>
+                                <p class="payment-item-description-guest" th:text="'Phòng ' + ${roomName} + ' - ' + ${month} ?: 'Không xác định'"></p>
                             </div>
                         </div>
-                        <div class="payment-item-amount-guest" th:text="${roomPrice}">3,500,000 VNĐ</div>
+                        <div class="payment-item-amount-guest" th:text="${roomPrice} ?: '0 VNĐ'"></div>
                     </div>
 
                     <div class="payment-breakdown-item-guest" th:if="${electricCost != '0 VNĐ'}">
@@ -138,10 +133,10 @@
                             </div>
                             <div class="payment-item-details-guest">
                                 <h4 class="payment-item-name-guest">Tiền điện</h4>
-                                <p class="payment-item-description-guest" th:text="${electricUsage} + ' ' + ${electricReadings}">71.4 kWh (1245 → 1316)</p>
+                                <p class="payment-item-description-guest" th:text="${electricUsage} + ' ' + ${electricReadings} ?: 'Không xác định'"></p>
                             </div>
                         </div>
-                        <div class="payment-item-amount-guest" th:text="${electricCost}">250,000 VNĐ</div>
+                        <div class="payment-item-amount-guest" th:text="${electricCost} ?: '0 VNĐ'"></div>
                     </div>
 
                     <div class="payment-breakdown-item-guest" th:if="${waterCost != '0 VNĐ'}">
@@ -151,10 +146,10 @@
                             </div>
                             <div class="payment-item-details-guest">
                                 <h4 class="payment-item-name-guest">Tiền nước</h4>
-                                <p class="payment-item-description-guest" th:text="${waterUsage} + ' ' + ${waterReadings}">4 m³ (156 → 160)</p>
+                                <p class="payment-item-description-guest" th:text="${waterUsage} + ' ' + ${waterReadings} ?: 'Không xác định'"></p>
                             </div>
                         </div>
-                        <div class="payment-item-amount-guest" th:text="${waterCost}">80,000 VNĐ</div>
+                        <div class="payment-item-amount-guest" th:text="${waterCost} ?: '0 VNĐ'"></div>
                     </div>
 
                     <div class="payment-breakdown-item-guest" th:if="${serviceFee != '0 VNĐ'}">
@@ -167,13 +162,34 @@
                                 <p class="payment-item-description-guest">Phí quản lý, vệ sinh chung</p>
                             </div>
                         </div>
-                        <div class="payment-item-amount-guest" th:text="${serviceFee}">100,000 VNĐ</div>
+                        <div class="payment-item-amount-guest" th:text="${serviceFee} ?: '0 VNĐ'"></div>
+                    </div>
+
+                    <div class="payment-breakdown-item-guest" th:if="${discountAmount != '0 VNĐ'}">
+                        <div class="payment-item-info-guest">
+                            <div class="payment-item-icon-guest payment-voucher-icon-guest">
+                                <i class="fas fa-ticket-alt"></i>
+                            </div>
+                            <div class="payment-item-details-guest">
+                                <h4 class="payment-item-name-guest">Giảm giá voucher</h4>
+                                <p class="payment-item-description-guest">Giảm giá từ mã voucher</p>
+                            </div>
+                        </div>
+                        <div class="payment-item-amount-guest" th:text="'-' + ${discountAmount} ?: '0 VNĐ'"></div>
                     </div>
 
                     <div class="payment-breakdown-total-guest">
                         <div class="payment-total-row-guest">
-                            <span class="payment-total-text-guest">Tổng cộng</span>
-                            <span class="payment-total-value-guest" th:text="${totalAmount}">3,930,000 VNĐ</span>
+                            <span class="payment-total-text-guest">Tổng cộng ban đầu</span>
+                            <span class="payment-total-value-guest" th:text="${originalTotal} ?: '0 VNĐ'"></span>
+                        </div>
+                        <div class="payment-total-row-guest" th:if="${discountAmount != '0 VNĐ'}">
+                            <span class="payment-total-text-guest">Giảm giá voucher</span>
+                            <span class="payment-total-value-guest" th:text="'-' + ${discountAmount} ?: '0 VNĐ'"></span>
+                        </div>
+                        <div class="payment-total-row-guest">
+                            <span class="payment-total-text-guest">Tổng thanh toán</span>
+                            <span class="payment-total-value-guest" th:text="${finalTotal} ?: '0 VNĐ'"></span>
                         </div>
                     </div>
                 </div>
@@ -189,10 +205,6 @@
                     <i class="fas fa-download"></i>
                     Tải Hóa Đơn PDF
                 </button>
-                <!-- <button class="payment-btn-guest payment-btn-outline-guest" onclick="printInvoice()">
-                    <i class="fas fa-print"></i>
-                    In Hóa Đơn
-                </button> -->
             </div>
 
             <!-- Additional Info -->
@@ -238,10 +250,6 @@
         function downloadInvoice() {
             alert('Chức năng tải hóa đơn PDF đang được phát triển!');
         }
-
-        // function printInvoice() {
-        //     window.print();
-        // }
 
         // Initialize animations
         document.addEventListener('DOMContentLoaded', function() {

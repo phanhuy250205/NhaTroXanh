@@ -305,7 +305,7 @@ public class VoucherServiceImpl implements VoucherService {
         if (voucher.getHostel() != null) {
             recipients = userRepository.findByHostelIdAndRole(voucher.getHostel().getHostelId(), Users.Role.CUSTOMER);
         } else {
-            recipients = userRepository.findByRole("CUSTOMER");
+            recipients = userRepository.findByRole(Users.Role.CUSTOMER);
         }
 
         for (Users recipient : recipients) {
@@ -334,5 +334,18 @@ public class VoucherServiceImpl implements VoucherService {
                                 "Nhà Trọ Xanh");
             }
         }
+    }
+
+    @Override
+    public Vouchers getVoucherByCode(String code) {
+        return voucherRepository.findByCode(code); // Giả sử có method findByCode trong VoucherRepository
+    }
+
+    @Override
+    public void updateVoucherQuantity(Vouchers voucher) {
+        if (voucher.getQuantity() <= 0) {
+            voucher.setStatus(false);
+        }
+        voucherRepository.save(voucher);
     }
 }

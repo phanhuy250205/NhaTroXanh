@@ -44,3 +44,8 @@ SELECT * FROM payments WHERE app_trans_id = '250724_1753358533608';enum('BANK','
 
 ALTER TABLE payments MODIFY COLUMN payment_method ENUM('TIỀN_MẶT', 'BANK', 'VNPAY', 'MOMO') NOT NULL;
 SHOW COLUMNS FROM payments LIKE 'payment_method';
+
+
+ALTER TABLE `vouchers` DROP FOREIGN KEY `FKl0frfppemmjn91a5jyli9ape3`;
+ALTER TABLE `vouchers` DROP COLUMN `room_id`;
+
