@@ -63,7 +63,7 @@ public class VoucherHostController {
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", voucherPage.getTotalPages());
         model.addAttribute("totalVouchers", voucherPage.getTotalElements());
-        model.addAttribute("searchQuery", normalizedSearchQuery); 
+        model.addAttribute("searchQuery", normalizedSearchQuery);
         model.addAttribute("statusFilter", normalizedStatusFilter);
         return "host/voucher-host";
     }
@@ -110,6 +110,7 @@ public class VoucherHostController {
                     .build();
 
             voucherService.createVoucherHost(voucher, currentUser.getUserId());
+            voucherService.sendVoucherNotification(voucher, userDetails); // Gửi thông báo sau khi tạo
 
             redirectAttributes.addFlashAttribute("successMessage", "Tạo voucher thành công!");
         } catch (IllegalArgumentException | SecurityException e) {
@@ -181,11 +182,15 @@ public class VoucherHostController {
             @RequestParam("status") Boolean status,
             RedirectAttributes redirectAttributes) {
         try {
+            Vouchers voucher = voucherService.getVoucherByIdAndHost(voucherId, userDetails.getUser().getUserId());
+            
             voucherService.updateVoucherHost(
                     voucherId, userDetails.getUser().getUserId(), title, code, hostelId,
                     discountValue, quantity, minAmount, Date.valueOf(startDate),
                     Date.valueOf(endDate), description, status);
-
+            if (status) { // Chỉ gửi thông báo nếu voucher đang hoạt động
+                voucherService.sendVoucherNotification(voucher, userDetails);
+            }
             // voucherService.checkAndDeactivateVouchersIfNeeded();
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật voucher thành công!");
         } catch (SecurityException e) {

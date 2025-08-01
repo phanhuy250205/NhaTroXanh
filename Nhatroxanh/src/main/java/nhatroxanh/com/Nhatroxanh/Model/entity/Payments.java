@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,13 +34,13 @@ public class Payments {
     private Contracts contract;
 
     @Column(name = "total_amount")
-    private Float totalAmount;
+    private Double totalAmount;
 
     @Column(name = "due_date")
     private Date dueDate;
 
     @Column(name = "payment_date")
-    private Date paymentDate;
+    private Timestamp paymentDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")

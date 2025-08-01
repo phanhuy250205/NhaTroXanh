@@ -76,12 +76,10 @@ public class WalletServiceImpl implements WalletService {
                 throw new IllegalArgumentException("User is not a landlord/owner");
             }
 
-            Float paymentAmountFloat = payment.getTotalAmount();
-            if (paymentAmountFloat == null || paymentAmountFloat <= 0) {
+            Double paymentAmount = payment.getTotalAmount();
+            if (paymentAmount == null || paymentAmount <= 0) {
                 throw new IllegalArgumentException("Payment amount must be positive");
             }
-            
-            Double paymentAmount = paymentAmountFloat.doubleValue();
 
             String description = String.format("Payment received from tenant for invoice #%d - Room: %s", 
                     payment.getId(), 
