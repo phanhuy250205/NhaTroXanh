@@ -12,8 +12,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto.PaymentMethod;
+
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
 @Repository
