@@ -277,7 +277,7 @@ public class PostServiceImpl implements PostService {
         }
 
         if (!errors.isEmpty() && imageList.isEmpty()) {
-            throw new Exception("Không thể upload ảnh nào: " + String.join(", ", errors));
+            throw new RuntimeException("Không thể upload ảnh nào: " + String.join(", ", errors));
         }
 
         if (!errors.isEmpty()) {

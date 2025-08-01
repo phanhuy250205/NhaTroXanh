@@ -600,4 +600,6 @@ public class EmailServiceImpl implements EmailService {
         
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, ""));
     }
+
 }
+

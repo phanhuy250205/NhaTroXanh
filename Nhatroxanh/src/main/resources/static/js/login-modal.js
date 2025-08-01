@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
     passwordToggles.forEach(toggle => {
-        toggle.addEventListener("click", function () {
+        toggle.addEventListener("click", function() {
             const wrapper = this.closest('.input-wrapper');
             const passwordInput = wrapper.querySelector('input');
             const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: formData,
             })
                 .then((response) => {
-                    if (response.ok) {
+                    if (response.ok) { 
                         // 4. THÀNH CÔNG: Tải lại trang để cập nhật thanh điều hướng
                         window.location.reload()
                     } else {

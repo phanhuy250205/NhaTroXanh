@@ -195,11 +195,6 @@ public class DemoController {
         return "host/QL-thanh-toan-host";
     }
 
-    @GetMapping("/chu-tro/quan-ly-tro")
-    public String phongtro() {
-        return "host/phongtro";
-    }
-
     @GetMapping("/chu-tro/khach-thue")
     public String showTenantManagementPage(
             Model model,
@@ -224,10 +219,10 @@ public class DemoController {
 
 
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue")
-    public String chitietkhachthue() {
-        return "host/chi-tiet-khach-thue";
-    }
+    // @GetMapping("/chu-tro/chi-tiet-khach-thue")
+    // public String chitietkhachthue() {
+    //     return "host/chi-tiet-khach-thue";
+    // }
 
 
     @GetMapping("/khach-thue/thanh-toan")
@@ -266,7 +261,6 @@ public class DemoController {
         userRepository.save(tenant);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công.");
-        // ✅ chuyển hướng lại đúng trang chi tiết khách thuê
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
     }
 

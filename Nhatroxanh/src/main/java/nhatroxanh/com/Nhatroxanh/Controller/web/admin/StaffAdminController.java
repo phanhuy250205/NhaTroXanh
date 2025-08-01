@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 
 @Controller
@@ -25,10 +28,18 @@ import nhatroxanh.com.Nhatroxanh.Service.UserService;
 public class StaffAdminController {
     @Autowired
     private UserService usersService;
+
     @Autowired
     UserRepository userRepository;
+
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserCccdRepository userCccdRepository;
+
+    @Autowired
+    private EncryptionService encryptionService;
 
     @GetMapping
     public String listStaffUsers(
@@ -63,10 +74,22 @@ public class StaffAdminController {
         Page<Users> staffPage = usersService.getStaffUsers(page, size);
         Users staff = usersService.getById(id);
 
+        // Tìm CCCD theo user
+        UserCccd cccd = userCccdRepository.findByUser(staff);
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                cccd.setCccdNumber(decryptedCccd); // Tạm thời set để hiển thị
+            } catch (Exception e) {
+                model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
+
         model.addAttribute("staffDetail", staff);
         model.addAttribute("staffPage", staffPage);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", staffPage.getTotalPages());
+        model.addAttribute("cccd", cccd); // Truyền xuống view nếu cần
 
         return "admin/quan-ly-nhan-vien";
     }

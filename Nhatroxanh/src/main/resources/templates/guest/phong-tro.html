@@ -19,7 +19,6 @@
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
 
-
     <div th:replace="~{/layouts/loc-danhmuc}"></div>
 
     <div class="container py-4">
@@ -59,7 +58,6 @@
                                 <img th:unless="${post.images != null and !post.images.isEmpty()}"
                                     src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
                             </a>
-                            
                         </div>
 
                         <div class="post-info ps-3 d-flex flex-column justify-content-between">
@@ -114,24 +112,70 @@
                 </div>
                 <nav th:if="${totalPages > 1}" class="mt-4">
                     <ul class="pagination justify-content-center">
+                        <!-- Previous Page -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/danh-muc/{id}(id=${categoryId},sort=${selectedSort},province=${selectedProvince},priceRange=${selectedPriceRange},searchTerm=${searchTerm},page=${currentPage - 1})}">Trước</a>
+                            <a class="page-link" href="#" 
+                               th:data-page="${currentPage - 1}"
+                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
                         </li>
 
-                        <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <!-- Show first page if current page is far from start -->
+                        <li class="page-item" th:if="${currentPage > 2}">
+                            <a class="page-link" href="#"
+                               th:data-page="0"
+                               onclick="navigateToPage(this.getAttribute('data-page')); return false;">1</a>
+                        </li>
+                        
+                        <!-- Show dots if there's a gap -->
+                        <li class="page-item disabled" th:if="${currentPage > 3}">
+                            <span class="page-link">...</span>
+                        </li>
+
+                        <!-- Show pages around current page -->
+                        <th:block th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}">
                             <li class="page-item" th:classappend="${currentPage == i} ? 'active'">
-                                <a class="page-link"
-                                    th:href="@{/danh-muc/{id}(id=${categoryId},sort=${selectedSort},province=${selectedProvince},priceRange=${selectedPriceRange},searchTerm=${searchTerm},page=${i})}"
-                                    th:text="${i + 1}">1</a>
+                                <a class="page-link" href="#"
+                                   th:data-page="${i}"
+                                   onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                                   th:text="${i + 1}">1</a>
                             </li>
                         </th:block>
 
-                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
-                            <a class="page-link"
-                                th:href="@{/danh-muc/{id}(id=${categoryId},sort=${selectedSort},province=${selectedProvince},priceRange=${selectedPriceRange},searchTerm=${searchTerm},page=${currentPage + 1})}">Sau</a>
+                        <!-- Show dots if there's a gap -->
+                        <li class="page-item disabled" th:if="${currentPage < totalPages - 4}">
+                            <span class="page-link">...</span>
+                        </li>
+                        
+                        <!-- Show last page if current page is far from end -->
+                        <li class="page-item" th:if="${currentPage < totalPages - 3}">
+                            <a class="page-link" href="#"
+                               th:data-page="${totalPages - 1}"
+                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                               th:text="${totalPages}">Last</a>
+                        </li>
+
+                        <!-- Next Page -->
+                        <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+                            <a class="page-link" href="#"
+                               th:data-page="${currentPage + 1}"
+                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
                         </li>
                     </ul>
+                    
+                    <!-- Page Info -->
+                    <div class="text-center mt-2">
+                        <small class="text-muted">
+                            Trang <span th:text="${currentPage + 1}">1</span> 
+                            trong <span th:text="${totalPages}">10</span> trang
+                            (<span th:text="${totalPosts}">100</span> kết quả)
+                        </small>
+                    </div>
                 </nav>
             </div>
 
@@ -142,9 +186,7 @@
                         <i class="fas fa-filter"></i> Lọc tìm kiếm phòng
                     </h6>
 
-                    <!-- ẨN CÁC ELEMENT DEBUG -->
                     <input type="hidden" id="categoryId" th:value="${categoryId}">
-                    <!-- <button class="btn btn-info btn-sm mb-3" id="testBtn">Nhà trọ xanh</button> -->
 
                     <div class="filter-section">
                         <label class="filter-label">Diện tích</label>
@@ -169,7 +211,7 @@
                             <label class="form-check-label" for="area4">25 - 30m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area5" value="30-">
+                            <input class="form-check-input" type="radio" name="area" id="area5" value="30+">
                             <label class="form-check-label" for="area5">Trên 30m²</label>
                         </div>
                     </div>
@@ -195,58 +237,62 @@
     </div>
 
     <script>
-        // XÓA HOẶC COMMENT FUNCTION TEST API
-        /*
-        document.getElementById('testBtn').addEventListener('click', function () {
-            const categoryId = document.getElementById('categoryId').value;
-            const debugInfo = document.getElementById('debugInfo');
-
-            debugInfo.style.display = 'block';
-            debugInfo.innerHTML = 'Testing API...';
-
-            fetch(`/api/test-category/${categoryId}`)
-                .then(response => response.text())
-                .then(data => {
-                    debugInfo.innerHTML = `Test result: ${data}`;
-                    debugInfo.className = 'alert alert-success';
-                })
-                .catch(error => {
-                    debugInfo.innerHTML = `Test error: ${error.message}`;
-                    debugInfo.className = 'alert alert-danger';
-                });
-        });
-        */
-
-        // Auto-apply filter when inputs change
-        document.addEventListener('change', function (e) {
-            if (e.target.matches('input[name="utilities"], input[name="area"], #sortBy')) {
-                applyFilter();
+        // Thiết lập trạng thái filter từ URL khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // Thiết lập sort
+            const sort = urlParams.get('sort') || 'latest';
+            document.getElementById('sortBy').value = sort;
+            
+            // Thiết lập utilities
+            const utilities = urlParams.getAll('utilities');
+            utilities.forEach(utilityId => {
+                const checkbox = document.querySelector(`input[name="utilities"][value="${utilityId}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+            
+            // Thiết lập area
+            const minArea = urlParams.get('minArea');
+            const maxArea = urlParams.get('maxArea');
+            
+            if (minArea || maxArea) {
+                let areaValue = 'all';
+                
+                if (minArea && maxArea) {
+                    areaValue = `${minArea}-${maxArea}`;
+                } else if (minArea && !maxArea) {
+                    areaValue = `${minArea}+`;
+                } else if (!minArea && maxArea) {
+                    areaValue = `0-${maxArea}`;
+                }
+                
+                const areaRadio = document.querySelector(`input[name="area"][value="${areaValue}"]`);
+                if (areaRadio) {
+                    areaRadio.checked = true;
+                } else {
+                    // Nếu không tìm thấy radio button chính xác, thử tìm theo logic
+                    if (minArea && !maxArea && minArea >= 30) {
+                        document.getElementById('area5').checked = true;
+                    }
+                }
             }
         });
 
-        // Manual filter button
+        // Event listeners
         document.getElementById('filter-btn').addEventListener('click', function () {
             applyFilter();
         });
 
-        // Reset filter button
         document.getElementById('reset-btn').addEventListener('click', function () {
             resetFilter();
         });
 
+        document.getElementById('sortBy').addEventListener('change', function() {
+            applyFilter();
+        });
+
         function applyFilter() {
-            const loading = document.getElementById('loading');
-            const postsContainer = document.getElementById('postsContainer');
-            const noResults = document.getElementById('noResults');
-            const debugInfo = document.getElementById('debugInfo');
-            const categoryId = document.getElementById('categoryId').value;
-
-            // Show loading
-            loading.style.display = 'block';
-            postsContainer.style.display = 'none';
-            noResults.style.display = 'none';
-            debugInfo.style.display = 'none';
-
             const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
                 .map(checkbox => checkbox.value);
 
@@ -254,170 +300,145 @@
             let minArea = null;
             let maxArea = null;
 
+            // Xử lý logic diện tích
             if (selectedArea !== 'all') {
-                if (selectedArea.includes('-')) {
-                    const parts = selectedArea.split('-');
-                    minArea = parts[0] !== '' ? parseFloat(parts[0]) : null;
-                    maxArea = parts[1] !== '' ? parseFloat(parts[1]) : null;
-                } else if (selectedArea.endsWith('-')) {
-                    minArea = parseFloat(selectedArea.replace('-', ''));
-                } else if (selectedArea.startsWith('-')) {
-                    maxArea = parseFloat(selectedArea.replace('-', ''));
+                switch(selectedArea) {
+                    case '0-10':
+                        minArea = 0;
+                        maxArea = 10;
+                        break;
+                    case '10-20':
+                        minArea = 10;
+                        maxArea = 20;
+                        break;
+                    case '20-25':
+                        minArea = 20;
+                        maxArea = 25;
+                        break;
+                    case '25-30':
+                        minArea = 25;
+                        maxArea = 30;
+                        break;
+                    case '30+':
+                        minArea = 30;
+                        maxArea = null; // Không giới hạn trên
+                        break;
+                    default:
+                        // Xử lý các trường hợp khác nếu có
+                        if (selectedArea.includes('-')) {
+                            const parts = selectedArea.split('-');
+                            minArea = parts[0] !== '' ? parseFloat(parts[0]) : null;
+                            maxArea = parts[1] !== '' ? parseFloat(parts[1]) : null;
+                        } else if (selectedArea.endsWith('+')) {
+                            minArea = parseFloat(selectedArea.replace('+', ''));
+                            maxArea = null;
+                        }
+                        break;
                 }
             }
 
             const sort = document.getElementById('sortBy').value;
 
-            const params = new URLSearchParams();
+            const url = new URL(window.location.href);
+            const params = url.searchParams;
 
+            // Cập nhật utilities
+            params.delete('utilities');
             selectedUtilities.forEach(utilityId => {
                 params.append('utilities', utilityId);
             });
 
-            if (minArea !== null) params.append('minArea', minArea);
-            if (maxArea !== null) params.append('maxArea', maxArea);
-            if (sort) params.append('sort', sort);
+            // Cập nhật minArea và maxArea
+            if (minArea !== null) {
+                params.set('minArea', minArea);
+            } else {
+                params.delete('minArea');
+            }
+            
+            if (maxArea !== null) {
+                params.set('maxArea', maxArea);
+            } else {
+                params.delete('maxArea');
+            }
 
-            console.log('Filter request:', {
-                categoryId,
-                selectedUtilities,
+            // Cập nhật sort
+            if (sort) {
+                params.set('sort', sort);
+            } else {
+                params.delete('sort');
+            }
+
+            // Reset page về 0 khi lọc mới
+            params.set('page', 0);
+
+            console.log('Filter applied:', {
+                selectedArea,
                 minArea,
                 maxArea,
+                utilities: selectedUtilities,
                 sort,
-                url: `/api/filter-posts-by-category/${categoryId}?${params.toString()}`
+                finalURL: url.toString()
             });
-
-            fetch(`/api/filter-posts-by-category/${categoryId}?${params.toString()}`)
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(`HTTP ${response.status}: ${text}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(posts => {
-                    console.log('Received posts:', posts.length);
-                    loading.style.display = 'none';
-                    displayPosts(posts);
-                    updatePostCount(posts.length);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    loading.style.display = 'none';
-                    debugInfo.style.display = 'block';
-                    debugInfo.className = 'alert alert-danger';
-                    debugInfo.innerHTML = `Lỗi: ${error.message}`;
-                    showError('Có lỗi xảy ra khi tải dữ liệu: ' + error.message);
-                });
-        }
-
-        function displayPosts(posts) {
-            const postsContainer = document.getElementById('postsContainer');
-            const noResults = document.getElementById('noResults');
-
-            if (posts.length === 0) {
-                postsContainer.style.display = 'none';
-                noResults.style.display = 'block';
-                return;
+            
+            // Debug: Log all URL parameters
+            console.log('All URL parameters:');
+            for (let [key, value] of params.entries()) {
+                console.log(`${key}: ${value}`);
             }
-
-            postsContainer.innerHTML = posts.map(post => createPostCard(post)).join('');
-            postsContainer.style.display = 'block';
-            noResults.style.display = 'none';
-        }
-
-        function createPostCard(post) {
-            const imageUrl = post.images && post.images.length > 0
-                ? post.images[0].url
-                : '/images/no-image.jpg';
-
-            const address = post.address
-                ? `${post.address.street || ''} ${post.address.ward?.name || ''} ${post.address.ward?.district?.name || ''} ${post.address.ward?.district?.province?.name || ''}`
-                : 'Địa chỉ chưa cập nhật';
-
-            const formattedDate = post.createdAt ? new Date(post.createdAt).toLocaleDateString('vi-VN') : '';
-
-            return `
-                <div class="post-card mb-3 d-flex">
-                    <div class="post-img position-relative">
-                        <a href="/chi-tiet/${post.postId}">
-                            <img src="${imageUrl}" alt="Phòng trọ" class="img-fluid" onerror="this.src='/images/no-image.jpg'" />
-                        </a>
-                        <button class="btn-favorite" th:attr="data-post-id=${post.postId}">
-                            <i class="far fa-heart"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="post-info ps-3 d-flex flex-column justify-content-between">
-                        <div>
-                            <h6 class="fw-bold mb-1">
-                                <a href="/chi-tiet/${post.postId}" class="text-dark text-decoration-none hover-text-primary">
-                                    ${post.title}
-                                </a>
-                            </h6>
-                            
-                            <div class="text-muted small mb-1">
-                                <span class="text-dark">Từ</span>
-                                <span class="text-danger fw-bold">
-                                    ${formatPrice(post.price)} VNĐ
-                                </span>
-                                <span class="text-muted">/tháng</span>
-                            </div>
-                            
-                            <div class="d-flex gap-2 mb-2">
-                                <span class="badge bg-light border text-dark small px-2">${post.area}m²</span>
-                                <span class="badge bg-primary text-white small px-2">${post.category?.name || ''}</span>
-                            </div>
-                            
-                            <div class="text-muted small">
-                                <i class="fas fa-map-marker-alt me-1 text-danger"></i>
-                                ${address}
-                            </div>
-                            
-                            <div class="text-muted small mt-1">
-                                <i class="fas fa-clock me-1"></i>
-                                ${formattedDate}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function formatPrice(price) {
-            if (!price) return '0';
-            return new Intl.NumberFormat('vi-VN').format(price);
-        }
-
-        function updatePostCount(count) {
-            const totalPostsCount = document.getElementById('totalPostsCount');
-            if (totalPostsCount) {
-                totalPostsCount.textContent = count;
-            }
+            
+            window.location.href = url.toString();
         }
 
         function resetFilter() {
+            // Reset utilities
             document.querySelectorAll('input[name="utilities"]').forEach(checkbox => {
                 checkbox.checked = false;
             });
 
+            // Reset area
             document.getElementById('area_all').checked = true;
 
+            // Reset sort  
             document.getElementById('sortBy').value = 'latest';
 
-            applyFilter();
+            // Reset URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('utilities');
+            url.searchParams.delete('minArea');
+            url.searchParams.delete('maxArea');
+            url.searchParams.set('sort', 'latest');
+            url.searchParams.set('page', 0);
+
+            window.location.href = url.toString();
         }
 
-        function showError(message) {
-            const postsContainer = document.getElementById('postsContainer');
-            postsContainer.innerHTML = `
-                <div class="alert alert-danger text-center">
-                    <i class="fas fa-exclamation-triangle"></i> ${message}
-                </div>
-            `;
-            postsContainer.style.display = 'block';
+        // Navigation function for pagination
+        function navigateToPage(page) {
+            const url = new URL(window.location.href);
+            const params = url.searchParams;
+            
+            // Set page
+            params.set('page', page);
+            
+            // Clean up empty parameters
+            const keysToCheck = ['sort', 'provinceCode', 'districtCode', 'wardCode', 'priceRange', 'searchTerm', 'minArea', 'maxArea'];
+            keysToCheck.forEach(key => {
+                const value = params.get(key);
+                if (!value || value === '') {
+                    params.delete(key);
+                }
+            });
+            
+            // Handle utilities specially (multiple values)
+            const utilities = params.getAll('utilities');
+            if (utilities.length === 0 || (utilities.length === 1 && utilities[0] === '')) {
+                params.delete('utilities');
+            }
+            
+            console.log('Navigating to page:', page);
+            console.log('Final URL:', url.toString());
+            
+            window.location.href = url.toString();
         }
     </script>
 

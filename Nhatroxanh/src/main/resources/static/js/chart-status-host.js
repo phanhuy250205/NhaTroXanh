@@ -1,4 +1,4 @@
-// Chart.js for Room Status Management
+
 class RoomStatusChart {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);

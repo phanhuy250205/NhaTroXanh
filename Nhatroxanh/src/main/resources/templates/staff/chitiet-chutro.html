@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -107,7 +106,6 @@
             font-weight: 600;
             color: #3e83cc;
             margin-bottom: 20px;
-            text-transform: lowercase;
             padding-bottom: 8px;
             border-bottom: 2px solid rgba(62, 131, 204, 0.1);
         }
@@ -308,7 +306,6 @@
                 transform: translateX(100%);
                 opacity: 0;
             }
-
             to {
                 transform: translateX(0);
                 opacity: 1;
@@ -638,6 +635,7 @@
             </div>
 
             <div class="status-section-staff">
+            
                 <span class="form-label-staff">Trạng thái :</span>
                 <span th:if="${user.enabled}" class="status-badge-staff status-active-staff">
                     <i class="fas fa-check-circle"></i>
@@ -669,7 +667,7 @@
                             <td th:text="${hostel.hostelId}">1</td>
                             <td th:text="${hostel.name}">Tên khu trọ</td>
                             <td
-                                th:text="${hostel.address?.street + ', ' + hostel.address?.ward?.name + ', ' + hostel.address?.ward?.district?.name + ', ' + hostel.address?.ward?.district?.province?.name ?: 'Không xác định'}">
+                                th:text="${hostel.address}">
                                 Địa chỉ</td>
                             <td>
                                 <span class="table-status-badge-staff"
@@ -713,5 +711,4 @@
 
     <script th:src="@{/js/sidebar.js}"></script>
 </body>
-
 </html>

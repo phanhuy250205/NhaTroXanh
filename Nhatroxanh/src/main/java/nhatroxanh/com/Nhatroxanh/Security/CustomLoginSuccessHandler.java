@@ -36,7 +36,7 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
                     redirectURL = "/nhan-vien/bai-dang";
                     break;
                 case "ROLE_ADMIN":
-                    redirectURL = "/admin/dashboard";
+                    redirectURL = "/admin/thong-ke";
                     break;
                 case "ROLE_CUSTOMER":
                     redirectURL = "/trang-chu"; 
@@ -57,6 +57,8 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"Bạn không có quyền truy cập vào hệ thống này.\"}");
         }
+
+        response.sendRedirect(redirectURL);
     }
 }
 

@@ -30,10 +30,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpSession;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,12 +61,11 @@ public class PayController {
             @RequestParam("invoiceId") String invoiceId,
             @RequestParam(value = "room_id", required = false) Integer roomId,
             @RequestParam(value = "hostel_id", required = false) Integer hostelId,
-            @RequestParam(value = "address_id", required = false) Integer addressId,
-            HttpSession session,
-            Model model) {
+            Model model,
+            HttpSession session) {
         try {
-            log.info("Loading payment page with invoiceId={}, room_id={}, hostel_id={}, address_id={} at {}",
-                    invoiceId, roomId, hostelId, addressId, LocalDateTime.now());
+            log.info("Loading payment page with invoiceId={}, room_id={}, hostel_id={} at {}",
+                    invoiceId, roomId, hostelId, LocalDateTime.now());
 
             Integer paymentIdInt = Integer.parseInt(invoiceId);
             Payments payment = paymentsRepository.findById(paymentIdInt)
@@ -95,44 +96,35 @@ public class PayController {
                 log.info("Reverted payment total for invoiceId {} to {} due to voucher removal", invoiceId,
                         payment.getTotalAmount());
             }
-
-            Contracts contract;
             Rooms room;
-
-            // Priority: Use provided room_id, hostel_id, and address_id if available
-            if (roomId != null && hostelId != null && addressId != null) {
+            if (roomId != null && hostelId != null) {
                 room = roomsRepository.findById(roomId)
                         .filter(r -> r.getHostel() != null && r.getHostel().getHostelId().equals(hostelId))
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Room not found or hostel mismatch for room_id: " + roomId));
-                Address hostelAddress = addressRepository.findById(addressId)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException("Address not found for address_id: " + addressId));
-                if (room.getHostel().getAddress() == null) {
-                    room.getHostel().setAddress(hostelAddress);
-                } else if (!room.getHostel().getAddress().getId().equals(addressId)) {
-                    log.warn("Provided address_id {} does not match room's address_id {} at {}",
-                            addressId, room.getHostel().getAddress().getId(), LocalDateTime.now());
-                }
+                        .orElseThrow(() -> {
+                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId, LocalDateTime.now());
+                            return new IllegalArgumentException(
+                                    "Room not found or hostel mismatch for room_id: " + roomId);
+                        });
             } else {
-                contract = contractsRepository.findById(payment.getContract().getContractId())
+                Contracts contract = contractsRepository.findById(payment.getContract().getContractId())
                         .orElseThrow(() -> {
                             log.error("Contract not found for payment ID: {} at {}", invoiceId, LocalDateTime.now());
                             return new IllegalArgumentException("Contract not found for payment ID: " + invoiceId);
                         });
-                room = roomsRepository.findByIdWithFullAddress(contract.getRoom().getRoomId())
+                room = roomsRepository.findById(contract.getRoom().getRoomId())
                         .orElseThrow(() -> {
-                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(),
-                                    LocalDateTime.now());
+                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(), LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found for contract ID: " + contract.getContractId());
                         });
             }
 
-            // Build full address
-            Address hostelAddress = room.getHostel() != null ? room.getHostel().getAddress() : null;
-            String fullAddress = buildFullAddress(hostelAddress);
+            // Use String address directly
+            String fullAddress = room.getHostel() != null && room.getHostel().getAddress() != null
+                    ? room.getHostel().getAddress()
+                    : "N/A";
 
+            // Set model attributes
             model.addAttribute("invoiceId", invoiceId);
             model.addAttribute("totalAmount", String.format("%,d VNĐ", payment.getTotalAmount().intValue()));
             model.addAttribute("originalTotal", String.format("%,d VNĐ", originalTotal.intValue()));
@@ -147,10 +139,12 @@ public class PayController {
                     .map(hostel -> hostel.getOwner())
                     .map(owner -> owner.getFullname())
                     .orElse("Không xác định"));
-            model.addAttribute("dueDate",
-                    Optional.ofNullable(payment.getDueDate()).map(Object::toString).orElse("Không xác định"));
+            model.addAttribute("dueDate", Optional.ofNullable(payment.getDueDate())
+                    .map(date -> date.toLocalDate().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                    .orElse("Không xác định"));
             model.addAttribute("month", Optional.ofNullable(payment.getDueDate())
-                    .map(date -> date.toLocalDate().getMonthValue() + "/" + date.toLocalDate().getYear())
+                    .map(date -> String.format("Tháng %02d/%d", date.toLocalDate().getMonthValue(),
+                            date.toLocalDate().getYear()))
                     .orElse("Không xác định"));
             model.addAttribute("hostelAddress", fullAddress);
 
@@ -167,16 +161,58 @@ public class PayController {
             model.addAttribute("status", status);
 
             model.addAttribute("paymentMethod",
-                    Optional.ofNullable(payment.getPaymentMethod()).map(this::getPaymentMethodDisplayName).orElse(""));
-            model.addAttribute("paymentDate",
-                    Optional.ofNullable(payment.getPaymentDate())
-                            .map(timestamp -> timestamp.toLocalDateTime()
-                                    .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
-                            .orElse("N/A"));
+                    Optional.ofNullable(payment.getPaymentMethod()).map(Object::toString).orElse(""));
+            model.addAttribute("paymentDate", Optional.ofNullable(payment.getPaymentDate())
+                    .map(date -> date.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                    .orElse("N/A"));
 
             // Initialize utility defaults
-            processPaymentDetails(details, room, model);
+            model.addAttribute("electricUsage", "0 kWh");
+            model.addAttribute("electricCost", "0 VNĐ");
+            model.addAttribute("electricUnitPrice", "0 VNĐ");
+            model.addAttribute("prevElectricReading", "Không xác định");
+            model.addAttribute("currElectricReading", "Không xác định");
+            model.addAttribute("waterUsage", "0 m³");
+            model.addAttribute("waterCost", "0 VNĐ");
+            model.addAttribute("waterUnitPrice", "0 VNĐ");
+            model.addAttribute("prevWaterReading", "Không xác định");
+            model.addAttribute("currWaterReading", "Không xác định");
+            model.addAttribute("serviceFee", "0 VNĐ");
 
+            details.forEach(detail -> {
+                try {
+                    String itemNameLower = detail.getItemName().toLowerCase();
+                    Double quantity = Optional.ofNullable(detail.getQuantity()).orElse(0).doubleValue();
+                    Double unitPrice = Optional.ofNullable(detail.getUnitPrice()).orElse(0f).doubleValue();
+                    Double amountUnitPrice = Optional.ofNullable(detail.getAmountUnitPrice()).orElse(0f).doubleValue();
+
+                    if (itemNameLower.contains("điện") || itemNameLower.contains("dien")
+                            || itemNameLower.contains("electric")) {
+                        model.addAttribute("electricUsage", String.format("%.0f kWh", quantity));
+                        model.addAttribute("electricCost", String.format("%,d VNĐ", amountUnitPrice.intValue()));
+                        model.addAttribute("electricUnitPrice", String.format("%,d VNĐ", unitPrice.intValue()));
+                        Double prevElectric = 0.0; // Replace with actual previous reading if available
+                        model.addAttribute("prevElectricReading", String.format("%.0f", prevElectric));
+                        model.addAttribute("currElectricReading", String.format("%.0f", prevElectric + quantity));
+                    } else if (itemNameLower.contains("nước") || itemNameLower.contains("nuoc")
+                            || itemNameLower.contains("water")) {
+                        model.addAttribute("waterUsage", String.format("%.0f m³", quantity));
+                        model.addAttribute("waterCost", String.format("%,d VNĐ", amountUnitPrice.intValue()));
+                        model.addAttribute("waterUnitPrice", String.format("%,d VNĐ", unitPrice.intValue()));
+                        Double prevWater = 0.0; // Replace with actual previous reading if available
+                        model.addAttribute("prevWaterReading", String.format("%.0f", prevWater));
+                        model.addAttribute("currWaterReading", String.format("%.0f", prevWater + quantity));
+                    } else if (itemNameLower.contains("dịch vụ") || itemNameLower.contains("dich vu")
+                            || itemNameLower.contains("phí") || itemNameLower.contains("phi")
+                            || itemNameLower.contains("service") || itemNameLower.contains("fee")) {
+                        model.addAttribute("serviceFee", String.format("%,d VNĐ", amountUnitPrice.intValue()));
+                    }
+                } catch (Exception e) {
+                    log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(), e);
+                }
+            });
+
+            log.info("Payment page loaded successfully for invoiceId: {}", invoiceId);
             return "guest/thanh-toan";
         } catch (NumberFormatException e) {
             log.error("Invalid invoiceId format: {} at {}", invoiceId, LocalDateTime.now(), e);
@@ -210,8 +246,8 @@ public class PayController {
 
         Map<String, Object> response = new HashMap<>();
         try {
-            log.info("Processing payment with invoiceId={}, voucherCode={} at {}", invoiceId, voucherCode,
-                    LocalDateTime.now());
+            log.info("Processing payment with invoiceId={}, room_id={}, hostel_id={}, address_id={}, method={} at {}",
+                    invoiceId, roomId, hostelId, addressId, paymentMethod, LocalDateTime.now());
             Integer paymentIdInt = Integer.parseInt(invoiceId);
             Payments payment = paymentsRepository.findById(paymentIdInt)
                     .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại với mã: " + invoiceId));
@@ -222,6 +258,7 @@ public class PayController {
 
             // Apply voucher if provided
             Float discount = 0f;
+            String appliedVoucherCode = null;
             if (voucherCode != null && !voucherCode.trim().isEmpty()) {
                 List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(paymentIdInt);
                 boolean alreadyApplied = details.stream()
@@ -257,9 +294,9 @@ public class PayController {
                         session.setAttribute("originalTotal_" + invoiceId, payment.getTotalAmount() + discount);
                         session.setAttribute("discountAmount_" + invoiceId, discount);
                         session.setAttribute("voucherCode_" + invoiceId, voucherCode);
+                        appliedVoucherCode = voucherCode;
 
-                        log.info(
-                                "Applied voucher {} with discount {} for payment {} during processPayment",
+                        log.info("Applied voucher {} with discount {} for payment {} during processPayment",
                                 voucherCode, discount, invoiceId);
                     } else {
                         log.warn("Invalid voucher {} for payment {} during processPayment", voucherCode, invoiceId);
@@ -289,7 +326,7 @@ public class PayController {
             for (DetailPayments detail : detailsAfter) {
                 String itemName = detail.getItemName().toLowerCase();
                 if (itemName.startsWith("giảm giá voucher ")) {
-                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim();
+                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
                     Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
                     if (usedVoucher != null) {
                         int newQuantity = usedVoucher.getQuantity() - 1;
@@ -300,13 +337,18 @@ public class PayController {
                             usedVoucher.setStatus(false);
                             log.info("Voucher {} quantity reached 0, setting status to inactive", usedVoucherCode);
                         }
-                        voucherRepository.save(usedVoucher); // Directly save to ensure transaction commits
+                        voucherRepository.save(usedVoucher);
                         log.info("Successfully updated voucher {} quantity to {} for payment {}",
                                 usedVoucherCode, newQuantity, invoiceId);
                     } else {
                         log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, invoiceId);
                     }
                 }
+            }
+
+            // Pass voucher code to success page
+            if (appliedVoucherCode != null) {
+                session.setAttribute("voucherCode_" + invoiceId, appliedVoucherCode);
             }
 
             response.put("success", true);
@@ -329,6 +371,13 @@ public class PayController {
             response.put("failureUrl",
                     "/guest/failure-thanhtoan?invoiceId=" + invoiceId + "&errorMessage=" + e.getMessage());
             return ResponseEntity.badRequest().body(response);
+        } catch (OptimisticLockException e) {
+            log.error("Concurrent update conflict for voucher in payment {} at {}", invoiceId, LocalDateTime.now(), e);
+            response.put("success", false);
+            response.put("error", "Lỗi do xung đột dữ liệu voucher. Vui lòng thử lại.");
+            response.put("failureUrl",
+                    "/guest/failure-thanhtoan?invoiceId=" + invoiceId + "&errorMessage=Lỗi do xung đột dữ liệu voucher");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (Exception e) {
             log.error("Unexpected error processing payment for invoice {} at {}: {}", invoiceId, LocalDateTime.now(),
                     e.getMessage(), e);
@@ -361,11 +410,11 @@ public class PayController {
             @RequestParam("invoiceId") String invoiceId,
             @RequestParam(value = "room_id", required = false) Integer roomId,
             @RequestParam(value = "hostel_id", required = false) Integer hostelId,
-            @RequestParam(value = "address_id", required = false) Integer addressId,
-            Model model) {
+            Model model,
+            HttpSession session) {
         try {
-            log.info("Loading payment success page with invoiceId={}, room_id={}, hostel_id={}, address_id={} at {}",
-                    invoiceId, roomId, hostelId, addressId, LocalDateTime.now());
+            log.info("Loading payment success page with invoiceId={}, room_id={}, hostel_id={} at {}",
+                    invoiceId, roomId, hostelId, LocalDateTime.now());
 
             Integer paymentIdInt = Integer.parseInt(invoiceId);
             Payments payment = paymentsRepository.findById(paymentIdInt)
@@ -374,34 +423,24 @@ public class PayController {
                         return new IllegalArgumentException("Payment not found with id: " + invoiceId);
                     });
 
-            Contracts contract;
             Rooms room;
-
-            // Priority: Use provided room_id, hostel_id, and address_id if available
-            if (roomId != null && hostelId != null && addressId != null) {
+            if (roomId != null && hostelId != null) {
                 room = roomsRepository.findById(roomId)
                         .filter(r -> r.getHostel() != null && r.getHostel().getHostelId().equals(hostelId))
-                        .orElseThrow(() -> new IllegalArgumentException(
-                                "Room not found or hostel mismatch for room_id: " + roomId));
-                Address hostelAddress = addressRepository.findById(addressId)
-                        .orElseThrow(
-                                () -> new IllegalArgumentException("Address not found for address_id: " + addressId));
-                if (room.getHostel().getAddress() == null) {
-                    room.getHostel().setAddress(hostelAddress);
-                } else if (!room.getHostel().getAddress().getId().equals(addressId)) {
-                    log.warn("Provided address_id {} does not match room's address_id {} at {}",
-                            addressId, room.getHostel().getAddress().getId(), LocalDateTime.now());
-                }
+                        .orElseThrow(() -> {
+                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId, LocalDateTime.now());
+                            return new IllegalArgumentException(
+                                    "Room not found or hostel mismatch for room_id: " + roomId);
+                        });
             } else {
-                contract = contractsRepository.findById(payment.getContract().getContractId())
+                Contracts contract = contractsRepository.findById(payment.getContract().getContractId())
                         .orElseThrow(() -> {
                             log.error("Contract not found for payment ID: {} at {}", invoiceId, LocalDateTime.now());
                             return new IllegalArgumentException("Contract not found for payment ID: " + invoiceId);
                         });
-                room = roomsRepository.findByIdWithFullAddress(contract.getRoom().getRoomId())
+                room = roomsRepository.findById(contract.getRoom().getRoomId())
                         .orElseThrow(() -> {
-                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(),
-                                    LocalDateTime.now());
+                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(), LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found for contract ID: " + contract.getContractId());
                         });
@@ -410,19 +449,18 @@ public class PayController {
             // Get payment details
             List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(paymentIdInt);
 
-            // Build full address
-            Address hostelAddress = room.getHostel() != null ? room.getHostel().getAddress() : null;
-            String fullAddress = buildFullAddress(hostelAddress);
+            // Use String address directly
+            String fullAddress = room.getHostel() != null && room.getHostel().getAddress() != null
+                    ? room.getHostel().getAddress()
+                    : "N/A";
 
-            // Set basic payment information
+            // Set model attributes
             model.addAttribute("invoiceId", invoiceId);
             model.addAttribute("paymentDate", Optional.ofNullable(payment.getPaymentDate())
-                    .map(timestamp -> timestamp.toLocalDateTime()
-                            .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                    .map(date -> date.toLocalDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                     .orElse("N/A"));
             model.addAttribute("paymentTime", Optional.ofNullable(payment.getPaymentDate())
-                    .map(timestamp -> timestamp.toLocalDateTime()
-                            .format(java.time.format.DateTimeFormatter.ofPattern("HH:mm")))
+                    .map(date -> date.toLocalDateTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                     .orElse("N/A"));
             model.addAttribute("paymentMethod", getPaymentMethodDisplayName(payment.getPaymentMethod()));
             model.addAttribute("roomName", Optional.ofNullable(room.getNamerooms()).orElse("N/A"));
@@ -430,12 +468,7 @@ public class PayController {
                     .map(date -> String.format("Tháng %02d/%d", date.toLocalDate().getMonthValue(),
                             date.toLocalDate().getYear()))
                     .orElse("N/A"));
-            model.addAttribute("hostelAddress", fullAddress);
-
-            // Process payment details for breakdown, including voucher discount
-            processPaymentDetails(details, room, model);
-
-            // Set totals explicitly for clarity
+             // Set totals explicitly for clarity
             model.addAttribute("originalTotal", Optional.ofNullable(model.getAttribute("originalTotal"))
                     .map(obj -> (String) obj)
                     .orElse("0 VNĐ"));
@@ -445,6 +478,14 @@ public class PayController {
             model.addAttribute("finalTotal", Optional.ofNullable(payment.getTotalAmount())
                     .map(amount -> String.format("%,d VNĐ", amount.intValue()))
                     .orElse("0 VNĐ"));
+            model.addAttribute("hostelAddress", fullAddress);
+
+            // Retrieve voucher code from session
+            String voucherCode = (String) session.getAttribute("voucherCode_" + invoiceId);
+            model.addAttribute("voucherCode", voucherCode != null ? voucherCode : "N/A");
+
+            // Process payment details
+            processPaymentDetails(details, room, model);
 
             log.info("Payment success page loaded successfully for invoiceId: {}", invoiceId);
             return "guest/success-thanhtoan";
@@ -457,8 +498,7 @@ public class PayController {
             model.addAttribute("error", e.getMessage());
             return "guest/success-thanhtoan";
         } catch (Exception e) {
-            log.error("Unexpected error loading payment success page at {}: {}", LocalDateTime.now(), e.getMessage(),
-                    e);
+            log.error("Unexpected error loading payment success page at {}: {}", LocalDateTime.now(), e.getMessage(), e);
             model.addAttribute("error", "Lỗi hệ thống: Vui lòng thử lại sau.");
             return "guest/success-thanhtoan";
         }
@@ -486,7 +526,7 @@ public class PayController {
                 Rooms room = null;
 
                 if (contract != null) {
-                    room = roomsRepository.findByIdWithFullAddress(contract.getRoom().getRoomId()).orElse(null);
+                    room = roomsRepository.findById(contract.getRoom().getRoomId()).orElse(null);
                 }
 
                 // Set payment information
@@ -502,9 +542,6 @@ public class PayController {
                 if (room != null) {
                     model.addAttribute("roomName", room.getNamerooms());
                 }
-
-                // Optionally process details for failure page if needed, but skipping breakdown
-                // as per template
             } else {
                 model.addAttribute("invoiceId", invoiceId);
             }
@@ -521,8 +558,7 @@ public class PayController {
             model.addAttribute("invoiceId", invoiceId);
             return "guest/failure-thanhtoan";
         } catch (Exception e) {
-            log.error("Unexpected error loading payment failure page at {}: {}", LocalDateTime.now(), e.getMessage(),
-                    e);
+            log.error("Unexpected error loading payment failure page at {}: {}", LocalDateTime.now(), e.getMessage(), e);
             model.addAttribute("errorMessage", "Lỗi hệ thống: Vui lòng thử lại sau.");
             model.addAttribute("invoiceId", invoiceId);
             return "guest/failure-thanhtoan";
@@ -563,53 +599,27 @@ public class PayController {
 
             return ResponseEntity.ok(response);
         } catch (NumberFormatException e) {
-            log.error("Invalid invoiceId format: {}", invoiceId, e);
+            log.error("Invalid invoiceId format: {} at {}", invoiceId, LocalDateTime.now(), e);
             response.put("success", false);
             response.put("error", "Mã hóa đơn không hợp lệ");
             response.put("failureUrl",
                     "/guest/failure-thanhtoan?invoiceId=" + invoiceId + "&errorMessage=Mã hóa đơn không hợp lệ");
             return ResponseEntity.badRequest().body(response);
         } catch (IllegalArgumentException e) {
-            log.error("Payment not found for invoiceId: {}", invoiceId, e);
+            log.error("Payment not found for invoiceId: {} at {}", invoiceId, LocalDateTime.now(), e);
             response.put("success", false);
             response.put("error", "Không tìm thấy thông tin thanh toán");
             response.put("failureUrl", "/guest/failure-thanhtoan?invoiceId=" + invoiceId
                     + "&errorMessage=Không tìm thấy thông tin thanh toán");
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            log.error("Error checking payment status for invoiceId: {}", invoiceId, e);
+            log.error("Error checking payment status for invoiceId: {} at {}", invoiceId, LocalDateTime.now(), e);
             response.put("success", false);
             response.put("error", "Không thể kiểm tra trạng thái thanh toán");
             response.put("failureUrl", "/guest/failure-thanhtoan?invoiceId=" + invoiceId
                     + "&errorMessage=Không thể kiểm tra trạng thái thanh toán");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-
-    private String buildFullAddress(Address hostelAddress) {
-        if (hostelAddress == null)
-            return "Không xác định";
-
-        StringBuilder fullAddress = new StringBuilder();
-        if (hostelAddress.getStreet() != null) {
-            fullAddress.append(hostelAddress.getStreet());
-        }
-        if (hostelAddress.getWard() != null) {
-            Ward ward = hostelAddress.getWard();
-            if (ward.getName() != null) {
-                fullAddress.append(fullAddress.length() > 0 ? ", " : "").append(ward.getName());
-            }
-            if (ward.getDistrict() != null) {
-                District district = ward.getDistrict();
-                if (district.getName() != null) {
-                    fullAddress.append(fullAddress.length() > 0 ? ", " : "").append(district.getName());
-                }
-                if (district.getProvince() != null && district.getProvince().getName() != null) {
-                    fullAddress.append(fullAddress.length() > 0 ? ", " : "").append(district.getProvince().getName());
-                }
-            }
-        }
-        return fullAddress.length() > 0 ? fullAddress.toString() : "Không xác định";
     }
 
     private String getPaymentMethodDisplayName(Payments.PaymentMethod method) {
@@ -632,17 +642,20 @@ public class PayController {
     private void processPaymentDetails(List<DetailPayments> details, Rooms room, Model model) {
         // Initialize accumulators
         Float originalTotal = 0f;
-        Float discount = 0f;
-        Float serviceFee = 0f;
-        String electricCost = "0 VNĐ";
-        String electricUsage = "0 kWh";
-        String electricReadings = "N/A";
-        String waterCost = "0 VNĐ";
-        String waterUsage = "0 m³";
-        String waterReadings = "N/A";
-        String roomPrice = Optional.ofNullable(room.getPrice())
+        Float discountAmount = 0f;
+        String voucherCode = null;
+
+        // Initialize default values
+        model.addAttribute("roomPrice", Optional.ofNullable(room.getPrice())
                 .map(price -> String.format("%,d VNĐ", price.intValue()))
-                .orElse("0 VNĐ");
+                .orElse("0 VNĐ"));
+        model.addAttribute("electricCost", "0 VNĐ");
+        model.addAttribute("electricUsage", "0 kWh");
+        model.addAttribute("electricReadings", "N/A");
+        model.addAttribute("waterCost", "0 VNĐ");
+        model.addAttribute("waterUsage", "0 m³");
+        model.addAttribute("waterReadings", "N/A");
+        model.addAttribute("serviceFee", "0 VNĐ");
 
         // Loop through all details to calculate breakdown
         for (DetailPayments detail : details) {
@@ -650,53 +663,38 @@ public class PayController {
                 String itemNameLower = detail.getItemName().toLowerCase();
                 Double quantity = Optional.ofNullable(detail.getQuantity()).orElse(0).doubleValue();
                 Double unitPrice = Optional.ofNullable(detail.getUnitPrice()).orElse(0f).doubleValue();
-                Double amount = Optional.ofNullable(detail.getAmountUnitPrice()).orElse(0f).doubleValue();
+                Double amountUnitPrice = Optional.ofNullable(detail.getAmountUnitPrice()).orElse(0f).doubleValue();
 
-                if (amount < 0) {
-                    // Negative amounts are discounts
-                    discount += Math.abs(amount.floatValue());
+                if (itemNameLower.startsWith("giảm giá voucher ")) {
+                    discountAmount += Math.abs(amountUnitPrice.floatValue());
+                    voucherCode = itemNameLower.substring("giảm giá voucher ".length()).trim().toUpperCase();
                 } else {
-                    // Positive amounts contribute to originalTotal
-                    originalTotal += amount.floatValue();
-
-                    // Categorize
-                    if (itemNameLower.contains("phòng")) {
-                        roomPrice = String.format("%,d VNĐ", amount.intValue());
-                    } else if (itemNameLower.contains("điện") || itemNameLower.contains("dien")
+                    originalTotal += amountUnitPrice.floatValue();
+                    if (itemNameLower.contains("điện") || itemNameLower.contains("dien")
                             || itemNameLower.contains("electric")) {
-                        electricCost = String.format("%,d VNĐ", amount.intValue());
-                        electricUsage = String.format("%.1f kWh", quantity);
-                        electricReadings = String.format("(%.0f → %.0f)", 0.0, quantity);
+                        model.addAttribute("electricCost", String.format("%,d VNĐ", amountUnitPrice.intValue()));
+                        model.addAttribute("electricUsage", String.format("%.1f kWh", quantity));
+                        model.addAttribute("electricReadings", String.format("(%.0f → %.0f)", 0.0, quantity));
                     } else if (itemNameLower.contains("nước") || itemNameLower.contains("nuoc")
                             || itemNameLower.contains("water")) {
-                        waterCost = String.format("%,d VNĐ", amount.intValue());
-                        waterUsage = String.format("%.0f m³", quantity);
-                        waterReadings = String.format("(%.0f → %.0f)", 0.0, quantity);
-                    } else {
-                        // Other positive fees (wifi, trash, etc.) go to serviceFee
-                        serviceFee += amount.floatValue();
+                        model.addAttribute("waterCost", String.format("%,d VNĐ", amountUnitPrice.intValue()));
+                        model.addAttribute("waterUsage", String.format("%.0f m³", quantity));
+                        model.addAttribute("waterReadings", String.format("(%.0f → %.0f)", 0.0, quantity));
+                    } else if (itemNameLower.contains("dịch vụ") || itemNameLower.contains("dich vu")
+                            || itemNameLower.contains("phí") || itemNameLower.contains("phi")
+                            || itemNameLower.contains("service") || itemNameLower.contains("fee")) {
+                        model.addAttribute("serviceFee", String.format("%,d VNĐ", amountUnitPrice.intValue()));
                     }
                 }
             } catch (Exception e) {
-                log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(),
-                        e);
+                log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(), e);
             }
         }
 
-        // Set serviceFee if any
-        String serviceFeeStr = serviceFee > 0 ? String.format("%,d VNĐ", serviceFee.intValue()) : "0 VNĐ";
-
-        // Set attributes for Thymeleaf or frontend display
-        model.addAttribute("roomPrice", roomPrice);
-        model.addAttribute("electricCost", electricCost);
-        model.addAttribute("electricUsage", electricUsage);
-        model.addAttribute("electricReadings", electricReadings);
-        model.addAttribute("waterCost", waterCost);
-        model.addAttribute("waterUsage", waterUsage);
-        model.addAttribute("waterReadings", waterReadings);
-        model.addAttribute("serviceFee", serviceFeeStr);
+        // Set calculated totals
         model.addAttribute("originalTotal", String.format("%,d VNĐ", originalTotal.intValue()));
-        model.addAttribute("discountAmount", discount > 0 ? String.format("%,d VNĐ", discount.intValue()) : "0 VNĐ");
+        model.addAttribute("discountAmount", String.format("%,d VNĐ", discountAmount.intValue()));
+        model.addAttribute("voucherCode", voucherCode != null ? voucherCode : "N/A");
     }
 
     @PostMapping("/apply-voucher")
@@ -718,7 +716,7 @@ public class PayController {
             try {
                 invoiceId = Integer.parseInt(invoiceIdStr);
             } catch (NumberFormatException e) {
-                log.error("Invalid invoiceId format: {} at {}", invoiceIdStr, LocalDateTime.now());
+                log.error("Invalid invoiceId format: {} at {}", invoiceIdStr, LocalDateTime.now(), e);
                 response.put("success", false);
                 response.put("error", "Mã hóa đơn không hợp lệ");
                 return ResponseEntity.badRequest().body(response);
