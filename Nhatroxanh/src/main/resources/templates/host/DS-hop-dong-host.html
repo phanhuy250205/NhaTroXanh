@@ -106,18 +106,19 @@
 <script>
   // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
   document.addEventListener('DOMContentLoaded', function() {
-    loadContracts();
+    loadContracts(0, 5); // Bắt đầu với trang 0, size 5
   });
 
   // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG
-  async function loadContracts() {
+  async function loadContracts(page = 0, size = 5) {
     try {
       showLoading(true);
 
-      const response = await fetch('/api/contracts/list', {
+      const response = await fetch(`/api/contracts/list?page=${page}&size=${size}`, {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') // Nếu cần token
         }
       });
 
@@ -130,7 +131,7 @@
       if (data.success) {
         displayContracts(data.contracts);
         updateStats(data.contracts);
-        updatePagination(data.totalContracts);
+        updatePagination(data.totalContracts, data.totalPages, data.currentPage, size);
       } else {
         showError(data.message || 'Không thể tải dữ liệu hợp đồng');
       }
@@ -234,7 +235,8 @@
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest'
+          'X-Requested-With': 'XMLHttpRequest',
+          'Authorization': 'Bearer ' + localStorage.getItem('token') // Nếu cần token
         },
         body: JSON.stringify(requestData)
       });
@@ -253,7 +255,8 @@
       console.log('✅ Update successful:', result);
 
       // Reload danh sách hợp đồng để cập nhật giao diện
-      await loadContracts();
+      const currentPage = parseInt(document.getElementById('pagination').dataset.currentPage || 0);
+      await loadContracts(currentPage, 5);
 
     } catch (error) {
       console.error('❌ Error updating contract status:', error);
@@ -261,9 +264,9 @@
     }
   }
 
-  // 🔧 FUNCTION LẤY VALID STATUSES (KHÔNG SỬ DỤNG NẾU KHÔNG CÓ ENDPOINT)
+  // 🔧 FUNCTION LẤY VALID STATUSES
   async function getValidStatuses() {
-    return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED']; // Hardcode vì không có endpoint /chu-tro/hop-dong/valid-statuses
+    return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED'];
   }
 
   // 📈 CẬP NHẬT THỐNG KÊ
@@ -287,7 +290,7 @@
     const today = new Date();
     const end = new Date(endDate);
     const daysUntilExpiry = (end - today) / (1000 * 60 * 60 * 24);
-    return daysUntilExpiry <= 30 && daysUntilExpiry > 0; // Sắp hết hạn trong 30 ngày
+    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   }
 
   // 📅 FORMAT NGÀY THÁNG
@@ -302,9 +305,55 @@
   }
 
   // 📄 CẬP NHẬT PAGINATION
-  function updatePagination(totalContracts) {
+  function updatePagination(totalContracts, totalPages, currentPage, size) {
+    const pagination = document.getElementById('pagination');
+    pagination.dataset.currentPage = currentPage; // Lưu trang hiện tại
+    pagination.innerHTML = '';
+
+    // Tính toán chỉ số hiển thị
+    const start = currentPage * size + 1;
+    const end = Math.min((currentPage + 1) * size, totalContracts);
     document.getElementById('pagination-info').textContent =
-            `Hiển thị 1 đến ${totalContracts} trong số ${totalContracts} hợp đồng`;
+            `Hiển thị ${start} đến ${end} trong số ${totalContracts} hợp đồng`;
+
+    // Tạo nút "Trước"
+    if (currentPage > 0) {
+      pagination.innerHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" onclick="loadContracts(${currentPage - 1}, ${size}); return false;">Trước</a>
+        </li>
+      `;
+    } else {
+      pagination.innerHTML += `
+        <li class="page-item disabled">
+          <a class="page-link">Trước</a>
+        </li>
+      `;
+    }
+
+    // Tạo các số trang
+    for (let i = 0; i < totalPages; i++) {
+      pagination.innerHTML += `
+        <li class="page-item ${i === currentPage ? 'active' : ''}">
+          <a class="page-link" href="#" onclick="loadContracts(${i}, ${size}); return false;">${i + 1}</a>
+        </li>
+      `;
+    }
+
+    // Tạo nút "Sau"
+    if (currentPage < totalPages - 1) {
+      pagination.innerHTML += `
+        <li class="page-item">
+          <a class="page-link" href="#" onclick="loadContracts(${currentPage + 1}, ${size}); return false;">Sau</a>
+        </li>
+      `;
+    } else {
+      pagination.innerHTML += `
+        <li class="page-item disabled">
+          <a class="page-link">Sau</a>
+        </li>
+      `;
+    }
   }
 
   // ⏳ HIỂN THỊ/ẨN LOADING

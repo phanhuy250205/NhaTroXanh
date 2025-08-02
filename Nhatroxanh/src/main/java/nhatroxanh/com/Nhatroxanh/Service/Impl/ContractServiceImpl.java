@@ -14,6 +14,9 @@ import nhatroxanh.com.Nhatroxanh.exception.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -55,6 +58,8 @@ public class ContractServiceImpl implements ContractService {
 
     @Autowired
     private UserCccdRepository userCccdRepository;
+
+
 
     @Autowired
     private UnregisteredTenantsRepository unregisteredTenantsRepository;
@@ -207,6 +212,49 @@ public class ContractServiceImpl implements ContractService {
         return savedContract;
     }
 
+    @Override
+    public Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable) {
+        logger.info("Getting contracts list for owner ID: {} with pagination, page: {}, size: {}",
+                ownerId, pageable.getPageNumber(), pageable.getPageSize());
+        try {
+            // Validate ownerId
+            if (ownerId == null || ownerId <= 0) {
+                logger.error("Invalid owner ID: {}", ownerId);
+                throw new IllegalArgumentException("ID chủ trọ không hợp lệ!");
+            }
+
+            // Truy vấn phân trang từ repository
+            Page<Contracts> contractPage = contractRepository.findByOwnerId(ownerId, pageable);
+
+            // Chuyển đổi từ Page<Contracts> sang Page<ContractListDto>
+            Page<ContractListDto> contractListDtoPage = contractPage.map(contract -> {
+                ContractListDto dto = new ContractListDto();
+                dto.setContractId(contract.getContractId() != null ? contract.getContractId().longValue() : null);
+                dto.setStartDate(contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
+                dto.setTenantName(Optional.ofNullable(contract.getTenant())
+                        .map(Users::getFullname)
+                        .orElse(Optional.ofNullable(contract.getUnregisteredTenant())
+                                .map(UnregisteredTenants::getFullName)
+                                .orElse("Chưa xác định")));
+                dto.setEndDate(calculateEndDate(contract));
+                dto.setTenantPhone(getTenantPhone(contract));
+                dto.setStatus(Optional.ofNullable(contract.getStatus())
+                        .map(Enum::toString)
+                        .orElse("UNKNOWN"));
+                // Thêm các trường khác từ contract nếu cần
+//                dto.setr(contract.getRoom() != null ? contract.getRoom().getNamerooms() : null);
+                return dto;
+            });
+
+            logger.info("Found {} contracts for owner ID: {} on page: {}",
+                    contractPage.getTotalElements(), ownerId, pageable.getPageNumber());
+            return contractListDtoPage;
+        } catch (Exception e) {
+            logger.error("Error getting contracts list for owner ID {}: {}", ownerId, e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi lấy danh sách hợp đồng của chủ trọ: " + e.getMessage());
+        }
+    }
+
     // Trong file: ContractServiceImpl.java
 
     @Override
@@ -326,6 +374,61 @@ public class ContractServiceImpl implements ContractService {
         logger.info("SERVICE: Đã tạo hợp đồng ID {} thành công.", savedContract.getContractId());
         return savedContract;
     }
+
+    @Override
+    public Page<Contracts> findContractsByOwnerCccd(String cccd, Pageable pageable) {
+        logger.info("Finding contracts by owner CCCD: {} with pagination", cccd);
+        if (cccd == null || cccd.trim().isEmpty()) {
+            logger.error("CCCD is null or empty");
+            throw new IllegalArgumentException("CCCD chủ trọ không được để trống!");
+        }
+
+        Optional<UserCccd> userCccd = userCccdRepository.findByCccdNumber(cccd);
+        if (userCccd.isEmpty()) {
+            logger.warn("No UserCccd found with CCCD: {}", cccd);
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        Users owner = userCccd.get().getUser();
+        if (owner == null || owner.getRole() != Users.Role.OWNER) {
+            logger.warn("User with CCCD {} is not an owner or user is null", cccd);
+            return new PageImpl<>(Collections.emptyList(), pageable, 0);
+        }
+
+        logger.info("Owner found: {}. Fetching contracts with pagination", owner.getFullname());
+        return contractRepository.findByOwnerId(owner.getUserId(), pageable);
+    }
+
+    @Override
+    public Page<Contracts> findContractsByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable) {
+        logger.info("Finding contracts by payment method: {} with pagination", paymentMethod);
+        if (paymentMethod == null) {
+            logger.error("Payment method is null");
+            throw new IllegalArgumentException("Phương thức thanh toán không được null!");
+        }
+        return contractRepository.findByPaymentMethod(paymentMethod, pageable);
+    }
+
+    @Override
+    public Page<Contracts> findActiveContractsByOwnerId(Integer ownerId, Pageable pageable) {
+        logger.info("Finding active contracts by owner ID: {} with pagination", ownerId);
+        if (ownerId == null || ownerId <= 0) {
+            logger.error("Invalid owner ID: {}", ownerId);
+            throw new IllegalArgumentException("ID chủ trọ không hợp lệ!");
+        }
+        return contractRepository.findByOwnerIdAndStatus(ownerId, Contracts.Status.ACTIVE, pageable);
+    }
+
+    @Override
+    public Page<Contracts> findContractsByRoomName(String roomName, Pageable pageable) {
+        logger.info("Finding contracts by room name: {} with pagination", roomName);
+        if (roomName == null || roomName.trim().isEmpty()) {
+            logger.error("Room name is null or empty");
+            throw new IllegalArgumentException("Tên phòng không được để trống!");
+        }
+        return contractRepository.findByRoomName(roomName, pageable);
+    }
+
     @Override
     @Transactional
     public Contracts updateContract(Integer contractId, Contracts updatedContract, ContractDto contractDto) throws Exception {
@@ -494,6 +597,8 @@ public class ContractServiceImpl implements ContractService {
         logger.info("=== END UPDATE CONTRACT ===");
         return savedContract;
     }
+
+
 
     @Override
     @Transactional
@@ -1394,4 +1499,5 @@ public class ContractServiceImpl implements ContractService {
 
         return savedContract;
     }
+
 }

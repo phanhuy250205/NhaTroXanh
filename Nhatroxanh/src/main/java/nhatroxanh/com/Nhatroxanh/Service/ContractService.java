@@ -13,6 +13,8 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -81,5 +83,15 @@ public interface ContractService {
     List<Contracts> getMyContracts();
     Contracts createContractFromDto(ContractDto contractDto, Integer ownerId, MultipartFile cccdFrontFile, MultipartFile cccdBackFile);
 
+
+    // Các phương thức phân trang mới
+    Page<Contracts> findContractsByOwnerCccd(String cccd, Pageable pageable);
+
+    Page<Contracts> findContractsByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
+
+    Page<Contracts> findActiveContractsByOwnerId(Integer ownerId, Pageable pageable);
+
+    Page<Contracts> findContractsByRoomName(String roomName, Pageable pageable);
+    Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable);
 
 }
