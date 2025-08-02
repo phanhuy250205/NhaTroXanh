@@ -67,7 +67,6 @@ public interface ContractService {
 
     // New methods for contract list
     List<ContractListDto> getAllContractsForList();
-
     List<ContractListDto> getContractsListByOwnerId(Integer ownerId);
 
     void updateStatus(Integer contractId, String newStatus);

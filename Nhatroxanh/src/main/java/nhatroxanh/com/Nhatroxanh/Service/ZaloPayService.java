@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -254,7 +255,7 @@ public class ZaloPayService {
             // Update payment status
             payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
             payment.setPaymentMethod(Payments.PaymentMethod.ZALOPAY);
-            payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
+            payment.setPaymentDate(new Timestamp(System.currentTimeMillis()));
             paymentsRepository.save(payment);
 
             // Send notification and add money to landlord's balance
@@ -436,7 +437,7 @@ public class ZaloPayService {
                                     // Payment successful
                                     payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
                                     payment.setPaymentMethod(Payments.PaymentMethod.ZALOPAY);
-                                    payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
+                                    payment.setPaymentDate(new Timestamp(System.currentTimeMillis()));
                                     paymentsRepository.save(payment);
 
                                     // Send success notification and add money to landlord's balance

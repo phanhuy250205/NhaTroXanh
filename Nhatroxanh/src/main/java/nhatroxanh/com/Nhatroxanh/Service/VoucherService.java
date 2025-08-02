@@ -36,4 +36,7 @@ public interface VoucherService {
     void checkAndDeactivateVouchersIfNeeded();
     Page<Vouchers> searchVouchers(Users user, String keyword, Pageable pageable);
     void sendVoucherNotification(Vouchers voucher, CustomUserDetails userDetails);
+    Vouchers getVoucherByCode(String code);
+void updateVoucherQuantity(Vouchers voucher);
+
 }
