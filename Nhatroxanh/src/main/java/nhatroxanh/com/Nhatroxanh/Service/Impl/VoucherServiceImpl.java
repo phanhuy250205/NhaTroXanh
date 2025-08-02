@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
 import java.sql.Date;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -321,19 +323,90 @@ public class VoucherServiceImpl implements VoucherService {
             notificationRepository.save(notification);
 
             if (recipient.getEmail() != null && !recipient.getEmail().isEmpty()) {
-                emailService.sendSimpleEmail(
-                        recipient.getEmail(),
-                        "Thông báo khuyến mãi mới",
-                        "Chào " + recipient.getFullname() + ",\n\n" +
-                                "Chúng tôi xin gửi đến bạn mã khuyến mãi mới: " + voucher.getCode() + "\n" +
-                                "Tiêu đề: " + voucher.getTitle() + "\n" +
-                                "Giảm: " + voucher.getDiscountValue() + " VNĐ\n" +
-                                "Đơn tối thiểu: " + voucher.getMinAmount() + " VNĐ\n" +
-                                "Hạn sử dụng: " + voucher.getEndDate() + "\n\n" +
-                                "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!\n" +
-                                "Nhà Trọ Xanh");
+                try {
+                    String emailContent = buildVoucherEmailContent(recipient, voucher);
+                    emailService.sendHtmlEmail(
+                            recipient.getEmail(),
+                            "🎁 " + voucher.getTitle() + " - Mã khuyến mãi độc quyền từ Nhà Trọ Xanh",
+                            emailContent);
+                } catch (Exception e) {
+
+                }
             }
         }
+    }
+
+    private String buildVoucherEmailContent(Users recipient, Vouchers voucher) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        String endDate = dateFormat.format(voucher.getEndDate());
+
+        // Định dạng tiền tệ với dấu phân cách hàng nghìn
+        DecimalFormat currencyFormat = new DecimalFormat("###,###,###");
+        String formattedDiscount = currencyFormat.format(voucher.getDiscountValue()) + " VNĐ";
+        String formattedMinAmount = currencyFormat.format(voucher.getMinAmount()) + " VNĐ";
+
+        return "<!DOCTYPE html>" +
+                "<html>" +
+                "<head>" +
+                "    <meta charset=\"UTF-8\">" +
+                "    <style>" +
+                "        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; }" +
+                "        .ticket { max-width: 600px; margin: 20px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }"
+                +
+                "        .header { background-color: #3e83cc; color: white; padding: 20px; text-align: center; }" +
+                "        .header h1 { margin: 0; font-size: 24px; }" +
+                "        .content { padding: 30px; background-color: #f9f9f9; }" +
+                "        .voucher-code { background-color: white; border: 2px dashed #3e83cc; padding: 15px; text-align: center; margin: 20px 0; font-size: 24px; font-weight: bold; color: #3e83cc; border-radius: 5px; }"
+                +
+                "        .details { background-color: white; border-radius: 5px; padding: 20px; margin-bottom: 20px; }"
+                +
+                "        .detail-row { display: flex; margin-bottom: 10px; }" +
+                "        .detail-label { font-weight: bold; color: #555; width: 150px; }" +
+                "        .footer { background-color: #3e83cc; color: white; padding: 15px; text-align: center; font-size: 12px; }"
+                +
+                "        .discount-value { font-size: 28px; color: #3e83cc; font-weight: bold; text-align: center; margin: 15px 0; }"
+                +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class=\"ticket\">" +
+                "        <div class=\"header\">" +
+                "            <h1>ƯU ĐÃI ĐẶC BIỆT</h1>" +
+                "            <p>Dành riêng cho khách hàng thân thiết</p>" +
+                "        </div>" +
+                "        <div class=\"content\">" +
+                "            <p>Xin chào <strong>" + recipient.getFullname() + "</strong>,</p>" +
+                "            <p>Nhà Trọ Xanh gửi tặng bạn mã giảm giá đặc biệt:</p>" +
+                "            " +
+                "            <div class=\"discount-value\">GIẢM " + formattedDiscount + "</div>" +
+                "            " +
+                "            <div class=\"voucher-code\">" + voucher.getCode() + "</div>" +
+                "            " +
+                "            <div class=\"details\">" +
+                "                <div class=\"detail-row\">" +
+                "                    <span class=\"detail-label\">Tiêu đề:</span>" +
+                "                    <span>" + voucher.getTitle() + "</span>" +
+                "                </div>" +
+                "                <div class=\"detail-row\">" +
+                "                    <span class=\"detail-label\">Đơn tối thiểu:</span>" +
+                "                    <span>" + formattedMinAmount + "</span>" +
+                "                </div>" +
+                "                <div class=\"detail-row\">" +
+                "                    <span class=\"detail-label\">Hạn sử dụng:</span>" +
+                "                    <span>" + endDate + "</span>" +
+                "                </div>" +
+                "            </div>" +
+                "            " +
+                "            <p>Hãy sử dụng mã này khi thanh toán để nhận ưu đãi đặc biệt này!</p>" +
+                "            <p>Trân trọng,<br>Đội ngũ Nhà Trọ Xanh</p>" +
+                "        </div>" +
+                "        <div class=\"footer\">" +
+                "            Đây là email tự động, vui lòng không trả lời. Mọi thắc mắc xin liên hệ hỗ trợ khách hàng."
+                +
+                "        </div>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
     }
 
     @Override

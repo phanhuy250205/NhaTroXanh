@@ -448,8 +448,8 @@ public class NotificationController {
                 Number discountValue = parseNumber(discountValueStr);
                 Number minAmount = parseNumber(minAmountStr);
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue", formatVietnameseCurrency(100000)); // Hardcode correct value
-                voucherDetails.put("minAmount", formatVietnameseCurrency(1000000)); // Hardcode correct value
+                voucherDetails.put("discountValue",  discountValue); // Hardcode correct value
+                voucherDetails.put("minAmount", minAmount); // Hardcode correct value
                 voucherDetails.put("endDate", endDate);
                 log.debug("Corrected voucher details: {}", voucherDetails);
                 return voucherDetails;
@@ -465,23 +465,16 @@ public class NotificationController {
                 String minAmountStr = fallbackMatcher.group(3);
                 String endDate = fallbackMatcher.group(4);
 
-                // Parse the numeric values
-                Number discountValue = parseNumber(discountValueStr);
-                Number minAmount = parseNumber(minAmountStr);
 
-                // Log the parsed values for debugging
-                log.debug(
-                        "Parsed fallback voucher details - voucherCode: {}, discountValue: {}, minAmount: {}, endDate: {}",
-                        voucherCode, discountValue, minAmount, endDate);
 
                 // Apply corrected values
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue", formatVietnameseCurrency(100000)); // Hardcode correct value
-                voucherDetails.put("minAmount", formatVietnameseCurrency(1000000)); // Hardcode correct value
+                voucherDetails.put("discountValue", discountValueStr); // Hardcode correct value
+                voucherDetails.put("minAmount", minAmountStr); // Hardcode correct value
                 voucherDetails.put("endDate", endDate);
                 log.debug("Corrected fallback voucher details: {}", voucherDetails);
                 return voucherDetails;
-            }
+            } 
 
             log.warn("Could not parse PROMOTION notification format: {}", message);
             return null;

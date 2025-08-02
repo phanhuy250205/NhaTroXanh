@@ -53,14 +53,15 @@
                 <span>Hoặc</span>
             </div>
 
-            <div class="social-login">
-                <button type="button" class="btn-icon btn-google">
-                    <i class="fab fa-google"></i>
-                </button>
-                <button type="button" class="btn-icon btn-facebook">
-                    <i class="fab fa-facebook-f"></i>
-                </button>
-            </div>
+           <div class="social-login">
+                    <a th:href="@{/oauth2/authorization/google}" class="btn-icon btn-google">
+                        <i class="fab fa-google"></i>
+                    </a>
+
+                    <a th:href="@{/oauth2/authorization/facebook}" class="btn-icon btn-facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                </div>
 
             <div class="register-link">
                 Chưa có tài khoản? <a href="#" class="register-now">Đăng ký ngay</a>

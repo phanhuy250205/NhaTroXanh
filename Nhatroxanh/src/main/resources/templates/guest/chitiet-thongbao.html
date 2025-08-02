@@ -938,8 +938,8 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
-                    <strong>Giá trị giảm:</strong> ${voucherDetails.discountValue || '0 VNĐ'}<br>
-                    <strong>Đơn tối thiểu:</strong> ${voucherDetails.minAmount || '0 VNĐ'}<br>
+                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue )|| '0 VNĐ'}<br>
+                    <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0 VNĐ'}<br>
                     <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
                 </div>
             </div>
