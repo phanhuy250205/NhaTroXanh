@@ -186,4 +186,13 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         // ContractsRepository.java
         Optional<Contracts> findTopByTenantOrderByContractIdDesc(Users tenant);
 
+    // Các phương thức mới
+    Page<Contracts> findByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
+
+    @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId AND c.status = :status")
+    Page<Contracts> findByOwnerIdAndStatus(@Param("ownerId") Integer ownerId, @Param("status") Contracts.Status status, Pageable pageable);
+
+    @Query("SELECT c FROM Contracts c WHERE LOWER(c.room.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%'))")
+    Page<Contracts> findByRoomName(@Param("roomName") String roomName, Pageable pageable);
+
 }

@@ -7,11 +7,11 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        
+
         <div class="register-modal-content">
             <div class="register-greeting">
                 <h3>Chào mừng bạn đến với <span style="color: #39a3e9;">NHÀ TRỌ XANH</span></h3>
-                <h2>Đăng ký tài khoản mới 
+                <h2>Đăng ký tài khoản mới
                     <span class="house-icons">
                         <img class="logo-register d-none d-md-block" th:src="@{/images/logo/nhatroxanh.png}" alt="">
                     </span>
@@ -19,7 +19,8 @@
             </div>
 
             <form class="register-form" id="registerForm">
-                <div id="register-error-message" class="alert alert-danger" style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
+                <div id="register-error-message" class="alert alert-danger"
+                    style="display: none; font-size: 14px; margin-bottom: 15px;"></div>
 
                 <!-- Hàng 1: Chỉ còn Họ tên -->
                 <div class="form-group">
@@ -66,12 +67,15 @@
                 <button type="submit" class="btn-register-submit">ĐĂNG KÝ</button>
 
                 <div class="register-divider"><span>Hoặc</span></div>
+                <div class="social-login">
+                    <a th:href="@{/oauth2/authorization/google}" class="btn-icon btn-google">
+                        <i class="fab fa-google"></i>
+                    </a>
 
-                <div class="social-register">
-                    <button type="button" class="btn-icon btn-google"><i class="fab fa-google"></i></button>
-                    <button type="button" class="btn-icon btn-facebook"><i class="fab fa-facebook-f"></i></button>
+                    <a th:href="@{/oauth2/authorization/facebook}" class="btn-icon btn-facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
                 </div>
-
                 <div class="login-link">
                     Đã có tài khoản? <a href="#" class="login-now">Đăng nhập ngay</a>
                 </div>
