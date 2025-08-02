@@ -247,6 +247,26 @@
         .nha-tro-image-upload input[type="file"]:disabled {
             display: none;
         }
+
+        .form-control.is-invalid,
+        .form-select.is-invalid {
+            border-color: #dc3545;
+        }
+
+        /* Style cho các dòng thông báo lỗi */
+        .invalid-feedback {
+            display: none;
+            /* Mặc định ẩn đi */
+            width: 100%;
+            margin-top: .25rem;
+            font-size: .875em;
+            color: #dc3545;
+        }
+
+        /* Khi một ô input có class 'is-invalid', hiện thông báo lỗi ngay bên dưới nó */
+        .is-invalid~.invalid-feedback {
+            display: block;
+        }
     </style>
 </head>
 
@@ -300,11 +320,8 @@
                                             Ngày lập hợp đồng <span class="text-danger">*</span>
                                         </label>
 
-                                        <input type="date"
-                                               id="contractDate"
-                                               name="contractDate"
-                                               class="form-control"
-                                               th:value="${#temporals.format(contract.contractDate, 'yyyy-MM-dd')}" />
+                                        <input type="date" id="contractDate" name="contractDate" class="form-control"
+                                            th:value="${#temporals.format(contract.contractDate, 'yyyy-MM-dd')}" />
 
                                     </div>
 
@@ -745,17 +762,16 @@
                                         </div>
                                         <div class="nha-tro-amenities" id="amenities-list-host">
                                             <div th:if="${allUtilities == null or #lists.isEmpty(allUtilities)}"
-                                                 class="text-muted fst-italic">
+                                                class="text-muted fst-italic">
                                                 Không có tiện ích nào được định nghĩa trong hệ thống.
                                             </div>
                                             <div th:each="util : ${allUtilities}" class="form-check form-check-inline">
                                                 <input class="form-check-input" type="checkbox"
-                                                       name="contract.room.utilityIds"
-                                                       th:id="'utility-' + ${util.utilityId}"
-                                                       th:value="${util.utilityId}"
-                                                       th:checked="${contract.room.utilityIds != null and contract.room.utilityIds.contains(util.utilityId)}">
+                                                    name="contract.room.utilityIds"
+                                                    th:id="'utility-' + ${util.utilityId}" th:value="${util.utilityId}"
+                                                    th:checked="${contract.room.utilityIds != null and contract.room.utilityIds.contains(util.utilityId)}">
                                                 <label class="form-check-label" th:for="'utility-' + ${util.utilityId}"
-                                                       th:text="${util.name}"></label>
+                                                    th:text="${util.name}"></label>
                                             </div>
                                         </div>
                                     </div>
@@ -785,22 +801,19 @@
                                             Giá thuê hàng tháng (VND) <span class="text-danger">*</span>
                                         </label>
                                         <!-- Input kiểu text để hiển thị giá trị định dạng từ SQL -->
-                                        <input type="text"
-                                               class="form-control"
-                                               id="rent-price"
-                                               name="terms.formattedPrice"
-                                               th:value="${contract.terms.formattedPrice ?: ''}"
-                                               required
-                                               placeholder="Nhập giá thuê (VD: 2.000.000)">
+                                        <input type="text" class="form-control" id="rent-price"
+                                            name="terms.formattedPrice"
+                                            th:value="${contract.terms.formattedPrice ?: ''}" required
+                                            placeholder="Nhập giá thuê (VD: 2.000.000)">
                                         <!-- Input ẩn để lưu giá trị số thô gửi về server -->
                                         <input type="hidden" id="rent-price-hidden" name="terms.price"
-                                               th:value="${contract.terms.price != null ? contract.terms.price : 0}">
+                                            th:value="${contract.terms.price != null ? contract.terms.price : 0}">
                                         <!-- Thông báo lỗi nếu nhập không hợp lệ -->
                                         <div id="price-error" class="text-danger" style="display: none;">
                                             Vui lòng nhập giá trị hợp lệ (chỉ chứa số và dấu chấm).
                                         </div>
-<!--                                        <p>Debug formattedPrice: <span th:text="${contract.terms.formattedPrice}"></span></p>-->
-<!--                                        <p>Debug price: <span th:text="${contract.terms.price}"></span></p>-->
+                                        <!--                                        <p>Debug formattedPrice: <span th:text="${contract.terms.formattedPrice}"></span></p>-->
+                                        <!--                                        <p>Debug price: <span th:text="${contract.terms.price}"></span></p>-->
                                     </div>
 
                                     <div class="col-md-6">
@@ -810,12 +823,10 @@
                                         </label>
                                         <div class="payment-select-wrapper">
                                             <i class="payment-icon bi bi-wallet2"></i>
-                                            <select class="form-select payment-select"
-                                                    id="payment-method"
-                                                    name="paymentMethod"
-                                                    th:field="*{paymentMethod}"
-                                                    required>
-                                                <option value="" data-icon="bi-question-circle">Chọn phương thức</option>
+                                            <select class="form-select payment-select" id="payment-method"
+                                                name="paymentMethod" th:field="*{paymentMethod}" required>
+                                                <option value="" data-icon="bi-question-circle">Chọn phương thức
+                                                </option>
                                                 <option value="TIEN_MAT" data-icon="bi-cash-stack"> Tiền mặt</option>
                                                 <option value="BANK" data-icon="bi-bank"> Chuyển khoản</option>
                                             </select>
@@ -848,25 +859,23 @@
                                         <label class="form-label">
                                             Ngày bắt đầu HĐ <span class="text-danger">*</span>
                                         </label>
-                                        <input type="date"
-                                               class="form-control"
-                                               id="start-date"
-                                               name="terms.startDate"
-                                               th:value="${contract.terms?.startDate != null ? #temporals.format(contract.terms.startDate, 'yyyy-MM-dd') : ''}"
-                                               required>
+                                        <input type="date" class="form-control" id="start-date" name="terms.startDate"
+                                            th:value="${contract.terms?.startDate != null ? #temporals.format(contract.terms.startDate, 'yyyy-MM-dd') : ''}"
+                                            required>
                                     </div>
 
 
                                     <div class="col-md-6">
-                                        <label class="form-label">Đặt cọc trước <span class="text-danger">*</span></label>
+                                        <label class="form-label">Đặt cọc trước <span
+                                                class="text-danger">*</span></label>
                                         <div class="input-group">
-                                            <input type="number" class="form-control" id="deposit-months" name="depositMonths"
-                                                   min="0" step="0.5" value="2" required>
+                                            <input type="number" class="form-control" id="deposit-months"
+                                                name="depositMonths" min="0" step="0.5" value="2" required>
                                             <span class="input-group-text">tháng tiền nhà</span>
                                         </div>
                                         <!-- Trường ẩn để lưu số tiền đặt cọc gửi về server -->
                                         <input type="hidden" id="deposit-amount" name="terms.deposit"
-                                               th:value="${contract.terms.deposit != null ? contract.terms.deposit : 0}">
+                                            th:value="${contract.terms.deposit != null ? contract.terms.deposit : 0}">
                                         <!-- Hiển thị tiền đặt cọc (chỉ để xem) -->
                                         <div class="form-text" id="deposit-amount-display">0 VNĐ</div>
                                     </div>
@@ -929,58 +938,102 @@
                             </div>
                         </div>
                         <div class="card-body nha-tro-preview-content" id="contract-preview">
-                            <div id="preview-container" style="transform-origin: top left; transition: transform 0.3s ease;">
+                            <div id="preview-container"
+                                style="transform-origin: top left; transition: transform 0.3s ease;">
                                 <div class="text-center mb-4">
-                                    <p><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh phúc</strong></p>
+                                    <p><strong>CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>Độc lập - Tự do - Hạnh
+                                            phúc</strong></p>
                                     <p><strong>HỢP ĐỒNG THUÊ NHÀ</strong></p>
                                 </div>
 
-                                <p>Hôm nay, ngày <span id="preview-sign-date" class="nha-tro-highlight">........................</span>, tại Đà Nẵng, chúng tôi - những bên tham gia - cùng nhau ký kết hợp đồng thuê nhà trọ với sự minh bạch và tin tưởng lẫn nhau:</p>
+                                <p>Hôm nay, ngày <span id="preview-sign-date"
+                                        class="nha-tro-highlight">........................</span>, tại Đà Nẵng, chúng
+                                    tôi - những bên tham gia - cùng nhau ký kết hợp đồng thuê nhà trọ với sự minh bạch
+                                    và tin tưởng lẫn nhau:</p>
 
                                 <div class="mb-3">
-                                    <p><strong>BÊN CHO THUÊ (Bên A):</strong> <span id="preview-owner-name" class="nha-tro-highlight">........................</span></p>
-                                    <p>Sinh ngày: <span id="preview-owner-dob" class="nha-tro-highlight">........................</span></p>
-                                    <p>Số CMND/CCCD: <span id="preview-owner-id" class="nha-tro-highlight">........................</span> cấp ngày <span id="preview-owner-id-date" class="nha-tro-highlight">........................</span> tại <span id="preview-owner-id-place" class="nha-tro-highlight">........................</span></p>
-                                    <p>Địa chỉ: <span id="preview-owner-address" class="nha-tro-highlight">........................</span></p>
-                                    <p>Số điện thoại: <span id="preview-owner-phone" class="nha-tro-highlight">........................</span></p>
+                                    <p><strong>BÊN CHO THUÊ (Bên A):</strong> <span id="preview-owner-name"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Sinh ngày: <span id="preview-owner-dob"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Số CMND/CCCD: <span id="preview-owner-id"
+                                            class="nha-tro-highlight">........................</span> cấp ngày <span
+                                            id="preview-owner-id-date"
+                                            class="nha-tro-highlight">........................</span> tại <span
+                                            id="preview-owner-id-place"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Địa chỉ: <span id="preview-owner-address"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Số điện thoại: <span id="preview-owner-phone"
+                                            class="nha-tro-highlight">........................</span></p>
                                 </div>
 
                                 <div class="mb-3">
                                     <p><strong>BÊN THUÊ (Bên B):</strong></p>
-                                    <p>Họ tên: <span id="preview-tenant-name" class="nha-tro-highlight">........................</span></p>
-                                    <p>Sinh ngày: <span id="preview-tenant-dob" class="nha-tro-highlight">........................</span></p>
-                                    <p>Số CMND/CCCD: <span id="preview-tenant-id" class="nha-tro-highlight">........................</span> cấp ngày <span id="preview-tenant-id-date" class="nha-tro-highlight">........................</span> tại <span id="preview-tenant-id-place" class="nha-tro-highlight">........................</span></p>
-                                    <p>Địa chỉ: <span id="preview-tenant-address" class="nha-tro-highlight">........................</span></p>
-                                    <p>Số điện thoại: <span id="preview-tenant-phone" class="nha-tro-highlight">........................</span></p>
+                                    <p>Họ tên: <span id="preview-tenant-name"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Sinh ngày: <span id="preview-tenant-dob"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Số CMND/CCCD: <span id="preview-tenant-id"
+                                            class="nha-tro-highlight">........................</span> cấp ngày <span
+                                            id="preview-tenant-id-date"
+                                            class="nha-tro-highlight">........................</span> tại <span
+                                            id="preview-tenant-id-place"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Địa chỉ: <span id="preview-tenant-address"
+                                            class="nha-tro-highlight">........................</span></p>
+                                    <p>Số điện thoại: <span id="preview-tenant-phone"
+                                            class="nha-tro-highlight">........................</span></p>
                                 </div>
 
                                 <div id="preview-residents-section" style="display: none;" class="mb-3">
                                     <p><strong>Danh sách người ở:</strong><br>
-                                        <span id="preview-residents" class="nha-tro-highlight">........................</span>
+                                        <span id="preview-residents"
+                                            class="nha-tro-highlight">........................</span>
                                     </p>
                                 </div>
 
-                                <p>Sau khi bàn bạc trên tinh thần dân chủ, hai bên thống nhất ký kết hợp đồng thuê nhà với các điều khoản sau:</p>
+                                <p>Sau khi bàn bạc trên tinh thần dân chủ, hai bên thống nhất ký kết hợp đồng thuê nhà
+                                    với các điều khoản sau:</p>
 
                                 <div class="mb-3">
                                     <p><strong>Điều 1: Đối tượng hợp đồng</strong></p>
-                                    <p>Bên A đồng ý cho Bên B thuê căn nhà tại địa chỉ: <span id="preview-room-address" class="nha-tro-highlight">........................</span>, phòng số <span id="preview-room-number" class="nha-tro-highlight">........................</span>, diện tích <span id="preview-room-area" class="nha-tro-highlight">........................</span>.</p>
+                                    <p>Bên A đồng ý cho Bên B thuê căn nhà tại địa chỉ: <span id="preview-room-address"
+                                            class="nha-tro-highlight">........................</span>, phòng số <span
+                                            id="preview-room-number"
+                                            class="nha-tro-highlight">........................</span>, diện tích <span
+                                            id="preview-room-area"
+                                            class="nha-tro-highlight">........................</span>.</p>
                                 </div>
 
                                 <div class="mb-3">
                                     <p><strong>Điều 2: Thời hạn thuê</strong></p>
-                                    <p>Thời gian thuê: <span id="preview-duration" class="nha-tro-highlight">........................</span> tháng, kể từ ngày <span id="preview-start-date" class="nha-tro-highlight">........................</span> đến ngày <span id="preview-end-date" class="nha-tro-highlight">........................</span>.</p>
+                                    <p>Thời gian thuê: <span id="preview-duration"
+                                            class="nha-tro-highlight">........................</span> tháng, kể từ ngày
+                                        <span id="preview-start-date"
+                                            class="nha-tro-highlight">........................</span> đến ngày <span
+                                            id="preview-end-date"
+                                            class="nha-tro-highlight">........................</span>.
+                                    </p>
                                 </div>
 
                                 <div class="mb-3">
                                     <p><strong>Điều 3: Giá thuê và phương thức thanh toán</strong></p>
-                                    <p>Giá thuê: <span id="preview-rent" class="nha-tro-highlight">........................</span>. Thanh toán <span id="preview-payment-date" class="nha-tro-highlight">........................</span>.</p>
-                                    <p>Tiền đặt cọc: <span id="preview-deposit" class="nha-tro-highlight">........................</span> (tương đương <span id="preview-deposit-months" class="nha-tro-highlight">........................</span> tháng tiền nhà).</p>
+                                    <p>Giá thuê: <span id="preview-rent"
+                                            class="nha-tro-highlight">........................</span>. Thanh toán <span
+                                            id="preview-payment-date"
+                                            class="nha-tro-highlight">........................</span>.</p>
+                                    <p>Tiền đặt cọc: <span id="preview-deposit"
+                                            class="nha-tro-highlight">........................</span> (tương đương <span
+                                            id="preview-deposit-months"
+                                            class="nha-tro-highlight">........................</span> tháng tiền nhà).
+                                    </p>
                                 </div>
 
                                 <div class="mb-3">
                                     <p><strong>Điều 4: Tiện ích và trang thiết bị</strong></p>
-                                    <p>Phòng được trang bị: <span id="preview-amenities" class="nha-tro-highlight">........................</span>.</p>
+                                    <p>Phòng được trang bị: <span id="preview-amenities"
+                                            class="nha-tro-highlight">........................</span>.</p>
                                 </div>
 
                                 <div class="mb-3">
@@ -988,18 +1041,25 @@
                                     <ul class="list-disc pl-6">
                                         <li><strong>Bên A:</strong>
                                             <ul class="list-circle pl-6">
-                                                <li>Cam kết giao nhà đúng thời gian, đúng hiện trạng như đã thỏa thuận trong Điều 1.</li>
-                                                <li>Cung cấp đầy đủ các tiện ích và trang thiết bị được liệt kê trong Điều 4.</li>
-                                                <li>Chịu trách nhiệm sửa chữa các hư hỏng lớn của căn nhà không do Bên B gây ra (ví dụ: hư hỏng kết cấu, hệ thống điện, nước).</li>
-                                                <li>Đảm bảo quyền sử dụng hợp pháp của căn nhà cho Bên B trong suốt thời hạn hợp đồng.</li>
+                                                <li>Cam kết giao nhà đúng thời gian, đúng hiện trạng như đã thỏa thuận
+                                                    trong Điều 1.</li>
+                                                <li>Cung cấp đầy đủ các tiện ích và trang thiết bị được liệt kê trong
+                                                    Điều 4.</li>
+                                                <li>Chịu trách nhiệm sửa chữa các hư hỏng lớn của căn nhà không do Bên B
+                                                    gây ra (ví dụ: hư hỏng kết cấu, hệ thống điện, nước).</li>
+                                                <li>Đảm bảo quyền sử dụng hợp pháp của căn nhà cho Bên B trong suốt thời
+                                                    hạn hợp đồng.</li>
                                             </ul>
                                         </li>
                                         <li><strong>Bên B:</strong>
                                             <ul class="list-circle pl-6">
-                                                <li>Sử dụng căn nhà đúng mục đích, bảo quản tài sản và không tự ý thay đổi cấu trúc hoặc công năng của căn nhà.</li>
-                                                <li>Thanh toán tiền thuê và các chi phí liên quan (điện, nước, internet, v.v.) đúng hạn theo Điều 3.</li>
+                                                <li>Sử dụng căn nhà đúng mục đích, bảo quản tài sản và không tự ý thay
+                                                    đổi cấu trúc hoặc công năng của căn nhà.</li>
+                                                <li>Thanh toán tiền thuê và các chi phí liên quan (điện, nước, internet,
+                                                    v.v.) đúng hạn theo Điều 3.</li>
                                                 <li>Thông báo ngay cho Bên A khi phát hiện hư hỏng cần sửa chữa.</li>
-                                                <li>Trả lại căn nhà cho Bên A đúng thời hạn khi hợp đồng kết thúc, trừ trường hợp hai bên thỏa thuận gia hạn.</li>
+                                                <li>Trả lại căn nhà cho Bên A đúng thời hạn khi hợp đồng kết thúc, trừ
+                                                    trường hợp hai bên thỏa thuận gia hạn.</li>
                                             </ul>
                                         </li>
                                     </ul>
@@ -1008,31 +1068,43 @@
                                 <div class="mb-3">
                                     <p><strong>Điều 6: Điều khoản khác</strong></p>
                                     <ul class="list-disc pl-6">
-                                        <li>Bên B có quyền yêu cầu gia hạn hợp đồng trước khi kết thúc thời hạn thuê, với điều kiện thông báo bằng văn bản cho Bên A trước ít nhất 30 ngày.</li>
-                                        <li>Mọi sửa đổi, bổ sung hợp đồng phải được lập thành văn bản và có chữ ký của cả hai bên.</li>
-                                        <li>Trong trường hợp bất khả kháng (thiên tai, dịch bệnh, thay đổi chính sách pháp luật), hai bên sẽ thương lượng để điều chỉnh các điều khoản hợp đồng phù hợp.</li>
-                                        <li>Bên B không được chuyển nhượng hợp đồng thuê nhà cho bên thứ ba mà không có sự đồng ý bằng văn bản của Bên A.</li>
-                                        <li><span id="preview-terms" class="nha-tro-highlight">........................</span></li>
+                                        <li>Bên B có quyền yêu cầu gia hạn hợp đồng trước khi kết thúc thời hạn thuê,
+                                            với điều kiện thông báo bằng văn bản cho Bên A trước ít nhất 30 ngày.</li>
+                                        <li>Mọi sửa đổi, bổ sung hợp đồng phải được lập thành văn bản và có chữ ký của
+                                            cả hai bên.</li>
+                                        <li>Trong trường hợp bất khả kháng (thiên tai, dịch bệnh, thay đổi chính sách
+                                            pháp luật), hai bên sẽ thương lượng để điều chỉnh các điều khoản hợp đồng
+                                            phù hợp.</li>
+                                        <li>Bên B không được chuyển nhượng hợp đồng thuê nhà cho bên thứ ba mà không có
+                                            sự đồng ý bằng văn bản của Bên A.</li>
+                                        <li><span id="preview-terms"
+                                                class="nha-tro-highlight">........................</span></li>
                                     </ul>
                                 </div>
 
                                 <div class="mb-4">
                                     <p><strong>Điều 7: Cam kết chung</strong></p>
-                                    <p>Hai bên cam kết thực hiện đúng các điều khoản đã thỏa thuận trong hợp đồng. Nếu có tranh chấp, hai bên sẽ ưu tiên giải quyết thông qua thương lượng. Trường hợp không đạt được thỏa thuận, tranh chấp sẽ được giải quyết tại Tòa án nhân dân có thẩm quyền tại Đà Nẵng theo quy định của pháp luật Việt Nam.</p>
+                                    <p>Hai bên cam kết thực hiện đúng các điều khoản đã thỏa thuận trong hợp đồng. Nếu
+                                        có tranh chấp, hai bên sẽ ưu tiên giải quyết thông qua thương lượng. Trường hợp
+                                        không đạt được thỏa thuận, tranh chấp sẽ được giải quyết tại Tòa án nhân dân có
+                                        thẩm quyền tại Đà Nẵng theo quy định của pháp luật Việt Nam.</p>
                                 </div>
 
-                                <p class="mb-4">Hợp đồng được lập thành 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý như nhau.</p>
+                                <p class="mb-4">Hợp đồng được lập thành 02 bản, mỗi bên giữ 01 bản và có giá trị pháp lý
+                                    như nhau.</p>
 
                                 <div class="row text-center mt-5">
                                     <div class="col-6">
                                         <p><strong>BÊN CHO THUÊ</strong></p>
                                         <p class="mt-5">(Ký, ghi rõ họ tên)</p>
-                                        <p><span id="preview-owner-signature" class="nha-tro-highlight">........................</span></p>
+                                        <p><span id="preview-owner-signature"
+                                                class="nha-tro-highlight">........................</span></p>
                                     </div>
                                     <div class="col-6">
                                         <p><strong>BÊN THUÊ</strong></p>
                                         <p class="mt-5">(Ký, ghi rõ họ tên)</p>
-                                        <p><span id="preview-tenant-signature" class="nha-tro-highlight">........................</span></p>
+                                        <p><span id="preview-tenant-signature"
+                                                class="nha-tro-highlight">........................</span></p>
                                     </div>
                                 </div>
                             </div>
@@ -1149,32 +1221,39 @@
                     <form id="addCustomerForm-host">
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control nha-tro-host-input" id="newCustomer-name">
+                                <label class="form-label">Họ và tên <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control nha-tro-host-input" id="newCustomer-name"
+                                    required>
+                                <div class="invalid-feedback" id="newCustomer-name-error"></div>
                             </div>
                             <div class="col-md-3">
                                 <label class="form-label">Ngày sinh</label>
                                 <input type="date" class="form-control nha-tro-host-input" id="newCustomer-dob">
                             </div>
                             <div class="col-md-3">
-                                <label class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control nha-tro-host-input" id="newCustomer-id">
+                                <label class="form-label">Số CMND/CCCD <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control nha-tro-host-input" id="newCustomer-id" required>
+                                <div class="invalid-feedback" id="newCustomer-id-error"></div>
                             </div>
-                            <div class="col-md-5">
+                             <div class="col-md-5">
                                 <label class="form-label">Ngày cấp</label>
                                 <input type="date" class="form-control nha-tro-host-input" id="newCustomer-id-date">
+                                <div class="invalid-feedback" id="newCustomer-id-date-error"></div>
                             </div>
                             <div class="col-md-7">
                                 <label class="form-label">Nơi cấp</label>
                                 <input type="text" class="form-control nha-tro-host-input" id="newCustomer-id-place">
+                                <div class="invalid-feedback" id="newCustomer-id-place-error"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control nha-tro-host-input" id="newCustomer-phone">
+                                <label class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control nha-tro-host-input" id="newCustomer-phone" >
+                                <div class="invalid-feedback" id="newCustomer-phone-error"></div>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email (tùy chọn)</label>
-                                <input type="email" class="form-control nha-tro-host-input" id="newCustomer-email">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control nha-tro-host-input" id="newCustomer-email" required>
+                                <div class="invalid-feedback" id="newCustomer-email-error"></div>
                             </div>
                             <div class="col-12">
                                 <hr class="my-4">
@@ -1227,31 +1306,29 @@
                                 <label class="form-label">Tên đường/Số nhà</label>
                                 <input type="text" class="form-control nha-tro-host-input" id="newCustomer-street">
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ảnh CCCD mặt trước</label>
-                                <div class="nha-tro-image-upload"
-                                    onclick="document.getElementById('newCustomer-cccd-front').click()">
-                                    <input type="file" id="newCustomer-cccd-front" accept="image/*"
-                                        style="display: none;">
+                           <div class="col-md-6">
+                                <label class="form-label">Ảnh CCCD mặt trước <span class="text-danger">*</span></label>
+                                <div class="nha-tro-image-upload" onclick="document.getElementById('newCustomer-cccd-front').click()">
+                                    <input type="file" id="newCustomer-cccd-front" accept="image/*" style="display: none;">
                                     <div id="newCustomer-cccd-front-preview" class="nha-tro-image-preview">
                                         <i class="fa fa-camera fa-2x"></i>
                                         <div class="mt-2">Tải ảnh mặt trước</div>
                                         <small class="text-muted">Nhấn để chọn ảnh</small>
                                     </div>
                                 </div>
+                                <div class="invalid-feedback" id="newCustomer-cccd-front-error"></div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Ảnh CCCD mặt sau</label>
-                                <div class="nha-tro-image-upload"
-                                    onclick="document.getElementById('newCustomer-cccd-back').click()">
-                                    <input type="file" id="newCustomer-cccd-back" accept="image/*"
-                                        style="display: none;">
+                           <div class="col-md-6">
+                                <label class="form-label">Ảnh CCCD mặt sau <span class="text-danger">*</span></label>
+                                <div class="nha-tro-image-upload" onclick="document.getElementById('newCustomer-cccd-back').click()">
+                                    <input type="file" id="newCustomer-cccd-back" accept="image/*" style="display: none;">
                                     <div id="newCustomer-cccd-back-preview" class="nha-tro-image-preview">
                                         <i class="fa fa-camera fa-2x"></i>
                                         <div class="mt-2">Tải ảnh mặt sau</div>
                                         <small class="text-muted">Nhấn để chọn ảnh</small>
                                     </div>
                                 </div>
+                                <div class="invalid-feedback" id="newCustomer-cccd-back-error"></div>
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Ghi chú (tùy chọn)</label>
@@ -1685,13 +1762,13 @@
                 .join(', ') || '........................';
 
             // DANH SÁCH NGƯỜI Ở
-            const residents = $('#residents-list .resident-item').map(function() {
+            const residents = $('#residents-list .resident-item').map(function () {
                 const name = $(this).find('.resident-name').text().trim();
                 return name ? name : null;
             }).get().filter(name => name).join(', ') || 'Không có';
 
             // TIỆN ÍCH
-            const amenities = $('.nha-tro-amenities input:checked').map(function() {
+            const amenities = $('.nha-tro-amenities input:checked').map(function () {
                 return $(this).next('label').text().trim();
             }).get().join(', ') || 'Không có';
 
@@ -2380,7 +2457,7 @@
 
     <script>
         // ✅ FIX NGAY START DATE
-        $(document).ready(function() {
+        $(document).ready(function () {
             console.log('🔧 Fixing start-date input...');
 
             const $startDate = $('#start-date');
@@ -2396,7 +2473,7 @@
             }
 
             // Ngăn JavaScript khác thay đổi
-            $startDate.on('input change', function() {
+            $startDate.on('input change', function () {
                 const currentVal = $(this).val();
                 if (correctValue && currentVal !== correctValue && !$(this).is(':focus')) {
                     console.log('🛡️ Preventing auto-change from', currentVal, 'to', correctValue);
@@ -2408,7 +2485,7 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const rentPriceInput = document.getElementById('rent-price');
             const rentPriceHidden = document.getElementById('rent-price-hidden');
 
@@ -2514,14 +2591,14 @@
         }
 
         // Thêm event listener cho input
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const rentPriceInput = document.getElementById('rent-price');
             if (rentPriceInput) {
-                rentPriceInput.addEventListener('input', function() {
+                rentPriceInput.addEventListener('input', function () {
                     formatPrice(this);
                 });
 
-                rentPriceInput.addEventListener('blur', function() {
+                rentPriceInput.addEventListener('blur', function () {
                     validatePrice(this);
                 });
             }
@@ -2592,7 +2669,6 @@
         padding: 10px;
         font-size: 14px;
     }
-
 </style>
 
 </html>

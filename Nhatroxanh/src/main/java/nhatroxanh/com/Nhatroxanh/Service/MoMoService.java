@@ -226,7 +226,7 @@ public class MoMoService {
             if (resultCode == 0) {
                 payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
                 payment.setPaymentMethod(Payments.PaymentMethod.MOMO);
-                payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
+                payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
                 paymentsRepository.save(payment);
 
                 try {
@@ -352,7 +352,7 @@ public class MoMoService {
                                     // Payment successful
                                     payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
                                     payment.setPaymentMethod(Payments.PaymentMethod.MOMO);
-                                    payment.setPaymentDate(new java.sql.Date(System.currentTimeMillis()));
+                                    payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
                                     paymentsRepository.save(payment);
                                     
                                     // Send success notification and add money to landlord's balance

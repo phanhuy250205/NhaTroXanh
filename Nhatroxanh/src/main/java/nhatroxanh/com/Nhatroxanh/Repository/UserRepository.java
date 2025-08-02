@@ -142,4 +142,4 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
            "WHERE h.hostelId = :hostelId AND u.role = :role")
     List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
         List<Users> findByRole(String role);
-}
+}  

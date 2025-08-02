@@ -3,27 +3,13 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.Document;
-import com.itextpdf.layout.borders.Border;
-import com.itextpdf.layout.element.Cell;
-import com.itextpdf.layout.element.Paragraph;
-import com.itextpdf.layout.element.Table;
-import com.itextpdf.layout.properties.TextAlignment;
-import com.itextpdf.layout.properties.UnitValue;
-import com.lowagie.text.StandardFonts;
-import jakarta.validation.Valid;
 
+import lombok.extern.slf4j.Slf4j;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractDto.Room;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.ContractListDto;
-
 import nhatroxanh.com.Nhatroxanh.Model.entity.*;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ResidentRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
@@ -34,7 +20,6 @@ import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.*;
 import nhatroxanh.com.Nhatroxanh.Util.CccdUtils;
 import nhatroxanh.com.Nhatroxanh.exception.ResourceNotFoundException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,29 +35,28 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 //@RestController
 @Controller
 @RequestMapping("/api/contracts")
-
+@Slf4j
 public class ContractController {
 
     private static final Logger logger = LoggerFactory.getLogger(ContractController.class);
+
+    @Autowired
+    private NotificationRepository notificationRepository;
 
     @Autowired
     private ResidentRepository residentRepository;
@@ -128,7 +112,8 @@ public class ContractController {
         if (contract == null) {
             contract = new ContractDto();
             contract.setContractDate(LocalDate.now());
-            logger.info("Contract was null, initialized new ContractDto with contractDate: {}", contract.getContractDate());
+            logger.info("Contract was null, initialized new ContractDto with contractDate: {}",
+                    contract.getContractDate());
         } else if (contract.getContractDate() == null) {
             contract.setContractDate(LocalDate.now());
             logger.info("ContractDate was null, set to: {}", contract.getContractDate());
@@ -427,7 +412,7 @@ public class ContractController {
                 contract.setUnregisteredTenant(null);
                 logger.info("✅ Set REGISTERED tenant: {}", registeredTenant.getFullname());
             } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())) {
-                contract.setTenant(null);  // ← QUAN TRỌNG: Set null cho registered tenant
+                contract.setTenant(null); // ← QUAN TRỌNG: Set null cho registered tenant
                 contract.setUnregisteredTenant(unregisteredTenant);
                 logger.info("✅ Set UNREGISTERED tenant: {}", unregisteredTenant.getFullName());
             } else {
@@ -1584,8 +1569,8 @@ public class ContractController {
             // Cập nhật payment method nếu có
             if (contractDto.getPaymentMethod() != null) {
                 try {
-                    Contracts.PaymentMethod entityPaymentMethod =
-                            Contracts.PaymentMethod.valueOf(contractDto.getPaymentMethod().name());
+                    Contracts.PaymentMethod entityPaymentMethod = Contracts.PaymentMethod
+                            .valueOf(contractDto.getPaymentMethod().name());
                     contract.setPaymentMethod(entityPaymentMethod);
                     logger.info("✅ Updated payment method: {}", entityPaymentMethod);
                 } catch (IllegalArgumentException e) {
@@ -1604,8 +1589,8 @@ public class ContractController {
             }
 
             // 🔥 THÊM XỬ LÝ RESIDENTS
-//            // Xóa residents cũ
-//            residentRepository.deleteByContractId(contractId);
+            // // Xóa residents cũ
+            // residentRepository.deleteByContractId(contractId);
             contract.getResidents().clear();
 
             // Thêm residents mới từ DTO
@@ -1619,7 +1604,8 @@ public class ContractController {
                     resident.setContract(contract);
                     contract.getResidents().add(resident);
                 }
-                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(), contractId);
+                logger.info("✅ Updated {} residents for contract ID: {}", contractDto.getResidents().size(),
+                        contractId);
             } else {
                 logger.info("✅ No residents provided, cleared resident list for contract ID: {}", contractId);
             }
@@ -1644,6 +1630,7 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
     @PutMapping("/update-owner")
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<?> updateOwner(
@@ -1924,15 +1911,18 @@ public class ContractController {
 
     @GetMapping("/list")
     @PreAuthorize("hasRole('OWNER')")
+
     public ResponseEntity<Map<String, Object>> getContractsListApi(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
         logger.info("Getting contracts list API for owner with page: {}, size: {}", page, size);
+
         Map<String, Object> response = new HashMap<>();
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
+
             Pageable pageable = PageRequest.of(page, size);
             Page<ContractListDto> contractPage = contractService.getContractsListByOwnerId(ownerId, pageable);
 
@@ -1941,13 +1931,14 @@ public class ContractController {
             response.put("totalContracts", contractPage.getTotalElements());
             response.put("totalPages", contractPage.getTotalPages());
             response.put("currentPage", contractPage.getNumber());
+
             response.put("message", "Lấy danh sách hợp đồng thành công");
             logger.info("API: Found {} contracts for owner ID: {}", contractPage.getTotalElements(), ownerId);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Error getting contracts list API: {}", e.getMessage(), e);
             response.put("success", false);
-            response.put("contracts", List.of());
+            response.put("contracts", List.of()); // Trả về danh sách rỗng khi có lỗi
             response.put("totalContracts", 0);
             response.put("totalPages", 0);
             response.put("currentPage", page);
@@ -2248,8 +2239,10 @@ public class ContractController {
 
                 model.addAttribute("allUtilities", utilityRepository.findAll());
 
-                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè contractDate
-                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra hàm này
+                // Nếu có hàm initializeModelAttributes, gọi ở đây nhưng đảm bảo không ghi đè
+                // contractDate
+                // initializeModelAttributes(model, contractDto); // Chỉ gọi nếu cần, kiểm tra
+                // hàm này
 
                 return "host/hop-dong-host";
 
@@ -2810,55 +2803,113 @@ public class ContractController {
     }
 
     // ✅ ENDPOINT SEND PDF VIA EMAIL
-    @PostMapping("/send-email-pdf")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
+@PostMapping("/send-email-pdf")
+@ResponseBody
+public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request, Authentication authentication) {
+    Map<String, Object> response = new HashMap<>();
 
-        try {
-            String recipientEmail = (String) request.get("recipientEmail");
-            String recipientName = (String) request.get("recipientName");
-            String contractHtml = (String) request.get("contractHtml");
-            String subject = (String) request.get("subject");
-            String contractId = (String) request.get("contractId");
+    try {
+        String recipientEmail = (String) request.get("recipientEmail");
+        String recipientName = (String) request.get("recipientName");
+        String contractHtml = (String) request.get("contractHtml");
+        String subject = (String) request.get("subject");
+        String contractIdStr = (String) request.get("contractId");
 
-            // ✅ VALIDATE
-            if (recipientEmail == null || contractHtml == null) {
-                response.put("success", false);
-                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
-                return ResponseEntity.badRequest().body(response);
+        // ✅ VALIDATE
+        if (recipientEmail == null || contractHtml == null) {
+            response.put("success", false);
+            response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        System.out.println("📧 Đang tạo PDF và gửi email tới: " + recipientEmail);
+
+        // ✅ TẠO PDF TỪ HTML
+        byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+
+        // ✅ TẠO TÊN FILE
+        String fileName = String.format("HopDong_%s_%s",
+                recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
+                contractIdStr != null ? contractIdStr : System.currentTimeMillis());
+
+        // ✅ GỬI EMAIL VỚI FILE PDF ĐÍNH KÈM
+        emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
+
+        // =================================================================
+        // ✅ BẮT ĐẦU LOGIC TẠO THÔNG BÁO CHO NGƯỜI DÙNG
+        // =================================================================
+        log.info("Bắt đầu tạo thông báo cho việc gửi hợp đồng...");
+
+        // 1. Tìm người dùng (khách thuê) bằng địa chỉ email
+        Optional<Users> tenantOptional = userRepository.findByEmail(recipientEmail);
+
+        if (tenantOptional.isPresent()) {
+            Users tenant = tenantOptional.get();
+
+            // 2. Lấy thông tin chủ trọ đang đăng nhập từ Authentication
+            CustomUserDetails ownerDetails = (CustomUserDetails) authentication.getPrincipal();
+            Users owner = userRepository.findById(ownerDetails.getUserId()).orElse(null);
+
+            // 3. Tìm phòng trọ từ contractId để liên kết (nếu có)
+            Rooms associatedRoom = null;
+            if (contractIdStr != null && !contractIdStr.isEmpty()) {
+                try {
+                    Integer contractId = Integer.parseInt(contractIdStr);
+                    // Lấy phòng từ hợp đồng
+                    associatedRoom = contractsRepository.findById(contractId)
+                                        .map(Contracts::getRoom)
+                                        .orElse(null);
+                } catch (NumberFormatException e) {
+                    log.warn("Không thể chuyển đổi contractId thành số: {}", contractIdStr);
+                }
             }
 
-            System.out.println("📧 Generating PDF and sending email to: " + recipientEmail);
+            // 4. Tạo tiêu đề và nội dung cho thông báo
+            String notificationTitle = "Hợp đồng thuê nhà mới";
+            String notificationMessage = "Chủ trọ " + (owner != null ? owner.getFullname() : "Chủ trọ") +
+                                         " đã gửi cho bạn hợp đồng thuê nhà qua email. Vui lòng kiểm tra hộp thư đến của bạn.";
 
-            // ✅ GENERATE PDF FROM HTML
-            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+            // 5. Tạo đối tượng Notification theo đúng cấu trúc entity của bạn
+            Notification newNotification = new Notification();
+            newNotification.setUser(tenant); // Gán thông báo cho người thuê
+            newNotification.setTitle(notificationTitle);
+            newNotification.setMessage(notificationMessage);
+            newNotification.setType(Notification.NotificationType.CONTRACT); // Đặt loại là hợp đồng
+            newNotification.setIsRead(false); // Trạng thái: chưa đọc
+            newNotification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));
 
-            // ✅ CREATE FILE NAME
-            String fileName = String.format("HopDong_%s_%s",
-                    recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
-                    contractId != null ? contractId : System.currentTimeMillis());
+            if (associatedRoom != null) {
+                newNotification.setRoom(associatedRoom); // Liên kết thông báo với phòng trọ
+            }
 
-            // ✅ SEND EMAIL WITH PDF ATTACHMENT
-            emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
+            // 6. Lưu thông báo vào cơ sở dữ liệu
+            notificationRepository.save(newNotification);
 
-            response.put("success", true);
-            response.put("message", "Hợp đồng PDF đã được gửi thành công qua email");
-            response.put("fileName", fileName + ".pdf");
-            response.put("recipientEmail", recipientEmail);
+            log.info("✅ Đã tạo thông báo hợp đồng thành công cho người dùng: {}", tenant.getEmail());
 
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            System.err.println("❌ Lỗi gửi email PDF: " + e.getMessage());
-            e.printStackTrace();
-
-            response.put("success", false);
-            response.put("message", "Lỗi gửi email: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+        } else {
+            log.warn("⚠️ Không tìm thấy người dùng với email '{}' để tạo thông báo.", recipientEmail);
         }
-    }
+        // =================================================================
+        // ✅ KẾT THÚC LOGIC TẠO THÔNG BÁO
+        // =================================================================
 
+        response.put("success", true);
+        response.put("message", "Hợp đồng PDF đã được gửi thành công qua email và đã tạo thông báo.");
+        response.put("fileName", fileName + ".pdf");
+        response.put("recipientEmail", recipientEmail);
+
+        return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+        System.err.println("❌ Lỗi trong quá trình gửi email và tạo thông báo: " + e.getMessage());
+        e.printStackTrace();
+
+        response.put("success", false);
+        response.put("message", "Lỗi hệ thống: " + e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+}
     @PostMapping("/generate-pdf")
     public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
         try {
@@ -2919,37 +2970,47 @@ public class ContractController {
                 "Ban quản lý";
     }
 
-    // KHÔI PHỤC: checkGuardianDuplicates endpoint
-    @GetMapping("/check-guardian-duplicates")
+    // Trong file: ContractController.java
+
+    @GetMapping("/check-duplicates")
     @ResponseBody
     @PreAuthorize("hasRole('OWNER')")
-    public ResponseEntity<Map<String, Boolean>> checkGuardianDuplicates(
+    public ResponseEntity<Map<String, Object>> checkDuplicates(
             @RequestParam(required = false) String phone,
-            @RequestParam(required = false) String cccd) {
-        logger.info("Kiểm tra SĐT ({}) và CCCD ({}) trên toàn hệ thống.", phone, cccd);
+            @RequestParam(required = false) String cccd,
+            @RequestParam(required = false) String email) {
 
+        logger.info("Đang kiểm tra trùng lặp cho SĐT: {}, CCCD: {}, Email: {}", phone, cccd, email);
+        Map<String, Object> response = new HashMap<>();
+
+        // 1. Kiểm tra SĐT (trong cả 3 bảng liên quan)
         boolean phoneExists = false;
-        boolean cccdExists = false;
-
         if (StringUtils.hasText(phone)) {
-            boolean existsInUsers = userRepository.existsByPhone(phone);
-            boolean existsInGuardians = unregisteredTenantsRepository.existsByPhone(phone);
-            boolean existsInResidents = residentRepository.existsByPhone(phone);
-            phoneExists = existsInUsers || existsInGuardians || existsInResidents;
+            phoneExists = userRepository.existsByPhone(phone) ||
+                    unregisteredTenantsRepository.existsByPhone(phone) ||
+                    residentRepository.existsByPhone(phone);
         }
 
+        // 2. Kiểm tra CCCD (trong cả 3 bảng liên quan)
+        boolean cccdExists = false;
         if (StringUtils.hasText(cccd)) {
-            boolean existsInUsers = userCccdRepository.existsByCccdNumber(cccd);
-            boolean existsInGuardians = unregisteredTenantsRepository.existsByCccdNumber(cccd);
-            boolean existsInResidents = residentRepository.existsByCccdNumber(cccd);
-            cccdExists = existsInUsers || existsInGuardians || existsInResidents;
+            cccdExists = userCccdRepository.existsByCccdNumber(cccd) ||
+                    unregisteredTenantsRepository.existsByCccdNumber(cccd) ||
+                    residentRepository.existsByCccdNumber(cccd);
         }
 
-        Map<String, Boolean> response = new HashMap<>();
+        // 3. Kiểm tra Email (chỉ trong bảng Users vì email là duy nhất cho tài khoản)
+        boolean emailExists = false;
+        if (StringUtils.hasText(email)) {
+            emailExists = userRepository.existsByEmail(email);
+        }
+
         response.put("phoneExists", phoneExists);
         response.put("cccdExists", cccdExists);
+        response.put("emailExists", emailExists);
 
+        logger.info("Kết quả - SĐT tồn tại: {}, CCCD tồn tại: {}, Email tồn tại: {}", phoneExists, cccdExists,
+                emailExists);
         return ResponseEntity.ok(response);
     }
-
 }

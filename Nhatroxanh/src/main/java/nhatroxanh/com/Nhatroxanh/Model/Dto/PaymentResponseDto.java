@@ -1,19 +1,15 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
-import lombok.AllArgsConstructor;
+import java.sql.Timestamp; // Change from java.sql.Date
+import java.util.Date;
+import java.util.List;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentMethod;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments.PaymentStatus;
 
-import java.sql.Date;
-import java.util.List;
-
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class PaymentResponseDto {
     private Integer paymentId;
     private Integer contractId;
@@ -22,28 +18,22 @@ public class PaymentResponseDto {
     private String tenantName;
     private String tenantPhone;
     private String month;
-    private Float totalAmount;
+    private Double totalAmount;
     private Date dueDate;
-    private Date paymentDate;
+    private Timestamp paymentDate; // Changed to Timestamp
+    private String paymentTime; // Optional: If added for explicit time display
     private PaymentStatus paymentStatus;
     private PaymentMethod paymentMethod;
-    private String notes;
-    
-    // Payment breakdown
     private List<PaymentDetailResponseDto> details;
-    
+
     @Data
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class PaymentDetailResponseDto {
         private Integer detailId;
         private String itemName;
         private Integer quantity;
         private Float unitPrice;
         private Float amount;
-        
-        // For display purposes
-        private String displayText; // e.g., "50kWh", "10 m³"
+        private String displayText;
     }
 }
