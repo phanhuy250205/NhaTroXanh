@@ -50,6 +50,7 @@
                                         <label for="hostelNameHost" class="form-label-host">Khu trọ</label>
                                         <input type="text" class="form-control-host" id="hostelNameHost" name="name"
                                             th:value="${hostel != null ? hostel.name : ''}" placeholder="Khu A">
+                                            <div class="invalid-feedback" id="error-hostelNameHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -66,6 +67,7 @@
                                         <input type="number" class="form-control-host" id="roomCountHost"
                                             name="roomNumber" th:value="${hostel != null ? hostel.roomNumber : ''}"
                                             placeholder="20">
+                                            <div class="invalid-feedback" id="error-roomCountHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -96,6 +98,7 @@
                                         <select id="provinceHost" class="form-select-host" name="province">
                                             <option value="">Chọn tỉnh/thành phố</option>
                                         </select>
+                                        <div class="invalid-feedback" id="error-provinceHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -104,6 +107,7 @@
                                         <select id="districtHost" class="form-select-host" name="district">
                                             <option value="">Chọn quận/huyện</option>
                                         </select>
+                                        <div class="invalid-feedback" id="error-districtHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -112,6 +116,7 @@
                                         <select id="wardHost" class="form-select-host" name="ward">
                                             <option value="">Chọn phường/xã</option>
                                         </select>
+                                        <div class="invalid-feedback" id="error-wardHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -120,6 +125,7 @@
                                         <input type="text" id="streetHost" class="form-control-host" name="street"
                                             th:value="${hostel != null ? hostel.street : ''}"
                                             placeholder="Nhập tên đường/phố">
+                                            <div class="invalid-feedback" id="error-streetHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -128,6 +134,7 @@
                                         <input type="text" id="houseNumberHost" class="form-control-host"
                                             name="houseNumber" th:value="${hostel != null ? hostel.houseNumber : ''}"
                                             placeholder="123">
+                                            <div class="invalid-feedback" id="error-houseNumberHost"></div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -166,6 +173,7 @@
                                 <textarea class="form-textarea-host" id="descriptionHost" rows="6" name="description"
                                     th:text="${hostel != null ? hostel.description : ''}"
                                     placeholder="Nhập mô tả về khu trọ..."></textarea>
+                                    
                             </div>
                         </div>
                     </div>
@@ -180,6 +188,7 @@
         </div>
     </div>
     <script th:src="@{/js/api-map.js}"></script>
+
     <style>
         .form-select-host:disabled {
             background-color: #f8f9fa;

@@ -46,8 +46,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // @Autowired
-    // private OtpService otpService;
+    @Autowired
+    private OtpService otpService;
 
     @Autowired
     private UserCccdRepository userCccdRepository;
@@ -75,14 +75,10 @@ public class UserServiceImpl implements UserService {
             logger.error("Email already exists: {}", userRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
-
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            if (userCccdRepository.findByCccdNumber(userRequest.getCccd()).isPresent()) {
-                logger.error("CCCD already exists: {}", userRequest.getCccd());
-                throw new RuntimeException("Số CCCD đã được sử dụng!");
-            }
+        if (userRepository.findByPhone(userRequest.getPhoneNumber()).isPresent()) {
+            logger.error("Phone already exists: {}", userRequest.getPhoneNumber());
+            throw new RuntimeException("Số điện thoại đã được sử dụng!");
         }
-
         Users newUser = new Users();
         newUser.setFullname(userRequest.getFullName());
         newUser.setEmail(userRequest.getEmail());
@@ -96,24 +92,7 @@ public class UserServiceImpl implements UserService {
         Users savedUser = userRepository.save(newUser);
         logger.info("Saved new user with ID: {}", savedUser.getUserId());
 
-        if (userRequest.getCccd() != null && !userRequest.getCccd().trim().isEmpty()) {
-            UserCccd userCccd = new UserCccd();
-            userCccd.setUser(savedUser);
-            userCccd.setCccdNumber(userRequest.getCccd());
-            try {
-                if (userRequest.getIssueDate() != null && !userRequest.getIssueDate().isEmpty()) {
-                    userCccd.setIssueDate(Date.valueOf(userRequest.getIssueDate()));
-                }
-                userCccd.setIssuePlace(userRequest.getIssuePlace());
-                userCccdRepository.save(userCccd);
-                logger.info("Saved UserCccd for userId: {}", savedUser.getUserId());
-            } catch (IllegalArgumentException e) {
-                logger.error("Invalid CCCD issue date format: {}", userRequest.getIssueDate(), e);
-                throw new RuntimeException("Định dạng ngày cấp CCCD không hợp lệ: " + userRequest.getIssueDate());
-            }
-        }
-
-        // otpService.createAndSendOtp(savedUser);
+        otpService.createAndSendOtp(savedUser);
 
         return savedUser;
     }
@@ -126,7 +105,13 @@ public class UserServiceImpl implements UserService {
             logger.error("Email already exists: {}", userOwnerRequest.getEmail());
             throw new RuntimeException("Email đã được sử dụng!");
         }
-
+        if (userOwnerRequest.getPhoneNumber() != null && !userOwnerRequest.getPhoneNumber().trim().isEmpty()) {
+            // String phoneNumber = userOwnerRequest.getPhoneNumber().trim();
+            if (userRepository.findByPhone(userOwnerRequest.getPhoneNumber()).isPresent()) {
+                logger.error("Phone number already exists: {}", userOwnerRequest.getPhoneNumber());
+                throw new RuntimeException("Số điện thoại đã được sử dụng!");
+            }
+        }
         if (userOwnerRequest.getCccdNumber() != null && !userOwnerRequest.getCccdNumber().trim().isEmpty()) {
             if (userCccdRepository.findByCccdNumber(userOwnerRequest.getCccdNumber()).isPresent()) {
                 logger.error("CCCD already exists: {}", userOwnerRequest.getCccdNumber());
@@ -227,6 +212,7 @@ public class UserServiceImpl implements UserService {
         newUser.setRole(Users.Role.OWNER);
         newUser.setEnabled(false);
         newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setStatus(Users.Status.PENDING);
 
         // Xử lý CCCD
         UserCccd userCccd = null;
@@ -413,38 +399,38 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email);
     }
 
+    @Override
+    @Transactional
+    public void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate,
+            String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage) {
+        Users user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Người dùng không hợp lệ!"));
 
-       @Override
-@Transactional
-public void completeOwnerRegistration(Integer userId, Boolean gender, String cccdNumber, String issueDate, String issuePlace, String address, MultipartFile frontImage, MultipartFile backImage) {
-    Users user = userRepository.findById(userId)
-            .orElseThrow(() -> new RuntimeException("Người dùng không hợp lệ!"));
+        // 2. Tải ảnh CCCD lên và lấy URL
+        try {
+            String frontImageUrl = fileUploadService.uploadFile(frontImage, "cccd-images/");
+            String backImageUrl = fileUploadService.uploadFile(backImage, "cccd-images/");
 
-    // 2. Tải ảnh CCCD lên và lấy URL
-    try {
-        String frontImageUrl = fileUploadService.uploadFile(frontImage, "cccd-images/");
-        String backImageUrl = fileUploadService.uploadFile(backImage, "cccd-images/");
+            // 3. Tạo mới và điền thông tin UserCccd
+            UserCccd cccd = new UserCccd();
+            cccd.setCccdNumber(cccdNumber);
+            cccd.setIssueDate(Date.valueOf(issueDate));
+            cccd.setIssuePlace(issuePlace);
+            cccd.setFrontImageUrl(frontImageUrl);
+            cccd.setBackImageUrl(backImageUrl);
+            cccd.setUser(user);
 
-        // 3. Tạo mới và điền thông tin UserCccd
-        UserCccd cccd = new UserCccd();
-        cccd.setCccdNumber(cccdNumber);
-        cccd.setIssueDate(Date.valueOf(issueDate));
-        cccd.setIssuePlace(issuePlace);
-        cccd.setFrontImageUrl(frontImageUrl);
-        cccd.setBackImageUrl(backImageUrl);
-        cccd.setUser(user);
+            // 4. Cập nhật thông tin còn thiếu cho User
+            user.setGender(gender);
+            user.setAddress(address); // Giả sử address là một chuỗi
+            user.setUserCccd(cccd);
 
-        // 4. Cập nhật thông tin còn thiếu cho User
-        user.setGender(gender);
-        user.setAddress(address); // Giả sử address là một chuỗi
-        user.setUserCccd(cccd);
-
-        // 5. Lưu lại, user.enabled vẫn là false
-        userRepository.save(user);
-    } catch (IOException e) {
-        throw new RuntimeException("Lỗi khi tải ảnh lên: " + e.getMessage());
+            // 5. Lưu lại, user.enabled vẫn là false
+            userRepository.save(user);
+        } catch (IOException e) {
+            throw new RuntimeException("Lỗi khi tải ảnh lên: " + e.getMessage());
+        }
     }
-}
 
     public Page<Users> getPendingOwners(int page, int size, String search) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
@@ -485,6 +471,5 @@ public void completeOwnerRegistration(Integer userId, Boolean gender, String ccc
         }
         userRepository.delete(user);
     }
-
 
 }

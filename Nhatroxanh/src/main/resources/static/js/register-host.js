@@ -1,568 +1,871 @@
 // CCCD Province Codes
 const CCCD_PROVINCE_CODES = {
-    "001": "Hà Nội", "002": "Hà Giang", "004": "Cao Bằng", "006": "Bắc Kạn", "008": "Tuyên Quang",
-    "010": "Lào Cai", "011": "Điện Biên", "012": "Lai Châu", "014": "Sơn La", "015": "Yên Bái",
-    "017": "Hoà Bình", "019": "Thái Nguyên", "020": "Lạng Sơn", "022": "Quảng Ninh", "024": "Bắc Giang",
-    "025": "Phú Thọ", "026": "Vĩnh Phúc", "027": "Bắc Ninh", "030": "Hải Dương", "031": "Hải Phòng",
-    "033": "Hưng Yên", "034": "Thái Bình", "035": "Hà Nam", "036": "Nam Định", "037": "Ninh Bình",
-    "038": "Thanh Hóa", "040": "Nghệ An", "042": "Hà Tĩnh", "044": "Quảng Bình", "045": "Quảng Trị",
-    "046": "Thừa Thiên Huế", "048": "Đà Nẵng", "049": "Quảng Nam", "051": "Quảng Ngãi", "052": "Bình Định",
-    "054": "Phú Yên", "056": "Khánh Hòa", "058": "Ninh Thuận", "060": "Bình Thuận", "062": "Kon Tum",
-    "064": "Gia Lai", "066": "Đắk Lắk", "067": "Đắk Nông", "068": "Lâm Đồng", "070": "Bình Phước",
-    "072": "Tây Ninh", "074": "Bình Dương", "075": "Đồng Nai", "077": "Bà Rịa - Vũng Tàu", "079": "Hồ Chí Minh",
-    "080": "Long An", "082": "Tiền Giang", "083": "Bến Tre", "084": "Trà Vinh", "086": "Vĩnh Long",
-    "087": "Đồng Tháp", "089": "An Giang", "091": "Kiên Giang", "092": "Cần Thơ", "093": "Hậu Giang",
-    "094": "Sóc Trăng", "095": "Bạc Liêu", "096": "Cà Mau"
-};
+    "001": "Hà Nội",
+    "002": "Hà Giang",
+    "004": "Cao Bằng",
+    "006": "Bắc Kạn",
+    "008": "Tuyên Quang",
+    "010": "Lào Cai",
+    "011": "Điện Biên",
+    "012": "Lai Châu",
+    "014": "Sơn La",
+    "015": "Yên Bái",
+    "017": "Hoà Bình",
+    "019": "Thái Nguyên",
+    "020": "Lạng Sơn",
+    "022": "Quảng Ninh",
+    "024": "Bắc Giang",
+    "025": "Phú Thọ",
+    "026": "Vĩnh Phúc",
+    "027": "Bắc Ninh",
+    "030": "Hải Dương",
+    "031": "Hải Phòng",
+    "033": "Hưng Yên",
+    "034": "Thái Bình",
+    "035": "Hà Nam",
+    "036": "Nam Định",
+    "037": "Ninh Bình",
+    "038": "Thanh Hóa",
+    "040": "Nghệ An",
+    "042": "Hà Tĩnh",
+    "044": "Quảng Bình",
+    "045": "Quảng Trị",
+    "046": "Thừa Thiên Huế",
+    "048": "Đà Nẵng",
+    "049": "Quảng Nam",
+    "051": "Quảng Ngãi",
+    "052": "Bình Định",
+    "054": "Phú Yên",
+    "056": "Khánh Hòa",
+    "058": "Ninh Thuận",
+    "060": "Bình Thuận",
+    "062": "Kon Tum",
+    "064": "Gia Lai",
+    "066": "Đắk Lắk",
+    "067": "Đắk Nông",
+    "068": "Lâm Đồng",
+    "070": "Bình Phước",
+    "072": "Tây Ninh",
+    "074": "Bình Dương",
+    "075": "Đồng Nai",
+    "077": "Bà Rịa - Vũng Tàu",
+    "079": "Hồ Chí Minh",
+    "080": "Long An",
+    "082": "Tiền Giang",
+    "083": "Bến Tre",
+    "084": "Trà Vinh",
+    "086": "Vĩnh Long",
+    "087": "Đồng Tháp",
+    "089": "An Giang",
+    "091": "Kiên Giang",
+    "092": "Cần Thơ",
+    "093": "Hậu Giang",
+    "094": "Sóc Trăng",
+    "095": "Bạc Liêu",
+    "096": "Cà Mau",
+}
 
 // Phone Network Codes
 const PHONE_NETWORK_CODES = {
-    "032": "Viettel", "033": "Viettel", "034": "Viettel", "035": "Viettel", "036": "Viettel",
-    "037": "Viettel", "038": "Viettel", "039": "Viettel", "096": "Viettel", "097": "Viettel",
-    "098": "Viettel", "081": "Vinaphone", "082": "Vinaphone", "083": "Vinaphone", "084": "Vinaphone",
-    "085": "Vinaphone", "091": "Vinaphone", "094": "Vinaphone", "070": "Mobifone", "076": "Mobifone",
-    "077": "Mobifone", "078": "Mobifone", "079": "Mobifone", "090": "Mobifone", "093": "Mobifone",
-    "056": "Vietnamobile", "058": "Vietnamobile", "092": "Vietnamobile", "059": "Gmobile", "099": "Gmobile"
-};
+    "032": "Viettel",
+    "033": "Viettel",
+    "034": "Viettel",
+    "035": "Viettel",
+    "036": "Viettel",
+    "037": "Viettel",
+    "038": "Viettel",
+    "039": "Viettel",
+    "096": "Viettel",
+    "097": "Viettel",
+    "098": "Viettel",
+    "081": "Vinaphone",
+    "082": "Vinaphone",
+    "083": "Vinaphone",
+    "084": "Vinaphone",
+    "085": "Vinaphone",
+    "091": "Vinaphone",
+    "094": "Vinaphone",
+    "070": "Mobifone",
+    "076": "Mobifone",
+    "077": "Mobifone",
+    "078": "Mobifone",
+    "079": "Mobifone",
+    "090": "Mobifone",
+    "093": "Mobifone",
+    "056": "Vietnamobile",
+    "058": "Vietnamobile",
+    "092": "Vietnamobile",
+    "059": "Gmobile",
+    "099": "Gmobile",
+}
+
+// Application State
+let currentStep = 1
+const totalSteps = 3
+let formData = {}
+
+// Vietnam Address API
+const API_BASE = "https://provinces.open-api.vn/api"
 
 document.addEventListener("DOMContentLoaded", () => {
-    // Show/hide password toggle
-    const passwordToggles = document.querySelectorAll(".password-toggle-host");
-    const registerForm = document.getElementById("registerForm");
+    initializeApp()
+})
 
-    // Image preview handling
-    const frontImageInput = document.getElementById("frontImage");
-    const backImageInput = document.getElementById("backImage");
-    const frontImagePreview = document.getElementById("frontImagePreview");
-    const backImagePreview = document.getElementById("backImagePreview");
+// Initialize Application
+function initializeApp() {
+    loadProvinces()
+    setupEventListeners()
+    updateProgressBar()
+    setupFormValidation()
+}
 
-    if (frontImageInput) {
-        frontImageInput.addEventListener("change", function () {
-            previewImage(this, frontImagePreview);
-        });
-    }
+// Setup Event Listeners
+function setupEventListeners() {
+    const form = document.getElementById("registrationForm")
 
-    if (backImageInput) {
-        backImageInput.addEventListener("change", function () {
-            previewImage(this, backImagePreview);
-        });
-    }
+    // Province change handler
+    document.getElementById("provinceSelect").addEventListener("change", handleProvinceChange)
 
-    function previewImage(input, previewElement) {
-        const file = input.files[0];
-        if (file) {
-            if (!["image/jpeg", "image/png"].includes(file.type)) {
-                showFieldError(input, "Chỉ được chọn file ảnh JPG hoặc PNG.");
-                return;
-            }
-            if (file.size > 5 * 1024 * 1024) {
-                showFieldError(input, "Kích thước ảnh không được vượt quá 5MB.");
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                previewElement.src = e.target.result;
-                previewElement.style.display = "block";
-            };
-            reader.readAsDataURL(file);
-        } else {
-            previewElement.src = "#";
-            previewElement.style.display = "none";
-        }
-    }
+    // District change handler
+    document.getElementById("districtSelect").addEventListener("change", handleDistrictChange)
 
-    // Address API handling
-    const provinceSelect = document.getElementById("province");
-    const districtSelect = document.getElementById("district");
-    const wardSelect = document.getElementById("ward");
+    // File upload handlers
+    document.getElementById("frontId").addEventListener("change", (e) => handleImageUpload(e, "front"))
+    document.getElementById("backId").addEventListener("change", (e) => handleImageUpload(e, "back"))
 
-    // Fetch provinces
-    fetch("https://provinces.open-api.vn/api/p/")
-        .then(response => {
-            // if (!response.ok) throw new Error("Không thể tải danh sách tỉnh/thành phố.");
-            return response.json();
-        })
-        .then(provinces => {
-            provinces.forEach(province => {
-                const option = document.createElement("option");
-                option.value = province.code;
-                option.text = province.name;
-                provinceSelect.appendChild(option);
-            });
-        })
-        // .catch(error => {
-        //     console.error("Error fetching provinces:", error);
-        //     Swal.fire({
-        //         icon: "error",
-        //         title: "Lỗi",
-        //         text: "Lỗi tải danh sách tỉnh/thành phố. Vui lòng thử lại sau.",
-        //         confirmButtonText: "OK"
-        //     });
-        //     provinceSelect.disabled = true;
-        // });
-
-    // Fetch districts when a province is selected
-    provinceSelect.addEventListener("change", function () {
-        districtSelect.innerHTML = '<option value="" disabled selected>Chọn quận/huyện</option>';
-        wardSelect.innerHTML = '<option value="" disabled selected>Chọn phường/xã</option>';
-        districtSelect.disabled = true;
-        wardSelect.disabled = true;
-
-        if (this.value) {
-            fetch(`https://provinces.open-api.vn/api/p/${this.value}?depth=2`)
-                .then(response => {
-                    if (!response.ok) throw new Error("Không thể tải danh sách quận/huyện.");
-                    return response.json();
-                })
-                .then(data => {
-                    data.districts.forEach(district => {
-                        const option = document.createElement("option");
-                        option.value = district.code;
-                        option.text = district.name;
-                        districtSelect.appendChild(option);
-                    });
-                    districtSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error("Error fetching districts:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Lỗi",
-                        text: "Lỗi tải danh sách quận/huyện. Vui lòng thử lại sau.",
-                        confirmButtonText: "OK"
-                    });
-                    districtSelect.disabled = true;
-                });
-        }
-    });
-
-    // Fetch wards when a district is selected
-    districtSelect.addEventListener("change", function () {
-        wardSelect.innerHTML = '<option value="" disabled selected>Chọn phường/xã</option>';
-        wardSelect.disabled = true;
-
-        if (this.value) {
-            fetch(`https://provinces.open-api.vn/api/d/${this.value}?depth=2`)
-                .then(response => {
-                    if (!response.ok) throw new Error("Không thể tải danh sách phường/xã.");
-                    return response.json();
-                })
-                .then(data => {
-                    data.wards.forEach(ward => {
-                        const option = document.createElement("option");
-                        option.value = ward.code;
-                        option.text = ward.name;
-                        wardSelect.appendChild(option);
-                    });
-                    wardSelect.disabled = false;
-                })
-                .catch(error => {
-                    console.error("Error fetching wards:", error);
-                    Swal.fire({
-                        icon: "error",
-                        title: "Lỗi",
-                        text: "Lỗi tải danh sách phường/xã. Vui lòng thử lại sau.",
-                        confirmButtonText: "OK"
-                    });
-                    wardSelect.disabled = true;
-                });
-        }
-    });
+    // Drag and drop handlers
+    setupDragAndDrop()
 
     // Form submission
-    if (registerForm) {
-        registerForm.addEventListener("submit", function (event) {
-            event.preventDefault();
-            if (!validateForm()) return;
+    form.addEventListener("submit", handleFormSubmit)
 
-            const provinceText = provinceSelect.options[provinceSelect.selectedIndex]?.text || "";
-            const districtText = districtSelect.options[districtSelect.selectedIndex]?.text || "";
-            const wardText = wardSelect.options[wardSelect.selectedIndex]?.text || "";
-            const addressDetail = document.getElementById("addressDetail").value;
-            const fullAddress = `${addressDetail}, ${wardText}, ${districtText}, ${provinceText}`.trim();
+    // Real-time validation
+    setupRealTimeValidation()
+}
 
-            const formData = new FormData();
-            formData.append("fullName", document.getElementById("fullName").value);
-            formData.append("email", document.getElementById("email").value);
-            formData.append("phoneNumber", document.getElementById("phoneNumber").value);
-            formData.append("password", document.getElementById("password").value);
-            formData.append("birthDate", document.getElementById("birthDate").value);
-            formData.append("gender", document.getElementById("gender").value);
-            formData.append("cccdNumber", document.getElementById("cccdNumber").value);
-            formData.append("issuePlace", document.getElementById("issuePlace").value);
-            formData.append("issueDate", document.getElementById("issueDate").value);
-            formData.append("frontImage", document.getElementById("frontImage").files[0]);
-            formData.append("backImage", document.getElementById("backImage").files[0]);
-            formData.append("address", fullAddress);
+// Load Provinces
+async function loadProvinces() {
+    try {
+        showElementLoading("provinceSelect")
+        const response = await fetch(`${API_BASE}/p/`)
+        const provinces = await response.json()
 
-            if (document.getElementById("password").value !== document.getElementById("confirmPassword").value) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Mật khẩu xác nhận không khớp.",
-                    confirmButtonText: "OK"
-                });
-                return;
-            }
-            if (!document.getElementById("agreeTerms").checked) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Bạn phải đồng ý với Điều khoản và Chính sách bảo mật.",
-                    confirmButtonText: "OK"
-                });
-                return;
-            }
+        const provinceSelect = document.getElementById("provinceSelect")
+        provinceSelect.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>'
 
-            fetch("/api/users/register-owner", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userRequest),
+        provinces.forEach((province) => {
+            const option = document.createElement("option")
+            option.value = province.code
+            option.textContent = province.name
+            provinceSelect.appendChild(option)
+        })
+
+        hideElementLoading("provinceSelect")
+    } catch (error) {
+        console.error("Error loading provinces:", error)
+        showNotification("Không thể tải danh sách tỉnh/thành phố", "error")
+        hideElementLoading("provinceSelect")
+    }
+}
+
+// Handle Province Change
+async function handleProvinceChange() {
+    const provinceCode = this.value
+    const districtSelect = document.getElementById("districtSelect")
+    const wardSelect = document.getElementById("wardSelect")
+
+    // Reset districts and wards
+    districtSelect.innerHTML = '<option value="">Chọn Quận/Huyện</option>'
+    wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>'
+    wardSelect.disabled = true
+
+    if (provinceCode) {
+        try {
+            showElementLoading("districtSelect")
+            const response = await fetch(`${API_BASE}/p/${provinceCode}?depth=2`)
+            const data = await response.json()
+
+            data.districts.forEach((district) => {
+                const option = document.createElement("option")
+                option.value = district.code
+                option.textContent = district.name
+                districtSelect.appendChild(option)
+            })
+
+            districtSelect.disabled = false
+            hideElementLoading("districtSelect")
+        } catch (error) {
+            console.error("Error loading districts:", error)
+            showNotification("Không thể tải danh sách quận/huyện", "error")
+            hideElementLoading("districtSelect")
+        }
+    } else {
+        districtSelect.disabled = true
+    }
+}
+
+// Handle District Change
+async function handleDistrictChange() {
+    const districtCode = this.value
+    const wardSelect = document.getElementById("wardSelect")
+
+    // Reset wards
+    wardSelect.innerHTML = '<option value="">Chọn Phường/Xã</option>'
+
+    if (districtCode) {
+        try {
+            showElementLoading("wardSelect")
+            const response = await fetch(`${API_BASE}/d/${districtCode}?depth=2`)
+            const data = await response.json()
+
+            data.wards.forEach((ward) => {
+                const option = document.createElement("option")
+                option.value = ward.code
+                option.textContent = ward.name
+                wardSelect.appendChild(option)
+            })
+
+            wardSelect.disabled = false
+            hideElementLoading("wardSelect")
+        } catch (error) {
+            console.error("Error loading wards:", error)
+            showNotification("Không thể tải danh sách phường/xã", "error")
+            hideElementLoading("wardSelect")
+        }
+    } else {
+        wardSelect.disabled = true
+    }
+}
+
+// Handle Image Upload
+function handleImageUpload(event, type) {
+    const file = event.target.files[0]
+    if (!file) return
+
+    // Validate file
+    if (!validateImageFile(file)) return
+
+    // Show preview
+    const reader = new FileReader()
+    reader.onload = (e) => {
+        showImagePreview(e.target.result, type)
+    }
+    reader.readAsDataURL(file)
+}
+
+// Validate Image File
+function validateImageFile(file) {
+    // Check file type
+    if (!file.type.startsWith("image/")) {
+        showNotification("Vui lòng chọn file ảnh hợp lệ", "error")
+        return false
+    }
+
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+        showNotification("File ảnh quá lớn. Vui lòng chọn file nhỏ hơn 5MB", "error")
+        return false
+    }
+
+    return true
+}
+
+// Show Image Preview
+function showImagePreview(imageSrc, type) {
+    const imageElement = document.getElementById(`${type}Image`)
+    const previewElement = document.getElementById(`${type}Preview`)
+
+    if (imageElement && previewElement) {
+        imageElement.src = imageSrc
+        previewElement.style.display = "block"
+
+        // Add animation
+        previewElement.style.opacity = "0"
+        previewElement.style.transform = "scale(0.9)"
+
+        setTimeout(() => {
+            previewElement.style.transition = "all 0.3s ease"
+            previewElement.style.opacity = "1"
+            previewElement.style.transform = "scale(1)"
+        }, 10)
+    }
+}
+
+// Remove Image
+function removeImage(type) {
+    const inputElement = document.getElementById(`${type}Id`)
+    const previewElement = document.getElementById(`${type}Preview`)
+
+    if (inputElement) inputElement.value = ""
+    if (previewElement) {
+        previewElement.style.transition = "all 0.3s ease"
+        previewElement.style.opacity = "0"
+        previewElement.style.transform = "scale(0.9)"
+
+        setTimeout(() => {
+            previewElement.style.display = "none"
+        }, 300)
+    }
+}
+
+// Setup Drag and Drop
+function setupDragAndDrop() {
+    const uploadZones = document.querySelectorAll(".upload-zone")
+
+    uploadZones.forEach((zone) => {
+        zone.addEventListener("dragover", handleDragOver)
+        zone.addEventListener("dragleave", handleDragLeave)
+        zone.addEventListener("drop", handleDrop)
     })
-    .then(response => {
-        if (response.ok) {
-            // Nếu thành công, lấy đối tượng JSON từ response
-            return response.json();
+}
+
+function handleDragOver(e) {
+    e.preventDefault()
+    this.style.backgroundColor = "#c8f0ff"
+    this.style.borderColor = "#0085be"
+    this.style.transform = "scale(1.02)"
+}
+
+function handleDragLeave(e) {
+    e.preventDefault()
+    this.style.backgroundColor = "#d5f8ff"
+    this.style.borderColor = "#1196f5"
+    this.style.transform = "scale(1)"
+}
+
+function handleDrop(e) {
+    e.preventDefault()
+    this.style.backgroundColor = "#d5f8ff"
+    this.style.borderColor = "#1196f5"
+    this.style.transform = "scale(1)"
+
+    const files = e.dataTransfer.files
+    if (files.length > 0) {
+        const input = this.parentElement.querySelector('input[type="file"]')
+        if (input) {
+            input.files = files
+            const event = new Event("change")
+            input.dispatchEvent(event)
+        }
+    }
+}
+
+// Toggle Password Visibility
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId)
+    const button = input.parentElement.querySelector(".password-toggle")
+    const icon = button.querySelector("i")
+
+    if (input.type === "password") {
+        input.type = "text"
+        icon.classList.remove("fa-eye-slash")
+        icon.classList.add("fa-eye")
+    } else {
+        input.type = "password"
+        icon.classList.remove("fa-eye")
+        icon.classList.add("fa-eye-slash")
+    }
+
+    // Add animation effect
+    button.style.transform = "scale(0.9)"
+    setTimeout(() => {
+        button.style.transform = "scale(1)"
+    }, 150)
+}
+
+// Step Navigation
+function nextStep() {
+    if (validateCurrentStep()) {
+        if (currentStep < totalSteps) {
+            currentStep++
+            showStep(currentStep)
+            updateProgressBar()
+            scrollToTop()
+        }
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        currentStep--
+        showStep(currentStep)
+        updateProgressBar()
+        scrollToTop()
+    }
+}
+
+function showStep(step) {
+    // Hide all steps
+    document.querySelectorAll(".form-step").forEach((stepEl) => {
+        stepEl.classList.remove("active")
+    })
+
+    // Show current step
+    const currentStepEl = document.getElementById(`step${step}`)
+    if (currentStepEl) {
+        currentStepEl.classList.add("active")
+    }
+
+    // Update progress steps
+    document.querySelectorAll(".progress-step").forEach((stepEl, index) => {
+        if (index + 1 <= step) {
+            stepEl.classList.add("active")
         } else {
-            // Nếu có lỗi,โยน lỗi ra để catch xử lý
-            return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
+            stepEl.classList.remove("active")
         }
     })
-    .then(createdUser => {
-        // ---- PHẦN THAY ĐỔI ----
-        // 1. Thông báo cho người dùng
-        alert("Tạo tài khoản thành công! Vui lòng bổ sung thông tin chi tiết để hoàn tất.");
-        
-        // 2. Chuyển hướng đến form thứ hai với userId
-        window.location.href = `/dang-ky-chi-tiet?userId=${createdUser.userId}`; 
-        // -----------------------
+}
+
+function updateProgressBar() {
+    const progressFill = document.getElementById("progressFill")
+    const percentage = (currentStep / totalSteps) * 100
+
+    if (progressFill) {
+        progressFill.style.width = `${percentage}%`
+    }
+}
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth",
     })
-    .catch(error => {
-        console.error("Lỗi đăng ký:", error);
-        alert("Đăng ký thất bại: " + error.message);
-    });
-        });
-    }
+}
 
-    // Password toggle
-    passwordToggles.forEach((toggle) => {
-        toggle.addEventListener("click", function () {
-            const passwordInput = this.parentElement.querySelector('input');
-            if (passwordInput) {
-                const type = passwordInput.type === "password" ? "text" : "password";
-                passwordInput.type = type;
-                const icon = this.querySelector("i");
-                if (icon) {
-                    icon.classList.toggle("fa-eye", type === "text");
-                    icon.classList.toggle("fa-eye-slash", type === "password");
-                }
-                passwordInput.focus();
-            }
-        });
-    });
+// Form Validation
+function validateCurrentStep() {
+    let isValid = true
+    const currentStepEl = document.getElementById(`step${currentStep}`)
 
-    // Handle close button
-    const closeBtn = document.querySelector(".close-btn");
-    if (closeBtn) {
-        closeBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            const homeItemInfo = {
-                text: "Trang chủ",
-                href: "/trang-chu",
-                isDropdownItem: false,
-            };
-            localStorage.setItem("activeNavItem", JSON.stringify(homeItemInfo));
-            window.location.href = "/trang-chu";
-        });
-    }
+    if (!currentStepEl) return false
 
-    // Form validation and real-time feedback
-    if (registerForm) {
-        const inputs = registerForm.querySelectorAll("input, select");
-        inputs.forEach((input) => {
-            input.addEventListener("input", () => {
-                clearFieldError(input);
-                if (input.id === "phoneNumber") validatePhoneNumber(input);
-                if (input.id === "cccdNumber") validateCCCDNumber(input);
-            });
-            input.addEventListener("change", () => {
-                clearFieldError(input);
-                if (input.id === "phoneNumber") validatePhoneNumber(input);
-                if (input.id === "cccdNumber") validateCCCDNumber(input);
-            });
-        });
-    }
+    const inputs = currentStepEl.querySelectorAll("input[required], select[required]")
 
-    function clearFieldError(input) {
-        input.classList.remove("is-invalid", "is-valid");
-        const errorMessage = input.parentElement.querySelector(".error-message");
-        if (errorMessage) {
-            errorMessage.classList.remove("show");
+    inputs.forEach((input) => {
+        if (!validateField(input)) {
+            isValid = false
         }
-        if (input.id === "agreeTerms") {
-            const checkmark = input.parentElement.querySelector(".checkmark");
-            if (checkmark) {
-                checkmark.classList.remove("is-invalid");
-            }
-            const termsError = document.querySelector(".terms-error");
-            if (termsError) {
-                termsError.classList.remove("show");
-            }
-        }
-        // Clear info messages
-        const infoElement = document.getElementById(input.id + "Info");
-        if (infoElement) {
-            infoElement.style.display = "none";
-            infoElement.textContent = "";
-        }
-    }
+    })
 
-    function showFieldError(input, message = null) {
-        input.classList.add("is-invalid");
-        input.classList.remove("is-valid");
-        const errorMessage = input.parentElement.querySelector(".error-message");
-        if (errorMessage) {
-            if (message) {
-                errorMessage.textContent = message;
-            }
-            errorMessage.classList.add("show");
-        }
-        if (input.id === "agreeTerms") {
-            const checkmark = input.parentElement.querySelector(".checkmark");
-            if (checkmark) {
-                checkmark.classList.add("is-invalid");
-            }
-            const termsError = document.querySelector(".terms-error");
-            if (termsError) {
-                termsError.classList.add("show");
-            }
-        }
-    }
+    // Special validation for step 3
+    if (currentStep === 3) {
+        // Validate file uploads
+        const frontId = document.getElementById("frontId")
+        const backId = document.getElementById("backId")
 
-    function showFieldInfo(input, message) {
-        input.classList.add("is-valid");
-        input.classList.remove("is-invalid");
-        const infoElement = document.getElementById(input.id + "Info");
-        if (infoElement) {
-            infoElement.textContent = message;
-            infoElement.style.display = "block";
-        }
-    }
-
-    function validatePhoneNumber(input) {
-        const value = input.value.replace(/[\s\-()]/g, "");
-        if (value) {
-            if (!value.startsWith("0")) {
-                showFieldError(input, "Số điện thoại phải bắt đầu bằng số 0.");
-                return false;
-            }
-            if (!/^0[0-9]{9}$/.test(value)) {
-                showFieldError(input, "Số điện thoại phải có 10 chữ số.");
-                return false;
-            }
-            const networkCode = value.substring(0, 3);
-            if (!PHONE_NETWORK_CODES[networkCode]) {
-                showFieldError(input, "Số điện thoại không thuộc nhà mạng hợp lệ tại Việt Nam.");
-                return false;
-            }
-            showFieldInfo(input, `Nhà mạng: ${PHONE_NETWORK_CODES[networkCode]}`);
-            return true;
-        }
-        return false;
-    }
-
-    function validateCCCDNumber(input) {
-        const value = input.value.replace(/\s/g, "");
-        if (value) {
-            if (!/^[0-9]{12}$/.test(value)) {
-                showFieldError(input, "Số CCCD phải có 12 chữ số.");
-                return false;
-            }
-            const provinceCode = value.substring(0, 3);
-            if (!CCCD_PROVINCE_CODES[provinceCode]) {
-                showFieldError(input, `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode}).`);
-                return false;
-            }
-            showFieldInfo(input, `Tỉnh/Thành phố: ${CCCD_PROVINCE_CODES[provinceCode]}`);
-            return true;
-        }
-        return false;
-    }
-
-    function validateForm() {
-        let isValid = true;
-        const form = document.getElementById("registerForm");
-        const allInputs = form.querySelectorAll("input, select");
-        allInputs.forEach((input) => clearFieldError(input));
-
-        // Validate họ tên
-        const fullName = document.getElementById("fullName");
-        if (!fullName.value.trim()) {
-            showFieldError(fullName, "Vui lòng nhập họ và tên.");
-            isValid = false;
-        } else if (fullName.value.trim().length < 2) {
-            showFieldError(fullName, "Họ tên phải có ít nhất 2 ký tự.");
-            isValid = false;
-        } else if (fullName.value.trim().length > 100) {
-            showFieldError(fullName, "Họ tên không được vượt quá 100 ký tự.");
-            isValid = false;
+        if (!frontId.files || frontId.files.length === 0) {
+            showFieldError(frontId, "Vui lòng chọn ảnh CCCD mặt trước")
+            isValid = false
         }
 
-        // Validate ngày sinh
-        const birthDate = document.getElementById("birthDate");
-        if (!birthDate.value) {
-            showFieldError(birthDate, "Vui lòng nhập ngày sinh.");
-            isValid = false;
-        } else {
-            const today = new Date();
-            const birth = new Date(birthDate.value);
-            const age = today.getFullYear() - birth.getFullYear();
-            const monthDiff = today.getMonth() - birth.getMonth();
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                age--;
-            }
-            if (age < 18) {
-                showFieldError(birthDate, "Bạn phải đủ 18 tuổi để đăng ký.");
-                isValid = false;
-            }
+        if (!backId.files || backId.files.length === 0) {
+            showFieldError(backId, "Vui lòng chọn ảnh CCCD mặt sau")
+            isValid = false
         }
 
-        // Validate email
-        const email = document.getElementById("email");
-        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!email.value.trim()) {
-            showFieldError(email, "Vui lòng nhập email.");
-            isValid = false;
-        } else if (!emailRegex.test(email.value)) {
-            showFieldError(email, "Vui lòng nhập email hợp lệ.");
-            isValid = false;
-        }
-
-        // Validate số điện thoại
-        const phone = document.getElementById("phoneNumber");
-        if (!validatePhoneNumber(phone)) {
-            isValid = false;
-        }
-
-        // Validate mật khẩu
-        const password = document.getElementById("password");
-        if (!password.value) {
-            showFieldError(password, "Vui lòng nhập mật khẩu.");
-            isValid = false;
-        } else if (password.value.length < 6) {
-            showFieldError(password, "Mật khẩu phải có ít nhất 6 ký tự.");
-            isValid = false;
-        } else if (!/[A-Z]/.test(password.value)) {
-            showFieldError(password, "Mật khẩu phải chứa ít nhất 1 chữ cái in hoa.");
-            isValid = false;
-        } else if (!/[!@#$%^&*(),.?\":{}|<>]/.test(password.value)) {
-            showFieldError(password, "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt.");
-            isValid = false;
-        }
-
-        // Validate xác nhận mật khẩu
-        const confirmPassword = document.getElementById("confirmPassword");
-        if (!confirmPassword.value) {
-            showFieldError(confirmPassword, "Vui lòng xác nhận mật khẩu.");
-            isValid = false;
-        } else if (password.value !== confirmPassword.value) {
-            showFieldError(confirmPassword, "Mật khẩu xác nhận không khớp.");
-            isValid = false;
-        }
-
-        // Validate giới tính
-        const gender = document.getElementById("gender");
-        if (!gender.value) {
-            showFieldError(gender, "Vui lòng chọn giới tính.");
-            isValid = false;
-        }
-
-        // Validate số CCCD
-        const cccdNumber = document.getElementById("cccdNumber");
-        if (!validateCCCDNumber(cccdNumber)) {
-            isValid = false;
-        }
-
-        // Validate nơi cấp
-        const issuePlace = document.getElementById("issuePlace");
-        if (!issuePlace.value.trim()) {
-            showFieldError(issuePlace, "Vui lòng nhập nơi cấp CCCD.");
-            isValid = false;
-        } else if (issuePlace.value.trim().length < 2) {
-            showFieldError(issuePlace, "Nơi cấp phải có ít nhất 2 ký tự.");
-            isValid = false;
-        }
-
-        // Validate ngày cấp
-        const issueDate = document.getElementById("issueDate");
-        if (!issueDate.value) {
-            showFieldError(issueDate, "Vui lòng nhập ngày cấp CCCD.");
-            isValid = false;
-        } else {
-            const issue = new Date(issueDate.value);
-            const birth = new Date(birthDate.value);
-            const today = new Date();
-            if (issue <= birth) {
-                showFieldError(issueDate, "Ngày cấp CCCD phải sau ngày sinh.");
-                isValid = false;
-            } else if (issue > today) {
-                showFieldError(issueDate, "Ngày cấp CCCD không được là tương lai.");
-                isValid = false;
-            }
-        }
-
-        // Validate ảnh CCCD mặt trước
-        const frontImage = document.getElementById("frontImage");
-        if (!frontImage.files[0]) {
-            showFieldError(frontImage, "Vui lòng chọn ảnh CCCD mặt trước.");
-            isValid = false;
-        }
-
-        // Validate ảnh CCCD mặt sau
-        const backImage = document.getElementById("backImage");
-        if (!backImage.files[0]) {
-            showFieldError(backImage, "Vui lòng chọn ảnh CCCD mặt sau.");
-            isValid = false;
-        }
-
-        // Validate tỉnh/thành phố
-        const province = document.getElementById("province");
-        if (!province.value) {
-            showFieldError(province, "Vui lòng chọn tỉnh/thành phố.");
-            isValid = false;
-        }
-
-        // Validate quận/huyện
-        const district = document.getElementById("district");
-        if (!district.value) {
-            showFieldError(district, "Vui lòng chọn quận/huyện.");
-            isValid = false;
-        }
-
-        // Validate phường/xã
-        const ward = document.getElementById("ward");
-        if (!ward.value) {
-            showFieldError(ward, "Vui lòng chọn phường/xã.");
-            isValid = false;
-        }
-
-        // Validate địa chỉ chi tiết
-        const addressDetail = document.getElementById("addressDetail");
-        if (!addressDetail.value.trim()) {
-            showFieldError(addressDetail, "Vui lòng nhập địa chỉ chi tiết.");
-            isValid = false;
-        } else if (addressDetail.value.trim().length < 5) {
-            showFieldError(addressDetail, "Địa chỉ chi tiết phải có ít nhất 5 ký tự.");
-            isValid = false;
-        }
-
-        // Validate điều khoản
-        const agreeTerms = document.getElementById("agreeTerms");
+        // Validate terms agreement
+        const agreeTerms = document.getElementById("agreeTerms")
         if (!agreeTerms.checked) {
-            showFieldError(agreeTerms);
-            isValid = false;
+            showFieldError(agreeTerms, "Vui lòng đồng ý với điều khoản và chính sách bảo mật")
+            isValid = false
+        }
+    }
+
+    return isValid
+}
+
+function validateField(field) {
+    const value = field.value.trim()
+    let isValid = true
+    let errorMessage = ""
+
+    // Clear previous errors
+    clearFieldError(field)
+
+    // Required field validation
+    if (field.hasAttribute("required") && !value) {
+        isValid = false
+        errorMessage = `Vui lòng ${field.type === "select-one" ? "chọn" : "nhập"} ${getFieldLabel(field)}`
+    }
+
+    // Specific field validations
+    if (value && isValid) {
+        switch (field.id) {
+            case "fullName":
+                if (value.length < 2) {
+                    isValid = false
+                    errorMessage = "Họ tên phải có ít nhất 2 ký tự"
+                }
+                break
+
+            case "idNumber":
+                if (!/^\d{9,12}$/.test(value)) {
+                    isValid = false
+                    errorMessage = "Số CCCD/CMND không hợp lệ"
+                } else {
+                    // Validate CCCD format for 12-digit numbers
+                    if (value.length === 12) {
+                        const provinceCode = value.substring(0, 3)
+                        if (!CCCD_PROVINCE_CODES[provinceCode]) {
+                            isValid = false
+                            errorMessage = `Mã tỉnh trong CCCD không hợp lệ (3 số đầu: ${provinceCode})`
+                        }
+                    }
+                }
+                break
+
+            case "phoneNumber":
+                const phoneValue = value.replace(/[\s\-()]/g, "")
+                if (!phoneValue.startsWith("0")) {
+                    isValid = false
+                    errorMessage = "Số điện thoại phải bắt đầu bằng số 0"
+                } else if (!/^0[0-9]{9}$/.test(phoneValue)) {
+                    isValid = false
+                    errorMessage = "Số điện thoại phải có 10 chữ số"
+                } else {
+                    const networkCode = phoneValue.substring(0, 3)
+                    if (!PHONE_NETWORK_CODES[networkCode]) {
+                        isValid = false
+                        errorMessage = "Số điện thoại không thuộc nhà mạng hợp lệ tại Việt Nam"
+                    }
+                }
+                break
+
+            case "email":
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+                    isValid = false
+                    errorMessage = "Vui lòng nhập email hợp lệ"
+                }
+                break
+
+            case "birthDate":
+                const today = new Date()
+                const birth = new Date(value)
+                const age = today.getFullYear() - birth.getFullYear()
+                if (age < 18) {
+                    isValid = false
+                    errorMessage = "Bạn phải đủ 18 tuổi để đăng ký"
+                }
+                break
+
+            case "password":
+                if (value.length < 6) {
+                    isValid = false
+                    errorMessage = "Mật khẩu phải có ít nhất 6 ký tự"
+                }
+                break
+
+            case "confirmPassword":
+                const password = document.getElementById("password").value
+                if (value !== password) {
+                    isValid = false
+                    errorMessage = "Mật khẩu xác nhận không khớp"
+                }
+                break
+        }
+    }
+
+    if (!isValid) {
+        showFieldError(field, errorMessage)
+    }
+
+    return isValid
+}
+
+function getFieldLabel(field) {
+    const label = field.parentElement.parentElement.querySelector(".form-label")
+    return label ? label.textContent.replace(" *", "").toLowerCase() : "thông tin này"
+}
+
+function showFieldError(field, message) {
+    field.classList.add("is-invalid")
+
+    let feedback = field.parentElement.parentElement.querySelector(".invalid-feedback")
+    if (!feedback) {
+        feedback = field.parentElement.querySelector(".invalid-feedback")
+    }
+
+    if (feedback) {
+        feedback.textContent = message
+        feedback.style.display = "block"
+    }
+
+    // Special handling for checkbox
+    if (field.type === "checkbox") {
+        const termsError = document.querySelector(".terms-error")
+        if (termsError) {
+            termsError.style.display = "block"
+            termsError.textContent = message
+        }
+    }
+}
+
+function clearFieldError(field) {
+    field.classList.remove("is-invalid")
+
+    let feedback = field.parentElement.parentElement.querySelector(".invalid-feedback")
+    if (!feedback) {
+        feedback = field.parentElement.querySelector(".invalid-feedback")
+    }
+
+    if (feedback) {
+        feedback.style.display = "none"
+    }
+
+    // Special handling for checkbox
+    if (field.type === "checkbox") {
+        const termsError = document.querySelector(".terms-error")
+        if (termsError) {
+            termsError.style.display = "none"
+        }
+    }
+}
+
+// Setup Real-time Validation
+function setupRealTimeValidation() {
+    const inputs = document.querySelectorAll("input, select")
+
+    inputs.forEach((input) => {
+        input.addEventListener("blur", () => validateField(input))
+        input.addEventListener("input", () => {
+            if (input.classList.contains("is-invalid")) {
+                validateField(input)
+            }
+        })
+    })
+}
+
+// Setup Form Validation
+function setupFormValidation() {
+    // This function sets up initial form validation
+    // Currently handled by setupRealTimeValidation() and other validation functions
+    console.log("Form validation setup completed")
+}
+
+// Form Submission
+function handleFormSubmit(e) {
+    e.preventDefault()
+
+    if (validateCurrentStep()) {
+        collectFormData()
+        showLoadingOverlay()
+
+        // Prepare form data for submission
+        const provinceText =
+            document.getElementById("provinceSelect").options[document.getElementById("provinceSelect").selectedIndex]
+                ?.text || ""
+        const districtText =
+            document.getElementById("districtSelect").options[document.getElementById("districtSelect").selectedIndex]
+                ?.text || ""
+        const wardText =
+            document.getElementById("wardSelect").options[document.getElementById("wardSelect").selectedIndex]?.text || ""
+        const addressDetail = document.getElementById("addressDetail").value
+        const fullAddress = `${addressDetail}, ${wardText}, ${districtText}, ${provinceText}`.trim()
+
+        const submitFormData = new FormData()
+        submitFormData.append("fullName", document.getElementById("fullName").value)
+        submitFormData.append("email", document.getElementById("email").value)
+        submitFormData.append("phoneNumber", document.getElementById("phoneNumber").value)
+        submitFormData.append("password", document.getElementById("password").value)
+        submitFormData.append("birthDate", document.getElementById("birthDate").value)
+        submitFormData.append("gender", document.getElementById("gender").value)
+        submitFormData.append("cccdNumber", document.getElementById("idNumber").value)
+        submitFormData.append("issuePlace", document.getElementById("idIssuePlace").value)
+        submitFormData.append("issueDate", document.getElementById("idIssueDate").value)
+        submitFormData.append("frontImage", document.getElementById("frontId").files[0])
+        submitFormData.append("backImage", document.getElementById("backId").files[0])
+        submitFormData.append("address", fullAddress)
+
+        // Submit to backend (keeping original backend logic)
+        fetch("/api/users/register-owner", {
+            method: "POST",
+            body: submitFormData,
+        })
+            .then(async (response) => {
+                // Kiểm tra content-type để xác định cách xử lý response
+                const contentType = response.headers.get("content-type")
+
+                if (response.ok) {
+                    // Nếu response thành công
+                    if (contentType && contentType.includes("application/json")) {
+                        // Nếu là JSON, parse JSON
+                        return response.json()
+                    } else {
+                        // Nếu không phải JSON, lấy text và tạo object giả
+                        const text = await response.text()
+                        console.log("Response text:", text)
+
+                        // Tạo object giả để tương thích với logic cũ
+                        return {
+                            success: true,
+                            message: text,
+                            userId: extractUserIdFromResponse(text), // Hàm helper để extract userId nếu có
+                        }
+                    }
+                } else {
+                    // Nếu response lỗi
+                    const text = await response.text()
+                    throw new Error(text || "Lỗi không xác định.")
+                }
+            })
+            .then((result) => {
+                hideLoadingOverlay()
+
+                // Kiểm tra xem có userId không để redirect
+                if (result.userId) {
+                    showSuccessModal()
+                    setTimeout(() => {
+                        window.location.href = `/dang-ky-chi-tiet?userId=${result.userId}`
+                    }, 2000)
+                } else {
+                    // Nếu không có userId, chỉ hiển thị thông báo thành công
+                    showSuccessModal()
+                    setTimeout(() => {
+                        // Redirect về trang chủ hoặc trang login
+                        window.location.href = "/dang-nhap-chu-tro"
+                    }, 2000)
+                }
+            })
+            .catch((error) => {
+                console.error("Lỗi đăng ký:", error)
+                hideLoadingOverlay()
+                showNotification("Đăng ký thất bại: " + error.message, "error")
+            })
+    }
+}
+
+// Helper function để extract userId từ response text nếu có
+function extractUserIdFromResponse(text) {
+    try {
+        // Thử tìm userId trong text response
+        const userIdMatch = text.match(/userId[:\s]*(\d+)/i)
+        if (userIdMatch) {
+            return userIdMatch[1]
         }
 
-        return isValid;
+        // Thử tìm id trong text response
+        const idMatch = text.match(/id[:\s]*(\d+)/i)
+        if (idMatch) {
+            return idMatch[1]
+        }
+
+        return null
+    } catch (e) {
+        console.log("Không thể extract userId từ response")
+        return null
     }
-});
+}
+
+function collectFormData() {
+    formData = {
+        fullName: document.getElementById("fullName").value,
+        gender: document.getElementById("gender").value,
+        birthDate: document.getElementById("birthDate").value,
+        idNumber: document.getElementById("idNumber").value,
+        idIssueDate: document.getElementById("idIssueDate").value,
+        idIssuePlace: document.getElementById("idIssuePlace").value,
+        phoneNumber: document.getElementById("phoneNumber").value,
+        email: document.getElementById("email").value,
+        province: document.getElementById("provinceSelect").value,
+        district: document.getElementById("districtSelect").value,
+        ward: document.getElementById("wardSelect").value,
+        addressDetail: document.getElementById("addressDetail").value,
+        password: document.getElementById("password").value,
+        frontIdFile: document.getElementById("frontId").files[0],
+        backIdFile: document.getElementById("backId").files[0],
+        agreeTerms: document.getElementById("agreeTerms").checked,
+    }
+
+    console.log("Form data collected:", formData)
+}
+
+// UI Helper Functions
+function showLoadingOverlay() {
+    const overlay = document.getElementById("loadingOverlay")
+    if (overlay) {
+        overlay.classList.add("active")
+    }
+}
+
+function hideLoadingOverlay() {
+    const overlay = document.getElementById("loadingOverlay")
+    if (overlay) {
+        overlay.classList.remove("active")
+    }
+}
+
+function showSuccessModal() {
+    Swal.fire({
+        icon: 'success',
+        title: 'Đăng ký thành công, tài khoản của bạn sẽ được nhân viên duyệt sớm nhất có thể!',
+        text: 'Bạn sẽ được chuyển hướng trong giây lát.',
+        showConfirmButton: false,
+        timer: 5000
+    });
+}
+
+function showElementLoading(elementId) {
+    const element = document.getElementById(elementId)
+    if (element) {
+        element.disabled = true
+        element.style.opacity = "0.6"
+    }
+}
+
+function hideElementLoading(elementId) {
+    const element = document.getElementById(elementId)
+    if (element) {
+        element.disabled = false
+        element.style.opacity = "1"
+    }
+}
+
+function showNotification(message, type = "info") {
+    // Create notification element
+    const notification = document.createElement("div")
+    notification.className = `notification notification-${type}`
+    notification.innerHTML = `
+        <div class="notification-content">
+            <i class="fas fa-${type === "error" ? "exclamation-circle" : "info-circle"}"></i>
+            <span>${message}</span>
+        </div>
+    `
+
+    // Add styles
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === "error" ? "#ef4444" : "#1196f5"};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+    `
+
+    document.body.appendChild(notification)
+
+    // Show notification
+    setTimeout(() => {
+        notification.style.transform = "translateX(0)"
+    }, 10)
+
+    // Hide notification
+    setTimeout(() => {
+        notification.style.transform = "translateX(100%)"
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification)
+            }
+        }, 300)
+    }, 3000)
+}
+
+// Global functions for HTML onclick handlers
+window.nextStep = nextStep
+window.prevStep = prevStep
+window.togglePassword = togglePassword
+window.removeImage = removeImage

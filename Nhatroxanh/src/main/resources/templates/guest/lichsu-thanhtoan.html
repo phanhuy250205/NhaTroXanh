@@ -110,9 +110,9 @@
                         <select name="method" class="filter-select-guest" onchange="this.form.submit()">
                             <option value="Tất cả" th:selected="${currentMethod == 'Tất cả'}">Tất cả</option>
                             <option value="TIỀN_MẶT" th:selected="${currentMethod == 'TIỀN_MẶT'}">Tiền mặt</option>
-                            <option value="BANK" th:selected="${currentMethod == 'BANK'}">Ngân hàng</option>
                             <option value="VNPAY" th:selected="${currentMethod == 'VNPAY'}">VNPay</option>
                             <option value="MOMO" th:selected="${currentMethod == 'MOMO'}">Momo</option>
+                            <option value="ZALOPAY" th:selected="${currentMethod == 'ZALOPAY'}">ZaloPay</option>
                         </select>
                     </div>
                     <input type="hidden" name="page" value="0" />
@@ -286,7 +286,7 @@
                         <ul class="pagination">
                             <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
                                 <a class="page-link"
-                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage - 1}, size=${pageSize})}">Trước</a>
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage - 1}, size=${pageSize})}">&laquo;</a>
                             </li>
                             <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${i == currentPage} ? 'active'">
@@ -296,7 +296,7 @@
                             </li>
                             <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
                                 <a class="page-link"
-                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage + 1}, size=${pageSize})}">Sau</a>
+                                    th:href="@{/khach-thue/lich-su-thanh-toan(year=${currentYear}, status=${currentStatus}, method=${currentMethod}, page=${currentPage + 1}, size=${pageSize})}">&raquo;</a>
                             </li>
                         </ul>
                     </nav>
