@@ -859,7 +859,7 @@
 .back-to-top {
     position: fixed;
     bottom: 32px;
-    right: 32px;
+    left: 32px;
     width: 56px;
     height: 56px;
     background: linear-gradient(135deg, #3498db, #5dade2);
