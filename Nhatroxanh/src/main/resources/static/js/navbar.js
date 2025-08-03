@@ -317,3 +317,138 @@ document.addEventListener("DOMContentLoaded", () => {
     // Poll for new notifications every 30 seconds
     setInterval(loadNotifications, 30000);
 });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Chỉ chạy script nếu người dùng đã đăng nhập và có chuông thông báo
+    const notificationDropdown = document.getElementById('notificationDropdown');
+    if (!notificationDropdown) {
+        console.log("Không tìm thấy chuông thông báo, script thông báo sẽ không chạy.");
+        return;
+    }
+
+    const notificationBadge = document.querySelector('.notification-badge');
+    const notificationHeaderCount = document.querySelector('.notification-header .text-muted');
+    const notificationContainer = document.querySelector('.notification-container');
+    const notificationLoading = document.querySelector('.notification-loading');
+
+    // Hàm để lấy và hiển thị thông báo
+    async function fetchNotifications() {
+        if (notificationLoading) notificationLoading.classList.remove('d-none');
+
+        try {
+            // API này đã có sẵn trong NotificationController của bạn
+            const response = await fetch('/api/notifications');
+            if (!response.ok) {
+                 throw new Error(`Lỗi server: ${response.status}`);
+            }
+
+            const data = await response.json();
+            const notifications = data.notifications || [];
+            const unreadCount = data.unreadCount || 0;
+
+            // Cập nhật số trên badge và header
+            if (unreadCount > 0) {
+                notificationBadge.textContent = unreadCount;
+                notificationBadge.style.display = 'block';
+                notificationHeaderCount.textContent = `${unreadCount} mới`;
+            } else {
+                notificationBadge.style.display = 'none';
+                notificationHeaderCount.textContent = `0 mới`;
+            }
+
+            // Hiển thị danh sách thông báo
+            notificationContainer.innerHTML = ''; // Xóa thông báo cũ
+            if (notifications.length === 0) {
+                notificationContainer.innerHTML = `
+                    <li>
+                        <div class="dropdown-item text-center text-muted p-3">
+                            <i class="fas fa-check-circle fs-4 mb-2"></i>
+                            <p class="mb-0">Không có thông báo mới</p>
+                        </div>
+                    </li>`;
+            } else {
+                notifications.forEach(noti => {
+                    const isUnreadClass = !noti.isRead ? 'notification-unread' : '';
+                    
+                    // Logic xác định link chuyển hướng
+                    let link = '#!'; // Link mặc định
+                    if (noti.type === 'CONTRACT') {
+                        link = '/khach-thue/quan-ly-thue-tra';
+                    }
+                    
+                    const notiElement = document.createElement('li');
+                    notiElement.innerHTML = `
+                        <a href="${link}" class="dropdown-item notification-item ${isUnreadClass}" data-notification-id="${noti.notificationId}">
+                            <div class="item-content">
+                                <p class="mb-1 fw-bold">${noti.title}</p>
+                                <p class="mb-1 small">${noti.message}</p>
+                                <small class="text-muted">${formatTimeAgo(noti.createAt)}</small>
+                            </div>
+                        </a>
+                    `;
+                    notificationContainer.appendChild(notiElement);
+                });
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy thông báo:', error);
+            notificationContainer.innerHTML = `
+                <li>
+                    <div class="dropdown-item text-center text-danger p-3">
+                        <i class="fas fa-exclamation-triangle fs-4 mb-2"></i>
+                        <p class="mb-0">Lỗi tải thông báo</p>
+                    </div>
+                </li>`;
+        } finally {
+            if (notificationLoading) notificationLoading.classList.add('d-none');
+        }
+    }
+    notificationContainer.addEventListener('click', async function(e) {
+        const target = e.target.closest('.notification-item');
+        if (!target) return;
+
+        e.preventDefault();
+        const notificationId = target.dataset.notificationId;
+        const link = target.href;
+
+        if (target.classList.contains('notification-unread')) {
+            try {
+                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || "";
+                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || "X-CSRF-TOKEN";
+                
+                let headers = {'Content-Type': 'application/json'};
+                if(csrfToken) {
+                    headers[csrfHeader] = csrfToken;
+                }
+
+                await fetch(`/api/notifications/${notificationId}/read`, {
+                    method: 'PUT',
+                    headers: headers
+                });
+                target.classList.remove('notification-unread');
+            } catch (error) {
+                console.error('Lỗi khi đánh dấu đã đọc:', error);
+            }
+        }
+        window.location.href = link;
+    });
+    function formatTimeAgo(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const seconds = Math.floor((now - date) / 1000);
+
+        if (seconds < 60) return "Vừa xong";
+        const minutes = Math.floor(seconds / 60);
+        if (minutes < 60) return `${minutes} phút trước`;
+        const hours = Math.floor(minutes / 60);
+        if (hours < 24) return `${hours} giờ trước`;
+        const days = Math.floor(hours / 24);
+        if (days < 7) return `${days} ngày trước`;
+        
+        return date.toLocaleDateString('vi-VN');
+    }
+    notificationDropdown.addEventListener('show.bs.dropdown', fetchNotifications);
+    fetchNotifications();
+    setInterval(fetchNotifications, 30000);
+});

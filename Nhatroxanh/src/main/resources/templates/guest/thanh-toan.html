@@ -481,7 +481,7 @@
                                 document.getElementById('appliedDiscount').value = discount;
                                 document.getElementById('discountAmount').innerText = formatCurrency(discount) + ' VNĐ';
                                 document.getElementById('finalTotal').innerText = formatCurrency(finalTotal) + ' VNĐ';
-                                showMessage(data.message || `Voucher áp dụng thành công! Giảm ${formatCurrency(discount)} VNĐ`);
+                                showMessage(data.message || `Voucher áp dụng thành công! `);
                             } else {
                                 showError(data.error);
                                 // Reset discount and final total if voucher application fails

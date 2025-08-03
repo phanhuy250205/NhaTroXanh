@@ -2,20 +2,23 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomOAuth2UserDetails;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
-import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
-import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
-import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,23 +31,35 @@ import java.util.stream.Collectors;
 public class NotificationController {
 
     private final NotificationRepository notificationRepository;
-    private final PaymentsRepository paymentsRepository;
     private final NotificationService notificationService;
+
+    /**
+     * Hàm helper để lấy thông tin Users một cách an toàn từ bất kỳ loại đăng nhập nào.
+     */
+    private Users getUserFromAuthentication(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof CustomUserDetails) {
+            return ((CustomUserDetails) principal).getUser();
+        } else if (principal instanceof CustomOAuth2UserDetails) {
+            return ((CustomOAuth2UserDetails) principal).getUser();
+        }
+        return null;
+    }
 
     @GetMapping
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getNotifications(Authentication authentication) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()
-                    || authentication.getPrincipal().equals("anonymousUser")) {
+            Users user = getUserFromAuthentication(authentication);
+            if (user == null) {
                 log.info("Unauthenticated access to /api/notifications, returning empty response");
-                return ResponseEntity.ok(Map.of(
-                        "notifications", Collections.emptyList(),
-                        "unreadCount", 0));
+                return ResponseEntity.ok(Map.of("notifications", Collections.emptyList(), "unreadCount", 0));
             }
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Integer userId = userDetails.getUserId();
+            Integer userId = user.getUserId();
             log.info("Fetching notifications for user ID: {}", userId);
 
             try {
@@ -59,91 +74,16 @@ public class NotificationController {
             List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
             List<Map<String, Object>> enrichedNotifications = notifications.stream()
                     .filter(Objects::nonNull)
-                    .map(notification -> {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("notificationId", notification.getNotificationId());
-                        map.put("title", notification.getTitle());
-                        map.put("message", notification.getMessage());
-                        map.put("type", notification.getType().toString());
-                        map.put("isRead", notification.getIsRead());
-                        map.put("createAt", notification.getCreateAt());
-
-                        if (notification.getRoom() != null) {
-                            Rooms room = notification.getRoom();
-                            Map<String, Object> roomMap = new HashMap<>();
-                            roomMap.put("roomId", room.getRoomId());
-                            roomMap.put("namerooms", room.getNamerooms());
-                            roomMap.put("acreage", room.getAcreage());
-                            roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
-                            if (room.getCategory() != null) {
-                                roomMap.put("category", Map.of("name", room.getCategory().getName()));
-                            }
-                            map.put("room", roomMap);
-                            log.debug("Added room data for notification {}: {}", notification.getNotificationId(),
-                                    roomMap);
-                        } else {
-                            log.warn(
-                                    "No room data for notification {} (room_id is null or not loaded), room_id from DB: {}",
-                                    notification.getNotificationId(),
-                                    notification.getRoom() != null ? notification.getRoom().getRoomId() : "null");
-                        }
-
-                        if (notification.getType() == Notification.NotificationType.PAYMENT) {
-                            Map<String, Object> paymentDetails = parsePaymentNotification(notification.getMessage());
-                            if (paymentDetails != null && paymentDetails.get("invoiceId") != null) {
-                                map.put("paymentId", paymentDetails.get("invoiceId"));
-                                map.put("paymentDetails", paymentDetails);
-                                log.debug("Added payment details for notification {}: {}",
-                                        notification.getNotificationId(), paymentDetails);
-                            } else {
-                                log.warn("Failed to parse payment details for notification ID: {}, message: {}",
-                                        notification.getNotificationId(), notification.getMessage());
-                            }
-                        } else if (notification.getType() == Notification.NotificationType.REPORT) {
-                            Map<String, Object> incidentDetails = parseIncidentNotification(notification.getMessage());
-                            if (incidentDetails != null && incidentDetails.get("incidentId") != null) {
-                                map.put("incidentId", incidentDetails.get("incidentId"));
-                                map.put("incidentDetails", incidentDetails);
-                                log.debug("Added incident details for notification {}: {}",
-                                        notification.getNotificationId(), incidentDetails);
-                            } else {
-                                log.warn("Failed to parse incident details for notification ID: {}, message: {}",
-                                        notification.getNotificationId(), notification.getMessage());
-                            }
-                        } else if (notification.getType() == Notification.NotificationType.PROMOTION) {
-                            Map<String, Object> voucherDetails = parseVoucherNotification(notification.getMessage());
-                            if (voucherDetails != null && voucherDetails.get("voucherCode") != null) {
-                                map.put("voucherCode", voucherDetails.get("voucherCode"));
-                                map.put("voucherDetails", voucherDetails);
-                                log.debug("Added voucher details for notification {}: {}",
-                                        notification.getNotificationId(), voucherDetails);
-                            } else {
-                                log.warn("Failed to parse voucher details for notification ID: {}, message: {}",
-                                        notification.getNotificationId(), notification.getMessage());
-                            }
-                        } else if (notification.getType() == Notification.NotificationType.ACCOUNT) {
-                            log.debug("Account notification {}: {}", notification.getNotificationId(),
-                                    notification.getMessage());
-                        } else if (notification.getType() == Notification.NotificationType.HOSTEL_ACTIVITY) {
-                            log.debug("Hostel activity notification {}: {}", notification.getNotificationId(),
-                                    notification.getMessage());
-                        }
-
-                        return map;
-                    })
+                    .map(this::enrichNotification)
                     .collect(Collectors.toList());
 
-            log.debug("Final enriched notifications: {}", enrichedNotifications);
             long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
             log.info("Found {} notifications ({} unread) for user ID: {}", notifications.size(), unreadCount, userId);
 
-            return ResponseEntity.ok(Map.of(
-                    "notifications", enrichedNotifications,
-                    "unreadCount", unreadCount));
+            return ResponseEntity.ok(Map.of("notifications", enrichedNotifications, "unreadCount", unreadCount));
         } catch (Exception e) {
             log.error("Error fetching notifications: ", e);
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Failed to fetch notifications: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to fetch notifications: " + e.getMessage()));
         }
     }
 
@@ -151,14 +91,13 @@ public class NotificationController {
     @ResponseBody
     public ResponseEntity<?> markAsRead(@PathVariable Integer id, Authentication authentication) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()
-                    || authentication.getPrincipal().equals("anonymousUser")) {
+            Users user = getUserFromAuthentication(authentication);
+            if (user == null) {
                 log.warn("Unauthenticated attempt to mark notification ID: {} as read", id);
-                return ResponseEntity.status(403).body("Unauthorized access to notification");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access to notification");
             }
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Integer userId = userDetails.getUserId();
+            Integer userId = user.getUserId();
             log.info("Marking notification ID: {} as read for user ID: {}", id, userId);
 
             Notification notification = notificationRepository.findById(id)
@@ -166,7 +105,7 @@ public class NotificationController {
 
             if (!notification.getUser().getUserId().equals(userId)) {
                 log.warn("Unauthorized attempt to mark notification ID: {} by user ID: {}", id, userId);
-                return ResponseEntity.status(403).body("Unauthorized access to notification");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Unauthorized access to notification");
             }
 
             notification.setIsRead(true);
@@ -182,17 +121,16 @@ public class NotificationController {
     @GetMapping("/view")
     public String viewNotifications(Authentication authentication, Model model) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()
-                    || authentication.getPrincipal().equals("anonymousUser")) {
+            Users user = getUserFromAuthentication(authentication);
+            if (user == null) {
                 log.warn("Unauthenticated access to notifications view");
                 model.addAttribute("error", "Vui lòng đăng nhập để xem thông báo");
                 model.addAttribute("notifications", Collections.emptyList());
                 model.addAttribute("unreadCount", 0);
                 return "guest/chitiet-thongbao";
             }
-
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Integer userId = userDetails.getUserId();
+            
+            Integer userId = user.getUserId();
             log.info("Rendering notifications view for user ID: {}", userId);
 
             try {
@@ -205,52 +143,12 @@ public class NotificationController {
             }
 
             List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
-            if (notifications == null) {
-                notifications = Collections.emptyList();
-                log.warn("No notifications found for user ID: {}", userId);
-            }
-
             long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
-            log.info("Found {} notifications ({} unread) for user ID: {}", notifications.size(), unreadCount, userId);
-
+            
             List<Map<String, Object>> enrichedNotifications = notifications.stream()
-                    .filter(Objects::nonNull)
-                    .map(notification -> {
-                        Map<String, Object> map = new HashMap<>();
-                        map.put("notification", notification);
-
-                        if (notification.getRoom() != null) {
-                            Rooms room = notification.getRoom();
-                            Map<String, Object> roomMap = new HashMap<>();
-                            roomMap.put("roomId", room.getRoomId());
-                            roomMap.put("namerooms", room.getNamerooms());
-                            roomMap.put("acreage", room.getAcreage());
-                            roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
-                            if (room.getCategory() != null) {
-                                roomMap.put("category", Map.of("name", room.getCategory().getName()));
-                            }
-                            map.put("room", roomMap);
-                        }
-
-                        if (notification.getType() == Notification.NotificationType.PAYMENT) {
-                            Map<String, Object> paymentDetails = parsePaymentNotification(notification.getMessage());
-                            if (paymentDetails != null) {
-                                map.put("paymentDetails", paymentDetails);
-                            }
-                        } else if (notification.getType() == Notification.NotificationType.REPORT) {
-                            Map<String, Object> incidentDetails = parseIncidentNotification(notification.getMessage());
-                            if (incidentDetails != null) {
-                                map.put("incidentDetails", incidentDetails);
-                            }
-                        } else if (notification.getType() == Notification.NotificationType.PROMOTION) {
-                            Map<String, Object> voucherDetails = parseVoucherNotification(notification.getMessage());
-                            if (voucherDetails != null) {
-                                map.put("voucherDetails", voucherDetails);
-                            }
-                        }
-                        return map;
-                    })
-                    .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .map(this::enrichNotification)
+                .collect(Collectors.toList());
 
             model.addAttribute("notifications", enrichedNotifications);
             model.addAttribute("unreadCount", unreadCount);
@@ -488,14 +386,13 @@ public class NotificationController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> cleanupObsoleteNotifications(Authentication authentication) {
         try {
-            if (authentication == null || !authentication.isAuthenticated()
-                    || authentication.getPrincipal().equals("anonymousUser")) {
+            Users user = getUserFromAuthentication(authentication);
+            if (user == null) {
                 log.warn("Unauthenticated attempt to cleanup notifications");
-                return ResponseEntity.status(403).body(Map.of("error", "Unauthorized access"));
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("error", "Unauthorized access"));
             }
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Integer userId = userDetails.getUserId();
+            Integer userId = user.getUserId();
             log.info("Manual cleanup request for user ID: {}", userId);
 
             int cleanedUp = notificationService.cleanupObsoletePaymentNotifications(userId);
@@ -506,8 +403,59 @@ public class NotificationController {
                     "cleanedUp", cleanedUp));
         } catch (Exception e) {
             log.error("Error during manual cleanup: ", e);
-            return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Failed to cleanup notifications: " + e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to cleanup notifications: " + e.getMessage()));
         }
     }
+    
+    // =================================================================
+    // CÁC HÀM HELPER ĐỂ XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU
+    // =================================================================
+
+   private Map<String, Object> enrichNotification(Notification notification) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("notificationId", notification.getNotificationId());
+    map.put("title", notification.getTitle());
+    map.put("message", notification.getMessage());
+    map.put("type", notification.getType().toString());
+    map.put("isRead", notification.getIsRead());
+    
+    // Định dạng createAt thành chuỗi
+    if (notification.getCreateAt() != null) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formattedDateTime = notification.getCreateAt().toLocalDateTime().format(formatter);
+        map.put("createAt", formattedDateTime);
+    } else {
+        map.put("createAt", "N/A");
+    }
+    
+    map.put("notification", notification); // For viewNotifications
+
+    if (notification.getRoom() != null) {
+        Rooms room = notification.getRoom();
+        Map<String, Object> roomMap = new HashMap<>();
+        roomMap.put("roomId", room.getRoomId());
+        roomMap.put("namerooms", room.getNamerooms());
+        roomMap.put("acreage", room.getAcreage());
+        roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
+        if (room.getCategory() != null) {
+            roomMap.put("category", Map.of("name", room.getCategory().getName()));
+        }
+        map.put("room", roomMap);
+    }
+
+    switch (notification.getType()) {
+        case PAYMENT:
+            map.put("paymentDetails", parsePaymentNotification(notification.getMessage()));
+            break;
+        case REPORT:
+            map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));
+            break;
+        case PROMOTION:
+            map.put("voucherDetails", parseVoucherNotification(notification.getMessage()));
+            break;
+        default:
+            break;
+    }
+    return map;
+}
 }

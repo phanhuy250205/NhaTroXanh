@@ -798,7 +798,7 @@
                         '<span class="unpaid-status-badge">Chưa thanh toán</span>' : ''}
                 </h3>
                 <div class="notification-card-meta">
-                    <span><i class="fas fa-clock"></i> ${formatDate(notification.createAt) || 'Không có ngày'}</span>
+                    <span><i class="fas fa-clock"></i> ${notification.createAt || 'Không có ngày'}</span>
                     <span><i class="fas fa-tag"></i> ${getTagName(notification.type) || 'Không xác định'}</span>
                     <span><i class="fas fa-user"></i> ${getSender(notification.type) || 'Không xác định'}</span>
                 </div>
@@ -938,7 +938,7 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
-                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue )|| '0 VNĐ'}<br>
+                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0 VNĐ'}<br>
                     <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0 VNĐ'}<br>
                     <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
                 </div>
@@ -1232,6 +1232,7 @@
                 setTimeout(() => alertContainer.remove(), 5000);
             }
 
+            
             // Load notifications on page load
             loadNotifications();
         });
