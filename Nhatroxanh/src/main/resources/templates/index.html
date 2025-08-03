@@ -6,7 +6,399 @@
     <!-- Include favorite styles -->
     <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
+<style>
+    /* Chat Widget Styles - Updated for smaller size */
+    .chat-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999; /* Giảm z-index để không đè lên các element quan trọng khác */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 
+    /* Chat Icon - Smaller */
+    .chat-icon {
+        width: 50px; /* Giảm từ 60px xuống 50px */
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12); /* Giảm shadow */
+        transition: all 0.3s ease;
+        position: relative;
+        animation: pulse 3s infinite; /* Tăng thời gian pulse để ít gây chú ý hơn */
+    }
+
+    .chat-icon:hover {
+        transform: scale(1.05); /* Giảm scale khi hover */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .chat-icon i {
+        color: white;
+        font-size: 20px; /* Giảm từ 24px xuống 20px */
+    }
+
+    .chat-badge {
+        position: absolute;
+        top: -3px; /* Điều chỉnh vị trí */
+        right: -3px;
+        background: #ff4757;
+        color: white;
+        border-radius: 50%;
+        width: 18px; /* Giảm từ 20px xuống 18px */
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px; /* Giảm từ 12px xuống 10px */
+        font-weight: bold;
+        border: 2px solid white; /* Thêm border trắng để nổi bật hơn */
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+        }
+        50% {
+            box-shadow: 0 3px 15px rgba(102, 126, 234, 0.3); /* Giảm opacity */
+        }
+        100% {
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    /* Chat Box - Smaller */
+    .chat-box {
+        position: absolute;
+        bottom: 65px; /* Giảm từ 80px xuống 65px */
+        right: 0;
+        width: 320px; /* Giảm từ 350px xuống 320px */
+        height: 400px; /* Giảm từ 450px xuống 400px */
+        background: white;
+        border-radius: 12px; /* Giảm border-radius */
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); /* Giảm shadow */
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .chat-box.active {
+        display: flex;
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Chat Header - Smaller */
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 16px; /* Giảm padding */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chat-header-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .chat-avatar {
+        width: 32px; /* Giảm từ 40px xuống 32px */
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 10px; /* Giảm margin */
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .chat-header-text h4 {
+        margin: 0;
+        font-size: 14px; /* Giảm từ 16px xuống 14px */
+        font-weight: 600;
+    }
+
+    .chat-status {
+        font-size: 11px; /* Giảm từ 12px xuống 11px */
+        opacity: 0.8;
+    }
+
+    .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px; /* Giảm từ 18px xuống 16px */
+        cursor: pointer;
+        padding: 4px; /* Giảm padding */
+        border-radius: 50%;
+        transition: background 0.3s ease;
+        width: 28px; /* Thêm width/height cố định */
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Chat Messages - Smaller */
+    .chat-messages {
+        flex: 1;
+        padding: 16px; /* Giảm từ 20px xuống 16px */
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+
+    .message {
+        margin-bottom: 12px; /* Giảm từ 15px xuống 12px */
+        display: flex;
+    }
+
+    .message.received {
+        justify-content: flex-start;
+    }
+
+    .message.sent {
+        justify-content: flex-end;
+    }
+
+    .message-content {
+        max-width: 75%; /* Tăng từ 70% lên 75% để tận dụng không gian */
+        position: relative;
+    }
+
+    .message.received .message-content {
+        background: white;
+        padding: 10px 14px; /* Giảm padding */
+        border-radius: 16px 16px 16px 4px; /* Giảm border-radius */
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Giảm shadow */
+    }
+
+    .message.sent .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 14px; /* Giảm padding */
+        border-radius: 16px 16px 4px 16px; /* Giảm border-radius */
+    }
+
+    .message-content p {
+        margin: 0;
+        font-size: 13px; /* Giảm từ 14px xuống 13px */
+        line-height: 1.4;
+    }
+
+    .message-time {
+        font-size: 10px; /* Giảm từ 11px xuống 10px */
+        opacity: 0.7;
+        display: block;
+        margin-top: 4px; /* Giảm margin */
+    }
+
+    /* Chat Input - Smaller */
+    .chat-input-container {
+        padding: 12px 16px; /* Giảm padding */
+        background: white;
+        border-top: 1px solid #eee;
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f1f3f4;
+        border-radius: 20px; /* Giảm border-radius */
+        padding: 4px; /* Giảm padding */
+    }
+
+    .chat-input {
+        flex: 1;
+        border: none;
+        background: none;
+        padding: 8px 12px; /* Giảm padding */
+        font-size: 13px; /* Giảm font-size */
+        outline: none;
+    }
+
+    .chat-send {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        width: 30px; /* Giảm từ 35px xuống 30px */
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .chat-send:hover {
+        transform: scale(1.05); /* Giảm scale */
+    }
+
+    .chat-send i {
+        font-size: 12px; /* Thêm font-size cho icon */
+    }
+
+    /* Responsive - Updated */
+    @media (max-width: 768px) {
+        .chat-widget {
+            bottom: 15px;
+            right: 15px;
+        }
+
+        .chat-icon {
+            width: 45px; /* Giảm thêm trên mobile */
+            height: 45px;
+        }
+
+        .chat-icon i {
+            font-size: 18px;
+        }
+
+        .chat-badge {
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            top: -2px;
+            right: -2px;
+        }
+
+        .chat-box {
+            width: 280px; /* Giảm width trên tablet */
+            height: 350px; /* Giảm height */
+            bottom: 55px;
+            right: -5px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .chat-widget {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .chat-icon {
+            width: 40px; /* Nhỏ hơn nữa trên mobile */
+            height: 40px;
+        }
+
+        .chat-icon i {
+            font-size: 16px;
+        }
+
+        .chat-badge {
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+        }
+
+        .chat-box {
+            width: calc(100vw - 30px); /* Full width trừ margin */
+            right: -10px;
+            left: 10px;
+            height: 300px; /* Giảm height trên mobile */
+            bottom: 50px;
+        }
+
+        .chat-header {
+            padding: 10px 12px;
+        }
+
+        .chat-avatar {
+            width: 28px;
+            height: 28px;
+        }
+
+        .chat-header-text h4 {
+            font-size: 13px;
+        }
+
+        .chat-status {
+            font-size: 10px;
+        }
+
+        .chat-messages {
+            padding: 12px;
+        }
+
+        .message-content p {
+            font-size: 12px;
+        }
+
+        .message-time {
+            font-size: 9px;
+        }
+
+        .chat-input-container {
+            padding: 10px 12px;
+        }
+
+        .chat-input {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .chat-send {
+            width: 26px;
+            height: 26px;
+        }
+
+        .chat-send i {
+            font-size: 11px;
+        }
+    }
+
+    /* Scrollbar styling - Thinner */
+    .chat-messages::-webkit-scrollbar {
+        width: 3px; /* Giảm từ 4px xuống 3px */
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Thêm CSS để tránh xung đột với các element khác */
+    .chat-widget * {
+        box-sizing: border-box;
+    }
+
+    /* Đảm bảo chat widget không ảnh hưởng đến layout */
+    .chat-widget {
+        pointer-events: auto;
+    }
+
+    .chat-widget .chat-box {
+        pointer-events: auto;
+    }
+
+    /* Tránh chat widget đè lên các nút quan trọng */
+    @media (max-width: 768px) {
+        /* Nếu có nút ở góc dưới phải, có thể điều chỉnh vị trí chat */
+        .chat-widget {
+            bottom: 80px; /* Tăng khoảng cách từ đáy nếu cần */
+        }
+    }
+
+
+</style>
 <body>
     <!-- NAVBAR -->
     <div th:replace="~{/layouts/navbar}"></div>
@@ -173,8 +565,8 @@
                             </div>
                             <div class="property-location">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span th:text="${post.address != null ? 
-                        post.address.street + ', ' + 
+                                <span th:text="${post.address != null ?
+                        post.address.street + ', ' +
                         post.address.ward.name + ', ' +
                         post.address.ward.district.name + ', ' +
                         post.address.ward.district.province.name : 'Chưa xác định'}">
@@ -300,10 +692,165 @@
         function applyPriceFilter() {
             applySearch();
         }
+
+
+        // Chat Widget JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatIcon = document.getElementById('chatIcon');
+            const chatBox = document.getElementById('chatBox');
+            const chatClose = document.getElementById('chatClose');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatBadge = document.getElementById('chatBadge');
+
+            let isOpen = false;
+
+            // Toggle chat box
+            function toggleChat() {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    chatBox.classList.add('active');
+                    chatBadge.style.display = 'none'; // Ẩn badge khi mở chat
+                } else {
+                    chatBox.classList.remove('active');
+                }
+            }
+
+            // Close chat
+            function closeChat() {
+                isOpen = false;
+                chatBox.classList.remove('active');
+            }
+
+            // Send message
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message) {
+                    // Add user message
+                    addMessage(message, 'sent');
+                    chatInput.value = '';
+
+                    // Simulate response after 1 second
+                    setTimeout(() => {
+                        const responses = [
+                            'Cảm ơn bạn đã liên hệ! Tôi sẽ hỗ trợ bạn ngay.',
+                            'Bạn có thể cho tôi biết thêm chi tiết về yêu cầu của bạn không?',
+                            'Tôi sẽ tìm những phòng trọ phù hợp nhất cho bạn.',
+                            'Bạn có ngân sách dự kiến bao nhiêu cho việc thuê phòng?'
+                        ];
+                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+                        addMessage(randomResponse, 'received');
+                    }, 1000);
+                }
+            }
+
+            // Add message to chat
+            function addMessage(text, type) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+
+                const currentTime = new Date().toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                messageDiv.innerHTML = `
+            <div class="message-content">
+                <p>${text}</p>
+                <span class="message-time">${currentTime}</span>
+            </div>
+        `;
+
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Event listeners
+            chatIcon.addEventListener('click', toggleChat);
+            chatClose.addEventListener('click', closeChat);
+            chatSend.addEventListener('click', sendMessage);
+
+            // Send message on Enter key
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Close chat when clicking outside
+            document.addEventListener('click', function(e) {
+                if (isOpen && !chatBox.contains(e.target) && !chatIcon.contains(e.target)) {
+                    closeChat();
+                }
+            });
+
+            // Auto show welcome message after 3 seconds
+            setTimeout(() => {
+                if (!isOpen) {
+                    chatBadge.style.display = 'flex';
+                    // Optional: Auto open chat after 10 seconds
+                    // setTimeout(() => {
+                    //     if (!isOpen) toggleChat();
+                    // }, 7000);
+                }
+            }, 3000);
+        });
+
     </script>
 
     <!-- Include favorite handler -->
     <script src="/js/favorite-handler.js"></script>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat Icon -->
+        <div class="chat-icon" id="chatIcon">
+            <i class="fas fa-comments"></i>
+            <span class="chat-badge" id="chatBadge">3</span>
+        </div>
+
+        <!-- Chat Box -->
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <img src="/images/avatar/support-avatar.jpg" alt="Support" class="chat-avatar">
+                    <div class="chat-header-text">
+                        <h4>Hỗ trợ khách hàng</h4>
+                        <span class="chat-status">Đang hoạt động</span>
+                    </div>
+                </div>
+                <button class="chat-close" id="chatClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message received">
+                    <div class="message-content">
+                        <p>Xin chào! Tôi có thể giúp gì cho bạn?</p>
+                        <span class="message-time">10:30</span>
+                    </div>
+                </div>
+                <div class="message received">
+                    <div class="message-content">
+                        <p>Bạn cần hỗ trợ tìm phòng trọ phù hợp không?</p>
+                        <span class="message-time">10:31</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn...">
+                    <button class="chat-send" id="chatSend">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
