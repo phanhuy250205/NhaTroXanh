@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -160,7 +161,227 @@ public class NotificationController {
             return "guest/chitiet-thongbao";
         }
     }
-    
+
+    private Map<String, Object> parsePaymentNotification(String message) {
+        try {
+            log.debug("Parsing payment notification message: {}", message);
+            Map<String, Object> paymentDetails = new HashMap<>();
+
+            // Check for success notifications
+            if (message.contains("thanh toán thành công") || message.contains("Bạn đã thanh toán thành công")) {
+                // Primary pattern for success notifications (allow spaces in room name)
+                Pattern successPattern = Pattern.compile(
+                        "Bạn đã thanh toán thành công hóa đơn #(\\d+) cho phòng ([^.]+) tại ([^.]+)\\. Tháng: ([\\d/]+)\\. Số tiền: ([\\d.,]+)[^\\d]*\\. Phương thức: ([^.]+)\\.");
+                Matcher successMatcher = successPattern.matcher(message);
+                if (successMatcher.find()) {
+                    paymentDetails.put("invoiceId", successMatcher.group(1));
+                    paymentDetails.put("month", successMatcher.group(4));
+                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
+                    paymentDetails.put("roomName", successMatcher.group(2).trim());
+                    paymentDetails.put("hostelName", successMatcher.group(3).trim());
+                    paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
+                    paymentDetails.put("status", "SUCCESS");
+                    paymentDetails.put("details", Collections.emptyList());
+                    log.debug("Parsed success payment details: {}", paymentDetails);
+                    return paymentDetails;
+                }
+
+                // Alternative success pattern (more flexible)
+                Pattern altSuccessPattern = Pattern.compile(
+                        "thanh toán thành công.*hoá đơn #(\\d+).*tháng ([\\d/]+).*số tiền:?\\s*([\\d.,]+).*VN[DĐ]?.*phương thức:?\\s*([^\\.\\s][^\\.]*)",
+                        Pattern.CASE_INSENSITIVE);
+                Matcher altSuccessMatcher = altSuccessPattern.matcher(message);
+                if (altSuccessMatcher.find()) {
+                    paymentDetails.put("invoiceId", altSuccessMatcher.group(1));
+                    paymentDetails.put("month", altSuccessMatcher.group(2));
+                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(altSuccessMatcher.group(3))));
+                    paymentDetails.put("paymentMethod", altSuccessMatcher.group(4).trim());
+                    paymentDetails.put("status", "SUCCESS");
+                    paymentDetails.put("details", Collections.emptyList());
+                    log.debug("Parsed alternative success payment details: {}", paymentDetails);
+                    return paymentDetails;
+                }
+                // Fallback pattern for minimal success message
+                Pattern fallbackPattern = Pattern.compile("hóa đơn #(\\d+)");
+                Matcher fallbackMatcher = fallbackPattern.matcher(message);
+                if (fallbackMatcher.find()) {
+                    paymentDetails.put("invoiceId", fallbackMatcher.group(1));
+                    paymentDetails.put("status", "SUCCESS");
+                    paymentDetails.put("details", Collections.emptyList());
+
+                    // Extract amount
+                    Pattern amountPattern = Pattern.compile("số tiền:?\\s*([\\d.,]+)\\s*VN[DĐ]?",
+                            Pattern.CASE_INSENSITIVE);
+                    Matcher amountMatcher = amountPattern.matcher(message);
+                    if (amountMatcher.find()) {
+                        paymentDetails.put("total", formatVietnameseCurrency(parseNumber(amountMatcher.group(1))));
+                    }
+
+                    // Extract month
+                    Pattern monthPattern = Pattern.compile("tháng:?\\s*([\\d/]+)", Pattern.CASE_INSENSITIVE);
+                    Matcher monthMatcher = monthPattern.matcher(message);
+                    if (monthMatcher.find()) {
+                        paymentDetails.put("month", monthMatcher.group(1).trim());
+                    } else {
+                        paymentDetails.put("month", "Không xác định");
+                    }
+
+                    // Extract payment method
+                    Pattern methodPattern = Pattern.compile("phương thức:?\\s*([^\\.\\s][^\\.]*)",
+                            Pattern.CASE_INSENSITIVE);
+                    Matcher methodMatcher = methodPattern.matcher(message);
+                    if (methodMatcher.find()) {
+                        paymentDetails.put("paymentMethod", methodMatcher.group(1).trim());
+                    } else {
+                        paymentDetails.put("paymentMethod", "VNPay");
+                    }
+
+                    log.debug("Parsed fallback success payment details: {}", paymentDetails);
+                    return paymentDetails;
+                }
+            } else {
+                // Pattern for pending notifications
+                Pattern pattern = Pattern.compile(
+                        "Hóa đơn #(\\d+) cho tháng ([\\d/]+) \\(Tổng: ([\\d.,]+)[^\\)]*\\)\\. Hạn thanh toán: ([^\\.]+)\\.?");
+                Matcher matcher = pattern.matcher(message);
+                if (matcher.find()) {
+                    paymentDetails.put("invoiceId", matcher.group(1));
+                    paymentDetails.put("month", matcher.group(2));
+                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(matcher.group(3))));
+                    paymentDetails.put("dueDate", matcher.group(4).trim());
+                    paymentDetails.put("status", "PENDING");
+                    paymentDetails.put("details", Collections.emptyList());
+                    log.debug("Parsed pending payment details: {}", paymentDetails);
+                    return paymentDetails;
+                }
+
+                // Alternative pending pattern
+                Pattern altPendingPattern = Pattern.compile(
+                        "hóa đơn #(\\d+).*tháng ([\\d/]+).*([\\d.,]+).*VN[DĐ]?.*hạn.*([\\d/]+)",
+                        Pattern.CASE_INSENSITIVE);
+                Matcher altPendingMatcher = altPendingPattern.matcher(message);
+                if (altPendingMatcher.find()) {
+                    paymentDetails.put("invoiceId", altPendingMatcher.group(1));
+                    paymentDetails.put("month", altPendingMatcher.group(2));
+                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(altPendingMatcher.group(3))));
+                    paymentDetails.put("dueDate", altPendingMatcher.group(4).trim());
+                    paymentDetails.put("status", "PENDING");
+                    paymentDetails.put("details", Collections.emptyList());
+                    log.debug("Parsed alternative pending payment details: {}", paymentDetails);
+                    return paymentDetails;
+                }
+            }
+
+            log.warn("Could not parse PAYMENT notification format: {}", message);
+            return null;
+        } catch (Exception e) {
+            log.error("Error parsing payment notification: {}", message, e);
+            return null;
+        }
+    }
+
+    private String formatVietnameseCurrency(Number amount) {
+        if (amount == null) {
+            return "0 VNĐ";
+        }
+
+        try {
+            double value = amount.doubleValue();
+            NumberFormat formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
+            return formatter.format(Math.round(value)) + " VNĐ";
+        } catch (Exception e) {
+            log.warn("Could not format currency amount: {}", amount, e);
+            return amount + " VNĐ";
+        }
+    }
+
+    private Number parseNumber(String amount) throws ParseException {
+        if (amount == null || amount.trim().isEmpty()) {
+            return 0;
+        }
+        String cleanAmount = amount.replaceAll("[^\\d.,]", "").trim();
+        NumberFormat parser = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
+        return parser.parse(cleanAmount);
+    }
+
+    private Map<String, Object> parseIncidentNotification(String message) {
+        try {
+            Map<String, Object> incidentDetails = new HashMap<>();
+            Pattern pattern = Pattern.compile("Sự cố #(\\d+) \\(([^,]+), mức độ: ([^)]+)\\) tại phòng ([^\\s]+)");
+            Matcher matcher = pattern.matcher(message);
+            if (matcher.find()) {
+                incidentDetails.put("incidentId", matcher.group(1));
+                incidentDetails.put("incidentType", matcher.group(2));
+                incidentDetails.put("level", matcher.group(3));
+                incidentDetails.put("roomName", matcher.group(4));
+                incidentDetails.put("status", message.contains("đang được xử lý") ? "DANG_XU_LY" : "DA_XU_LY");
+                log.debug("Parsed incident details: {}", incidentDetails);
+                return incidentDetails;
+            }
+            log.warn("Could not parse INCIDENT notification format: {}", message);
+            return null;
+        } catch (Exception e) {
+            log.error("Error parsing incident notification: {}", message, e);
+            return null;
+        }
+    }
+
+    private Map<String, Object> parseVoucherNotification(String message) {
+        try {
+            log.debug("Parsing voucher notification message: {}", message);
+            Map<String, Object> voucherDetails = new HashMap<>();
+
+            // Pattern for the new message format with line breaks
+            Pattern pattern = Pattern.compile(
+                    "Mã voucher: ([^\\s]+)\\s*Giá trị giảm: ([\\d.,]+)\\s*VNĐ\\s*Đơn tối thiểu: ([\\d.,]+)\\s*VNĐ\\s*Hạn sử dụng: ([^\\s]+)",
+                    Pattern.DOTALL);
+            Matcher matcher = pattern.matcher(message);
+            if (matcher.find()) {
+                String voucherCode = matcher.group(1);
+                String discountValueStr = matcher.group(2);
+                String minAmountStr = matcher.group(3);
+                String endDate = matcher.group(4);
+
+                // Parse the numeric values
+                Number discountValue = parseNumber(discountValueStr);
+                Number minAmount = parseNumber(minAmountStr);
+                voucherDetails.put("voucherCode", voucherCode);
+                voucherDetails.put("discountValue",  discountValue); // Hardcode correct value
+                voucherDetails.put("minAmount", minAmount); // Hardcode correct value
+                voucherDetails.put("endDate", endDate);
+                log.debug("Corrected voucher details: {}", voucherDetails);
+                return voucherDetails;
+            }
+
+            // Fallback pattern for original format
+            Pattern fallbackPattern = Pattern.compile(
+                    "Sử dụng mã voucher ([^\\s]+) để được giảm ([\\d.,]+) VNĐ cho đơn tối thiểu ([\\d.,]+) VNĐ\\. Hạn sử dụng đến ([^\\.]+)\\.");
+            Matcher fallbackMatcher = fallbackPattern.matcher(message);
+            if (fallbackMatcher.find()) {
+                String voucherCode = fallbackMatcher.group(1);
+                String discountValueStr = fallbackMatcher.group(2);
+                String minAmountStr = fallbackMatcher.group(3);
+                String endDate = fallbackMatcher.group(4);
+
+
+
+                // Apply corrected values
+                voucherDetails.put("voucherCode", voucherCode);
+                voucherDetails.put("discountValue", discountValueStr); // Hardcode correct value
+                voucherDetails.put("minAmount", minAmountStr); // Hardcode correct value
+                voucherDetails.put("endDate", endDate);
+                log.debug("Corrected fallback voucher details: {}", voucherDetails);
+                return voucherDetails;
+            } 
+
+            log.warn("Could not parse PROMOTION notification format: {}", message);
+            return null;
+        } catch (Exception e) {
+            log.error("Error parsing voucher notification: {}", message, e);
+            return null;
+        }
+    }
+
     @PostMapping("/cleanup")
     @ResponseBody
     public ResponseEntity<Map<String, Object>> cleanupObsoleteNotifications(Authentication authentication) {
@@ -190,126 +411,51 @@ public class NotificationController {
     // CÁC HÀM HELPER ĐỂ XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU
     // =================================================================
 
-    private Map<String, Object> enrichNotification(Notification notification) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("notificationId", notification.getNotificationId());
-        map.put("title", notification.getTitle());
-        map.put("message", notification.getMessage());
-        map.put("type", notification.getType().toString());
-        map.put("isRead", notification.getIsRead());
-        map.put("createAt", notification.getCreateAt());
-        map.put("notification", notification); // For viewNotifications
-
-        if (notification.getRoom() != null) {
-            Rooms room = notification.getRoom();
-            Map<String, Object> roomMap = new HashMap<>();
-            roomMap.put("roomId", room.getRoomId());
-            roomMap.put("namerooms", room.getNamerooms());
-            roomMap.put("acreage", room.getAcreage());
-            roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
-            if (room.getCategory() != null) {
-                roomMap.put("category", Map.of("name", room.getCategory().getName()));
-            }
-            map.put("room", roomMap);
-        }
-
-        switch (notification.getType()) {
-            case PAYMENT:
-                map.put("paymentDetails", parsePaymentNotification(notification.getMessage()));
-                break;
-            case REPORT:
-                map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));
-                break;
-            case PROMOTION:
-                map.put("voucherDetails", parseVoucherNotification(notification.getMessage()));
-                break;
-            default:
-                break;
-        }
-        return map;
-    }
-
-    private Map<String, Object> parsePaymentNotification(String message) {
-        try {
-            Map<String, Object> paymentDetails = new HashMap<>();
-            if (message.contains("thanh toán thành công")) {
-                Pattern p = Pattern.compile("hóa đơn #(\\d+).*tháng ([\\d/]+).*Số tiền: ([\\d.,]+)[^\\d]*\\. Phương thức: ([^.]+)\\.");
-                Matcher m = p.matcher(message);
-                if (m.find()) {
-                    paymentDetails.put("invoiceId", m.group(1));
-                    paymentDetails.put("month", m.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(m.group(3))));
-                    paymentDetails.put("paymentMethod", m.group(4).trim());
-                    paymentDetails.put("status", "SUCCESS");
-                    return paymentDetails;
-                }
-            } else {
-                Pattern p = Pattern.compile("Hóa đơn #(\\d+) cho tháng ([\\d/]+) \\(Tổng: ([\\d.,]+)[^\\)]*\\)\\. Hạn thanh toán: ([^\\.]+)\\.?");
-                Matcher m = p.matcher(message);
-                if (m.find()) {
-                    paymentDetails.put("invoiceId", m.group(1));
-                    paymentDetails.put("month", m.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(m.group(3))));
-                    paymentDetails.put("dueDate", m.group(4).trim());
-                    paymentDetails.put("status", "PENDING");
-                    return paymentDetails;
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error parsing payment notification: {}", message, e);
-        }
-        return null;
+   private Map<String, Object> enrichNotification(Notification notification) {
+    Map<String, Object> map = new HashMap<>();
+    map.put("notificationId", notification.getNotificationId());
+    map.put("title", notification.getTitle());
+    map.put("message", notification.getMessage());
+    map.put("type", notification.getType().toString());
+    map.put("isRead", notification.getIsRead());
+    
+    // Định dạng createAt thành chuỗi
+    if (notification.getCreateAt() != null) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String formattedDateTime = notification.getCreateAt().toLocalDateTime().format(formatter);
+        map.put("createAt", formattedDateTime);
+    } else {
+        map.put("createAt", "N/A");
     }
     
-    private Map<String, Object> parseIncidentNotification(String message) {
-        try {
-            Map<String, Object> details = new HashMap<>();
-            Pattern p = Pattern.compile("Sự cố #(\\d+) \\(([^,]+), mức độ: ([^)]+)\\) tại phòng ([^\\s]+)");
-            Matcher m = p.matcher(message);
-            if (m.find()) {
-                details.put("incidentId", m.group(1));
-                details.put("incidentType", m.group(2));
-                details.put("level", m.group(3));
-                details.put("roomName", m.group(4));
-                details.put("status", message.contains("đang được xử lý") ? "DANG_XU_LY" : "DA_XU_LY");
-                return details;
-            }
-        } catch (Exception e) {
-            log.error("Error parsing incident notification: {}", message, e);
+    map.put("notification", notification); // For viewNotifications
+
+    if (notification.getRoom() != null) {
+        Rooms room = notification.getRoom();
+        Map<String, Object> roomMap = new HashMap<>();
+        roomMap.put("roomId", room.getRoomId());
+        roomMap.put("namerooms", room.getNamerooms());
+        roomMap.put("acreage", room.getAcreage());
+        roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
+        if (room.getCategory() != null) {
+            roomMap.put("category", Map.of("name", room.getCategory().getName()));
         }
-        return null;
-    }
-    
-    private Map<String, Object> parseVoucherNotification(String message) {
-        try {
-            Map<String, Object> details = new HashMap<>();
-            Pattern p = Pattern.compile("Mã voucher: ([^\\s]+)\\s*Giá trị giảm: ([\\d.,]+)\\s*VNĐ\\s*Đơn tối thiểu: ([\\d.,]+)\\s*VNĐ\\s*Hạn sử dụng: ([^\\s]+)", Pattern.DOTALL);
-            Matcher m = p.matcher(message);
-            if (m.find()) {
-                details.put("voucherCode", m.group(1));
-                details.put("discountValue", formatVietnameseCurrency(100000));
-                details.put("minAmount", formatVietnameseCurrency(1000000));
-                details.put("endDate", m.group(4));
-                return details;
-            }
-        } catch (Exception e) {
-            log.error("Error parsing voucher notification: {}", message, e);
-        }
-        return null;
+        map.put("room", roomMap);
     }
 
-    private String formatVietnameseCurrency(Number amount) {
-        if (amount == null) return "0 VNĐ";
-        try {
-            return NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN")).format(Math.round(amount.doubleValue())) + " VNĐ";
-        } catch (Exception e) {
-            return amount + " VNĐ";
-        }
+    switch (notification.getType()) {
+        case PAYMENT:
+            map.put("paymentDetails", parsePaymentNotification(notification.getMessage()));
+            break;
+        case REPORT:
+            map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));
+            break;
+        case PROMOTION:
+            map.put("voucherDetails", parseVoucherNotification(notification.getMessage()));
+            break;
+        default:
+            break;
     }
-
-    private Number parseNumber(String amount) throws ParseException {
-        if (amount == null || amount.trim().isEmpty()) return 0;
-        String cleanAmount = amount.replaceAll("[^\\d.,]", "").trim();
-        return NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN")).parse(cleanAmount);
-    }
+    return map;
+}
 }
