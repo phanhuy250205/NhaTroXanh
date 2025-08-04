@@ -303,3 +303,34 @@
         padding: 12px;
     }
 }
+
+.btn-forgot-password-submit-guest.loading {
+    position: relative;
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+/* Vòng xoay ở giữa nút */
+.btn-forgot-password-submit-guest.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 18px;
+    /* căn đúng giữa */
+    transform: translateY(-50%);
+    border: 2px solid white;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    z-index: 1;
+}
+
+
+/* Giữ chữ nguyên vẹn, không làm mờ */
+.btn-forgot-password-submit-guest {
+    position: relative;
+    z-index: 2;
+    /* chữ hiển thị trên vòng quay nếu cần */
+}

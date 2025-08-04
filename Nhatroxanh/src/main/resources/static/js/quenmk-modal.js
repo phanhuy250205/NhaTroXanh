@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function closeModals() {
         if (forgotPasswordModal) {
-            forgotPasswordModal.style.display = 'none';
+            forgotPasswordModal.style.display = '';
             forgotPasswordModal.classList.remove('show');
         }
         if (verificationModal) {
@@ -228,18 +228,26 @@ document.addEventListener('DOMContentLoaded', function () {
     if (forgotPasswordForm) {
         forgotPasswordForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+
             const emailInput = document.getElementById('forgotPasswordContactGuest');
-            if (!emailInput) {
-                logDebug('Không tìm thấy trường nhập email');
-                showMessage('forgot-password-error-message-guest', 'Không tìm thấy trường email.');
+            const submitBtn = this.querySelector('.btn-forgot-password-submit-guest');
+
+            if (!emailInput || !submitBtn) {
+                logDebug('Thiếu email input hoặc nút submit');
+                showMessage('forgot-password-error-message-guest', 'Có lỗi xảy ra. Vui lòng thử lại.');
                 return;
             }
+
             const email = emailInput.value.trim();
 
             if (!email) {
                 showMessage('forgot-password-error-message-guest', 'Vui lòng nhập email.');
                 return;
             }
+
+            // Chặn người dùng nhấn nhiều lần
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
 
             logDebug(`Gửi yêu cầu quên mật khẩu cho email: ${email}`);
 
@@ -253,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
 
                 const data = await response.json();
+
                 if (response.ok) {
                     showMessage('forgot-password-success-message-guest', data.message, 'success');
                     logDebug('Yêu cầu quên mật khẩu thành công, chuyển sang modal xác thực');
@@ -266,9 +275,14 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (error) {
                 showMessage('forgot-password-error-message-guest', 'Có lỗi xảy ra, vui lòng thử lại.');
                 logDebug(`Lỗi khi gửi yêu cầu quên mật khẩu: ${error.message}`);
+            } finally {
+                // Bỏ loading và mở lại nút sau khi xử lý
+                submitBtn.classList.remove('loading');
+                submitBtn.disabled = false;
             }
         });
-    } else {
+    }
+    else {
         logDebug('Không tìm thấy form quên mật khẩu');
     }
 

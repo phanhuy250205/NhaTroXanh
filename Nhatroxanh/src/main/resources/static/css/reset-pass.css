@@ -233,5 +233,18 @@
 .verification-modal-overlay-auth.show .verification-modal-auth {
     transform: scale(1);
 }
+.input-wrapper-guest {
+    position: relative;
+}
+
+.input-wrapper-guest .toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 14px;
+}
 
 /* Các style khác cho OTP modal giữ nguyên như bạn đã cung cấp */

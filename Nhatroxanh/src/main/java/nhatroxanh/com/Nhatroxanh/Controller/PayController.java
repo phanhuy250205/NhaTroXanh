@@ -805,14 +805,10 @@ public class PayController {
             session.setAttribute("discountAmount_" + invoiceId, discount);
             session.setAttribute("voucherCode_" + invoiceId, voucherCode);
 
-            log.info(
-                    "Applied voucher {} with discount {} for payment {} (quantity will be decreased on payment success)",
-                    voucherCode, discount, invoiceId);
-
             response.put("success", true);
             response.put("discountValue", discount);
             response.put("finalTotal", payment.getTotalAmount());
-            response.put("message", "Áp dụng voucher thành công! Giảm " + discount + " VNĐ");
+            response.put("message", "Áp dụng voucher thành công! ");
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {

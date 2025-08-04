@@ -61,8 +61,9 @@ public class UserApiController {
         if (user.isEnabled())
             return ResponseEntity.badRequest().body("Tài khoản đã được kích hoạt.");
         if (otpService.verifyOtp(user, otp)) {
-            return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập.");
-        } else {
+        return ResponseEntity.ok("Xác thực thành công! Bây giờ bạn có thể đăng nhập");
+        }
+        else {
             return ResponseEntity.badRequest().body("Mã OTP không hợp lệ hoặc đã hết hạn.");
         }
     }
