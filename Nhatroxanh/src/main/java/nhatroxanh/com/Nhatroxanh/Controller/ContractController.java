@@ -96,6 +96,8 @@ public class ContractController {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private EncryptionService encryptionService; // ✅ SỬ DỤNG SERVICE CÓ SẴN
 
     @Autowired
     private CccdUtils cccdUtils;
@@ -1181,15 +1183,25 @@ public class ContractController {
                 tenantData.put("birthday", user.getBirthday() != null ? user.getBirthday().toString() : null);
 
                 if (tenantCccd != null) {
-                    tenantData.put("cccdNumber", tenantCccd.getCccdNumber()); // Số CCCD đầy đủ
-                    tenantData.put("maskedCccdNumber", cccdUtils.maskCccd(tenantCccd.getCccdNumber())); // Số CCCD bị
-                                                                                                        // che
-                    tenantData.put("issueDate",
-                            tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
+                    try {
+                        // ✅ GIẢI MÃ CCCD BẰNG ENCRYPTIONSERVICE CÓ SẴN
+                        String encryptedCccd = tenantCccd.getCccdNumber();
+                        String decryptedCccd = encryptionService.decrypt(encryptedCccd);
+
+                        logger.info("🔓 Encrypted CCCD: {}", encryptedCccd != null ? encryptedCccd.substring(0, Math.min(10, encryptedCccd.length())) + "..." : "null");
+                        logger.info("🔓 Decrypted CCCD: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+
+                        tenantData.put("cccdNumber", decryptedCccd != null ? decryptedCccd : ""); // ✅ SỐ ĐÃ GIẢI MÃ
+
+                    } catch (Exception e) {
+                        logger.error("❌ Lỗi giải mã CCCD: {}", e.getMessage());
+                        tenantData.put("cccdNumber", ""); // Nếu lỗi thì để trống
+                    }
+
+                    tenantData.put("issueDate", tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
                 } else {
                     tenantData.put("cccdNumber", "");
-                    tenantData.put("maskedCccdNumber", "");
                     tenantData.put("issueDate", null);
                     tenantData.put("issuePlace", "");
                 }
@@ -1229,7 +1241,13 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
-
+    // ✅ THÊM METHOD HELPER ĐỂ MASK CCCD CHO LOG
+    private String maskCccdForLog(String cccd) {
+        if (cccd == null || cccd.length() < 8) {
+            return "***";
+        }
+        return cccd.substring(0, 3) + "*****" + cccd.substring(cccd.length() - 3);
+    }
     private Map<String, String> parseAddress(String addressString) {
         Map<String, String> addressParts = new HashMap<>();
         if (addressString == null || addressString.trim().isEmpty()) {
@@ -2500,23 +2518,50 @@ public class ContractController {
 
             UserCccd cccd = user.getUserCccd();
             if (cccd != null) {
-                tenant.setCccdNumber(cccd.getCccdNumber());
-                tenant.setMaskedCccdNumber(cccdUtils.maskCccd(cccd.getCccdNumber()));
+                try {
+                    // ✅ GIẢI MÃ CCCD BẰNG ENCRYPTIONSERVICE CÓ SẴN
+                    String encryptedCccd = cccd.getCccdNumber();
+                    String decryptedCccd = encryptionService.decrypt(encryptedCccd);
+
+                    tenant.setCccdNumber(decryptedCccd != null ? decryptedCccd : ""); // ✅ SỐ ĐÃ GIẢI MÃ
+                    logger.info("🔓 Decrypted CCCD for contract: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+
+                } catch (Exception e) {
+                    logger.error("❌ Lỗi giải mã CCCD trong contract: {}", e.getMessage());
+                    tenant.setCccdNumber(""); // Nếu lỗi thì để trống
+                }
                 tenant.setIssueDate(cccd.getIssueDate());
                 tenant.setIssuePlace(cccd.getIssuePlace());
 
-                // 🔥 SỬA LỖI: Lấy URL ảnh từ bảng images
-                List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
-                for (Image image : images) {
-                    if (image.getType() == Image.ImageType.FRONT) {
-                        tenant.setCccdFrontUrl(image.getUrl());
-                        logger.info("Mapped Registered Tenant Front CCCD URL: {}", image.getUrl());
-                    } else if (image.getType() == Image.ImageType.BACK) {
-                        tenant.setCccdBackUrl(image.getUrl());
-                        logger.info("Mapped Registered Tenant Back CCCD URL: {}", image.getUrl());
+                // ✅ XỬ LÝ ẢNH CCCD - SỬ DỤNG DIRECT FIELDS
+                if (cccd.getFrontImageUrl() != null && !cccd.getFrontImageUrl().isEmpty()) {
+                    tenant.setCccdFrontUrl(cccd.getFrontImageUrl());
+                    logger.info("✅ Front CCCD URL: {}", cccd.getFrontImageUrl());
+                }
+
+                if (cccd.getBackImageUrl() != null && !cccd.getBackImageUrl().isEmpty()) {
+                    tenant.setCccdBackUrl(cccd.getBackImageUrl());
+                    logger.info("✅ Back CCCD URL: {}", cccd.getBackImageUrl());
+                }
+
+                // ✅ NẾU KHÔNG CÓ DIRECT FIELDS, TÌM TRONG IMAGE TABLE
+                if (tenant.getCccdFrontUrl() == null || tenant.getCccdBackUrl() == null) {
+                    logger.info("🔍 Tìm ảnh trong Image table cho UserCccd ID: {}", cccd.getId());
+                    List<Image> images = imageService.findByUserCccdId(Long.valueOf(cccd.getId()));
+                    logger.info("📊 Tìm được {} ảnh", images.size());
+
+                    for (Image image : images) {
+                        logger.info("🖼️ Image - Type: {}, URL: {}", image.getType(), image.getUrl());
+                        if (image.getType() == Image.ImageType.FRONT && tenant.getCccdFrontUrl() == null) {
+                            tenant.setCccdFrontUrl(image.getUrl());
+                        } else if (image.getType() == Image.ImageType.BACK && tenant.getCccdBackUrl() == null) {
+                            tenant.setCccdBackUrl(image.getUrl());
+                        }
                     }
                 }
-            }
+
+                }
+
 
             dto.setTenant(tenant);
             dto.setTenantType("REGISTERED");
@@ -2582,7 +2627,21 @@ public class ContractController {
 
             UserCccd cccd = user.getUserCccd();
             if (cccd != null) {
-                owner.setCccdNumber(cccd.getCccdNumber());
+                try {
+                    // ✅ GIẢI MÃ CCCD CHO OWNER
+                    String encryptedCccd = cccd.getCccdNumber();
+                    logger.info("🔐 Owner Encrypted CCCD: {}", encryptedCccd);
+
+                    String decryptedCccd = encryptionService.decrypt(encryptedCccd);
+                    logger.info("🔓 Owner Decrypted CCCD: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+
+                    owner.setCccdNumber(decryptedCccd != null ? decryptedCccd : "");
+
+                } catch (Exception e) {
+                    logger.error("❌ Lỗi giải mã CCCD Owner: {}", e.getMessage());
+                    owner.setCccdNumber("");
+                }
+
                 owner.setIssueDate(cccd.getIssueDate());
                 owner.setIssuePlace(cccd.getIssuePlace());
             }
@@ -3012,5 +3071,155 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
         logger.info("Kết quả - SĐT tồn tại: {}, CCCD tồn tại: {}, Email tồn tại: {}", phoneExists, cccdExists,
                 emailExists);
         return ResponseEntity.ok(response);
+    }
+
+
+    /**
+     * Tính tổng số hợp đồng theo trạng thái cho chủ trọ.
+     * Endpoint: GET /api/contracts/count-by-status
+     * Yêu cầu quyền: OWNER
+     * @param authentication Thông tin xác thực của người dùng
+     * @return ResponseEntity chứa số lượng hợp đồng theo từng trạng thái
+     */
+    @GetMapping("/count-by-status")
+    @PreAuthorize("hasRole('OWNER')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> countContractsByStatus(Authentication authentication) {
+        logger.info("Nhận yêu cầu tính tổng số hợp đồng theo trạng thái");
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            logger.info("Tính tổng hợp đồng cho chủ trọ ID: {}", ownerId);
+
+            // Lấy số lượng hợp đồng theo trạng thái từ repository
+            Map<String, Long> statusCounts = new HashMap<>();
+            for (Contracts.Status status : Contracts.Status.values()) {
+                Long count = contractsRepository.countByOwnerUserIdAndStatus(ownerId, status);
+                statusCounts.put(status.name(), count);
+            }
+
+            response.put("success", true);
+            response.put("statusCounts", statusCounts);
+            response.put("message", "Lấy số lượng hợp đồng theo trạng thái thành công");
+            logger.info("Tổng số hợp đồng theo trạng thái: {}", statusCounts);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tính tổng số hợp đồng theo trạng thái: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi tính tổng số hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Tìm kiếm hợp đồng theo số điện thoại của người thuê.
+     * Endpoint: GET /api/contracts/search-by-phone
+     * Yêu cầu quyền: OWNER
+     * @param phone Số điện thoại của người thuê (bắt buộc)
+     * @param authentication Thông tin xác thực của người dùng
+     * @return ResponseEntity chứa danh sách hợp đồng phù hợp
+     */
+    @GetMapping("/search-by-phone")
+    @PreAuthorize("hasRole('OWNER')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> searchContractsByPhone(
+            @RequestParam String phone,
+            Authentication authentication) {
+        logger.info("Nhận yêu cầu tìm kiếm hợp đồng theo số điện thoại: {}", phone);
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            if (!StringUtils.hasText(phone)) {
+                logger.error("Số điện thoại không được để trống");
+                response.put("success", false);
+                response.put("message", "Số điện thoại không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            logger.info("Tìm kiếm hợp đồng cho chủ trọ ID: {}", ownerId);
+
+            // Tìm kiếm hợp đồng theo số điện thoại và chủ trọ
+            List<Contracts> contracts = contractsRepository.findByTenantPhoneAndOwnerUserId(phone, ownerId);
+            List<ContractListDto> contractDtos = contracts.stream()
+                    .map(contract -> {
+                        ContractListDto dto = new ContractListDto();
+                        dto.setContractId(Long.valueOf(contract.getContractId()));
+//                        dto.setRoomName(contract.getRoom().getNamerooms());
+                        dto.setTenantName(contract.getTenant() != null ? contract.getTenant().getFullname() :
+                                contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName() : "");
+                        dto.setTenantPhone(contract.getTenantPhone());
+                        dto.setStatus(String.valueOf(contract.getStatus()));
+                        dto.setStartDate(contract.getStartDate().toLocalDate());
+                        dto.setEndDate(contract.getEndDate().toLocalDate());
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+            if (contractDtos.isEmpty()) {
+                logger.warn("Không tìm thấy hợp đồng nào với số điện thoại: {}", phone);
+                response.put("success", true);
+                response.put("contracts", new ArrayList<>());
+                response.put("message", "Không tìm thấy hợp đồng với số điện thoại: " + phone);
+            } else {
+                logger.info("Tìm thấy {} hợp đồng với số điện thoại: {}", contractDtos.size(), phone);
+                response.put("success", true);
+                response.put("contracts", contractDtos);
+                response.put("message", "Tìm kiếm hợp đồng thành công");
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tìm kiếm hợp đồng theo số điện thoại: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi tìm kiếm hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Đếm số hợp đồng sắp hết hạn (trong 3 ngày) cho chủ trọ.
+     * Endpoint: GET /api/contracts/count-expiring
+     * Yêu cầu quyền: OWNER
+     * @param authentication Thông tin xác thực của người dùng
+     * @return ResponseEntity chứa số lượng hợp đồng sắp hết hạn
+     */
+    @GetMapping("/count-expiring")
+    @PreAuthorize("hasRole('OWNER')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> countExpiringContracts(Authentication authentication) {
+        logger.info("Nhận yêu cầu đếm số hợp đồng sắp hết hạn");
+
+        Map<String, Object> response = new HashMap<>();
+        try {
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            LocalDate today = LocalDate.now();
+            LocalDate threeDaysLater = today.plusDays(3);
+
+            Long count = contractsRepository.countByOwnerUserIdAndEndDateBetweenAndStatus(
+                    ownerId,
+                    Date.valueOf(today),
+                    Date.valueOf(threeDaysLater),
+                    Contracts.Status.ACTIVE
+            );
+
+            response.put("success", true);
+            response.put("expiringCount", count);
+            response.put("message", "Lấy số hợp đồng sắp hết hạn thành công");
+            logger.info("Số hợp đồng sắp hết hạn: {}", count);
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi đếm hợp đồng sắp hết hạn: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi khi đếm hợp đồng sắp hết hạn: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
     }
 }
