@@ -422,9 +422,9 @@
                                             Số CMND/CCCD <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" class="form-control" name="tenant.cccdNumber" id="tenant-id"
-                                            required pattern="[0-9]{3}\*{4}[0-9]{3}" maxlength="10" readonly
-                                            placeholder="123****789" th:field="*{tenant.maskedCccdNumber}">
-                                        <input type="hidden" th:field="*{tenant.cccdNumber}" id="tenant-cccd-number">
+                                               required pattern="[0-9]{12}" maxlength="12"
+                                               placeholder="123456789012" th:field="*{tenant.cccdNumber}">
+
                                     </div>
 
                                     <div class="col-md-5">
@@ -1504,8 +1504,7 @@
                     success: function (response) {
                         if (response.success) {
                             const tenant = response.tenant;
-                            $('#tenant-id').val(tenant.cccdNumber); // CCCD dạng ẩn
-                            $('#tenant-full-cccd-number').val(tenant.fullCccdNumber); // CCCD đầy đủ
+                            $('#tenant-id').val(tenant.cccdNumber); // Gán số CCCD đầy đủ
                             $('#tenant-name').val(tenant.fullName);
                             $('#tenant-dob').val(tenant.birthday);
                             $('#tenant-id-date').val(tenant.issueDate);
@@ -1517,12 +1516,11 @@
                             $('#tenant-email').val(tenant.email);
 
                             // Lấy ảnh CCCD
-                            const fullCccdNumber = tenant.fullCccdNumber;
-                            if (fullCccdNumber) {
+                            if (tenant.cccdNumber) {
                                 $.ajax({
                                     url: '/api/contracts/cccd-images',
                                     method: 'POST',
-                                    data: { cccdNumber: fullCccdNumber },
+                                    data: { cccdNumber: tenant.cccdNumber }, // Sử dụng cccdNumber
                                     success: function (imageResponse) {
                                         if (imageResponse.success) {
                                             if (imageResponse.cccdFrontUrl) {
@@ -1553,8 +1551,6 @@
                     }
                 });
             });
-
-            // Xử lý thêm người thuê chưa đăng ký
 
         });
 
