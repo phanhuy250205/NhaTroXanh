@@ -195,4 +195,5 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
     @Query("SELECT c FROM Contracts c WHERE LOWER(c.room.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%'))")
     Page<Contracts> findByRoomName(@Param("roomName") String roomName, Pageable pageable);
 
+    
 }

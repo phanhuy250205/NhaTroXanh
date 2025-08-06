@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Notification;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Integer> {
@@ -38,4 +39,5 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     // Find all payment notifications for a user
     @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND n.type = 'PAYMENT'")
     List<Notification> findAllPaymentNotificationsByUserId(@Param("userId") Integer userId);
+    boolean existsByUserAndMessageContaining(Users user, String messageSubstring);
 }

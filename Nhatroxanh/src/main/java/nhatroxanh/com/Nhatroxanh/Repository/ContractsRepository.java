@@ -85,7 +85,6 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Long countByOwnerUserIdAndEndDateBetweenAndStatus(Integer ownerId, Date startDate, Date endDate, Contracts.Status status);
 
         List<Contracts> findByStatusAndEndDateLessThanEqual(Contracts.Status status, Date endDate);
-
-                        
+        List<Contracts> findByStatusAndEndDateBetween(Contracts.Status status, Date startDate, Date endDate);
 
 }

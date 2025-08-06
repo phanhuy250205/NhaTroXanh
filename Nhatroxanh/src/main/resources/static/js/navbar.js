@@ -321,7 +321,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Chỉ chạy script nếu người dùng đã đăng nhập và có chuông thông báo
+    
     const notificationDropdown = document.getElementById('notificationDropdown');
     if (!notificationDropdown) {
         console.log("Không tìm thấy chuông thông báo, script thông báo sẽ không chạy.");
@@ -332,8 +332,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationHeaderCount = document.querySelector('.notification-header .text-muted');
     const notificationContainer = document.querySelector('.notification-container');
     const notificationLoading = document.querySelector('.notification-loading');
-
-    // Hàm để lấy và hiển thị thông báo
     async function fetchNotifications() {
         if (notificationLoading) notificationLoading.classList.remove('d-none');
 
@@ -347,8 +345,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const data = await response.json();
             const notifications = data.notifications || [];
             const unreadCount = data.unreadCount || 0;
-
-            // Cập nhật số trên badge và header
             if (unreadCount > 0) {
                 notificationBadge.textContent = unreadCount;
                 notificationBadge.style.display = 'block';
