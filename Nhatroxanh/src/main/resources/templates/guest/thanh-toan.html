@@ -730,23 +730,25 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            if (selectedMethod.value === 'cash') {
+                            if (selectedMethod.value === 'cash' && data.appointmentScheduled) {
+                                // Handle cash payment appointment scheduling
                                 paymentBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Đã đặt lịch thành công!';
                                 paymentBtn.classList.remove('btn-primary-guest');
                                 paymentBtn.classList.add('btn-success-guest');
                                 
-                                // Show success modal for cash payment
-                                showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount);
+                                // Get the actual values from the form elements
+                                const paymentDateValue = document.getElementById('paymentDate').value;
+                                const paymentTimeValue = document.getElementById('paymentTime').value;
                                 
-                                // Redirect after modal is closed
+                                // Show success modal for cash payment and keep user on page
+                                showCashPaymentSuccessModal(paymentDateValue, paymentTimeValue, totalAmount, data.message);
+                                
+                                // Reset form after showing modal (optional)
                                 setTimeout(() => {
-                                    if (data.redirectUrl) {
-                                        window.location.href = data.redirectUrl;
-                                    } else {
-                                        window.location.reload();
-                                    }
-                                }, 5000);
+                                    resetPaymentForm();
+                                }, 3000);
                             } else {
+                                // Handle other payment methods (bank, etc.)
                                 paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
                                 paymentBtn.classList.remove('btn-primary-guest');
                                 paymentBtn.classList.add('btn-success-guest');
@@ -791,15 +793,60 @@
         }
 
         // Show cash payment success modal with appointment details
-        function showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount) {
+        function showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount, message) {
             const modal = new bootstrap.Modal(document.getElementById('cashPaymentSuccessModal'));
             const appointmentDetailsDiv = document.getElementById('appointmentDetails');
             appointmentDetailsDiv.innerHTML = `
-                <p><strong>Ngày thanh toán:</strong> ${formatDate(paymentDate)}</p>
-                <p><strong>Giờ thanh toán:</strong> ${paymentTime}</p>
-                <p><strong>Số tiền:</strong> ${totalAmount}</p>
+                <div class="alert alert-success">
+                    <p class="mb-2"><strong>Thông báo:</strong> ${message || 'Đã đặt lịch thanh toán tiền mặt thành công!'}</p>
+                </div>
+                <div class="appointment-info">
+                    <p><strong>Ngày thanh toán:</strong> ${paymentDate}</p>
+                    <p><strong>Giờ thanh toán:</strong> ${paymentTime}</p>
+                    <p><strong>Số tiền:</strong> ${totalAmount}</p>
+                </div>
             `;
             modal.show();
+        }
+
+        // Reset payment form after successful cash payment scheduling
+        function resetPaymentForm() {
+            const paymentBtn = document.getElementById('paymentBtn');
+            
+            // Reset button to original state
+            paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+            paymentBtn.classList.remove('btn-success-guest');
+            paymentBtn.classList.add('btn-primary-guest');
+            paymentBtn.disabled = false;
+            
+            // Clear payment method selections
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Clear wallet selections
+            document.querySelectorAll('input[name="wallet"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Hide payment options
+            document.getElementById('walletOptions').style.display = 'none';
+            document.getElementById('cashOptions').style.display = 'none';
+            
+            // Clear cash payment form
+            document.getElementById('paymentDate').value = '';
+            document.getElementById('paymentTime').value = '';
+            document.getElementById('paymentNote').value = '';
+            
+            // Remove active classes from payment options
+            document.querySelectorAll('.payment-option-guest').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Clear voucher form
+            document.getElementById('voucherCode').value = '';
+            document.getElementById('voucherMessage').style.display = 'none';
+            document.getElementById('voucherError').style.display = 'none';
         }
 
 

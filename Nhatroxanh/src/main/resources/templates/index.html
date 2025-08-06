@@ -694,7 +694,6 @@
         }
 
 
-        // Chat Widget JavaScript
         document.addEventListener('DOMContentLoaded', function() {
             const chatIcon = document.getElementById('chatIcon');
             const chatBox = document.getElementById('chatBox');
@@ -705,13 +704,70 @@
             const chatBadge = document.getElementById('chatBadge');
 
             let isOpen = false;
+            let stompClient = null;
+            let connected = false;
+            let currentUserId = 'user_' + Math.random().toString(36).substr(2, 9); // Generate random user ID
+
+            // WebSocket Connection Setup
+            function connectWebSocket() {
+                const socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+
+                stompClient.connect({}, function(frame) {
+                    console.log('Connected to WebSocket: ' + frame);
+                    connected = true;
+                    updateChatStatus('Đang hoạt động');
+
+                    // Subscribe to receive messages
+                    stompClient.subscribe('/topic/messages', function(message) {
+                        const messageData = JSON.parse(message.body);
+                        if (messageData.sender !== currentUserId) {
+                            addMessage(messageData.content, 'received', messageData.timestamp);
+
+                            // Show notification badge if chat is closed
+                            if (!isOpen) {
+                                showNotificationBadge();
+                            }
+                        }
+                    });
+
+                    // Send welcome message from server
+                    setTimeout(() => {
+                        addMessage('Xin chào! Tôi có thể giúp gì cho bạn?', 'received');
+                    }, 1000);
+
+                }, function(error) {
+                    console.log('WebSocket connection error: ' + error);
+                    connected = false;
+                    updateChatStatus('Mất kết nối');
+
+                    // Retry connection after 3 seconds
+                    setTimeout(connectWebSocket, 3000);
+                });
+            }
+
+            // Update chat status
+            function updateChatStatus(status) {
+                const statusElement = document.querySelector('.chat-status');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                }
+            }
+
+            // Show notification badge
+            function showNotificationBadge() {
+                chatBadge.style.display = 'flex';
+                const currentCount = parseInt(chatBadge.textContent) || 0;
+                chatBadge.textContent = currentCount + 1;
+            }
 
             // Toggle chat box
             function toggleChat() {
                 isOpen = !isOpen;
                 if (isOpen) {
                     chatBox.classList.add('active');
-                    chatBadge.style.display = 'none'; // Ẩn badge khi mở chat
+                    chatBadge.style.display = 'none';
+                    chatBadge.textContent = '0';
                 } else {
                     chatBox.classList.remove('active');
                 }
@@ -723,42 +779,40 @@
                 chatBox.classList.remove('active');
             }
 
-            // Send message
+            // Send message via WebSocket
             function sendMessage() {
                 const message = chatInput.value.trim();
-                if (message) {
-                    // Add user message
+                if (message && connected && stompClient) {
+                    const messageData = {
+                        content: message,
+                        sender: currentUserId,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Send to server
+                    stompClient.send('/app/sendMessage', {}, JSON.stringify(messageData));
+
+                    // Add to local chat
                     addMessage(message, 'sent');
                     chatInput.value = '';
-
-                    // Simulate response after 1 second
-                    setTimeout(() => {
-                        const responses = [
-                            'Cảm ơn bạn đã liên hệ! Tôi sẽ hỗ trợ bạn ngay.',
-                            'Bạn có thể cho tôi biết thêm chi tiết về yêu cầu của bạn không?',
-                            'Tôi sẽ tìm những phòng trọ phù hợp nhất cho bạn.',
-                            'Bạn có ngân sách dự kiến bao nhiêu cho việc thuê phòng?'
-                        ];
-                        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-                        addMessage(randomResponse, 'received');
-                    }, 1000);
+                } else if (!connected) {
+                    addMessage('Đang kết nối lại... Vui lòng thử lại sau.', 'received');
                 }
             }
 
             // Add message to chat
-            function addMessage(text, type) {
+            function addMessage(text, type, timestamp = null) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = `message ${type}`;
 
-                const currentTime = new Date().toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                const messageTime = timestamp ?
+                    new Date(timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) :
+                    new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 
                 messageDiv.innerHTML = `
             <div class="message-content">
                 <p>${text}</p>
-                <span class="message-time">${currentTime}</span>
+                <span class="message-time">${messageTime}</span>
             </div>
         `;
 
@@ -785,16 +839,22 @@
                 }
             });
 
-            // Auto show welcome message after 3 seconds
+            // Initialize WebSocket connection
+            connectWebSocket();
+
+            // Auto show welcome badge after 3 seconds
             setTimeout(() => {
                 if (!isOpen) {
                     chatBadge.style.display = 'flex';
-                    // Optional: Auto open chat after 10 seconds
-                    // setTimeout(() => {
-                    //     if (!isOpen) toggleChat();
-                    // }, 7000);
                 }
             }, 3000);
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function() {
+                if (stompClient && connected) {
+                    stompClient.disconnect();
+                }
+            });
         });
 
     </script>

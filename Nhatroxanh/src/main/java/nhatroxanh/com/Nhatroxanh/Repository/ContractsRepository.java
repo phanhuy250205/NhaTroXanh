@@ -74,6 +74,18 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Page<Contracts> findReturnRequestsByOwnerAndKeyword(@Param("ownerId") Integer ownerId,
                         @Param("keyword") String keyword, Pageable pageable);
 
+
+        // Đếm số hợp đồng theo trạng thái và chủ trọ
+        Long countByOwnerUserIdAndStatus(Integer ownerId, Contracts.Status status);
+
+        // Tìm hợp đồng theo số điện thoại người thuê và chủ trọ
+        List<Contracts> findByTenantPhoneAndOwnerUserId(String tenantPhone, Integer ownerId);
+
+
+        Long countByOwnerUserIdAndEndDateBetweenAndStatus(Integer ownerId, Date startDate, Date endDate, Contracts.Status status);
+
+        List<Contracts> findByStatusAndEndDateLessThanEqual(Contracts.Status status, Date endDate);
+
                         
 
 }

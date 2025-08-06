@@ -352,13 +352,12 @@ public class NotificationService {
     }
 
     /**
-     * Create cash payment appointment notification for tenant
+     * Create cash payment appointment notification
      */
-    public Notification createCashPaymentAppointmentNotification(Users tenant, Payments payment, 
-            String paymentDate, String paymentTime, String paymentNote) {
+    public Notification createCashPaymentAppointmentNotification(Users user, Payments payment, String paymentDate, String paymentTime, String paymentNote) {
         try {
-            if (tenant == null || payment == null) {
-                log.error("Cannot create cash payment appointment notification: tenant or payment is null");
+            if (user == null || payment == null) {
+                log.error("Cannot create cash payment appointment notification: user or payment is null");
                 return null;
             }
 
@@ -376,21 +375,29 @@ public class NotificationService {
             }
 
             DecimalFormat formatter = new DecimalFormat("#,###");
-            String formattedAmount = formatter.format(payment.getTotalAmount()) + " VNĐ";
+            String formattedAmount = payment.getTotalAmount() != null ? 
+                formatter.format(payment.getTotalAmount()) + " VNĐ" : "N/A";
 
-            String title = "Đặt lịch thanh toán tiền mặt thành công";
+            String title = "Lịch hẹn thanh toán tiền mặt";
             String message = String.format(
-                "Bạn đã đặt lịch thanh toán tiền mặt thành công cho hóa đơn #%d. " +
-                "Phòng: %s tại %s. Số tiền: %s. " +
-                "Ngày hẹn: %s lúc %s. %s" +
-                "Vui lòng chờ chủ trọ xác nhận thanh toán.",
-                payment.getId(), roomName, hostelName, formattedAmount, 
-                paymentDate, paymentTime,
-                (paymentNote != null && !paymentNote.trim().isEmpty()) ? "Ghi chú: " + paymentNote + ". " : ""
+                "Bạn đã đặt lịch thanh toán tiền mặt cho hóa đơn #%d. " +
+                "Phòng: %s tại %s. " +
+                "Ngày: %s, Giờ: %s. " +
+                "Số tiền: %s. " +
+                "%s" +
+                "Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian thanh toán.",
+                payment.getId(),
+                roomName,
+                hostelName,
+                paymentDate != null ? paymentDate : "N/A",
+                paymentTime != null ? paymentTime : "N/A",
+                formattedAmount,
+                paymentNote != null && !paymentNote.trim().isEmpty() ? 
+                    "Ghi chú: " + paymentNote + ". " : ""
             );
 
             Notification notification = Notification.builder()
-                    .user(tenant)
+                    .user(user)
                     .title(title)
                     .message(message)
                     .type(Notification.NotificationType.PAYMENT)
@@ -401,108 +408,71 @@ public class NotificationService {
 
             Notification savedNotification = notificationRepository.save(notification);
             log.info("Created cash payment appointment notification for user {} and payment {}: {}", 
-                    tenant.getUserId(), payment.getId(), message);
+                    user.getUserId(), payment.getId(), message);
             return savedNotification;
         } catch (Exception e) {
             log.error("Error creating cash payment appointment notification for user {} and payment {}: {}", 
-                    tenant.getUserId(), payment.getId(), e.getMessage(), e);
+                    user.getUserId(), payment != null ? payment.getId() : "null", e.getMessage(), e);
             return null;
         }
     }
 
     /**
-     * Handle cash payment confirmation - update appointment notification to success
+     * Create cash payment success notification when landlord confirms payment
      */
-    public void handleCashPaymentConfirmation(Users tenant, Payments payment) {
+    public Notification createCashPaymentSuccessNotification(Users user, Payments payment) {
         try {
-            if (tenant == null || payment == null) {
-                log.error("Cannot handle cash payment confirmation: tenant or payment is null");
-                return;
+            if (user == null || payment == null) {
+                log.error("Cannot create cash payment success notification: user or payment is null");
+                return null;
             }
 
-            // Find existing appointment notification for this payment
-            List<Notification> existingNotifications = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(
-                    tenant.getUserId(), Notification.NotificationType.PAYMENT);
-            
-            String paymentIdStr = String.valueOf(payment.getId());
-            boolean notificationUpdated = false;
-            
-            for (Notification notification : existingNotifications) {
-                if (notification.getMessage() != null && 
-                    notification.getMessage().contains("hóa đơn #" + paymentIdStr) &&
-                    notification.getMessage().contains("đặt lịch thanh toán tiền mặt")) {
-                    
-                    // Update the notification to success status
-                    String roomName = "N/A";
-                    String hostelName = "N/A";
-                    
-                    if (payment.getContract() != null && payment.getContract().getRoom() != null) {
-                        roomName = payment.getContract().getRoom().getNamerooms() != null 
-                            ? payment.getContract().getRoom().getNamerooms() : "N/A";
-                        
-                        if (payment.getContract().getRoom().getHostel() != null) {
-                            hostelName = payment.getContract().getRoom().getHostel().getName() != null
-                                ? payment.getContract().getRoom().getHostel().getName() : "N/A";
-                        }
-                    }
+            String roomName = "N/A";
+            String hostelName = "N/A";
+            Rooms room = null;
 
-                    DecimalFormat formatter = new DecimalFormat("#,###");
-                    String formattedAmount = formatter.format(payment.getTotalAmount()) + " VNĐ";
-
-                    String successTitle = "Thanh toán tiền mặt thành công";
-                    String successMessage = String.format(
-                        "Chủ trọ đã xác nhận thanh toán tiền mặt thành công cho hóa đơn #%d. " +
-                        "Phòng: %s tại %s. Số tiền: %s. " +
-                        "Cảm ơn bạn đã thanh toán đúng hạn!",
-                        payment.getId(), roomName, hostelName, formattedAmount
-                    );
-
-                    notification.setTitle(successTitle);
-                    notification.setMessage(successMessage);
-                    notification.setIsRead(false); // Mark as unread so user sees the update
-                    notification.setCreateAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))));
-                    
-                    notificationRepository.save(notification);
-                    log.info("Updated cash payment appointment notification {} to success status", 
-                            notification.getNotificationId());
-                    notificationUpdated = true;
-                    break;
+            if (payment.getContract() != null && payment.getContract().getRoom() != null) {
+                room = payment.getContract().getRoom();
+                roomName = room.getNamerooms() != null ? room.getNamerooms() : "N/A";
+                
+                if (room.getHostel() != null) {
+                    hostelName = room.getHostel().getName() != null ? room.getHostel().getName() : "N/A";
                 }
             }
-            
-            if (!notificationUpdated) {
-                // Create new success notification if no appointment notification found
-                String roomName = "N/A";
-                String hostelName = "N/A";
-                Rooms room = null;
 
-                if (payment.getContract() != null && payment.getContract().getRoom() != null) {
-                    room = payment.getContract().getRoom();
-                    roomName = room.getNamerooms() != null ? room.getNamerooms() : "N/A";
-                    
-                    if (room.getHostel() != null) {
-                        hostelName = room.getHostel().getName() != null ? room.getHostel().getName() : "N/A";
-                    }
-                }
+            DecimalFormat formatter = new DecimalFormat("#,###");
+            String formattedAmount = payment.getTotalAmount() != null ? 
+                formatter.format(payment.getTotalAmount()) + " VNĐ" : "N/A";
 
-                DecimalFormat formatter = new DecimalFormat("#,###");
-                String formattedAmount = formatter.format(payment.getTotalAmount()) + " VNĐ";
+            String title = "Thanh toán thành công";
+            String message = String.format(
+                "Bạn đã thanh toán thành công hóa đơn #%d cho phòng %s tại %s. " +
+                "Số tiền: %s. Phương thức: Tiền mặt. " +
+                "Cảm ơn bạn đã thanh toán đúng hạn!",
+                payment.getId(),
+                roomName,
+                hostelName,
+                formattedAmount
+            );
 
-                String title = "Thanh toán tiền mặt thành công";
-                String message = String.format(
-                    "Chủ trọ đã xác nhận thanh toán tiền mặt thành công cho hóa đơn #%d. " +
-                    "Phòng: %s tại %s. Số tiền: %s. " +
-                    "Cảm ơn bạn đã thanh toán đúng hạn!",
-                    payment.getId(), roomName, hostelName, formattedAmount
-                );
+            Notification notification = Notification.builder()
+                    .user(user)
+                    .title(title)
+                    .message(message)
+                    .type(Notification.NotificationType.PAYMENT)
+                    .isRead(false)
+                    .createAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))))
+                    .room(room)
+                    .build();
 
-                createPaymentNotification(tenant, payment, title, message);
-                log.info("Created new cash payment success notification for user {} and payment {}", 
-                        tenant.getUserId(), payment.getId());
-            }
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("Created cash payment success notification for user {} and payment {}: {}", 
+                    user.getUserId(), payment.getId(), message);
+            return savedNotification;
         } catch (Exception e) {
-            log.error("Error handling cash payment confirmation for user {} and payment {}: {}", 
-                    tenant.getUserId(), payment.getId(), e.getMessage(), e);
+            log.error("Error creating cash payment success notification for user {} and payment {}: {}", 
+                    user.getUserId(), payment != null ? payment.getId() : "null", e.getMessage(), e);
+            return null;
         }
     }
 }

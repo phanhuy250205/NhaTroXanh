@@ -44,7 +44,7 @@
       <div class="host-card-stat host-stat-purple">
         <div class="host-stat-icon"><i class="fa fa-calendar-times"></i></div>
         <div class="host-stat-text">
-          <div class="host-stat-label">Sắp hết hạn</div>
+          <div class="host-stat-label">Sắp Hết Hạn</div>
           <div class="host-stat-number" id="expiring-contracts">0</div>
         </div>
       </div>
@@ -103,51 +103,163 @@
   </div>
 </div>
 
-<script>
-  // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
-  document.addEventListener('DOMContentLoaded', function() {
-    loadContracts(0, 5); // Bắt đầu với trang 0, size 5
+
+  <script>
+    // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
+    document.addEventListener('DOMContentLoaded', function() {
+    loadContractStats(); // Tải thống kê hợp đồng
+    loadContracts(0, 5); // Tải danh sách hợp đồng
   });
 
-  // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG
-  async function loadContracts(page = 0, size = 5) {
-    try {
-      showLoading(true);
-
-      const response = await fetch(`/api/contracts/list?page=${page}&size=${size}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + localStorage.getItem('token') // Nếu cần token
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.success) {
-        displayContracts(data.contracts);
-        updateStats(data.contracts);
-        updatePagination(data.totalContracts, data.totalPages, data.currentPage, size);
-      } else {
-        showError(data.message || 'Không thể tải dữ liệu hợp đồng');
-      }
-    } catch (error) {
-      console.error('Error loading contracts:', error);
-      showError('Lỗi kết nối. Vui lòng thử lại sau.');
-    } finally {
-      showLoading(false);
-    }
+    // ⏳ HIỂN THỊ/ẨN LOADING
+    function showLoading(show) {
+    const loadingElement = document.getElementById('loading');
+    const contractsTable = document.getElementById('contracts-table');
+    if (loadingElement && contractsTable) {
+    loadingElement.style.display = show ? 'block' : 'none';
+    contractsTable.style.display = show ? 'none' : 'block';
+  } else {
+    console.error('Loading or contracts table element not found');
+  }
   }
 
-  function displayContracts(contracts) {
+    // ❌ HIỂN THỊ LỖI
+    function showError(message) {
+    const errorElement = document.getElementById('error-message');
+    const errorText = document.getElementById('error-text');
+    if (errorElement && errorText) {
+    errorText.textContent = message;
+    errorElement.style.display = 'block';
+    document.getElementById('contracts-table').style.display = 'none';
+  } else {
+    console.error('Error message elements not found');
+  }
+  }
+
+    // 📊 HÀM LOAD THỐNG KÊ HỢP ĐỒNG
+    async function loadContractStats() {
+    try {
+    showLoading(true);
+
+    const [statusResponse, expiringResponse] = await Promise.all([
+    fetch('/api/contracts/count-by-status', {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  }
+  }),
+    fetch('/api/contracts/count-expiring', {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  }
+  })
+    ]);
+
+    if (!statusResponse.ok || !expiringResponse.ok) {
+    throw new Error(`HTTP error! status: ${statusResponse.status}, ${expiringResponse.status}`);
+  }
+
+    const statusData = await statusResponse.json();
+    const expiringData = await expiringResponse.json();
+
+    if (statusData.success && expiringData.success) {
+    updateStats(statusData.statusCounts, expiringData.expiringCount);
+  } else {
+    showError(statusData.message || expiringData.message || 'Không thể tải thống kê hợp đồng');
+  }
+  } catch (error) {
+    console.error('Error loading contract stats:', error);
+    showError('Lỗi kết nối khi tải thống kê. Vui lòng thử lại sau.');
+  } finally {
+    showLoading(false);
+  }
+  }
+
+    // 📈 CẬP NHẬT THỐNG KÊ
+    function updateStats(statusCounts, expiringCount) {
+    const total = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
+    const totalElement = document.getElementById('total-contracts');
+    const activeElement = document.getElementById('active-contracts');
+    const draftElement = document.getElementById('draft-contracts');
+    const expiringElement = document.getElementById('expiring-contracts');
+
+    if (totalElement && activeElement && draftElement && expiringElement) {
+    totalElement.textContent = total;
+    activeElement.textContent = statusCounts.ACTIVE || 0;
+    draftElement.textContent = statusCounts.DRAFT || 0;
+    expiringElement.textContent = expiringCount || 0;
+  } else {
+    console.error('One or more stat elements not found');
+  }
+  }
+
+    // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG
+    async function loadContracts(page = 0, size = 5) {
+    try {
+    showLoading(true);
+
+    const response = await fetch(`/api/contracts/list?page=${page}&size=${size}`, {
+    method: 'GET',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  }
+  });
+
+    if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+    const data = await response.json();
+
+    if (data.success) {
+    displayContracts(data.contracts);
+    updatePagination(data.totalContracts, data.totalPages, data.currentPage, size);
+  } else {
+    showError(data.message || 'Không thể tải dữ liệu hợp đồng');
+  }
+  } catch (error) {
+    console.error('Error loading contracts:', error);
+    showError('Lỗi kết nối. Vui lòng thử lại sau.');
+  } finally {
+    showLoading(false);
+  }
+  }
+
+    // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
+    function isExpiringSoon(endDate) {
+    if (!endDate) return false;
+    const today = new Date();
+    const end = new Date(endDate);
+    const daysUntilExpiry = (end - today) / (1000 * 60 * 60 * 24);
+    return daysUntilExpiry <= 3 && daysUntilExpiry > 0;
+  }
+
+    // 📅 FORMAT NGÀY THÁNG
+    function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  });
+  }
+
+    // 📄 HÀM HIỂN THỊ HỢP ĐỒNG
+    function displayContracts(contracts) {
     const tbody = document.getElementById('contracts-tbody');
+    if (!tbody) {
+    console.error('Contracts table body not found');
+    showError('Không tìm thấy bảng hợp đồng');
+    return;
+  }
 
     if (!contracts || contracts.length === 0) {
-      tbody.innerHTML = `
+    tbody.innerHTML = `
       <tr>
         <td colspan="7" class="text-muted">
           <i class="fa fa-inbox"></i><br>
@@ -155,42 +267,45 @@
         </td>
       </tr>
     `;
-      return;
-    }
+    return;
+  }
 
-    tbody.innerHTML = contracts.map(contract => `
-    <tr>
-      <td><strong>${contract.contractId}</strong></td>
-      <td>${contract.tenantName || 'N/A'}</td>
-      <td>${formatDate(contract.startDate)}</td>
-      <td>${formatDate(contract.endDate)}</td>
-      <td>${contract.tenantPhone || 'N/A'}</td>
-      <td>${getStatusSelect(contract.contractId, contract.status)}</td>
-      <td>
-        <button
-          class="btn btn-sm btn-outline-primary"
-          onclick="editContract(${contract.contractId})"
-          title="Chỉnh sửa">
-          <i class="fa fa-pen"></i>
-        </button>
-      </td>
-    </tr>
-  `).join('');
+    tbody.innerHTML = contracts.map(contract => {
+    if (!contract) return '';
+    return `
+      <tr>
+        <td><strong>${contract.contractId || 'N/A'}</strong></td>
+        <td>${contract.tenantName || 'N/A'}</td>
+        <td>${formatDate(contract.startDate)}</td>
+        <td>${formatDate(contract.endDate)}</td>
+        <td>${contract.tenantPhone || 'N/A'}</td>
+        <td>${getStatusSelect(contract.contractId, contract.status)}</td>
+        <td>
+          <button
+            class="btn btn-sm btn-outline-primary"
+            onclick="editContract(${contract.contractId})"
+            title="Chỉnh sửa">
+            <i class="fa fa-pen"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+  }).join('');
 
     document.getElementById('contracts-table').style.display = 'block';
   }
 
-  // 🏷️ TẠO SELECT TRẠNG THÁI
-  function getStatusSelect(contractId, currentStatus) {
+    // 🏷️ TẠO SELECT TRẠNG THÁI
+    function getStatusSelect(contractId, currentStatus) {
     const statusOptions = [
-      { value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary' },
-      { value: 'ACTIVE', label: 'Đang thuê', class: 'text-success' },
-      { value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger' },
-      { value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning' }
+  {value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary'},
+  {value: 'ACTIVE', label: 'Đang thuê', class: 'text-success'},
+  {value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger'},
+  {value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning'}
     ];
 
     const options = statusOptions.map(option =>
-            `<option value="${option.value}"
+    `<option value="${option.value}"
              class="${option.class}"
              ${option.value === currentStatus ? 'selected' : ''}>
        ${option.label}
@@ -208,174 +323,101 @@
   `;
   }
 
-  // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
-  async function updateContractStatus(contractId, newStatus) {
+    // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
+    async function updateContractStatus(contractId, newStatus) {
     console.log('🔄 Updating contract status');
     console.log('📝 Contract ID:', contractId);
     console.log('📝 New Status:', newStatus);
 
-    // 🔍 VALIDATE STATUS TRƯỚC KHI GỬI
     const validStatuses = ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED'];
     const upperStatus = newStatus.toUpperCase();
 
     if (!validStatuses.includes(upperStatus)) {
-      showErrorMessage(`Status không hợp lệ: ${newStatus}. Các giá trị cho phép: ${validStatuses.join(', ')}`);
-      console.error(`❌ Status không hợp lệ: ${newStatus}`);
-      return;
-    }
-
-    const requestData = {
-      status: upperStatus
-    };
-
-    console.log('📤 Sending request:', requestData);
+    showError(`Status không hợp lệ: ${newStatus}`);
+    return;
+  }
 
     try {
-      const response = await fetch(`/api/contracts/hop-dong/update-status/${contractId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          'Authorization': 'Bearer ' + localStorage.getItem('token') // Nếu cần token
-        },
-        body: JSON.stringify(requestData)
-      });
+    const response = await fetch(`/api/contracts/hop-dong/update-status/${contractId}`, {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer ' + localStorage.getItem('token')
+  },
+    body: JSON.stringify({status: upperStatus})
+  });
 
-      console.log('📥 Response status:', response.status);
+    const result = await response.json();
 
-      const result = await response.json();
-      console.log('📥 Response data:', result);
-
-      if (!response.ok) {
-        showErrorMessage(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
-        throw new Error(result.message || `HTTP error! status: ${response.status}`);
-      }
-
-      showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
-      console.log('✅ Update successful:', result);
-
-      // Reload danh sách hợp đồng để cập nhật giao diện
-      const currentPage = parseInt(document.getElementById('pagination').dataset.currentPage || 0);
-      await loadContracts(currentPage, 5);
-
-    } catch (error) {
-      console.error('❌ Error updating contract status:', error);
-      showErrorMessage(error.message || 'Lỗi khi cập nhật trạng thái hợp đồng');
-    }
+    if (!response.ok) {
+    showError(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
+    return;
   }
 
-  // 🔧 FUNCTION LẤY VALID STATUSES
-  async function getValidStatuses() {
-    return ['DRAFT', 'ACTIVE', 'TERMINATED', 'EXPIRED'];
+    showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
+    const currentPage = parseInt(document.getElementById('pagination').dataset.currentPage || 0);
+    await loadContracts(currentPage, 5);
+    await loadContractStats(); // Cập nhật lại thống kê sau khi thay đổi trạng thái
+  } catch (error) {
+    console.error('Error updating contract status:', error);
+    showError('Lỗi khi cập nhật trạng thái hợp đồng');
+  }
   }
 
-  // 📈 CẬP NHẬT THỐNG KÊ
-  function updateStats(contracts) {
-    const stats = {
-      total: contracts.length,
-      active: contracts.filter(c => c.status === 'ACTIVE').length,
-      draft: contracts.filter(c => c.status === 'DRAFT').length,
-      expiring: contracts.filter(c => isExpiringSoon(c.endDate)).length
-    };
-
-    document.getElementById('total-contracts').textContent = stats.total;
-    document.getElementById('active-contracts').textContent = stats.active;
-    document.getElementById('draft-contracts').textContent = stats.draft;
-    document.getElementById('expiring-contracts').textContent = stats.expiring;
-  }
-
-  // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
-  function isExpiringSoon(endDate) {
-    if (!endDate) return false;
-    const today = new Date();
-    const end = new Date(endDate);
-    const daysUntilExpiry = (end - today) / (1000 * 60 * 60 * 24);
-    return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
-  }
-
-  // 📅 FORMAT NGÀY THÁNG
-  function formatDate(dateString) {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  }
-
-  // 📄 CẬP NHẬT PAGINATION
-  function updatePagination(totalContracts, totalPages, currentPage, size) {
+    // 📄 CẬP NHẬT PAGINATION
+    function updatePagination(totalContracts, totalPages, currentPage, size) {
     const pagination = document.getElementById('pagination');
-    pagination.dataset.currentPage = currentPage; // Lưu trang hiện tại
-    pagination.innerHTML = '';
+    if (!pagination) {
+    console.error('Pagination element not found');
+    return;
+  }
+    pagination.dataset.currentPage = currentPage;
 
-    // Tính toán chỉ số hiển thị
+    pagination.innerHTML = '';
     const start = currentPage * size + 1;
     const end = Math.min((currentPage + 1) * size, totalContracts);
     document.getElementById('pagination-info').textContent =
-            `Hiển thị ${start} đến ${end} trong số ${totalContracts} hợp đồng`;
+    `Hiển thị ${start} đến ${end} trong số ${totalContracts} hợp đồng`;
 
-    // Tạo nút "Trước"
     if (currentPage > 0) {
-      pagination.innerHTML += `
-        <li class="page-item">
-          <a class="page-link" href="#" onclick="loadContracts(${currentPage - 1}, ${size}); return false;">Trước</a>
-        </li>
-      `;
-    } else {
-      pagination.innerHTML += `
-        <li class="page-item disabled">
-          <a class="page-link">Trước</a>
-        </li>
-      `;
-    }
+    pagination.innerHTML += `
+      <li class="page-item">
+        <a class="page-link" href="#" onclick="loadContracts(${currentPage - 1}, ${size}); return false;">Trước</a>
+      </li>
+    `;
+  } else {
+    pagination.innerHTML += `
+      <li class="page-item disabled">
+        <a class="page-link">Trước</a>
+      </li>
+    `;
+  }
 
-    // Tạo các số trang
     for (let i = 0; i < totalPages; i++) {
-      pagination.innerHTML += `
-        <li class="page-item ${i === currentPage ? 'active' : ''}">
-          <a class="page-link" href="#" onclick="loadContracts(${i}, ${size}); return false;">${i + 1}</a>
-        </li>
-      `;
-    }
+    pagination.innerHTML += `
+      <li class="page-item ${i === currentPage ? 'active' : ''}">
+        <a class="page-link" href="#" onclick="loadContracts(${i}, ${size}); return false;">${i + 1}</a>
+      </li>
+    `;
+  }
 
-    // Tạo nút "Sau"
     if (currentPage < totalPages - 1) {
-      pagination.innerHTML += `
-        <li class="page-item">
-          <a class="page-link" href="#" onclick="loadContracts(${currentPage + 1}, ${size}); return false;">Sau</a>
-        </li>
-      `;
-    } else {
-      pagination.innerHTML += `
-        <li class="page-item disabled">
-          <a class="page-link">Sau</a>
-        </li>
-      `;
-    }
+    pagination.innerHTML += `
+      <li class="page-item">
+        <a class="page-link" href="#" onclick="loadContracts(${currentPage + 1}, ${size}); return false;">Sau</a>
+      </li>
+    `;
+  } else {
+    pagination.innerHTML += `
+      <li class="page-item disabled">
+        <a class="page-link">Sau</a>
+      </li>
+    `;
+  }
   }
 
-  // ⏳ HIỂN THỊ/ẨN LOADING
-  function showLoading(show) {
-    document.getElementById('loading').style.display = show ? 'block' : 'none';
-    document.getElementById('contracts-table').style.display = show ? 'none' : 'block';
-  }
-
-  // ❌ HIỂN THỊ LỖI
-  function showError(message) {
-    document.getElementById('error-text').textContent = message;
-    document.getElementById('error-message').style.display = 'block';
-    document.getElementById('contracts-table').style.display = 'none';
-  }
-
-  function editContract(contractId) {
-    console.log('🔍 Attempting to edit contract with ID:', contractId);
-    window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
-  }
-
-  // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
-  function showSuccessMessage(message) {
+    // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
+    function showSuccessMessage(message) {
     const toast = document.createElement('div');
     toast.className = 'alert alert-success position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
@@ -385,29 +427,19 @@
   `;
     document.body.appendChild(toast);
     setTimeout(() => {
-      if (toast.parentElement) {
-        toast.remove();
-      }
-    }, 5000);
+    if (toast.parentElement) {
+    toast.remove();
+  }
+  }, 5000);
   }
 
-  // ❌ HIỂN THỊ THÔNG BÁO LỖI
-  function showErrorMessage(message) {
-    const toast = document.createElement('div');
-    toast.className = 'alert alert-danger position-fixed';
-    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    toast.innerHTML = `
-    <i class="fa fa-exclamation-triangle"></i> ${message}
-    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
-  `;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-      if (toast.parentElement) {
-        toast.remove();
-      }
-    }, 5000);
+    // 🔧 CHỈNH SỬA HỢP ĐỒNG
+    function editContract(contractId) {
+    console.log('🔍 Attempting to edit contract with ID:', contractId);
+    window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
   }
 </script>
+
 
 <style>
   .cursor-pointer {

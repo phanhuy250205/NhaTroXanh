@@ -369,8 +369,9 @@ public class PayController {
                 }
 
                 response.put("success", true);
-                response.put("message", "Đã đặt lịch thanh toán tiền mặt. Chủ trọ sẽ liên hệ để xác nhận.");
-                response.put("redirectUrl", "/guest/success-thanhtoan?invoiceId=" + invoiceId);
+                response.put("message", "Đã đặt lịch thanh toán tiền mặt thành công! Chủ trọ sẽ liên hệ để xác nhận. Vui lòng chờ xác nhận từ chủ trọ.");
+                response.put("appointmentScheduled", true);
+                // Không redirect, giữ nguyên trang thanh toán
                 return ResponseEntity.ok(response);
             } else {
                 // For other payment methods, process as paid immediately
@@ -880,7 +881,9 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
+            // Update payment status and set payment method to cash
             payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
+            payment.setPaymentMethod(Payments.PaymentMethod.TIỀN_MẶT);
             payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
             paymentsRepository.save(payment);
 
@@ -902,8 +905,13 @@ public class PayController {
                     log.error("Failed to send cash payment success email: {}", e.getMessage());
                 }
 
-                // Update notification for tenant using the new cash payment confirmation method
-                notificationService.handleCashPaymentConfirmation(contract.getTenant(), payment);
+                // Create cash payment success notification for tenant
+                try {
+                    notificationService.createCashPaymentSuccessNotification(contract.getTenant(), payment);
+                    log.info("Created cash payment success notification for tenant {}", contract.getTenant().getUserId());
+                } catch (Exception e) {
+                    log.error("Failed to create cash payment success notification: {}", e.getMessage());
+                }
             }
 
             response.put("success", true);
