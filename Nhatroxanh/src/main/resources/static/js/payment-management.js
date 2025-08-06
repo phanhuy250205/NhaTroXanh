@@ -295,7 +295,7 @@ function populateInvoiceModal(payment) {
     document.getElementById('invoiceModal').setAttribute('data-payment-id', payment.paymentId);
 }
 
-// Mark payment as paid
+// Mark payment as paid (for cash payments)
 function markAsPaid() {
     const modal = document.getElementById('invoiceModal');
     const paymentId = modal.getAttribute('data-payment-id');
@@ -305,29 +305,36 @@ function markAsPaid() {
         return;
     }
     
-    fetch(`/api/payments/${paymentId}/status`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'ĐÃ_THANH_TOÁN' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('success', 'Đã cập nhật trạng thái thanh toán');
-            // Close modal
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            bsModal.hide();
-            // Reload current page
-            loadPage(currentPage);
-        } else {
-            showAlert('error', data.message || 'Có lỗi xảy ra');
+    // Show confirmation dialog
+    showAlert('warning', 'Bạn có chắc chắn muốn đánh dấu hóa đơn này đã thanh toán bằng tiền mặt?', { 
+        showConfirm: true, 
+        onConfirm: () => {
+            // Call the cash payment confirmation endpoint
+            fetch('/landlord/confirm-cash-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `paymentId=${paymentId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', 'Đã xác nhận thanh toán tiền mặt thành công! Thông báo đã được gửi đến người thuê.');
+                    // Close modal
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    bsModal.hide();
+                    // Reload current page
+                    loadPage(currentPage);
+                } else {
+                    showAlert('error', data.message || 'Có lỗi xảy ra khi xác nhận thanh toán');
+                }
+            })
+            .catch(error => {
+                console.error('Error confirming cash payment:', error);
+                showAlert('error', 'Có lỗi xảy ra khi xác nhận thanh toán tiền mặt');
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error updating payment status:', error);
-        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái');
     });
 }
 

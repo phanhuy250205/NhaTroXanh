@@ -424,6 +424,41 @@
 
     <div th:replace="~{/layouts/footer}"></div>
 
+    <!-- Success Modal for Cash Payment -->
+    <div class="modal fade" id="cashPaymentSuccessModal" tabindex="-1" aria-labelledby="cashPaymentSuccessModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="cashPaymentSuccessModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Đặt Lịch Thành Công
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-calendar-check text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-success mb-3">Bạn đã đặt lịch hẹn thành công!</h4>
+                    <p class="mb-3">Vui lòng thanh toán đúng hẹn theo thời gian đã đặt.</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Lưu ý:</strong> Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian thanh toán.
+                    </div>
+                    <div id="appointmentDetails" class="mt-3">
+                        <!-- Appointment details will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>
+                        Đã hiểu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Font Awesome (for icons) -->
@@ -611,21 +646,14 @@
             const addressId = urlParams.get('address_id');
             const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
             const paymentBtn = document.getElementById('paymentBtn');
-            let formData = new FormData();
 
-            formData.append('invoiceId', invoiceId);
-            if (roomId) formData.append('room_id', roomId);
-            if (hostelId) formData.append('hostel_id', hostelId);
-            if (addressId) formData.append('address_id', addressId);
-            formData.append('paymentMethod', selectedMethod.value);
-
+            // Handle e-wallet payments separately
             if (selectedMethod.value === 'ewallet') {
                 const selectedWallet = document.querySelector('input[name="wallet"]:checked');
                 if (!selectedWallet) {
                     showAlert('Vui lòng chọn ví điện tử!', 'warning');
                     return;
                 }
-                formData.append('wallet', selectedWallet.value);
 
                 if (selectedWallet.value === 'momo') {
                     processMoMoPayment(invoiceId, paymentBtn);
@@ -637,30 +665,57 @@
                     processZaloPayPayment(invoiceId, paymentBtn);
                     return;
                 }
-            } else if (selectedMethod.value === 'cash') {
+            }
+
+            // Prepare form data for cash and bank payments
+            let formData = new FormData();
+            formData.append('invoiceId', invoiceId);
+            if (roomId) formData.append('room_id', roomId);
+            if (hostelId) formData.append('hostel_id', hostelId);
+            if (addressId) formData.append('address_id', addressId);
+
+            // Set payment method correctly
+            if (selectedMethod.value === 'cash') {
+                formData.append('paymentMethod', 'cash');
                 const paymentDate = document.getElementById('paymentDate').value;
                 const paymentTime = document.getElementById('paymentTime').value;
-                const paymentNote = document.getElementById('paymentNote').value;
+                const paymentNote = document.getElementById('paymentNote').value || '';
+                
                 formData.append('paymentDate', paymentDate);
                 formData.append('paymentTime', paymentTime);
                 formData.append('paymentNote', paymentNote);
+            } else if (selectedMethod.value === 'bank') {
+                formData.append('paymentMethod', 'bank');
             }
 
-            let message = 'Xác nhận thanh toán ' + (document.querySelector('.total-amount-guest').textContent || '0 VNĐ') + ' bằng ';
+            // Add voucher code if present
+            const voucherCode = document.getElementById('voucherCode').value.trim();
+            if (voucherCode) {
+                formData.append('voucherCode', voucherCode);
+            }
+
+            // Create confirmation message
+            const totalAmountElement = document.getElementById('finalTotal');
+            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
+            let message = `Xác nhận thanh toán ${totalAmount} bằng `;
+            
             switch (selectedMethod.value) {
                 case 'bank':
                     message += 'chuyển khoản ngân hàng?';
                     break;
-                case 'ewallet':
-                    message += `ví điện tử ${document.querySelector('input[name="wallet"]:checked').value.toUpperCase()}?`;
-                    break;
                 case 'cash':
-                    message += `tiền mặt vào ngày ${document.getElementById('paymentDate').value} lúc ${document.getElementById('paymentTime').value}?`;
+                    const paymentDate = document.getElementById('paymentDate').value;
+                    const paymentTime = document.getElementById('paymentTime').value;
+                    message += `tiền mặt vào ngày ${formatDate(paymentDate)} lúc ${paymentTime}?`;
                     break;
+                default:
+                    message += 'phương thức đã chọn?';
             }
 
             if (confirm(message)) {
-                paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán...';
+                // Update button state
+                const originalButtonText = paymentBtn.innerHTML;
+                paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
                 paymentBtn.disabled = true;
 
                 fetch('/thanh-toan', {
@@ -675,17 +730,31 @@
                     })
                     .then(data => {
                         if (data.success) {
-                            paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
-                            paymentBtn.classList.remove('btn-primary-guest');
-                            paymentBtn.classList.add('btn-success-guest');
-
-                            setTimeout(() => {
-                                if (selectedMethod.value === 'cash') {
-                                    showAlert('Đã đặt lịch thanh toán thành công! Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian.', 'success');
-                                } else {
-                                    showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn. Hóa đơn đã được gửi qua email.', 'success');
-                                }
-
+                            if (selectedMethod.value === 'cash' && data.appointmentScheduled) {
+                                // Handle cash payment appointment scheduling
+                                paymentBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Đã đặt lịch thành công!';
+                                paymentBtn.classList.remove('btn-primary-guest');
+                                paymentBtn.classList.add('btn-success-guest');
+                                
+                                // Get the actual values from the form elements
+                                const paymentDateValue = document.getElementById('paymentDate').value;
+                                const paymentTimeValue = document.getElementById('paymentTime').value;
+                                
+                                // Show success modal for cash payment and keep user on page
+                                showCashPaymentSuccessModal(paymentDateValue, paymentTimeValue, totalAmount, data.message);
+                                
+                                // Reset form after showing modal (optional)
+                                setTimeout(() => {
+                                    resetPaymentForm();
+                                }, 3000);
+                            } else {
+                                // Handle other payment methods (bank, etc.)
+                                paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
+                                paymentBtn.classList.remove('btn-primary-guest');
+                                paymentBtn.classList.add('btn-success-guest');
+                                
+                                showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn.', 'success');
+                                
                                 setTimeout(() => {
                                     if (data.redirectUrl) {
                                         window.location.href = data.redirectUrl;
@@ -693,12 +762,10 @@
                                         window.location.reload();
                                     }
                                 }, 2000);
-                            }, 1500);
+                            }
                         } else {
                             showAlert(data.error || 'Thanh toán thất bại: Lỗi hệ thống.', 'danger');
-                            paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
-                            paymentBtn.classList.remove('btn-success-guest');
-                            paymentBtn.classList.add('btn-primary-guest');
+                            paymentBtn.innerHTML = originalButtonText;
                             paymentBtn.disabled = false;
 
                             // Redirect to failure page if available
@@ -711,22 +778,75 @@
                     })
                     .catch(error => {
                         console.error('Error processing payment:', error);
-                        showAlert('Thanh toán thất bại: Lỗi kết nối hoặc phản hồi không đầy đủ. Chi tiết: ' + error.message, 'danger');
-                        paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
-                        paymentBtn.classList.remove('btn-success-guest');
-                        paymentBtn.classList.add('btn-primary-guest');
+                        showAlert('Thanh toán thất bại: Lỗi kết nối. Vui lòng thử lại.', 'danger');
+                        paymentBtn.innerHTML = originalButtonText;
                         paymentBtn.disabled = false;
 
                         // Redirect to failure page after showing error
                         setTimeout(() => {
-                            const urlParams = new URLSearchParams(window.location.search);
-                            const invoiceId = urlParams.get('invoiceId');
                             if (invoiceId) {
                                 window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent('Lỗi kết nối mạng')}`;
                             }
                         }, 3000);
                     });
             }
+        }
+
+        // Show cash payment success modal with appointment details
+        function showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount, message) {
+            const modal = new bootstrap.Modal(document.getElementById('cashPaymentSuccessModal'));
+            const appointmentDetailsDiv = document.getElementById('appointmentDetails');
+            appointmentDetailsDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <p class="mb-2"><strong>Thông báo:</strong> ${message || 'Đã đặt lịch thanh toán tiền mặt thành công!'}</p>
+                </div>
+                <div class="appointment-info">
+                    <p><strong>Ngày thanh toán:</strong> ${paymentDate}</p>
+                    <p><strong>Giờ thanh toán:</strong> ${paymentTime}</p>
+                    <p><strong>Số tiền:</strong> ${totalAmount}</p>
+                </div>
+            `;
+            modal.show();
+        }
+
+        // Reset payment form after successful cash payment scheduling
+        function resetPaymentForm() {
+            const paymentBtn = document.getElementById('paymentBtn');
+            
+            // Reset button to original state
+            paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+            paymentBtn.classList.remove('btn-success-guest');
+            paymentBtn.classList.add('btn-primary-guest');
+            paymentBtn.disabled = false;
+            
+            // Clear payment method selections
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Clear wallet selections
+            document.querySelectorAll('input[name="wallet"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Hide payment options
+            document.getElementById('walletOptions').style.display = 'none';
+            document.getElementById('cashOptions').style.display = 'none';
+            
+            // Clear cash payment form
+            document.getElementById('paymentDate').value = '';
+            document.getElementById('paymentTime').value = '';
+            document.getElementById('paymentNote').value = '';
+            
+            // Remove active classes from payment options
+            document.querySelectorAll('.payment-option-guest').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // Clear voucher form
+            document.getElementById('voucherCode').value = '';
+            document.getElementById('voucherMessage').style.display = 'none';
+            document.getElementById('voucherError').style.display = 'none';
         }
 
 
@@ -947,21 +1067,7 @@
             }
 
             if (selectedMethod.value === 'cash') {
-                const paymentDate = document.getElementById('paymentDate').value;
-                const paymentTime = document.getElementById('paymentTime').value;
-
-                if (!paymentDate || !paymentTime) {
-                    showAlert('Vui lòng chọn ngày và giờ thanh toán!', 'warning');
-                    return false;
-                }
-
-                const selectedDateTime = new Date(paymentDate + ' ' + paymentTime);
-                const now = new Date();
-
-                if (selectedDateTime <= now) {
-                    showAlert('Vui lòng chọn thời gian trong tương lai!', 'warning');
-                    return false;
-                }
+                return validateCashPayment();
             }
 
             return true;
@@ -994,6 +1100,84 @@
         function formatCurrency(amount) {
             return amount.toLocaleString('vi-VN');
         }
+
+        // Helper function to format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Enhanced cash payment validation
+        function validateCashPayment() {
+            const paymentDate = document.getElementById('paymentDate').value;
+            const paymentTime = document.getElementById('paymentTime').value;
+
+            if (!paymentDate) {
+                showAlert('Vui lòng chọn ngày thanh toán!', 'warning');
+                return false;
+            }
+
+            if (!paymentTime) {
+                showAlert('Vui lòng chọn giờ thanh toán!', 'warning');
+                return false;
+            }
+
+            // Check if selected date is not in the past
+            const selectedDate = new Date(paymentDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                showAlert('Không thể chọn ngày trong quá khứ!', 'warning');
+                return false;
+            }
+
+            // Check if selected datetime is not in the past (for today)
+            const selectedDateTime = new Date(paymentDate + ' ' + paymentTime);
+            const now = new Date();
+
+            if (selectedDate.getTime() === today.getTime() && selectedDateTime <= now) {
+                showAlert('Vui lòng chọn thời gian trong tương lai!', 'warning');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Update button text based on payment method
+        function updatePaymentButtonText() {
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+            const paymentBtn = document.getElementById('paymentBtn');
+            
+            if (!selectedMethod || !paymentBtn) return;
+
+            switch (selectedMethod.value) {
+                case 'cash':
+                    paymentBtn.innerHTML = '<i class="fas fa-calendar-plus"></i> Đặt Lịch Thanh Toán';
+                    break;
+                case 'bank':
+                    paymentBtn.innerHTML = '<i class="fas fa-university"></i> Thanh Toán Ngân Hàng';
+                    break;
+                case 'ewallet':
+                    paymentBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Thanh Toán Ví Điện Tử';
+                    break;
+                default:
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+            }
+        }
+
+        // Add event listeners for payment method changes
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add listeners to payment method radio buttons
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                radio.addEventListener('change', updatePaymentButtonText);
+            });
+        });
     </script>
 
 </body>

@@ -230,7 +230,6 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-
     public void sendContractEmail(String to, String customerName, byte[] pdfContent, String contractNumber)
             throws Exception {
 
@@ -278,7 +277,6 @@ public class EmailServiceImpl implements EmailService {
             mailSender.send(message);
 
         } catch (Exception e) {
-
             throw e;
         }
     }
@@ -408,18 +406,15 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendEmail(String to, String subject, String body) throws Exception {
-
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("nhatroxanh123@gmail.com"); // ✅ Thay bằng email của bạn
+            message.setFrom("nhatroxanh123@gmail.com");
             message.setTo(to);
             message.setSubject(subject);
             message.setText(body);
 
             mailSender.send(message);
-
         } catch (Exception e) {
-
             throw new Exception("Không thể gửi email: " + e.getMessage());
         }
     }
@@ -427,7 +422,6 @@ public class EmailServiceImpl implements EmailService {
     @Override
     public void sendEmailWithAttachment(String to, String subject, String body,
             byte[] attachmentData, String fileName) throws Exception {
-
         try {
             // ✅ VALIDATE ATTACHMENT
             if (attachmentData == null || attachmentData.length == 0) {
@@ -440,7 +434,6 @@ public class EmailServiceImpl implements EmailService {
                     String header = new String(attachmentData, 0, Math.min(10, attachmentData.length));
 
                     if (!header.startsWith("%PDF")) {
-
                         throw new Exception("Invalid PDF format!");
                     }
                 }
@@ -487,6 +480,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
 
+    @Override
     public void sendVoucherDeactivationEmail(Vouchers voucher) {
         Users creator = voucher.getUser();
 
@@ -596,6 +590,67 @@ public class EmailServiceImpl implements EmailService {
                 """, newPassword);
 
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, ""));
+    }
+
+    @Override
+    public void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
+                                              String roomName, String hostelName, String paymentDate, 
+                                              String paymentTime, String amount, String note, Integer paymentId) {
+        String title = "Lịch hẹn thanh toán tiền mặt - Hóa đơn #" + paymentId;
+        
+        String content = String.format(
+            "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
+            "<h3 style='color: #28a745; margin-bottom: 15px;'>📅 Thông tin lịch hẹn thanh toán</h3>" +
+            "<table style='width: 100%%; border-collapse: collapse;'>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Người thuê:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Giờ hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
+            "%s" +
+            "</table>" +
+            "</div>" +
+            "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
+            "<p style='margin: 0; color: #856404;'><strong>⚠️ Lưu ý:</strong> Vui lòng xác nhận việc nhận thanh toán trong hệ thống sau khi người thuê đã thanh toán.</p>" +
+            "</div>",
+            tenantName, roomName, hostelName, paymentDate, paymentTime, amount,
+            (note != null && !note.trim().isEmpty()) ? 
+                String.format("<tr><td style='padding: 8px 0; font-weight: bold;'>Ghi chú:</td><td style='padding: 8px 0;'>%s</td></tr>", note) : ""
+        );
+
+        String greeting = String.format("Xin chào %s", landlordName);
+        String footer = "Vui lòng đăng nhập vào hệ thống để xác nhận thanh toán sau khi nhận tiền từ người thuê.";
+        
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
+    }
+
+    @Override
+    public void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
+                                          String hostelName, String amount, String paymentDate, Integer paymentId) {
+        String title = "Thanh toán thành công - Hóa đơn #" + paymentId;
+        
+        String content = String.format(
+            "<div style='background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
+            "<h3 style='color: #155724; margin-bottom: 15px;'>✅ Thanh toán đã được xác nhận</h3>" +
+            "<table style='width: 100%%; border-collapse: collapse;'>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền đã thanh toán:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày thanh toán:</td><td style='padding: 8px 0;'>%s</td></tr>" +
+            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phương thức:</td><td style='padding: 8px 0;'>Tiền mặt</td></tr>" +
+            "</table>" +
+            "</div>" +
+            "<div style='background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
+            "<p style='margin: 0; color: #0c5460;'><strong>💡 Thông tin:</strong> Chủ trọ đã xác nhận đã nhận được thanh toán của bạn. Cảm ơn bạn đã thanh toán đúng hạn!</p>" +
+            "</div>",
+            roomName, hostelName, amount, paymentDate
+        );
+
+        String greeting = String.format("Xin chào %s", tenantName);
+        String footer = "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!";
+        
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
     }
 
 }

@@ -142,6 +142,97 @@
             margin-bottom: 20px;
         }
 
+        /* Pagination Styles */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 10px;
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: #6b7280;
+            margin-right: 20px;
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pagination-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            color: #3e83cc;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 40px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(.disabled) {
+            background: #3e83cc;
+            color: white;
+            text-decoration: none;
+        }
+
+        .pagination-btn.active {
+            background: #3e83cc;
+            color: white;
+            border-color: #3e83cc;
+        }
+
+        .pagination-btn.disabled {
+            background: #f3f4f6;
+            color: #9ca3af;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+
+        .pagination-btn i {
+            font-size: 12px;
+        }
+
+        .pagination-ellipsis {
+            color: #9ca3af;
+            padding: 8px 4px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .pagination-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .pagination-info {
+                margin-right: 0;
+                text-align: center;
+            }
+
+            .pagination-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .pagination-btn {
+                padding: 6px 10px;
+                font-size: 13px;
+                min-width: 35px;
+            }
+        }
+
         .notification-card-item {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 15px;
@@ -582,15 +673,31 @@
             <div class="panel-section-notifications show-panel-notifications active" id="lodging-notifications"
                 role="tabpanel">
                 <div class="notification-list-container" id="lodging-notifications-list"></div>
+                <div class="pagination-container" id="lodging-pagination" style="display: none;">
+                    <div class="pagination-info" id="lodging-pagination-info"></div>
+                    <div class="pagination-controls" id="lodging-pagination-controls"></div>
+                </div>
             </div>
             <div class="panel-section-notifications" id="finance-notifications" role="tabpanel">
                 <div class="notification-list-container" id="finance-notifications-list"></div>
+                <div class="pagination-container" id="finance-pagination" style="display: none;">
+                    <div class="pagination-info" id="finance-pagination-info"></div>
+                    <div class="pagination-controls" id="finance-pagination-controls"></div>
+                </div>
             </div>
             <div class="panel-section-notifications" id="deals-notifications" role="tabpanel">
                 <div class="notification-list-container" id="deals-notifications-list"></div>
+                <div class="pagination-container" id="deals-pagination" style="display: none;">
+                    <div class="pagination-info" id="deals-pagination-info"></div>
+                    <div class="pagination-controls" id="deals-pagination-controls"></div>
+                </div>
             </div>
             <div class="panel-section-notifications" id="profile-notifications" role="tabpanel">
                 <div class="notification-list-container" id="profile-notifications-list"></div>
+                <div class="pagination-container" id="profile-pagination" style="display: none;">
+                    <div class="pagination-info" id="profile-pagination-info"></div>
+                    <div class="pagination-controls" id="profile-pagination-controls"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -599,6 +706,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Pagination state for each tab
+            const paginationState = {
+                'lodging-notifications': { currentPage: 0, totalPages: 0, totalItems: 0 },
+                'finance-notifications': { currentPage: 0, totalPages: 0, totalItems: 0 },
+                'deals-notifications': { currentPage: 0, totalPages: 0, totalItems: 0 },
+                'profile-notifications': { currentPage: 0, totalPages: 0, totalItems: 0 }
+            };
+
             // Tab switching functionality
             const tabLinks = document.querySelectorAll('.tab-link-notifications');
             const tabPanes = document.querySelectorAll('.panel-section-notifications');
@@ -612,6 +727,8 @@
                     const targetPane = document.getElementById(targetId);
                     if (targetPane) {
                         targetPane.classList.add('show-panel-notifications');
+                        // Load notifications for the selected tab if not already loaded
+                        loadNotificationsForTab(targetId);
                     }
                 });
             });
@@ -646,9 +763,27 @@
                 });
             });
 
-            // Fetch and render notifications
-            function loadNotifications() {
-                fetch('/api/notifications', {
+            // Map tab IDs to notification types
+            const tabToType = {
+                'lodging-notifications': [ 'REPORT'],
+                'finance-notifications': ['PAYMENT'],
+                'deals-notifications': ['PROMOTION'],
+                'profile-notifications': ['ACCOUNT', 'SYSTEM']
+            };
+
+            // Load notifications for a specific tab with pagination
+            function loadNotificationsForTab(tabId, page = 0) {
+                const types = tabToType[tabId];
+                if (!types || types.length === 0) return;
+
+                // For mixed tabs, load all notifications and filter client-side
+                // For single-type tabs, use server-side filtering
+                let url = '/api/notifications?page=' + page + '&size=8';
+                if (types.length === 1) {
+                    url += '&type=' + types[0];
+                }
+
+                fetch(url, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -659,15 +794,7 @@
                         if (!response.ok) {
                             throw new Error(`HTTP error! Status: ${response.status}`);
                         }
-                        return response.text().then(text => {
-                            try {
-                                const data = JSON.parse(text);
-                                return data;
-                            } catch (e) {
-                                console.error('Invalid JSON response:', text);
-                                throw new Error(`Invalid JSON: ${e.message}`);
-                            }
-                        });
+                        return response.json();
                     })
                     .then(data => {
                         if (data.error) {
@@ -682,68 +809,179 @@
                             return;
                         }
 
-                        const containers = {
-                            lodging: document.getElementById('lodging-notifications-list'),
-                            finance: document.getElementById('finance-notifications-list'),
-                            deals: document.getElementById('deals-notifications-list'),
-                            profile: document.getElementById('profile-notifications-list')
+                        // Filter notifications for mixed tabs
+                        let filteredNotifications = data.notifications;
+                        if (types.length > 1) {
+                            filteredNotifications = data.notifications.filter(notification => 
+                                types.includes(notification.type)
+                            );
+                        }
+
+                        // Update pagination state
+                        paginationState[tabId] = {
+                            currentPage: data.currentPage || page,
+                            totalPages: data.totalPages || 1,
+                            totalItems: data.totalItems || filteredNotifications.length
                         };
 
-                        Object.values(containers).forEach(container => {
-                            if (container) container.innerHTML = '';
-                        });
-
-                        const typeToTab = {
-                            'PAYMENT': 'finance-notifications-list',
-                            'CONTRACT': 'lodging-notifications-list',
-                            'SYSTEM': 'profile-notifications-list',
-                            'REPORT': 'lodging-notifications-list',
-                            'PROMOTION': 'deals-notifications-list',
-                            'ACCOUNT': 'profile-notifications-list',
-                            'HOSTEL_ACTIVITY': 'lodging-notifications-list'
-                        };
-
-                        data.notifications.forEach(notification => {
-                            if (!notification) {
-                                console.warn('Invalid notification:', notification);
-                                return;
-                            }
-                            const tabId = typeToTab[notification.type] || 'lodging-notifications';
-                            const container = document.getElementById(tabId);
-                            const allContainer = document.getElementById('lodging-notifications');
-
-                            if (!container || !allContainer) {
-                                console.error('Tab container not found for tabId:', tabId);
-                                return;
-                            }
-
-                            [container, allContainer].forEach(cont => {
-                                if (cont && cont !== container) return; // Skip duplicate rendering in all tab
-                                const card = createNotificationCard(notification);
-                                if (card) cont.appendChild(card);
-                            });
-
-                            const cardHeader = container.querySelector(`[data-notification-id="${notification.notificationId}"]`);
-                            if (cardHeader && !notification.isRead) {
-                                cardHeader.addEventListener('click', () => {
-                                    markNotificationAsRead(notification.notificationId, cardHeader);
-                                }, { once: true });
-                            }
-                        });
-
-                        Object.entries(containers).forEach(([key, container]) => {
-                            if (container && container.children.length === 0) {
-                                const emptyItem = document.createElement('div');
-                                emptyItem.className = 'notification-card-item';
-                                emptyItem.innerHTML = '<div class="notification-card-body text-center">Không có thông báo</div>';
-                                container.appendChild(emptyItem);
-                            }
-                        });
+                        // Render notifications
+                        renderNotifications(tabId, filteredNotifications);
+                        
+                        // Update pagination UI
+                        updatePaginationUI(tabId);
                     })
                     .catch(error => {
                         console.error('Error loading notifications:', error);
                         showAlert('danger', 'Không thể tải thông báo: ' + error.message);
                     });
+            }
+
+            // Render notifications for a specific tab
+            function renderNotifications(tabId, notifications) {
+                const container = document.getElementById(tabId + '-list');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (notifications.length === 0) {
+                    const emptyItem = document.createElement('div');
+                    emptyItem.className = 'notification-card-item';
+                    emptyItem.innerHTML = '<div class="notification-card-body text-center">Không có thông báo</div>';
+                    container.appendChild(emptyItem);
+                    return;
+                }
+
+                notifications.forEach(notification => {
+                    if (!notification) {
+                        console.warn('Invalid notification:', notification);
+                        return;
+                    }
+
+                    const card = createNotificationCard(notification);
+                    if (card) {
+                        container.appendChild(card);
+
+                        // Add click handler for unread notifications
+                        const cardHeader = card.querySelector(`[data-notification-id="${notification.notificationId}"]`);
+                        if (cardHeader && !notification.isRead) {
+                            cardHeader.addEventListener('click', () => {
+                                markNotificationAsRead(notification.notificationId, cardHeader);
+                            }, { once: true });
+                        }
+                    }
+                });
+            }
+
+            // Update pagination UI for a specific tab
+            function updatePaginationUI(tabId) {
+                const state = paginationState[tabId];
+                const paginationContainer = document.getElementById(tabId.replace('-notifications', '-pagination'));
+                const paginationInfo = document.getElementById(tabId.replace('-notifications', '-pagination-info'));
+                const paginationControls = document.getElementById(tabId.replace('-notifications', '-pagination-controls'));
+
+                if (!paginationContainer || !paginationInfo || !paginationControls) return;
+
+                // Show/hide pagination based on total pages
+                if (state.totalPages <= 1) {
+                    paginationContainer.style.display = 'none';
+                    return;
+                }
+
+                paginationContainer.style.display = 'flex';
+
+                // Update pagination info
+                const startItem = state.currentPage * 8 + 1;
+                const endItem = Math.min((state.currentPage + 1) * 8, state.totalItems);
+                paginationInfo.textContent = `Hiển thị ${startItem}-${endItem} trong tổng số ${state.totalItems} thông báo`;
+
+                // Update pagination controls
+                paginationControls.innerHTML = '';
+
+                // Previous button
+                const prevBtn = createPaginationButton('‹', state.currentPage - 1, state.currentPage === 0);
+                prevBtn.addEventListener('click', () => {
+                    if (state.currentPage > 0) {
+                        loadNotificationsForTab(tabId, state.currentPage - 1);
+                    }
+                });
+                paginationControls.appendChild(prevBtn);
+
+                // Page numbers
+                const maxVisiblePages = 5;
+                let startPage = Math.max(0, state.currentPage - Math.floor(maxVisiblePages / 2));
+                let endPage = Math.min(state.totalPages - 1, startPage + maxVisiblePages - 1);
+
+                if (endPage - startPage < maxVisiblePages - 1) {
+                    startPage = Math.max(0, endPage - maxVisiblePages + 1);
+                }
+
+                // First page and ellipsis
+                if (startPage > 0) {
+                    const firstBtn = createPaginationButton('1', 0, false);
+                    firstBtn.addEventListener('click', () => loadNotificationsForTab(tabId, 0));
+                    paginationControls.appendChild(firstBtn);
+
+                    if (startPage > 1) {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = 'pagination-ellipsis';
+                        ellipsis.textContent = '...';
+                        paginationControls.appendChild(ellipsis);
+                    }
+                }
+
+                // Page number buttons
+                for (let i = startPage; i <= endPage; i++) {
+                    const pageBtn = createPaginationButton((i + 1).toString(), i, false, i === state.currentPage);
+                    pageBtn.addEventListener('click', () => loadNotificationsForTab(tabId, i));
+                    paginationControls.appendChild(pageBtn);
+                }
+
+                // Last page and ellipsis
+                if (endPage < state.totalPages - 1) {
+                    if (endPage < state.totalPages - 2) {
+                        const ellipsis = document.createElement('span');
+                        ellipsis.className = 'pagination-ellipsis';
+                        ellipsis.textContent = '...';
+                        paginationControls.appendChild(ellipsis);
+                    }
+
+                    const lastBtn = createPaginationButton(state.totalPages.toString(), state.totalPages - 1, false);
+                    lastBtn.addEventListener('click', () => loadNotificationsForTab(tabId, state.totalPages - 1));
+                    paginationControls.appendChild(lastBtn);
+                }
+
+                // Next button
+                const nextBtn = createPaginationButton('›', state.currentPage + 1, state.currentPage >= state.totalPages - 1);
+                nextBtn.addEventListener('click', () => {
+                    if (state.currentPage < state.totalPages - 1) {
+                        loadNotificationsForTab(tabId, state.currentPage + 1);
+                    }
+                });
+                paginationControls.appendChild(nextBtn);
+            }
+
+            // Create pagination button
+            function createPaginationButton(text, page, disabled = false, active = false) {
+                const button = document.createElement('button');
+                button.className = 'pagination-btn';
+                button.textContent = text;
+                
+                if (disabled) {
+                    button.classList.add('disabled');
+                    button.disabled = true;
+                }
+                
+                if (active) {
+                    button.classList.add('active');
+                }
+                
+                return button;
+            }
+
+            // Load initial notifications for the active tab
+            function loadNotifications() {
+                // Load notifications for the default active tab (lodging-notifications)
+                loadNotificationsForTab('lodging-notifications', 0);
             }
 
             // Create notification card

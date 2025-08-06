@@ -58,4 +58,12 @@ public interface EmailService {
 
     void sendHtmlEmail(String to, String subject, String htmlContent) throws Exception;
 
+    // Cash payment appointment email methods
+    void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
+                                       String roomName, String hostelName, String paymentDate, 
+                                       String paymentTime, String amount, String note, Integer paymentId);
+
+    void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
+                                   String hostelName, String amount, String paymentDate, Integer paymentId);
+
 }
