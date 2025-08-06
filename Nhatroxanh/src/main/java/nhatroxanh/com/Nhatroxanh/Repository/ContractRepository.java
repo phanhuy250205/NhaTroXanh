@@ -26,7 +26,11 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c JOIN FETCH c.owner JOIN FETCH c.tenant WHERE c.owner.userId = :ownerId")
         List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
-        @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
+    @Query("SELECT c FROM Contracts c JOIN c.owner o WHERE o.userId = :ownerId")
+    Page<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+
+    @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
         List<Contracts> findByRoomId(@Param("roomId") Integer roomId);
 
         List<Contracts> findByTenantUserId(@Param("userId") Integer userId);
@@ -181,5 +185,14 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         // ContractsRepository.java
         Optional<Contracts> findTopByTenantOrderByContractIdDesc(Users tenant);
+
+    // Các phương thức mới
+    Page<Contracts> findByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
+
+    @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId AND c.status = :status")
+    Page<Contracts> findByOwnerIdAndStatus(@Param("ownerId") Integer ownerId, @Param("status") Contracts.Status status, Pageable pageable);
+
+    @Query("SELECT c FROM Contracts c WHERE LOWER(c.room.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%'))")
+    Page<Contracts> findByRoomName(@Param("roomName") String roomName, Pageable pageable);
 
 }

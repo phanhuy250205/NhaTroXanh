@@ -349,8 +349,8 @@ table thead {
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 8px 16px;
-  height: 40px;
+  padding: 8px 25px;
+  height: 43px;
   display: flex;
   align-items: center;
   gap: 6px;

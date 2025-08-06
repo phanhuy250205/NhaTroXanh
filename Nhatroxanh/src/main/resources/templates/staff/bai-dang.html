@@ -627,8 +627,8 @@
                                 <div class="post-info">
                                     <i class="fas fa-info-circle"></i>
                                     <span
-                                        th:text="${post.description?.substring(0, #strings.length(post.description) > 150 ? 150 : #strings.length(post.description)) + '...'}">
-                                        Phòng mới, đầy đủ tiện nghi
+                                        th:utext="${#strings.length(post.description) > 150 ? #strings.replace(post.description.substring(0, 150) + '...', '\n', '<br/>') : #strings.replace(post.description, '\n', '<br/>')}">
+                                        Đầy đủ nội thất
                                     </span>
                                 </div>
 

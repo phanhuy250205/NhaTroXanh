@@ -11,6 +11,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- WebSocket Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
     <!-- Axios -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
@@ -229,508 +233,617 @@
             box-shadow: 0 2px 8px rgba(62, 131, 204, 0.05);
             height: 320px;
         }
+        /* Chat Widget Styles */
+        .chat-widget {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        @media (max-width: 1200px) {
-            .main-content-wrapper-host {
-                padding: 12px;
+        /* Chat Icon */
+        .chat-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow-primary);
+            transition: all 0.3s ease;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .chat-icon:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .chat-icon i {
+            color: white;
+            font-size: 24px;
+        }
+
+        .chat-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: var(--shadow-primary);
             }
-
-            .metrics-grid-host {
-                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-                gap: 10px;
+            50% {
+                box-shadow: 0 4px 20px rgba(62, 131, 204, 0.4);
             }
-
-            .page-title-host {
-                font-size: 22px;
-            }
-
-            .finance-cards-host {
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            100% {
+                box-shadow: var(--shadow-primary);
             }
         }
 
-        @media (max-width: 992px) {
-            .main-content-wrapper-host {
-                margin-left: 80px;
-                width: calc(100% - 80px);
-            }
-
-            .metrics-grid-host {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .finance-cards-host {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
-            }
-
-            .time-selector-host {
-                min-width: 160px;
-                font-size: 13px;
-            }
+        /* Chat Box */
+        .chat-box {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 350px;
+            height: 450px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
         }
 
+        .chat-box.active {
+            display: flex;
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .chat-header-text h4 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .chat-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Chat Messages */
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+
+        .message.received {
+            justify-content: flex-start;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-content {
+            max-width: 70%;
+            position: relative;
+        }
+
+        .message.received .message-content {
+            background: white;
+            padding: 12px 16px;
+            border-radius: 18px 18px 18px 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.sent .message-content {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 18px 18px 5px 18px;
+        }
+
+        .message-content p {
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f1f3f4;
+            border-radius: 25px;
+            padding: 5px;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            background: none;
+            padding: 10px 15px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .chat-send {
+            background: var(--gradient-primary);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chat-send:hover {
+            transform: scale(1.1);
+        }
+
+        /* Responsive cho Chat Widget */
         @media (max-width: 768px) {
-            .main-content-wrapper-host {
-                margin-left: 0;
-                padding: 10px;
-                width: 100%;
-                padding-top: 70px;
+            .chat-box {
+                width: 300px;
+                height: 400px;
+                bottom: 75px;
+                right: -10px;
             }
 
-            .page-title-host {
+            .chat-widget {
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .chat-icon {
+                width: 50px;
+                height: 50px;
+            }
+
+            .chat-icon i {
                 font-size: 20px;
-                margin-bottom: 16px;
-            }
-
-            .finance-header-host {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-            }
-
-            .time-selector-host {
-                width: 100%;
-                min-width: auto;
-                padding: 12px 40px 12px 16px;
-            }
-
-            .metrics-grid-host {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-
-            .finance-cards-host {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-
-            .chart-wrapper-host {
-                height: 280px;
-                padding: 12px;
-            }
-
-            .metric-card-host {
-                height: 100px;
-                padding: 14px;
-            }
-
-            .metric-label-host {
-                font-size: 11px;
-            }
-
-            .metric-value-host {
-                font-size: 20px;
-            }
-
-            .finance-card-host {
-                height: 75px;
-                padding: 14px;
-            }
-
-            .finance-card-title-host {
-                font-size: 11px;
-            }
-
-            .finance-card-value-host {
-                font-size: 18px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .main-content-wrapper-host {
-                padding: 8px;
-            }
-
-            .page-title-host {
-                font-size: 18px;
-                margin-bottom: 12px;
-            }
-
-            .metrics-grid-host {
-                grid-template-columns: 1fr;
-                gap: 8px;
-            }
-
-            .metric-card-host {
-                height: 85px;
-                padding: 12px;
-            }
-
-            .metric-icon-host {
-                width: 30px;
-                height: 30px;
-            }
-
-            .metric-icon-host i {
-                font-size: 14px;
-            }
-
-            .metric-label-host {
-                font-size: 10px;
-                margin-bottom: 4px;
-            }
-
-            .metric-value-host {
-                font-size: 18px;
-            }
-
-            .finance-section-host {
-                padding: 16px;
-            }
-
-            .finance-title-host {
-                font-size: 18px;
-            }
-
-            .finance-card-host {
-                height: 70px;
-                padding: 12px;
-            }
-
-            .finance-card-title-host {
-                font-size: 10px;
-                margin-bottom: 4px;
-            }
-
-            .finance-card-value-host {
-                font-size: 16px;
-            }
-
-            .chart-wrapper-host {
-                height: 240px;
-                padding: 10px;
-            }
-
-            .time-selector-host {
-                padding: 10px 35px 10px 12px;
-                font-size: 12px;
-                background-position: right 8px center;
-                background-size: 14px;
             }
         }
 
         @media (max-width: 480px) {
-            .main-content-wrapper-host {
-                padding: 6px;
+            .chat-box {
+                width: calc(100vw - 30px);
+                right: -15px;
+                left: 15px;
+                height: 350px;
             }
 
-            .page-title-host {
-                font-size: 16px;
-                margin-bottom: 10px;
+            .chat-widget {
+                bottom: 10px;
+                right: 10px;
             }
 
-            .metrics-grid-host {
-                gap: 6px;
+            .chat-icon {
+                width: 45px;
+                height: 45px;
             }
 
-            .metric-card-host {
-                height: 80px;
-                padding: 10px;
-                border-radius: 8px;
+            .chat-icon i {
+                font-size: 18px;
             }
 
-            .metric-icon-host {
-                width: 28px;
-                height: 28px;
-                border-radius: 6px;
-                margin-bottom: 6px;
+            .chat-badge {
+                width: 18px;
+                height: 18px;
+                font-size: 10px;
             }
 
-            .metric-icon-host i {
-                font-size: 12px;
+            .chat-header {
+                padding: 12px 15px;
             }
 
-            .metric-label-host {
-                font-size: 9px;
-                margin-bottom: 3px;
+            .chat-avatar {
+                width: 35px;
+                height: 35px;
             }
 
-            .metric-value-host {
-                font-size: 16px;
-            }
-
-            .section-divider-host {
-                margin: 15px 0;
-            }
-
-            .finance-section-host {
-                padding: 12px;
-                border-radius: 12px;
-            }
-
-            .finance-title-host {
-                font-size: 16px;
-            }
-
-            .finance-header-host {
-                margin-bottom: 12px;
-                gap: 8px;
-            }
-
-            .finance-cards-host {
-                gap: 6px;
-                margin-bottom: 15px;
-            }
-
-            .finance-card-host {
-                height: 65px;
-                padding: 10px;
-                border-radius: 8px;
-            }
-
-            .finance-card-title-host {
-                font-size: 9px;
-                margin-bottom: 3px;
-            }
-
-            .finance-card-value-host {
+            .chat-header-text h4 {
                 font-size: 14px;
             }
 
-            .chart-wrapper-host {
-                height: 200px;
-                padding: 8px;
-                border-radius: 8px;
+            .chat-status {
+                font-size: 11px;
             }
 
-            .time-selector-host {
-                padding: 8px 30px 8px 10px;
-                font-size: 11px;
-                border-radius: 6px;
-                background-position: right 6px center;
-                background-size: 12px;
+            .chat-messages {
+                padding: 15px;
+            }
+
+            .message-content p {
+                font-size: 13px;
+            }
+
+            .chat-input-container {
+                padding: 12px 15px;
+            }
+
+            .chat-input {
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+
+            .chat-send {
+                width: 32px;
+                height: 32px;
             }
         }
 
         @media (max-width: 360px) {
-            .main-content-wrapper-host {
-                padding: 4px;
+            .chat-box {
+                width: calc(100vw - 20px);
+                right: -10px;
+                left: 10px;
+                height: 320px;
             }
 
-            .page-title-host {
-                font-size: 14px;
-                margin-bottom: 8px;
+            .chat-icon {
+                width: 40px;
+                height: 40px;
             }
 
-            .metric-card-host {
-                height: 75px;
-                padding: 8px;
+            .chat-icon i {
+                font-size: 16px;
             }
 
-            .metric-icon-host {
-                width: 24px;
-                height: 24px;
-                margin-bottom: 4px;
+            .chat-badge {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
             }
 
-            .metric-icon-host i {
+            .chat-header {
+                padding: 10px 12px;
+            }
+
+            .chat-avatar {
+                width: 30px;
+                height: 30px;
+            }
+
+            .chat-header-text h4 {
+                font-size: 13px;
+            }
+
+            .chat-status {
                 font-size: 10px;
             }
 
-            .metric-label-host {
-                font-size: 8px;
-                margin-bottom: 2px;
+            .chat-messages {
+                padding: 12px;
             }
 
-            .metric-value-host {
-                font-size: 14px;
-            }
-
-            .finance-section-host {
-                padding: 10px;
-            }
-
-            .finance-title-host {
-                font-size: 14px;
-            }
-
-            .finance-card-host {
-                height: 60px;
-                padding: 8px;
-            }
-
-            .finance-card-title-host {
-                font-size: 8px;
-            }
-
-            .finance-card-value-host {
+            .message-content p {
                 font-size: 12px;
             }
 
-            .chart-wrapper-host {
-                height: 180px;
-                padding: 6px;
-            }
-
-            .time-selector-host {
-                padding: 6px 25px 6px 8px;
+            .message-time {
                 font-size: 10px;
-                background-position: right 4px center;
-                background-size: 10px;
+            }
+
+            .chat-input-container {
+                padding: 10px 12px;
+            }
+
+            .chat-input {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+
+            .chat-send {
+                width: 28px;
+                height: 28px;
             }
         }
 
-        ::-webkit-scrollbar {
-            width: 6px;
+        /* Scrollbar styling cho chat messages */
+        .chat-messages::-webkit-scrollbar {
+            width: 4px;
         }
 
-        ::-webkit-scrollbar-track {
-            background: rgba(62, 131, 204, 0.1);
-            border-radius: 3px;
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: var(--gradient-primary);
-            border-radius: 3px;
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--primary-blue);
+            border-radius: 2px;
         }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-blue);
+        }
+
+
     </style>
 </head>
 
 <body class="dashboard-body-host">
-    <!-- SIDEBAR -->
-    <div th:replace="~{/layouts/sidebar-host}"></div>
+<!-- SIDEBAR -->
+<div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <div class="main-content-wrapper-host">
-        <div class="dashboard-container-host">
-            <h1 class="page-title-host">BẢNG TỔNG QUAN</h1>
+<div class="main-content-wrapper-host">
+    <div class="dashboard-container-host">
+        <h1 class="page-title-host">BẢNG TỔNG QUAN</h1>
 
-            <div class="metrics-grid-host">
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #3E83CC, #2563eb);">
-                        <i class="fas fa-building"></i>
-                    </div>
-                    <div class="metric-label-host">Tổng số nhà trọ</div>
-                    <div class="metric-value-host" id="totalHostels"
-                        style="background: linear-gradient(135deg, #3E83CC, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+        <div class="metrics-grid-host">
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #3E83CC, #2563eb);">
+                    <i class="fas fa-building"></i>
                 </div>
+                <div class="metric-label-host">Tổng số nhà trọ</div>
+                <div class="metric-value-host" id="totalHostels"
+                     style="background: linear-gradient(135deg, #3E83CC, #2563eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #10b981, #059669);">
-                        <i class="fas fa-door-open"></i>
-                    </div>
-                    <div class="metric-label-host">Tổng số phòng trọ</div>
-                    <div class="metric-value-host" id="totalRooms"
-                        style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <i class="fas fa-door-open"></i>
                 </div>
+                <div class="metric-label-host">Tổng số phòng trọ</div>
+                <div class="metric-value-host" id="totalRooms"
+                     style="background: linear-gradient(135deg, #10b981, #059669); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
-                        <i class="fas fa-door-closed"></i>
-                    </div>
-                    <div class="metric-label-host">Số phòng đang trống</div>
-                    <div class="metric-value-host" id="vacantRooms"
-                        style="background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                    <i class="fas fa-door-closed"></i>
                 </div>
+                <div class="metric-label-host">Số phòng đang trống</div>
+                <div class="metric-value-host" id="vacantRooms"
+                     style="background: linear-gradient(135deg, #ef4444, #dc2626); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="metric-label-host">Số phòng đang thuê</div>
-                    <div class="metric-value-host" id="rentedRooms"
-                        style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <i class="fas fa-users"></i>
                 </div>
+                <div class="metric-label-host">Số phòng đang thuê</div>
+                <div class="metric-value-host" id="rentedRooms"
+                     style="background: linear-gradient(135deg, #f59e0b, #d97706); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="metric-label-host">Số phòng đang cọc</div>
-                    <div class="metric-value-host" id="depositedRooms"
-                        style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <i class="fas fa-clock"></i>
                 </div>
+                <div class="metric-label-host">Số phòng đang cọc</div>
+                <div class="metric-value-host" id="depositedRooms"
+                     style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #ec4899, #db2777);">
-                        <i class="fas fa-exclamation-triangle"></i>
-                    </div>
-                    <div class="metric-label-host">Số phòng chưa thanh toán</div>
-                    <div class="metric-value-host" id="overdueRooms"
-                        style="background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #ec4899, #db2777);">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
+                <div class="metric-label-host">Số phòng chưa thanh toán</div>
+                <div class="metric-value-host" id="overdueRooms"
+                     style="background: linear-gradient(135deg, #ec4899, #db2777); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
-                        <i class="fas fa-user-friends"></i>
-                    </div>
-                    <div class="metric-label-host">Tổng số người thuê</div>
-                    <div class="metric-value-host" id="totalTenants"
-                        style="background: linear-gradient(135deg, #6b7280, #4b5563); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #6b7280, #4b5563);">
+                    <i class="fas fa-user-friends"></i>
                 </div>
+                <div class="metric-label-host">Tổng số người thuê</div>
+                <div class="metric-value-host" id="totalTenants"
+                     style="background: linear-gradient(135deg, #6b7280, #4b5563); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
-                        <i class="fas fa-user-plus"></i>
-                    </div>
-                    <div class="metric-label-host">Người thuê mới</div>
-                    <div class="metric-value-host" id="newTenants"
-                        style="background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #22c55e, #16a34a);">
+                    <i class="fas fa-user-plus"></i>
                 </div>
+                <div class="metric-label-host">Người thuê mới</div>
+                <div class="metric-value-host" id="newTenants"
+                     style="background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
 
-                <div class="metric-card-host">
-                    <div class="metric-icon-host" style="background: linear-gradient(135deg, #f97316, #ea580c);">
-                        <i class="fas fa-hourglass-end"></i>
-                    </div>
-                    <div class="metric-label-host">Hợp đồng sắp hết hạn</div>
-                    <div class="metric-value-host" id="expiringContracts"
-                        style="background: linear-gradient(135deg, #f97316, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-                        0</div>
+            <div class="metric-card-host">
+                <div class="metric-icon-host" style="background: linear-gradient(135deg, #f97316, #ea580c);">
+                    <i class="fas fa-hourglass-end"></i>
+                </div>
+                <div class="metric-label-host">Hợp đồng sắp hết hạn</div>
+                <div class="metric-value-host" id="expiringContracts"
+                     style="background: linear-gradient(135deg, #f97316, #ea580c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    0</div>
+            </div>
+        </div>
+
+        <div class="section-divider-host"></div>
+
+        <div class="finance-section-host">
+            <div class="finance-header-host">
+                <h2 class="finance-title-host">TỔNG QUAN THU CHI</h2>
+                <select class="time-selector-host" id="timeSelector">
+                    <!-- Tùy chọn sẽ được tạo động bằng JavaScript -->
+                </select>
+            </div>
+
+            <div class="finance-cards-host">
+                <div class="finance-card-host">
+                    <div class="finance-card-title-host">Tổng khoản thu</div>
+                    <div class="finance-card-value-host" id="totalRevenue">0 VNĐ</div>
                 </div>
             </div>
 
-            <div class="section-divider-host"></div>
-
-            <div class="finance-section-host">
-                <div class="finance-header-host">
-                    <h2 class="finance-title-host">TỔNG QUAN THU CHI</h2>
-                    <select class="time-selector-host" id="timeSelector">
-                        <!-- Tùy chọn sẽ được tạo động bằng JavaScript -->
-                    </select>
-                </div>
-
-                <div class="finance-cards-host">
-                    <div class="finance-card-host">
-                        <div class="finance-card-title-host">Tổng khoản thu</div>
-                        <div class="finance-card-value-host" id="totalRevenue">0 VNĐ</div>
-                    </div>
-                </div>
-
-                <div class="chart-wrapper-host">
-                    <canvas id="financialChart"></canvas>
-                </div>
+            <div class="chart-wrapper-host">
+                <canvas id="financialChart"></canvas>
             </div>
         </div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script th:src="@{/js/sidebar.js}"></script>
-    <script>
-        // Hàm định dạng số tiền
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-        }
+<!-- Chat Widget -->
+<div class="chat-widget">
+    <!-- Chat Icon -->
+    <div class="chat-icon" id="chatIcon">
+        <i class="fas fa-comments"></i>
+        <span class="chat-badge" id="chatBadge">3</span>
+    </div>
 
-        // Hàm tạo động danh sách tùy chọn lọc
-        function populateTimeSelector() {
-            const timeSelector = document.getElementById('timeSelector');
-            const currentYear = new Date().getFullYear();
-            const months = [
-                'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
-                'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
-            ];
+    <!-- Chat Box -->
+    <div class="chat-box" id="chatBox">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <img src="/images/avatar/support-avatar.jpg" alt="Support" class="chat-avatar">
+                <div class="chat-header-text">
+                    <h4>Nhóm Chat Dãy Trọ</h4>
+                    <span class="chat-status">Đang hoạt động</span>
+                </div>
+            </div>
+            <button class="chat-close" id="chatClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
-            timeSelector.innerHTML = `
+        <div class="chat-messages" id="chatMessages">
+            <div class="message received">
+                <div class="message-content">
+                    <p>Chào mọi người! Có cập nhật gì mới không?</p>
+                    <span class="message-time">10:30</span>
+                </div>
+            </div>
+            <div class="message received">
+                <div class="message-content">
+                    <p>Phòng 101 vừa có khách mới check-in</p>
+                    <span class="message-time">10:31</span>
+                </div>
+            </div>
+            <div class="message sent">
+                <div class="message-content">
+                    <p>OK, tôi sẽ cập nhật thông tin</p>
+                    <span class="message-time">10:32</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn...">
+                <button class="chat-send" id="chatSend">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:src="@{/js/sidebar.js}"></script>
+<script>
+    // Hàm định dạng số tiền
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+    }
+
+    // Hàm tạo động danh sách tùy chọn lọc
+    function populateTimeSelector() {
+        const timeSelector = document.getElementById('timeSelector');
+        const currentYear = new Date().getFullYear();
+        const months = [
+            'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
+        ];
+
+        timeSelector.innerHTML = `
                 <option value="7 ngày gần đây">7 ngày gần đây</option>
                 <option value="14 ngày gần đây">14 ngày gần đây</option>
                 <option value="30 ngày gần đây">30 ngày gần đây</option>
@@ -739,187 +852,603 @@
                 <option value="1 năm gần đây">1 năm gần đây</option>
             `;
 
-            for (let year = currentYear; year >= currentYear - 5; year--) {
-                months.forEach((month, index) => {
-                    const monthValue = `month-${year}-${(index + 1).toString().padStart(2, '0')}`;
-                    const option = document.createElement('option');
-                    option.value = monthValue;
-                    option.textContent = `${month}/${year}`;
-                    timeSelector.appendChild(option);
-                });
-            }
-
-            for (let year = currentYear; year >= currentYear - 5; year--) {
-                for (let q = 1; q <= 4; q++) {
-                    const quarterValue = `quarter-${year}-${q}`;
-                    const option = document.createElement('option');
-                    option.value = quarterValue;
-                    option.textContent = `Quý ${q}/${year}`;
-                    timeSelector.appendChild(option);
-                }
-            }
-
-            for (let year = currentYear; year >= currentYear - 5; year--) {
-                const yearValue = `year-${year}`;
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            months.forEach((month, index) => {
+                const monthValue = `month-${year}-${(index + 1).toString().padStart(2, '0')}`;
                 const option = document.createElement('option');
-                option.value = yearValue;
-                option.textContent = `Năm ${year}`;
+                option.value = monthValue;
+                option.textContent = `${month}/${year}`;
+                timeSelector.appendChild(option);
+            });
+        }
+
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            for (let q = 1; q <= 4; q++) {
+                const quarterValue = `quarter-${year}-${q}`;
+                const option = document.createElement('option');
+                option.value = quarterValue;
+                option.textContent = `Quý ${q}/${year}`;
                 timeSelector.appendChild(option);
             }
         }
 
-        // Hàm lấy dữ liệu từ API
-        function fetchDashboardStats(timeRange) {
-            axios.get('/api/dashboard/stats', {
-                params: { timeRange: timeRange }
-            }).then(response => {
-                const data = response.data;
-
-                // Cập nhật các số liệu
-                document.getElementById('totalHostels').textContent = data.totalHostels;
-                document.getElementById('totalRooms').textContent = data.totalRooms;
-                document.getElementById('vacantRooms').textContent = data.vacantRooms;
-                document.getElementById('rentedRooms').textContent = data.rentedRooms;
-                document.getElementById('depositedRooms').textContent = data.depositedRooms;
-                document.getElementById('overdueRooms').textContent = data.overdueRooms;
-                document.getElementById('totalTenants').textContent = data.totalTenants;
-                document.getElementById('newTenants').textContent = data.newTenants;
-                document.getElementById('expiringContracts').textContent = data.expiringContracts;
-                document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue);
-
-                // Cập nhật biểu đồ
-                financialChart.data.labels = data.chartLabels.length > 0 ? data.chartLabels : ['Không có dữ liệu'];
-                financialChart.data.datasets[0].data = data.chartRevenue.length > 0 ? data.chartRevenue : [0];
-                financialChart.update();
-            }).catch(error => {
-                console.error('Error fetching dashboard stats:', error);
-            });
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            const yearValue = `year-${year}`;
+            const option = document.createElement('option');
+            option.value = yearValue;
+            option.textContent = `Năm ${year}`;
+            timeSelector.appendChild(option);
         }
+    }
 
-        // Khởi tạo biểu đồ
-        const ctx = document.getElementById('financialChart').getContext('2d');
-        const financialChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: ['Không có dữ liệu'],
-                datasets: [
-                    {
-                        label: 'Tổng khoản thu',
-                        data: [0],
-                        borderColor: '#3E83CC',
-                        backgroundColor: 'rgba(62, 131, 204, 0.1)',
-                        fill: true,
-                        tension: 0.3,
-                        borderWidth: 1,
-                        pointBackgroundColor: '#3E83CC',
-                        pointBorderColor: '#ffffff',
-                        pointBorderWidth: 1,
-                        pointRadius: 3,
-                        pointHoverRadius: 5
-                    }
-                ]
+    // Hàm lấy dữ liệu từ API
+    function fetchDashboardStats(timeRange) {
+        axios.get('/api/dashboard/stats', {
+            params: { timeRange: timeRange }
+        }).then(response => {
+            const data = response.data;
+
+            // Cập nhật các số liệu
+            document.getElementById('totalHostels').textContent = data.totalHostels;
+            document.getElementById('totalRooms').textContent = data.totalRooms;
+            document.getElementById('vacantRooms').textContent = data.vacantRooms;
+            document.getElementById('rentedRooms').textContent = data.rentedRooms;
+            document.getElementById('depositedRooms').textContent = data.depositedRooms;
+            document.getElementById('overdueRooms').textContent = data.overdueRooms;
+            document.getElementById('totalTenants').textContent = data.totalTenants;
+            document.getElementById('newTenants').textContent = data.newTenants;
+            document.getElementById('expiringContracts').textContent = data.expiringContracts;
+            document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue);
+
+            // Cập nhật biểu đồ
+            financialChart.data.labels = data.chartLabels.length > 0 ? data.chartLabels : ['Không có dữ liệu'];
+            financialChart.data.datasets[0].data = data.chartRevenue.length > 0 ? data.chartRevenue : [0];
+            financialChart.update();
+        }).catch(error => {
+            console.error('Error fetching dashboard stats:', error);
+        });
+    }
+
+    // Khởi tạo biểu đồ
+    const ctx = document.getElementById('financialChart').getContext('2d');
+    const financialChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Không có dữ liệu'],
+            datasets: [
+                {
+                    label: 'Tổng khoản thu',
+                    data: [0],
+                    borderColor: '#3E83CC',
+                    backgroundColor: 'rgba(62, 131, 204, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 1,
+                    pointBackgroundColor: '#3E83CC',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 1,
+                    pointRadius: 3,
+                    pointHoverRadius: 5
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            interaction: {
+                intersect: false,
+                mode: 'index'
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                devicePixelRatio: window.devicePixelRatio || 1,
-                interaction: {
-                    intersect: false,
-                    mode: 'index'
-                },
-                plugins: {
-                    legend: {
-                        position: window.innerWidth < 768 ? 'bottom' : 'bottom',
-                        labels: {
-                            color: '#1f2937',
-                            font: {
-                                size: window.innerWidth < 576 ? 10 : window.innerWidth < 768 ? 11 : 12,
-                                weight: '600'
-                            },
-                            padding: window.innerWidth < 576 ? 8 : 16,
-                            usePointStyle: true,
-                            pointStyle: 'circle',
-                            boxWidth: window.innerWidth < 576 ? 8 : 12
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                        titleColor: '#1f2937',
-                        bodyColor: '#1f2937',
-                        borderColor: '#3E83CC',
-                        borderWidth: 1,
-                        cornerRadius: 8,
-                        displayColors: true,
-                        padding: window.innerWidth < 576 ? 6 : 10,
-                        titleFont: {
-                            size: window.innerWidth < 576 ? 10 : 12
+            plugins: {
+                legend: {
+                    position: window.innerWidth < 768 ? 'bottom' : 'bottom',
+                    labels: {
+                        color: '#1f2937',
+                        font: {
+                            size: window.innerWidth < 576 ? 10 : window.innerWidth < 768 ? 11 : 12,
+                            weight: '600'
                         },
-                        bodyFont: {
-                            size: window.innerWidth < 576 ? 9 : 11
-                        },
-                        callbacks: {
-                            label: function (context) {
-                                return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
-                            }
-                        }
+                        padding: window.innerWidth < 576 ? 8 : 16,
+                        usePointStyle: true,
+                        pointStyle: 'circle',
+                        boxWidth: window.innerWidth < 576 ? 8 : 12
                     }
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1000000,
-                            color: '#1f2937',
-                            font: {
-                                size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
-                                weight: '500'
-                            },
-                            maxTicksLimit: window.innerWidth < 576 ? 4 : 6,
-                            callback: function (value) {
-                                return formatCurrency(value);
-                            }
-                        },
-                        grid: {
-                            color: 'rgba(62, 131, 204, 0.1)',
-                            lineWidth: 1
-                        },
-                        border: {
-                            color: 'rgba(62, 131, 204, 0.2)'
-                        }
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#1f2937',
+                    borderColor: '#3E83CC',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: true,
+                    padding: window.innerWidth < 576 ? 6 : 10,
+                    titleFont: {
+                        size: window.innerWidth < 576 ? 10 : 12
                     },
-                    x: {
-                        ticks: {
-                            padding: window.innerWidth < 576 ? 4 : 8,
-                            color: '#1f2937',
-                            font: {
-                                size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
-                                weight: '500'
-                            },
-                            maxRotation: window.innerWidth < 576 ? 45 : 0
-                        },
-                        grid: {
-                            color: 'rgba(62, 131, 204, 0.1)',
-                            lineWidth: 1
-                        },
-                        border: {
-                            color: 'rgba(62, 131, 204, 0.2)'
+                    bodyFont: {
+                        size: window.innerWidth < 576 ? 9 : 11
+                    },
+                    callbacks: {
+                        label: function (context) {
+                            return `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`;
                         }
                     }
                 }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1000000,
+                        color: '#1f2937',
+                        font: {
+                            size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                            weight: '500'
+                        },
+                        maxTicksLimit: window.innerWidth < 576 ? 4 : 6,
+                        callback: function (value) {
+                            return formatCurrency(value);
+                        }
+                    },
+                    grid: {
+                        color: 'rgba(62, 131, 204, 0.1)',
+                        lineWidth: 1
+                    },
+                    border: {
+                        color: 'rgba(62, 131, 204, 0.2)'
+                    }
+                },
+                x: {
+                    ticks: {
+                        padding: window.innerWidth < 576 ? 4 : 8,
+                        color: '#1f2937',
+                        font: {
+                            size: window.innerWidth < 576 ? 8 : window.innerWidth < 768 ? 9 : 11,
+                            weight: '500'
+                        },
+                        maxRotation: window.innerWidth < 576 ? 45 : 0
+                    },
+                    grid: {
+                        color: 'rgba(62, 131, 204, 0.1)',
+                        lineWidth: 1
+                    },
+                    border: {
+                        color: 'rgba(62, 131, 204, 0.2)'
+                    }
+                }
+            }
+        }
+    });
+
+    // Gọi hàm tạo danh sách tùy chọn khi trang tải
+    populateTimeSelector();
+
+    // Lắng nghe sự kiện thay đổi khoảng thời gian
+    document.getElementById('timeSelector').addEventListener('change', function () {
+        fetchDashboardStats(this.value);
+    });
+
+    // Gọi API khi trang được tải
+    fetchDashboardStats('7 ngày gần đây');
+
+    // WebSocket Chat System for Host Dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        // Chat elements
+        const chatIcon = document.getElementById('chatIcon');
+        const chatBox = document.getElementById('chatBox');
+        const chatClose = document.getElementById('chatClose');
+        const chatInput = document.getElementById('chatInput');
+        const chatSend = document.getElementById('chatSend');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatBadge = document.getElementById('chatBadge');
+
+        // WebSocket variables
+        let stompClient = null;
+        let currentUser = null;
+        let currentHostelId = null;
+        let isConnected = false;
+        let isOpen = false;
+        let unreadCount = 0;
+
+        // Initialize chat system
+        async function initializeChat() {
+            try {
+                // Get current user info
+                await getCurrentUser();
+
+                if (!currentUser) {
+                    console.warn('User not authenticated');
+                    showLoginPrompt();
+                    return;
+                }
+
+                // Get user's first hostel ID (or you can modify this logic)
+                await getUserHostels();
+
+                if (!currentHostelId) {
+                    console.warn('No hostel found for user');
+                    showNoHostelMessage();
+                    return;
+                }
+
+                // Connect to WebSocket
+                await connectWebSocket();
+
+                // Load recent messages
+                await loadRecentMessages();
+
+                console.log('✅ Chat system initialized successfully!');
+
+            } catch (error) {
+                console.error('❌ Error initializing chat:', error);
+                showError('Không thể khởi tạo chat. Vui lòng thử lại!');
+            }
+        }
+
+        // Get current user information
+        async function getCurrentUser() {
+            try {
+                const response = await fetch('/api/users/current', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    console.log('Current user:', currentUser);
+
+                    // Update chat header with user info
+                    updateChatHeader();
+                    return currentUser;
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error getting current user:', error);
+                return null;
+            }
+        }
+
+        // Get user's hostels (assuming user has hostels)
+        async function getUserHostels() {
+            try {
+                const response = await fetch('/api/hostels/my-hostels', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    const hostels = await response.json();
+                    if (hostels && hostels.length > 0) {
+                        // Use first hostel for now (you can add hostel selector later)
+                        currentHostelId = hostels[0].hostelId;
+                        console.log('Using hostel:', currentHostelId);
+                    }
+                }
+            } catch (error) {
+                console.error('Error getting user hostels:', error);
+            }
+        }
+
+        // Connect to WebSocket
+        function connectWebSocket() {
+            return new Promise((resolve, reject) => {
+                const socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+
+                // Disable debug logs
+                stompClient.debug = null;
+
+                stompClient.connect({},
+                    function (frame) {
+                        console.log('🔗 Connected to WebSocket:', frame);
+                        isConnected = true;
+                        updateConnectionStatus(true);
+
+                        // Subscribe to hostel chat room
+                        stompClient.subscribe(`/topic/hostel/${currentHostelId}`, function (messageOutput) {
+                            const message = JSON.parse(messageOutput.body);
+                            handleIncomingMessage(message);
+                        });
+
+                        // Send join notification
+                        sendJoinNotification();
+
+                        resolve();
+                    },
+                    function (error) {
+                        console.error('❌ WebSocket connection error:', error);
+                        isConnected = false;
+                        updateConnectionStatus(false);
+                        reject(error);
+                    }
+                );
+            });
+        }
+
+        // Load recent messages
+        async function loadRecentMessages() {
+            try {
+                const response = await fetch(`/api/chat/hostel/${currentHostelId}/recent?limit=50`);
+                if (response.ok) {
+                    const messages = await response.json();
+
+                    // Clear loading message
+                    chatMessages.innerHTML = '';
+
+                    // Display messages
+                    messages.forEach(message => {
+                        displayMessage(message, false); // false = don't scroll for history
+                    });
+
+                    // Scroll to bottom
+                    scrollToBottom();
+
+                } else {
+                    console.warn('Could not load recent messages');
+                    chatMessages.innerHTML = '<div class="no-messages">Chưa có tin nhắn nào</div>';
+                }
+            } catch (error) {
+                console.error('Error loading recent messages:', error);
+                chatMessages.innerHTML = '<div class="error-message">Không thể tải tin nhắn</div>';
+            }
+        }
+
+        // Send join notification
+        function sendJoinNotification() {
+            if (!stompClient || !isConnected || !currentUser) return;
+
+            const joinMessage = {
+                hostelId: currentHostelId,
+                senderId: currentUser.userId,
+                senderName: currentUser.fullname || currentUser.name || 'Chủ trọ',
+                content: `${currentUser.fullname || 'Chủ trọ'} đã tham gia chat`,
+                type: 'JOIN'
+            };
+
+            stompClient.send("/app/chat.addUser", {}, JSON.stringify(joinMessage));
+        }
+
+        // Handle incoming messages
+        function handleIncomingMessage(message) {
+            displayMessage(message, true);
+
+            // Update unread count if chat is closed
+            if (!isOpen && message.senderId !== currentUser?.userId) {
+                unreadCount++;
+                updateBadge();
+
+                // Show notification
+                showNotification(message);
+            }
+        }
+
+        // Display message in chat
+        function displayMessage(message, shouldScroll = true) {
+            const messageDiv = document.createElement('div');
+            const isOwnMessage = currentUser && message.senderId === currentUser.userId;
+            const isSystemMessage = ['JOIN', 'LEAVE'].includes(message.type);
+
+            if (isSystemMessage) {
+                messageDiv.className = 'message system-message';
+                messageDiv.innerHTML = `
+                <div class="message-content" style="background: #f8f9fa; color: #6c757d; text-align: center; font-style: italic; border-radius: 15px; padding: 8px 12px;">
+                    <p><i class="fas fa-info-circle"></i> ${message.content}</p>
+                    <span class="message-time">${formatTime(message.timestamp || new Date())}</span>
+                </div>
+            `;
+            } else {
+                messageDiv.className = `message ${isOwnMessage ? 'sent' : 'received'}`;
+                messageDiv.innerHTML = `
+                <div class="message-content">
+                    ${!isOwnMessage ? `<div class="sender-name" style="font-size: 11px; color: #666; margin-bottom: 4px;">${message.senderName}</div>` : ''}
+                    <p>${escapeHtml(message.content)}</p>
+                    <span class="message-time">${formatTime(message.timestamp || new Date())}</span>
+                </div>
+            `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+
+            if (shouldScroll) {
+                scrollToBottom();
+            }
+        }
+
+        // Send message
+        function sendMessage() {
+            const messageText = chatInput.value.trim();
+            if (!messageText || !isConnected || !currentUser) {
+                return;
+            }
+
+            const chatMessage = {
+                hostelId: currentHostelId,
+                senderId: currentUser.userId,
+                senderName: currentUser.fullname || currentUser.name || 'Chủ trọ',
+                content: messageText,
+                type: 'CHAT'
+            };
+
+            // Send via WebSocket
+            stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+
+            // Clear input
+            chatInput.value = '';
+            chatInput.focus();
+        }
+
+        // Toggle chat box
+        function toggleChat() {
+            isOpen = !isOpen;
+            if (isOpen) {
+                chatBox.classList.add('active');
+                unreadCount = 0;
+                updateBadge();
+                scrollToBottom();
+                chatInput.focus();
+            } else {
+                chatBox.classList.remove('active');
+            }
+        }
+
+        // Close chat
+        function closeChat() {
+            isOpen = false;
+            chatBox.classList.remove('active');
+        }
+
+        // Update chat header
+        function updateChatHeader() {
+            if (currentUser) {
+                const headerText = document.querySelector('.chat-header-text h4');
+                const statusText = document.querySelector('.chat-status');
+
+                if (headerText) {
+                    headerText.textContent = `Chat Dãy Trọ - ${currentUser.fullname || 'Chủ trọ'}`;
+                }
+
+                if (statusText) {
+                    statusText.textContent = isConnected ? 'Đang hoạt động' : 'Đang kết nối...';
+                }
+            }
+        }
+
+        // Update connection status
+        function updateConnectionStatus(connected) {
+            const statusText = document.querySelector('.chat-status');
+            if (statusText) {
+                statusText.textContent = connected ? 'Đang hoạt động' : 'Mất kết nối';
+                statusText.style.color = connected ? '#22c55e' : '#ef4444';
+            }
+        }
+
+        // Update badge
+        function updateBadge() {
+            if (unreadCount > 0) {
+                chatBadge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                chatBadge.style.display = 'flex';
+            } else {
+                chatBadge.style.display = 'none';
+            }
+        }
+
+        // Show notification
+        function showNotification(message) {
+            if (Notification.permission === 'granted') {
+                new Notification(`Tin nhắn từ ${message.senderName}`, {
+                    body: message.content,
+                    icon: '/images/logo/nhatroxanh(title).png'
+                });
+            }
+        }
+
+        // Show login prompt
+        function showLoginPrompt() {
+            chatMessages.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: #6c757d;">
+                <i class="fas fa-sign-in-alt" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>Vui lòng đăng nhập để sử dụng chat</p>
+                <a href="/login" class="btn btn-primary btn-sm">Đăng nhập</a>
+            </div>
+        `;
+        }
+
+        // Show no hostel message
+        function showNoHostelMessage() {
+            chatMessages.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: #6c757d;">
+                <i class="fas fa-building" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>Bạn chưa có dãy trọ nào để chat</p>
+            </div>
+        `;
+        }
+
+        // Show error message
+        function showError(message) {
+            chatMessages.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: #dc3545;">
+                <i class="fas fa-exclamation-triangle" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <p>${message}</p>
+                <button onclick="location.reload()" class="btn btn-outline-primary btn-sm">Thử lại</button>
+            </div>
+        `;
+        }
+
+        // Utility functions
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+
+        // Event listeners
+        if (chatIcon) chatIcon.addEventListener('click', toggleChat);
+        if (chatClose) chatClose.addEventListener('click', closeChat);
+        if (chatSend) chatSend.addEventListener('click', sendMessage);
+
+        // Send message on Enter key
+        if (chatInput) {
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        // Close chat when clicking outside
+        document.addEventListener('click', function(e) {
+            if (isOpen && chatBox && !chatBox.contains(e.target) && chatIcon && !chatIcon.contains(e.target)) {
+                closeChat();
             }
         });
 
-        // Gọi hàm tạo danh sách tùy chọn khi trang tải
-        populateTimeSelector();
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
 
-        // Lắng nghe sự kiện thay đổi khoảng thời gian
-        document.getElementById('timeSelector').addEventListener('change', function () {
-            fetchDashboardStats(this.value);
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (stompClient && isConnected && currentUser) {
+                const leaveMessage = {
+                    hostelId: currentHostelId,
+                    senderId: currentUser.userId,
+                    senderName: currentUser.fullname || 'Chủ trọ',
+                    content: `${currentUser.fullname || 'Chủ trọ'} đã rời khỏi chat`,
+                    type: 'LEAVE'
+                };
+
+                stompClient.send("/app/chat.addUser", {}, JSON.stringify(leaveMessage));
+                stompClient.disconnect();
+            }
         });
 
-        // Gọi API khi trang được tải
-        fetchDashboardStats('7 ngày gần đây');
-    </script>
+        // Initialize chat system
+        initializeChat();
+    });
+
+
+    // Phần code dashboard khác giữ nguyên...
+
+</script>
 </body>
 
 </html>

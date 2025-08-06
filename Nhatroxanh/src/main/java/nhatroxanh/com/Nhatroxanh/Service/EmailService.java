@@ -23,20 +23,23 @@ public interface EmailService {
     void sendIncidentProcessingEmail(String to, IncidentReports incident);
 
     void sendIncidentResolvedEmail(String to, IncidentReports incident);
+
     // ✅ THÊM METHOD MỚI CHO GỬI HỢP ĐỒNG
     void sendContractEmail(String to, String customerName, byte[] pdfContent, String contractNumber) throws Exception;
+
     // ✅ THÊM METHOD MỚI ĐƠN GIẢN
     void sendEmail(String to, String subject, String body) throws Exception;
 
     // ✅ THÊM METHOD GỬI EMAIL VỚI ATTACHMENT
-    void sendEmailWithAttachment(String to, String subject, String body, byte[] attachmentData, String fileName) throws Exception;
+    void sendEmailWithAttachment(String to, String subject, String body, byte[] attachmentData, String fileName)
+            throws Exception;
 
     // ✅ THÊM METHOD GỬI HỢP ĐỒNG PDF HOÀN CHỈNH
-    void sendContractPDF(String to, String tenantName, String roomName, byte[] pdfData, String fileName) throws Exception;
+    void sendContractPDF(String to, String tenantName, String roomName, byte[] pdfData, String fileName)
+            throws Exception;
 
     // ✅ METHOD MỚI GỬI HTML
     void sendContractHtml(String recipientEmail, String recipientName, String subject, String contractHtml);
-
 
     void sendVoucherDeactivationEmail(Vouchers voucher);
 
@@ -49,6 +52,19 @@ public interface EmailService {
     void sendOwnerRejectionEmail(String to, String fullname);
 
     void sendSimpleEmail(String to, String subject, String body);
+
     void sendNewPasswordEmail(String to, String fullname, String newPassword);
+
+    void sendTextEmail(String to, String subject, String text) throws Exception;
+
+    void sendHtmlEmail(String to, String subject, String htmlContent) throws Exception;
+
+    // Cash payment appointment email methods
+    void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
+                                       String roomName, String hostelName, String paymentDate, 
+                                       String paymentTime, String amount, String note, Integer paymentId);
+
+    void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
+                                   String hostelName, String amount, String paymentDate, Integer paymentId);
 
 }

@@ -18,19 +18,14 @@ window.NhaTroContract = {
         this.setupResidentModal();
         this.initializePreviewUpdates();
 
-        return this.loadProvinces() // Load provinces ngay từ đầu
+        return this.loadProvinces()
             .then(() => {
                 console.log("Provinces loaded successfully");
 
-                // ✅ SỬA CÁCH LẤY CONTRACT ID
                 const pathParts = window.location.pathname.split('/');
-                console.log("Path parts:", pathParts);
-
-                // Tìm ID số trong URL path
                 let contractId = null;
                 for (let i = pathParts.length - 1; i >= 0; i--) {
                     const part = pathParts[i];
-                    // Kiểm tra nếu là số và không phải là "form", "edit", "create"
                     if (part && !isNaN(part) && !['form', 'edit', 'create', 'new'].includes(part.toLowerCase())) {
                         contractId = parseInt(part);
                         break;
@@ -39,7 +34,6 @@ window.NhaTroContract = {
 
                 console.log("Contract ID from URL:", contractId);
 
-                // ✅ CHỈ GỌI API KHI CÓ ID HỢP LỆ
                 if (contractId && contractId > 0) {
                     return fetch(`/api/contracts/edit-data/${contractId}`, {
                         method: 'GET',
@@ -50,24 +44,53 @@ window.NhaTroContract = {
                         }
                     })
                         .then(response => {
-                            console.log("Response status:", response.status);
                             if (!response.ok) {
-                                return response.text().then(text => {
-                                    console.error("Response text:", text);
-                                    throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
-                                });
+                                return response.text().then(text => { throw new Error(`HTTP error! status: ${response.status}, response: ${text}`); });
                             }
                             return response.json();
                         })
                         .then(contract => {
                             console.log("Contract data:", JSON.stringify(contract, null, 2));
                             window.contractData = contract; // Lưu dữ liệu toàn cục
-                            console.log("🚀 Contract data saved, waiting for tab activation");
-                            console.log("🚀 Contract form initialized");
-                        })
-                        .catch(error => {
-                            console.error("Error fetching contract data:", error);
-                            this.showNotification("Lỗi khi tải dữ liệu hợp đồng: " + error.message, "error");
+
+                            // Xử lý tenant
+                            if (contract.tenantType === "UNREGISTERED" && contract.unregisteredTenant) {
+                                console.log("Initial load: Filling unregistered tenant fields...");
+                                this.fillTenantFields(contract.unregisteredTenant);
+                            } else if (contract.tenantType === "REGISTERED" && contract.tenant) {
+                                console.log("Initial load: Filling registered tenant fields...");
+                                this.fillTenantFields(contract.tenant);
+                            }
+
+                            // 🔥 THÊM XỬ LÝ RESIDENTS 🔥
+                            if (contract.residents && Array.isArray(contract.residents) && contract.residents.length > 0) {
+                                console.log("🔍 Loading residents:", contract.residents);
+                                // Gán residents vào mảng toàn cục
+                                this.residents = contract.residents.map(res => ({
+                                    name: res.fullName,
+                                    birthYear: res.birthYear,
+                                    phone: res.phone || "",
+                                    id: res.cccdNumber || "",
+                                    notes: "" // Ghi chú không có trong DTO, để trống
+                                }));
+
+                                // Hiển thị residents trong UI
+                                this.residents.forEach(resident => {
+                                    this.addResidentToList(resident);
+                                });
+
+                                // Cập nhật số lượng và preview
+                                this.updateResidentsCount();
+                                this.updateResidentsPreview();
+                                console.log("✅ Loaded", this.residents.length, "residents into UI");
+                            } else {
+                                console.log("🔍 No residents found in contract data");
+                                this.residents = [];
+                                this.updateResidentsCount();
+                                this.updateResidentsPreview();
+                            }
+
+                            console.log("🚀 Contract data saved, and initial form filled.");
                         });
                 } else {
                     console.log("No valid contract ID found, skipping data load (create mode)");
@@ -75,8 +98,8 @@ window.NhaTroContract = {
                 }
             })
             .catch(error => {
-                console.error("Error loading provinces:", error);
-                this.showNotification("Lỗi khi tải danh sách tỉnh/thành phố: " + error.message, "error");
+                console.error("Error during initialization:", error);
+                this.showNotification("Lỗi khi khởi tạo form: " + error.message, "error");
             });
     },
 
@@ -298,6 +321,7 @@ window.NhaTroContract = {
             this.updateResidentsPreview()
         }
     },
+
 
     // Update residents in preview
     updateResidentsPreview() {
@@ -912,124 +936,80 @@ window.NhaTroContract = {
     },
 
     async onRoomSelected() {
-        const roomSelect = document.getElementById("roomSelect") // Đổi từ roomId thành roomSelect
+        const roomSelect = document.getElementById("roomSelect");
         if (!roomSelect) {
-            this.showNotification("Không tìm thấy dropdown phòng trọ!", "error")
-            return
+            this.showNotification("Không tìm thấy dropdown phòng trọ!", "error");
+            return;
         }
 
-        const selectedOption = roomSelect.options[roomSelect.selectedIndex]
-        const roomId = roomSelect.value
+        const roomId = roomSelect.value;
         if (!roomId) {
-            this.clearRoomFields()
-            return
+            this.clearRoomFields();
+            return;
         }
 
-        console.log("Fetching room details for roomId:", roomId)
+        console.log("Fetching details for room ID:", roomId);
 
         try {
-            const response = await fetch(`/api/contracts/get-room-details?roomId=${roomId}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Requested-With": "XMLHttpRequest",
-                    "X-CSRF-TOKEN": document.querySelector('meta[name="_csrf"]')?.content || "",
-                    Authorization: "Bearer " + localStorage.getItem("authToken") || "",
-                },
-            })
-            const data = await response.json()
-            console.log("Room details received:", data)
+            // Lấy thông tin chi tiết của phòng (giá, diện tích, địa chỉ...)
+            const roomDetailsResponse = await fetch(`/api/contracts/get-room-details?roomId=${roomId}`);
+            if (!roomDetailsResponse.ok) throw new Error("Lỗi khi lấy chi tiết phòng.");
+            const roomData = await roomDetailsResponse.json();
 
-            if (data.success && data.room) {
-                const room = data.room
+            if (roomData.success && roomData.room) {
+                const room = roomData.room;
+                document.getElementById("room-number").value = room.roomName || "";
+                document.getElementById("room-area").value = room.acreage || "";
+                document.getElementById("rent-price").value = room.price || "";
 
-                // Cập nhật các field
-                document.getElementById("room-number").value = room.namerooms || selectedOption.text.split(" (")[0] || ""
-                document.getElementById("room-area").value = room.acreage || ""
-                document.getElementById("rent-price").value = room.price || ""
-
-                // ✅ QUAN TRỌNG: Cập nhật địa chỉ vào preview ngay lập tức
-                let roomAddress = room.address
-                if (!roomAddress && selectedOption.text.includes("(")) {
-                    roomAddress = selectedOption.text.split(" (")[1].replace(")", "")
+                // Cập nhật preview
+                this.updatePreviewField("room-number", "preview-room-number");
+                this.updatePreviewField("room-area", "preview-room-area");
+                this.updatePreviewField("rent-price", "preview-rent");
+                const previewRoomAddress = document.getElementById("preview-room-address");
+                if (previewRoomAddress) {
+                    previewRoomAddress.textContent = room.address || "Chưa có địa chỉ";
                 }
 
-                console.log("Room address for preview:", roomAddress)
+                // 🔥 PHẦN SỬA LỖI VÀ THÊM MỚI NẰM Ở ĐÂY 🔥
+                // Lấy danh sách tiện ích của phòng đó và tick vào checkbox
+                const utilityResponse = await fetch(`/api/contracts/rooms/${roomId}/utilities`);
+                if (!utilityResponse.ok) throw new Error("Lỗi khi lấy tiện ích phòng.");
+                const utilities = await utilityResponse.json();
 
-                // ✅ CẬP NHẬT PREVIEW NGAY
-                this.updatePreviewField("room-number", "preview-room-number")
-                this.updatePreviewField("room-area", "preview-room-area")
-                this.updatePreviewField("rent-price", "preview-rent")
+                // Bỏ check tất cả checkbox
+                document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                });
 
-                // ✅ CẬP NHẬT ĐỊA CHỈ PHÒNG VÀO PREVIEW
-                const previewRoomAddress = document.getElementById("preview-room-address")
-                if (previewRoomAddress && roomAddress) {
-                    previewRoomAddress.textContent = roomAddress
-                    console.log("✅ Updated preview-room-address:", roomAddress)
-                }
-
-                // Xử lý địa chỉ cho form (nếu cần)
-                if (roomAddress) {
-                    const addressParts = roomAddress.split(", ")
-                    const street = addressParts.length > 0 ? addressParts[0].trim() : ""
-                    const ward = addressParts.length > 1 ? addressParts[1].trim() : ""
-                    const district = addressParts.length > 2 ? addressParts[2].trim() : ""
-                    const province = addressParts.length > 3 ? addressParts[3].trim() : ""
-
-                    document.getElementById("room-street").value = street
-
-                    // Load địa chỉ vào dropdown (nếu cần)
-                    const provinceSelect = document.getElementById("room-province")
-                    if (provinceSelect && province) {
-                        const provinceCode = await this.mapProvinceNameToCode(province)
-                        if (provinceCode) {
-                            const provinceOption = provinceSelect.querySelector(`option[value="${provinceCode}"]`)
-                            if (provinceOption) {
-                                provinceSelect.value = provinceCode
-                                await this.loadDistricts(provinceCode, "room-district", "room-ward")
-
-                                // Load district
-                                const districtSelect = document.getElementById("room-district")
-                                if (districtSelect && district) {
-                                    const districtCode = await this.mapDistrictNameToCode(provinceCode, district)
-                                    if (districtCode) {
-                                        const districtOption = districtSelect.querySelector(`option[value="${districtCode}"]`)
-                                        if (districtOption) {
-                                            districtSelect.value = districtCode
-                                            await this.loadWards(districtCode, "room-ward")
-
-                                            // Load ward
-                                            const wardSelect = document.getElementById("room-ward")
-                                            if (wardSelect && ward) {
-                                                const wardCode = await this.mapWardNameToCode(districtCode, ward, provinceCode)
-                                                if (wardCode) {
-                                                    const wardOption = wardSelect.querySelector(`option[value="${wardCode}"]`)
-                                                    if (wardOption) {
-                                                        wardSelect.value = wardCode
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                // 2. Tick vào những checkbox tương ứng với tiện ích của phòng
+                if (utilities && utilities.length > 0) {
+                    console.log(`Phòng có ${utilities.length} tiện ích.`);
+                    const utilityIds = utilities.map(util => util.utilityId);
+                    utilityIds.forEach(id => {
+                        const checkbox = document.getElementById(`utility-${id}`);
+                        if (checkbox) {
+                            checkbox.checked = true;
+                            console.log(`Đã tick vào tiện ích ID: ${id}`);
                         }
-                    }
+                    });
+                } else {
+                    console.log("Phòng này không có tiện ích nào.");
                 }
 
-                this.calculateDeposit()
-                this.showNotification(
-                    `Đã chọn ${room.namerooms || selectedOption.text.split(" (")[0]} - Diện tích: ${room.acreage || ""}m² - Giá: ${new Intl.NumberFormat("vi-VN").format(room.price || 0)} VNĐ/tháng`,
-                    "success",
-                )
+                // 3. Cập nhật lại phần preview của tiện ích
+                this.updateAmenities();
+                // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
+
+                this.showNotification(`Đã tải thông tin phòng ${room.roomName}`, "success");
             } else {
-                this.showNotification(data.message || "Không thể lấy thông tin phòng!", "error")
-                this.clearRoomFields()
+                this.showNotification(roomData.message || "Không thể lấy thông tin phòng!", "error");
+                this.clearRoomFields();
             }
         } catch (error) {
-            console.error("Error fetching room details:", error)
-            this.showNotification("Lỗi khi lấy thông tin phòng: " + error.message, "error")
-            this.clearRoomFields()
+            console.error("Error in onRoomSelected:", error);
+            this.showNotification("Lỗi khi tải dữ liệu phòng: " + error.message, "error");
+            this.clearRoomFields();
         }
     },
 
@@ -1185,6 +1165,7 @@ window.NhaTroContract = {
         }
     },
 
+
     // ✅ HÀM PHỤ: Xử lý trạng thái tenant type với validation
     handleTenantTypeStatus(tenant) {
         console.log("🏷️ Handling tenant type status...");
@@ -1197,71 +1178,45 @@ window.NhaTroContract = {
             const btnEditGuardian = document.getElementById("btn-edit-guardian");
             const btnDeleteGuardian = document.getElementById("btn-delete-guardian");
 
-            // ✅ KIỂM TRA CÁC ELEMENTS QUAN TRỌNG
-            const requiredElements = {
-                guardianDisplayContainer,
-                btnAddCustomerHost,
-                tenantTypeSelect
-            };
-
-            const missingElements = Object.entries(requiredElements)
-                .filter(([name, element]) => !element)
-                .map(([name]) => name);
-
-            if (missingElements.length > 0) {
-                console.warn("❌ Missing tenant type elements:", missingElements);
+            if (!guardianDisplayContainer || !btnAddCustomerHost || !tenantTypeSelect) {
+                console.warn("❌ Missing critical elements for tenant type status handling.");
                 return;
             }
-
-            // ✅ XỬ LÝ LOGIC TENANT TYPE
-            if (tenant.id && typeof tenant.id === 'number') {
+            if (!('userId' in tenant)) {
                 // Unregistered tenant
                 this.unregisteredTenantData = { ...tenant };
+                console.log("✅ Set as UNREGISTERED tenant");
 
                 if (guardianDisplayContainer) {
-                    $('#guardian-display-container').removeClass('d-none').show();
-                }
-
-                if (guardianDisplayName) {
                     guardianDisplayName.textContent = tenant.fullName;
+                    $(guardianDisplayContainer).removeClass('d-none').show();
                 }
 
-                if (btnAddCustomerHost) {
-                    $('#btn-add-customer-host').hide();
-                }
-
+                $(btnAddCustomerHost).hide();
                 tenantTypeSelect.value = "UNREGISTERED";
+                this.toggleTenantInputFields(false); // Vô hiệu hóa các trường input
 
-                // ✅ GẮN LISTENERS CHO NÚT SỬA/XÓA (NẾU TỒN TẠI)
                 if (btnEditGuardian) {
-                    $('#btn-edit-guardian').off('click').on('click', () => {
+                    $(btnEditGuardian).off('click').on('click', () => {
                         this.openEditCustomerModal(this.unregisteredTenantData);
                     });
                 }
 
                 if (btnDeleteGuardian) {
-                    $('#btn-delete-guardian').off('click').on('click', () => {
+                    $(btnDeleteGuardian).off('click').on('click', () => {
                         this.clearUnregisteredTenantData();
                     });
                 }
 
-                console.log("✅ Set as UNREGISTERED tenant");
-
             } else {
-                // Registered tenant
+                // Registered tenant (có userId)
                 this.unregisteredTenantData = null;
-
-                if (guardianDisplayContainer) {
-                    $('#guardian-display-container').hide();
-                }
-
-                if (btnAddCustomerHost) {
-                    $('#btn-add-customer-host').show();
-                }
-
-                tenantTypeSelect.value = "REGISTERED";
-
                 console.log("✅ Set as REGISTERED tenant");
+
+                $(guardianDisplayContainer).hide();
+                $(btnAddCustomerHost).show();
+                tenantTypeSelect.value = "REGISTERED";
+                this.toggleTenantInputFields(true); // Kích hoạt lại các trường input
             }
 
         } catch (error) {
@@ -1277,36 +1232,59 @@ window.NhaTroContract = {
         const frontPreview = document.getElementById("cccd-front-preview");
         const backPreview = document.getElementById("cccd-back-preview");
 
-        // ✅ KIỂM TRA ELEMENTS TỒN TẠI
+        // Kiểm tra phần tử DOM
         if (!frontPreview) {
             console.warn("❌ cccd-front-preview element not found");
             return;
         }
-
         if (!backPreview) {
             console.warn("❌ cccd-back-preview element not found");
             return;
         }
 
         try {
-            frontPreview.innerHTML = ''; // Xóa nội dung cũ
-            backPreview.innerHTML = ''; // Xóa nội dung cũ
+            // Xóa nội dung cũ
+            frontPreview.innerHTML = '';
+            backPreview.innerHTML = '';
 
+            // Tạo base URL
             const baseUrl = window.location.origin;
             const cccdFrontUrl = tenant.cccdFrontUrl ?
-                `${baseUrl}${tenant.cccdFrontUrl.startsWith('/') ? '' : '/'}${tenant.cccdFrontUrl.replace(/ /g, '%20')}` : null;
+                `${baseUrl}${tenant.cccdFrontUrl.replace('/uploads/', '/uploads/cccd/')}` : null;
             const cccdBackUrl = tenant.cccdBackUrl ?
-                `${baseUrl}${tenant.cccdBackUrl.startsWith('/') ? '' : '/'}${tenant.cccdBackUrl.replace(/ /g, '%20')}` : null;
+                `${baseUrl}${tenant.cccdBackUrl.replace('/uploads/', '/uploads/cccd/')}` : null;
 
+            // Hàm tạo thẻ img với xử lý lỗi
+            const createImageElement = (url, alt) => {
+                const img = document.createElement('img');
+                img.src = url;
+                img.alt = alt;
+                img.style.maxWidth = '100%';
+                img.style.maxHeight = '200px';
+                img.style.height = 'auto';
+                img.style.objectFit = 'contain';
+                img.style.borderRadius = '8px';
+                img.onerror = () => {
+                    console.error(`❌ Failed to load image: ${url}`);
+                    img.parentElement.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Không tải được ảnh</div>`;
+                    if (typeof this.showNotification === 'function') {
+                        this.showNotification(`Không tải được ảnh ${alt}`, 'error');
+                    }
+                };
+                return img;
+            };
+
+            // Hiển thị ảnh mặt trước
             if (cccdFrontUrl) {
-                frontPreview.innerHTML = `<img src="${cccdFrontUrl}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                frontPreview.appendChild(createImageElement(cccdFrontUrl, 'CCCD Front'));
                 console.log("✅ CCCD front image set");
             } else {
                 frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
             }
 
+            // Hiển thị ảnh mặt sau
             if (cccdBackUrl) {
-                backPreview.innerHTML = `<img src="${cccdBackUrl}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+                backPreview.appendChild(createImageElement(cccdBackUrl, 'CCCD Back'));
                 console.log("✅ CCCD back image set");
             } else {
                 backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
@@ -1314,11 +1292,13 @@ window.NhaTroContract = {
 
         } catch (error) {
             console.error("❌ Error filling tenant images:", error);
-            this.showNotification("Lỗi khi hiển thị ảnh CCCD: " + error.message, "error");
+            if (typeof this.showNotification === 'function') {
+                this.showNotification("Lỗi khi hiển thị ảnh CCCD: " + error.message, "error");
+            }
         }
     },
 
-// ✅ HÀM PHỤ: Đảm bảo provinces được load
+    // ✅ HÀM PHỤ: Đảm bảo provinces được load
     async ensureProvincesLoaded() {
         const tenantProvinceSelect = document.getElementById("tenant-province");
 
@@ -1338,7 +1318,7 @@ window.NhaTroContract = {
         console.log("✅ Provinces ready with", tenantProvinceSelect.options.length, "options");
     },
 
-// ✅ HÀM PHỤ: Điền thông tin cơ bản
+    // ✅ HÀM PHỤ: Điền thông tin cơ bản
     // ✅ HÀM PHỤ: Điền thông tin cơ bản với validation
     fillBasicTenantInfo(tenant) {
         console.log("🔍 Filling basic tenant info...");
@@ -1394,7 +1374,7 @@ window.NhaTroContract = {
         console.log("✅ Basic tenant info filled successfully");
     },
 
-// ✅ HÀM PHỤ: Xử lý địa chỉ với proper validation
+    // ✅ HÀM PHỤ: Xử lý địa chỉ với proper validation
     async fillTenantAddress(tenant) {
         const tenantProvinceSelect = document.getElementById("tenant-province");
 
@@ -1435,7 +1415,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý district và ward
+    // ✅ HÀM PHỤ: Xử lý district và ward
     async fillTenantDistrict(tenant, provinceCode) {
         const tenantDistrictSelect = document.getElementById("tenant-district");
 
@@ -1468,7 +1448,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý ward
+    // ✅ HÀM PHỤ: Xử lý ward
     async fillTenantWard(tenant, districtCode, provinceCode) {
         const tenantWardSelect = document.getElementById("tenant-ward");
 
@@ -1647,7 +1627,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý địa chỉ để code sạch hơn
+    // Tách riêng logic xử lý địa chỉ để code sạch hơn
     async fillOwnerAddress(owner, elements) {
         try {
             // Kiểm tra format tỉnh hợp lệ
@@ -1705,7 +1685,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý district
+    // Tách riêng logic xử lý district
     async fillOwnerDistrict(owner, elements, provinceCode) {
         try {
             const districtCode = await this.mapDistrictNameToCode(provinceCode, owner.district);
@@ -1742,7 +1722,7 @@ window.NhaTroContract = {
         }
     },
 
-// Tách riêng logic xử lý ward
+    // Tách riêng logic xử lý ward
     async fillOwnerWard(owner, elements, districtCode, provinceCode) {
         try {
             const wardCode = await this.mapWardNameToCode(districtCode, owner.ward, provinceCode);
@@ -1988,7 +1968,7 @@ window.NhaTroContract = {
         return fullAddress || "Chưa có thông tin địa chỉ";
     },
 
-// Hàm chuyển đổi định dạng ngày
+    // Hàm chuyển đổi định dạng ngày
     formatDate(dateStr) {
         if (!dateStr) return "";
         // Nếu định dạng là dd/MM/yy
@@ -2440,7 +2420,7 @@ window.NhaTroContract = {
     },
 
 
-// Hàm chuyển đổi định dạng ngày
+    // Hàm chuyển đổi định dạng ngày
     formatDate(dateStr) {
         if (!dateStr) return "";
         // Nếu định dạng là dd/MM/yy
@@ -2696,7 +2676,7 @@ window.NhaTroContract = {
         printWindow.print()
     },
 
-saveContract() {
+    saveContract() {
         const roomSelect = document.getElementById('roomSelect');
         const roomIdValue = roomSelect?.value;
 
@@ -2729,34 +2709,28 @@ saveContract() {
         }
 
         const formData = new FormData();
-
-        // Append ContractDto fields as JSON
-        // Chuyển đổi contractData (JSON object) thành JSON string
         formData.append("contract", JSON.stringify(contractData));
 
-        // Append files for unregistered tenant if exist
-        if (contractData.tenantType === "UNREGISTERED" && this.unregisteredTenantData) {
+        // ✅ Đã sửa: Gửi file với tên nhất quán là "cccdFrontFile" và "cccdBackFile"
+        if (contractData.tenantType === "UNREGISTERED") {
+            // Nếu là người bảo hộ, lấy file từ biến tạm
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
-                console.log("Appending unregisteredTenantCccdFrontFile:", this.unregisteredTenantCccdFrontFile.name);
             }
             if (this.unregisteredTenantCccdBackFile) {
                 formData.append("cccdBackFile", this.unregisteredTenantCccdBackFile);
-                console.log("Appending unregisteredTenantCccdBackFile:", this.unregisteredTenantCccdBackFile.name);
             }
-        } else { // Nếu là registered tenant, gửi file CCCD của tenant chính (nếu có thay đổi)
-             const cccdFront = document.getElementById("cccd-front").files[0];
-             const cccdBack = document.getElementById("cccd-back").files[0];
-             if (cccdFront) {
-                 formData.append("cccdFrontFile", cccdFront);
-                 console.log("Appending registeredTenantCccdFrontFile:", cccdFront.name);
-             }
-             if (cccdBack) {
-                 formData.append("cccdBackFile", cccdBack);
-                 console.log("Appending registeredTenantCccdBackFile:", cccdBack.name);
-             }
+        } else {
+            // Nếu là người thuê đã đăng ký, lấy file trực tiếp từ input
+            const cccdFront = document.getElementById("cccd-front").files[0];
+            const cccdBack = document.getElementById("cccd-back").files[0];
+            if (cccdFront) {
+                formData.append("cccdFrontFile", cccdFront);
+            }
+            if (cccdBack) {
+                formData.append("cccdBackFile", cccdBack);
+            }
         }
-
 
         console.log("=== FINAL FORM DATA TO SEND ===");
         for (let [key, value] of formData.entries()) {
@@ -2765,36 +2739,40 @@ saveContract() {
 
         fetch("/api/contracts", {
             method: "POST",
-            body: formData // FormData sẽ tự thiết lập Content-Type là multipart/form-data
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(error => {
-                    throw new Error(error.message || `HTTP error! status: ${response.status}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                this.showNotification("Hợp đồng đã được tạo thành công!", "success");
-                setTimeout(() => window.location.href = "/api/contracts/list", 1500);
-            } else {
-                this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
+            body: formData, // FormData sẽ tự thiết lập Content-Type là multipart/form-data
+            // Thêm CSRF token nếu cần
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
             }
         })
-        .catch(error => {
-            console.error("Lỗi khi tạo hợp đồng:", error);
-            this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
-        });
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(error => {
+                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    this.showNotification("Hợp đồng đã được tạo thành công!", "success");
+                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
+                } else {
+                    this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Lỗi khi tạo hợp đồng:", error);
+                this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
+            });
     },
 
 
 
- buildContractData(roomIdNumber, roomSelect) {
+    buildContractData(roomIdNumber, roomSelect) {
         const contractData = {};
 
-        // Room (chỉ gửi nếu người dùng chọn phòng mới)
+        // Room (giữ nguyên)
         if (roomIdNumber && roomSelect && roomSelect.selectedIndex >= 0) {
             const selectedOption = roomSelect.options[roomSelect.selectedIndex];
             contractData.room = {
@@ -2804,11 +2782,29 @@ saveContract() {
                 area: parseFloat(selectedOption.dataset.area) || undefined,
                 status: selectedOption.dataset.status || undefined
             };
+
+            // Thu thập tiện ích
+            const selectedUtilityIds = [];
+            document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]:checked').forEach(checkbox => {
+                selectedUtilityIds.push(parseInt(checkbox.value));
+            });
+
+            if (selectedUtilityIds.length > 0) {
+                contractData.room.utilityIds = selectedUtilityIds;
+                console.log("🛠️ Tiện ích đã chọn (IDs):", selectedUtilityIds);
+            }
         }
 
-        // Contract basic info
-        const contractDate = document.getElementById("contract-date")?.value?.trim();
-        if (contractDate) contractData.contractDate = contractDate;
+        // ✅ SỬA: Contract Date - Lấy từ hidden input
+        const contractDateValue = document.getElementById("contract-date-value")?.value?.trim();
+        if (contractDateValue) {
+            contractData.contractDate = contractDateValue;
+            console.log("📅 Contract date from hidden input:", contractDateValue);
+        } else {
+            // Fallback
+            contractData.contractDate = new Date().toISOString().split('T')[0];
+            console.log("📅 Using current date as fallback:", contractData.contractDate);
+        }
 
         const contractStatus = document.getElementById("contract-status")?.value?.trim();
         if (contractStatus) contractData.status = contractStatus;
@@ -2828,28 +2824,39 @@ saveContract() {
         if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
             terms.deposit = depositMonths * rentPrice;
         }
+
+        // Tính endDate
         if (terms.startDate && terms.duration) {
             const start = new Date(terms.startDate);
             start.setMonth(start.getMonth() + terms.duration);
             terms.endDate = start.toISOString().split("T")[0];
         }
 
-
         const termsText = this.getContractTermsText ? this.getContractTermsText() : undefined;
         if (termsText) terms.terms = termsText;
 
-        if (Object.keys(terms).length > 0) contractData.terms = terms;
+        // Payment method và date
+        const paymentMethod = document.getElementById("payment-method")?.value?.trim();
+        if (paymentMethod) contractData.paymentMethod = paymentMethod;
 
-        // Tenant
-        // Kiểm tra xem có dữ liệu người bảo hộ tạm thời không
+        const paymentDate = document.getElementById("payment-date")?.value?.trim();
+        if (paymentDate) {
+            terms.paymentDateDescription = paymentDate;
+            console.log("💳 Payment date description:", paymentDate);
+        }
+
+        if (Object.keys(terms).length > 0) {
+            contractData.terms = terms;
+        }
+
+        // Tenant (giữ nguyên code của bạn)
         if (this.unregisteredTenantData) {
             contractData.tenantType = "UNREGISTERED";
             contractData.unregisteredTenant = { ...this.unregisteredTenantData };
-            // Các URL ảnh sẽ được xử lý ở server từ MultipartFile,
-            // không cần gửi lại từ client nếu đang gửi MultipartFile
         } else {
             contractData.tenantType = "REGISTERED";
             const tenant = {};
+
             const tenantPhone = document.getElementById("tenant-phone")?.value?.trim();
             if (tenantPhone) tenant.phone = tenantPhone;
 
@@ -2883,13 +2890,12 @@ saveContract() {
             const tenantIssuePlace = document.getElementById("tenant-id-place")?.value?.trim();
             if (tenantIssuePlace) tenant.issuePlace = tenantIssuePlace;
 
-
-            // Lấy URL ảnh hiện tại nếu không có file mới được chọn
+            // CCCD images
             const frontPreviewElement = document.getElementById('cccd-front-preview');
             const frontImg = frontPreviewElement ? frontPreviewElement.querySelector('img') : null;
             if (frontImg && frontImg.src) {
                 const relativePath = frontImg.src.replace(window.location.origin, '');
-                if (relativePath && !relativePath.includes('data:')) { // Tránh base64 URLs
+                if (relativePath && !relativePath.includes('data:')) {
                     tenant.cccdFrontUrl = relativePath;
                 }
             }
@@ -2898,7 +2904,7 @@ saveContract() {
             const backImg = backPreviewElement ? backPreviewElement.querySelector('img') : null;
             if (backImg && backImg.src) {
                 const relativePath = backImg.src.replace(window.location.origin, '');
-                 if (relativePath && !relativePath.includes('data:')) {
+                if (relativePath && !relativePath.includes('data:')) {
                     tenant.cccdBackUrl = relativePath;
                 }
             }
@@ -2906,7 +2912,7 @@ saveContract() {
             if (Object.keys(tenant).length > 0) contractData.tenant = tenant;
         }
 
-        // Owner
+        // Owner (giữ nguyên code của bạn)
         const owner = {};
         const ownerFullName = document.getElementById("owner-name")?.value?.trim();
         if (ownerFullName) owner.fullName = ownerFullName;
@@ -2946,10 +2952,23 @@ saveContract() {
 
         if (Object.keys(owner).length > 0) contractData.owner = owner;
 
-        console.log("=== FINAL CONTRACT DATA (before sending files) ===");
+        // Residents
+        if (this.residents && this.residents.length > 0) {
+            contractData.residents = this.residents.map(res => ({
+                fullName: res.name,
+                birthYear: res.birthYear,
+                phone: res.phone,
+                cccdNumber: res.id
+            }));
+            console.log("👥 Residents data:", contractData.residents);
+        }
+
+        console.log("=== FINAL CONTRACT DATA ===");
+        console.log("📅 Contract Date:", contractData.contractDate);
         console.log(JSON.stringify(contractData, null, 2));
         return contractData;
     },
+
 
 
     getContractTermsText() {
@@ -2962,7 +2981,7 @@ saveContract() {
     },
 
 
-// ✅ Method gửi FormData (backup - đã sửa)
+    // ✅ Method gửi FormData (backup - đã sửa)
     saveContractWithFormData() {
         // Lấy roomId từ form
         const roomSelect = document.getElementById('roomSelect')
@@ -2994,7 +3013,7 @@ saveContract() {
         this.sendFormData(formData)
     },
 
-// ✅ Method gửi FormData (đã sửa)
+    // ✅ Method gửi FormData (đã sửa)
     sendFormData(formData) {
         fetch("/api/contracts", {
             method: "POST",
@@ -3004,7 +3023,7 @@ saveContract() {
             .catch(this.handleError.bind(this))
     },
 
-// ✅ Handle response (đã sửa)
+    // ✅ Handle response (đã sửa)
     async handleResponse(response) {
         console.log("=== SERVER RESPONSE ===")
         console.log("Status:", response.status)
@@ -3043,7 +3062,7 @@ saveContract() {
         }
     },
 
-// ✅ Handle error (giữ nguyên)
+    // ✅ Handle error (giữ nguyên)
     handleError(error) {
         console.error("Error saving contract:", error)
         this.showNotification("Lỗi khi lưu hợp đồng: " + error.message, "error")
@@ -3125,35 +3144,113 @@ saveContract() {
 
     // FIX: Thêm hàm addResidentToList
     addResidentToList(resident) {
-        const residentsList = document.getElementById("residents-list")
-        const noResidentsMessage = document.getElementById("no-residents-message")
+        const residentsList = document.getElementById("residents-list");
+        const noResidentsMessage = document.getElementById("no-residents-message");
 
         if (noResidentsMessage) {
-            noResidentsMessage.style.display = "none"
+            noResidentsMessage.style.display = "none";
         }
 
-        const residentId = "resident-" + Date.now()
-        const residentDiv = document.createElement("div")
-        residentDiv.className = "nha-tro-resident-item card mb-2"
+        const residentId = "resident-" + Date.now();
+        const residentDiv = document.createElement("div");
+        residentDiv.className = "nha-tro-resident-item card mb-2";
+        residentDiv.id = residentId;
+        residentDiv.dataset.residentId = residentId; // Lưu ID để chỉnh sửa
         residentDiv.innerHTML = `
-            <div class="card-body p-3">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <h6 class="mb-1">${resident.name}</h6>
-                        <small class="text-muted">Năm sinh: ${resident.birthYear}</small>
-                        ${resident.phone ? `<br><small class="text-muted">SĐT: ${resident.phone}</small>` : ""}
-                        ${resident.id ? `<br><small class="text-muted">CCCD: ${resident.id}</small>` : ""}
-                        ${resident.notes ? `<br><small class="text-muted">Ghi chú: ${resident.notes}</small>` : ""}
-                    </div>
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${this.escapeHtml(resident.name)}</h6>
+                    <small class="text-muted">Năm sinh: ${this.escapeHtml(resident.birthYear)}</small>
+                    ${resident.phone ? `<br><small class="text-muted">SĐT: ${this.escapeHtml(resident.phone)}</small>` : ""}
+                    ${resident.id ? `<br><small class="text-muted">CCCD: ${this.escapeHtml(resident.id)}</small>` : ""}
+                    ${resident.notes ? `<br><small class="text-muted">Ghi chú: ${this.escapeHtml(resident.notes)}</small>` : ""}
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="NhaTroContract.editResident('${residentId}')" title="Sửa người ở">
+                        <i class="fa fa-edit"></i>
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline-danger" onclick="NhaTroContract.removeResident('${residentId}')" title="Xóa người ở">
                         <i class="fa fa-times"></i>
                     </button>
                 </div>
             </div>
-        `
-        residentDiv.id = residentId
+        </div>
+    `;
+        residentsList.appendChild(residentDiv);
+    },
 
-        residentsList.appendChild(residentDiv)
+    editResident(residentId) {
+        const residentElement = document.getElementById(residentId);
+        if (!residentElement) return;
+
+        const residentName = residentElement.querySelector("h6").textContent;
+        const resident = this.residents.find(r => r.name === residentName);
+        if (!resident) return;
+
+        // Mở modal và điền dữ liệu
+        const modalElement = document.getElementById("addResidentModal");
+        const modal = new bootstrap.Modal(modalElement);
+        modal.show();
+
+        document.getElementById("resident-name").value = resident.name;
+        document.getElementById("resident-birth-year").value = resident.birthYear;
+        document.getElementById("resident-phone").value = resident.phone || "";
+        document.getElementById("resident-id").value = resident.id || "";
+        document.getElementById("resident-notes").value = resident.notes || "";
+
+        // Cập nhật nút lưu để chỉnh sửa
+        const saveButton = document.getElementById("btn-save-resident");
+        saveButton.textContent = "Cập nhật người ở";
+        const originalOnClick = saveButton.onclick;
+        saveButton.onclick = () => {
+            const updatedResident = {
+                name: document.getElementById("resident-name").value.trim(),
+                birthYear: document.getElementById("resident-birth-year").value,
+                phone: document.getElementById("resident-phone").value.trim(),
+                id: document.getElementById("resident-id").value.trim(),
+                notes: document.getElementById("resident-notes").value.trim()
+            };
+
+            if (!updatedResident.name || !updatedResident.birthYear) {
+                this.showNotification("Vui lòng nhập đầy đủ họ tên và năm sinh", "warning");
+                return;
+            }
+
+            // Cập nhật resident trong mảng
+            const index = this.residents.findIndex(r => r.name === resident.name);
+            if (index !== -1) {
+                this.residents[index] = updatedResident;
+            }
+
+            // Cập nhật UI
+            residentElement.querySelector(".card-body").innerHTML = `
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="mb-1">${this.escapeHtml(updatedResident.name)}</h6>
+                    <small class="text-muted">Năm sinh: ${this.escapeHtml(updatedResident.birthYear)}</small>
+                    ${updatedResident.phone ? `<br><small class="text-muted">SĐT: ${this.escapeHtml(updatedResident.phone)}</small>` : ""}
+                    ${updatedResident.id ? `<br><small class="text-muted">CCCD: ${this.escapeHtml(updatedResident.id)}</small>` : ""}
+                    ${updatedResident.notes ? `<br><small class="text-muted">Ghi chú: ${this.escapeHtml(updatedResident.notes)}</small>` : ""}
+                </div>
+                <div>
+                    <button type="button" class="btn btn-sm btn-outline-primary me-1" onclick="NhaTroContract.editResident('${residentId}')" title="Sửa người ở">
+                        <i class="fa fa-edit"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="NhaTroContract.removeResident('${residentId}')" title="Xóa người ở">
+                        <i class="fa fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+
+            this.updateResidentsPreview();
+            this.updateResidentsCount();
+            this.showNotification(`Đã cập nhật người ở "${updatedResident.name}"`, "success");
+            modal.hide();
+            saveButton.textContent = "Thêm người ở";
+            saveButton.onclick = originalOnClick; // Khôi phục hàm thêm mới
+        };
     },
 
     // FIX: Thêm hàm removeResident
@@ -3364,198 +3461,212 @@ saveContract() {
         })
     },
 
-saveNewCustomer: function() {
-    const fullName = document.getElementById("newCustomer-name").value.trim();
-    const dob = document.getElementById("newCustomer-dob").value || null;
-    const cccdNumber = document.getElementById("newCustomer-id").value.trim();
-    const issueDate = document.getElementById("newCustomer-id-date").value || null;
-    const issuePlace = document.getElementById("newCustomer-id-place").value || null;
-    const phone = document.getElementById("newCustomer-phone").value.trim();
-    const email = document.getElementById("newCustomer-email").value || null;
-    const street = document.getElementById("newCustomer-street").value || null;
-    const ward = this.getSelectText("newCustomer-ward") || null;
-    const district = this.getSelectText("newCustomer-district") || null;
-    const province = this.getSelectText("newCustomer-province") || null;
-    const relationship = document.getElementById("newCustomer-relationship")?.value || null;
-    const relationshipNote = document.getElementById("newCustomer-relationship-note")?.value || null;
-    const notes = document.getElementById("newCustomer-notes")?.value || null;
+    saveNewCustomer: async function () {
+        const fullName = document.getElementById("newCustomer-name").value.trim();
+        const dob = document.getElementById("newCustomer-dob").value || null;
+        const cccdNumber = document.getElementById("newCustomer-id").value.trim();
+        const issueDate = document.getElementById("newCustomer-id-date").value || null;
+        const issuePlace = document.getElementById("newCustomer-id-place").value || null;
+        const phone = document.getElementById("newCustomer-phone").value.trim();
+        const email = document.getElementById("newCustomer-email").value || null;
+        const street = document.getElementById("newCustomer-street").value || null;
 
-    if (!fullName || !phone || !cccdNumber) {
-        this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
-        return;
-    }
+        // 🔥 SỬA LỖI: Lấy mã số (value) thay vì lấy tên (text)
+        const provinceCode = document.getElementById("newCustomer-province").value;
+        const districtCode = document.getElementById("newCustomer-district").value;
+        const wardCode = document.getElementById("newCustomer-ward").value;
 
-    this.unregisteredTenantData = {
-        fullName: fullName,
-        phone: phone,
-        cccdNumber: cccdNumber,
-        birthday: dob,
-        issueDate: issueDate,
-        issuePlace: issuePlace,
-        email: email,
-        street: street,
-        ward: ward,
-        district: district,
-        province: province,
-        relationship: relationship,
-        relationshipNote: relationshipNote,
-        notes: notes
-    };
-    this.unregisteredTenantCccdFrontFile = document.getElementById("newCustomer-cccd-front").files[0] || null;
-    this.unregisteredTenantCccdBackFile = document.getElementById("newCustomer-cccd-back").files[0] || null;
+        const relationship = document.getElementById("newCustomer-relationship")?.value || null;
+        const relationshipNote = document.getElementById("newCustomer-relationship-note")?.value || null;
+        const notes = document.getElementById("newCustomer-notes")?.value || null;
 
-    const guardianDisplayContainer = document.getElementById("guardian-display-container");
-    const guardianDisplayName = document.getElementById("guardian-display-name");
-    const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
+        if (!fullName || !phone || !cccdNumber) {
+            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
+            return;
+        }
 
-    if (guardianDisplayContainer && guardianDisplayName && btnAddCustomerHost) {
-        guardianDisplayName.textContent = fullName;
-        guardianDisplayContainer.classList.remove('d-none');
-        guardianDisplayContainer.style.display = 'flex';
-        btnAddCustomerHost.style.display = 'none';
-    } else {
-        console.error("Lỗi: Không tìm thấy các phần tử hiển thị người bảo hộ.");
-        this.showNotification("Lỗi hiển thị thông tin người bảo hộ.", "error");
-    }
+        this.unregisteredTenantData = {
+            fullName: fullName,
+            phone: phone,
+            cccdNumber: cccdNumber,
+            birthday: dob,
+            issueDate: issueDate,
+            issuePlace: issuePlace,
+            email: email,
+            street: street,
+            // Lưu cả tên để hiển thị
+            ward: this.getSelectText("newCustomer-ward"),
+            district: this.getSelectText("newCustomer-district"),
+            province: this.getSelectText("newCustomer-province"),
+            relationship: relationship,
+            relationshipNote: relationshipNote,
+            notes: notes
+        };
+        this.unregisteredTenantCccdFrontFile = document.getElementById("newCustomer-cccd-front").files[0] || null;
+        this.unregisteredTenantCccdBackFile = document.getElementById("newCustomer-cccd-back").files[0] || null;
 
-    $('#btn-edit-guardian').off('click').on('click', () => {
-        this.openEditCustomerModal(this.unregisteredTenantData);
-    });
-    $('#btn-delete-guardian').off('click').on('click', () => {
-        this.clearUnregisteredTenantData();
-    });
+        const guardianDisplayContainer = document.getElementById("guardian-display-container");
+        const guardianDisplayName = document.getElementById("guardian-display-name");
+        const btnAddCustomerHost = document.getElementById("btn-add-customer-host");
 
-    document.getElementById("tenant-name").value = fullName;
-    document.getElementById("tenant-phone").value = phone;
-    document.getElementById("tenant-id").value = cccdNumber;
-    document.getElementById("tenant-dob").value = dob;
-    document.getElementById("tenant-id-date").value = issueDate;
-    document.getElementById("tenant-id-place").value = issuePlace;
-    document.getElementById("tenant-email").value = email;
-    document.getElementById("tenant-street").value = street;
-    document.getElementById("tenant-ward").value = ward;
-    document.getElementById("tenant-district").value = district;
-    document.getElementById("tenant-province").value = province;
-    this.toggleTenantInputFields(false);
-    document.getElementById("tenantType").value = "UNREGISTERED";
+        if (guardianDisplayContainer && guardianDisplayName && btnAddCustomerHost) {
+            guardianDisplayName.textContent = fullName;
+            guardianDisplayContainer.classList.remove('d-none');
+            guardianDisplayContainer.style.display = 'flex';
+            btnAddCustomerHost.style.display = 'none';
+        }
 
-    const frontPreview = document.getElementById("cccd-front-preview");
-    const backPreview = document.getElementById("cccd-back-preview");
-    frontPreview.innerHTML = '';
-    backPreview.innerHTML = '';
+        $('#btn-edit-guardian').off('click').on('click', () => {
+            this.openEditCustomerModal(this.unregisteredTenantData);
+        });
+        $('#btn-delete-guardian').off('click').on('click', () => {
+            this.clearUnregisteredTenantData();
+        });
 
-    if (this.unregisteredTenantCccdFrontFile) {
-        const readerFront = new FileReader();
-        readerFront.onload = (e) => { frontPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`; };
-        readerFront.readAsDataURL(this.unregisteredTenantCccdFrontFile);
-    } else if (this.unregisteredTenantData.cccdFrontUrl) {
-        frontPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdFrontUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdFrontUrl.replace(/ /g, '%20')}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
-    }
+        // Điền các thông tin cơ bản
+        document.getElementById("tenant-name").value = fullName;
+        document.getElementById("tenant-phone").value = phone;
+        document.getElementById("tenant-id").value = cccdNumber;
+        document.getElementById("tenant-dob").value = dob;
+        document.getElementById("tenant-id-date").value = issueDate;
+        document.getElementById("tenant-id-place").value = issuePlace;
+        document.getElementById("tenant-email").value = email;
+        document.getElementById("tenant-street").value = street;
 
-    if (this.unregisteredTenantCccdBackFile) {
-        const readerBack = new FileReader();
-        readerBack.onload = (e) => { backPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Back" style="max-width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`; };
-        readerBack.readAsDataURL(this.unregisteredTenantCccdBackFile);
-    } else if (this.unregisteredTenantData.cccdBackUrl) {
-        backPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdBackUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdBackUrl.replace(/ /g, '%20')}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
-    } else {
-        backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
-    }
+        // 🔥 BẮT ĐẦU KHỐI CODE SỬA LỖI ĐỊA CHỈ 🔥
+        const tenantProvinceSelect = document.getElementById("tenant-province");
+        const tenantDistrictSelect = document.getElementById("tenant-district");
+        const tenantWardSelect = document.getElementById("tenant-ward");
 
-    // Đóng modal và cleanup
-    const $modal = $('#addCustomerModal-host');
-    if ($modal.hasClass('show')) {
-        $modal.modal('hide');
-        this.cleanupModalBackdrop();
-        $('body').removeClass('modal-open');
-        $('.modal-backdrop').remove();
-    }
+        if (tenantProvinceSelect && provinceCode) {
+            tenantProvinceSelect.value = provinceCode;
+            // Tải danh sách huyện tương ứng và chờ cho nó hoàn thành
+            await this.loadDistricts(provinceCode, 'tenant-district', 'tenant-ward');
 
-    this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
-    this.updateAllPreview();
-},
-toggleTenantInputFields: function(enable) {
-    const fieldsToControl = [
-        "tenant-name", "tenant-phone", "tenant-id", "tenant-dob",
-        "tenant-id-date", "tenant-id-place", "tenant-email",
-        "tenant-street", "tenant-province", "tenant-district", "tenant-ward"
-    ];
-    const cccdFileInputs = ["cccd-front", "cccd-back"]; // IDs of the file inputs
+            if (tenantDistrictSelect && districtCode) {
+                tenantDistrictSelect.value = districtCode;
+                // Tải danh sách xã tương ứng và chờ cho nó hoàn thành
+                await this.loadWards(districtCode, 'tenant-ward');
 
-    fieldsToControl.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.disabled = !enable; // Set disabled = true nếu enable là false
-            if (!enable) {
-                element.classList.add('nha-tro-input-disabled'); // Thêm class để đổi style
-            } else {
-                element.classList.remove('nha-tro-input-disabled'); // Bỏ class để kích hoạt
+                if (tenantWardSelect && wardCode) {
+                    tenantWardSelect.value = wardCode;
+                }
             }
         }
-    });
+        // 🔥 KẾT THÚC KHỐI CODE SỬA LỖI ĐỊA CHỈ 🔥
 
-    // Xử lý các input type="file" (ảnh CCCD) và div click của chúng
-    cccdFileInputs.forEach(id => {
-        const fileInput = document.getElementById(id); // Input type="file"
-        const uploadDiv = fileInput?.closest('.nha-tro-image-upload'); // Div bao ngoài có onclick
+        this.toggleTenantInputFields(false);
+        document.getElementById("tenantType").value = "UNREGISTERED";
 
-        if (fileInput) fileInput.disabled = !enable; // Vô hiệu hóa input file
-        if (uploadDiv) {
-            if (!enable) {
-                uploadDiv.classList.add('is-disabled'); // Thêm class mới cho div upload
-            } else {
-                uploadDiv.classList.remove('is-disabled');
-            }
+        const frontPreview = document.getElementById("cccd-front-preview");
+        const backPreview = document.getElementById("cccd-back-preview");
+        frontPreview.innerHTML = '';
+        backPreview.innerHTML = '';
+
+        if (this.unregisteredTenantCccdFrontFile) {
+            const readerFront = new FileReader();
+            readerFront.onload = (e) => { frontPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`; };
+            readerFront.readAsDataURL(this.unregisteredTenantCccdFrontFile);
+        } else if (this.unregisteredTenantData.cccdFrontUrl) {
+            frontPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdFrontUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdFrontUrl.replace(/ /g, '%20')}" alt="CCCD Front" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+        } else {
+            frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
         }
-    });
-},
-clearUnregisteredTenantData: function() {
-    this.unregisteredTenantData = null;
-    this.unregisteredTenantCccdFrontFile = null;
-    this.unregisteredTenantCccdBackFile = null;
 
-    // Ẩn khung hiển thị người bảo hộ và hiện nút "Thêm người bảo hộ"
-    $('#guardian-display-container').hide();
-    $('#btn-add-customer-host').show();
+        if (this.unregisteredTenantCccdBackFile) {
+            const readerBack = new FileReader();
+            readerBack.onload = (e) => { backPreview.innerHTML = `<img src="${e.target.result}" alt="CCCD Back" style="max-width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">`; };
+            readerBack.readAsDataURL(this.unregisteredTenantCccdBackFile);
+        } else if (this.unregisteredTenantData.cccdBackUrl) {
+            backPreview.innerHTML = `<img src="${window.location.origin}${this.unregisteredTenantData.cccdBackUrl.startsWith('/') ? '' : '/'}${this.unregisteredTenantData.cccdBackUrl.replace(/ /g, '%20')}" alt="CCCD Back" style="max-width: 100%; max-height: 200px; height: auto; object-fit: contain; border-radius: 8px;">`;
+        } else {
+            backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        }
 
-    // Reset các trường hiển thị và hidden input của người thuê chính
-    // (Đây là phần quan trọng để "xóa" dữ liệu người bảo hộ khỏi form chính)
-    document.getElementById("tenant-name-display").textContent = "........................";
-    document.getElementById("tenant-phone-display").textContent = "........................";
-    document.getElementById("tenant-id-display").textContent = "........................";
-    document.getElementById("tenant-dob-display").textContent = "........................";
-    document.getElementById("tenant-id-date-display").textContent = "........................";
-    document.getElementById("tenant-id-place-display").textContent = "........................";
-    document.getElementById("tenant-email-display").textContent = "........................";
-    document.getElementById("tenant-address-display").textContent = "........................";
+        $('#addCustomerModal-host').modal('hide');
 
-    document.getElementById("tenant-name").value = "";
-    document.getElementById("tenant-phone").value = "";
-    document.getElementById("tenant-id").value = "";
-    document.getElementById("tenant-dob").value = "";
-    document.getElementById("tenant-id-date").value = "";
-    document.getElementById("tenant-id-place").value = "";
-    document.getElementById("tenant-email").value = "";
-    document.getElementById("tenant-street").value = "";
-    document.getElementById("tenant-ward").value = "";
-    document.getElementById("tenant-district").value = "";
-    document.getElementById("tenant-province").value = "";
+        this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
+        this.updateAllPreview();
+    },
+    toggleTenantInputFields: function (enable) {
+        const fieldsToControl = [
+            "tenant-name", "tenant-phone", "tenant-id", "tenant-dob",
+            "tenant-id-date", "tenant-id-place", "tenant-email",
+            "tenant-street", "tenant-province", "tenant-district", "tenant-ward"
+        ];
+        const cccdFileInputs = ["cccd-front", "cccd-back"]; // IDs of the file inputs
 
-    // Reset preview ảnh CCCD trên form chính
-    const frontPreview = document.getElementById("cccd-front-preview");
-    const backPreview = document.getElementById("cccd-back-preview");
-    frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
-    backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        fieldsToControl.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.disabled = !enable; // Set disabled = true nếu enable là false
+                if (!enable) {
+                    element.classList.add('nha-tro-input-disabled'); // Thêm class để đổi style
+                } else {
+                    element.classList.remove('nha-tro-input-disabled'); // Bỏ class để kích hoạt
+                }
+            }
+        });
 
-     NhaTroContract.toggleTenantInputFields(true);
-    // Cập nhật loại người thuê về REGISTERED (mặc định ban đầu)
-    document.getElementById("tenantType").value = "REGISTERED";
+        // Xử lý các input type="file" (ảnh CCCD) và div click của chúng
+        cccdFileInputs.forEach(id => {
+            const fileInput = document.getElementById(id); // Input type="file"
+            const uploadDiv = fileInput?.closest('.nha-tro-image-upload'); // Div bao ngoài có onclick
 
-    this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
-    this.updateAllPreview();
-},
+            if (fileInput) fileInput.disabled = !enable; // Vô hiệu hóa input file
+            if (uploadDiv) {
+                if (!enable) {
+                    uploadDiv.classList.add('is-disabled'); // Thêm class mới cho div upload
+                } else {
+                    uploadDiv.classList.remove('is-disabled');
+                }
+            }
+        });
+    },
+    clearUnregisteredTenantData: function () {
+        this.unregisteredTenantData = null;
+        this.unregisteredTenantCccdFrontFile = null;
+        this.unregisteredTenantCccdBackFile = null;
+
+        // Ẩn khung hiển thị người bảo hộ và hiện lại nút "Thêm người bảo hộ"
+        $('#guardian-display-container').hide();
+        $('#btn-add-customer-host').show();
+
+        // Reset các trường input của người thuê trên form chính
+        document.getElementById("tenant-name").value = "";
+        document.getElementById("tenant-phone").value = "";
+        document.getElementById("tenant-id").value = "";
+        document.getElementById("tenant-dob").value = "";
+        document.getElementById("tenant-id-date").value = "";
+        document.getElementById("tenant-id-place").value = "";
+        document.getElementById("tenant-email").value = "";
+        document.getElementById("tenant-street").value = "";
+        document.getElementById("tenant-ward").value = "";
+        document.getElementById("tenant-district").value = "";
+        document.getElementById("tenant-province").value = "";
+
+        // Kích hoạt lại các trường input cho người thuê
+        this.toggleTenantInputFields(true);
+
+        // Reset preview ảnh CCCD trên form chính
+        const frontPreview = document.getElementById("cccd-front-preview");
+        const backPreview = document.getElementById("cccd-back-preview");
+        if (frontPreview) {
+            frontPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt trước</div>`;
+        }
+        if (backPreview) {
+            backPreview.innerHTML = `<i class="fa fa-camera fa-2x"></i><div class="mt-2">Tải ảnh mặt sau</div>`;
+        }
+
+        // Cập nhật loại người thuê về REGISTERED (mặc định ban đầu)
+        const tenantTypeSelect = document.getElementById("tenantType");
+        if (tenantTypeSelect) {
+            tenantTypeSelect.value = "REGISTERED";
+        }
+
+        this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
+        this.updateAllPreview();
+    },
 
     previewCustomerImage(event, previewId) {
         const file = event.target.files[0]
@@ -3637,537 +3748,157 @@ clearUnregisteredTenantData: function() {
         }, 10000)
     },
 }
+function updateContractPreview() {
+    // Lấy dữ liệu từ form
+    const contractData = collectContractData();
 
-class ContractPreview {
-    constructor() {
-        this.initializePreview();
-        this.bindEvents();
+    // Định dạng ngày ký hợp đồng
+    const signDate = contractData.contractDate
+        ? new Date(contractData.contractDate).toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        })
+        : '........................';
+
+    // Cập nhật các trường trong preview
+    $('#preview-sign-date').text(signDate);
+    $('#preview-owner-name').text(contractData.ownerName || '........................');
+    $('#preview-owner-dob').text(contractData.ownerBirthday || '........................');
+    $('#preview-owner-id').text(contractData.ownerIdCard || '........................');
+    $('#preview-owner-id-date').text(contractData.ownerIdDate || '........................');
+    $('#preview-owner-id-place').text(contractData.ownerIdPlace || '........................');
+    $('#preview-owner-address').text(contractData.ownerAddress || '........................');
+    $('#preview-owner-phone').text(contractData.ownerPhone || '........................');
+    $('#preview-owner-signature').text(contractData.ownerName || '........................');
+
+    $('#preview-tenant-name').text(contractData.tenantName || '........................');
+    $('#preview-tenant-dob').text(contractData.tenantBirthday || '........................');
+    $('#preview-tenant-id').text(contractData.tenantIdCard || '........................');
+    $('#preview-tenant-id-date').text(contractData.tenantIdDate || '........................');
+    $('#preview-tenant-id-place').text(contractData.tenantIdPlace || '........................');
+    $('#preview-tenant-address').text(contractData.tenantAddress || '........................');
+    $('#preview-tenant-phone').text(contractData.tenantPhone || '........................');
+    $('#preview-tenant-signature').text(contractData.tenantName || '........................');
+
+    $('#preview-room-address').text(contractData.roomAddress || 'Ký túc xá chưa xác định');
+    $('#preview-room-number').text(contractData.roomNumber || '........................');
+    $('#preview-room-area').text(contractData.roomArea ? `${contractData.roomArea} m²` : '........................');
+
+    $('#preview-duration').text(contractData.contractDuration || '........................');
+    $('#preview-start-date').text(contractData.contractStartDate || '........................');
+
+    // Tính ngày kết thúc
+    let endDate = '........................';
+    if (contractData.contractStartDate && contractData.contractDuration) {
+        const start = new Date(contractData.contractStartDate);
+        start.setMonth(start.getMonth() + parseInt(contractData.contractDuration));
+        endDate = start.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     }
-
-    initializePreview() {
-        this.updatePreview();
-    }
-
-    bindEvents() {
-        const formInputs = document.querySelectorAll('#contract-form input, #contract-form select, #contract-form textarea');
-
-        formInputs.forEach(input => {
-            input.addEventListener('input', () => this.updatePreview());
-            input.addEventListener('change', () => this.updatePreview());
-        });
-
-        this.initializeZoomControls();
-    }
-
-    updatePreview() {
-        try {
-            this.updateOwnerInfo();
-            this.updateTenantInfo();
-            this.updateRoomInfo();
-            this.updateContractInfo();
-            this.updateAmenities();
-            this.updateTerms();
-        } catch (error) {
-            console.error('Error updating preview:', error);
-        }
-    }
-
-    updateOwnerInfo() {
-        // Tên chủ nhà
-        const ownerName = document.getElementById('owner-name')?.value || '........................';
-        this.setPreviewText('preview-owner-name', ownerName);
-        this.setPreviewText('preview-owner-signature', ownerName);
-
-        // Ngày sinh chủ nhà
-        const ownerDob = document.getElementById('owner-dob')?.value;
-        this.setPreviewText('preview-owner-dob', this.formatDate(ownerDob));
-
-        // CCCD chủ nhà - SỬA: từ 'owner-cccd' thành 'owner-id'
-        const ownerCccd = document.getElementById('owner-id')?.value;
-        this.setPreviewText('preview-owner-id', ownerCccd || '........................');
-
-        // Ngày cấp CCCD
-        const ownerIdDate = document.getElementById('owner-id-date')?.value;
-        this.setPreviewText('preview-owner-id-date', this.formatDate(ownerIdDate));
-
-        // Nơi cấp CCCD
-        const ownerIdPlace = document.getElementById('owner-id-place')?.value;
-        this.setPreviewText('preview-owner-id-place', ownerIdPlace || '........................');
-
-        // Địa chỉ chủ nhà
-        const ownerAddress = this.getFullAddress('owner');
-        this.setPreviewText('preview-owner-address', ownerAddress);
-
-        // Số điện thoại chủ nhà
-        const ownerPhone = document.getElementById('owner-phone')?.value;
-        this.setPreviewText('preview-owner-phone', ownerPhone || '........................');
-    }
-
-    updateTenantInfo() {
-        // Tên người thuê
-        const tenantName = document.getElementById('tenant-name')?.value;
-        this.setPreviewText('preview-tenant-name', tenantName || '........................');
-        this.setPreviewText('preview-tenant-signature', tenantName || '........................');
-
-        // Ngày sinh người thuê
-        const tenantDob = document.getElementById('tenant-dob')?.value;
-        this.setPreviewText('preview-tenant-dob', this.formatDate(tenantDob));
-
-        // CCCD người thuê - SỬA: từ 'tenant-cccd' thành 'tenant-id'
-        const tenantCccd = document.getElementById('tenant-id')?.value;
-        this.setPreviewText('preview-tenant-id', tenantCccd || '........................');
-
-        // Ngày cấp CCCD người thuê
-        const tenantIdDate = document.getElementById('tenant-id-date')?.value;
-        this.setPreviewText('preview-tenant-id-date', this.formatDate(tenantIdDate));
-
-        // Nơi cấp CCCD người thuê
-        const tenantIdPlace = document.getElementById('tenant-id-place')?.value;
-        this.setPreviewText('preview-tenant-id-place', tenantIdPlace || '........................');
-
-        // Địa chỉ người thuê
-        const tenantAddress = this.getFullAddress('tenant');
-        this.setPreviewText('preview-tenant-address', tenantAddress);
-
-        // Số điện thoại người thuê
-        const tenantPhone = document.getElementById('tenant-phone')?.value;
-        this.setPreviewText('preview-tenant-phone', tenantPhone || '........................');
-
-        // Danh sách người ở
-        this.updateResidents();
-    }
-
-
-    updateResidents() {
-        const residentsContainer = document.getElementById('preview-residents-section');
-        const residentsSpan = document.getElementById('preview-residents');
-
-        const residentsTable = document.getElementById('residents-table-body');
-        if (residentsTable && residentsTable.children.length > 0) {
-            const residents = [];
-            for (let row of residentsTable.children) {
-                const name = row.children[0]?.textContent?.trim();
-                const cccd = row.children[1]?.textContent?.trim();
-                if (name && cccd && name !== 'Không có dữ liệu') {
-                    residents.push(`${name} (CCCD: ${cccd})`);
-                }
-            }
-
-            if (residents.length > 0) {
-                residentsSpan.textContent = residents.join(', ');
-                residentsContainer.style.display = 'block';
-            } else {
-                residentsContainer.style.display = 'none';
-            }
-        } else {
-            residentsContainer.style.display = 'none';
-        }
-    }
-
-    updateRoomInfo() {
-        console.log('🚀 updateRoomInfo() BẮT ĐẦU!');
-
-        const roomSelect = document.getElementById('roomSelect');
-
-        if (roomSelect && roomSelect.selectedOptions[0] && roomSelect.value) {
-            const selectedOption = roomSelect.selectedOptions[0];
-            const selectedText = selectedOption.text;
-
-            console.log('📝 Selected room text:', selectedText);
-
-            // Parse từ text: "Phòng 000 - Trương hòa, Phường Quận liên chiểu, Quận Hòa minh, Tỉnh quảng nam - 20.000đ"
-            let roomNumber = '';
-            let roomAddress = '';
-
-            if (selectedText.includes(' - ')) {
-                const parts = selectedText.split(' - ');
-                roomNumber = parts[0].trim(); // "Phòng 000"
-
-                // Loại bỏ phần giá tiền cuối cùng
-                let addressParts = parts.slice(1);
-                let fullAddress = addressParts.join(' - ').trim();
-
-                // Tìm và loại bỏ phần giá (có đuôi đ)
-                const pricePattern = /\s*-\s*[\d.,]+đ\s*$/;
-                roomAddress = fullAddress.replace(pricePattern, '').trim();
-
-                console.log('✅ Parsed roomNumber:', roomNumber);
-                console.log('✅ Parsed roomAddress:', roomAddress);
-            } else {
-                roomNumber = selectedText;
-                roomAddress = 'Địa chỉ chưa được cập nhật';
-            }
-
-            // ✅ CẬP NHẬT PREVIEW - TRỰC TIẾP
-            const previewRoomNumber = document.getElementById('preview-room-number');
-            const previewRoomAddress = document.getElementById('preview-room-address');
-            const previewRoomArea = document.getElementById('preview-room-area');
-
-            console.log('🔍 Elements found:', {
-                previewRoomNumber: !!previewRoomNumber,
-                previewRoomAddress: !!previewRoomAddress,
-                previewRoomArea: !!previewRoomArea
-            });
-
-            if (previewRoomNumber) {
-                previewRoomNumber.textContent = roomNumber;
-                console.log('✅ Updated preview-room-number:', roomNumber);
-            } else {
-                console.error('❌ preview-room-number element not found!');
-            }
-
-            if (previewRoomAddress) {
-                previewRoomAddress.textContent = roomAddress;
-                console.log('✅ Updated preview-room-address:', roomAddress);
-            } else {
-                console.error('❌ preview-room-address element not found!');
-            }
-
-            // ✅ CẬP NHẬT DIỆN TÍCH
-            const roomAreaInput = document.getElementById('room-area')?.value;
-            if (roomAreaInput && previewRoomArea) {
-                previewRoomArea.textContent = roomAreaInput + ' m²';
-                console.log('✅ Updated preview-room-area:', roomAreaInput + ' m²');
-            } else if (previewRoomArea) {
-                // Lấy từ data attribute nếu có
-                const areaFromData = selectedOption.getAttribute('data-area');
-                if (areaFromData) {
-                    previewRoomArea.textContent = areaFromData + ' m²';
-                    console.log('✅ Updated preview-room-area from data:', areaFromData + ' m²');
-                }
-            }
-
-            console.log('✅ Updated room info:', { roomNumber, roomAddress });
-
-        } else {
-            console.warn('⚠️ Không có phòng nào được chọn');
-        }
-
-        console.log('✅ updateRoomInfo() KẾT THÚC!');
-    }
-
-
-
-
-// 🔥 THÊM METHOD setPreviewText nếu chưa có:
-    setPreviewText(elementId, text) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent = text || '........................';
-            console.log(`✅ Updated ${elementId}:`, text);
-        } else {
-            console.warn(`❌ Element not found: ${elementId}`);
-        }
-    }
-
-
-    updateContractInfo() {
-        // Ngày ký hợp đồng
-        const signDate = document.getElementById('sign-date')?.value;
-        this.setPreviewText('preview-sign-date', this.formatDate(signDate));
-
-        // Thời hạn thuê
-        const duration = document.getElementById('duration')?.value;
-        this.setPreviewText('preview-duration', duration || '........................');
-
-        // Ngày bắt đầu
-        const startDate = document.getElementById('start-date')?.value;
-        this.setPreviewText('preview-start-date', this.formatDate(startDate));
-
-        // Ngày kết thúc
-        const endDate = document.getElementById('end-date')?.value;
-        this.setPreviewText('preview-end-date', this.formatDate(endDate));
-
-        // Giá thuê
-        const rent = document.getElementById('rent')?.value;
-        this.setPreviewText('preview-rent', this.formatCurrency(rent));
-
-        // Ngày thanh toán - FIX: Lấy đúng giá trị
-        const paymentDate = document.getElementById('payment-date')?.value;
-        const paymentDateText = paymentDate ? `vào ngày ${paymentDate} hàng tháng` : '........................';
-        this.setPreviewText('preview-payment-date', paymentDateText);
-
-        // Phương thức thanh toán - FIX: Lấy text thay vì value
-        const paymentMethodSelect = document.getElementById('payment-method');
-        const paymentMethod = paymentMethodSelect?.selectedOptions[0]?.text;
-        const paymentMethodText = (paymentMethod && paymentMethod !== 'Chọn phương thức') ?
-            paymentMethod.toLowerCase() : '........................';
-        this.setPreviewText('preview-payment-method', paymentMethodText);
-
-        // Tiền đặt cọc
-        const deposit = document.getElementById('deposit')?.value;
-        this.setPreviewText('preview-deposit', this.formatCurrency(deposit));
-
-        // Số tháng đặt cọc - FIX: Tính toán đúng
-        this.updateDepositMonths();
-    }
-
-    updateDepositMonths() {
-        const deposit = document.getElementById('deposit')?.value;
-        const rent = document.getElementById('rent')?.value;
-
-        if (deposit && rent && rent > 0) {
-            const depositAmount = parseFloat(deposit.toString().replace(/[^\d]/g, ''));
-            const rentAmount = parseFloat(rent.toString().replace(/[^\d]/g, ''));
-
-            if (depositAmount > 0 && rentAmount > 0) {
-                const months = (depositAmount / rentAmount).toFixed(1);
-                this.setPreviewText('preview-deposit-months', months);
-            } else {
-                this.setPreviewText('preview-deposit-months', '........................');
-            }
-        } else {
-            this.setPreviewText('preview-deposit-months', '........................');
-        }
-    }
-
-    updateAmenities() {
-        const amenitiesContainer = document.getElementById('preview-amenities');
-
-        // Lấy tiện ích từ checkboxes
-        const amenityCheckboxes = document.querySelectorAll('input[name="amenities"]:checked');
-        const selectedAmenities = [];
-
-        amenityCheckboxes.forEach(checkbox => {
-            // Lấy text từ label
-            const label = checkbox.closest('label')?.textContent?.trim() ||
-                checkbox.nextElementSibling?.textContent?.trim() ||
-                checkbox.value;
-            if (label) {
-                selectedAmenities.push(label);
-            }
-        });
-
-        const amenitiesText = selectedAmenities.length > 0 ?
-            selectedAmenities.join(', ') : '........................';
-        this.setPreviewText('preview-amenities', amenitiesText);
-    }
-
-    updateTerms() {
-        const terms = document.getElementById('terms')?.value;
-        this.setPreviewText('preview-terms', terms || '........................');
-    }
-
-    getFullAddress(type) {
-        const street = document.getElementById(`${type}-street`)?.value || '';
-        const wardSelect = document.getElementById(`${type}-ward`);
-        const districtSelect = document.getElementById(`${type}-district`);
-        const provinceSelect = document.getElementById(`${type}-province`);
-
-        // Lấy text thay vì value, và loại bỏ "Chọn..."
-        const ward = wardSelect?.selectedOptions[0]?.text || '';
-        const district = districtSelect?.selectedOptions[0]?.text || '';
-        const province = provinceSelect?.selectedOptions[0]?.text || '';
-
-        const addressParts = [street, ward, district, province]
-            .filter(part => part &&
-                part !== 'Chọn...' &&
-                part !== 'Chọn Tỉnh/Thành phố' &&
-                part !== 'Chọn Quận/Huyện' &&
-                part !== 'Chọn Phường/Xã');
-
-        return addressParts.length > 0 ? addressParts.join(', ') : '........................';
-    }
-
-    formatDate(dateString) {
-        if (!dateString) {
-            return '........................';
-        }
-
-        try {
-            const date = new Date(dateString);
-            if (isNaN(date.getTime())) {
-                return '........................';
-            }
-            return date.toLocaleDateString('vi-VN');
-        } catch (error) {
-            return '........................';
-        }
-    }
-
-
-    getRoomNumber() {
-        // Thử lấy từ input trước
-        const roomNumberInput = document.getElementById('room-number')?.value;
-        if (roomNumberInput && roomNumberInput.trim()) {
-            return roomNumberInput.trim();
-        }
-
-        // Lấy từ selected room option
-        const roomSelect = document.getElementById('roomSelect');
-        if (roomSelect && roomSelect.selectedOptions[0]) {
-            const selectedOption = roomSelect.selectedOptions[0];
-            const roomText = selectedOption.textContent || selectedOption.text || '';
-
-            // Extract room number từ text (ví dụ: "Phòng 101 - 25m²" -> "101")
-            const roomMatch = roomText.match(/Phòng\s*(\d+)/i);
-            if (roomMatch) {
-                return roomMatch[1];
-            }
-
-            // Hoặc lấy toàn bộ text nếu không match pattern
-            if (roomText && roomText !== '-- Chọn phòng trọ --') {
-                return roomText;
-            }
-        }
-
-        return '........................';
-    }
-    getRoomAddress() {
-        console.log('🔍 getRoomAddress() được gọi');
-
-        // Lấy từ room được chọn
-        const roomSelect = document.getElementById('roomSelect');
-        if (roomSelect && roomSelect.selectedOptions[0] && roomSelect.value) {
-            const selectedText = roomSelect.selectedOptions[0].text;
-            console.log('📝 Selected room text:', selectedText);
-
-            if (selectedText && selectedText !== '-- Chọn phòng trọ --') {
-                // Parse format: "Phòng 000 - Địa chỉ - Giá"
-                const parts = selectedText.split(' - ');
-                console.log('🔍 Split parts:', parts);
-
-                if (parts.length >= 3) {
-                    // Lấy phần giữa (index 1) là địa chỉ
-                    const address = parts[1].trim();
-                    console.log('✅ Extracted address:', address);
-                    return address;
-                } else if (parts.length === 2) {
-                    // Nếu chỉ có 2 phần, lấy phần sau
-                    const address = parts[1].trim();
-                    console.log('✅ Extracted address (fallback):', address);
-                    return address;
-                }
-            }
-        }
-
-        console.log('❌ No address found, using fallback');
-        // Fallback: lấy từ form inputs
-        return this.getFullAddress('room');
-    }
-
-    getRoomArea() {
-        // Thử lấy từ input trước
-        const roomAreaInput = document.getElementById('room-area')?.value;
-        if (roomAreaInput && roomAreaInput.trim()) {
-            return roomAreaInput.trim() + ' m²';
-        }
-
-        // Lấy từ selected room option
-        const roomSelect = document.getElementById('roomSelect');
-        if (roomSelect && roomSelect.selectedOptions[0]) {
-            const selectedOption = roomSelect.selectedOptions[0];
-            const roomText = selectedOption.textContent || selectedOption.text || '';
-
-            // Extract area từ text (ví dụ: "Phòng 101 - 25m²" -> "25")
-            const areaMatch = roomText.match(/(\d+)\s*m²/i);
-            if (areaMatch) {
-                return areaMatch[1] + ' m²';
-            }
-        }
-
-        // Lấy từ data attribute nếu có
-        const roomSelect2 = document.getElementById('roomSelect');
-        if (roomSelect2 && roomSelect2.selectedOptions[0]) {
-            const area = roomSelect2.selectedOptions[0].getAttribute('data-area');
-            if (area) {
-                return area + ' m²';
-            }
-        }
-
-        return '........................';
-    }
-
-    getHostelName() {
-        const hostelSelect = document.getElementById('hostelSelect');
-        if (hostelSelect && hostelSelect.selectedOptions[0]) {
-            const selectedOption = hostelSelect.selectedOptions[0];
-            const hostelName = selectedOption.textContent || selectedOption.text || '';
-
-            if (hostelName && hostelName !== '-- Chọn khu trọ --') {
-                return hostelName;
-            }
-        }
-
-        return '........................';
-    }
-
-    formatCurrency(amount) {
-        if (!amount) {
-            return '........................';
-        }
-
-        try {
-            const number = parseFloat(amount.toString().replace(/[^\d]/g, ''));
-            if (isNaN(number) || number === 0) {
-                return '........................';
-            }
-            return number.toLocaleString('vi-VN');
-        } catch (error) {
-            return '........................';
-        }
-    }
-
-    setPreviewText(elementId, text) {
-        const element = document.getElementById(elementId);
-        if (element) {
-            element.textContent = text || '........................';
-        }
-    }
-
-    initializeZoomControls() {
-        const previewContainer = document.getElementById('preview-container');
-        if (!previewContainer) return;
-
-        let currentZoom = 1;
-
-        const zoomIn = document.getElementById('btn-zoom-in');
-        const zoomOut = document.getElementById('btn-zoom-out');
-        const resetZoom = document.getElementById('btn-reset-zoom');
-
-        if (zoomIn) {
-            zoomIn.addEventListener('click', () => {
-                currentZoom = Math.min(currentZoom + 0.1, 2);
-                previewContainer.style.transform = `scale(${currentZoom})`;
-            });
-        }
-
-        if (zoomOut) {
-            zoomOut.addEventListener('click', () => {
-                currentZoom = Math.max(currentZoom - 0.1, 0.5);
-                previewContainer.style.transform = `scale(${currentZoom})`;
-            });
-        }
-
-        if (resetZoom) {
-            resetZoom.addEventListener('click', () => {
-                currentZoom = 1;
-                previewContainer.style.transform = `scale(${currentZoom})`;
-            });
-        }
-    }
+    $('#preview-end-date').text(endDate);
+
+    // Cập nhật giá thuê
+    const monthlyRent = contractData.monthlyRent;
+    $('#preview-rent').text(!isNaN(monthlyRent) && monthlyRent > 0
+        ? new Intl.NumberFormat('vi-VN').format(monthlyRent) + ' VNĐ/tháng'
+        : '........................');
+
+    // Cập nhật thông tin thanh toán
+    const paymentMethodText = contractData.paymentMethod === 'TIEN_MAT' ? 'Tiền mặt' : contractData.paymentMethod === 'BANK' ? 'Chuyển khoản' : '';
+    const paymentInfo = contractData.paymentDate && paymentMethodText
+        ? `vào ngày ${contractData.paymentDate} hàng tháng bằng ${paymentMethodText}`
+        : '........................';
+    $('#preview-payment-date').text(paymentInfo);
+
+    $('#preview-deposit').text(!isNaN(contractData.deposit) && contractData.deposit > 0
+        ? new Intl.NumberFormat('vi-VN').format(contractData.deposit) + ' VNĐ'
+        : '........................');
+    $('#preview-deposit-months').text(contractData.depositMonths || '........................');
+
+    // Cập nhật danh sách người ở
+    const residents = $('#residents-list').children().not('#no-residents-message').map(function() {
+        return $(this).find('.resident-name').text();
+    }).get().join(', ') || '........................';
+    $('#preview-residents').text(residents);
+    $('#preview-residents-section').css('display', residents !== '........................' ? 'block' : 'none');
+
+    // Cập nhật tiện ích
+    const amenities = $('.nha-tro-amenities input:checked').map(function() {
+        return $(this).siblings('label').text();
+    }).get().join(', ') || '........................';
+    $('#preview-amenities').text(amenities);
+
+    // Cập nhật điều khoản chung
+    $('#preview-terms').text(contractData.terms || 'Không có điều khoản bổ sung.');
+
+    // Debug
+    console.log('🔍 Preview Sign Date:', signDate);
+    console.log('🔍 Preview Rent:', contractData.monthlyRent);
+    console.log('🔍 Preview Payment Info:', paymentInfo);
+    console.log('🔍 Preview Room Address:', contractData.roomAddress);
 }
 
-// Khởi tạo preview
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        window.contractPreview = new ContractPreview();
-        console.log('✅ Contract Preview initialized');
-    }, 500);
+// Hàm debounce để tối ưu hiệu suất
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
+
+// Thêm sự kiện input để cập nhật preview
+$(document).ready(function() {
+    const inputs = [
+        '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
+        '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',
+        '#room-number', '#room-area', '#room-street', '#room-ward', '#room-district', '#room-province',
+        '#contract-date', '#start-date', '#contract-duration', '#rent-price', '#payment-date', '#payment-method', '#deposit-months', '#terms-conditions'
+    ];
+
+    const debouncedUpdatePreview = debounce(updateContractPreview, 300);
+    inputs.forEach(selector => {
+        $(selector).on('input change', debouncedUpdatePreview);
+    });
+
+    // Cập nhật preview khi thêm/xóa người ở hoặc tiện ích
+    $('#btn-save-resident, .nha-tro-amenities input').on('click', debouncedUpdatePreview);
+
+    // Cập nhật preview ban đầu
+    updateContractPreview();
 });
 
-// Trigger update khi switch tab
-function switchToTab(tabName) {
-    // ... existing tab switching code ...
-
-    // Trigger preview update
-    if (window.contractPreview) {
-        setTimeout(() => {
-            window.contractPreview.updatePreview();
-            console.log('🔄 Preview updated after tab switch');
-        }, 200);
-    }
+// Hàm debounce để tối ưu hiệu suất
+function debounce(func, wait) {
+    let timeout;
+    return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
 }
+
+// Thêm sự kiện input để cập nhật preview
+$(document).ready(function() {
+    const inputs = [
+        '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
+        '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',
+        '#room-number', '#room-area', '#room-street', '#room-ward', '#room-district', '#room-province',
+        '#contract-date', '#start-date', '#contract-duration', '#rent-price', '#payment-date', '#payment-method', '#deposit-months', '#terms-conditions'
+    ];
+
+    const debouncedUpdatePreview = debounce(updateContractPreview, 300);
+    inputs.forEach(selector => {
+        $(selector).on('input change', debouncedUpdatePreview);
+    });
+
+    // Cập nhật preview khi thêm/xóa người ở hoặc tiện ích
+    $('#btn-save-resident, .nha-tro-amenities input').on('click', debouncedUpdatePreview);
+
+    // Cập nhật preview ban đầu
+    updateContractPreview();
+});
+
+
 
 
 document.addEventListener("DOMContentLoaded", () => {

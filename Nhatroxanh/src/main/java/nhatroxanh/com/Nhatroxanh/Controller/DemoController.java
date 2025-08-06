@@ -1,9 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
+import nhatroxanh.com.Nhatroxanh.Model.Dto.*;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
@@ -13,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
@@ -24,10 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
-import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
@@ -122,8 +119,39 @@ public class DemoController {
     }
 
     @GetMapping("/chu-tro/DS-hop-dong-host")
-    public String contractsPage() {
-        return "host/DS-hop-dong-host";
+    @PreAuthorize("hasRole('OWNER')")
+    public String contractsPage(
+            Authentication authentication,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            Model model) {
+        logger.info("Accessing contracts page for owner with page: {}, size: {}", page, size);
+        try {
+            // Lấy ownerId từ Authentication
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+
+            // Tạo Pageable với page và size
+            Pageable pageable = PageRequest.of(page, size);
+
+            // Gọi service để lấy danh sách hợp đồng phân trang
+            Page<ContractListDto> contractPage = contractService.getContractsListByOwnerId(ownerId, pageable);
+
+            // Thêm dữ liệu vào model
+            model.addAttribute("contracts", contractPage.getContent());
+            model.addAttribute("totalPages", contractPage.getTotalPages());
+            model.addAttribute("currentPage", contractPage.getNumber());
+            model.addAttribute("pageSize", size);
+            model.addAttribute("totalContracts", contractPage.getTotalElements());
+
+            logger.info("Found {} contracts for owner ID: {} on page: {}",
+                    contractPage.getTotalElements(), ownerId, page);
+            return "host/DS-hop-dong-host";
+        } catch (Exception e) {
+            logger.error("Error loading contracts page: {}", e.getMessage(), e);
+            model.addAttribute("errorMessage", "Lỗi khi tải danh sách hợp đồng: " + e.getMessage());
+            return "host/DS-hop-dong-host";
+        }
     }
 
     @GetMapping("/chu-tro/lich-su-thue")
@@ -195,11 +223,6 @@ public class DemoController {
         return "host/QL-thanh-toan-host";
     }
 
-    @GetMapping("/chu-tro/quan-ly-tro")
-    public String phongtro() {
-        return "host/phongtro";
-    }
-
     @GetMapping("/chu-tro/khach-thue")
     public String showTenantManagementPage(
             Model model,
@@ -224,10 +247,10 @@ public class DemoController {
 
 
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue")
-    public String chitietkhachthue() {
-        return "host/chi-tiet-khach-thue";
-    }
+    // @GetMapping("/chu-tro/chi-tiet-khach-thue")
+    // public String chitietkhachthue() {
+    //     return "host/chi-tiet-khach-thue";
+    // }
 
 
     @GetMapping("/khach-thue/thanh-toan")
@@ -266,7 +289,6 @@ public class DemoController {
         userRepository.save(tenant);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công.");
-        // ✅ chuyển hướng lại đúng trang chi tiết khách thuê
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
     }
 

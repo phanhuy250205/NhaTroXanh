@@ -689,7 +689,6 @@
                         <label for="phoneNumber" class="form-label-staff">Số điện thoại</label>
                         <input type="tel" class="form-control-staff" id="phoneNumber" th:value="${customer.phone}"
                             readonly>
-
                     </div>
                 </div>
 
@@ -702,10 +701,7 @@
             : customer.userCccd.cccdNumber
         : ''}" readonly>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12 mb-4">
+                    <div class="col-md-6 mb-4">
                         <label for="issuePlace" class="form-label-staff">Nơi cấp</label>
                         <input type="text" class="form-control-staff" id="issuePlace"
                             th:value="${customer.userCccd != null ? customer.userCccd.issuePlace : ''}" readonly>

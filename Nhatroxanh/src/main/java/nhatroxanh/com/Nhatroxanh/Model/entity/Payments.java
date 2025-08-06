@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.entity;
 
 import java.sql.Date;
+import java.sql.Timestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -33,13 +34,13 @@ public class Payments {
     private Contracts contract;
 
     @Column(name = "total_amount")
-    private Float totalAmount;
+    private Double totalAmount;
 
     @Column(name = "due_date")
     private Date dueDate;
 
     @Column(name = "payment_date")
-    private Date paymentDate;
+    private Timestamp paymentDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
@@ -56,8 +57,20 @@ public class Payments {
     @Column(name = "last_notification_date")
     private Date lastNotificationDate;
 
+    @Column(name = "scheduled_payment_date")
+    private Date scheduledPaymentDate;
+
+    @Column(name = "scheduled_payment_time")
+    private String scheduledPaymentTime;
+
+    @Column(name = "payment_note")
+    private String paymentNote;
+
+    @Column(name = "landlord_notified")
+    private Boolean landlordNotified = false;
+
     public enum PaymentStatus {
-        CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN
+        CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN, CHỜ_XÁC_NHẬN_TIỀN_MẶT
         
     }
 

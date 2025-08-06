@@ -25,25 +25,28 @@ document.addEventListener("DOMContentLoaded", () => {
             // Gọi đến URL xử lý đăng nhập của Spring Security
             fetch("/login-processing", {
                 method: "POST",
-                headers: {  
+                headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
                 },
                 body: formData,
             })
-            .then(response => {
-                if (response.ok) {
-                    // Nếu status 200 -> thành công
-                    // Chuyển hướng đến trang dashboard
-                    window.location.href = "chu-tro/tong-quan";
-                } else {
-                    // Nếu status 401 -> thất bại
-                    throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi đăng nhập:", error);
-                alert(error.message);
-            });
+                .then(response => {
+                    if (response.redirected) {
+                        // Nếu Spring Security redirect, thì chuyển luôn
+                        window.location.href = response.url;
+                    } else if (response.ok) {
+                        // Nếu backend trả JSON (tùy chỉnh), parse JSON
+                        return response.json().then(data => {
+                            window.location.href = data.redirectUrl;
+                        });
+                    } else {
+                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Lỗi đăng nhập:", error);
+                    alert(error.message);
+                });
         });
     }
 
@@ -106,7 +109,38 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("activeNavItem", JSON.stringify(homeItemInfo));
 
             // Navigate to home page
-            window.location.href = "/trang-chu";
+            window.location.href = "/trang-chu"
+        })
+    }
+})
+document.addEventListener("DOMContentLoaded", function () {
+    const modalOverlay = document.getElementById("forgotPasswordModalOverlayGuest");
+    const openModalBtn = document.getElementById("forgotPasswordBtnGuest");
+    const closeModalBtn = document.getElementById("forgotPasswordModalCloseGuest");
+    const backToLoginBtn = document.getElementById("backToLoginBtnGuest");
+
+    if (openModalBtn && modalOverlay) {
+        openModalBtn.addEventListener("click", function () {
+            modalOverlay.classList.add("show");
         });
     }
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener("click", function () {
+            modalOverlay.style.display = "none";
+        });
+    }
+
+    if (backToLoginBtn) {
+        backToLoginBtn.addEventListener("click", function () {
+            modalOverlay.style.display = "none";
+        });
+    }
+
+    // Đóng modal khi nhấn ra ngoài
+    window.addEventListener("click", function (event) {
+        if (event.target === modalOverlay) {
+            modalOverlay.style.display = "none";
+        }
+    });
 });

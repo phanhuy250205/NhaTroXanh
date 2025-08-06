@@ -1,59 +1,319 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
+    <link rel="stylesheet" th:href="@{/css/phongtro.css}">
 </head>
-<head>
-    
-</head>
-<body class="phongtro">
-    <!-- SIDEBAR -->
-    <div th:replace="~{/layouts/sidebar-host}"></div>
+<style>
+    .upload-area {
+        border: 2px dashed #3E83CC;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
 
+    .upload-area.dragover {
+        background-color: rgba(62, 131, 204, 0.1);
+    }
+
+    .upload-icon svg {
+        margin-bottom: 10px;
+    }
+
+    .upload-text {
+        font-size: 14px;
+        color: #3E83CC;
+    }
+
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
+
+    .image-preview-container .image-preview {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        overflow: hidden;
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .image-preview-container .image-preview:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .image-preview-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .image-preview-container .remove-image {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+
+    .image-preview-container .remove-image:hover {
+        opacity: 1;
+    }
+
+    @media (max-width: 576px) {
+        .image-preview-container {
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        }
+
+        .image-preview-container .image-preview {
+            width: 100px;
+            height: 100px;
+        }
+    }
+
+    .toast-container-host {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1050;
+        width: 350px;
+        max-width: 90%;
+    }
+
+    .toast-host {
+        display: flex;
+        align-items: center;
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .toast-host.show {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .toast-host.success {
+        border-left-color: var(--success-green);
+        background-color: #ecfdf5;
+    }
+
+    .toast-host.error {
+        border-left-color: var(--danger-red);
+        background-color: #fef2f2;
+    }
+
+    .toast-host .toast-icon {
+        font-size: 20px;
+        margin-right: 12px;
+    }
+
+    .toast-host .toast-message {
+        flex: 1;
+        font-size: 14px;
+        color: var(--dark-blue);
+    }
+
+    .toast-host .btn-close {
+        background: none;
+        border: none;
+        font-size: 16px;
+        cursor: pointer;
+        color: #6b7280;
+        padding: 0 8px;
+    }
+
+    .toast-host .btn-close:hover {
+        color: var(--dark-blue);
+    }
+
+    @media (max-width: 992px) {
+        .form-container-host {
+            margin-left: 0;
+            padding: 10px;
+            padding-top: 70px;
+            width: 100%;
+        }
+
+        .row-host {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .toast-container-host {
+            width: calc(100% - 40px);
+            right: 20px;
+        }
+    }
+
+    /* CSS để ẩn file input mặc định */
+    #imageUpload {
+        display: none !important;
+        opacity: 0;
+        position: absolute;
+        left: -9999px;
+        width: 0;
+        height: 0;
+        visibility: hidden;
+    }
+
+    /* Tùy chọn: Nếu muốn ẩn hoàn toàn input file */
+    input[type="file"] {
+        display: none !important;
+    }
+
+    /* Đảm bảo upload area có thể click được */
+    .upload-area {
+        border: 2px dashed #3E83CC;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .upload-area:hover {
+        background-color: rgba(62, 131, 204, 0.1);
+        border-color: #2c5f94;
+    }
+
+    .upload-area.dragover {
+        background-color: rgba(62, 131, 204, 0.2);
+        border-color: #2c5f94;
+        transform: scale(1.02);
+    }
+
+    .upload-icon svg {
+        margin-bottom: 10px;
+        transition: transform 0.3s ease;
+    }
+
+    .upload-area:hover .upload-icon svg {
+        transform: scale(1.1);
+    }
+
+    .upload-text {
+        font-size: 14px;
+        color: #3E83CC;
+        font-weight: 500;
+        user-select: none;
+    }
+
+    /* Responsive cho mobile */
+    @media (max-width: 576px) {
+        .upload-area {
+            padding: 15px;
+        }
+
+        .upload-text {
+            font-size: 13px;
+        }
+
+        .upload-icon svg {
+            width: 40px;
+            height: 40px;
+        }
+    }
+</style>
+
+<body class="phongtro">
+    <div th:replace="~{/layouts/sidebar-host}"></div>
     <div class="main-content-host" id="mainContentHost">
+        <div class="toast-container-host" id="toastContainer">
+            <div th:if="${successMessage}" class="toast-host success" role="alert">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="toast-host error" role="alert">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+            </div>
+        </div>
         <div class="content-container-host">
-            <!-- Header Section -->
             <div class="page-header-host">
                 <h1 class="page-title-host">QUẢN LÝ PHÒNG TRỌ</h1>
             </div>
-
-            <!-- Tabs Navigation -->
             <div class="tabs-container-host">
                 <ul class="nav nav-tabs tabs-nav-host" id="roomTabsHost" role="tablist">
                     <li class="nav-item tab-item-host" role="presentation">
                         <button class="nav-link tab-link-host active" id="room-list-tab-host" data-bs-toggle="tab"
                             data-bs-target="#room-list-host" type="button" role="tab" aria-controls="room-list-host"
                             aria-selected="true">
-                            <i class="fas fa-list me-2"></i>
-                            Danh sách phòng trọ
+                            <i class="fas fa-list me-2"></i> Danh sách phòng trọ
                         </button>
                     </li>
                     <li class="nav-item tab-item-host" role="presentation">
                         <button class="nav-link tab-link-host" id="add-room-tab-host" data-bs-toggle="tab"
                             data-bs-target="#add-room-host" type="button" role="tab" aria-controls="add-room-host"
                             aria-selected="false">
-                            <i class="fas fa-plus me-2"></i>
-                            Thêm phòng mới
+                            <i class="fas fa-plus me-2"></i> <span id="addRoomTabText">Thêm phòng mới</span>
                         </button>
                     </li>
                     <li class="nav-item tab-item-host" role="presentation">
                         <button class="nav-link tab-link-host" id="status-management-tab-host" data-bs-toggle="tab"
                             data-bs-target="#status-management-host" type="button" role="tab"
                             aria-controls="status-management-host" aria-selected="false">
-                            <i class="fas fa-cogs me-2"></i>
-                            Quản lý trạng thái
+                            <i class="fas fa-cogs me-2"></i> Quản lý trạng thái
                         </button>
                     </li>
                 </ul>
             </div>
-
-            <!-- Tab Content -->
             <div class="tab-content tabs-content-host" id="roomTabContentHost">
-                <!-- Tab 1: Danh sách phòng trọ -->
                 <div class="tab-pane fade show active" id="room-list-host" role="tabpanel"
                     aria-labelledby="room-list-tab-host" tabindex="0">
-
-                    <!-- Search and Filter Section -->
+                    <div class="hostel-selection-section">
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <div class="form-group-modern mb-3">
+                                    <label for="hostelSelect" class="form-label-modern">Chọn khu trọ</label>
+                                    <select class="form-select-modern" id="hostelSelect"
+                                        onchange="window.location.href='/chu-tro/quan-ly-tro?hostelId=' + this.value">
+                                        <option value="">Chọn khu trọ</option>
+                                        <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
+                                            th:text="${hostel.name}" th:selected="${hostel.hostelId == hostelId}">
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="search-filter-section-host">
                         <div class="row g-3">
                             <div class="col-md-8">
@@ -66,17 +326,18 @@
                                 </div>
                             </div>
                             <div class="col-md-4">
-                                <select class="form-select status-filter-host" id="statusFilterHost">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="available">Trống</option>
-                                    <option value="occupied">Đã thuê</option>
-                                    <option value="maintenance">Bảo trì</option>
+                                <select class="form-select status-filter-host" id="statusFilterHost"
+                                    onchange="filterByHostelAndStatus()">
+                                    <option value="" th:selected="${selectedStatus == null or selectedStatus == ''}">Tất
+                                        cả trạng thái</option>
+                                    <option value="unactive" th:selected="${selectedStatus == 'unactive'}">Trống
+                                    </option>
+                                    <option value="active" th:selected="${selectedStatus == 'active'}">Đã thuê</option>
+                                    <option value="repair" th:selected="${selectedStatus == 'repair'}">Bảo trì</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Room List Table -->
                     <div class="table-container-host">
                         <div class="table-responsive">
                             <table class="table room-table-host" id="roomTableHost">
@@ -91,87 +352,51 @@
                                     </tr>
                                 </thead>
                                 <tbody class="table-body-host" id="roomTableBodyHost">
-                                    <tr class="table-row-host">
-                                        <td class="table-td-host room-name-host">Phòng A101</td>
-                                        <td class="table-td-host-price price-host">3.500.000 ₫</td>
-                                        <td class="table-td-host">
-                                            <span class="status-badge-host status-available-host">Trống</span>
+                                    <tr class="table-row-host" th:each="room : ${rooms}">
+                                        <td class="table-td-host room-name-host" th:text="${room.namerooms}"></td>
+                                        <td class="table-td-host-price price-host"
+                                            th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
                                         </td>
-                                        <td class="table-td-host">25 m²</td>
-                                        <td class="table-td-host">2 người</td>
+                                        <td class="table-td-host">
+                                            <span
+                                                th:text="'[Debug: ' + ${room.status != null ? room.status.name() : 'null'} + ']'"
+                                                style="display: none;"></span>
+                                            <span th:if="${room.status != null and room.status.name() == 'unactive'}"
+                                                class="status-badge-host status-available-host">
+                                                <i class="fas fa-door-open me-1"></i> Trống
+                                            </span>
+                                            <span th:if="${room.status != null and room.status.name() == 'active'}"
+                                                class="status-badge-host status-occupied-host">
+                                                <i class="fas fa-door-closed me-1"></i> Đã thuê
+                                            </span>
+                                            <span th:if="${room.status != null and room.status.name() == 'repair'}"
+                                                class="status-badge-host status-maintenance-host">
+                                                <i class="fas fa-tools me-1"></i> Bảo trì
+                                            </span>
+                                            <span
+                                                th:if="${room.status == null or room.status.name() != 'unactive' and room.status.name() != 'active' and room.status.name() != 'repair'}"
+                                                class="status-badge-host status-unknown-host">
+                                                <i class="fas fa-question-circle me-1"></i> Không xác định
+                                            </span>
+                                        </td>
+                                        <td class="table-td-host" th:text="${room.acreage} + ' m²'"></td>
+                                        <td class="table-td-host" th:text="${room.max_tenants} + ' người'"></td>
                                         <td class="table-td-host">
                                             <div class="action-buttons-host">
                                                 <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
                                                     data-bs-target="#add-room-host" role="tab"
-                                                    aria-controls="add-room-host">
+                                                    aria-controls="add-room-host" th:attr="data-room-id=${room.roomId}">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-                                                <button class="btn-delete-host" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="table-row-host">
-                                        <td class="table-td-host room-name-host">Phòng A102</td>
-                                        <td class="table-td-host-price price-host">4.000.000 ₫</td>
-                                        <td class="table-td-host">
-                                            <span class="status-badge-host status-occupied-host">Đã thuê</span>
-                                        </td>
-                                        <td class="table-td-host">30 m²</td>
-                                        <td class="table-td-host">3 người</td>
-                                        <td class="table-td-host">
-                                            <div class="action-buttons-host">
-                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-                                                    data-bs-target="#add-room-host" role="tab"
-                                                    aria-controls="add-room-host">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-delete-host" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="table-row-host">
-                                        <td class="table-td-host room-name-host">Phòng B201</td>
-                                        <td class="table-td-host-price price-host">3.200.000 ₫</td>
-                                        <td class="table-td-host">
-                                            <span class="status-badge-host status-available-host">Trống</span>
-                                        </td>
-                                        <td class="table-td-host">20 m²</td>
-                                        <td class="table-td-host">2 người</td>
-                                        <td class="table-td-host">
-                                            <div class="action-buttons-host">
-                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-                                                    data-bs-target="#add-room-host" role="tab"
-                                                    aria-controls="add-room-host">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-delete-host" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr class="table-row-host">
-                                        <td class="table-td-host room-name-host">Phòng B202</td>
-                                        <td class="table-td-host-price price-host">3.500.000 ₫</td>
-                                        <td class="table-td-host">
-                                            <span class="status-badge-host status-maintenance-host">Bảo trì</span>
-                                        </td>
-                                        <td class="table-td-host">25 m²</td>
-                                        <td class="table-td-host">2 người</td>
-                                        <td class="table-td-host">
-                                            <div class="action-buttons-host">
-                                                <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
-                                                    data-bs-target="#add-room-host" role="tab"
-                                                    aria-controls="add-room-host">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button class="btn-delete-host" title="Xóa">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
+                                                <form th:action="@{/chu-tro/xoa-phong/{roomId}(roomId=${room.roomId})}"
+                                                    method="post" class="delete-room-form"
+                                                    th:attr="data-room-id=${room.roomId}, data-hostel-id=${hostelId}"
+                                                    style="display:inline;">
+                                                    <input type="hidden" name="hostelId" th:value="${hostelId}">
+                                                    <button type="submit" class="btn btn-danger btn-sm delete-room-btn">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -180,141 +405,100 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Tab 2: Thêm phòng mới - Updated Design -->
                 <div class="tab-pane fade" id="add-room-host" role="tabpanel" aria-labelledby="add-room-tab-host"
                     tabindex="0">
-
                     <div class="add-room-container-modern">
-                        <form id="addRoomFormHost" class="add-room-form-modern">
-                            <!-- Row 1: Khu trọ và Tên phòng -->
+                        <form id="addRoomFormHost" class="add-room-form-modern" th:action="@{/chu-tro/them-phong}"
+                            method="post" enctype="multipart/form-data">
+                            <input type="hidden" id="roomIdHost" name="roomId">
+                            <input type="hidden" id="existingImages" name="existingImages">
                             <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomAreaSelectHost" class="form-label-modern">
                                         Khu trọ <span class="required-star">*</span>
                                     </label>
-                                    <select class="form-select-modern" id="roomAreaSelectHost" required>
+                                    <select class="form-select-modern" id="roomAreaSelectHost" name="hostelId">
                                         <option value="">Chọn khu trọ</option>
-                                        <option value="khu-a">Khu A - Tầng 1</option>
-                                        <option value="khu-b">Khu B - Tầng 2</option>
-                                        <option value="khu-c">Khu C - Tầng 3</option>
-                                        <option value="khu-d">Khu D - Tầng 4</option>
-                                        <option value="khu-e">Khu E - Tầng 5</option>
+                                        <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
+                                            th:text="${hostel.name}"></option>
                                     </select>
                                 </div>
                                 <div class="form-group-modern">
                                     <label for="roomNameHost" class="form-label-modern">
                                         Tên phòng <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomNameHost"
-                                        placeholder="Nhập tên phòng (VD: A101)" required>
+                                    <input type="text" class="form-input-modern" id="roomNameHost" name="namerooms"
+                                        placeholder="Nhập tên phòng (VD: A101)">
                                 </div>
                             </div>
-
-                            <!-- Row 2: Giá thuê và Trạng thái -->
                             <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomPriceHost" class="form-label-modern">
                                         Giá thuê (VNĐ) <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomPriceHost"
-                                        placeholder="Nhập giá thuê phòng" required>
+                                    <input type="text" class="form-input-modern" id="roomPriceHost" name="price"
+                                        placeholder="Nhập giá thuê phòng">
                                 </div>
                                 <div class="form-group-modern">
                                     <label for="roomStatusHost" class="form-label-modern">
                                         Trạng thái <span class="required-star">*</span>
                                     </label>
-                                    <select class="form-select-modern" id="roomStatusHost" required>
-                                        <option value="">Chọn trạng thái</option>
-                                        <option value="available">Trống</option>
-                                        <option value="occupied">Đã thuê</option>
-                                        <option value="maintenance">Bảo trì</option>
+                                    <select class="form-select-modern" id="roomStatusHost" name="status">
+                                        <option value="unactive">Trống</option>
+                                        <option value="active">Đã thuê</option>
+                                        <option value="repair">Bảo trì</option>
                                     </select>
                                 </div>
                             </div>
-
-                            <!-- Row 3: Diện tích và Số người tối đa -->
                             <div class="form-row-modern">
                                 <div class="form-group-modern">
                                     <label for="roomAreaHost" class="form-label-modern">
                                         Diện tích (m²) <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomAreaHost"
-                                        placeholder="Nhập diện tích phòng" required>
+                                    <input type="text" class="form-input-modern" id="roomAreaHost" name="acreage"
+                                        placeholder="Nhập diện tích phòng">
                                 </div>
                                 <div class="form-group-modern">
                                     <label for="roomCapacityHost" class="form-label-modern">
                                         Số người tối đa <span class="required-star">*</span>
                                     </label>
-                                    <input type="text" class="form-input-modern" id="roomCapacityHost"
-                                        placeholder="Số người thuê phòng tối đa" required>
+                                    <input type="text" class="form-input-modern" id="roomCapacityHost" name="maxTenants"
+                                        placeholder="Số người thuê phòng tối đa">
                                 </div>
                             </div>
-
-                            <!-- Row 4: Tiện ích phòng -->
                             <div class="form-group-modern full-width">
                                 <label class="form-label-modern">Tiện ích phòng</label>
-                                <div class="amenities-grid">
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="wifi" name="amenities" value="wifi" class="amenity-checkbox">
-                                        <label for="wifi" class="amenity-label">
-                                            <i class="fas fa-wifi"></i>
-                                            <span>WiFi</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="ac" name="amenities" value="ac" class="amenity-checkbox">
-                                        <label for="ac" class="amenity-label">
-                                            <i class="fas fa-snowflake"></i>
-                                            <span>Điều hòa</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="fridge" name="amenities" value="fridge" class="amenity-checkbox">
-                                        <label for="fridge" class="amenity-label">
-                                            <i class="fas fa-cube"></i>
-                                            <span>Tủ lạnh</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="washing-machine" name="amenities" value="washing-machine" class="amenity-checkbox">
-                                        <label for="washing-machine" class="amenity-label">
-                                            <i class="fas fa-tshirt"></i>
-                                            <span>Máy giặt</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="water-heater" name="amenities" value="water-heater" class="amenity-checkbox">
-                                        <label for="water-heater" class="amenity-label">
-                                            <i class="fas fa-fire"></i>
-                                            <span>Nước nóng</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="kitchen" name="amenities" value="kitchen" class="amenity-checkbox">
-                                        <label for="kitchen" class="amenity-label">
-                                            <i class="fas fa-utensils"></i>
-                                            <span>Bếp riêng</span>
-                                        </label>
-                                    </div>
-                                    <div class="amenity-item">
-                                        <input type="checkbox" id="bathroom" name="amenities" value="bathroom" class="amenity-checkbox">
-                                        <label for="bathroom" class="amenity-label">
-                                            <i class="fas fa-bath"></i>
-                                            <span>WC riêng</span>
+                                <div class="amenities-grid"
+                                    th:unless="${utilities == null or #lists.isEmpty(utilities)}">
+                                    <div class="amenity-item" th:each="utility : ${utilities}">
+                                        <input type="checkbox" th:id="'utility-' + ${utility.utilityId}"
+                                            name="amenities" th:value="${utility.name}" class="amenity-checkbox">
+                                        <label th:for="'utility-' + ${utility.utilityId}" class="amenity-label">
+                                            <i th:switch="${utility.name}">
+                                                <i th:case="'WiFi'" class="fas fa-wifi"></i>
+                                                <i th:case="'Điều hòa'" class="fas fa-snowflake"></i>
+                                                <i th:case="'Tủ lạnh'" class="fas fa-cube"></i>
+                                                <i th:case="'Máy giặt'" class="fas fa-tshirt"></i>
+                                                <i th:case="'Nước nóng'" class="fas fa-fire"></i>
+                                                <i th:case="'Bếp riêng'" class="fas fa-utensils"></i>
+                                                <i th:case="'WC riêng'" class="fas fa-bath"></i>
+                                                <i th:case="*" class="fas fa-circle"></i>
+                                            </i>
+                                            <span th:text="${utility.name}"></span>
                                         </label>
                                     </div>
                                 </div>
+                                <div th:if="${utilities == null or #lists.isEmpty(utilities)}"
+                                    class="alert alert-warning">
+                                    Không có tiện ích nào để hiển thị. Vui lòng thêm tiện ích trong hệ thống.
+                                </div>
                             </div>
-
-                            <!-- Row 5: Mô tả -->
                             <div class="form-group-modern full-width">
                                 <label for="roomDescriptionHost" class="form-label-modern">Mô tả chi tiết</label>
-                                <textarea class="form-textarea-modern" id="roomDescriptionHost"
-                                    placeholder="Mô tả chi tiết về phòng, vị trí, môi trường xung quanh..." rows="4"></textarea>
+                                <textarea class="form-textarea-modern" id="roomDescriptionHost" name="description"
+                                    placeholder="Mô tả chi tiết về phòng, vị trí, môi trường xung quanh..."
+                                    rows="4"></textarea>
                             </div>
-
-                            <!-- Image Upload Section -->
                             <div class="image-upload-section">
                                 <div class="upload-area" id="uploadArea">
                                     <div class="upload-icon">
@@ -333,19 +517,13 @@
                                         </svg>
                                     </div>
                                     <p class="upload-text">Kéo thả ảnh vào đây hoặc click để chọn</p>
-                                    <input type="file" id="imageUpload" multiple accept="image/*"
-                                        style="display: none;">
+                                    <input type="file" id="imageUpload" name="images" multiple accept="image/*">
                                 </div>
-
-                                <!-- Image Preview Section -->
-                                <div class="image-preview-container" id="imagePreviewContainer">
-                                    <!-- Preview images will be dynamically added here -->
-                                </div>
+                                <div class="image-preview-container" id="imagePreviewContainer"></div>
                             </div>
-
-                            <!-- Action Buttons -->
                             <div class="form-actions-modern">
-                                <button type="button" class="btn-cancel-modern">
+                                <button type="button" class="btn-cancel-modern"
+                                    onclick="switchToTab('room-list-tab-host')">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2"
@@ -353,26 +531,31 @@
                                     </svg>
                                     Hủy bỏ
                                 </button>
-                                <button type="submit" class="btn-submit-modern">
+                                <button type="button" class="btn-cancel-modern" onclick="resetForm()">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round" />
+                                    </svg>
+                                    Reset
+                                </button>
+                                <button type="submit" class="btn-submit-modern" id="submitRoomBtn">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
                                             stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
-                                    Thêm phòng
+                                    <span id="submitBtnText">Thêm phòng</span>
                                 </button>
                             </div>
                         </form>
                     </div>
                 </div>
-
-
-                <!-- Tab 3: Quản lý trạng thái - Updated Design -->
                 <div class="tab-pane fade" id="status-management-host" role="tabpanel"
                     aria-labelledby="status-management-tab-host" tabindex="0">
-
                     <div class="status-management-modern">
-                        <!-- Statistics Cards -->
                         <div class="stats-grid-modern">
                             <div class="stat-card-modern stat-total-modern">
                                 <div class="stat-icon-modern">
@@ -388,12 +571,11 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Tổng phòng</div>
-                                    <div class="stat-number-modern" id="totalRoomsCount">4</div>
+                                    <div class="stat-number-modern" id="totalRoomsCount" th:text="${totalRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
-
                             <div class="stat-card-modern stat-available-modern">
                                 <div class="stat-icon-modern">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -405,12 +587,12 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng trống</div>
-                                    <div class="stat-number-modern" id="availableRoomsCount">2</div>
+                                    <div class="stat-number-modern" id="availableRoomsCount"
+                                        th:text="${availableRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
-
                             <div class="stat-card-modern stat-occupied-modern">
                                 <div class="stat-icon-modern">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -427,12 +609,12 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng đã thuê</div>
-                                    <div class="stat-number-modern" id="occupiedRoomsCount">1</div>
+                                    <div class="stat-number-modern" id="occupiedRoomsCount" th:text="${occupiedRooms}">0
+                                    </div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
-
                             <div class="stat-card-modern stat-maintenance-modern">
                                 <div class="stat-icon-modern">
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -453,14 +635,13 @@
                                 </div>
                                 <div class="stat-content-modern">
                                     <div class="stat-label-modern">Phòng bảo trì</div>
-                                    <div class="stat-number-modern" id="maintenanceRoomsCount">1</div>
+                                    <div class="stat-number-modern" id="maintenanceRoomsCount"
+                                        th:text="${maintenanceRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
                                     <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Chart Section -->
                         <div class="chart-section-modern">
                             <div class="chart-container-modern">
                                 <h3 class="chart-title-modern">Biểu đồ thống kê tỷ lệ tình trạng phòng</h3>
@@ -485,42 +666,33 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Quick Actions -->
                         <div class="quick-actions-modern">
                             <div class="action-card-modern">
                                 <h4 class="action-title-modern">Thay đổi trạng thái nhanh</h4>
                                 <div class="action-form-modern">
                                     <div class="form-group-inline-modern">
-                                        <label for="quickRoomSelect" class="form-label-inline-modern">Chọn
-                                            khu trọ:</label>
-                                        <select class="form-select-inline-modern" id="quickRoomSelect">
+                                        <label for="quickHostelSelect" class="form-label-modern">Chọn khu trọ:</label>
+                                        <select class="form-select-modern" id="quickHostelSelect">
                                             <option value="">Chọn khu trọ...</option>
-                                            <option value="A101">Khu trọ A101</option>
-                                            <option value="A102">Khu trọ A102</option>
-                                            <option value="B201">Khu trọ B201</option>
-                                            <option value="B202">Khu trọ B202</option>
+                                            <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
+                                                th:text="${hostel.name}"></option>
                                         </select>
                                     </div>
                                     <div class="form-group-inline-modern">
-                                        <label for="quickRoomSelect" class="form-label-inline-modern">Chọn
-                                            phòng:</label>
-                                        <select class="form-select-inline-modern" id="quickRoomSelect">
+                                        <label for="quickRoomSelect" class="form-label-modern">Chọn phòng:</label>
+                                        <select class="form-select-modern" id="quickRoomSelect">
                                             <option value="">Chọn phòng...</option>
-                                            <option value="A101">Phòng A101</option>
-                                            <option value="A102">Phòng A102</option>
-                                            <option value="B201">Phòng B201</option>
-                                            <option value="B202">Phòng B202</option>
+                                            <option th:each="room : ${rooms}" th:value="${room.roomId}"
+                                                th:text="${room.namerooms}"></option>
                                         </select>
                                     </div>
                                     <div class="form-group-inline-modern">
-                                        <label for="quickStatusSelect" class="form-label-inline-modern">Trạng thái
-                                            mới:</label>
-                                        <select class="form-select-inline-modern" id="quickStatusSelect">
+                                        <label for="quickStatusSelect" class="form-label-modern">Trạng thái mới:</label>
+                                        <select class="form-select-modern" id="quickStatusSelect">
                                             <option value="">Chọn trạng thái...</option>
-                                            <option value="available">Trống</option>
-                                            <option value="occupied">Đã thuê</option>
-                                            <option value="maintenance">Bảo trì</option>
+                                            <option value="unactive">Trống</option>
+                                            <option value="active">Đã thuê</option>
+                                            <option value="repair">Bảo trì</option>
                                         </select>
                                     </div>
                                     <button type="button" class="btn-update-status-modern" id="updateStatusBtn">
@@ -538,10 +710,359 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
-        
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        let existingImages = [];
+        let selectedFiles = new Map();
+        let previewURLs = new Set();
+
+        function showNotification(message, type) {
+            alert(message);
+        }
+
+        function switchToTab(tabId) {
+            const tab = new bootstrap.Tab(document.getElementById(tabId));
+            tab.show();
+        }
+
+        function resetForm() {
+            const form = document.getElementById("addRoomFormHost");
+            form.reset();
+            form.action = "/chu-tro/them-phong";
+            document.getElementById("submitBtnText").textContent = "Thêm phòng";
+            document.getElementById("addRoomTabText").textContent = "Thêm phòng mới";
+            document.getElementById("roomIdHost").value = "";
+            document.getElementById("imagePreviewContainer").innerHTML = "";
+            document.getElementById("imageUpload").value = "";
+            existingImages = [];
+            selectedFiles.clear();
+            previewURLs.clear();
+            // showNotification("Đã đặt lại form", "info");
+        }
+
+        function createImagePreview(src, isExisting = false, file = null) {
+            const previewContainer = document.getElementById("imagePreviewContainer");
+            if (previewURLs.has(src)) return;
+
+            const previewDiv = document.createElement("div");
+            previewDiv.className = "image-preview";
+
+            const imgElement = document.createElement("img");
+            imgElement.src = src;
+            imgElement.alt = "Room image preview";
+
+            const removeBtn = document.createElement("button");
+            removeBtn.className = "remove-image";
+            removeBtn.innerHTML = "×";
+            removeBtn.onclick = () => {
+                previewDiv.remove();
+                previewURLs.delete(src);
+                if (isExisting) {
+                    existingImages = existingImages.filter(img => img !== src);
+                    document.getElementById("existingImages").value = existingImages.join(",");
+                } else if (file) {
+                    const fileKey = `${file.name}_${file.size}`;
+                    selectedFiles.delete(fileKey);
+                    updateFileInput();
+                }
+            };
+
+            previewDiv.appendChild(imgElement);
+            previewDiv.appendChild(removeBtn);
+            previewContainer.appendChild(previewDiv);
+            previewURLs.add(src);
+        }
+
+        function updateFileInput() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById("imageUpload").files = dataTransfer.files;
+        }
+
+        // Hàm thêm ảnh mới mà KHÔNG xóa ảnh cũ
+        function addNewImages(files) {
+            const newFiles = Array.from(files);
+            let addedCount = 0;
+
+            newFiles.forEach(file => {
+                if (!file.type.startsWith("image/")) {
+                    showNotification(`File "${file.name}" không phải là ảnh hợp lệ!`, "error");
+                    return;
+                }
+                const fileKey = `${file.name}_${file.size}`;
+                if (!selectedFiles.has(fileKey)) {
+                    const url = URL.createObjectURL(file);
+                    selectedFiles.set(fileKey, file);
+                    createImagePreview(url, false, file);
+                    addedCount++;
+                }
+            });
+
+            if (addedCount > 0) {
+                updateFileInput();
+            }
+        }
+
+        document.getElementById("addRoomFormHost").addEventListener("submit", function (e) {
+            let isValid = true;
+            document.querySelectorAll(".input-error-message").forEach(el => el.remove());
+
+            // Helper để hiển thị lỗi dưới input
+            function showError(inputId, message) {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.createElement("div");
+                errorDiv.className = "input-error-message";
+                errorDiv.style.color = "#dc3545";
+                errorDiv.style.fontSize = "13px";
+                errorDiv.style.marginTop = "4px";
+                errorDiv.textContent = message;
+                input.parentNode.appendChild(errorDiv);
+            }
+
+            // Kiểm tra tên phòng
+            const roomName = document.getElementById("roomNameHost").value.trim();
+            if (!roomName) {
+                isValid = false;
+                showError("roomNameHost", "Vui lòng nhập tên phòng.");
+            }
+
+            // Kiểm tra giá thuê
+            const priceInput = document.getElementById("roomPriceHost");
+            let price = priceInput.value.trim();
+            if (!price) {
+                isValid = false;
+                showError("roomPriceHost", "Vui lòng nhập giá thuê.");
+            } else if (!/^\d+$/.test(price.replace(/[^\d]/g, ''))) {
+                isValid = false;
+                showError("roomPriceHost", "Giá thuê phải là số.");
+            }
+
+            // Kiểm tra diện tích
+            const acreageInput = document.getElementById("roomAreaHost");
+            let acreage = acreageInput.value.trim();
+            if (!acreage) {
+                isValid = false;
+                showError("roomAreaHost", "Vui lòng nhập diện tích phòng.");
+            } else if (isNaN(acreage) || Number(acreage) <= 0) {
+                isValid = false;
+                showError("roomAreaHost", "Diện tích phải là số lớn hơn 0.");
+            }
+
+            // Kiểm tra số người tối đa
+            const maxTenantsInput = document.getElementById("roomCapacityHost");
+            let maxTenants = maxTenantsInput.value.trim();
+            if (!maxTenants) {
+                isValid = false;
+                showError("roomCapacityHost", "Vui lòng nhập số người tối đa.");
+            } else if (isNaN(maxTenants) || Number(maxTenants) <= 0) {
+                isValid = false;
+                showError("roomCapacityHost", "Số người tối đa phải là số lớn hơn 0.");
+            }
+
+            // Kiểm tra khu trọ
+            const hostelId = document.getElementById("roomAreaSelectHost").value;
+            if (!hostelId) {
+                isValid = false;
+                showError("roomAreaSelectHost", "Vui lòng chọn khu trọ.");
+            }
+
+            // Kiểm tra trạng thái
+            const status = document.getElementById("roomStatusHost").value;
+            if (!status) {
+                isValid = false;
+                showError("roomStatusHost", "Vui lòng chọn trạng thái phòng.");
+            }
+
+            // Nếu có lỗi thì không submit và scroll tới lỗi đầu tiên
+            if (!isValid) {
+                e.preventDefault();
+                const firstError = document.querySelector(".input-error-message");
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: "smooth", block: "center" });
+                }
+                // showNotification("Vui lòng kiểm tra lại thông tin!", "error");
+                return;
+            }
+
+            // Nếu không có lỗi, chuẩn hóa giá trị số tiền trước khi submit
+            priceInput.value = price.replace(/[^\d]/g, '');
+
+            // Gửi form bằng fetch để xử lý ảnh, sau đó chuyển hướng (server sẽ trả về thông báo qua redirectAttributes)
+            e.preventDefault();
+            const formData = new FormData(this);
+            selectedFiles.forEach(file => {
+                if (file.type.startsWith("image/")) formData.append("images", file);
+            });
+
+            const actionUrl = document.getElementById("roomIdHost").value ? "/chu-tro/cap-nhat-phong" : "/chu-tro/them-phong";
+            fetch(actionUrl, {
+                method: "POST",
+                body: formData
+            }).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else {
+                    return response.text().then(text => {
+                        showNotification("Có lỗi xảy ra: " + text, "error");
+                    });
+                }
+            }).catch(error => {
+                showNotification("Lỗi khi gửi form: " + error.message, "error");
+            });
+        });
+
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".btn-edit-host")) {
+                e.preventDefault();
+                const roomId = e.target.closest(".btn-edit-host").getAttribute("data-room-id");
+                fetch(`/chu-tro/cap-nhat-phong/${roomId}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Không thể tải thông tin phòng");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Data from API:", data);
+                        const form = document.getElementById("addRoomFormHost");
+                        form.action = "/chu-tro/cap-nhat-phong";
+                        document.getElementById("submitBtnText").textContent = "Cập nhật phòng";
+                        document.getElementById("addRoomTabText").textContent = "Chỉnh sửa phòng";
+                        document.getElementById("roomIdHost").value = data.roomId;
+                        document.getElementById("roomNameHost").value = data.namerooms;
+                        document.getElementById("roomPriceHost").value = data.price.toLocaleString("vi-VN");
+                        document.getElementById("roomAreaHost").value = data.acreage;
+                        document.getElementById("roomStatusHost").value = data.status;
+                        document.getElementById("roomCapacityHost").value = data.maxTenants;
+                        document.getElementById("roomAreaSelectHost").value = data.hostelId;
+                        document.getElementById("roomDescriptionHost").value = data.description || "";
+
+                        document.querySelectorAll("input[name='amenities']").forEach(checkbox => {
+                            checkbox.checked = data.amenities.includes(checkbox.value);
+                        });
+
+                        // CHỈ XÓA ẢNH MỚI, GIỮ LẠI ẢNH CŨ
+                        const previewContainer = document.getElementById("imagePreviewContainer");
+                        previewContainer.innerHTML = "";
+
+                        // Reset chỉ ảnh mới được chọn, giữ lại ảnh cũ từ server
+                        selectedFiles.clear();
+                        previewURLs.clear();
+
+                        // Thiết lập lại ảnh cũ từ server
+                        existingImages = data.images || [];
+                        existingImages.forEach(image => {
+                            createImagePreview(image, true);
+                        });
+                        document.getElementById("existingImages").value = existingImages.join(",");
+                        document.getElementById("imageUpload").value = "";
+
+                        switchToTab("add-room-tab-host");
+                    })
+                    .catch(error => {
+                        showNotification("Không thể tải thông tin phòng: " + error.message, "error");
+                        console.error("Error:", error);
+                    });
+            }
+        });
+
+        // SỬA ĐỔI CHÍNH: Event listener cho việc chọn ảnh mới
+        document.getElementById("imageUpload").addEventListener("change", function (e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                addNewImages(files);
+            }
+            // Reset input để có thể chọn lại cùng file nếu cần
+            e.target.value = "";
+        });
+
+        // SỬA ĐỔI CHÍNH: Drag and Drop handlers
+        const uploadArea = document.getElementById("uploadArea");
+
+        uploadArea.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            uploadArea.classList.add("dragover");
+        });
+
+        uploadArea.addEventListener("dragleave", () => {
+            uploadArea.classList.remove("dragover");
+        });
+
+        uploadArea.addEventListener("drop", (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove("dragover");
+
+            const files = e.dataTransfer.files;
+            if (files && files.length > 0) {
+                // Sử dụng hàm addNewImages thay vì xóa tất cả ảnh
+                addNewImages(files);
+            }
+        });
+
+        // ...existing code...
+        uploadArea.addEventListener("click", function (e) {
+            // Chỉ trigger khi click trực tiếp vào uploadArea
+            if (e.target === uploadArea) {
+                document.getElementById("imageUpload").click();
+            }
+        });
+        // ...existing code...
+
+        function initializeToasts() {
+            const toasts = document.querySelectorAll('.toast-host');
+            toasts.forEach(toast => {
+                setTimeout(() => toast.classList.add('show'), 100);
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                }, 5000);
+
+                const closeBtn = toast.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        toast.style.opacity = '0';
+                        toast.style.transform = 'translateX(100%)';
+                        setTimeout(() => toast.remove(), 300);
+                    });
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeToasts();
+            const deleteButtons = document.querySelectorAll('.delete-room-btn');
+
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const form = this.closest('form');
+                    Swal.fire({
+                        title: 'Xác nhận xóa?',
+                        text: "Bạn có chắc chắn muốn xóa phòng này không?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
+
 </html>
