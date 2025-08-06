@@ -11,6 +11,8 @@
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/host.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <!-- ✅ THÊM SWEETALERT2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Validation Styles -->
     <style>
@@ -1429,68 +1431,112 @@
                 }
             });
         }
-        // ✅ SỬA LẠI HÀM GỬI EMAIL
+        // ✅ CẬP NHẬT NÚT GỬI EMAIL
         $('#btn-send-email').on('click', function () {
             console.log('📧 Sending contract email...');
 
             // Validate form trước
             if (!validateContractForm()) {
-                alert('❌ Vui lòng điền đầy đủ thông tin hợp đồng trước khi gửi email!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng điền đầy đủ thông tin hợp đồng trước khi gửi email!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#f39c12'
+                });
                 return;
             }
 
             // Kiểm tra email người thuê
             const tenantEmail = $('#tenant-email').val();
             if (!tenantEmail || !tenantEmail.includes('@')) {
-                alert('❌ Vui lòng nhập email hợp lệ cho người thuê!');
-                $('#tenant-email').focus();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Email không hợp lệ!',
+                    text: 'Vui lòng nhập email hợp lệ cho người thuê!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#e74c3c'
+                }).then(() => {
+                    $('#tenant-email').focus();
+                });
                 return;
             }
 
-            // Hiển thị loading
-            $(this).prop('disabled', true);
-            $(this).html('<i class="fa fa-spinner fa-spin me-1"></i> Đang gửi...');
+            // Xác nhận trước khi gửi
+            Swal.fire({
+                title: 'Xác nhận gửi email',
+                html: `
+            <div class="text-start">
+                <p><strong>📧 Gửi tới:</strong> ${tenantEmail}</p>
+                <p><strong>👤 Người nhận:</strong> ${$('#tenant-name').val()}</p>
+                <p><strong>🏠 Phòng:</strong> ${$('#room-number').val()}</p>
 
-            // ✅ CAPTURE HTML PREVIEW THAY VÌ DỮ LIỆU THÔ
+            </div>
+        `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Có, gửi ngay!',
+                cancelButtonText: 'Hủy',
+                showLoaderOnConfirm: true,
+                preConfirm: () => {
+                    return sendContractEmail(); // Gọi hàm gửi email
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            });
+        });
+
+        // ✅ HÀM GỬI EMAIL (tách riêng)
+        function sendContractEmail() {
             const contractHtml = captureContractPreview();
             const contractData = {
                 contractId: getContractIdFromUrl(),
-                recipientEmail: tenantEmail,
+                recipientEmail: $('#tenant-email').val(),
                 recipientName: $('#tenant-name').val(),
-                contractHtml: contractHtml, // ← GỬI HTML THAY VÌ DỮ LIỆU THÔ
+                contractHtml: contractHtml,
                 subject: `Hợp đồng thuê nhà - ${$('#tenant-name').val()}`,
-                // Thêm một số thông tin cơ bản để backend xử lý
                 tenantName: $('#tenant-name').val(),
                 roomNumber: $('#room-number').val(),
                 monthlyRent: $('#rent-price').val()
             };
 
-            console.log('📤 Sending HTML contract:', contractData);
-
-            // Gửi request
-            $.ajax({
-                url: '/api/contracts/send-email-html', // ← ĐỔI ENDPOINT
+            return $.ajax({
+                url: '/api/contracts/send-email-pdf',
                 method: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(contractData),
-                success: function (response) {
-                    console.log('✅ Response:', response);
-                    if (response.success) {
-                        alert('✅ Hợp đồng đã được gửi qua email thành công!');
-                    } else {
-                        alert('❌ Có lỗi xảy ra: ' + response.message);
-                    }
-                },
-                error: function (xhr, status, error) {
-                    console.error('❌ Error:', xhr.responseText);
-                    alert('❌ Lỗi: ' + (xhr.responseText || error));
-                },
-                complete: function () {
-                    $('#btn-send-email').prop('disabled', false);
-                    $('#btn-send-email').html('<i class="fa fa-envelope me-1"></i> Gửi qua Email');
+                data: JSON.stringify(contractData)
+            }).then(response => {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Gửi email thành công! 🎉',
+                        html: `
+                    <div class="text-start">
+                        <p>✅ Email đã được gửi thành công!</p>
+                        <p>📧 <strong>Gửi tới:</strong> ${$('#tenant-email').val()}</p>
+                        <p>🕒 <strong>Thời gian:</strong> ${new Date().toLocaleString('vi-VN')}</p>
+                    </div>
+                `,
+                        confirmButtonText: 'Về danh sách hợp đồng',
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        window.location.href = '/chu-tro/DS-hop-dong-host';
+                    });
+                } else {
+                    throw new Error(response.message);
                 }
+            }).catch(error => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi gửi email!',
+                    text: error.message || 'Có lỗi xảy ra khi gửi email',
+                    confirmButtonText: 'Thử lại',
+                    confirmButtonColor: '#e74c3c'
+                });
+                throw error;
             });
-        });
+        }
 
 
         $(document).ready(function () {
@@ -2103,25 +2149,34 @@
 
             return contractHtml;
         }
-        // ✅ NÚT DOWNLOAD PDF
+        // ✅ CẬP NHẬT NÚT DOWNLOAD PDF
         $('#btn-download-pdf').on('click', function () {
             console.log('📄 Downloading PDF...');
 
-            try {
-                // Validate form
-                if (!validateContractForm()) {
-                    alert('❌ Vui lòng điền đầy đủ thông tin hợp đồng trước khi tải PDF!');
-                    return;
+            if (!validateContractForm()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng điền đầy đủ thông tin hợp đồng trước khi tải PDF!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#f39c12'
+                });
+                return;
+            }
+
+            // Hiển thị loading
+            Swal.fire({
+                title: 'Đang tạo PDF...',
+                html: 'Vui lòng chờ trong giây lát',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
                 }
+            });
 
-                // Loading state
-                $(this).prop('disabled', true);
-                $(this).html('<i class="fa fa-spinner fa-spin me-1"></i> Đang tạo PDF...');
-
-                // Capture HTML
+            try {
                 const contractHtml = captureContractPreviewForPdf();
 
-                // Send to server to generate PDF
                 $.ajax({
                     url: '/api/contracts/generate-pdf',
                     method: 'POST',
@@ -2131,10 +2186,10 @@
                         fileName: `HopDong_${$('#tenant-name').val().replace(/\s+/g, '_')}_${Date.now()}`
                     }),
                     xhrFields: {
-                        responseType: 'blob' // Important for PDF download
+                        responseType: 'blob'
                     },
                     success: function (data, status, xhr) {
-                        // Create download link
+                        // Tạo download
                         const blob = new Blob([data], { type: 'application/pdf' });
                         const url = window.URL.createObjectURL(blob);
                         const a = document.createElement('a');
@@ -2145,22 +2200,41 @@
                         window.URL.revokeObjectURL(url);
                         document.body.removeChild(a);
 
-                        alert('✅ Tải PDF thành công!');
+                        // Thông báo thành công
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Tải PDF thành công! 📄',
+                            html: `
+                        <div class="text-start">
+                            <p>✅ File PDF đã được tạo và tải xuống!</p>
+                            <p>📁 <strong>Tên file:</strong> HopDong_${$('#tenant-name').val().replace(/\s+/g, '_')}.pdf</p>
+                            <p>👤 <strong>Người thuê:</strong> ${$('#tenant-name').val()}</p>
+                        </div>
+                    `,
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#28a745'
+                        });
                     },
                     error: function (xhr, status, error) {
                         console.error('❌ Error:', error);
-                        alert('❌ Lỗi tạo PDF: ' + error);
-                    },
-                    complete: function () {
-                        $('#btn-download-pdf').prop('disabled', false);
-                        $('#btn-download-pdf').html('<i class="fa fa-file-pdf me-1"></i> Tải PDF');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi tạo PDF!',
+                            text: 'Có lỗi xảy ra khi tạo file PDF. Vui lòng thử lại!',
+                            confirmButtonText: 'Thử lại',
+                            confirmButtonColor: '#e74c3c'
+                        });
                     }
                 });
 
             } catch (error) {
-                alert('❌ ' + error.message);
-                $(this).prop('disabled', false);
-                $(this).html('<i class="fa fa-file-pdf me-1"></i> Tải PDF');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi!',
+                    text: error.message,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#e74c3c'
+                });
             }
         });
 
@@ -2212,9 +2286,7 @@
                     success: function (response) {
                         console.log('✅ Response:', response);
                         if (response.success) {
-                            alert(`✅ Hợp đồng PDF đã được gửi thành công!\n📎 File: ${response.fileName}\n📧 Gửi tới: ${tenantEmail}`);
-                        } else {
-                            alert('❌ Có lỗi xảy ra: ' + response.message);
+
                         }
                     },
                     error: function (xhr, status, error) {
@@ -2653,6 +2725,141 @@
             }
         });
 
+        // ✅ CẬP NHẬT NÚT CẬP NHẬT HỢP ĐỒNG
+        $('#btn-update').on('click', function () {
+            const contractId = $(this).data('contract-id');
+
+            if (!contractId) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Không tìm thấy ID hợp đồng!',
+                    text: 'Vui lòng tải lại trang và thử lại.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#e74c3c'
+                });
+                return;
+            }
+
+            if (!validateContractForm()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng điền đầy đủ thông tin trước khi cập nhật!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#f39c12'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Xác nhận cập nhật',
+                html: `
+            <div class="text-start">
+                <p>Bạn có chắc chắn muốn cập nhật hợp đồng này?</p>
+                <p><strong>ID:</strong> ${contractId}</p>
+                <p><strong>Người thuê:</strong> ${$('#tenant-name').val()}</p>
+                <p><strong>Phòng:</strong> ${$('#room-number').val()}</p>
+            </div>
+        `,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#17a2b8',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Có, cập nhật!',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Hiển thị loading
+                    Swal.fire({
+                        title: 'Đang cập nhật...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Simulate update process
+                    setTimeout(() => {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cập nhật thành công! ✏️',
+                            text: 'Hợp đồng đã được cập nhật trong hệ thống!',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#17a2b8'
+                        });
+                    }, 2000);
+                }
+            });
+        });
+
+
+        // ✅ THÔNG BÁO CHO CÁC NÚT KHÁC
+        $('#btn-add-customer-host').on('click', function () {
+            Toast.fire({
+                icon: 'info',
+                title: 'Mở form thêm người bảo hộ'
+            });
+        });
+
+        $('#btn-add-resident').on('click', function () {
+            Toast.fire({
+                icon: 'info',
+                title: 'Mở form thêm người ở'
+            });
+        });
+
+        // ✅ THÔNG BÁO KHI CHUYỂN TAB
+        $('.nav-link').on('click', function () {
+            const tabName = $(this).text().trim();
+            Toast.fire({
+                icon: 'info',
+                title: `Chuyển sang tab: ${tabName}`
+            });
+        });
+
+        // ✅ THÔNG BÁO KHI CHỌN KHU TRỌ/PHÒNG
+        $('#hostelSelect').on('change', function () {
+            const hostelName = $(this).find('option:selected').text();
+            if (hostelName && hostelName !== '-- Chọn khu trọ --') {
+                Toast.fire({
+                    icon: 'success',
+                    title: `Đã chọn: ${hostelName}`
+                });
+            }
+        });
+
+        $('#roomSelect').on('change', function () {
+            const roomName = $(this).find('option:selected').text();
+            if (roomName && roomName !== '-- Chọn phòng trọ --') {
+                Toast.fire({
+                    icon: 'success',
+                    title: `Đã chọn phòng: ${roomName.split(' - ')[0]}`
+                });
+            }
+        });
+
+        // ✅ THÔNG BÁO KHI ZOOM PREVIEW
+        $('#btn-zoom-in, #btn-zoom-out, #btn-reset-zoom').on('click', function () {
+            const action = $(this).attr('title');
+            Toast.fire({
+                icon: 'info',
+                title: action
+            });
+        });
+
+        // ✅ SWEETALERT2 CONFIGURATION
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+
     </script>
 
     <!-- ✅ LOAD CONTRACT.JS IF EXISTS -->
@@ -2661,6 +2868,47 @@
 
 </body>
 <style>
+    /* ✅ CUSTOM SWEETALERT2 STYLES */
+    .swal2-popup {
+        border-radius: 16px !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .swal2-title {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        color: #2c3e50 !important;
+    }
+
+    .swal2-html-container {
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+    }
+
+    .swal2-confirm {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        padding: 10px 20px !important;
+    }
+
+    .swal2-cancel {
+        border-radius: 8px !important;
+        font-weight: 500 !important;
+        padding: 10px 20px !important;
+    }
+
+    /* Toast styles */
+    .swal2-toast .swal2-title {
+        font-size: 14px !important;
+        margin: 0 !important;
+    }
+
+    .swal2-toast {
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+    }
+
+
     .nha-tro-image-preview img {
         max-width: 100%;
         max-height: 200px;

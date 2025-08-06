@@ -2677,95 +2677,274 @@ window.NhaTroContract = {
     },
 
     saveContract() {
+        console.log("💾 Starting contract save process...");
+
+        // ✅ BƯỚC 1: Validate cơ bản
+        if (!this.validateBasicContractInfo()) {
+            return;
+        }
+
+        // ✅ BƯỚC 2: Lấy và validate room
+        const { roomIdNumber, roomSelect } = this.getRoomInfo();
+        if (!roomIdNumber) {
+            return;
+        }
+
+        // ✅ BƯỚC 3: Build contract data
+        const contractData = this.buildContractData(roomIdNumber, roomSelect);
+
+        // ✅ BƯỚC 4: Validate tenant data
+        if (!this.validateTenantData(contractData)) {
+            return;
+        }
+
+        // ✅ BƯỚC 5: Prepare form data
+        const formData = this.prepareFormData(contractData);
+
+        // ✅ BƯỚC 6: Show loading state
+        this.setLoadingState(true);
+
+        // ✅ BƯỚC 7: Send request
+        this.sendSaveRequest(formData);
+    },
+
+// ✅ HÀM PHỤ: Validate thông tin cơ bản
+    validateBasicContractInfo() {
+        const requiredFields = [
+            { id: 'tenant-name', name: 'Tên người thuê' },
+            { id: 'tenant-phone', name: 'Số điện thoại người thuê' },
+            { id: 'owner-name', name: 'Tên chủ trọ' },
+            { id: 'owner-phone', name: 'Số điện thoại chủ trọ' },
+            { id: 'rent-price', name: 'Giá thuê' },
+            { id: 'start-date', name: 'Ngày bắt đầu hợp đồng' }
+        ];
+
+        for (const field of requiredFields) {
+            const element = document.getElementById(field.id);
+            if (!element || !element.value || element.value.trim() === '') {
+                this.showNotification(`❌ Vui lòng điền: ${field.name}`, "error");
+                element?.focus();
+                return false;
+            }
+        }
+
+        return true;
+    },
+
+// ✅ HÀM PHỤ: Lấy thông tin phòng
+    getRoomInfo() {
         const roomSelect = document.getElementById('roomSelect');
         const roomIdValue = roomSelect?.value;
 
         if (!roomIdValue || roomIdValue.trim() === "" || roomIdValue === "null" || roomIdValue === "undefined") {
-            this.showNotification("Vui lòng chọn phòng trọ!", "error");
-            return;
+            this.showNotification("❌ Vui lòng chọn phòng trọ!", "error");
+            roomSelect?.focus();
+            return { roomIdNumber: null, roomSelect: null };
         }
 
         const roomIdNumber = parseInt(roomIdValue, 10);
         if (isNaN(roomIdNumber) || roomIdNumber <= 0) {
-            this.showNotification("ID phòng không hợp lệ!", "error");
-            return;
+            this.showNotification("❌ ID phòng không hợp lệ!", "error");
+            return { roomIdNumber: null, roomSelect: null };
         }
 
-        // Lấy dữ liệu hợp đồng đã chuẩn hóa (ContractDto)
-        const contractData = this.buildContractData(roomIdNumber, roomSelect);
+        console.log("✅ Room validated:", roomIdNumber);
+        return { roomIdNumber, roomSelect };
+    },
 
+// ✅ HÀM PHỤ: Validate dữ liệu người thuê
+    validateTenantData(contractData) {
         const tenantPhone = contractData.tenantType === "UNREGISTERED" ?
             this.unregisteredTenantData?.phone : contractData.tenant?.phone;
+
         if (!tenantPhone) {
-            this.showNotification("Số điện thoại người thuê không được để trống!", "error");
-            return;
+            this.showNotification("❌ Số điện thoại người thuê không được để trống!", "error");
+            document.getElementById('tenant-phone')?.focus();
+            return false;
         }
 
         const cccdNumber = contractData.tenantType === "UNREGISTERED" ?
             this.unregisteredTenantData?.cccdNumber : contractData.tenant?.cccdNumber;
+
         if (!cccdNumber) {
-            this.showNotification("Số CCCD không được để trống!", "error");
-            return;
+            this.showNotification("❌ Số CCCD không được để trống!", "error");
+            document.getElementById('tenant-id')?.focus();
+            return false;
         }
 
+        // Validate CCCD format (12 digits)
+        if (!/^\d{12}$/.test(cccdNumber)) {
+            this.showNotification("❌ Số CCCD phải có đúng 12 chữ số!", "error");
+            document.getElementById('tenant-id')?.focus();
+            return false;
+        }
+
+        console.log("✅ Tenant data validated");
+        return true;
+    },
+
+// ✅ HÀM PHỤ: Chuẩn bị form data
+    prepareFormData(contractData) {
         const formData = new FormData();
         formData.append("contract", JSON.stringify(contractData));
 
-        // ✅ Đã sửa: Gửi file với tên nhất quán là "cccdFrontFile" và "cccdBackFile"
+        // Thêm file CCCD
         if (contractData.tenantType === "UNREGISTERED") {
-            // Nếu là người bảo hộ, lấy file từ biến tạm
+            // Người bảo hộ - lấy file từ biến tạm
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
+                console.log("📎 Added unregistered tenant front CCCD file");
             }
             if (this.unregisteredTenantCccdBackFile) {
                 formData.append("cccdBackFile", this.unregisteredTenantCccdBackFile);
+                console.log("📎 Added unregistered tenant back CCCD file");
             }
         } else {
-            // Nếu là người thuê đã đăng ký, lấy file trực tiếp từ input
-            const cccdFront = document.getElementById("cccd-front").files[0];
-            const cccdBack = document.getElementById("cccd-back").files[0];
+            // Người thuê đã đăng ký - lấy file từ input
+            const cccdFront = document.getElementById("cccd-front")?.files[0];
+            const cccdBack = document.getElementById("cccd-back")?.files[0];
+
             if (cccdFront) {
                 formData.append("cccdFrontFile", cccdFront);
+                console.log("📎 Added registered tenant front CCCD file:", cccdFront.name);
             }
             if (cccdBack) {
                 formData.append("cccdBackFile", cccdBack);
+                console.log("📎 Added registered tenant back CCCD file:", cccdBack.name);
             }
         }
 
-        console.log("=== FINAL FORM DATA TO SEND ===");
+        // Debug form data
+        console.log("=== FORM DATA PREPARED ===");
         for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+            console.log(`${key}: ${value instanceof File ? `${value.name} (${value.size} bytes)` : value}`);
         }
 
-        fetch("/api/contracts", {
-            method: "POST",
-            body: formData, // FormData sẽ tự thiết lập Content-Type là multipart/form-data
-            // Thêm CSRF token nếu cần
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => {
-                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    this.showNotification("Hợp đồng đã được tạo thành công!", "success");
-                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
-                } else {
-                    this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi khi tạo hợp đồng:", error);
-                this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
-            });
+        return formData;
     },
+
+// ✅ HÀM PHỤ: Set loading state
+    setLoadingState(isLoading) {
+        const saveButton = document.getElementById('btn-save');
+        const sendEmailButton = document.getElementById('btn-send-email');
+
+        if (saveButton) {
+            saveButton.disabled = isLoading;
+            saveButton.innerHTML = isLoading
+                ? '<i class="fa fa-spinner fa-spin me-1"></i> Đang lưu...'
+                : '<i class="fa fa-floppy-disk me-1"></i> Lưu hợp đồng';
+        }
+
+        // Disable send email button khi đang save
+        if (sendEmailButton) {
+            sendEmailButton.disabled = isLoading;
+        }
+
+        console.log(isLoading ? "🔄 Loading state ON" : "✅ Loading state OFF");
+    },
+
+// ✅ HÀM PHỤ: Gửi request save
+    async sendSaveRequest(formData) {
+        try {
+            console.log("📤 Sending save request to /api/contracts...");
+
+            const response = await fetch("/api/contracts", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
+                }
+            });
+
+            console.log("📥 Response status:", response.status);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("📥 Response data:", data);
+
+            await this.handleSaveSuccess(data);
+
+        } catch (error) {
+            console.error("❌ Save error:", error);
+            this.handleSaveError(error);
+        } finally {
+            this.setLoadingState(false);
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý khi save thành công
+    async handleSaveSuccess(data) {
+        if (data.success) {
+            console.log("✅ Contract saved successfully!");
+
+            // Hiển thị thông báo thành công
+            this.showNotification("✅ Hợp đồng đã được lưu thành công!", "success");
+
+            // Cập nhật URL nếu có contractId (tạo mới)
+            if (data.contractId) {
+                const newUrl = `/contracts/edit/${data.contractId}`;
+                window.history.replaceState({ contractId: data.contractId }, '', newUrl);
+                console.log("🔗 URL updated to:", newUrl);
+
+                // Lưu contractId để sử dụng cho các chức năng khác
+                this.currentContractId = data.contractId;
+            }
+
+            // Cập nhật preview và enable nút gửi email
+            try {
+                this.updateAllPreview();
+
+                // Enable send email button nếu có email
+                const tenantEmail = document.getElementById('tenant-email')?.value?.trim();
+                const sendEmailButton = document.getElementById('btn-send-email');
+                if (sendEmailButton && tenantEmail) {
+                    sendEmailButton.disabled = false;
+                    sendEmailButton.classList.remove('btn-secondary');
+                    sendEmailButton.classList.add('btn-success');
+                    console.log("📧 Send email button enabled");
+                }
+
+            } catch (previewError) {
+                console.warn("⚠️ Preview update failed:", previewError);
+            }
+
+            // ✅ QUAN TRỌNG: KHÔNG CHUYỂN TRANG - chỉ thông báo thành công
+            console.log("🏠 Staying on current page as requested");
+
+        } else {
+            throw new Error(data.message || "Phản hồi không hợp lệ từ server");
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý khi save lỗi
+    handleSaveError(error) {
+        console.error("❌ Contract save failed:", error);
+
+        let errorMessage = "Lỗi khi lưu hợp đồng: ";
+
+        if (error.message.includes('duplicate')) {
+            errorMessage += "Hợp đồng đã tồn tại hoặc trùng lặp dữ liệu!";
+        } else if (error.message.includes('validation')) {
+            errorMessage += "Dữ liệu không hợp lệ, vui lòng kiểm tra lại!";
+        } else if (error.message.includes('network')) {
+            errorMessage += "Lỗi kết nối mạng, vui lòng thử lại!";
+        } else {
+            errorMessage += error.message;
+        }
+
+        this.showNotification(errorMessage, "error");
+
+        // Focus vào trường đầu tiên có lỗi (nếu có)
+        const firstErrorField = document.querySelector('.is-invalid, .error');
+        if (firstErrorField) {
+            firstErrorField.focus();
+        }
+    },
+
 
 
 
@@ -3732,20 +3911,44 @@ window.NhaTroContract = {
         })
     },
 
+    // ✅ PHIÊN BẢN TOAST ĐẸP NHẤT
     showNotification(message, type = "info") {
-        const notification = document.createElement("div")
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`
-        notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 400px;"
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `
-        document.body.appendChild(notification)
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove()
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: type === 'error' ? 5000 : 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            },
+            customClass: {
+                popup: 'colored-toast'
             }
-        }, 10000)
+        });
+
+        const config = {
+            title: message
+        };
+
+        switch(type) {
+            case 'success':
+                config.icon = 'success';
+                break;
+            case 'error':
+                config.icon = 'error';
+                break;
+            case 'warning':
+                config.icon = 'warning';
+                break;
+            case 'info':
+            default:
+                config.icon = 'info';
+                break;
+        }
+
+        Toast.fire(config);
     },
 }
 function updateContractPreview() {
