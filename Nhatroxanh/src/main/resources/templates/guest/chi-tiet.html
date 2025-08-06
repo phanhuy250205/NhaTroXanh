@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
         integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/css/lightgallery-bundle.min.css">
     <style>
         :root {
             --primary-blue: #3E83CC;
@@ -1103,11 +1103,11 @@
                                         <img th:unless="${similarPost.images != null and !#lists.isEmpty(similarPost.images)}"
                                             src="/images/cards/default.jpg" alt="Hình ảnh nhà trọ" class="card-img-top"
                                             style="height: 200px; object-fit: cover;">
-                                        <div class="card-overlay">
+                                        <!-- <div class="card-overlay">
                                             <button class="btn-favorite" th:attr="data-post-id=${similarPost.postId}">
                                                 <i class="far fa-heart"></i>
                                             </button>
-                                        </div>
+                                        </div> -->
                                     </div>
                                     <div class="card-body">
                                         <h5 class="property-title"
@@ -1144,22 +1144,28 @@
 
     <!-- Photo Modal -->
     <div class="modal fade" id="photoModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">Tất cả hình ảnh</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="photo-grid row">
-                        <div th:each="image : ${images}" class="col-md-4 mb-3">
-                            <img th:src="@{${image}}" alt="Hình ảnh phòng trọ" class="img-fluid rounded">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                        <div th:each="image : ${images}" class="col">
+                            <div class="card border-0 shadow-sm h-100">
+                                <a th:href="@{${image}}" target="_blank">
+                                    <img th:src="@{${image}}" class="card-img-top img-fluid rounded"
+                                        alt="Hình ảnh phòng trọ" style="object-fit: cover; height: 200px;">
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- Share Modal -->
     <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
@@ -1279,8 +1285,11 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/lightgallery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/thumbnail/lg-thumbnail.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightgallery@2.7.1/plugins/zoom/lg-zoom.min.js"></script>
     <script>
         function changeMainImage(src, element) {
             const mainImage = document.getElementById('mainImage');
@@ -1454,33 +1463,61 @@
             try {
                 switch (action) {
                     case 'call':
-                        // Gọi điện thoại
+                        if (!isMobileDevice()) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Chỉ hỗ trợ trên điện thoại',
+                                text: 'Chức năng gọi điện chỉ hoạt động trên thiết bị di động.'
+                            });
+                            return;
+                        }
                         window.location.href = `tel:${phoneNumber}`;
                         break;
 
                     case 'sms':
-                        // Gửi tin nhắn SMS
+                        if (!isMobileDevice()) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Chỉ hỗ trợ trên điện thoại',
+                                text: 'Chức năng nhắn tin SMS chỉ hoạt động trên thiết bị di động.'
+                            });
+                            return;
+                        }
                         window.location.href = `sms:${phoneNumber}`;
                         break;
 
                     case 'zalo':
                         const deepLink = `zalo://chat?phone=${phoneNumber}`;
                         const fallbackLink = `https://zalo.me/${phoneNumber}`;
+
                         window.location.href = deepLink;
+
                         setTimeout(() => {
                             window.open(fallbackLink, '_blank');
                         }, 1000);
                         break;
 
                     default:
-                        alert("Hành động không được hỗ trợ");
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi',
+                            text: 'Hành động không được hỗ trợ.'
+                        });
                 }
             } catch (error) {
                 console.error('Error executing contact action:', error);
-                alert("Không thể thực hiện hành động này");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: 'Không thể thực hiện hành động này.'
+                });
             }
         }
 
+
+        function isMobileDevice() {
+            return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        }
 
         function saveProperty() { alert('Đã lưu tin!'); }
 
