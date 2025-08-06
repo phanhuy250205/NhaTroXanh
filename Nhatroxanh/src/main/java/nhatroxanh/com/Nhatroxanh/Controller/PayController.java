@@ -17,6 +17,8 @@ import nhatroxanh.com.Nhatroxanh.Repository.PaymentsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.RoomsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Service.VoucherService;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,7 @@ import jakarta.persistence.OptimisticLockException;
 import jakarta.servlet.http.HttpSession;
 
 import java.sql.Date;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -54,6 +57,12 @@ public class PayController {
     private final VoucherRepository voucherRepository;
     @Autowired
     private VoucherService voucherService;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private NotificationService notificationService;
+
+    private static final DecimalFormat CURRENCY_FORMAT = new DecimalFormat("#,###");
 
     @GetMapping("/thanh-toan")
     @Transactional
@@ -101,7 +110,8 @@ public class PayController {
                 room = roomsRepository.findById(roomId)
                         .filter(r -> r.getHostel() != null && r.getHostel().getHostelId().equals(hostelId))
                         .orElseThrow(() -> {
-                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId, LocalDateTime.now());
+                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId,
+                                    LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found or hostel mismatch for room_id: " + roomId);
                         });
@@ -113,7 +123,8 @@ public class PayController {
                         });
                 room = roomsRepository.findById(contract.getRoom().getRoomId())
                         .orElseThrow(() -> {
-                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(), LocalDateTime.now());
+                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(),
+                                    LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found for contract ID: " + contract.getContractId());
                         });
@@ -208,7 +219,8 @@ public class PayController {
                         model.addAttribute("serviceFee", String.format("%,d VNĐ", amountUnitPrice.intValue()));
                     }
                 } catch (Exception e) {
-                    log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(), e);
+                    log.error("Error processing detail payment item: {} at {}", detail.getItemName(),
+                            LocalDateTime.now(), e);
                 }
             });
 
@@ -309,52 +321,63 @@ public class PayController {
                 }
             }
 
-            // Update payment status
-            payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
-            payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
             Payments.PaymentMethod methodEnum = determinePaymentMethod(paymentMethod, wallet);
             payment.setPaymentMethod(methodEnum);
 
             if ("cash".equalsIgnoreCase(paymentMethod) && paymentDate != null && paymentTime != null) {
-                log.info("Scheduled cash payment for invoice {} on {} at {}", invoiceId, paymentDate, paymentTime);
-            }
+                // Set payment status to waiting for cash payment confirmation
+                payment.setPaymentStatus(Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT);
+                // Save scheduled payment date, time, and note
+                payment.setScheduledPaymentDate(Date.valueOf(paymentDate));
+                payment.setScheduledPaymentTime(paymentTime);
+                payment.setPaymentNote(paymentNote);
+                payment.setLandlordNotified(false);
+                paymentsRepository.save(payment);
 
-            paymentsRepository.save(payment);
+                // Send email to landlord with appointment details
+                Contracts contract = payment.getContract();
+                if (contract != null && contract.getRoom() != null && contract.getRoom().getHostel() != null) {
+                    String landlordEmail = contract.getRoom().getHostel().getOwner().getEmail();
+                    String landlordName = contract.getRoom().getHostel().getOwner().getFullname();
+                    String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname() : "Khách thuê";
+                    String roomName = contract.getRoom().getNamerooms();
+                    String hostelName = contract.getRoom().getHostel().getName();
+                    String amount = CURRENCY_FORMAT.format(payment.getTotalAmount()) + " VNĐ";
 
-            // Decrease voucher quantity after successful payment
-            List<DetailPayments> detailsAfter = detailPaymentsRepository.findByPaymentId(paymentIdInt);
-            for (DetailPayments detail : detailsAfter) {
-                String itemName = detail.getItemName().toLowerCase();
-                if (itemName.startsWith("giảm giá voucher ")) {
-                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
-                    Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
-                    if (usedVoucher != null) {
-                        int newQuantity = usedVoucher.getQuantity() - 1;
-                        log.info("Decreasing voucher {} quantity from {} to {} for payment {}",
-                                usedVoucherCode, usedVoucher.getQuantity(), newQuantity, invoiceId);
-                        usedVoucher.setQuantity(newQuantity);
-                        if (newQuantity <= 0) {
-                            usedVoucher.setStatus(false);
-                            log.info("Voucher {} quantity reached 0, setting status to inactive", usedVoucherCode);
-                        }
-                        voucherRepository.save(usedVoucher);
-                        log.info("Successfully updated voucher {} quantity to {} for payment {}",
-                                usedVoucherCode, newQuantity, invoiceId);
-                    } else {
-                        log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, invoiceId);
+                    try {
+                        emailService.sendCashPaymentAppointmentEmail(
+                            landlordEmail, landlordName, tenantName, roomName, hostelName,
+                            paymentDate, paymentTime, amount, paymentNote, payment.getId()
+                        );
+                        log.info("Sent cash payment appointment email to landlord {}", landlordEmail);
+                    } catch (Exception e) {
+                        log.error("Failed to send cash payment appointment email: {}", e.getMessage());
                     }
                 }
-            }
 
-            // Pass voucher code to success page
-            if (appliedVoucherCode != null) {
-                session.setAttribute("voucherCode_" + invoiceId, appliedVoucherCode);
-            }
+                response.put("success", true);
+                response.put("message", "Đã đặt lịch thanh toán tiền mặt. Chủ trọ sẽ liên hệ để xác nhận.");
+                response.put("redirectUrl", "/guest/success-thanhtoan?invoiceId=" + invoiceId);
+                return ResponseEntity.ok(response);
+            } else {
+                // For other payment methods, process as paid immediately
+                payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
+                payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
+                paymentsRepository.save(payment);
 
-            response.put("success", true);
-            response.put("message", "Thanh toán thành công! Giảm giá: " + discount + " VNĐ");
-            response.put("redirectUrl", "/guest/success-thanhtoan?invoiceId=" + invoiceId);
-            return ResponseEntity.ok(response);
+                // Decrease voucher quantity after successful payment
+                decreaseVoucherQuantity(paymentIdInt, invoiceId);
+
+                // Pass voucher code to success page
+                if (appliedVoucherCode != null) {
+                    session.setAttribute("voucherCode_" + invoiceId, appliedVoucherCode);
+                }
+
+                response.put("success", true);
+                response.put("message", "Thanh toán thành công! Giảm giá: " + discount + " VNĐ");
+                response.put("redirectUrl", "/guest/success-thanhtoan?invoiceId=" + invoiceId);
+                return ResponseEntity.ok(response);
+            }
 
         } catch (NumberFormatException e) {
             log.error("Invalid invoiceId format: {} at {}", invoiceId, LocalDateTime.now(), e);
@@ -827,5 +850,96 @@ public class PayController {
     @GetMapping("/nap-rut")
     public String rutTien() {
         return "redirect:/staff/transactions/duyet-nap-rut";
+    }
+
+    @PostMapping("/landlord/confirm-cash-payment")
+    @Transactional
+    public ResponseEntity<Map<String, Object>> confirmCashPayment(
+            @RequestParam("paymentId") Integer paymentId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Payments payment = paymentsRepository.findById(paymentId)
+                    .orElseThrow(() -> new IllegalArgumentException("Payment not found with id: " + paymentId));
+
+            if (payment.getPaymentStatus() != Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT) {
+                response.put("success", false);
+                response.put("message", "Payment is not in waiting confirmation status.");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
+            payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
+            paymentsRepository.save(payment);
+
+            // Send success notification email to tenant
+            Contracts contract = payment.getContract();
+            if (contract != null && contract.getTenant() != null) {
+                String tenantEmail = contract.getTenant().getEmail();
+                String tenantName = contract.getTenant().getFullname();
+                String roomName = contract.getRoom().getNamerooms();
+                String hostelName = contract.getRoom().getHostel().getName();
+                String amount = CURRENCY_FORMAT.format(payment.getTotalAmount()) + " VNĐ";
+                String paymentDateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+
+                try {
+                    emailService.sendCashPaymentSuccessEmail(
+                            tenantEmail, tenantName, roomName, hostelName, amount, paymentDateStr, payment.getId());
+                    log.info("Sent cash payment success email to tenant {}", tenantEmail);
+                } catch (Exception e) {
+                    log.error("Failed to send cash payment success email: {}", e.getMessage());
+                }
+
+                // Create notification for tenant
+                String title = "Thanh toán tiền mặt thành công";
+                String message = String.format("Bạn đã thanh toán thành công hóa đơn #%d cho phòng %s tại %s.",
+                        payment.getId(), roomName, hostelName);
+                notificationService.createPaymentNotification(contract.getTenant(), payment, title, message);
+            }
+
+            response.put("success", true);
+            response.put("message", "Payment confirmed successfully.");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Failed to confirm payment.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
+
+    /**
+     * Helper method to decrease voucher quantity after successful payment
+     */
+    private void decreaseVoucherQuantity(Integer paymentId, String invoiceId) {
+        try {
+            List<DetailPayments> detailsAfter = detailPaymentsRepository.findByPaymentId(paymentId);
+            for (DetailPayments detail : detailsAfter) {
+                String itemName = detail.getItemName().toLowerCase();
+                if (itemName.startsWith("giảm giá voucher ")) {
+                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
+                    Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
+                    if (usedVoucher != null) {
+                        int newQuantity = usedVoucher.getQuantity() - 1;
+                        log.info("Decreasing voucher {} quantity from {} to {} for payment {}",
+                                usedVoucherCode, usedVoucher.getQuantity(), newQuantity, invoiceId);
+                        usedVoucher.setQuantity(newQuantity);
+                        if (newQuantity <= 0) {
+                            usedVoucher.setStatus(false);
+                            log.info("Voucher {} quantity reached 0, setting status to inactive", usedVoucherCode);
+                        }
+                        voucherRepository.save(usedVoucher);
+                        log.info("Successfully updated voucher {} quantity to {} for payment {}",
+                                usedVoucherCode, newQuantity, invoiceId);
+                    } else {
+                        log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, invoiceId);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error decreasing voucher quantity for payment {}: {}", invoiceId, e.getMessage(), e);
+        }
     }
 }
