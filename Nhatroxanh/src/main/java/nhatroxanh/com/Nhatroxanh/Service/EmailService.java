@@ -38,8 +38,7 @@ public interface EmailService {
     void sendContractPDF(String to, String tenantName, String roomName, byte[] pdfData, String fileName)
             throws Exception;
 
-    // ✅ METHOD MỚI GỬI HTML
-    void sendContractHtml(String recipientEmail, String recipientName, String subject, String contractHtml);
+
 
     void sendVoucherDeactivationEmail(Vouchers voucher);
 

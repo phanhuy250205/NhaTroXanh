@@ -333,6 +333,25 @@ public class ContractController {
         Map<String, Object> response = new HashMap<>();
 
         try {
+
+            // ✅ THÊM NULL CHECK CHO AUTHENTICATION
+            if (authentication == null || !authentication.isAuthenticated()) {
+                response.put("success", false);
+                response.put("message", "Người dùng chưa được xác thực!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            // ✅ KIỂM TRA PRINCIPAL TRƯỚC KHI CAST
+            Object principal = authentication.getPrincipal();
+            if (!(principal instanceof CustomUserDetails)) {
+                response.put("success", false);
+                response.put("message", "Thông tin người dùng không hợp lệ!");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            CustomUserDetails userDetails = (CustomUserDetails) principal;
+            Integer ownerId = userDetails.getUserId();
+
             // Bước 1: Parse ContractDto từ JSON string
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -352,8 +371,10 @@ public class ContractController {
                 throw new IllegalArgumentException("Thông tin phòng trọ không được để trống.");
             }
 
-            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
-            Integer ownerId = userDetails.getUserId();
+            if (contractDto.getTerms() == null) {
+                throw new IllegalArgumentException("Thông tin điều khoản hợp đồng không được để trống.");
+            }
+
             Users owner = userRepository.findById(ownerId)
                     .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin chủ trọ!"));
 
@@ -2804,41 +2825,6 @@ public class ContractController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/send-email-html")
-    @ResponseBody
-    public ResponseEntity<Map<String, Object>> sendContractEmailHtml(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
-
-        try {
-            String recipientEmail = (String) request.get("recipientEmail");
-            String recipientName = (String) request.get("recipientName");
-            String contractHtml = (String) request.get("contractHtml");
-            String subject = (String) request.get("subject");
-
-            // Validate
-            if (recipientEmail == null || contractHtml == null) {
-                response.put("success", false);
-                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
-                return ResponseEntity.badRequest().body(response);
-            }
-
-            // ✅ GỬI EMAIL VỚI HTML CONTENT
-            emailService.sendContractHtml(recipientEmail, recipientName, subject, contractHtml);
-
-            response.put("success", true);
-            response.put("message", "Hợp đồng đã được gửi thành công qua email");
-
-            return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-            System.err.println("❌ Lỗi gửi email HTML: " + e.getMessage());
-            e.printStackTrace();
-
-            response.put("success", false);
-            response.put("message", "Lỗi gửi email: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
-        }
-    }
 
     // ✅ THÊM METHOD NÀY VÀO CONTROLLER
     private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
