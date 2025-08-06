@@ -951,10 +951,27 @@ window.NhaTroContract = {
         console.log("Fetching details for room ID:", roomId);
 
         try {
-            // Lấy thông tin chi tiết của phòng (giá, diện tích, địa chỉ...)
+            // 🔥 BƯỚC 1: Lấy thông tin chi tiết phòng
             const roomDetailsResponse = await fetch(`/api/contracts/get-room-details?roomId=${roomId}`);
-            if (!roomDetailsResponse.ok) throw new Error("Lỗi khi lấy chi tiết phòng.");
+
+            // ✅ KIỂM TRA CONTENT-TYPE TRƯỚC KHI PARSE
+            const contentType = roomDetailsResponse.headers.get("content-type");
+            console.log("Room details response content-type:", contentType);
+
+            if (!roomDetailsResponse.ok) {
+                const errorText = await roomDetailsResponse.text();
+                console.error("Room details error response:", errorText);
+                throw new Error(`Lỗi khi lấy chi tiết phòng: ${roomDetailsResponse.status}`);
+            }
+
+            if (!contentType || !contentType.includes("application/json")) {
+                const responseText = await roomDetailsResponse.text();
+                console.error("Expected JSON but got:", responseText.substring(0, 200));
+                throw new Error("Server không trả về JSON cho thông tin phòng");
+            }
+
             const roomData = await roomDetailsResponse.json();
+            console.log("Room data received:", roomData);
 
             if (roomData.success && roomData.room) {
                 const room = roomData.room;
@@ -966,52 +983,129 @@ window.NhaTroContract = {
                 this.updatePreviewField("room-number", "preview-room-number");
                 this.updatePreviewField("room-area", "preview-room-area");
                 this.updatePreviewField("rent-price", "preview-rent");
+
                 const previewRoomAddress = document.getElementById("preview-room-address");
                 if (previewRoomAddress) {
                     previewRoomAddress.textContent = room.address || "Chưa có địa chỉ";
                 }
 
-                // 🔥 PHẦN SỬA LỖI VÀ THÊM MỚI NẰM Ở ĐÂY 🔥
-                // Lấy danh sách tiện ích của phòng đó và tick vào checkbox
-                const utilityResponse = await fetch(`/api/contracts/rooms/${roomId}/utilities`);
-                if (!utilityResponse.ok) throw new Error("Lỗi khi lấy tiện ích phòng.");
-                const utilities = await utilityResponse.json();
+                // 🔥 BƯỚC 2: Lấy tiện ích phòng với error handling
+                try {
+                    const utilityResponse = await fetch(`/api/contracts/rooms/${roomId}/utilities`);
 
-                // Bỏ check tất cả checkbox
-                document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
+                    // ✅ KIỂM TRA CONTENT-TYPE CHO UTILITIES
+                    const utilityContentType = utilityResponse.headers.get("content-type");
+                    console.log("Utilities response content-type:", utilityContentType);
+                    console.log("Utilities response status:", utilityResponse.status);
 
-                // 2. Tick vào những checkbox tương ứng với tiện ích của phòng
-                if (utilities && utilities.length > 0) {
-                    console.log(`Phòng có ${utilities.length} tiện ích.`);
-                    const utilityIds = utilities.map(util => util.utilityId);
-                    utilityIds.forEach(id => {
-                        const checkbox = document.getElementById(`utility-${id}`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                            console.log(`Đã tick vào tiện ích ID: ${id}`);
+                    if (!utilityResponse.ok) {
+                        const errorText = await utilityResponse.text();
+                        console.error("Utilities error response:", errorText);
+
+                        // ❌ NẾU API KHÔNG TỒN TẠI (404), BỎ QUA PHẦN UTILITIES
+                        if (utilityResponse.status === 404) {
+                            console.warn("Utilities API not found, skipping utilities loading");
+                            this.showNotification("API tiện ích không khả dụng, bỏ qua tải tiện ích", "warning");
+                            return; // Vẫn tiếp tục, chỉ không load utilities
                         }
+
+                        throw new Error(`Lỗi khi lấy tiện ích: ${utilityResponse.status}`);
+                    }
+
+                    if (!utilityContentType || !utilityContentType.includes("application/json")) {
+                        const responseText = await utilityResponse.text();
+                        console.error("Expected JSON for utilities but got:", responseText.substring(0, 200));
+                        console.warn("Utilities response is not JSON, skipping utilities loading");
+                        return; // Bỏ qua utilities nếu không phải JSON
+                    }
+
+                    const utilities = await utilityResponse.json();
+                    console.log("Utilities received:", utilities);
+
+                    // Bỏ check tất cả checkbox
+                    document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
+                        checkbox.checked = false;
                     });
-                } else {
-                    console.log("Phòng này không có tiện ích nào.");
+
+                    // Tick vào những checkbox tương ứng với tiện ích của phòng
+                    if (utilities && Array.isArray(utilities) && utilities.length > 0) {
+                        console.log(`Phòng có ${utilities.length} tiện ích.`);
+                        const utilityIds = utilities.map(util => util.utilityId || util.id);
+                        utilityIds.forEach(id => {
+                            const checkbox = document.getElementById(`utility-${id}`);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                                console.log(`Đã tick vào tiện ích ID: ${id}`);
+                            } else {
+                                console.warn(`Không tìm thấy checkbox cho utility ID: ${id}`);
+                            }
+                        });
+
+                        this.showNotification(`Đã tải ${utilities.length} tiện ích cho phòng`, "success");
+                    } else {
+                        console.log("Phòng này không có tiện ích nào.");
+                    }
+
+                    // Cập nhật preview tiện ích
+                    this.updateAmenities();
+
+                } catch (utilityError) {
+                    console.error("Error loading utilities:", utilityError);
+                    // ❌ KHÔNG THROW ERROR - chỉ log và thông báo
+                    this.showNotification("Không thể tải tiện ích phòng: " + utilityError.message, "warning");
                 }
 
-                // 3. Cập nhật lại phần preview của tiện ích
-                this.updateAmenities();
-                // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
-
                 this.showNotification(`Đã tải thông tin phòng ${room.roomName}`, "success");
+
             } else {
                 this.showNotification(roomData.message || "Không thể lấy thông tin phòng!", "error");
                 this.clearRoomFields();
             }
+
         } catch (error) {
             console.error("Error in onRoomSelected:", error);
             this.showNotification("Lỗi khi tải dữ liệu phòng: " + error.message, "error");
             this.clearRoomFields();
         }
     },
+
+
+    // Thêm vào object NhaTroContract
+    async safeFetchJSON(url, options = {}) {
+        try {
+            console.log(`🌐 Fetching: ${url}`);
+            const response = await fetch(url, options);
+
+            // Kiểm tra content-type
+            const contentType = response.headers.get("content-type");
+            console.log(`📄 Content-Type: ${contentType}`);
+            console.log(`📊 Status: ${response.status}`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`❌ Error Response (${response.status}):`, errorText.substring(0, 500));
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // Kiểm tra xem có phải JSON không
+            if (!contentType || !contentType.includes("application/json")) {
+                const responseText = await response.text();
+                console.error("❌ Expected JSON but received:", responseText.substring(0, 200));
+                throw new Error(`Server trả về ${contentType || 'unknown'} thay vì JSON`);
+            }
+
+            const data = await response.json();
+            console.log("✅ JSON parsed successfully:", data);
+            return data;
+
+        } catch (error) {
+            console.error(`❌ safeFetchJSON error for ${url}:`, error);
+            throw error;
+        }
+    },
+
+
+
 
 
     clearRoomFields() {
@@ -3594,7 +3688,7 @@ window.NhaTroContract = {
                 modal.show()
                 if (customerForm) customerForm.reset()
                 this.clearCustomerFormImages()
-                this.setupCustomerLocationListeners()
+
             })
         }
 
@@ -4041,14 +4135,7 @@ function updateContractPreview() {
     console.log('🔍 Preview Room Address:', contractData.roomAddress);
 }
 
-// Hàm debounce để tối ưu hiệu suất
-function debounce(func, wait) {
-    let timeout;
-    return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-    };
-}
+
 
 // Thêm sự kiện input để cập nhật preview
 $(document).ready(function() {
