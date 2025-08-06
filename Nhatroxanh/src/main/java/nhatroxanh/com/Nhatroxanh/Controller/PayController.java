@@ -353,6 +353,19 @@ public class PayController {
                     } catch (Exception e) {
                         log.error("Failed to send cash payment appointment email: {}", e.getMessage());
                     }
+
+                    // Create notification for tenant about the appointment
+                    if (contract.getTenant() != null) {
+                        try {
+                            notificationService.createCashPaymentAppointmentNotification(
+                                contract.getTenant(), payment, paymentDate, paymentTime, paymentNote
+                            );
+                            log.info("Created cash payment appointment notification for tenant {}", 
+                                    contract.getTenant().getUserId());
+                        } catch (Exception e) {
+                            log.error("Failed to create cash payment appointment notification: {}", e.getMessage());
+                        }
+                    }
                 }
 
                 response.put("success", true);
@@ -889,11 +902,8 @@ public class PayController {
                     log.error("Failed to send cash payment success email: {}", e.getMessage());
                 }
 
-                // Create notification for tenant
-                String title = "Thanh toán tiền mặt thành công";
-                String message = String.format("Bạn đã thanh toán thành công hóa đơn #%d cho phòng %s tại %s.",
-                        payment.getId(), roomName, hostelName);
-                notificationService.createPaymentNotification(contract.getTenant(), payment, title, message);
+                // Update notification for tenant using the new cash payment confirmation method
+                notificationService.handleCashPaymentConfirmation(contract.getTenant(), payment);
             }
 
             response.put("success", true);
