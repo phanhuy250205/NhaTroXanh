@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.*;
@@ -46,6 +47,7 @@ import java.time.LocalDate;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 //@RestController
 @Controller
@@ -1950,34 +1952,72 @@ public class ContractController {
 
     @GetMapping("/list")
     @PreAuthorize("hasRole('OWNER')")
-
+    @ResponseBody
+    @Transactional(readOnly = true) // ✅ THÊM TRANSACTION
     public ResponseEntity<Map<String, Object>> getContractsListApi(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size) {
-        logger.info("Getting contracts list API for owner with page: {}, size: {}", page, size);
 
+        logger.info("Getting contracts list API for owner with page: {}, size: {}", page, size);
         Map<String, Object> response = new HashMap<>();
+
         try {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             Integer ownerId = userDetails.getUserId();
 
             Pageable pageable = PageRequest.of(page, size);
-            Page<ContractListDto> contractPage = contractService.getContractsListByOwnerId(ownerId, pageable);
+
+            // ✅ SỬ DỤNG METHOD MỚI VỚI JOIN FETCH
+            Page<Contracts> contractsPage = contractsRepository.findByOwnerUserIdWithRoom(ownerId, pageable);
+
+            // ✅ SỬ DỤNG CÙNG LOGIC MAPPING NHU TRÊN
+            List<ContractListDto> contractDtos = contractsPage.getContent().stream()
+                    .map(contract -> {
+                        ContractListDto dto = new ContractListDto();
+                        dto.setContractId(Long.valueOf(contract.getContractId()));
+
+                        // Set room name với kiểm tra null
+                        if (contract.getRoom() != null && StringUtils.hasText(contract.getRoom().getNamerooms())) {
+                            dto.setRoomName(contract.getRoom().getNamerooms());
+                        } else {
+                            dto.setRoomName("Phòng chưa xác định");
+                        }
+
+                        // Set tenant name
+                        String tenantName = "Chưa xác định";
+                        if (contract.getTenant() != null && StringUtils.hasText(contract.getTenant().getFullname())) {
+                            tenantName = contract.getTenant().getFullname();
+                        } else if (contract.getUnregisteredTenant() != null && StringUtils.hasText(contract.getUnregisteredTenant().getFullName())) {
+                            tenantName = contract.getUnregisteredTenant().getFullName();
+                        }
+                        dto.setTenantName(tenantName);
+
+                        String phoneNumber = contract.getTenantPhone();
+                        dto.setTenantPhone(StringUtils.hasText(phoneNumber) ? phoneNumber : "Chưa cập nhật");
+
+                        dto.setStatus(String.valueOf(contract.getStatus()));
+                        dto.setStartDate(contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
+                        dto.setEndDate(contract.getEndDate() != null ? contract.getEndDate().toLocalDate() : null);
+
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
 
             response.put("success", true);
-            response.put("contracts", contractPage.getContent());
-            response.put("totalContracts", contractPage.getTotalElements());
-            response.put("totalPages", contractPage.getTotalPages());
-            response.put("currentPage", contractPage.getNumber());
-
+            response.put("contracts", contractDtos);
+            response.put("totalContracts", contractsPage.getTotalElements());
+            response.put("totalPages", contractsPage.getTotalPages());
+            response.put("currentPage", contractsPage.getNumber());
             response.put("message", "Lấy danh sách hợp đồng thành công");
-            logger.info("API: Found {} contracts for owner ID: {}", contractPage.getTotalElements(), ownerId);
+
+            logger.info("API: Found {} contracts for owner ID: {}", contractsPage.getTotalElements(), ownerId);
             return ResponseEntity.ok(response);
+
         } catch (Exception e) {
             logger.error("Error getting contracts list API: {}", e.getMessage(), e);
             response.put("success", false);
-            response.put("contracts", List.of()); // Trả về danh sách rỗng khi có lỗi
+            response.put("contracts", List.of());
             response.put("totalContracts", 0);
             response.put("totalPages", 0);
             response.put("currentPage", page);
@@ -1985,6 +2025,7 @@ public class ContractController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -3168,6 +3209,122 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
         }
     }
 
+
+    /**
+     * Tìm kiếm hợp đồng theo số điện thoại hoặc CCCD của người thuê.
+     * Endpoint: GET /api/contracts/search
+     * Yêu cầu quyền: OWNER
+     * @param phone Số điện thoại của người thuê (tùy chọn)
+
+     * @param authentication Thông tin xác thực của người dùng
+     * @return ResponseEntity chứa danh sách hợp đồng phù hợp
+     */
+    @GetMapping("/search")
+    @PreAuthorize("hasRole('OWNER')")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> searchContracts(
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String roomName,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            Authentication authentication) {
+        logger.info("🔍 Nhận yêu cầu tìm kiếm hợp đồng - Phone: {}, RoomName: {}, Page: {}, Size: {}", phone, roomName, page, size);
+        Map<String, Object> response = new HashMap<>();
+
+        try {
+            // Kiểm tra đầu vào
+            if (!StringUtils.hasText(phone) && !StringUtils.hasText(roomName)) {
+                logger.error("Cần cung cấp ít nhất số điện thoại hoặc tên phòng để tìm kiếm");
+                response.put("success", false);
+                response.put("message", "Cần cung cấp ít nhất số điện thoại hoặc tên phòng để tìm kiếm");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra xác thực
+            if (authentication == null || authentication.getPrincipal() == null) {
+                logger.error("Không tìm thấy thông tin xác thực");
+                response.put("success", false);
+                response.put("message", "Không tìm thấy thông tin xác thực");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            CustomUserDetails userDetails;
+            try {
+                userDetails = (CustomUserDetails) authentication.getPrincipal();
+            } catch (ClassCastException e) {
+                logger.error("Principal không phải CustomUserDetails: {}", e.getMessage());
+                response.put("success", false);
+                response.put("message", "Lỗi xác thực người dùng");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+
+            Integer ownerId = userDetails.getUserId();
+            if (ownerId == null) {
+                logger.error("ID chủ trọ không hợp lệ");
+                response.put("success", false);
+                response.put("message", "ID chủ trọ không hợp lệ");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+            }
+            logger.info("Tìm kiếm hợp đồng cho chủ trọ ID: {}", ownerId);
+
+            // Tạo đối tượng Pageable
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Contracts> contractsPage;
+
+            // Tìm kiếm hợp đồng
+            if (StringUtils.hasText(phone) && StringUtils.hasText(roomName)) {
+                // Tìm theo cả phone và roomName (kết hợp OR)
+                contractsPage = contractsRepository.findByTenantPhoneAndOwnerUserId(phone, ownerId, pageable);
+                if (contractsPage.isEmpty()) {
+                    contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+                } else {
+                    // Nếu tìm thấy theo phone, thêm kết quả tìm theo roomName
+                    Page<Contracts> roomContractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+                    List<Contracts> combinedContracts = Stream.concat(
+                            contractsPage.getContent().stream(),
+                            roomContractsPage.getContent().stream()
+                    ).distinct().collect(Collectors.toList());
+                    contractsPage = new PageImpl<>(combinedContracts, pageable, combinedContracts.size());
+                }
+            } else if (StringUtils.hasText(phone)) {
+                contractsPage = contractsRepository.findByTenantPhoneAndOwnerUserId(phone, ownerId, pageable);
+            } else {
+                contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+            }
+
+            // Chuyển đổi sang ContractListDto
+            List<ContractListDto> contractDtos = contractsPage.getContent().stream()
+                    .map(contract -> {
+                        ContractListDto dto = new ContractListDto();
+                        dto.setContractId(Long.valueOf(contract.getContractId()));
+                        dto.setRoomName(contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A");
+                        String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname() :
+                                (contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName() : "N/A");
+                        dto.setTenantName(tenantName);
+                        dto.setTenantPhone(contract.getTenantPhone() != null ? contract.getTenantPhone() : "N/A");
+                        dto.setStatus(String.valueOf(contract.getStatus()));
+                        dto.setStartDate(contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
+                        dto.setEndDate(contract.getEndDate() != null ? contract.getEndDate().toLocalDate() : null);
+                        return dto;
+                    })
+                    .collect(Collectors.toList());
+
+            // Chuẩn bị response
+            response.put("success", true);
+            response.put("contracts", contractDtos);
+            response.put("totalContracts", contractsPage.getTotalElements());
+            response.put("totalPages", contractsPage.getTotalPages());
+            response.put("currentPage", contractsPage.getNumber());
+            response.put("message", contractDtos.isEmpty() ? "Không tìm thấy hợp đồng nào" : "Tìm kiếm hợp đồng thành công");
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            logger.error("Lỗi khi tìm kiếm hợp đồng: {}", e.getMessage(), e);
+            response.put("success", false);
+            response.put("message", "Lỗi server khi tìm kiếm hợp đồng: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
     /**
      * Đếm số hợp đồng sắp hết hạn (trong 3 ngày) cho chủ trọ.
      * Endpoint: GET /api/contracts/count-expiring

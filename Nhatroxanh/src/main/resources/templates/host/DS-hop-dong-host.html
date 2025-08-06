@@ -51,6 +51,25 @@
     </div>
   </div>
 
+  <div class="search-section">
+    <div class="search-input-group">
+      <input type="text" class="search-input" id="searchInput"
+             placeholder="Tìm kiếm theo số điện thoại hoặc tên phòng...">
+      <button type="button" class="search-btn" id="searchBtn" onclick="searchContracts()">
+        <i class="fas fa-search"></i>
+      </button>
+      <button type="button" class="search-btn" id="clearSearchBtn" onclick="clearSearch()" style="display: none;">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Search Results Info -->
+  <div class="search-results-info" id="searchResultsInfo" style="display: none;">
+    <i class="fas fa-info-circle me-2"></i>
+    <span id="resultsCount">Tìm thấy 0 hợp đồng</span>
+  </div>
+
   <!-- Loading spinner -->
   <div id="loading" class="text-center mt-4">
     <div class="spinner-border text-primary" role="status">
@@ -74,6 +93,7 @@
         <tr>
           <th>MÃ SỐ HĐ</th>
           <th>NGƯỜI THUÊ</th>
+          <th>PHÒNG</th>
           <th>NGÀY BẮT ĐẦU</th>
           <th>NGÀY KẾT THÚC</th>
           <th>SỐ ĐIỆN THOẠI</th>
@@ -95,91 +115,111 @@
       </nav>
     </div>
   </div>
-
-  <!-- Error message -->
-  <div id="error-message" class="alert alert-danger mt-4" style="display: none;">
-    <i class="fa fa-exclamation-triangle"></i>
-    <span id="error-text">Có lỗi xảy ra khi tải dữ liệu</span>
-  </div>
 </div>
 
+<script>
+  // 🚀 HÀM DEBOUNCE ĐỂ TRÌ HOÃN TÌM KIẾM
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
 
-  <script>
-    // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
-    document.addEventListener('DOMContentLoaded', function() {
+  // 🚀 LOAD DỮ LIỆU KHI TRANG ĐƯỢC TẢI
+  document.addEventListener('DOMContentLoaded', function() {
     loadContractStats(); // Tải thống kê hợp đồng
-    loadContracts(0, 5); // Tải danh sách hợp đồng
+    loadContracts(0, 5); // Tải danh sách hợp đồng mặc định
+
+    // Gắn sự kiện input để tìm kiếm tự động
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const debouncedSearch = debounce(function() {
+      const input = searchInput.value.trim();
+      if (input) {
+        searchContracts(0, 5); // Tìm kiếm với trang đầu tiên
+        clearSearchBtn.style.display = 'block';
+      } else {
+        clearSearch(); // Tải lại danh sách mặc định khi ô tìm kiếm trống
+      }
+    }, 500); // Chờ 500ms sau khi người dùng dừng gõ
+
+    searchInput.addEventListener('input', debouncedSearch);
   });
 
-    // ⏳ HIỂN THỊ/ẨN LOADING
-    function showLoading(show) {
+  // ⏳ HIỂN THỊ/ẨN LOADING
+  function showLoading(show) {
     const loadingElement = document.getElementById('loading');
     const contractsTable = document.getElementById('contracts-table');
     if (loadingElement && contractsTable) {
-    loadingElement.style.display = show ? 'block' : 'none';
-    contractsTable.style.display = show ? 'none' : 'block';
-  } else {
-    console.error('Loading or contracts table element not found');
-  }
-  }
-
-    // ❌ HIỂN THỊ LỖI
-    function showError(message) {
-    const errorElement = document.getElementById('error-message');
-    const errorText = document.getElementById('error-text');
-    if (errorElement && errorText) {
-    errorText.textContent = message;
-    errorElement.style.display = 'block';
-    document.getElementById('contracts-table').style.display = 'none';
-  } else {
-    console.error('Error message elements not found');
-  }
+      loadingElement.style.display = show ? 'block' : 'none';
+      contractsTable.style.display = show ? 'none' : 'block';
+    } else {
+      console.error('Loading or contracts table element not found');
+    }
   }
 
-    // 📊 HÀM LOAD THỐNG KÊ HỢP ĐỒNG
-    async function loadContractStats() {
+  // ❌ HIỂN THỊ LỖI
+  function showError(message) {
+    const toast = document.createElement('div');
+    toast.className = 'alert alert-danger position-fixed';
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+    <i class="fa fa-exclamation-circle"></i> ${message}
+    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+  `;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 5000);
+  }
+
+  // 📊 HÀM LOAD THỐNG KÊ HỢP ĐỒNG
+  async function loadContractStats() {
     try {
-    showLoading(true);
+      showLoading(true);
+      const [statusResponse, expiringResponse] = await Promise.all([
+        fetch('/api/contracts/count-by-status', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        }),
+        fetch('/api/contracts/count-expiring', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          }
+        })
+      ]);
 
-    const [statusResponse, expiringResponse] = await Promise.all([
-    fetch('/api/contracts/count-by-status', {
-    method: 'GET',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
-  }
-  }),
-    fetch('/api/contracts/count-expiring', {
-    method: 'GET',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
-  }
-  })
-    ]);
+      if (!statusResponse.ok || !expiringResponse.ok) {
+        throw new Error(`HTTP error! status: ${statusResponse.status}, ${expiringResponse.status}`);
+      }
 
-    if (!statusResponse.ok || !expiringResponse.ok) {
-    throw new Error(`HTTP error! status: ${statusResponse.status}, ${expiringResponse.status}`);
-  }
+      const statusData = await statusResponse.json();
+      const expiringData = await expiringResponse.json();
 
-    const statusData = await statusResponse.json();
-    const expiringData = await expiringResponse.json();
-
-    if (statusData.success && expiringData.success) {
-    updateStats(statusData.statusCounts, expiringData.expiringCount);
-  } else {
-    showError(statusData.message || expiringData.message || 'Không thể tải thống kê hợp đồng');
-  }
-  } catch (error) {
-    console.error('Error loading contract stats:', error);
-    showError('Lỗi kết nối khi tải thống kê. Vui lòng thử lại sau.');
-  } finally {
-    showLoading(false);
-  }
+      if (statusData.success && expiringData.success) {
+        updateStats(statusData.statusCounts, expiringData.expiringCount);
+      } else {
+        showError(statusData.message || expiringData.message || 'Không thể tải thống kê hợp đồng');
+      }
+    } catch (error) {
+      console.error('Error loading contract stats:', error);
+      showError('Lỗi kết nối khi tải thống kê. Vui lòng thử lại sau.');
+    } finally {
+      showLoading(false);
+    }
   }
 
-    // 📈 CẬP NHẬT THỐNG KÊ
-    function updateStats(statusCounts, expiringCount) {
+  // 📈 CẬP NHẬT THỐNG KÊ
+  function updateStats(statusCounts, expiringCount) {
     const total = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
     const totalElement = document.getElementById('total-contracts');
     const activeElement = document.getElementById('active-contracts');
@@ -187,50 +227,116 @@
     const expiringElement = document.getElementById('expiring-contracts');
 
     if (totalElement && activeElement && draftElement && expiringElement) {
-    totalElement.textContent = total;
-    activeElement.textContent = statusCounts.ACTIVE || 0;
-    draftElement.textContent = statusCounts.DRAFT || 0;
-    expiringElement.textContent = expiringCount || 0;
-  } else {
-    console.error('One or more stat elements not found');
-  }
+      totalElement.textContent = total;
+      activeElement.textContent = statusCounts.ACTIVE || 0;
+      draftElement.textContent = statusCounts.DRAFT || 0;
+      expiringElement.textContent = expiringCount || 0;
+    } else {
+      console.error('One or more stat elements not found');
+    }
   }
 
-    // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG
-    async function loadContracts(page = 0, size = 5) {
+  // 📊 HÀM LOAD DANH SÁCH HỢP ĐỒNG MẶC ĐỊNH
+  async function loadContracts(page = 0, size = 5) {
     try {
-    showLoading(true);
+      showLoading(true);
+      const response = await fetch(`/api/contracts/list?page=${page}&size=${size}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
 
-    const response = await fetch(`/api/contracts/list?page=${page}&size=${size}`, {
-    method: 'GET',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
-  }
-  });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
-    if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
+      const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.success) {
-    displayContracts(data.contracts);
-    updatePagination(data.totalContracts, data.totalPages, data.currentPage, size);
-  } else {
-    showError(data.message || 'Không thể tải dữ liệu hợp đồng');
-  }
-  } catch (error) {
-    console.error('Error loading contracts:', error);
-    showError('Lỗi kết nối. Vui lòng thử lại sau.');
-  } finally {
-    showLoading(false);
-  }
+      if (data.success) {
+        document.getElementById('searchResultsInfo').style.display = 'none';
+        document.getElementById('clearSearchBtn').style.display = 'none';
+        displayContracts(data.contracts);
+        updatePagination(data.totalContracts, data.totalPages, data.currentPage, size, false);
+      } else {
+        showError(data.message || 'Không thể tải dữ liệu hợp đồng');
+      }
+    } catch (error) {
+      console.error('Error loading contracts:', error);
+      showError('Lỗi kết nối. Vui lòng thử lại sau.');
+    } finally {
+      showLoading(false);
+    }
   }
 
-    // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
-    function isExpiringSoon(endDate) {
+  // 🔍 HÀM TÌM KIẾM HỢP ĐỒNG
+  async function searchContracts(page = 0, size = 5) {
+    const input = document.getElementById('searchInput').value.trim();
+    if (!input) {
+      showError('Vui lòng nhập số điện thoại hoặc tên phòng để tìm kiếm');
+      return;
+    }
+
+    try {
+      showLoading(true);
+      const params = new URLSearchParams();
+      const isPhone = /^\d+$/.test(input);
+      if (isPhone) {
+        params.append('phone', input);
+      } else {
+        params.append('roomName', input);
+      }
+      params.append('page', page);
+      params.append('size', size);
+
+      const response = await fetch(`/api/contracts/search?${params.toString()}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (data.success) {
+        const resultsInfo = document.getElementById('searchResultsInfo');
+        const resultsCount = document.getElementById('resultsCount');
+        resultsInfo.style.display = 'block';
+        resultsCount.textContent = `Tìm thấy ${data.totalContracts} hợp đồng`;
+        document.getElementById('clearSearchBtn').style.display = 'block';
+        displayContracts(data.contracts);
+        updatePagination(data.totalContracts, data.totalPages, data.currentPage, size, true, input);
+      } else {
+        showError(data.message || 'Không thể tải dữ liệu hợp đồng');
+        document.getElementById('searchResultsInfo').style.display = 'none';
+      }
+    } catch (error) {
+      console.error('Error searching contracts:', error);
+      showError(error.message || 'Lỗi kết nối khi tìm kiếm hợp đồng. Vui lòng thử lại sau.');
+      document.getElementById('searchResultsInfo').style.display = 'none';
+    } finally {
+      showLoading(false);
+    }
+  }
+
+  // 🔄 HÀM XÓA TÌM KIẾM
+  function clearSearch() {
+    const searchInput = document.getElementById('searchInput');
+    searchInput.value = '';
+    document.getElementById('clearSearchBtn').style.display = 'none';
+    document.getElementById('searchResultsInfo').style.display = 'none';
+    loadContracts(0, 5); // Tải lại danh sách hợp đồng mặc định
+  }
+
+  // 📅 KIỂM TRA HỢP ĐỒNG SẮP HẾT HẠN
+  function isExpiringSoon(endDate) {
     if (!endDate) return false;
     const today = new Date();
     const end = new Date(endDate);
@@ -238,44 +344,45 @@
     return daysUntilExpiry <= 3 && daysUntilExpiry > 0;
   }
 
-    // 📅 FORMAT NGÀY THÁNG
-    function formatDate(dateString) {
+  // 📅 FORMAT NGÀY THÁNG
+  function formatDate(dateString) {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('vi-VN', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  });
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
-    // 📄 HÀM HIỂN THỊ HỢP ĐỒNG
-    function displayContracts(contracts) {
+  // 📄 HÀM HIỂN THỊ HỢP ĐỒNG
+  function displayContracts(contracts) {
     const tbody = document.getElementById('contracts-tbody');
     if (!tbody) {
-    console.error('Contracts table body not found');
-    showError('Không tìm thấy bảng hợp đồng');
-    return;
-  }
+      console.error('Contracts table body not found');
+      showError('Không tìm thấy bảng hợp đồng');
+      return;
+    }
 
     if (!contracts || contracts.length === 0) {
-    tbody.innerHTML = `
+      tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="text-muted">
+        <td colspan="8" class="text-muted">
           <i class="fa fa-inbox"></i><br>
           Không có hợp đồng nào
         </td>
       </tr>
     `;
-    return;
-  }
+      return;
+    }
 
     tbody.innerHTML = contracts.map(contract => {
-    if (!contract) return '';
-    return `
+      if (!contract) return '';
+      return `
       <tr>
         <td><strong>${contract.contractId || 'N/A'}</strong></td>
         <td>${contract.tenantName || 'N/A'}</td>
+        <td>${contract.roomName || 'N/A'}</td>
         <td>${formatDate(contract.startDate)}</td>
         <td>${formatDate(contract.endDate)}</td>
         <td>${contract.tenantPhone || 'N/A'}</td>
@@ -290,22 +397,22 @@
         </td>
       </tr>
     `;
-  }).join('');
+    }).join('');
 
     document.getElementById('contracts-table').style.display = 'block';
   }
 
-    // 🏷️ TẠO SELECT TRẠNG THÁI
-    function getStatusSelect(contractId, currentStatus) {
+  // 🏷️ TẠO SELECT TRẠNG THÁI
+  function getStatusSelect(contractId, currentStatus) {
     const statusOptions = [
-  {value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary'},
-  {value: 'ACTIVE', label: 'Đang thuê', class: 'text-success'},
-  {value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger'},
-  {value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning'}
+      {value: 'DRAFT', label: 'Bản nháp', class: 'text-secondary'},
+      {value: 'ACTIVE', label: 'Đang thuê', class: 'text-success'},
+      {value: 'TERMINATED', label: 'Đã chấm dứt', class: 'text-danger'},
+      {value: 'EXPIRED', label: 'Hết hạn', class: 'text-warning'}
     ];
 
     const options = statusOptions.map(option =>
-    `<option value="${option.value}"
+            `<option value="${option.value}"
              class="${option.class}"
              ${option.value === currentStatus ? 'selected' : ''}>
        ${option.label}
@@ -323,8 +430,8 @@
   `;
   }
 
-    // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
-    async function updateContractStatus(contractId, newStatus) {
+  // 🔧 CẬP NHẬT TRẠNG THÁI HỢP ĐỒNG
+  async function updateContractStatus(contractId, newStatus) {
     console.log('🔄 Updating contract status');
     console.log('📝 Contract ID:', contractId);
     console.log('📝 New Status:', newStatus);
@@ -333,91 +440,96 @@
     const upperStatus = newStatus.toUpperCase();
 
     if (!validStatuses.includes(upperStatus)) {
-    showError(`Status không hợp lệ: ${newStatus}`);
-    return;
-  }
+      showError(`Status không hợp lệ: ${newStatus}`);
+      return;
+    }
 
     try {
-    const response = await fetch(`/api/contracts/hop-dong/update-status/${contractId}`, {
-    method: 'POST',
-    headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer ' + localStorage.getItem('token')
-  },
-    body: JSON.stringify({status: upperStatus})
-  });
+      const response = await fetch(`/api/contracts/hop-dong/update-status/${contractId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        },
+        body: JSON.stringify({status: upperStatus})
+      });
 
-    const result = await response.json();
+      const result = await response.json();
 
-    if (!response.ok) {
-    showError(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
-    return;
+      if (!response.ok) {
+        showError(result.message || `Lỗi khi cập nhật trạng thái: HTTP status ${response.status}`);
+        return;
+      }
+
+      showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
+      const currentPage = parseInt(document.getElementById('pagination').dataset.currentPage || 0);
+      const searchInput = document.getElementById('searchInput').value.trim();
+      if (searchInput) {
+        searchContracts(currentPage, 5); // Tải lại kết quả tìm kiếm
+      } else {
+        loadContracts(currentPage, 5); // Tải lại danh sách mặc định
+      }
+      await loadContractStats();
+    } catch (error) {
+      console.error('Error updating contract status:', error);
+      showError('Lỗi khi cập nhật trạng thái hợp đồng');
+    }
   }
 
-    showSuccessMessage(result.message || 'Cập nhật trạng thái hợp đồng thành công');
-    const currentPage = parseInt(document.getElementById('pagination').dataset.currentPage || 0);
-    await loadContracts(currentPage, 5);
-    await loadContractStats(); // Cập nhật lại thống kê sau khi thay đổi trạng thái
-  } catch (error) {
-    console.error('Error updating contract status:', error);
-    showError('Lỗi khi cập nhật trạng thái hợp đồng');
-  }
-  }
-
-    // 📄 CẬP NHẬT PAGINATION
-    function updatePagination(totalContracts, totalPages, currentPage, size) {
+  // 📄 CẬP NHẬT PAGINATION
+  function updatePagination(totalContracts, totalPages, currentPage, size, isSearch = false, searchInput = '') {
     const pagination = document.getElementById('pagination');
     if (!pagination) {
-    console.error('Pagination element not found');
-    return;
-  }
+      console.error('Pagination element not found');
+      return;
+    }
     pagination.dataset.currentPage = currentPage;
 
     pagination.innerHTML = '';
     const start = currentPage * size + 1;
     const end = Math.min((currentPage + 1) * size, totalContracts);
     document.getElementById('pagination-info').textContent =
-    `Hiển thị ${start} đến ${end} trong số ${totalContracts} hợp đồng`;
+            `Hiển thị ${start} đến ${end} trong số ${totalContracts} hợp đồng`;
 
     if (currentPage > 0) {
-    pagination.innerHTML += `
+      pagination.innerHTML += `
       <li class="page-item">
-        <a class="page-link" href="#" onclick="loadContracts(${currentPage - 1}, ${size}); return false;">Trước</a>
+        <a class="page-link" href="#" onclick="${isSearch ? `searchContracts(${currentPage - 1}, ${size})` : `loadContracts(${currentPage - 1}, ${size})`}; return false;">Trước</a>
       </li>
     `;
-  } else {
-    pagination.innerHTML += `
+    } else {
+      pagination.innerHTML += `
       <li class="page-item disabled">
         <a class="page-link">Trước</a>
       </li>
     `;
-  }
+    }
 
     for (let i = 0; i < totalPages; i++) {
-    pagination.innerHTML += `
+      pagination.innerHTML += `
       <li class="page-item ${i === currentPage ? 'active' : ''}">
-        <a class="page-link" href="#" onclick="loadContracts(${i}, ${size}); return false;">${i + 1}</a>
+        <a class="page-link" href="#" onclick="${isSearch ? `searchContracts(${i}, ${size})` : `loadContracts(${i}, ${size})`}; return false;">${i + 1}</a>
       </li>
     `;
-  }
+    }
 
     if (currentPage < totalPages - 1) {
-    pagination.innerHTML += `
+      pagination.innerHTML += `
       <li class="page-item">
-        <a class="page-link" href="#" onclick="loadContracts(${currentPage + 1}, ${size}); return false;">Sau</a>
+        <a class="page-link" href="#" onclick="${isSearch ? `searchContracts(${currentPage + 1}, ${size})` : `loadContracts(${currentPage + 1}, ${size})`}; return false;">Sau</a>
       </li>
     `;
-  } else {
-    pagination.innerHTML += `
+    } else {
+      pagination.innerHTML += `
       <li class="page-item disabled">
         <a class="page-link">Sau</a>
       </li>
     `;
-  }
+    }
   }
 
-    // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
-    function showSuccessMessage(message) {
+  // ✅ HIỂN THỊ THÔNG BÁO THÀNH CÔNG
+  function showSuccessMessage(message) {
     const toast = document.createElement('div');
     toast.className = 'alert alert-success position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
@@ -427,19 +539,18 @@
   `;
     document.body.appendChild(toast);
     setTimeout(() => {
-    if (toast.parentElement) {
-    toast.remove();
-  }
-  }, 5000);
+      if (toast.parentElement) {
+        toast.remove();
+      }
+    }, 5000);
   }
 
-    // 🔧 CHỈNH SỬA HỢP ĐỒNG
-    function editContract(contractId) {
+  // 🔧 CHỈNH SỬA HỢP ĐỒNG
+  function editContract(contractId) {
     console.log('🔍 Attempting to edit contract with ID:', contractId);
     window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
   }
 </script>
-
 
 <style>
   .cursor-pointer {
@@ -503,6 +614,133 @@
 
   .status-select option.text-secondary {
     color: #6c757d !important;
+  }
+
+  /* Search Section Styles */
+  .search-section {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 40px rgba(0, 168, 255, 0.1);
+    border: 1px solid rgba(0, 168, 255, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .search-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    z-index: 1;
+  }
+
+  .search-input-group {
+    position: relative;
+    max-width: 100%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+  }
+
+  .search-input {
+    border: 2px solid rgba(0, 168, 255, 0.1);
+    border-radius: 50px;
+    padding: 15px 60px 15px 20px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+    width: 100%;
+  }
+
+  .search-input:focus {
+    border-color: #3E83CC;
+    box-shadow: 0 0 0 0.2rem rgba(62, 131, 204, 0.25);
+    background: white;
+    outline: none;
+  }
+
+  .search-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #3E83CC, #549eed);
+    border: none;
+    color: white;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 16px rgba(62, 131, 204, 0.3);
+  }
+
+  .search-btn#clearSearchBtn {
+    right: 55px;
+    background: linear-gradient(135deg, #dc3545, #e4606d);
+  }
+
+  .search-btn:hover {
+    transform: translateY(-50%) scale(1.05);
+    box-shadow: 0 6px 20px rgba(62, 131, 204, 0.4);
+  }
+
+  .search-results-info {
+    background: rgba(62, 131, 204, 0.1);
+    border: 1px solid rgba(62, 131, 204, 0.2);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    color: #3E83CC;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6b7280;
+  }
+
+  .no-results i {
+    font-size: 64px;
+    color: #d1d5db;
+    margin-bottom: 20px;
+  }
+
+  .no-results h4 {
+    color: #374151;
+    margin-bottom: 10px;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .search-section {
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      padding: 12px 80px 12px 16px;
+      font-size: 14px;
+    }
+
+    .search-btn {
+      width: 40px;
+      height: 40px;
+      right: 4px;
+    }
+
+    .search-btn#clearSearchBtn {
+      right: 48px;
+    }
   }
 </style>
 </body>
