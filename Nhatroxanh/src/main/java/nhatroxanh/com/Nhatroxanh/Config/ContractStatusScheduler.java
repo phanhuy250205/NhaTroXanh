@@ -1,4 +1,4 @@
-package nhatroxanh.com.Nhatroxanh.config;
+package nhatroxanh.com.Nhatroxanh.Config;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
