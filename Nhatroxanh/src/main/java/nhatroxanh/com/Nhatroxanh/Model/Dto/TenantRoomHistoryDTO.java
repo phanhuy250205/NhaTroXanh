@@ -1,7 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Model.Dto;
 
 import lombok.Data;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts.Status;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 
 import java.sql.Date;
 

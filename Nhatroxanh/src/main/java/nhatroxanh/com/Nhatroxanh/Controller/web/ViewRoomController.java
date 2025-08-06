@@ -19,11 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PostDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Province;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ApprovalStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Category;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 import nhatroxanh.com.Nhatroxanh.Model.mapper.PostMapper;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;

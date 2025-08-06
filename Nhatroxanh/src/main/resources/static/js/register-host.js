@@ -215,34 +215,32 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             fetch("/api/users/register-owner", {
-                method: "POST",
-                body: formData,
-            })
-            .then(response => {
-                if (response.ok) {
-                    Swal.fire({
-                        icon: "success",
-                        title: "Thành công",
-                        text: "Đăng ký tài khoản thành công bạn sẽ được hệ thống hỗ trợ duyệt sớm!",
-                        confirmButtonText: "OK"
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/dang-nhap-chu-tro';
-                        }
-                    });
-                } else {
-                    return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi đăng ký:", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Đăng ký thất bại: " + error.message,
-                    confirmButtonText: "OK"
-                });
-            });
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userRequest),
+    })
+    .then(response => {
+        if (response.ok) {
+            // Nếu thành công, lấy đối tượng JSON từ response
+            return response.json();
+        } else {
+            // Nếu có lỗi,โยน lỗi ra để catch xử lý
+            return response.text().then(text => { throw new Error(text || "Lỗi không xác định.") });
+        }
+    })
+    .then(createdUser => {
+        // ---- PHẦN THAY ĐỔI ----
+        // 1. Thông báo cho người dùng
+        alert("Tạo tài khoản thành công! Vui lòng bổ sung thông tin chi tiết để hoàn tất.");
+        
+        // 2. Chuyển hướng đến form thứ hai với userId
+        window.location.href = `/dang-ky-chi-tiet?userId=${createdUser.userId}`; 
+        // -----------------------
+    })
+    .catch(error => {
+        console.error("Lỗi đăng ký:", error);
+        alert("Đăng ký thất bại: " + error.message);
+    });
         });
     }
 

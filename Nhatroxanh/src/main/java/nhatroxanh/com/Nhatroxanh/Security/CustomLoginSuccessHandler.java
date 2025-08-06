@@ -16,8 +16,10 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+
+                                        HttpServletResponse response,
+                                        Authentication authentication) throws IOException {
+
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         String redirectURL = null;
@@ -25,29 +27,40 @@ public class CustomLoginSuccessHandler implements AuthenticationSuccessHandler {
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
 
-            if (role.equals("ROLE_OWNER")) {
-                redirectURL = "/chu-tro/tong-quan";
-                break;
-            } else if (role.equals("ROLE_STAFF")) {
-                redirectURL = "/nhan-vien/bai-dang";
-                break;
-            } else if (role.equals("ROLE_ADMIN")) {
-                redirectURL = "/admin/thong-ke";
-                break;
+
+            switch (role) {
+                case "ROLE_OWNER":
+                    redirectURL = "/chu-tro/tong-quan";
+                    break;
+                case "ROLE_STAFF":
+                    redirectURL = "/nhan-vien/bai-dang";
+                    break;
+                case "ROLE_ADMIN":
+                    redirectURL = "/admin/thong-ke";
+                    break;
+                case "ROLE_CUSTOMER":
+                    redirectURL = "/trang-chu"; 
+                    break;
             }
+
+            if (redirectURL != null) break;
+
         }
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
         if (redirectURL != null) {
-            // ✅ Có quyền, trả URL để frontend redirect
+
             response.getWriter().write("{\"redirectUrl\": \"" + redirectURL + "\"}");
         } else {
-            // ❌ Không có quyền (ví dụ: CUSTOMER)
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write("{\"error\": \"Bạn không có quyền truy cập vào hệ thống này.\"}");
         }
     }
-
 }
+
+
+
+
+

@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.HostelDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 public interface    HostelService {
 

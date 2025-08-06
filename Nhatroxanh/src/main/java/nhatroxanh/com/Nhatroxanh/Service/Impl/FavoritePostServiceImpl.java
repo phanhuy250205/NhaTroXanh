@@ -1,8 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Service.Impl;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.FavoritePost;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.FavoritePost;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.FavoritePostRepository;
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
 import org.slf4j.Logger;

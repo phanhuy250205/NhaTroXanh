@@ -1,11 +1,12 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.ExtensionRequests;
 
 public interface ExtensionRequestRepository extends JpaRepository<ExtensionRequests, Integer> {
         @Query("SELECT e FROM ExtensionRequests e " +

@@ -19,12 +19,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.GuestInfoDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,7 +36,7 @@ public class ProfileGuest {
 
     @Autowired
     private UserRepository usersRepository;
-    
+
     @Autowired
     private UserCccdRepository userCccdRepository;
 
@@ -45,11 +46,14 @@ public class ProfileGuest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private EncryptionService encryptionService; // Thêm service mã hóa
+
     @GetMapping("/profile-khach-thue")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+        UserCccd cccd = userCccdRepository.findByUser(user);
 
         // Tạo DTO để liên kết với form
         GuestInfoDTO dto = new GuestInfoDTO();
@@ -59,11 +63,18 @@ public class ProfileGuest {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
-        
-        if (cccd != null) {
-            dto.setCccdNumber(cccd.getCccdNumber());
-            dto.setIssueDate(cccd.getIssueDate());
-            dto.setIssuePlace(cccd.getIssuePlace());
+
+        // Giải mã CCCD để hiển thị
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                dto.setCccdNumber(decryptedCccd);
+                dto.setIssueDate(cccd.getIssueDate());
+                dto.setIssuePlace(cccd.getIssuePlace());
+            } catch (Exception e) {
+                model.addAttribute("error", "Không thể giải mã CCCD: " + e.getMessage());
+                dto.setCccdNumber(null); // Đặt null để tránh hiển thị sai
+            }
         }
 
         model.addAttribute("guestInfo", dto);
@@ -86,33 +97,27 @@ public class ProfileGuest {
             return "guest/profile-guest";
         }
 
-        // ===== KIỂM TRA EMAIL ĐÃ TỒN TẠI - PHẦN MỚI =====
+        // Kiểm tra trùng email
         if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
-            String newEmail = dto.getEmail().trim().toLowerCase();
-            String currentEmail = user.getEmail() != null ? user.getEmail().toLowerCase() : "";
-            
-            // Chỉ kiểm tra nếu email mới khác email hiện tại
-            if (!newEmail.equals(currentEmail)) {
-                Optional<Users> existingUserWithEmail = usersRepository.findByEmail(newEmail);
-                if (existingUserWithEmail.isPresent()) {
-                    Users existingUser = existingUserWithEmail.get();
-                    // Đảm bảo không phải chính user hiện tại
-                    if (!existingUser.getUserId().equals(user.getUserId())) {
-                        // model.addAttribute("error", "Email '" + newEmail + "' đã được sử dụng bởi tài khoản khác.");
-                        model.addAttribute("error", "Email đã được sử dụng bởi tài khoản khác.");
-                        model.addAttribute("user", user);
-                        return "guest/profile-guest";
-                    }
-                }
+            Optional<Users> existingEmail = usersRepository.findByEmail(dto.getEmail().trim());
+            if (existingEmail.isPresent() && !existingEmail.get().getUserId().equals(user.getUserId())) {
+                model.addAttribute("error", "Email đã được sử dụng bởi tài khoản khác.");
+                model.addAttribute("user", user);
+                return "guest/profile-guest";
             }
-        } else {
-            model.addAttribute("error", "Email không được để trống.");
-            model.addAttribute("user", user);
-            return "guest/profile-guest";
         }
-        // ===== KẾT THÚC KIỂM TRA EMAIL =====
 
-        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+        // Kiểm tra trùng số điện thoại
+        if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
+            Optional<Users> existingPhone = usersRepository.findByPhone(dto.getPhone().trim());
+            if (existingPhone.isPresent() && !existingPhone.get().getUserId().equals(user.getUserId())) {
+                model.addAttribute("error", "Số điện thoại đã được sử dụng bởi tài khoản khác.");
+                model.addAttribute("user", user);
+                return "guest/profile-guest";
+            }
+        }
+
+        UserCccd cccd = userCccdRepository.findByUser(user);
 
         // Handle avatar upload
         MultipartFile avatarFile = dto.getAvatarFile();
@@ -145,53 +150,59 @@ public class ProfileGuest {
             }
         }
 
-        // Update user info
-        user.setFullname(dto.getFullname());
-        user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
-        user.setPhone(dto.getPhone());
-        user.setGender(dto.getGender());
-        user.setEmail(dto.getEmail().trim().toLowerCase()); // Chuẩn hóa email
-        user.setAddress(dto.getAddress());
+        try {
+            // Update user info
+            user.setFullname(dto.getFullname());
+            user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
+            user.setPhone(dto.getPhone());
+            user.setGender(dto.getGender());
+            user.setEmail(dto.getEmail());
+            user.setAddress(dto.getAddress());
 
-        // Handle CCCD
-        if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
-            String trimmedCccd = dto.getCccdNumber().trim();
-            Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
-            if (existingCccdOptional.isPresent()) {
-                UserCccd existingCccd = existingCccdOptional.get();
-                if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
-                    model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
-                    model.addAttribute("user", user);
-                    return "guest/profile-guest";
+            if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
+                String trimmedCccd = dto.getCccdNumber().trim();
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
+                if (existingCccdOptional.isPresent()) {
+                    UserCccd existingCccd = existingCccdOptional.get();
+                    if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
+                        model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                        model.addAttribute("user", user);
+                        return "guest/profile-guest";
+                    }
                 }
+
+                if (cccd == null) {
+                    cccd = new UserCccd();
+                    cccd.setUser(user);
+                }
+                cccd.setCccdNumber(encryptedCccd);
+                cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
+                cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
+                        ? dto.getIssuePlace().trim()
+                        : null);
+                userCccdRepository.save(cccd);
+            } else if (cccd != null) {
+                userCccdRepository.delete(cccd);
             }
 
-            if (cccd == null) {
-                cccd = new UserCccd();
-                cccd.setUser(user);
-            }
-            cccd.setCccdNumber(trimmedCccd);
-            cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
-            cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
-                    ? dto.getIssuePlace().trim()
-                    : null);
-            userCccdRepository.save(cccd);
-        } else if (cccd != null) {
-            userCccdRepository.delete(cccd);
+            usersRepository.save(user);
+            redirectAttributes.addFlashAttribute("profileSuccess", "Cập nhật thông tin cá nhân thành công!");
+            return "redirect:/khach-thue/profile-khach-thue";
+
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi cập nhật: " + e.getMessage());
+            model.addAttribute("user", user);
+            return "guest/profile-guest";
         }
-
-        usersRepository.save(user);
-        redirectAttributes.addFlashAttribute("profileSuccess", "Cập nhật thông tin cá nhân thành công!");
-        return "redirect:/khach-thue/profile-khach-thue";
     }
 
-    // TÁCH RIÊNG - Endpoint riêng cho đổi mật khẩu
     @PostMapping("/change-password")
     public String changePassword(@RequestParam("currentPassword") String currentPassword,
-                                @RequestParam("newPassword") String newPassword,
-                                @RequestParam("confirmPassword") String confirmPassword,
-                                @AuthenticationPrincipal CustomUserDetails userDetails,
-                                RedirectAttributes redirectAttributes) {
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
 
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
@@ -250,15 +261,14 @@ public class ProfileGuest {
         }
     }
 
-    // ENDPOINT MỚI - Xử lý báo cáo sự cố với NHIỀU ẢNH
     @PostMapping("/report-issue")
     public String reportIssue(@RequestParam("issueTitle") String issueTitle,
-                             @RequestParam("priority") String priority,
-                             @RequestParam("description") String description,
-                             @RequestParam(value = "issueImages", required = false) List<MultipartFile> issueImages,
-                             @AuthenticationPrincipal CustomUserDetails userDetails,
-                             RedirectAttributes redirectAttributes) {
-        
+            @RequestParam("priority") String priority,
+            @RequestParam("description") String description,
+            @RequestParam(value = "issueImages", required = false) List<MultipartFile> issueImages,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -304,15 +314,15 @@ public class ProfileGuest {
                         // Kiểm tra loại tệp
                         String contentType = image.getContentType();
                         if (contentType == null || !contentType.startsWith("image/")) {
-                            redirectAttributes.addFlashAttribute("reportError", 
-                                "File '" + image.getOriginalFilename() + "' không phải là ảnh (JPG, PNG, GIF)!");
+                            redirectAttributes.addFlashAttribute("reportError",
+                                    "File '" + image.getOriginalFilename() + "' không phải là ảnh (JPG, PNG, GIF)!");
                             return "redirect:/khach-thue/profile-khach-thue";
                         }
 
                         // Kiểm tra kích thước tệp (tối đa 5MB)
                         if (image.getSize() > 5 * 1024 * 1024) {
-                            redirectAttributes.addFlashAttribute("reportError", 
-                                "File '" + image.getOriginalFilename() + "' vượt quá 5MB!");
+                            redirectAttributes.addFlashAttribute("reportError",
+                                    "File '" + image.getOriginalFilename() + "' vượt quá 5MB!");
                             return "redirect:/khach-thue/profile-khach-thue";
                         }
 
@@ -320,8 +330,8 @@ public class ProfileGuest {
                             String imagePath = fileUploadService.uploadFile(image, "issues/");
                             imagePaths.add(imagePath);
                         } catch (IOException e) {
-                            redirectAttributes.addFlashAttribute("reportError", 
-                                "Không thể upload ảnh '" + image.getOriginalFilename() + "': " + e.getMessage());
+                            redirectAttributes.addFlashAttribute("reportError",
+                                    "Không thể upload ảnh '" + image.getOriginalFilename() + "': " + e.getMessage());
                             return "redirect:/khach-thue/profile-khach-thue";
                         }
                     }
@@ -329,8 +339,9 @@ public class ProfileGuest {
             }
 
             // TODO: Lưu báo cáo sự cố vào database
-            // Ví dụ: issueService.createIssue(user, issueTitle, priority, description, imagePaths);
-            
+            // Ví dụ: issueService.createIssue(user, issueTitle, priority, description,
+            // imagePaths);
+
             // Log thông tin báo cáo (tạm thời để test)
             System.out.println("=== BÁO CÁO SỰ CỐ MỚI ===");
             System.out.println("Người báo cáo: " + user.getFullname() + " (" + user.getEmail() + ")");
@@ -351,11 +362,12 @@ public class ProfileGuest {
             // Thông báo thành công
             String priorityText = getPriorityText(priority);
             String imageInfo = imagePaths.isEmpty() ? "không có ảnh đính kèm" : imagePaths.size() + " ảnh đính kèm";
-            
-            redirectAttributes.addFlashAttribute("reportSuccess", 
-                "Báo cáo sự cố \"" + issueTitle.trim() + "\" (Mức độ: " + priorityText + ", " + imageInfo + ") " +
-                "đã được gửi thành công! Chúng tôi sẽ xử lý trong thời gian sớm nhất và liên hệ với bạn qua email " + user.getEmail() + ".");
-            
+
+            redirectAttributes.addFlashAttribute("reportSuccess",
+                    "Báo cáo sự cố \"" + issueTitle.trim() + "\" (Mức độ: " + priorityText + ", " + imageInfo + ") " +
+                            "đã được gửi thành công! Chúng tôi sẽ xử lý trong thời gian sớm nhất và liên hệ với bạn qua email "
+                            + user.getEmail() + ".");
+
             return "redirect:/khach-thue/profile-khach-thue";
 
         } catch (Exception e) {
@@ -369,11 +381,16 @@ public class ProfileGuest {
     // Helper method để chuyển đổi priority code thành text
     private String getPriorityText(String priority) {
         switch (priority) {
-            case "low": return "Thấp";
-            case "medium": return "Trung bình";
-            case "high": return "Cao";
-            case "urgent": return "Khẩn cấp";
-            default: return priority;
+            case "low":
+                return "Thấp";
+            case "medium":
+                return "Trung bình";
+            case "high":
+                return "Cao";
+            case "urgent":
+                return "Khẩn cấp";
+            default:
+                return priority;
         }
     }
 }

@@ -7,9 +7,10 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
+
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 
 @Service
@@ -55,9 +56,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Tài khoản chưa được kích hoạt");
         }
         
-        if (user.getStatus() != Users.Status.APPROVED) {
-            throw new UsernameNotFoundException("Tài khoản đang chờ duyệt");
-        }
+        // if (user.getStatus() != Users.Status.APPROVED) {
+        //     throw new UsernameNotFoundException("Tài khoản đang chờ duyệt");
+        // }
         // Tìm UserCccd tương ứng
         UserCccd userCccd = userCccdRepository.findByUser_UserId(user.getUserId()).orElse(null);
 

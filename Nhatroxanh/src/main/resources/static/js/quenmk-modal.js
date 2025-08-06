@@ -356,6 +356,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // ✅ Kiểm tra độ mạnh của mật khẩu
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+{}\[\]:;<>,.?~\\/-]).{6,}$/;
+            if (!passwordRegex.test(newPassword)) {
+                showMessage(
+                    'reset-password-error-message-guest',
+                    'Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa, số và ký tự đặc biệt.'
+                );
+                return;
+            }
+
             if (!email) {
                 showMessage('reset-password-error-message-guest', 'Có lỗi xảy ra, vui lòng thử lại.');
                 logDebug('Không tìm thấy email cho đặt lại mật khẩu');
@@ -398,6 +408,7 @@ document.addEventListener('DOMContentLoaded', function () {
     } else {
         logDebug('Không tìm thấy form đặt lại mật khẩu');
     }
+
 
     // Xử lý gửi lại OTP
     if (resendCodeBtn) {

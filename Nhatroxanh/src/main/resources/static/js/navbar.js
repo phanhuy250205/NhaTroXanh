@@ -67,32 +67,6 @@ document.addEventListener("DOMContentLoaded", () => {
     setActiveBasedOnURL();
     window.addEventListener("popstate", setActiveBasedOnURL);
 
-    // --- XỬ LÝ SỰ KIỆN CLICK ---
-    document.addEventListener("click", (e) => {
-        const target = e.target;
-
-        // Xử lý hiệu ứng Ripple
-        const rippleElement = target.closest(".btn, .nav-link, .dropdown-item");
-        if (rippleElement) {
-            createRipple(e, rippleElement);
-        }
-
-        // Xử lý click vào dropdown item
-        const dropdownItem = target.closest(".user-dropdown-menu .dropdown-item");
-        if (dropdownItem) {
-            if (dropdownItem.tagName === 'BUTTON' && dropdownItem.type === 'submit') {
-                return;
-            }
-        }
-
-        // Xử lý click vào notification item
-        const notificationItem = target.closest(".notification-item");
-        if (notificationItem && notificationItem.classList.contains('unread')) {
-            const notificationId = notificationItem.getAttribute('data-notification-id');
-            markNotificationAsRead(notificationId, notificationItem);
-        }
-    });
-
     // --- HIỆU ỨNG CUỘN NAVBAR ---
     window.addEventListener("scroll", () => {
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -111,22 +85,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
     }, { passive: true });
-
-    // --- HIỆU ỨNG RIPPLE ---
-    function createRipple(event, element) {
-        const circle = document.createElement("span");
-        const diameter = Math.max(element.clientWidth, element.clientHeight);
-        const radius = diameter / 2;
-        const rect = element.getBoundingClientRect();
-
-        circle.style.width = circle.style.height = `${diameter}px`;
-        circle.style.left = `${event.clientX - rect.left - radius}px`;
-        circle.style.top = `${event.clientY - rect.top - radius}px`;
-        circle.classList.add("ripple");
-
-        element.querySelector(".ripple")?.remove();
-        element.appendChild(circle);
-    }
 
     // --- QUẢN LÝ THÔNG BÁO ---
     function loadNotifications() {
@@ -213,10 +171,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     data.notifications.forEach(notification => {
                         const iconClass = getIconClass(notification.type);
                         const bgClass = getBgClass(notification.type);
-                        const href = getNotificationHref(notification);
                         const item = document.createElement('li');
                         item.innerHTML = `
-                            <a class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" href="${href}" data-notification-id="${notification.notificationId}">
+                            <a class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" data-notification-id="${notification.notificationId}">
                                 <div class="notification-icon ${bgClass}">
                                     <i class="${iconClass} text-white"></i>
                                 </div>
@@ -287,7 +244,7 @@ document.addEventListener("DOMContentLoaded", () => {
             case 'PAYMENT': return 'fas fa-exclamation';
             case 'CONTRACT': return 'fas fa-file-contract';
             case 'SYSTEM': return 'fas fa-bell';
-            case 'REPORT': return 'fas fa-flag';
+            case 'REPORT': return 'fas fa-exclamation-triangle';
             default: return 'fas fa-bell';
         }
     }
@@ -303,14 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Generate href based on notification type
-    function getNotificationHref(notification) {
-        if (notification.type === 'PAYMENT' && notification.paymentId) {
-            return `/tenant/payments?paymentId=${notification.paymentId}`;
-        }
-        console.warn(`No valid paymentId for PAYMENT notification: ${notification.notificationId}`);
-        return '#';
-    }
+  
 
     // Format time for Date object in Vietnam timezone (GMT+7)
     function formatTime(date) {

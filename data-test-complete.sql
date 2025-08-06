@@ -347,13 +347,13 @@ INSERT INTO Notifications (notification_id, user_id, title, message, is_read, cr
 -- 20. VOUCHERS DATA
 -- =====================================================
 
-INSERT INTO Vouchers (voucher_id, user_id, code, title, description, discount_type, discount_value, min_order_value, max_discount_amount, start_date, end_date, usage_limit, used_count, status, created_at) VALUES
-(1, 3, 'WELCOME2024', 'Voucher chào mừng', 'Giảm giá cho khách hàng mới đăng ký', 'PERCENTAGE', 10.0, 5000000.00, 500000.00, '2024-01-01', '2024-12-31', 100, 15, 'ACTIVE', '2024-01-01 00:00:00'),
-(2, 3, 'SUMMER2024', 'Voucher mùa hè', 'Ưu đãi đặc biệt mùa hè 2024', 'FIXED_AMOUNT', 300000.0, 3000000.00, 300000.00, '2024-06-01', '2024-08-31', 50, 8, 'ACTIVE', '2024-05-15 00:00:00'),
-(3, 4, 'STUDENT50', 'Ưu đãi sinh viên', 'Giảm giá đặc biệt cho sinh viên', 'PERCENTAGE', 15.0, 2000000.00, 400000.00, '2024-02-01', '2024-06-30', 200, 45, 'ACTIVE', '2024-01-15 00:00:00'),
-(4, 4, 'LONGTERM', 'Thuê dài hạn', 'Ưu đãi cho hợp đồng từ 6 tháng trở lên', 'PERCENTAGE', 5.0, 10000000.00, 1000000.00, '2024-01-01', '2024-12-31', 30, 12, 'ACTIVE', '2024-01-01 00:00:00'),
+INSERT INTO vouchers ( user_id, code, title, description, discount_type, discount_value, min_order_value, max_discount_amount, start_date, end_date, usage_limit, used_count, status, created_at) VALUES
+(1, 3, 'WELCOME2024', 'Voucher chào mừng', 'Giảm giá cho khách hàng mới đăng ký', 'PERCENTAGE', 10000.0, 5000000.00, 500000.00, '2024-01-01', '2024-12-31', 100, 15, 1, '2024-01-01 00:00:00'),
+(2, 3, 'SUMMER2024', 'Voucher mùa hè', 'Ưu đãi đặc biệt mùa hè 2024', 'FIXED_AMOUNT', 300000.0, 3000000.00, 300000.00, '2024-06-01', '2024-08-31', 50, 8, 1, '2024-05-15 00:00:00'),
+(3, 4, 'STUDENT50', 'Ưu đãi sinh viên', 'Giảm giá đặc biệt cho sinh viên', 'PERCENTAGE', 15.0, 2000000.00, 400000.00, '2024-02-01', '2024-06-30', 200, 45, 1, '2024-01-15 00:00:00'),
+(4, 4, 'LONGTERM', 'Thuê dài hạn', 'Ưu đãi cho hợp đồng từ 6 tháng trở lên', 'PERCENTAGE', 5.0, 10000000.00, 1000000.00, '2024-01-01', '2024-12-31', 30, 12, 1, '2024-01-01 00:00:00'),
 (5, 5, 'PREMIUM2024', 'Voucher cao cấp', 'Dành cho phòng cao cấp và studio', 'FIXED_AMOUNT', 500000.0, 7000000.00, 500000.00, '2024-03-01', '2024-05-31', 25, 3, 'PENDING', '2024-02-20 00:00:00'),
-(6, 3, 'EXPIRED2023', 'Voucher hết hạn', 'Voucher đã hết hạn sử dụng', 'PERCENTAGE', 20.0, 1000000.00, 200000.00, '2023-12-01', '2023-12-31', 100, 85, 'EXPIRED', '2023-11-15 00:00:00');
+(6, 3, 'EXPIRED2023', 'Voucher hết hạn', 'Voucher đã hết hạn sử dụng', 'PERCENTAGE', 20.0, 1000000.00, 200000.00, '2023-12-01', '2023-12-31', 100, 85, 1, '2023-11-15 00:00:00');
 
 -- =====================================================
 -- 21. EXTENSION REQUESTS DATA
@@ -515,3 +515,4 @@ All users have password: "password123" (encrypted)
 - Customers: customer1@gmail.com to customer10@gmail.com
 */
 
+alter table vouchers drop column room_id

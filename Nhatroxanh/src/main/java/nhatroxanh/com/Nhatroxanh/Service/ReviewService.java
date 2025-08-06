@@ -3,7 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Service;
 import java.util.List;
 import java.util.Optional;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
 
 public interface ReviewService {
     List<Review> getReviewsByPostId(Integer postId);

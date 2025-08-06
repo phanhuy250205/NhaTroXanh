@@ -1,14 +1,15 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.FavoritePost;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.FavoritePost;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 import java.util.List;
 import java.util.Optional;

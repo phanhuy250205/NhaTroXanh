@@ -2,12 +2,11 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ContractStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests.RequestStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.RoomStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ExtensionRequests;
+import nhatroxanh.com.Nhatroxanh.Model.entity.RoomStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ExtensionRequests.RequestStatus;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ExtensionRequestRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
@@ -156,7 +155,13 @@ public class ContracExtensionController {
             if (!contract.getOwner().getUserId().equals(userDetails.getUser().getUserId())) {
                 throw new RuntimeException("Không có quyền duyệt hợp đồng này.");
             }
+            // ✅ Lấy ngày trả từ trường tạm
+            Date returnDate = contract.getRequestedReturnDate();
+            if (returnDate == null) {
+                throw new RuntimeException("Không có ngày yêu cầu trả phòng.");
+            }
 
+            contract.setEndDate(returnDate);
             contract.setStatus(Contracts.Status.TERMINATED);
             contract.setReturnStatus(Contracts.ReturnStatus.APPROVED);
 

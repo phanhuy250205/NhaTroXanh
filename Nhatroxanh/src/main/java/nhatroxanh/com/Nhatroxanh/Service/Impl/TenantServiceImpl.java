@@ -16,22 +16,23 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Utility;
 import lombok.RequiredArgsConstructor;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts.Status;
-import nhatroxanh.com.Nhatroxanh.Model.enity.ExtensionRequests;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Image;
-import nhatroxanh.com.Nhatroxanh.Model.enity.IncidentReports;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Review;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Rooms;
-import nhatroxanh.com.Nhatroxanh.Model.enity.UserCccd;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ExtensionRequests;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
+import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Review;
+import nhatroxanh.com.Nhatroxanh.Model.entity.RoomStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
@@ -43,12 +44,13 @@ import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ExtensionRequestRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import java.util.Map;
 import java.util.Optional;
 import java.io.IOException;
 import java.sql.Date;
-import nhatroxanh.com.Nhatroxanh.Model.enity.RoomStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +84,9 @@ public class TenantServiceImpl implements TenantService {
 
     @Autowired
     private ExtensionRequestRepository extensionRequestRepository;
+
+         @Autowired
+    private EncryptionService encryptionService;
 
     @Override
     @Transactional(readOnly = true)
@@ -271,7 +276,7 @@ public class TenantServiceImpl implements TenantService {
             throw new RuntimeException("Unauthorized action");
         }
 
-        contract.setEndDate(returnDate);
+        contract.setRequestedReturnDate(returnDate);
         contract.setReturnReason(reason);
         contract.setReturnStatus(Contracts.ReturnStatus.PENDING);
 
@@ -513,6 +518,14 @@ public class TenantServiceImpl implements TenantService {
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
         UserCccd userCccd = tenant.getUserCccd();
+        if (userCccd != null && userCccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(userCccd.getCccdNumber());
+                userCccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
+            } catch (Exception e) {
+                throw new RuntimeException("Không thể giải mã CCCD: " + e.getMessage());
+            }
+        }
 
         String cccdNumber = (userCccd != null) ? userCccd.getCccdNumber() : "Chưa có";
         String issuePlace = (userCccd != null) ? userCccd.getIssuePlace() : "Chưa có";

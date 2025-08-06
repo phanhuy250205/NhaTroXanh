@@ -14,9 +14,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import nhatroxanh.com.Nhatroxanh.Model.Dto.PaymentResponseDto;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 
 import nhatroxanh.com.Nhatroxanh.Service.FavoritePostService;
@@ -31,8 +28,10 @@ import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantDetailDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO;
 import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Contracts;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
@@ -223,39 +222,19 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
-    // @GetMapping("/chu-tro/dang-tin")
-    // public String dangtin() {
-    // return "host/bai-dang-host";
-    // }
 
-    // @GetMapping("/chu-tro/bai-dang")
-    // public String quanlyhopdong() {
-    // return "host/quan-ly-bai-dang";
-    // }
-
-    // @GetMapping("/chu-tro/Qlthue-tra")
-    // public String chitietbaidang() {
-    // return "guest/quan-ly-thue-tra";
-    // }
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue")
     public String chitietkhachthue() {
         return "host/chi-tiet-khach-thue";
     }
 
-    // @GetMapping("/khach-thue/quan-ly-thue-tra")
-    // public String quanLyThueTra() {
-    // return "guest/quan-ly-thue-tra";
-    // }
 
-    // @GetMapping("/khach-thue/chitiet-phongthue")
-    // public String chiTietPhongThue() {
-    // return "guest/chitiet-phongthue";
-    // }
     @GetMapping("/khach-thue/thanh-toan")
     public String thanhToan() {
         return "guest/thanh-toan";
     }
+
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
     public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {
@@ -309,9 +288,5 @@ public class DemoController {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
                 .getUserId();
     }
-
-    // @GetMapping("/chu-tro/sua-bai-dang")
-    // public String chitiethopdong() {
-    // return "host/sua-bai-dang";
 
 }

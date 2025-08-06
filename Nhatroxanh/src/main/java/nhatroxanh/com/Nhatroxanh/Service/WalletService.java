@@ -1,7 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Service;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
 /**
  * Service interface for wallet/balance operations

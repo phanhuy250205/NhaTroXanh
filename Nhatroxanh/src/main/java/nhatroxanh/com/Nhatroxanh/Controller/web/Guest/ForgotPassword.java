@@ -1,6 +1,7 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web.Guest;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Users;
+
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;

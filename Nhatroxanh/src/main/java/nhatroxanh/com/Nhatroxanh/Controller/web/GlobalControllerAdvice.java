@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.Category;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Category;
 import nhatroxanh.com.Nhatroxanh.Repository.CategoryRepository;
 
 @ControllerAdvice
