@@ -95,6 +95,17 @@ public interface PaymentService {
      */
     int sendInvoicesToTenants(List<PaymentResponseDto> payments);
 
+    /**
+     * Kiểm tra xem hóa đơn đã tồn tại cho contract và tháng/năm cụ thể chưa
+     * 
+     * @param contractId ID của hợp đồng
+     * @param month      Tháng (1-12)
+     * @param year       Năm
+     * @param ownerId    ID của chủ trọ (để bảo mật)
+     * @return true nếu hóa đơn đã tồn tại, false nếu chưa
+     */
+    boolean checkPaymentExists(Integer contractId, int month, int year, Integer ownerId);
+
     Page<Payments> getPaymentHistory(Integer year, String status, String method, int page, int size);
 
     List<DetailPayments> getDetailPaymentsByPaymentId(Integer paymentId);
