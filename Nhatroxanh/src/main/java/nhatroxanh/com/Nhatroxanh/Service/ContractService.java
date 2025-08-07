@@ -93,4 +93,6 @@ public interface ContractService {
     Page<Contracts> findContractsByRoomName(String roomName, Pageable pageable);
     Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable);
 
+    // Thêm phương thức tìm kiếm phân trang theo số điện thoại hoặc tên khách hàng
+    Page<Contracts> searchContracts(String searchTerm, Pageable pageable);
 }

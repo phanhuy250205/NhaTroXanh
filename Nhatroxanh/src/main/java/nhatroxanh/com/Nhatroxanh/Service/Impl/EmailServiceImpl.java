@@ -479,27 +479,6 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    @Override
-    public void sendContractHtml(String recipientEmail, String recipientName, String subject, String contractHtml) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(recipientEmail);
-            helper.setSubject(subject != null ? subject : "Hợp đồng thuê nhà");
-            helper.setFrom("nhatroxanh@gmail.com", "Nhà Trọ Xanh");
-
-            // ✅ SET HTML CONTENT THAY VÌ TEXT
-            helper.setText(contractHtml, true); // true = HTML content
-
-            mailSender.send(message);
-            System.out.println("✅ Email HTML sent successfully to: " + recipientEmail);
-
-        } catch (Exception e) {
-            System.err.println("❌ Error sending HTML email: " + e.getMessage());
-            throw new RuntimeException("Không thể gửi email: " + e.getMessage());
-        }
-    }
 
     @Override
     public void sendVoucherDeactivationEmail(Vouchers voucher) {

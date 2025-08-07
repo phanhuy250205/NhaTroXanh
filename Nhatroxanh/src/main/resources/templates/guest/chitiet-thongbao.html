@@ -765,7 +765,7 @@
 
             // Map tab IDs to notification types
             const tabToType = {
-                'lodging-notifications': [ 'REPORT'],
+                'lodging-notifications': ['REPORT', 'CONTRACT', 'HOSTEL_ACTIVITY'], 
                 'finance-notifications': ['PAYMENT'],
                 'deals-notifications': ['PROMOTION'],
                 'profile-notifications': ['ACCOUNT', 'SYSTEM']
@@ -812,7 +812,7 @@
                         // Filter notifications for mixed tabs
                         let filteredNotifications = data.notifications;
                         if (types.length > 1) {
-                            filteredNotifications = data.notifications.filter(notification => 
+                            filteredNotifications = data.notifications.filter(notification =>
                                 types.includes(notification.type)
                             );
                         }
@@ -826,7 +826,7 @@
 
                         // Render notifications
                         renderNotifications(tabId, filteredNotifications);
-                        
+
                         // Update pagination UI
                         updatePaginationUI(tabId);
                     })
@@ -965,16 +965,16 @@
                 const button = document.createElement('button');
                 button.className = 'pagination-btn';
                 button.textContent = text;
-                
+
                 if (disabled) {
                     button.classList.add('disabled');
                     button.disabled = true;
                 }
-                
+
                 if (active) {
                     button.classList.add('active');
                 }
-                
+
                 return button;
             }
 
@@ -1470,7 +1470,7 @@
                 setTimeout(() => alertContainer.remove(), 5000);
             }
 
-            
+
             // Load notifications on page load
             loadNotifications();
         });

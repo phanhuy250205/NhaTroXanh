@@ -150,5 +150,7 @@ public void checkExpiringContractsAndNotifyTenants() {
         }
     }
     log.info("🎉 Hoàn thành tác vụ quét hợp đồng cho khách thuê.");
-}
+  }
+  
+
 }
