@@ -316,6 +316,57 @@ public class PaymentController {
     }
 
     /**
+     * Kiểm tra xem hóa đơn đã tồn tại cho contract và tháng cụ thể chưa
+     */
+    @GetMapping("/check-existing")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkExistingPayment(
+            @RequestParam("contractId") Integer contractId,
+            @RequestParam("month") String month,
+            Authentication authentication) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            // Validate user has access to this contract
+            CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+            Integer ownerId = userDetails.getUserId();
+            
+            // Parse month (MM/YYYY format)
+            String[] monthYear = month.split("/");
+            if (monthYear.length != 2) {
+                response.put("exists", false);
+                response.put("error", "Định dạng tháng không hợp lệ");
+                return ResponseEntity.badRequest().body(response);
+            }
+            
+            int monthNum = Integer.parseInt(monthYear[0]);
+            int year = Integer.parseInt(monthYear[1]);
+            
+            // Check if payment exists
+            boolean exists = paymentService.checkPaymentExists(contractId, monthNum, year, ownerId);
+            
+            response.put("exists", exists);
+            if (exists) {
+                response.put("message", String.format("Hóa đơn cho tháng %02d/%d đã tồn tại", monthNum, year));
+            }
+            
+            return ResponseEntity.ok(response);
+            
+        } catch (NumberFormatException e) {
+            log.error("Invalid month format: {}", month, e);
+            response.put("exists", false);
+            response.put("error", "Định dạng tháng không hợp lệ");
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            log.error("Error checking existing payment for contract {} and month {}: ", contractId, month, e);
+            response.put("exists", false);
+            response.put("error", "Lỗi kiểm tra hóa đơn");
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
      * Tạo payment/invoice mới từ form - cho phép chủ trọ nhập đơn giá điện nước
      */
     @PostMapping("/create-form")

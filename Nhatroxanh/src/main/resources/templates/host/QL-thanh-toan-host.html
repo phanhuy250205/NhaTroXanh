@@ -538,29 +538,42 @@
 <body>
   <div th:replace="~{/layouts/sidebar-host}" style="z-index: 1020;"></div>
   <div class="main-content">
-    <!-- Toast Container -->
-    <div class="toast-container">
-      <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body d-flex align-items-center">
-          <i class="fas fa-check-circle me-2"></i>
-          <span class="toast-message">Thao tác thành công!</span>
-        </div>
-      </div>
-
-      <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body d-flex align-items-center">
-          <i class="fas fa-exclamation-circle me-2"></i>
-          <span class="toast-message">Có lỗi xảy ra!</span>
-        </div>
-      </div>
-
-      <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="toast-body d-flex align-items-center">
-          <i class="fas fa-info-circle me-2"></i>
-          <span class="toast-message">Thông tin!</span>
-        </div>
+  <!-- Toast Container -->
+  <div class="toast-container">
+    <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body d-flex align-items-center">
+        <i class="fas fa-check-circle me-2"></i>
+        <span class="toast-message">Thao tác thành công!</span>
       </div>
     </div>
+
+    <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body d-flex align-items-center">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span class="toast-message">Có lỗi xảy ra!</span>
+      </div>
+    </div>
+
+    <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-body d-flex align-items-center">
+        <i class="fas fa-info-circle me-2"></i>
+        <span class="toast-message">Thông tin!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Messages Display -->
+  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+    <i class="fas fa-check-circle me-2"></i>
+    <span th:text="${successMessage}">Thành công!</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+
+  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
 
     <div class="container-fluid">
       <div class="main-container">
