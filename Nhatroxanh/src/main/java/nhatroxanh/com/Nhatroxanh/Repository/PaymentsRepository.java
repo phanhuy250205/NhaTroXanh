@@ -165,4 +165,20 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
                      @Param("status") PaymentStatus status,
                      @Param("method") PaymentMethod method,
                      Pageable pageable);
+
+       // === CASH APPOINTMENT VALIDATION QUERIES ===
+
+       // Check if payment already has a cash appointment scheduled
+       @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Payments p " +
+                     "WHERE p.id = :paymentId AND p.cashAppointmentCount > 0")
+       boolean hasCashAppointmentScheduled(@Param("paymentId") Integer paymentId);
+
+       // Check if payment is currently waiting for cash confirmation
+       @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Payments p " +
+                     "WHERE p.id = :paymentId AND p.paymentStatus = 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'")
+       boolean isWaitingForCashConfirmation(@Param("paymentId") Integer paymentId);
+
+       // Get cash appointment count for a payment
+       @Query("SELECT p.cashAppointmentCount FROM Payments p WHERE p.id = :paymentId")
+       Optional<Integer> getCashAppointmentCount(@Param("paymentId") Integer paymentId);
 }

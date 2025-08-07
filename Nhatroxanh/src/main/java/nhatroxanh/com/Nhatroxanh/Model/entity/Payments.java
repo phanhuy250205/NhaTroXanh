@@ -69,6 +69,9 @@ public class Payments {
     @Column(name = "landlord_notified")
     private Boolean landlordNotified = false;
 
+    @Column(name = "cash_appointment_count", nullable = false)
+    private Integer cashAppointmentCount = 0;
+
     public enum PaymentStatus {
         CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN, CHỜ_XÁC_NHẬN_TIỀN_MẶT
     }
