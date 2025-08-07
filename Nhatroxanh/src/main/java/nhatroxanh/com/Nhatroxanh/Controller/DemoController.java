@@ -183,6 +183,7 @@ public class DemoController {
         model.addAttribute("contractStatuses", Arrays.stream(Contracts.Status.values())
                 .filter(s -> s != Contracts.Status.DRAFT)
                 .toList());
+        model.addAttribute("contractStats", stats);
 
         return "host/LS-thue-tra-host";
     }

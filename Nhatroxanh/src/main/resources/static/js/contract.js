@@ -951,10 +951,27 @@ window.NhaTroContract = {
         console.log("Fetching details for room ID:", roomId);
 
         try {
-            // Lấy thông tin chi tiết của phòng (giá, diện tích, địa chỉ...)
+            // 🔥 BƯỚC 1: Lấy thông tin chi tiết phòng
             const roomDetailsResponse = await fetch(`/api/contracts/get-room-details?roomId=${roomId}`);
-            if (!roomDetailsResponse.ok) throw new Error("Lỗi khi lấy chi tiết phòng.");
+
+            // ✅ KIỂM TRA CONTENT-TYPE TRƯỚC KHI PARSE
+            const contentType = roomDetailsResponse.headers.get("content-type");
+            console.log("Room details response content-type:", contentType);
+
+            if (!roomDetailsResponse.ok) {
+                const errorText = await roomDetailsResponse.text();
+                console.error("Room details error response:", errorText);
+                throw new Error(`Lỗi khi lấy chi tiết phòng: ${roomDetailsResponse.status}`);
+            }
+
+            if (!contentType || !contentType.includes("application/json")) {
+                const responseText = await roomDetailsResponse.text();
+                console.error("Expected JSON but got:", responseText.substring(0, 200));
+                throw new Error("Server không trả về JSON cho thông tin phòng");
+            }
+
             const roomData = await roomDetailsResponse.json();
+            console.log("Room data received:", roomData);
 
             if (roomData.success && roomData.room) {
                 const room = roomData.room;
@@ -966,52 +983,129 @@ window.NhaTroContract = {
                 this.updatePreviewField("room-number", "preview-room-number");
                 this.updatePreviewField("room-area", "preview-room-area");
                 this.updatePreviewField("rent-price", "preview-rent");
+
                 const previewRoomAddress = document.getElementById("preview-room-address");
                 if (previewRoomAddress) {
                     previewRoomAddress.textContent = room.address || "Chưa có địa chỉ";
                 }
 
-                // 🔥 PHẦN SỬA LỖI VÀ THÊM MỚI NẰM Ở ĐÂY 🔥
-                // Lấy danh sách tiện ích của phòng đó và tick vào checkbox
-                const utilityResponse = await fetch(`/api/contracts/rooms/${roomId}/utilities`);
-                if (!utilityResponse.ok) throw new Error("Lỗi khi lấy tiện ích phòng.");
-                const utilities = await utilityResponse.json();
+                // 🔥 BƯỚC 2: Lấy tiện ích phòng với error handling
+                try {
+                    const utilityResponse = await fetch(`/api/contracts/rooms/${roomId}/utilities`);
 
-                // Bỏ check tất cả checkbox
-                document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
-                    checkbox.checked = false;
-                });
+                    // ✅ KIỂM TRA CONTENT-TYPE CHO UTILITIES
+                    const utilityContentType = utilityResponse.headers.get("content-type");
+                    console.log("Utilities response content-type:", utilityContentType);
+                    console.log("Utilities response status:", utilityResponse.status);
 
-                // 2. Tick vào những checkbox tương ứng với tiện ích của phòng
-                if (utilities && utilities.length > 0) {
-                    console.log(`Phòng có ${utilities.length} tiện ích.`);
-                    const utilityIds = utilities.map(util => util.utilityId);
-                    utilityIds.forEach(id => {
-                        const checkbox = document.getElementById(`utility-${id}`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                            console.log(`Đã tick vào tiện ích ID: ${id}`);
+                    if (!utilityResponse.ok) {
+                        const errorText = await utilityResponse.text();
+                        console.error("Utilities error response:", errorText);
+
+                        // ❌ NẾU API KHÔNG TỒN TẠI (404), BỎ QUA PHẦN UTILITIES
+                        if (utilityResponse.status === 404) {
+                            console.warn("Utilities API not found, skipping utilities loading");
+                            this.showNotification("API tiện ích không khả dụng, bỏ qua tải tiện ích", "warning");
+                            return; // Vẫn tiếp tục, chỉ không load utilities
                         }
+
+                        throw new Error(`Lỗi khi lấy tiện ích: ${utilityResponse.status}`);
+                    }
+
+                    if (!utilityContentType || !utilityContentType.includes("application/json")) {
+                        const responseText = await utilityResponse.text();
+                        console.error("Expected JSON for utilities but got:", responseText.substring(0, 200));
+                        console.warn("Utilities response is not JSON, skipping utilities loading");
+                        return; // Bỏ qua utilities nếu không phải JSON
+                    }
+
+                    const utilities = await utilityResponse.json();
+                    console.log("Utilities received:", utilities);
+
+                    // Bỏ check tất cả checkbox
+                    document.querySelectorAll('#amenities-list-host input[name="contract.room.utilityIds"]').forEach(checkbox => {
+                        checkbox.checked = false;
                     });
-                } else {
-                    console.log("Phòng này không có tiện ích nào.");
+
+                    // Tick vào những checkbox tương ứng với tiện ích của phòng
+                    if (utilities && Array.isArray(utilities) && utilities.length > 0) {
+                        console.log(`Phòng có ${utilities.length} tiện ích.`);
+                        const utilityIds = utilities.map(util => util.utilityId || util.id);
+                        utilityIds.forEach(id => {
+                            const checkbox = document.getElementById(`utility-${id}`);
+                            if (checkbox) {
+                                checkbox.checked = true;
+                                console.log(`Đã tick vào tiện ích ID: ${id}`);
+                            } else {
+                                console.warn(`Không tìm thấy checkbox cho utility ID: ${id}`);
+                            }
+                        });
+
+                        this.showNotification(`Đã tải ${utilities.length} tiện ích cho phòng`, "success");
+                    } else {
+                        console.log("Phòng này không có tiện ích nào.");
+                    }
+
+                    // Cập nhật preview tiện ích
+                    this.updateAmenities();
+
+                } catch (utilityError) {
+                    console.error("Error loading utilities:", utilityError);
+                    // ❌ KHÔNG THROW ERROR - chỉ log và thông báo
+                    this.showNotification("Không thể tải tiện ích phòng: " + utilityError.message, "warning");
                 }
 
-                // 3. Cập nhật lại phần preview của tiện ích
-                this.updateAmenities();
-                // 🔥 KẾT THÚC PHẦN SỬA LỖI 🔥
-
                 this.showNotification(`Đã tải thông tin phòng ${room.roomName}`, "success");
+
             } else {
                 this.showNotification(roomData.message || "Không thể lấy thông tin phòng!", "error");
                 this.clearRoomFields();
             }
+
         } catch (error) {
             console.error("Error in onRoomSelected:", error);
             this.showNotification("Lỗi khi tải dữ liệu phòng: " + error.message, "error");
-            // this.clearRoomFields();
+            this.clearRoomFields();
         }
     },
+
+
+    // Thêm vào object NhaTroContract
+    async safeFetchJSON(url, options = {}) {
+        try {
+            console.log(`🌐 Fetching: ${url}`);
+            const response = await fetch(url, options);
+
+            // Kiểm tra content-type
+            const contentType = response.headers.get("content-type");
+            console.log(`📄 Content-Type: ${contentType}`);
+            console.log(`📊 Status: ${response.status}`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`❌ Error Response (${response.status}):`, errorText.substring(0, 500));
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            // Kiểm tra xem có phải JSON không
+            if (!contentType || !contentType.includes("application/json")) {
+                const responseText = await response.text();
+                console.error("❌ Expected JSON but received:", responseText.substring(0, 200));
+                throw new Error(`Server trả về ${contentType || 'unknown'} thay vì JSON`);
+            }
+
+            const data = await response.json();
+            console.log("✅ JSON parsed successfully:", data);
+            return data;
+
+        } catch (error) {
+            console.error(`❌ safeFetchJSON error for ${url}:`, error);
+            throw error;
+        }
+    },
+
+
+
 
 
     clearRoomFields() {
@@ -2677,95 +2771,274 @@ window.NhaTroContract = {
     },
 
     saveContract() {
+        console.log("💾 Starting contract save process...");
+
+        // ✅ BƯỚC 1: Validate cơ bản
+        if (!this.validateBasicContractInfo()) {
+            return;
+        }
+
+        // ✅ BƯỚC 2: Lấy và validate room
+        const { roomIdNumber, roomSelect } = this.getRoomInfo();
+        if (!roomIdNumber) {
+            return;
+        }
+
+        // ✅ BƯỚC 3: Build contract data
+        const contractData = this.buildContractData(roomIdNumber, roomSelect);
+
+        // ✅ BƯỚC 4: Validate tenant data
+        if (!this.validateTenantData(contractData)) {
+            return;
+        }
+
+        // ✅ BƯỚC 5: Prepare form data
+        const formData = this.prepareFormData(contractData);
+
+        // ✅ BƯỚC 6: Show loading state
+        this.setLoadingState(true);
+
+        // ✅ BƯỚC 7: Send request
+        this.sendSaveRequest(formData);
+    },
+
+// ✅ HÀM PHỤ: Validate thông tin cơ bản
+    validateBasicContractInfo() {
+        const requiredFields = [
+            { id: 'tenant-name', name: 'Tên người thuê' },
+            { id: 'tenant-phone', name: 'Số điện thoại người thuê' },
+            { id: 'owner-name', name: 'Tên chủ trọ' },
+            { id: 'owner-phone', name: 'Số điện thoại chủ trọ' },
+            { id: 'rent-price', name: 'Giá thuê' },
+            { id: 'start-date', name: 'Ngày bắt đầu hợp đồng' }
+        ];
+
+        for (const field of requiredFields) {
+            const element = document.getElementById(field.id);
+            if (!element || !element.value || element.value.trim() === '') {
+                this.showNotification(`❌ Vui lòng điền: ${field.name}`, "error");
+                element?.focus();
+                return false;
+            }
+        }
+
+        return true;
+    },
+
+// ✅ HÀM PHỤ: Lấy thông tin phòng
+    getRoomInfo() {
         const roomSelect = document.getElementById('roomSelect');
         const roomIdValue = roomSelect?.value;
 
         if (!roomIdValue || roomIdValue.trim() === "" || roomIdValue === "null" || roomIdValue === "undefined") {
-            this.showNotification("Vui lòng chọn phòng trọ!", "error");
-            return;
+            this.showNotification("❌ Vui lòng chọn phòng trọ!", "error");
+            roomSelect?.focus();
+            return { roomIdNumber: null, roomSelect: null };
         }
 
         const roomIdNumber = parseInt(roomIdValue, 10);
         if (isNaN(roomIdNumber) || roomIdNumber <= 0) {
-            this.showNotification("ID phòng không hợp lệ!", "error");
-            return;
+            this.showNotification("❌ ID phòng không hợp lệ!", "error");
+            return { roomIdNumber: null, roomSelect: null };
         }
 
-        // Lấy dữ liệu hợp đồng đã chuẩn hóa (ContractDto)
-        const contractData = this.buildContractData(roomIdNumber, roomSelect);
+        console.log("✅ Room validated:", roomIdNumber);
+        return { roomIdNumber, roomSelect };
+    },
 
+// ✅ HÀM PHỤ: Validate dữ liệu người thuê
+    validateTenantData(contractData) {
         const tenantPhone = contractData.tenantType === "UNREGISTERED" ?
             this.unregisteredTenantData?.phone : contractData.tenant?.phone;
+
         if (!tenantPhone) {
-            this.showNotification("Số điện thoại người thuê không được để trống!", "error");
-            return;
+            this.showNotification("❌ Số điện thoại người thuê không được để trống!", "error");
+            document.getElementById('tenant-phone')?.focus();
+            return false;
         }
 
         const cccdNumber = contractData.tenantType === "UNREGISTERED" ?
             this.unregisteredTenantData?.cccdNumber : contractData.tenant?.cccdNumber;
+
         if (!cccdNumber) {
-            this.showNotification("Số CCCD không được để trống!", "error");
-            return;
+            this.showNotification("❌ Số CCCD không được để trống!", "error");
+            document.getElementById('tenant-id')?.focus();
+            return false;
         }
 
+        // Validate CCCD format (12 digits)
+        if (!/^\d{12}$/.test(cccdNumber)) {
+            this.showNotification("❌ Số CCCD phải có đúng 12 chữ số!", "error");
+            document.getElementById('tenant-id')?.focus();
+            return false;
+        }
+
+        console.log("✅ Tenant data validated");
+        return true;
+    },
+
+// ✅ HÀM PHỤ: Chuẩn bị form data
+    prepareFormData(contractData) {
         const formData = new FormData();
         formData.append("contract", JSON.stringify(contractData));
 
-        // ✅ Đã sửa: Gửi file với tên nhất quán là "cccdFrontFile" và "cccdBackFile"
+        // Thêm file CCCD
         if (contractData.tenantType === "UNREGISTERED") {
-            // Nếu là người bảo hộ, lấy file từ biến tạm
+            // Người bảo hộ - lấy file từ biến tạm
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
+                console.log("📎 Added unregistered tenant front CCCD file");
             }
             if (this.unregisteredTenantCccdBackFile) {
                 formData.append("cccdBackFile", this.unregisteredTenantCccdBackFile);
+                console.log("📎 Added unregistered tenant back CCCD file");
             }
         } else {
-            // Nếu là người thuê đã đăng ký, lấy file trực tiếp từ input
-            const cccdFront = document.getElementById("cccd-front").files[0];
-            const cccdBack = document.getElementById("cccd-back").files[0];
+            // Người thuê đã đăng ký - lấy file từ input
+            const cccdFront = document.getElementById("cccd-front")?.files[0];
+            const cccdBack = document.getElementById("cccd-back")?.files[0];
+
             if (cccdFront) {
                 formData.append("cccdFrontFile", cccdFront);
+                console.log("📎 Added registered tenant front CCCD file:", cccdFront.name);
             }
             if (cccdBack) {
                 formData.append("cccdBackFile", cccdBack);
+                console.log("📎 Added registered tenant back CCCD file:", cccdBack.name);
             }
         }
 
-        console.log("=== FINAL FORM DATA TO SEND ===");
+        // Debug form data
+        console.log("=== FORM DATA PREPARED ===");
         for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value instanceof File ? value.name : value}`);
+            console.log(`${key}: ${value instanceof File ? `${value.name} (${value.size} bytes)` : value}`);
         }
 
-        fetch("/api/contracts", {
-            method: "POST",
-            body: formData, // FormData sẽ tự thiết lập Content-Type là multipart/form-data
-            // Thêm CSRF token nếu cần
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
-            }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(error => {
-                        throw new Error(error.message || `HTTP error! status: ${response.status}`);
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    this.showNotification("Hợp đồng đã được tạo thành công!", "success");
-                    setTimeout(() => window.location.href = "/api/contracts/list", 1500);
-                } else {
-                    this.showNotification(data.message || "Lỗi khi tạo hợp đồng!", "error");
-                }
-            })
-            .catch(error => {
-                console.error("Lỗi khi tạo hợp đồng:", error);
-                this.showNotification("Lỗi khi tạo hợp đồng: " + error.message, "error");
-            });
+        return formData;
     },
+
+// ✅ HÀM PHỤ: Set loading state
+    setLoadingState(isLoading) {
+        const saveButton = document.getElementById('btn-save');
+        const sendEmailButton = document.getElementById('btn-send-email');
+
+        if (saveButton) {
+            saveButton.disabled = isLoading;
+            saveButton.innerHTML = isLoading
+                ? '<i class="fa fa-spinner fa-spin me-1"></i> Đang lưu...'
+                : '<i class="fa fa-floppy-disk me-1"></i> Lưu hợp đồng';
+        }
+
+        // Disable send email button khi đang save
+        if (sendEmailButton) {
+            sendEmailButton.disabled = isLoading;
+        }
+
+        console.log(isLoading ? "🔄 Loading state ON" : "✅ Loading state OFF");
+    },
+
+// ✅ HÀM PHỤ: Gửi request save
+    async sendSaveRequest(formData) {
+        try {
+            console.log("📤 Sending save request to /api/contracts...");
+
+            const response = await fetch("/api/contracts", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]')?.content || ""
+                }
+            });
+
+            console.log("📥 Response status:", response.status);
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("📥 Response data:", data);
+
+            await this.handleSaveSuccess(data);
+
+        } catch (error) {
+            console.error("❌ Save error:", error);
+            this.handleSaveError(error);
+        } finally {
+            this.setLoadingState(false);
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý khi save thành công
+    async handleSaveSuccess(data) {
+        if (data.success) {
+            console.log("✅ Contract saved successfully!");
+
+            // Hiển thị thông báo thành công
+            this.showNotification("✅ Hợp đồng đã được lưu thành công!", "success");
+
+            // Cập nhật URL nếu có contractId (tạo mới)
+            if (data.contractId) {
+                const newUrl = `/contracts/edit/${data.contractId}`;
+                window.history.replaceState({ contractId: data.contractId }, '', newUrl);
+                console.log("🔗 URL updated to:", newUrl);
+
+                // Lưu contractId để sử dụng cho các chức năng khác
+                this.currentContractId = data.contractId;
+            }
+
+            // Cập nhật preview và enable nút gửi email
+            try {
+                this.updateAllPreview();
+
+                // Enable send email button nếu có email
+                const tenantEmail = document.getElementById('tenant-email')?.value?.trim();
+                const sendEmailButton = document.getElementById('btn-send-email');
+                if (sendEmailButton && tenantEmail) {
+                    sendEmailButton.disabled = false;
+                    sendEmailButton.classList.remove('btn-secondary');
+                    sendEmailButton.classList.add('btn-success');
+                    console.log("📧 Send email button enabled");
+                }
+
+            } catch (previewError) {
+                console.warn("⚠️ Preview update failed:", previewError);
+            }
+
+            // ✅ QUAN TRỌNG: KHÔNG CHUYỂN TRANG - chỉ thông báo thành công
+            console.log("🏠 Staying on current page as requested");
+
+        } else {
+            throw new Error(data.message || "Phản hồi không hợp lệ từ server");
+        }
+    },
+
+// ✅ HÀM PHỤ: Xử lý khi save lỗi
+    handleSaveError(error) {
+        console.error("❌ Contract save failed:", error);
+
+        let errorMessage = "Lỗi khi lưu hợp đồng: ";
+
+        if (error.message.includes('duplicate')) {
+            errorMessage += "Hợp đồng đã tồn tại hoặc trùng lặp dữ liệu!";
+        } else if (error.message.includes('validation')) {
+            errorMessage += "Dữ liệu không hợp lệ, vui lòng kiểm tra lại!";
+        } else if (error.message.includes('network')) {
+            errorMessage += "Lỗi kết nối mạng, vui lòng thử lại!";
+        } else {
+            errorMessage += error.message;
+        }
+
+        this.showNotification(errorMessage, "error");
+
+        // Focus vào trường đầu tiên có lỗi (nếu có)
+        const firstErrorField = document.querySelector('.is-invalid, .error');
+        if (firstErrorField) {
+            firstErrorField.focus();
+        }
+    },
+
 
 
 
@@ -3415,7 +3688,7 @@ window.NhaTroContract = {
                 modal.show()
                 if (customerForm) customerForm.reset()
                 this.clearCustomerFormImages()
-                this.setupCustomerLocationListeners()
+
             })
         }
 
@@ -3732,20 +4005,44 @@ window.NhaTroContract = {
         })
     },
 
+    // ✅ PHIÊN BẢN TOAST ĐẸP NHẤT
     showNotification(message, type = "info") {
-        const notification = document.createElement("div")
-        notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`
-        notification.style.cssText = "top: 20px; right: 20px; z-index: 9999; min-width: 400px;"
-        notification.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `
-        document.body.appendChild(notification)
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove()
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: type === 'error' ? 5000 : 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
+            },
+            customClass: {
+                popup: 'colored-toast'
             }
-        }, 10000)
+        });
+
+        const config = {
+            title: message
+        };
+
+        switch(type) {
+            case 'success':
+                config.icon = 'success';
+                break;
+            case 'error':
+                config.icon = 'error';
+                break;
+            case 'warning':
+                config.icon = 'warning';
+                break;
+            case 'info':
+            default:
+                config.icon = 'info';
+                break;
+        }
+
+        Toast.fire(config);
     },
 }
 function updateContractPreview() {

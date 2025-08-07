@@ -1,6 +1,5 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
-import org.apache.hc.core5.annotation.Contract;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,27 +12,33 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 import java.util.Optional;
 import java.sql.Date;
-
 import java.util.List;
+import java.util.Optional;
 
 @Repository
-
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
-   @Query("SELECT c FROM Contracts c " +
-       "WHERE c.owner.userId = :ownerId " +
-       "AND c.status <> 'DRAFT' " +
-       "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) " +
-       "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
-       "AND (:status IS NULL OR c.status = :status)")
-Page<Contracts> findTenantsByOwnerWithFilters(
-        @Param("ownerId") Integer ownerId,
-        @Param("keyword") String keyword,
-        @Param("hostelId") Integer hostelId,
-        @Param("status") Contracts.Status status,
-        Pageable pageable);
 
+        @Query("SELECT c FROM Contracts c " +
+                        "WHERE c.owner.userId = :ownerId " +
+                        "AND c.status <> 'DRAFT' " +
+                        "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) "
+                        +
+                        "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
+                        "AND (:status IS NULL OR c.status = :status)")
+        Page<Contracts> findTenantsByOwnerWithFilters(
+                        @Param("ownerId") Integer ownerId,
+                        @Param("keyword") String keyword,
+                        @Param("hostelId") Integer hostelId,
+                        @Param("status") Contracts.Status status,
+                        Pageable pageable);
 
-        @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId")
+        // ✅ THÊM JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE c.owner.userId = :ownerId")
         List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
         // Đếm tổng số người thuê hiện tại (hợp đồng đang hoạt động)
@@ -54,23 +59,35 @@ Page<Contracts> findTenantsByOwnerWithFilters(
                         "AND c.endDate BETWEEN :currentDate AND :futureDate")
         long countExpiringContractsByOwnerId(Integer ownerId, Date currentDate, Date futureDate);
 
-        @Query("SELECT c FROM Contracts c WHERE c.tenant.userCccd.cccdNumber = :cccd")
-        List<Contract> findByTenantCccd(@Param("cccd") String cccd);
+        // ✅ THÊM JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "WHERE (t.userCccd.cccdNumber = :cccd OR ut.cccdNumber = :cccd)")
+        List<Contracts> findByTenantCccd(@Param("cccd") String cccd);
 
         @Query("SELECT c FROM Contracts c WHERE c.tenant = :tenant AND c.status != :status ORDER BY c.startDate DESC")
         List<Contracts> findByTenantOrderByStartDateDesc(@Param("tenant") Users tenant, @Param("status") Status status);
 
         Long countByStatus(Contracts.Status status);
 
-        // ContractsRepository.java
-        @Query("SELECT c FROM Contracts c JOIN FETCH c.room r JOIN FETCH r.hostel h " +
+        @Query("SELECT c FROM Contracts c " +
+                        "JOIN FETCH c.room r " +
+                        "JOIN FETCH r.hostel h " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
                         "WHERE h.owner.userId = :ownerId AND c.returnReason IS NOT NULL " +
                         "ORDER BY c.createdAt DESC")
         Page<Contracts> findReturnRequestsByOwner(@Param("ownerId") Integer ownerId, Pageable pageable);
 
-        @Query("SELECT c FROM Contracts c JOIN FETCH c.room r JOIN FETCH r.hostel h " +
+        @Query("SELECT c FROM Contracts c " +
+                        "JOIN FETCH c.room r " +
+                        "JOIN FETCH r.hostel h " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
                         "WHERE h.owner.userId = :ownerId AND c.returnReason IS NOT NULL " +
-                        "AND (LOWER(c.tenant.fullname) LIKE %:keyword% OR LOWER(r.namerooms) LIKE %:keyword%) " +
+                        "AND (LOWER(t.fullname) LIKE %:keyword% OR LOWER(r.namerooms) LIKE %:keyword%) " +
                         "ORDER BY c.createdAt DESC")
         Page<Contracts> findReturnRequestsByOwnerAndKeyword(@Param("ownerId") Integer ownerId,
                         @Param("keyword") String keyword, Pageable pageable);
@@ -78,12 +95,99 @@ Page<Contracts> findTenantsByOwnerWithFilters(
         // Đếm số hợp đồng theo trạng thái và chủ trọ
         Long countByOwnerUserIdAndStatus(Integer ownerId, Contracts.Status status);
 
-        // Tìm hợp đồng theo số điện thoại người thuê và chủ trọ
-        List<Contracts> findByTenantPhoneAndOwnerUserId(String tenantPhone, Integer ownerId);
+        // ✅ SỬA LẠI VỚI JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE c.tenantPhone LIKE %:phone% AND c.owner.userId = :ownerId")
+        List<Contracts> findByTenantPhoneAndOwnerUserId(@Param("phone") String phone,
+                        @Param("ownerId") Integer ownerId);
+
+        // ✅ SỬA LẠI VỚI JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "WHERE c.tenant.userId IN :userIds AND c.owner.userId = :ownerId")
+        List<Contracts> findByTenantUserIdInAndOwnerUserId(@Param("userIds") List<Integer> userIds,
+                        @Param("ownerId") Integer ownerId);
+
+        // ✅ SỬA LẠI VỚI JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "WHERE c.unregisteredTenant.id IN :unregisteredTenantIds AND c.owner.userId = :ownerId")
+        List<Contracts> findByUnregisteredTenantIdInAndOwnerUserId(
+                        @Param("unregisteredTenantIds") List<Integer> unregisteredTenantIds,
+                        @Param("ownerId") Integer ownerId);
 
         Long countByOwnerUserIdAndEndDateBetweenAndStatus(Integer ownerId, Date startDate, Date endDate,
                         Contracts.Status status);
 
         List<Contracts> findByStatusAndEndDateLessThanEqual(Contracts.Status status, Date endDate);
 
+        // ✅ SỬA LẠI VỚI JOIN FETCH
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE LOWER(r.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%')) AND c.owner.userId = :ownerId")
+        List<Contracts> findByRoomNameAndOwnerUserId(@Param("roomName") String roomName,
+                        @Param("ownerId") Integer ownerId);
+
+        // ✅ PHIÊN BẢN PHÂN TRANG VỚI JOIN FETCH CHO SEARCH BY PHONE
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE c.tenantPhone LIKE %:phone% AND c.owner.userId = :ownerId")
+        Page<Contracts> findByTenantPhoneAndOwnerUserId(@Param("phone") String phone, @Param("ownerId") Integer ownerId,
+                        Pageable pageable);
+
+        // ✅ PHIÊN BẢN PHÂN TRANG VỚI JOIN FETCH CHO SEARCH BY ROOM NAME
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE LOWER(r.namerooms) LIKE :roomName AND c.owner.userId = :ownerId")
+        Page<Contracts> findByRoomNameAndOwnerUserId(@Param("roomName") String roomName,
+                        @Param("ownerId") Integer ownerId, Pageable pageable);
+
+        // ✅ PHIÊN BẢN PHÂN TRANG VỚI JOIN FETCH CHO LIST ALL
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE c.owner.userId = :ownerId")
+        Page<Contracts> findByOwnerUserId(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+        // ✅ THÊM METHOD MỚI CHO SEARCH TỔNG HỢP
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "LEFT JOIN FETCH c.owner o " +
+                        "WHERE c.owner.userId = :ownerId " +
+                        "AND (:phone IS NULL OR c.tenantPhone LIKE %:phone%) " +
+                        "AND (:roomName IS NULL OR LOWER(r.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%')))")
+        Page<Contracts> findByOwnerWithSearchCriteria(
+                        @Param("ownerId") Integer ownerId,
+                        @Param("phone") String phone,
+                        @Param("roomName") String roomName,
+                        Pageable pageable);
+
+        // ✅ METHOD MỚI VỚI JOIN FETCH RÕ RÀNG
+        @Query("SELECT c FROM Contracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH c.tenant t " +
+                        "LEFT JOIN FETCH c.unregisteredTenant ut " +
+                        "WHERE c.owner.userId = :ownerId")
+        Page<Contracts> findByOwnerUserIdWithRoom(@Param("ownerId") Integer ownerId, Pageable pageable);
 }

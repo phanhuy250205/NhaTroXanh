@@ -156,9 +156,5 @@ public class Users {
         PENDING, APPROVED, REJECTED
     }
 
-    // ✅ XÓA method hashCode() tự viết vì đã có @EqualsAndHashCode
-    // @Override
-    // public int hashCode() {
-    // return Objects.hash(userId, fullname, phone, email);
-    // }
+
 }
