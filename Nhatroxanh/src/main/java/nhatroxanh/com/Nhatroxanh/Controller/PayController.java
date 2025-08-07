@@ -325,6 +325,16 @@ public class PayController {
             payment.setPaymentMethod(methodEnum);
 
             if ("cash".equalsIgnoreCase(paymentMethod) && paymentDate != null && paymentTime != null) {
+                // Check if payment already has a cash appointment scheduled
+                if (paymentsRepository.hasCashAppointmentScheduled(paymentIdInt)) {
+                    throw new IllegalStateException("Hóa đơn này đã được hẹn thanh toán tiền mặt trước đó. Mỗi hóa đơn chỉ được hẹn thanh toán tiền mặt một lần duy nhất.");
+                }
+
+                // Check if payment is currently waiting for cash confirmation
+                if (paymentsRepository.isWaitingForCashConfirmation(paymentIdInt)) {
+                    throw new IllegalStateException("Hóa đơn này đang chờ xác nhận thanh toán tiền mặt. Vui lòng chờ chủ trọ xác nhận.");
+                }
+
                 // Set payment status to waiting for cash payment confirmation
                 payment.setPaymentStatus(Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT);
                 // Save scheduled payment date, time, and note
@@ -332,6 +342,11 @@ public class PayController {
                 payment.setScheduledPaymentTime(paymentTime);
                 payment.setPaymentNote(paymentNote);
                 payment.setLandlordNotified(false);
+                
+                // Increment cash appointment count
+                Integer currentCount = payment.getCashAppointmentCount() != null ? payment.getCashAppointmentCount() : 0;
+                payment.setCashAppointmentCount(currentCount + 1);
+                
                 paymentsRepository.save(payment);
 
                 // Send email to landlord with appointment details
