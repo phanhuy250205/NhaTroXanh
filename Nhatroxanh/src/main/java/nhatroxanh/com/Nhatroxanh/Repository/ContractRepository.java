@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 
 import java.sql.Date;
 import java.util.List;
@@ -26,11 +27,10 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c JOIN FETCH c.owner JOIN FETCH c.tenant WHERE c.owner.userId = :ownerId")
         List<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId);
 
-    @Query("SELECT c FROM Contracts c JOIN c.owner o WHERE o.userId = :ownerId")
-    Page<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId, Pageable pageable);
+        @Query("SELECT c FROM Contracts c JOIN c.owner o WHERE o.userId = :ownerId")
+        Page<Contracts> findByOwnerId(@Param("ownerId") Integer ownerId, Pageable pageable);
 
-
-    @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
+        @Query("SELECT c FROM Contracts c WHERE c.room.roomId = :roomId")
         List<Contracts> findByRoomId(@Param("roomId") Integer roomId);
 
         List<Contracts> findByTenantUserId(@Param("userId") Integer userId);
@@ -71,8 +71,6 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         List<Contracts> findByRoomIdAndStatus(@Param("roomId") Integer roomId,
                         @Param("status") Contracts.Status status);
 
-      
-
         @Query("SELECT c FROM Contracts c ORDER BY c.contractDate DESC")
         List<Contracts> findAllOrderByContractDateDesc();
 
@@ -83,13 +81,12 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
                         "ORDER BY c.contractDate DESC")
         List<Contracts> findByOwnerUserIdOrderByContractDateDesc(@Param("ownerId") Integer ownerId);
 
-
         List<Contracts> findByTenantAndStatusIn(Users tenant, List<Contracts.Status> statuses);
-
 
         List<Contracts> findByTenant(Users tenant);
 
-        Page<Contracts> findByTenant(Users tenant, Pageable pageable);
+        @Query("SELECT c FROM Contracts c WHERE c.tenant = :tenant AND c.status <> 'DRAFT'")
+        Page<Contracts> findByTenantAndStatusNotDraft(@Param("tenant") Users tenant, Pageable pageable);
 
         @Query("SELECT c.status, COUNT(c) FROM Contracts c WHERE c.room.hostel.owner.userId = :ownerId GROUP BY c.status")
         List<Object[]> countContractsByStatus(@Param("ownerId") Integer ownerId);
@@ -114,85 +111,108 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
         Optional<Contracts> findByContractId(@Param("contractId") Integer contractId);
 
         // Tìm hợp đồng theo tenant ID
-      
 
+        // Tìm hợp đồng theo tenant ID
+        @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
+        Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
 
+        @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.fullName LIKE %:name%")
+        List<Contracts> findByUnregisteredTenantName(@Param("name") String name);
 
-    // Tìm hợp đồng theo tenant ID
-    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId OR c.unregisteredTenant.id = :tenantId")
-    Optional<Contracts> findByTenantId(@Param("tenantId") Long tenantId);
-    
+        // THÊM: Phương thức tìm hợp đồng theo số điện thoại của người thuê CHƯA đăng ký
+        // (UnregisteredTenants)
+        @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.phone = :phone")
+        List<Contracts> findByUnregisteredTenantPhone(@Param("phone") String phone);
 
-    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.fullName LIKE %:name%")
-    List<Contracts> findByUnregisteredTenantName(@Param("name") String name);
+        // THÊM: Phương thức tìm hợp đồng theo CCCD của người thuê CHƯA đăng ký
+        // (UnregisteredTenants)
+        @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.cccdNumber = :cccd")
+        List<Contracts> findByUnregisteredTenantCccd(@Param("cccd") String cccd);
 
-    // THÊM: Phương thức tìm hợp đồng theo số điện thoại của người thuê CHƯA đăng ký (UnregisteredTenants)
-    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.phone = :phone")
-    List<Contracts> findByUnregisteredTenantPhone(@Param("phone") String phone);
+        // THÊM HOẶC SỬA: Phương thức tìm hợp đồng theo ID của unregistered tenant
+        // Cần đảm bảo rằng `unregisteredTenant.id` là trường ID của UnregisteredTenants
+        // entity
+        // và kiểu dữ liệu của ID (Integer hoặc Long) phải khớp.
+        // Tôi đã thấy bạn có một dòng query `findByUnregisteredTenantId` nhưng lại
+        // truyền Long.
+        // Nếu ID của UnregisteredTenants là Integer, bạn có thể cần chỉnh lại kiểu tham
+        // số.
+        @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.id = :unregisteredTenantId")
+        Optional<Contracts> findByUnregisteredTenantId(@Param("unregisteredTenantId") Integer unregisteredTenantId); // Đã
+                                                                                                                     // chỉnh
+                                                                                                                     // về
+                                                                                                                     // Integer
+                                                                                                                     // để
+                                                                                                                     // nhất
+                                                                                                                     // quán
+                                                                                                                     // với
+                                                                                                                     // JpaRepository<Contracts,
+                                                                                                                     // Integer>
 
-    // THÊM: Phương thức tìm hợp đồng theo CCCD của người thuê CHƯA đăng ký (UnregisteredTenants)
-    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.cccdNumber = :cccd")
-    List<Contracts> findByUnregisteredTenantCccd(@Param("cccd") String cccd);
-
-    // THÊM HOẶC SỬA: Phương thức tìm hợp đồng theo ID của unregistered tenant
-    // Cần đảm bảo rằng `unregisteredTenant.id` là trường ID của UnregisteredTenants entity
-    // và kiểu dữ liệu của ID (Integer hoặc Long) phải khớp.
-    // Tôi đã thấy bạn có một dòng query `findByUnregisteredTenantId` nhưng lại truyền Long.
-    // Nếu ID của UnregisteredTenants là Integer, bạn có thể cần chỉnh lại kiểu tham số.
-    @Query("SELECT c FROM Contracts c WHERE c.unregisteredTenant.id = :unregisteredTenantId")
-    Optional<Contracts> findByUnregisteredTenantId(@Param("unregisteredTenantId") Integer unregisteredTenantId); // Đã chỉnh về Integer để nhất quán với JpaRepository<Contracts, Integer>
-
-    // Nếu bạn có một phương thức findByTenantId chung cho cả 2 loại,
-    // hãy chắc chắn rằng ID của Users và UnregisteredTenants không bao giờ trùng nhau.
-    // Nếu chúng có thể trùng, bạn cần xử lý logic này ở Service thay vì dùng 1 query chung.
-    // Dựa trên code trước, bạn có 2 dòng findByTenantId, tôi sẽ giữ lại 1 và thêm 1 cái mới.
-    @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId")
-    Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId); // Giữ lại cho Registered Tenant (Users)
+        // Nếu bạn có một phương thức findByTenantId chung cho cả 2 loại,
+        // hãy chắc chắn rằng ID của Users và UnregisteredTenants không bao giờ trùng
+        // nhau.
+        // Nếu chúng có thể trùng, bạn cần xử lý logic này ở Service thay vì dùng 1
+        // query chung.
+        // Dựa trên code trước, bạn có 2 dòng findByTenantId, tôi sẽ giữ lại 1 và thêm 1
+        // cái mới.
+        @Query("SELECT c FROM Contracts c WHERE c.tenant.userId = :tenantId")
+        Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId); // Giữ lại cho Registered Tenant
+                                                                                 // (Users)
 
         @Query("""
-                            SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO(
-                                c.tenant.userId,
-                                c.tenant.fullname,
-                                c.tenant.phone,
-                                COUNT(c.contractId)
-                            )
-                            FROM Contracts c
-                            WHERE c.room.hostel.owner.userId = :ownerId
-                                AND (:keyword IS NULL OR LOWER(c.tenant.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                                                      OR c.tenant.phone LIKE CONCAT('%', :keyword, '%'))
-                            GROUP BY c.tenant.userId, c.tenant.fullname, c.tenant.phone
+                                SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO(
+                                    c.tenant.userId,
+                                    c.tenant.fullname,
+                                    c.tenant.phone,
+                                    COUNT(c.contractId)
+                                )
+                                FROM Contracts c
+                                WHERE c.room.hostel.owner.userId = :ownerId
+                                    AND c.status != :excludeStatus
+                                    AND (:keyword IS NULL OR LOWER(c.tenant.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                                                          OR c.tenant.phone LIKE CONCAT('%', :keyword, '%'))
+                                GROUP BY c.tenant.userId, c.tenant.fullname, c.tenant.phone
                         """)
         Page<TenantSummaryDTO> getTenantSummaryByOwnerWithFilters(
                         @Param("ownerId") Integer ownerId,
                         @Param("keyword") String keyword,
+                        @Param("excludeStatus") Status excludeStatus,
                         Pageable pageable);
 
         @Query("""
-                            SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO(
-                                c.contractId,
-                                c.room.hostel.name,
-                                c.room.namerooms,
-                                c.startDate,
-                                c.endDate,
-                                c.status,
-                                c.terms
-                            )
-                            FROM Contracts c
-                            WHERE c.tenant.userId = :tenantId
-                            ORDER BY c.startDate DESC
+                                SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantRoomHistoryDTO(
+                                    c.contractId,
+                                    c.room.hostel.name,
+                                    c.room.namerooms,
+                                    c.startDate,
+                                    c.endDate,
+                                    c.status,
+                                    c.terms
+                                )
+                                FROM Contracts c
+                                WHERE c.tenant.userId = :tenantId
+                                AND c.status != :excludeStatus
+                                ORDER BY c.startDate DESC
                         """)
-        List<TenantRoomHistoryDTO> findRoomHistoryByTenantId(@Param("tenantId") Integer tenantId);
+        List<TenantRoomHistoryDTO> findRoomHistoryByTenantId(
+                        @Param("tenantId") Integer tenantId,
+                        @Param("excludeStatus") Status excludeStatus);
 
         // ContractsRepository.java
         Optional<Contracts> findTopByTenantOrderByContractIdDesc(Users tenant);
 
-    // Các phương thức mới
-    Page<Contracts> findByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
+        // Các phương thức mới
+        Page<Contracts> findByPaymentMethod(Contracts.PaymentMethod paymentMethod, Pageable pageable);
 
-    @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId AND c.status = :status")
-    Page<Contracts> findByOwnerIdAndStatus(@Param("ownerId") Integer ownerId, @Param("status") Contracts.Status status, Pageable pageable);
+        @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId AND c.status = :status")
+        Page<Contracts> findByOwnerIdAndStatus(@Param("ownerId") Integer ownerId,
+                        @Param("status") Contracts.Status status,
+                        Pageable pageable);
 
-    @Query("SELECT c FROM Contracts c WHERE LOWER(c.room.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%'))")
-    Page<Contracts> findByRoomName(@Param("roomName") String roomName, Pageable pageable);
+        @Query("SELECT c FROM Contracts c WHERE LOWER(c.room.namerooms) LIKE LOWER(CONCAT('%', :roomName, '%'))")
+        Page<Contracts> findByRoomName(@Param("roomName") String roomName, Pageable pageable);
+
+        long countByTenantUserIdAndStatus(Integer userId, Contracts.Status status);
 
 }

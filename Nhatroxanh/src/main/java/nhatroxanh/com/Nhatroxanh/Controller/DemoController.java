@@ -180,7 +180,9 @@ public class DemoController {
         model.addAttribute("hostels", ownerHostels);
         model.addAttribute("selectedStatus", statusFilter);
         model.addAttribute("isHistoryPage", true);
-        model.addAttribute("contractStats", stats);
+        model.addAttribute("contractStatuses", Arrays.stream(Contracts.Status.values())
+                .filter(s -> s != Contracts.Status.DRAFT)
+                .toList());
 
         return "host/LS-thue-tra-host";
     }
@@ -245,19 +247,15 @@ public class DemoController {
         return "host/quan-ly-khach-thue";
     }
 
-
-
     // @GetMapping("/chu-tro/chi-tiet-khach-thue")
     // public String chitietkhachthue() {
-    //     return "host/chi-tiet-khach-thue";
+    // return "host/chi-tiet-khach-thue";
     // }
-
 
     @GetMapping("/khach-thue/thanh-toan")
     public String thanhToan() {
         return "guest/thanh-toan";
     }
-
 
     @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
     public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {

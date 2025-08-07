@@ -1009,7 +1009,7 @@ window.NhaTroContract = {
         } catch (error) {
             console.error("Error in onRoomSelected:", error);
             this.showNotification("Lỗi khi tải dữ liệu phòng: " + error.message, "error");
-            this.clearRoomFields();
+            // this.clearRoomFields();
         }
     },
 
@@ -3816,14 +3816,14 @@ function updateContractPreview() {
     $('#preview-deposit-months').text(contractData.depositMonths || '........................');
 
     // Cập nhật danh sách người ở
-    const residents = $('#residents-list').children().not('#no-residents-message').map(function() {
+    const residents = $('#residents-list').children().not('#no-residents-message').map(function () {
         return $(this).find('.resident-name').text();
     }).get().join(', ') || '........................';
     $('#preview-residents').text(residents);
     $('#preview-residents-section').css('display', residents !== '........................' ? 'block' : 'none');
 
     // Cập nhật tiện ích
-    const amenities = $('.nha-tro-amenities input:checked').map(function() {
+    const amenities = $('.nha-tro-amenities input:checked').map(function () {
         return $(this).siblings('label').text();
     }).get().join(', ') || '........................';
     $('#preview-amenities').text(amenities);
@@ -3841,14 +3841,14 @@ function updateContractPreview() {
 // Hàm debounce để tối ưu hiệu suất
 function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
 }
 
 // Thêm sự kiện input để cập nhật preview
-$(document).ready(function() {
+$(document).ready(function () {
     const inputs = [
         '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
         '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',
@@ -3871,14 +3871,14 @@ $(document).ready(function() {
 // Hàm debounce để tối ưu hiệu suất
 function debounce(func, wait) {
     let timeout;
-    return function(...args) {
+    return function (...args) {
         clearTimeout(timeout);
         timeout = setTimeout(() => func.apply(this, args), wait);
     };
 }
 
 // Thêm sự kiện input để cập nhật preview
-$(document).ready(function() {
+$(document).ready(function () {
     const inputs = [
         '#tenant-name', '#tenant-phone', '#tenant-email', '#tenant-id', '#tenant-dob', '#tenant-id-date', '#tenant-id-place', '#tenant-street', '#tenant-ward', '#tenant-district', '#tenant-province',
         '#owner-name', '#owner-phone', '#owner-email', '#owner-id', '#owner-dob', '#owner-id-date', '#owner-id-place', '#owner-street', '#owner-ward', '#owner-district', '#owner-province',

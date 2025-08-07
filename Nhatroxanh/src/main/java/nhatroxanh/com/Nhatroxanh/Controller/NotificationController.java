@@ -9,6 +9,9 @@ import nhatroxanh.com.Nhatroxanh.Repository.NotificationRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomOAuth2UserDetails;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -51,16 +54,26 @@ public class NotificationController {
 
     @GetMapping
     @ResponseBody
-    public ResponseEntity<Map<String, Object>> getNotifications(Authentication authentication) {
+    public ResponseEntity<Map<String, Object>> getNotifications(
+            Authentication authentication,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size,
+            @RequestParam(required = false) String type) {
         try {
             Users user = getUserFromAuthentication(authentication);
             if (user == null) {
                 log.info("Unauthenticated access to /api/notifications, returning empty response");
-                return ResponseEntity.ok(Map.of("notifications", Collections.emptyList(), "unreadCount", 0));
+                return ResponseEntity.ok(Map.of(
+                    "notifications", Collections.emptyList(),
+                    "unreadCount", 0,
+                    "currentPage", 0,
+                    "totalPages", 0,
+                    "totalItems", 0
+                ));
             }
 
             Integer userId = user.getUserId();
-            log.info("Fetching notifications for user ID: {}", userId);
+            log.info("Fetching notifications for user ID: {}, page: {}, size: {}, type: {}", userId, page, size, type);
 
             try {
                 int cleanedUp = notificationService.cleanupObsoletePaymentNotifications(userId);
@@ -71,19 +84,102 @@ public class NotificationController {
                 log.warn("Failed to cleanup obsolete notifications for user {}: {}", userId, e.getMessage());
             }
 
-            List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
-            List<Map<String, Object>> enrichedNotifications = notifications.stream()
+            // Use database-level pagination
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Notification> notificationPage;
+            
+            if (type != null && !type.isEmpty()) {
+                try {
+                    Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type.toUpperCase());
+                    notificationPage = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(userId, notificationType, pageable);
+                } catch (IllegalArgumentException e) {
+                    log.warn("Invalid notification type: {}", type);
+                    notificationPage = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId, pageable);
+                }
+            } else {
+                notificationPage = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId, pageable);
+            }
+            
+            List<Map<String, Object>> enrichedNotifications = notificationPage.getContent().stream()
                     .filter(Objects::nonNull)
                     .map(this::enrichNotification)
                     .collect(Collectors.toList());
 
             long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
-            log.info("Found {} notifications ({} unread) for user ID: {}", notifications.size(), unreadCount, userId);
+            
+            log.info("Found {} total notifications, returning {} items for page {} ({} unread) for user ID: {}", 
+                    notificationPage.getTotalElements(), enrichedNotifications.size(), page, unreadCount, userId);
 
-            return ResponseEntity.ok(Map.of("notifications", enrichedNotifications, "unreadCount", unreadCount));
+            return ResponseEntity.ok(Map.of(
+                    "notifications", enrichedNotifications,
+                    "unreadCount", unreadCount,
+                    "currentPage", notificationPage.getNumber(),
+                    "totalPages", notificationPage.getTotalPages(),
+                    "totalItems", notificationPage.getTotalElements(),
+                    "hasNext", notificationPage.hasNext(),
+                    "hasPrevious", notificationPage.hasPrevious()
+            ));
         } catch (Exception e) {
             log.error("Error fetching notifications: ", e);
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to fetch notifications: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/by-type")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getNotificationsByType(
+            Authentication authentication,
+            @RequestParam String type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
+        try {
+            Users user = getUserFromAuthentication(authentication);
+            if (user == null) {
+                log.info("Unauthenticated access to /api/notifications/by-type, returning empty response");
+                return ResponseEntity.ok(Map.of(
+                    "notifications", Collections.emptyList(),
+                    "unreadCount", 0,
+                    "currentPage", 0,
+                    "totalPages", 0,
+                    "totalItems", 0
+                ));
+            }
+
+            Integer userId = user.getUserId();
+            log.info("Fetching notifications by type for user ID: {}, type: {}, page: {}, size: {}", userId, type, page, size);
+
+            try {
+                Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type.toUpperCase());
+                Pageable pageable = PageRequest.of(page, size);
+                Page<Notification> notificationPage = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(userId, notificationType, pageable);
+                
+                List<Map<String, Object>> enrichedNotifications = notificationPage.getContent().stream()
+                        .filter(Objects::nonNull)
+                        .map(this::enrichNotification)
+                        .collect(Collectors.toList());
+
+                long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
+                
+                log.info("Found {} notifications of type {} for user ID: {}, returning {} items for page {}", 
+                        notificationPage.getTotalElements(), type, userId, enrichedNotifications.size(), page);
+
+                return ResponseEntity.ok(Map.of(
+                        "notifications", enrichedNotifications,
+                        "unreadCount", unreadCount,
+                        "currentPage", notificationPage.getNumber(),
+                        "totalPages", notificationPage.getTotalPages(),
+                        "totalItems", notificationPage.getTotalElements(),
+                        "hasNext", notificationPage.hasNext(),
+                        "hasPrevious", notificationPage.hasPrevious(),
+                        "type", type
+                ));
+            } catch (IllegalArgumentException e) {
+                log.warn("Invalid notification type: {}", type);
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid notification type: " + type));
+            }
+        } catch (Exception e) {
+            log.error("Error fetching notifications by type: ", e);
+            return ResponseEntity.badRequest().body(Map.of("error", "Failed to fetch notifications by type: " + e.getMessage()));
         }
     }
 

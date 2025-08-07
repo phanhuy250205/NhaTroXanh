@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
-
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 import java.util.Optional;
 import java.sql.Date;
 
@@ -19,18 +19,18 @@ import java.util.List;
 @Repository
 
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
-        @Query("SELECT c FROM Contracts c " +
-                        "WHERE c.owner.userId = :ownerId " +
-                        "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) "
-                        +
-                        "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
-                        "AND (:status IS NULL OR c.status = :status)")
-        Page<Contracts> findTenantsByOwnerWithFilters(
-                        @Param("ownerId") Integer ownerId,
-                        @Param("keyword") String keyword,
-                        @Param("hostelId") Integer hostelId,
-                        @Param("status") Contracts.Status status,
-                        Pageable pageable);
+   @Query("SELECT c FROM Contracts c " +
+       "WHERE c.owner.userId = :ownerId " +
+       "AND c.status <> 'DRAFT' " +
+       "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) " +
+       "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
+       "AND (:status IS NULL OR c.status = :status)")
+Page<Contracts> findTenantsByOwnerWithFilters(
+        @Param("ownerId") Integer ownerId,
+        @Param("keyword") String keyword,
+        @Param("hostelId") Integer hostelId,
+        @Param("status") Contracts.Status status,
+        Pageable pageable);
 
 
         @Query("SELECT c FROM Contracts c WHERE c.owner.userId = :ownerId")
@@ -57,7 +57,8 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         @Query("SELECT c FROM Contracts c WHERE c.tenant.userCccd.cccdNumber = :cccd")
         List<Contract> findByTenantCccd(@Param("cccd") String cccd);
 
-        List<Contracts> findByTenantOrderByStartDateDesc(Users tenant);
+        @Query("SELECT c FROM Contracts c WHERE c.tenant = :tenant AND c.status != :status ORDER BY c.startDate DESC")
+        List<Contracts> findByTenantOrderByStartDateDesc(@Param("tenant") Users tenant, @Param("status") Status status);
 
         Long countByStatus(Contracts.Status status);
 
@@ -74,6 +75,15 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Page<Contracts> findReturnRequestsByOwnerAndKeyword(@Param("ownerId") Integer ownerId,
                         @Param("keyword") String keyword, Pageable pageable);
 
-                        
+        // Đếm số hợp đồng theo trạng thái và chủ trọ
+        Long countByOwnerUserIdAndStatus(Integer ownerId, Contracts.Status status);
+
+        // Tìm hợp đồng theo số điện thoại người thuê và chủ trọ
+        List<Contracts> findByTenantPhoneAndOwnerUserId(String tenantPhone, Integer ownerId);
+
+        Long countByOwnerUserIdAndEndDateBetweenAndStatus(Integer ownerId, Date startDate, Date endDate,
+                        Contracts.Status status);
+
+        List<Contracts> findByStatusAndEndDateLessThanEqual(Contracts.Status status, Date endDate);
 
 }
