@@ -7,6 +7,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +35,7 @@ public class CustomerController {
     @Autowired
     private ContractsRepository contractRepository;
 
-     @Autowired
+    @Autowired
     private EncryptionService encryptionService;
 
     @GetMapping("/khach-thue")
@@ -58,7 +59,7 @@ public class CustomerController {
         }
         Users customer = userOpt.get();
         UserCccd cccd = customer.getUserCccd();
-         if (cccd != null && cccd.getCccdNumber() != null) {
+        if (cccd != null && cccd.getCccdNumber() != null) {
             try {
                 String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
                 cccd.setCccdNumber(decryptedCccd); // Tạm thời gán giá trị giải mã để hiển thị
@@ -67,7 +68,8 @@ public class CustomerController {
             }
         }
         customer.setUserCccd(cccd);
-        List<Contracts> contracts = contractRepository.findByTenantOrderByStartDateDesc(customer);
+        // Sử dụng Contracts.Status.DRAFT thay vì chuỗi "DRAFT"
+        List<Contracts> contracts = contractRepository.findByTenantOrderByStartDateDesc(customer,Status.DRAFT);
 
         model.addAttribute("customer", customer);
         model.addAttribute("contracts", contracts);

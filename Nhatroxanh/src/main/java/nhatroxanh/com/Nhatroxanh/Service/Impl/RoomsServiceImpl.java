@@ -5,6 +5,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.entity.District;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Province;
+import nhatroxanh.com.Nhatroxanh.Model.entity.RoomStatus;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Utility;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
@@ -84,12 +85,43 @@ public class RoomsServiceImpl implements RoomsService {
     // }
 
     @Override
+    @Transactional
     public Rooms save(Rooms room) {
         logger.info("Saving room: {}", room.getNamerooms());
         if (room == null) {
             logger.error("Room is null");
             throw new IllegalArgumentException("Phòng không được null!");
         }
+
+        // Nếu phòng là mới (roomId == null), đặt trạng thái mặc định là unactive
+        if (room.getRoomId() == null && room.getStatus() == null) {
+            logger.info("New room, setting default status to unactive");
+            room.setStatus(RoomStatus.unactive);
+        }
+
+        // Nếu là cập nhật, kiểm tra chuyển trạng thái
+        if (room.getRoomId() != null) {
+            Optional<Rooms> existingRoomOpt = roomsRepository.findById(room.getRoomId());
+            if (existingRoomOpt.isPresent()) {
+                Rooms existingRoom = existingRoomOpt.get();
+                // Ngăn chuyển từ active sang trạng thái khác
+                if (existingRoom.getStatus() == RoomStatus.active && room.getStatus() != RoomStatus.active) {
+                    logger.warn("Invalid status transition: from active to {} for roomId: {}",
+                            room.getStatus(), room.getRoomId());
+                    throw new IllegalArgumentException(
+                            "Không thể thay đổi trạng thái phòng từ 'Đã thuê' sang trạng thái khác.");
+                }
+                // Ngăn chuyển từ unactive sang active
+                if (existingRoom.getStatus() == RoomStatus.unactive &&
+                        room.getStatus() != RoomStatus.unactive && room.getStatus() != RoomStatus.repair) {
+                    logger.warn("Invalid status transition: from unactive to {} for roomId: {}",
+                            room.getStatus(), room.getRoomId());
+                    throw new IllegalArgumentException(
+                            "Phòng ở trạng thái 'Trống' chỉ có thể chuyển sang 'Bảo trì'.");
+                }
+            }
+        }
+
         return roomsRepository.save(room);
     }
 

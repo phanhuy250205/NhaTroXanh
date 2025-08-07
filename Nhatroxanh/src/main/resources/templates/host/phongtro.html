@@ -179,7 +179,6 @@
         }
     }
 
-    /* CSS để ẩn file input mặc định */
     #imageUpload {
         display: none !important;
         opacity: 0;
@@ -190,12 +189,10 @@
         visibility: hidden;
     }
 
-    /* Tùy chọn: Nếu muốn ẩn hoàn toàn input file */
     input[type="file"] {
         display: none !important;
     }
 
-    /* Đảm bảo upload area có thể click được */
     .upload-area {
         border: 2px dashed #3E83CC;
         padding: 20px;
@@ -234,7 +231,6 @@
         user-select: none;
     }
 
-    /* Responsive cho mobile */
     @media (max-width: 576px) {
         .upload-area {
             padding: 15px;
@@ -444,9 +440,7 @@
                                         Trạng thái <span class="required-star">*</span>
                                     </label>
                                     <select class="form-select-modern" id="roomStatusHost" name="status">
-                                        <option value="unactive">Trống</option>
-                                        <option value="active">Đã thuê</option>
-                                        <option value="repair">Bảo trì</option>
+                                        <option value="unactive" selected>Trống</option>
                                     </select>
                                 </div>
                             </div>
@@ -573,7 +567,6 @@
                                     <div class="stat-label-modern">Tổng phòng</div>
                                     <div class="stat-number-modern" id="totalRoomsCount" th:text="${totalRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
-                                    <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
                             <div class="stat-card-modern stat-available-modern">
@@ -590,7 +583,6 @@
                                     <div class="stat-number-modern" id="availableRoomsCount"
                                         th:text="${availableRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
-                                    <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
                             <div class="stat-card-modern stat-occupied-modern">
@@ -612,7 +604,6 @@
                                     <div class="stat-number-modern" id="occupiedRoomsCount" th:text="${occupiedRooms}">0
                                     </div>
                                     <div class="stat-sublabel-modern">phòng</div>
-                                    <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
                             <div class="stat-card-modern stat-maintenance-modern">
@@ -638,7 +629,6 @@
                                     <div class="stat-number-modern" id="maintenanceRoomsCount"
                                         th:text="${maintenanceRooms}">0</div>
                                     <div class="stat-sublabel-modern">phòng</div>
-                                    <div class="stat-action-modern">Xem danh sách</div>
                                 </div>
                             </div>
                         </div>
@@ -666,48 +656,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="quick-actions-modern">
-                            <div class="action-card-modern">
-                                <h4 class="action-title-modern">Thay đổi trạng thái nhanh</h4>
-                                <div class="action-form-modern">
-                                    <div class="form-group-inline-modern">
-                                        <label for="quickHostelSelect" class="form-label-modern">Chọn khu trọ:</label>
-                                        <select class="form-select-modern" id="quickHostelSelect">
-                                            <option value="">Chọn khu trọ...</option>
-                                            <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
-                                                th:text="${hostel.name}"></option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group-inline-modern">
-                                        <label for="quickRoomSelect" class="form-label-modern">Chọn phòng:</label>
-                                        <select class="form-select-modern" id="quickRoomSelect">
-                                            <option value="">Chọn phòng...</option>
-                                            <option th:each="room : ${rooms}" th:value="${room.roomId}"
-                                                th:text="${room.namerooms}"></option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group-inline-modern">
-                                        <label for="quickStatusSelect" class="form-label-modern">Trạng thái mới:</label>
-                                        <select class="form-select-modern" id="quickStatusSelect">
-                                            <option value="">Chọn trạng thái...</option>
-                                            <option value="unactive">Trống</option>
-                                            <option value="active">Đã thuê</option>
-                                            <option value="repair">Bảo trì</option>
-                                        </select>
-                                    </div>
-                                    <button type="button" class="btn-update-status-modern" id="updateStatusBtn">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                                            xmlns="http://www.w3.org/2000/svg">
-                                            <path
-                                                d="M1 4V10H7M23 20V14H17M20.49 9C19.9828 7.56678 19.1209 6.28392 17.9845 5.27304C16.8482 4.26216 15.4745 3.55682 13.9917 3.21834C12.5089 2.87986 10.9652 2.91902 9.50481 3.33329C8.04437 3.74757 6.71475 4.52306 5.64 5.58L1 10M23 14L18.36 18.42C17.2853 19.477 15.9556 20.2524 14.4952 20.6667C13.0348 21.081 11.4911 21.1201 10.0083 20.7817C8.52547 20.4432 7.1518 19.7378 6.01547 18.727C4.87913 17.7161 4.01717 16.4332 3.51 15"
-                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                                stroke-linejoin="round" />
-                                        </svg>
-                                        Cập nhật
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -726,6 +674,18 @@
         function switchToTab(tabId) {
             const tab = new bootstrap.Tab(document.getElementById(tabId));
             tab.show();
+            if (tabId === "add-room-tab-host") {
+                const statusSelect = document.getElementById("roomStatusHost");
+                const roomId = document.getElementById("roomIdHost").value;
+                if (!roomId) {
+                    statusSelect.innerHTML = `
+                        <option value="unactive" selected>Trống</option>
+                    `;
+                    document.getElementById("submitBtnText").textContent = "Thêm phòng";
+                    document.getElementById("addRoomTabText").textContent = "Thêm phòng mới";
+                    document.getElementById("addRoomFormHost").action = "/chu-tro/them-phong";
+                }
+            }
         }
 
         function resetForm() {
@@ -737,10 +697,13 @@
             document.getElementById("roomIdHost").value = "";
             document.getElementById("imagePreviewContainer").innerHTML = "";
             document.getElementById("imageUpload").value = "";
+            const statusSelect = document.getElementById("roomStatusHost");
+            statusSelect.innerHTML = `
+                <option value="unactive" selected>Trống</option>
+            `;
             existingImages = [];
             selectedFiles.clear();
             previewURLs.clear();
-            // showNotification("Đã đặt lại form", "info");
         }
 
         function createImagePreview(src, isExisting = false, file = null) {
@@ -782,7 +745,6 @@
             document.getElementById("imageUpload").files = dataTransfer.files;
         }
 
-        // Hàm thêm ảnh mới mà KHÔNG xóa ảnh cũ
         function addNewImages(files) {
             const newFiles = Array.from(files);
             let addedCount = 0;
@@ -810,7 +772,6 @@
             let isValid = true;
             document.querySelectorAll(".input-error-message").forEach(el => el.remove());
 
-            // Helper để hiển thị lỗi dưới input
             function showError(inputId, message) {
                 const input = document.getElementById(inputId);
                 const errorDiv = document.createElement("div");
@@ -822,14 +783,12 @@
                 input.parentNode.appendChild(errorDiv);
             }
 
-            // Kiểm tra tên phòng
             const roomName = document.getElementById("roomNameHost").value.trim();
             if (!roomName) {
                 isValid = false;
                 showError("roomNameHost", "Vui lòng nhập tên phòng.");
             }
 
-            // Kiểm tra giá thuê
             const priceInput = document.getElementById("roomPriceHost");
             let price = priceInput.value.trim();
             if (!price) {
@@ -840,7 +799,6 @@
                 showError("roomPriceHost", "Giá thuê phải là số.");
             }
 
-            // Kiểm tra diện tích
             const acreageInput = document.getElementById("roomAreaHost");
             let acreage = acreageInput.value.trim();
             if (!acreage) {
@@ -851,7 +809,6 @@
                 showError("roomAreaHost", "Diện tích phải là số lớn hơn 0.");
             }
 
-            // Kiểm tra số người tối đa
             const maxTenantsInput = document.getElementById("roomCapacityHost");
             let maxTenants = maxTenantsInput.value.trim();
             if (!maxTenants) {
@@ -862,35 +819,29 @@
                 showError("roomCapacityHost", "Số người tối đa phải là số lớn hơn 0.");
             }
 
-            // Kiểm tra khu trọ
             const hostelId = document.getElementById("roomAreaSelectHost").value;
             if (!hostelId) {
                 isValid = false;
                 showError("roomAreaSelectHost", "Vui lòng chọn khu trọ.");
             }
 
-            // Kiểm tra trạng thái
             const status = document.getElementById("roomStatusHost").value;
             if (!status) {
                 isValid = false;
                 showError("roomStatusHost", "Vui lòng chọn trạng thái phòng.");
             }
 
-            // Nếu có lỗi thì không submit và scroll tới lỗi đầu tiên
             if (!isValid) {
                 e.preventDefault();
                 const firstError = document.querySelector(".input-error-message");
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: "smooth", block: "center" });
                 }
-                // showNotification("Vui lòng kiểm tra lại thông tin!", "error");
                 return;
             }
 
-            // Nếu không có lỗi, chuẩn hóa giá trị số tiền trước khi submit
             priceInput.value = price.replace(/[^\d]/g, '');
 
-            // Gửi form bằng fetch để xử lý ảnh, sau đó chuyển hướng (server sẽ trả về thông báo qua redirectAttributes)
             e.preventDefault();
             const formData = new FormData(this);
             selectedFiles.forEach(file => {
@@ -938,24 +889,36 @@
                         document.getElementById("roomNameHost").value = data.namerooms;
                         document.getElementById("roomPriceHost").value = data.price.toLocaleString("vi-VN");
                         document.getElementById("roomAreaHost").value = data.acreage;
-                        document.getElementById("roomStatusHost").value = data.status;
                         document.getElementById("roomCapacityHost").value = data.maxTenants;
                         document.getElementById("roomAreaSelectHost").value = data.hostelId;
                         document.getElementById("roomDescriptionHost").value = data.description || "";
 
+                        const statusSelect = document.getElementById("roomStatusHost");
+                        statusSelect.innerHTML = "";
+                        if (data.status === "active") {
+                            statusSelect.innerHTML = `
+                                <option value="active" selected>Đã thuê</option>
+                            `;
+                        } else if (data.status === "unactive") {
+                            statusSelect.innerHTML = `
+                                <option value="unactive" selected>Trống</option>
+                                <option value="repair">Bảo trì</option>
+                            `;
+                        } else {
+                            statusSelect.innerHTML = `
+                                <option value="unactive">Trống</option>
+                                <option value="repair" selected>Bảo trì</option>
+                            `;
+                        }
                         document.querySelectorAll("input[name='amenities']").forEach(checkbox => {
                             checkbox.checked = data.amenities.includes(checkbox.value);
                         });
 
-                        // CHỈ XÓA ẢNH MỚI, GIỮ LẠI ẢNH CŨ
                         const previewContainer = document.getElementById("imagePreviewContainer");
                         previewContainer.innerHTML = "";
-
-                        // Reset chỉ ảnh mới được chọn, giữ lại ảnh cũ từ server
                         selectedFiles.clear();
                         previewURLs.clear();
 
-                        // Thiết lập lại ảnh cũ từ server
                         existingImages = data.images || [];
                         existingImages.forEach(image => {
                             createImagePreview(image, true);
@@ -972,17 +935,14 @@
             }
         });
 
-        // SỬA ĐỔI CHÍNH: Event listener cho việc chọn ảnh mới
         document.getElementById("imageUpload").addEventListener("change", function (e) {
             const files = e.target.files;
             if (files && files.length > 0) {
                 addNewImages(files);
             }
-            // Reset input để có thể chọn lại cùng file nếu cần
             e.target.value = "";
         });
 
-        // SỬA ĐỔI CHÍNH: Drag and Drop handlers
         const uploadArea = document.getElementById("uploadArea");
 
         uploadArea.addEventListener("dragover", (e) => {
@@ -997,22 +957,17 @@
         uploadArea.addEventListener("drop", (e) => {
             e.preventDefault();
             uploadArea.classList.remove("dragover");
-
             const files = e.dataTransfer.files;
             if (files && files.length > 0) {
-                // Sử dụng hàm addNewImages thay vì xóa tất cả ảnh
                 addNewImages(files);
             }
         });
 
-        // ...existing code...
         uploadArea.addEventListener("click", function (e) {
-            // Chỉ trigger khi click trực tiếp vào uploadArea
             if (e.target === uploadArea) {
                 document.getElementById("imageUpload").click();
             }
         });
-        // ...existing code...
 
         function initializeToasts() {
             const toasts = document.querySelectorAll('.toast-host');
@@ -1060,7 +1015,6 @@
                 });
             });
         });
-
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>

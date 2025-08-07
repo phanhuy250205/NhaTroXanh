@@ -1268,8 +1268,8 @@
                     <div th:each="contract : ${activeContracts}" class="room-card-guest">
                         <div class="room-card-header-guest">
                             <h5 class="room-title-guest"
-                                th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">
-                                Phòng 101 - Căn hộ
+                                th:text="${contract.room.namerooms}">
+                                Phòng 101
                             </h5>
                             <span class="status-badge-guest" th:classappend="
     ${contract.status.name() == 'DRAFT'} ? ' status-draft-guest' :
@@ -1396,7 +1396,7 @@
                         <tr th:each="contract, iter : ${contractHistory}">
                             <td th:text="${iter.index + 1 + currentPage * size}">1</td>
                             <td>
-                                <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205
+                                <div th:text="${contract.room.namerooms} ">B205
                                     - Standard</div>
                                 <div th:text="${contract.room.description}">2 giường đơn</div>
                             </td>
@@ -1468,7 +1468,7 @@
                     </div>
                     <div class="rental-card-body">
                         <div class="rental-card-room">
-                            <div th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">B205 -
+                            <div th:text="${contract.room.namerooms}">B205 -
                                 Standard</div>
                             <div th:text="${contract.room.description}">2 giường đơn</div>
                         </div>

@@ -85,7 +85,7 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private ExtensionRequestRepository extensionRequestRepository;
 
-         @Autowired
+    @Autowired
     private EncryptionService encryptionService;
 
     @Override
@@ -212,7 +212,7 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Page<Contracts> getContractHistory(Pageable pageable) {
         Users tenant = getCurrentUser();
-        return contractRepository.findByTenant(tenant, pageable);
+        return contractRepository.findByTenantAndStatusNotDraft(tenant, pageable);
     }
 
     public Contracts getContractById(Integer contractId) {
@@ -227,40 +227,41 @@ public class TenantServiceImpl implements TenantService {
     @Override
     public Map<String, Object> getQuickStats(Pageable pageable) {
         Users tenant = getCurrentUser();
+        Integer userId = tenant.getUserId();
         List<Contracts> activeContracts = getActiveContracts();
         Page<Contracts> pagedContracts = getContractHistory(pageable); // phân trang
         List<Contracts> allContracts = pagedContracts.getContent(); // chỉ lấy contracts ở page hiện tại
+        long totalTerminated = contractRepository.countByTenantUserIdAndStatus(userId, Contracts.Status.TERMINATED);
 
         LocalDate now = LocalDate.now();
         int currentMonth = now.getMonthValue();
         int currentYear = now.getYear();
+        LocalDate monthStart = LocalDate.of(currentYear, currentMonth, 1);
+        LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
+        long totalDaysInMonth = monthStart.lengthOfMonth();
 
-        double totalCostThisMonth = allContracts.stream()
+        double totalCostThisMonth = activeContracts.stream()
                 .filter(c -> c.getStartDate() != null && c.getEndDate() != null)
                 .filter(c -> {
                     LocalDate start = c.getStartDate().toLocalDate();
                     LocalDate end = c.getEndDate().toLocalDate();
-                    return (start.getYear() <= currentYear && end.getYear() >= currentYear)
-                            && (start.getMonthValue() <= currentMonth && end.getMonthValue() >= currentMonth);
+                    return !(end.isBefore(monthStart) || start.isAfter(monthEnd));
                 })
                 .mapToDouble(c -> {
                     LocalDate start = c.getStartDate().toLocalDate();
                     LocalDate end = c.getEndDate().toLocalDate();
-                    LocalDate monthStart = LocalDate.of(currentYear, currentMonth, 1);
-                    LocalDate monthEnd = monthStart.withDayOfMonth(monthStart.lengthOfMonth());
 
                     LocalDate effectiveStart = start.isBefore(monthStart) ? monthStart : start;
                     LocalDate effectiveEnd = end.isAfter(monthEnd) ? monthEnd : end;
 
                     long daysInMonth = ChronoUnit.DAYS.between(effectiveStart, effectiveEnd.plusDays(1));
-                    long totalDaysInMonth = monthStart.lengthOfMonth();
                     return c.getPrice() * ((double) daysInMonth / totalDaysInMonth);
                 })
                 .sum();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("activeRooms", activeContracts.size());
-        stats.put("totalRentals", pagedContracts.getTotalElements() - activeContracts.size());
+        stats.put("totalRentals", totalTerminated);
         stats.put("totalCostThisMonth", Math.round(totalCostThisMonth));
 
         return stats;
@@ -498,12 +499,17 @@ public class TenantServiceImpl implements TenantService {
     @Override
     @Transactional(readOnly = true)
     public Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable) {
-        return contractRepository.getTenantSummaryByOwnerWithFilters(ownerId, keyword, pageable);
+        return contractRepository.getTenantSummaryByOwnerWithFilters(
+                ownerId,
+                keyword,
+                Contracts.Status.DRAFT, // Truyền Status.DRAFT
+                pageable);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<TenantRoomHistoryDTO> getTenantRentalHistory(Integer tenantId) {
-        return contractRepository.findRoomHistoryByTenantId(tenantId);
+        return contractRepository.findRoomHistoryByTenantId(tenantId, Contracts.Status.DRAFT);
     }
 
     @Override

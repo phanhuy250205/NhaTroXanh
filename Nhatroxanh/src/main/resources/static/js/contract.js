@@ -4139,7 +4139,14 @@ function updateContractPreview() {
     console.log('🔍 Preview Room Address:', contractData.roomAddress);
 }
 
-
+// Hàm debounce để tối ưu hiệu suất
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+}
 
 // Thêm sự kiện input để cập nhật preview
 $(document).ready(function () {
