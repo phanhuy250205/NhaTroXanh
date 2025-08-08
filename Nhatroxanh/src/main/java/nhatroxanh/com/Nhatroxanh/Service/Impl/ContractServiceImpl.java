@@ -24,19 +24,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import java.text.Normalizer;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -210,6 +204,58 @@ public class ContractServiceImpl implements ContractService {
         logger.info("Contract created successfully: {}", savedContract.getContractId());
         logger.info("=== END CREATE CONTRACT (Detailed Parameters) ===");
         return savedContract;
+    }
+
+    @Override
+    public Page<Contracts> searchContracts(String searchTerm, Pageable pageable) {
+        logger.info("=== START SEARCH CONTRACTS ===");
+        logger.info("Searching contracts with searchTerm: {}, page: {}, size: {}",
+                searchTerm, pageable.getPageNumber(), pageable.getPageSize());
+
+        try {
+            List<Contracts> filteredContracts;
+
+            // Nếu searchTerm rỗng, lấy tất cả hợp đồng với phân trang
+            if (searchTerm == null || searchTerm.trim().isEmpty()) {
+                logger.info("Search term is empty, retrieving all contracts with pagination");
+                return contractRepository.findAll(pageable);
+            }
+
+            // Chuẩn hóa searchTerm
+            String normalizedSearchTerm = searchTerm.toLowerCase().trim();
+            logger.info("Normalized search term: {}", normalizedSearchTerm);
+
+            // Tìm kiếm theo số điện thoại và tên
+            List<Contracts> byPhone = contractRepository.findByTenantPhone(normalizedSearchTerm);
+            List<Contracts> byName = contractRepository.findByTenantName(normalizedSearchTerm);
+
+            // Kết hợp và loại bỏ trùng lặp
+            filteredContracts = new ArrayList<>();
+            filteredContracts.addAll(byPhone);
+            filteredContracts.addAll(byName);
+            filteredContracts = filteredContracts.stream()
+                    .distinct()
+                    .collect(Collectors.toList());
+
+            logger.info("Found {} contracts matching search term", filteredContracts.size());
+
+            // Áp dụng phân trang
+            int start = (int) pageable.getOffset();
+            int end = Math.min(start + pageable.getPageSize(), filteredContracts.size());
+            List<Contracts> pagedContracts = start < filteredContracts.size()
+                    ? filteredContracts.subList(start, end)
+                    : Collections.emptyList();
+
+            Page<Contracts> result = new PageImpl<>(pagedContracts, pageable, filteredContracts.size());
+            logger.info("Returning {} contracts for page {} with total elements: {}",
+                    pagedContracts.size(), pageable.getPageNumber(), filteredContracts.size());
+            logger.info("=== END SEARCH CONTRACTS ===");
+            return result;
+
+        } catch (Exception e) {
+            logger.error("Error searching contracts: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi tìm kiếm hợp đồng: " + e.getMessage());
+        }
     }
 
     @Override

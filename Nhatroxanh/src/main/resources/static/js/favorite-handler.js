@@ -12,7 +12,7 @@ class FavoriteHandler {
     bindEvents() {
         // Bind click events to favorite buttons
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.btn-favorite') || e.target.closest('.btn-favorite-large' )) {
+            if (e.target.closest('.btn-favorite') || e.target.closest('.btn-favorite-large')) {
                 e.preventDefault();
                 e.stopPropagation();
                 this.handleFavoriteClick(e.target.closest('.btn-favorite, .btn-favorite-large'));
@@ -29,7 +29,7 @@ class FavoriteHandler {
         try {
             // Get post ID from button or parent element
             const postId = this.getPostIdFromButton(button);
-            
+
             if (!postId) {
                 this.showNotification('Không tìm thấy ID bài đăng', 'error');
                 return;
@@ -53,7 +53,7 @@ class FavoriteHandler {
                 // Update button state
                 this.updateButtonState(button, data.isFavorited);
                 this.showNotification(data.message, 'success');
-                
+
                 // Update favorite count if element exists
                 this.updateFavoriteCount(postId, data.favoriteCount);
             } else if (data.requireLogin) {
@@ -74,7 +74,7 @@ class FavoriteHandler {
     getPostIdFromButton(button) {
         // Try to get post ID from various sources
         let postId = button.getAttribute('data-post-id');
-        
+
         if (!postId) {
             // Try to get from parent card
             const card = button.closest('.post-card, .property-card, .card');
@@ -131,7 +131,7 @@ class FavoriteHandler {
         try {
             // Get all post IDs on current page
             const postIds = this.getAllPostIds();
-            
+
             if (postIds.length === 0) return;
 
             // Call API to get favorite statuses
@@ -145,7 +145,7 @@ class FavoriteHandler {
             });
 
             const data = await response.json();
-            
+
             if (data.favoriteStatus) {
                 // Update all buttons based on status
                 this.updateAllButtonStates(data.favoriteStatus);
@@ -204,19 +204,24 @@ class FavoriteHandler {
     }
 
     showLoginModal() {
-        // Try to show existing login modal
-        const loginModal = document.getElementById('loginModal');
-        if (loginModal) {
-            const modal = new bootstrap.Modal(loginModal);
-            modal.show();
+        const loginModalOverlay = document.getElementById('loginModalOverlay');
+        if (loginModalOverlay) {
+            this.showNotification('Vui lòng đăng nhập để sử dụng tính năng này', 'warning');
+
+            // Hiển thị modal sau 1 giây
+            setTimeout(() => {
+                loginModalOverlay.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }, 2000); // 1000 ms = 1 giây
         } else {
-            // Fallback: redirect to login page
+            // Nếu không có modal, chuyển hướng
             this.showNotification('Vui lòng đăng nhập để sử dụng tính năng này', 'warning');
             setTimeout(() => {
                 window.location.href = '/';
             }, 2000);
         }
     }
+
 
     showNotification(message, type = 'info') {
         // Try to use existing notification system

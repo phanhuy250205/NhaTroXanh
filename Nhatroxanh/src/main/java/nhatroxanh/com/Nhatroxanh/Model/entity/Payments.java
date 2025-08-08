@@ -74,7 +74,6 @@ public class Payments {
 
     public enum PaymentStatus {
         CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN, CHỜ_XÁC_NHẬN_TIỀN_MẶT
-        
     }
 
     public enum PaymentMethod {

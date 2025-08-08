@@ -40,27 +40,38 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     })
 
-    // Contact button functionality
+    function isMobileDevice() {
+        return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
     const contactButtons = document.querySelectorAll(".btn-contact");
 
     contactButtons.forEach((button) => {
         button.addEventListener("click", function (e) {
             e.preventDefault();
-            createRipple(e, this); // hiệu ứng ripple
+            createRipple(e, this); // hiệu ứng ripple nếu có
 
             const phone = this.getAttribute("data-phone");
+            const btnText = this.querySelector(".btn-text");
             const card = this.closest(".property-card");
-            const title = card.querySelector(".property-title").textContent;
+            const title = card?.querySelector(".property-title")?.textContent || "";
 
-            setTimeout(() => {
-                if (phone && phone.trim() !== '') {
-                    window.location.href = `tel:${phone}`; // nếu muốn gọi trực tiếp
-                } else {
-                    alert(`Không có số điện thoại cho phòng "${title}"`);
+            if (phone && phone.trim() !== '') {
+                // Thay "Liên hệ" bằng số điện thoại
+                btnText.textContent = phone;
+
+                // Chỉ thực hiện gọi nếu là thiết bị di động
+                if (isMobileDevice()) {
+                    setTimeout(() => {
+                        window.location.href = `tel:${phone}`;
+                    }, 200);
                 }
-            }, 200);
+            } else {
+                alert(`Không có số điện thoại cho phòng "${title}"`);
+            }
         });
     });
+
 
 
     // View detail button functionality
