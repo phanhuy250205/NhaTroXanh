@@ -1551,164 +1551,435 @@
 
         // ✅ HÀM CAPTURE HTML PREVIEW
         function captureContractPreview() {
-            // Lấy toàn bộ HTML của preview container
-            const $previewContainer = $('#preview-container');
+            // Lấy dữ liệu từ form
+            const formData = {
+                tenantName: $('#tenant-name').val() || 'Khách hàng',
+                tenantBirth: $('#tenant-birth').val() || '',
+                tenantId: $('#tenant-id').val() || '',
+                tenantIdDate: $('#tenant-id-date').val() || '',
+                tenantIdPlace: $('#tenant-id-place').val() || '',
+                tenantAddress: $('#tenant-address').val() || '',
+                tenantPhone: $('#tenant-phone').val() || '',
 
-            // Clone để không ảnh hưởng đến original
-            const $clonedPreview = $previewContainer.clone();
+                landlordName: $('#owner-name').val() || 'Chủ trọ',
+                landlordBirth: $('#owner-birth').val() || '',
+                landlordId: $('#owner-id').val() || '',
+                landlordIdDate: $('#owner-id-date').val() || '',
+                landlordIdPlace: $('#owner-id-place').val() || '',
+                landlordAddress: $('#owner-address').val() || '',
+                landlordPhone: $('#owner-phone').val() || '',
 
-            // Loại bỏ các class highlight để có text bình thường
-            $clonedPreview.find('.nha-tro-highlight').removeClass('nha-tro-highlight');
+                roomAddress: $('#room-address').val() || '',
+                roomArea: $('#room-area').val() || '',
+                roomPrice: $('#room-price').val() || '',
+                deposit: $('#deposit').val() || '',
+                startDate: $('#start-date').val() || '',
+                contractDuration: $('#contract-duration').val() || '',
+                electricPrice: $('#electric-price').val() || '',
+                waterPrice: $('#water-price').val() || '',
+                wifiPrice: $('#wifi-price').val() || '',
+                cleaningPrice: $('#cleaning-price').val() || '',
+                parkingPrice: $('#parking-price').val() || '',
+                otherFees: $('#other-fees').val() || '',
+                paymentDate: $('#payment-date').val() || '',
+                contractLocation: $('#contract-location').val() || 'Đà Nẵng'
+            };
 
-            // Tạo HTML hoàn chỉnh với CSS inline
+            // Format số tiền
+            function formatMoney(amount) {
+                if (!amount) return '0';
+                return parseInt(amount).toLocaleString('vi-VN') + ' VNĐ';
+            }
+
+            // Format ngày
+            function formatDate(dateStr) {
+                if (!dateStr) return '';
+                const date = new Date(dateStr);
+                return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            }
+
+            // Chuyển số tiền thành chữ
+            function numberToWords(number) {
+                if (!number) return 'Không đồng';
+                const units = ['', 'nghìn', 'triệu', 'tỷ'];
+                const numbers = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+                let result = '';
+                let num = parseInt(number);
+                let unitIndex = 0;
+
+                if (num === 0) return 'Không đồng';
+
+                while (num > 0) {
+                    let chunk = num % 1000;
+                    let chunkStr = '';
+                    if (chunk > 0) {
+                        let hundreds = Math.floor(chunk / 100);
+                        let tens = Math.floor((chunk % 100) / 10);
+                        let ones = chunk % 10;
+
+                        if (hundreds > 0) {
+                            chunkStr += numbers[hundreds] + ' trăm';
+                            if (tens > 0 || ones > 0) chunkStr += ' ';
+                        }
+                        if (tens > 1) {
+                            chunkStr += numbers[tens] + ' mươi';
+                            if (ones > 0) chunkStr += ' ' + numbers[ones];
+                        } else if (tens === 1) {
+                            chunkStr += 'mười';
+                            if (ones > 0) chunkStr += ' ' + numbers[ones];
+                        } else if (ones > 0) {
+                            chunkStr += numbers[ones];
+                        }
+                        if (unitIndex > 0) {
+                            chunkStr += ' ' + units[unitIndex];
+                        }
+                        result = chunkStr + (result ? ' ' + result : '');
+                    }
+                    num = Math.floor(num / 1000);
+                    unitIndex++;
+                }
+                return result.charAt(0).toUpperCase() + result.slice(1) + ' đồng';
+            }
+
+            // Tạo HTML hợp đồng
             const contractHtml = `
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hợp đồng thuê nhà</title>
+    <title>Hợp đồng thuê nhà trọ - ${formData.tenantName}</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Times New Roman', serif;
-            line-height: 1.6;
-            margin: 40px;
-            color: #333;
-            background: white;
-        }
-        .text-center { text-align: center; }
-        .mb-3 { margin-bottom: 1rem; }
-        .mb-4 { margin-bottom: 1.5rem; }
-        .mt-5 { margin-top: 3rem; }
-        .row { display: flex; justify-content: space-between; }
-        .col-6 { width: 48%; }
-        strong { font-weight: bold; }
-        p { margin: 0.5rem 0; }
-        h6 { font-size: 1.1rem; font-weight: bold; margin: 1rem 0; }
-
-        /* Print styles */
-        @media print {
-            body { margin: 20px; }
-            .no-print { display: none; }
+            font-family: 'Times New Roman', Times, serif;
+            font-size: 15px;
+            line-height: 1.7;
+            color: #000;
+            background: #fff;
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            body { margin: 20px; font-size: 14px; }
-            .row { flex-direction: column; }
-            .col-6 { width: 100%; margin-bottom: 2rem; }
-        }
-
-        /* Custom styles for contract preview */
-        .nha-tro-contract-preview {
-            background-color: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            padding: 24px;
-            font-family: 'Times New Roman', serif;
-            color: #333;
-            max-height: 80vh;
-            overflow-y: auto;
-            position: sticky;
-            top: 24px;
-        }
-        .nha-tro-contract-preview .contract-header {
+        .contract-header {
             text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #007bff;
+            margin-bottom: 40px;
         }
-        .nha-tro-contract-preview .contract-header .country-info {
-            font-size: 14px;
+
+        .country-info {
+            font-size: 15px;
             font-weight: bold;
-            color: #007bff;
             text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-        .nha-tro-contract-preview .contract-header .contract-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-top: 10px;
-        }
-        .nha-tro-contract-preview .party-section {
+            line-height: 1.5;
             margin-bottom: 20px;
         }
-        .nha-tro-contract-preview .party-section h6 {
-            font-size: 18px;
+
+        .contract-title {
+            font-size: 22px;
             font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
+            text-transform: uppercase;
+            margin-top: 20px;
+            letter-spacing: 2px;
         }
-        .nha-tro-contract-preview .party-section p {
-            margin: 5px 0;
-            line-height: 1.6;
+
+        .contract-content {
+            text-align: justify;
+            line-height: 1.8;
         }
-        .nha-tro-contract-preview .terms-section {
-            margin-bottom: 20px;
+
+        .contract-intro {
+            margin-bottom: 30px;
+            text-indent: 40px;
+            font-size: 16px;
         }
-        .nha-tro-contract-preview .terms-section h6 {
-            font-size: 18px;
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 5px;
+
+        .party-section {
+            margin-bottom: 30px;
         }
-        .nha-tro-contract-preview .terms-section p {
-            margin: 5px 0;
-            line-height: 1.6;
-        }
-        .nha-tro-contract-preview .signature-section {
-            margin-top: 30px;
-            text-align: center;
-        }
-        .nha-tro-contract-preview .signature-section p {
+
+        .party-title {
             font-size: 16px;
             font-weight: bold;
-            color: #2c3e50;
-            margin: 10px 0;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            text-decoration: underline;
         }
-        .nha-tro-contract-preview .signature-section .signature-line {
-            display: inline-block;
-            width: 200px;
-            border-bottom: 2px solid #333;
-            margin: 10px auto;
-            position: relative;
+
+        .party-info {
+            margin-left: 30px;
+            line-height: 1.9;
+            font-size: 14px;
         }
-        .nha-tro-contract-preview .signature-section .signature-line::after {
-            content: "(Ký, ghi rõ họ tên)";
-            position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 12px;
-            color: #666;
+
+        .terms-section {
+            margin: 40px 0;
+        }
+
+        .terms-title {
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .term-item {
+            margin-bottom: 20px;
+            text-indent: 40px;
+            line-height: 1.9;
+            text-align: justify;
+        }
+
+        .term-number {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .sub-term {
+            margin: 10px 0 10px 60px;
+            line-height: 1.8;
+        }
+
+        .signature-section {
+            margin-top: 60px;
+            page-break-inside: avoid;
+        }
+
+        .signature-date {
+            text-align: right;
+            margin-bottom: 50px;
+            font-style: italic;
+            font-size: 15px;
+        }
+
+        .signature-parties {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+        }
+
+        .signature-party {
+            width: 45%;
+            text-align: center;
+        }
+
+        .signature-title {
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .signature-subtitle {
+            font-size: 13px;
+            margin-bottom: 80px;
             font-style: italic;
         }
-        .nha-tro-contract-preview .interactive:hover {
-            background-color: #f8f9fa;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
+
+        .signature-name {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 20px; font-size: 13px; }
+            .signature-parties { flex-direction: column; }
+            .signature-party { width: 100%; margin-bottom: 50px; }
+        }
+
+        @media print {
+            body { padding: 20px; }
+            .signature-section { page-break-inside: avoid; }
         }
     </style>
 </head>
 <body>
-    ${$clonedPreview.html()}
+    <!-- HEADER HỢP ĐỒNG -->
+    <div class="contract-header">
+        <div class="country-info">
+            CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM<br>
+            Độc lập - Tự do - Hạnh phúc<br>
+            -------------------
+        </div>
+        <div class="contract-title">
+            HỢP ĐỒNG THUÊ NHÀ TRỌ
+        </div>
+    </div>
 
-    <div style="margin-top: 40px; padding: 20px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
-        <p><strong>📧 Email được gửi từ hệ thống Nhà Trọ Xanh</strong></p>
-        <p>Đây là bản sao hợp đồng thuê nhà. Vui lòng kiểm tra thông tin và liên hệ nếu có thắc mắc.</p>
-        <p><small>🕒 Thời gian gửi: ${new Date().toLocaleString('vi-VN')}</small></p>
+    <!-- NỘI DUNG HỢP ĐỒNG -->
+    <div class="contract-content">
+        <div class="contract-intro">
+            Căn cứ vào Bộ luật Dân sự số 91/2015/QH13 ngày 24/11/2015; Luật Nhà ở số 65/2014/QH13 ngày 25/11/2014; Nghị định số 99/2015/NĐ-CP ngày 20/10/2015 của Chính phủ quy định chi tiết và hướng dẫn thi hành một số điều của Luật Nhà ở; và các quy định pháp luật có liên quan khác. Hôm nay, ngày ${new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })}, tại ${formData.contractLocation}, chúng tôi gồm có:
+        </div>
+
+        <!-- BÊN CHO THUÊ -->
+        <div class="party-section">
+            <div class="party-title">Bên cho thuê nhà trọ (Bên A):</div>
+            <div class="party-info">
+                <strong>Họ và tên:</strong> ${formData.landlordName}<br>
+                ${formData.landlordBirth ? `<strong>Ngày sinh:</strong> ${formatDate(formData.landlordBirth)}<br>` : ''}
+                ${formData.landlordId ? `<strong>Số CMND/CCCD:</strong> ${formData.landlordId}` : ''}${formData.landlordIdDate ? `, cấp ngày ${formatDate(formData.landlordIdDate)}` : ''}${formData.landlordIdPlace ? `, tại ${formData.landlordIdPlace}` : ''}<br>
+                ${formData.landlordAddress ? `<strong>Địa chỉ thường trú:</strong> ${formData.landlordAddress}<br>` : ''}
+                ${formData.landlordPhone ? `<strong>Số điện thoại:</strong> ${formData.landlordPhone}` : ''}
+            </div>
+        </div>
+
+        <!-- BÊN THUÊ -->
+        <div class="party-section">
+            <div class="party-title">Bên thuê nhà trọ (Bên B):</div>
+            <div class="party-info">
+                <strong>Họ và tên:</strong> ${formData.tenantName}<br>
+                ${formData.tenantBirth ? `<strong>Ngày sinh:</strong> ${formatDate(formData.tenantBirth)}<br>` : ''}
+                ${formData.tenantId ? `<strong>Số CMND/CCCD:</strong> ${formData.tenantId}` : ''}${formData.tenantIdDate ? `, cấp ngày ${formatDate(formData.tenantIdDate)}` : ''}${formData.tenantIdPlace ? `, tại ${formData.tenantIdPlace}` : ''}<br>
+                ${formData.tenantAddress ? `<strong>Địa chỉ thường trú:</strong> ${formData.tenantAddress}<br>` : ''}
+                ${formData.tenantPhone ? `<strong>Số điện thoại:</strong> ${formData.tenantPhone}` : ''}
+            </div>
+        </div>
+
+        <div style="text-indent: 40px; margin: 30px 0;">
+            Hai bên cùng thỏa thuận ký kết hợp đồng thuê nhà trọ với các điều khoản sau:
+        </div>
+
+        <!-- ĐIỀU KHOẢN HỢP ĐỒNG -->
+        <div class="terms-section">
+            <div class="terms-title">CÁC ĐIỀU KHOẢN HỢP ĐỒNG</div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 1: Đối tượng và mục đích thuê</span><br>
+                Bên A đồng ý cho Bên B thuê căn phòng trọ tại địa chỉ: <strong>${formData.roomAddress || '[Địa chỉ phòng trọ]'}</strong>, với diện tích sử dụng <strong>${formData.roomArea || '[Diện tích]'} m²</strong>. Phòng trọ được trang bị đầy đủ các tiện nghi cơ bản phục vụ cho mục đích sinh hoạt của Bên B.
+                <div class="sub-term">1.1. Mục đích thuê: Sử dụng để ở. Bên B cam kết không sử dụng phòng trọ vào mục đích kinh doanh, buôn bán hoặc bất kỳ hoạt động nào trái với quy định pháp luật.</div>
+                <div class="sub-term">1.2. Bên B chịu trách nhiệm giữ gìn tài sản, sử dụng phòng trọ đúng mục đích và bảo quản các trang thiết bị như tài sản của chính mình.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 2: Thời hạn thuê</span><br>
+                Thời hạn thuê là <strong>${formData.contractDuration || '12'} tháng</strong>, từ ngày <strong>${formatDate(formData.startDate) || '[Ngày bắt đầu]'}</strong> đến ngày <strong>${(() => {
+                if (formData.startDate && formData.contractDuration) {
+                    const start = new Date(formData.startDate);
+                    const end = new Date(start.setMonth(start.getMonth() + parseInt(formData.contractDuration)));
+                    return formatDate(end);
+                }
+                return '[Ngày kết thúc]';
+            })()}</strong>.
+                <div class="sub-term">2.1. Khi hết thời hạn thuê, nếu hai bên có nhu cầu tiếp tục, hợp đồng mới sẽ được ký kết theo thỏa thuận.</div>
+                <div class="sub-term">2.2. Bên B phải thông báo bằng văn bản cho Bên A ít nhất 30 ngày trước khi hết hạn hợp đồng nếu muốn gia hạn.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 3: Giá thuê và phương thức thanh toán</span><br>
+                Giá thuê phòng trọ: <strong>${formatMoney(formData.roomPrice)}</strong> (Bằng chữ: <strong>${numberToWords(formData.roomPrice)}</strong>).
+                <div class="sub-term">3.1. Tiền đặt cọc: <strong>${formatMoney(formData.deposit)}</strong> (Bằng chữ: <strong>${numberToWords(formData.deposit)}</strong>), được hoàn trả khi kết thúc hợp đồng nếu không có vi phạm hoặc thiệt hại.</div>
+                <div class="sub-term">3.2. Bên B thanh toán tiền thuê vào ngày <strong>${formData.paymentDate || '1'}</strong> hàng tháng bằng hình thức chuyển khoản hoặc tiền mặt.</div>
+                <div class="sub-term">3.3. Trường hợp chậm thanh toán quá 7 ngày, Bên B chịu phí phạt <strong>0,5% giá trị tiền thuê/ngày</strong>.</div>
+                <div class="sub-term">3.4. Tiền đặt cọc không được sử dụng để thanh toán tiền thuê trong thời gian hợp đồng còn hiệu lực.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 4: Các khoản phí phát sinh</span><br>
+                Ngoài tiền thuê phòng, Bên B chịu trách nhiệm thanh toán các khoản phí sau:
+                ${formData.electricPrice ? `<div class="sub-term">4.1. Tiền điện: <strong>${formatMoney(formData.electricPrice)}/kWh</strong> (theo chỉ số công tơ điện).</div>` : ''}
+                ${formData.waterPrice ? `<div class="sub-term">4.2. Tiền nước: <strong>${formatMoney(formData.waterPrice)}/m³</strong> (theo chỉ số đồng hồ nước).</div>` : ''}
+                ${formData.wifiPrice ? `<div class="sub-term">4.3. Phí Internet/Wifi: <strong>${formatMoney(formData.wifiPrice)}/tháng</strong>.</div>` : ''}
+                ${formData.cleaningPrice ? `<div class="sub-term">4.4. Phí vệ sinh chung: <strong>${formatMoney(formData.cleaningPrice)}/tháng</strong>.</div>` : ''}
+                ${formData.parkingPrice ? `<div class="sub-term">4.5. Phí gửi xe: <strong>${formatMoney(formData.parkingPrice)}/tháng</strong>.</div>` : ''}
+                ${formData.otherFees ? `<div class="sub-term">4.6. Các phí khác: ${formData.otherFees}.</div>` : ''}
+                <div class="sub-term">4.7. Các khoản phí này được thanh toán cùng thời điểm với tiền thuê phòng hàng tháng.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 5: Quyền và nghĩa vụ của Bên A</span><br>
+                <strong>Quyền của Bên A:</strong>
+                <div class="sub-term">5.1. Nhận tiền thuê và các khoản phí đúng hạn theo thỏa thuận.</div>
+                <div class="sub-term">5.2. Yêu cầu Bên B sử dụng phòng trọ đúng mục đích, bảo quản tài sản và tuân thủ nội quy.</div>
+                <div class="sub-term">5.3. Kiểm tra định kỳ tình trạng phòng trọ (thông báo trước ít nhất 24 giờ).</div>
+                <div class="sub-term">5.4. Đơn phương chấm dứt hợp đồng nếu Bên B vi phạm nghiêm trọng các điều khoản.</div>
+                <strong>Nghĩa vụ của Bên A:</strong>
+                <div class="sub-term">5.5. Giao phòng trọ đúng thời hạn, đảm bảo tình trạng sử dụng tốt.</div>
+                <div class="sub-term">5.6. Đảm bảo quyền sử dụng ổn định của Bên B trong thời gian hợp đồng.</div>
+                <div class="sub-term">5.7. Sửa chữa các hư hỏng do hao mòn tự nhiên hoặc lỗi kỹ thuật không do Bên B gây ra.</div>
+                <div class="sub-term">5.8. Cung cấp hóa đơn, biên lai minh bạch cho các khoản phí điện, nước và dịch vụ.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 6: Quyền và nghĩa vụ của Bên B</span><br>
+                <strong>Quyền của Bên B:</strong>
+                <div class="sub-term">6.1. Sử dụng phòng trọ theo đúng mục đích đã thỏa thuận.</div>
+                <div class="sub-term">6.2. Yêu cầu Bên A sửa chữa kịp thời các hư hỏng không do lỗi của Bên B.</div>
+                <div class="sub-term">6.3. Nhận lại tiền đặt cọc khi kết thúc hợp đồng nếu không vi phạm các điều khoản.</div>
+                <strong>Nghĩa vụ của Bên B:</strong>
+                <div class="sub-term">6.4. Thanh toán đầy đủ và đúng hạn các khoản tiền thuê, phí dịch vụ.</div>
+                <div class="sub-term">6.5. Giữ gìn, bảo quản tài sản và sử dụng phòng trọ đúng mục đích.</div>
+                <div class="sub-term">6.6. Tuân thủ nội quy khu nhà trọ và các quy định pháp luật.</div>
+                <div class="sub-term">6.7. Bồi thường thiệt hại nếu làm hư hỏng tài sản do lỗi của mình.</div>
+                <div class="sub-term">6.8. Thông báo ngay cho Bên A khi phát hiện hư hỏng hoặc sự cố.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 7: Các hành vi bị cấm</span><br>
+                Bên B không được phép thực hiện các hành vi sau:
+                <div class="sub-term">7.1. Sử dụng phòng trọ để kinh doanh, buôn bán hoặc các hoạt động trái pháp luật.</div>
+                <div class="sub-term">7.2. Chuyển nhượng, cho thuê lại phòng trọ dưới bất kỳ hình thức nào.</div>
+                <div class="sub-term">7.3. Gây rối, làm mất trật tự hoặc ảnh hưởng đến cư dân xung quanh.</div>
+                <div class="sub-term">7.4. Tự ý sửa chữa, cải tạo kết cấu phòng trọ mà không có sự đồng ý của Bên A.</div>
+                <div class="sub-term">7.5. Nuôi thú cưng hoặc tổ chức các hoạt động trái pháp luật (ma túy, cờ bạc, mại dâm).</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 8: Chấm dứt hợp đồng</span><br>
+                Hợp đồng chấm dứt trong các trường hợp sau:
+                <div class="sub-term">8.1. Hết thời hạn hợp đồng và không có thỏa thuận gia hạn.</div>
+                <div class="sub-term">8.2. Hai bên thỏa thuận chấm dứt hợp đồng trước thời hạn bằng văn bản.</div>
+                <div class="sub-term">8.3. Bên B vi phạm nghiêm trọng các điều khoản hợp đồng (bao gồm chậm thanh toán quá 15 ngày).</div>
+                <div class="sub-term">8.4. Khi chấm dứt hợp đồng, Bên B phải bàn giao phòng trọ trong tình trạng ban đầu (trừ hao mòn tự nhiên).</div>
+                <div class="sub-term">8.5. Bên A hoàn trả tiền đặt cọc trong vòng 7 ngày sau khi kiểm tra và xác nhận không có thiệt hại.</div>
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 9: Giải quyết tranh chấp</span><br>
+                Mọi tranh chấp phát sinh từ hợp đồng này sẽ được giải quyết thông qua thương lượng, hòa giải. Nếu không đạt được thỏa thuận, tranh chấp sẽ được đưa ra Tòa án nhân dân có thẩm quyền tại ${formData.contractLocation} để giải quyết theo quy định của pháp luật Việt Nam.
+            </div>
+
+            <div class="term-item">
+                <span class="term-number">Điều 10: Hiệu lực hợp đồng</span><br>
+                Hợp đồng này có hiệu lực từ ngày ký và được lập thành 02 (hai) bản, mỗi bên giữ 01 bản, có giá trị pháp lý như nhau. Mọi sửa đổi, bổ sung hợp đồng phải được lập thành văn bản và có sự đồng ý của cả hai bên.
+            </div>
+        </div>
+
+        <!-- CHỮ KÝ -->
+        <div class="signature-section">
+            <div class="signature-date">
+                <strong><em>${formData.contractLocation}, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()}</em></strong>
+            </div>
+
+            <div class="signature-parties">
+                <div class="signature-party">
+                    <div class="signature-title">BÊN CHO THUÊ (BÊN A)</div>
+                    <div class="signature-subtitle">(Ký và ghi rõ họ tên)</div>
+                </div>
+
+                <div class="signature-party">
+                    <div class="signature-title">BÊN THUÊ (BÊN B)</div>
+                    <div class="signature-subtitle">(Ký và ghi rõ họ tên)</div>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>`;
 
             return contractHtml;
         }
+
+
+
+
 
         function captureContractPreviewForPdf() {
             const $previewContainer = $('#preview-container');
@@ -1718,13 +1989,12 @@
             }
 
             // LẤY DỮ LIỆU TỪ FORM
-            // THÔNG TIN CHỦ TRỌ (BÊN CHO THUÊ)
-            const landlordName = $('#owner-name').val() || '........................';
-            const landlordDob = $('#owner-dob').val() || '........................';
-            const landlordId = $('#owner-id').val() || '........................';
-            const landlordIdDate = $('#owner-id-date').val() || '........................';
-            const landlordIdPlace = $('#owner-id-place').val() || '........................';
-            const landlordPhone = $('#owner-phone').val() || '........................';
+            const landlordName = $('#owner-name').val() || '................................';
+            const landlordDob = $('#owner-dob').val() ? formatDate($('#owner-dob').val()) : '................................';
+            const landlordId = $('#owner-id').val() || '................................';
+            const landlordIdDate = $('#owner-id-date').val() ? formatDate($('#owner-id-date').val()) : '................................';
+            const landlordIdPlace = $('#owner-id-place').val() || '................................';
+            const landlordPhone = $('#owner-phone').val() || '................................';
 
             // XÂY DỰNG ĐỊA CHỈ CHỦ TRỌ
             const ownerStreet = $('#owner-street').val() || '';
@@ -1733,15 +2003,15 @@
             const ownerProvince = $('#owner-province option:selected').text() || '';
             const landlordAddress = [ownerStreet, ownerWard, ownerDistrict, ownerProvince]
                 .filter(item => item && item !== 'Chọn...' && item.trim() !== '')
-                .join(', ') || '........................';
+                .join(', ') || '................................';
 
-            // THÔNG TIN NGƯỜI THUÊ (BÊN THUÊ)
-            const tenantName = $('#tenant-name').val() || '........................';
-            const tenantDob = $('#tenant-dob').val() || '........................';
-            const tenantId = $('#tenant-id').val() || '........................';
-            const tenantIdDate = $('#tenant-id-date').val() || '........................';
-            const tenantIdPlace = $('#tenant-id-place').val() || '........................';
-            const tenantPhone = $('#tenant-phone').val() || '........................';
+            // THÔNG TIN NGƯỜI THUÊ
+            const tenantName = $('#tenant-name').val() || '................................';
+            const tenantDob = $('#tenant-dob').val() ? formatDate($('#tenant-dob').val()) : '................................';
+            const tenantId = $('#tenant-id').val() || '................................';
+            const tenantIdDate = $('#tenant-id-date').val() ? formatDate($('#tenant-id-date').val()) : '................................';
+            const tenantIdPlace = $('#tenant-id-place').val() || '................................';
+            const tenantPhone = $('#tenant-phone').val() || '................................';
 
             // XÂY DỰNG ĐỊA CHỈ NGƯỜI THUÊ
             const tenantStreet = $('#tenant-street').val() || '';
@@ -1750,22 +2020,22 @@
             const tenantProvince = $('#tenant-province option:selected').text() || '';
             const tenantAddress = [tenantStreet, tenantWard, tenantDistrict, tenantProvince]
                 .filter(item => item && item !== 'Chọn...' && item.trim() !== '')
-                .join(', ') || '........................';
+                .join(', ') || '................................';
 
             // DANH SÁCH NGƯỜI Ở
             const residents = $('#residents-list .resident-item').map(function () {
                 const name = $(this).find('.resident-name').text().trim();
                 return name ? name : null;
-            }).get().filter(name => name).join(', ') || 'Không có';
+            }).get().filter(name => name).join(', ') || '';
 
             // TIỆN ÍCH
             const amenities = $('.nha-tro-amenities input:checked').map(function () {
                 return $(this).next('label').text().trim();
-            }).get().join(', ') || 'Không có';
+            }).get().join(', ') || 'Không có tiện ích đặc biệt';
 
             // THÔNG TIN PHÒNG TRỌ
-            const roomNumber = $('#room-number').val() || '........................';
-            const roomArea = $('#room-area').val() || '........................';
+            const roomNumber = $('#room-number').val() || '................................';
+            const roomArea = $('#room-area').val() || '................................';
 
             // XÂY DỰNG ĐỊA CHỈ PHÒNG
             const roomStreet = $('#room-street').val() || '';
@@ -1774,33 +2044,38 @@
             const roomProvince = $('#room-province option:selected').text() || '';
             const propertyAddress = [roomStreet, roomWard, roomDistrict, roomProvince]
                 .filter(item => item && item !== 'Chọn...' && item.trim() !== '')
-                .join(', ') || '........................';
+                .join(', ') || '................................';
 
             // THÔNG TIN HỢP ĐỒNG
-            const contractDuration = $('#contract-duration').val() || '........................';
-            const startDate = $('#start-date').val() || '........................';
+            const contractDuration = $('#contract-duration').val() || '................................';
+            const startDate = $('#start-date').val() ? formatDate($('#start-date').val()) : '................................';
 
             // TÍNH NGÀY KẾT THÚC
-            let endDate = '........................';
-            if (startDate && contractDuration) {
-                const start = new Date(startDate);
+            let endDate = '................................';
+            if ($('#start-date').val() && contractDuration) {
+                const start = new Date($('#start-date').val());
                 start.setMonth(start.getMonth() + parseInt(contractDuration));
-                endDate = start.toISOString().split('T')[0];
+                endDate = formatDate(start.toISOString().split('T')[0]);
             }
 
             const monthlyRent = $('#rent-price').val() ?
-                parseInt($('#rent-price').val()).toLocaleString('vi-VN') : '........................';
+                $('#rent-price').val().replace(' VND', '') : '................................';
 
             // TÍNH TIỀN CỌC
             const depositMonths = $('#deposit-months').val() || '2';
-            const rentPrice = parseInt($('#rent-price').val()) || 0;
-            const depositAmount = rentPrice * parseInt(depositMonths);
+            const rentPrice = parseInt($('#rent-price-hidden').val()) || 0;
+            const depositAmount = rentPrice * parseFloat(depositMonths);
             const deposit = depositAmount > 0 ?
-                depositAmount.toLocaleString('vi-VN') : '........................';
+                new Intl.NumberFormat('vi-VN').format(depositAmount) : '................................';
 
-            const paymentDate = $('#payment-date').val() || '........................';
+            const paymentDate = $('#payment-date').val() || '................................';
+            const paymentMethod = $('#payment-method option:selected').text() || 'Tiền mặt';
 
-            // HTML VỚI DỮ LIỆU ĐÚNG
+            // Ngày ký hợp đồng
+            const today = new Date();
+            const contractSignDate = formatDate(today.toISOString().split('T')[0]);
+
+            // HTML CHUẨN PHÁP LÝ VIỆT NAM
             const contractHtml = `
 <!DOCTYPE html>
 <html lang="vi">
@@ -1808,296 +2083,409 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hợp đồng thuê nhà</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', 'Times New Roman', serif;
-            font-size: 16px;
-            line-height: 1.6;
-            color: #2d2d2d;
-            margin: 30px;
-            background: #fff;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            border: 1px solid #e0e0e0;
-            padding: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        @page {
+            size: A4;
+            margin: 2cm 1.5cm;
         }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            font-size: 13px;
+            line-height: 1.4;
+            color: #000;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
         .header {
             text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid #4a90e2;
-            padding-bottom: 15px;
-        }
-        .title {
-            font-size: 20px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #1a3c73;
-        }
-        .section {
             margin-bottom: 25px;
+            page-break-inside: avoid;
         }
-        .clause-title {
-            font-weight: 500;
-            font-size: 18px;
-            color: #1a3c73;
-            margin: 15px 0 10px 0;
-            border-left: 4px solid #4a90e2;
-            padding-left: 10px;
+
+        .header .country {
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 3px;
         }
-        .indent {
+
+        .header .motto {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .header .separator {
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .header .title {
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            margin: 15px 0 5px 0;
+        }
+
+        .header .contract-number {
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
+        .section-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin: 20px 0 10px 0;
+            text-align: left;
+        }
+
+        .party-info {
             margin-left: 20px;
+            margin-bottom: 15px;
         }
+
+        .party-info div {
+            margin-bottom: 4px;
+        }
+
+        .clause {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+
+        .clause-title {
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .clause-content {
+            margin-left: 15px;
+            text-align: justify;
+        }
+
+        .clause-content div {
+            margin-bottom: 6px;
+        }
+
+        .sub-clause {
+            margin-left: 20px;
+            margin-bottom: 4px;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            page-break-inside: avoid;
+        }
+
         .signature-table {
             width: 100%;
-            margin-top: 40px;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 20px;
+            border-collapse: collapse;
         }
+
         .signature-cell {
             width: 50%;
             text-align: center;
             vertical-align: top;
-            padding: 20px;
+            padding: 20px 10px;
         }
-        .signature-space {
-            height: 80px;
-            border-bottom: 1px dashed #ccc;
-            margin-bottom: 10px;
+
+        .signature-title {
+            font-weight: bold;
+            font-size: 13px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
         }
+
+        .signature-note {
+            font-style: italic;
+            font-size: 12px;
+            margin-bottom: 60px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            display: inline-block;
+            min-width: 200px;
+            padding-bottom: 2px;
+        }
+
         .footer {
             text-align: center;
-            font-size: 14px;
+            font-size: 11px;
             color: #666;
             margin-top: 30px;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 10px;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
         }
+
+        .highlight {
+            font-weight: bold;
+        }
+
+        .date-location {
+            text-align: right;
+            font-style: italic;
+            margin-bottom: 20px;
+        }
+
         @media print {
             body {
-                margin: 0;
-                box-shadow: none;
-                border: none;
-                font-size: 15px;
-            }
-            .header {
-                border-bottom: 1px solid #000;
-            }
-            .title {
-                font-size: 18px;
-            }
-            .clause-title {
-                font-size: 16px;
-                border-left: none;
-                padding-left: 0;
-            }
-            .footer {
-                font-size: 13px;
-            }
-        }
-        @media (max-width: 768px) {
-            body {
-                font-size: 14px;
-                margin: 15px;
-                padding: 15px;
-            }
-            .title {
-                font-size: 18px;
-            }
-            .clause-title {
-                font-size: 16px;
-            }
-            .footer {
                 font-size: 12px;
+                -webkit-print-color-adjust: exact;
             }
-            .signature-table {
-                display: block;
-            }
-            .signature-cell {
-
-                display: block;
-                margin-bottom: 20px;
-            }
+            .no-print { display: none; }
+            .page-break { page-break-before: always; }
         }
     </style>
 </head>
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div style="font-weight: 700;">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-        <div style="font-weight: 700;">Độc lập - Tự do - Hạnh phúc</div>
-        <div style="margin: 15px 0;">────────────</div>
-        <div class="title">HỢP ĐỒNG THUÊ NHÀ</div>
-        <div style="font-style: italic; margin-top: 10px;">Số: ${Date.now()}/HDTN</div>
-    </div>
-
-    <!-- NGÀY LẬP -->
-    <div class="section">
-        Hôm nay, ngày ${new Date().getDate()} tháng ${new Date().getMonth() + 1} năm ${new Date().getFullYear()},
-        tại ${propertyAddress || 'Đà Nẵng'}, chúng tôi gồm:
-    </div>
-
-    <!-- BÊN CHO THUÊ -->
-    <div class="section">
-        <div style="font-weight: 700;">BÊN CHO THUÊ (Bên A):</div>
-        <div class="indent">
-            <div>Họ và tên: <strong>${landlordName}</strong></div>
-            <div>Sinh ngày: ${landlordDob}</div>
-            <div>Số CMND/CCCD: ${landlordId}, cấp ngày ${landlordIdDate} tại ${landlordIdPlace}</div>
-            <div>Địa chỉ thường trú: ${landlordAddress}</div>
-            <div>Số điện thoại: ${landlordPhone}</div>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="country">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
+            <div class="motto">Độc lập - Tự do - Hạnh phúc</div>
+            <div class="separator">━━━━━━━━━━━━━━━</div>
+            <div class="title">HỢP ĐỒNG THUÊ NHÀ</div>
+            <div class="contract-number">Số: ${Date.now()}/HDTN-${new Date().getFullYear()}</div>
         </div>
-    </div>
 
-    <!-- BÊN THUÊ -->
-    <div class="section">
-        <div style="font-weight: 700;">BÊN THUÊ (Bên B):</div>
-        <div class="indent">
-            <div>Họ và tên: <strong>${tenantName}</strong></div>
-            <div>Sinh ngày: ${tenantDob}</div>
-            <div>Số CMND/CCCD: ${tenantId}, cấp ngày ${tenantIdDate} tại ${tenantIdPlace}</div>
-            <div>Địa chỉ thường trú: ${tenantAddress}</div>
-            <div>Số điện thoại: ${tenantPhone}</div>
+        <!-- NGÀY VÀ ĐỊA ĐIỂM -->
+        <div class="date-location">
+            <em>Đà Nẵng, ngày ${today.getDate()} tháng ${today.getMonth() + 1} năm ${today.getFullYear()}</em>
         </div>
-    </div>
 
-    <!-- DANH SÁCH NGƯỜI Ở -->
-    <div class="section" style="display: ${residents === 'Không có' ? 'none' : 'block'};">
-        <div style="font-weight: 700;">Danh sách người ở:</div>
-        <div class="indent">${residents}</div>
-    </div>
-
-    <!-- MỞ ĐẦU -->
-    <div class="section">
-        Sau khi bàn bạc trên tinh thần dân chủ, hai bên thống nhất ký kết hợp đồng thuê nhà với các điều khoản sau:
-    </div>
-
-    <!-- ĐIỀU 1: ĐỐI TƯỢNG HỢP ĐỒNG -->
-    <div class="section">
-        <div class="clause-title">Điều 1: Đối tượng của hợp đồng</div>
-        <div class="indent">
-            Bên A đồng ý cho Bên B thuê căn phòng số <strong>${roomNumber}</strong>,
-            tại địa chỉ: <strong>${propertyAddress}</strong>,
-            diện tích sử dụng: <strong>${roomArea} m²</strong>.
+        <!-- MỞ ĐẦU -->
+        <div class="section">
+            Căn cứ Bộ luật Dân sự năm 2015; Luật Nhà ở năm 2014 và các văn bản pháp luật có liên quan, hôm nay
+            tại <strong>${propertyAddress || 'Đà Nẵng'}</strong>, chúng tôi gồm có:
         </div>
-    </div>
 
-    <!-- ĐIỀU 2: THỜI HẠN THUÊ -->
-    <div class="section">
-        <div class="clause-title">Điều 2: Thời hạn thuê</div>
-        <div class="indent">
-            <div>- Thời hạn thuê: <strong>${contractDuration} tháng</strong></div>
-            <div>- Từ ngày: <strong>${startDate}</strong> đến ngày: <strong>${endDate}</strong></div>
-            <div>- Hợp đồng có hiệu lực kể từ ngày ký và bàn giao nhà.</div>
+        <!-- BÊN CHO THUÊ -->
+        <div class="section">
+            <div class="section-title">BÊN CHO THUÊ (Bên A):</div>
+            <div class="party-info">
+                <div>Ông/Bà: <span class="highlight">${landlordName}</span></div>
+                <div>Sinh ngày: ${landlordDob}</div>
+                <div>Số CMND/CCCD: <span class="highlight">${landlordId}</span>, cấp ngày ${landlordIdDate}</div>
+                <div>Nơi cấp: ${landlordIdPlace}</div>
+                <div>Địa chỉ thường trú: ${landlordAddress}</div>
+                <div>Số điện thoại: <span class="highlight">${landlordPhone}</span></div>
+            </div>
         </div>
-    </div>
 
-    <!-- ĐIỀU 3: GIÁ THUÊ VÀ THANH TOÁN -->
-    <div class="section">
-        <div class="clause-title">Điều 3: Giá thuê và phương thức thanh toán</div>
-        <div class="indent">
-            <div>- Giá thuê: <strong>${monthlyRent} VNĐ/tháng</strong></div>
-            <div>- Tiền đặt cọc: <strong>${deposit} VNĐ</strong> (tương đương ${depositMonths} tháng tiền nhà)</div>
-            <div>- Thanh toán: ${paymentDate} hàng tháng</div>
-            <div>- Phương thức thanh toán: Tiền mặt hoặc chuyển khoản</div>
-            <div>- Bên B chịu trách nhiệm thanh toán tiền điện, nước, internet, rác theo thực tế sử dụng.</div>
+        <!-- BÊN THUÊ -->
+        <div class="section">
+            <div class="section-title">BÊN THUÊ (Bên B):</div>
+            <div class="party-info">
+                <div>Ông/Bà: <span class="highlight">${tenantName}</span></div>
+                <div>Sinh ngày: ${tenantDob}</div>
+                <div>Số CMND/CCCD: <span class="highlight">${tenantId}</span>, cấp ngày ${tenantIdDate}</div>
+                <div>Nơi cấp: ${tenantIdPlace}</div>
+                <div>Địa chỉ thường trú: ${tenantAddress}</div>
+                <div>Số điện thoại: <span class="highlight">${tenantPhone}</span></div>
+            </div>
         </div>
-    </div>
 
-    <!-- ĐIỀU 4: TIỆN ÍCH VÀ TRANG THIẾT BỊ -->
-    <div class="section">
-        <div class="clause-title">Điều 4: Tiện ích và trang thiết bị</div>
-        <div class="indent">
-            <div>Phòng được trang bị: <strong>${amenities}</strong></div>
+        ${residents ? `
+        <div class="section">
+            <div class="section-title">Danh sách người cùng ở:</div>
+            <div class="party-info">${residents}</div>
         </div>
-    </div>
+        ` : ''}
 
-    <!-- ĐIỀU 5: NGHĨA VỤ CỦA BÊN CHO THUÊ -->
-    <div class="section">
-        <div class="clause-title">Điều 5: Nghĩa vụ của bên cho thuê</div>
-        <div class="indent">
-            <div>- Bàn giao nhà đúng thời hạn, đảm bảo nhà ở tình trạng tốt, đủ tiện nghi như đã thỏa thuận.</div>
-            <div>- Đảm bảo quyền sử dụng ổn định của bên thuê trong suốt thời hạn hợp đồng.</div>
-            <div>- Không được tăng giá thuê trong thời hạn hợp đồng.</div>
-            <div>- Sửa chữa những hư hỏng do lỗi kỹ thuật của nhà.</div>
-            <div>- Thông báo trước 30 ngày nếu muốn chấm dứt hợp đồng.</div>
+        <!-- MỞ ĐẦU ĐIỀU KHOẢN -->
+        <div class="section">
+            Sau khi bàn bạc trên tinh thần dân chủ, bình đẳng, tự nguyện, hai bên cùng thống nhất
+            ký kết hợp đồng thuê nhà với những điều khoản sau đây:
         </div>
-    </div>
 
-    <!-- ĐIỀU 6: NGHĨA VỤ CỦA BÊN THUÊ -->
-    <div class="section">
-        <div class="clause-title">Điều 6: Nghĩa vụ của bên thuê</div>
-        <div class="indent">
-            <div>- Thanh toán tiền thuê nhà đúng hạn theo thỏa thuận.</div>
-            <div>- Sử dụng nhà đúng mục đích, giữ gìn và bảo quản tài sản của bên cho thuê.</div>
-            <div>- Không được chuyển nhượng hợp đồng cho người khác mà không có sự đồng ý của bên cho thuê.</div>
-            <div>- Trả nhà trong tình trạng ban đầu khi hết hạn hợp đồng (trừ hao mòn tự nhiên).</div>
-            <div>- Chấp hành đầy đủ các quy định của pháp luật và quy định của địa phương.</div>
-            <div>- Thông báo trước 30 ngày nếu muốn chấm dứt hợp đồng.</div>
+        <!-- ĐIỀU 1 -->
+        <div class="clause">
+            <div class="clause-title">Điều 1: Đối tượng của hợp đồng</div>
+            <div class="clause-content">
+                <div>Bên A đồng ý cho Bên B thuê căn phòng trọ số <span class="highlight">${roomNumber}</span>,
+                tọa lạc tại địa chỉ: <span class="highlight">${propertyAddress}</span>.</div>
+                <div>Diện tích sử dụng: <span class="highlight">${roomArea} m²</span></div>
+                <div>Tình trạng nhà: Nhà được bàn giao trong tình trạng tốt, đầy đủ các tiện ích cơ bản.</div>
+            </div>
         </div>
-    </div>
 
-    <!-- ĐIỀU 7: CHẤM DỨT HỢP ĐỒNG -->
-    <div class="section">
-        <div class="clause-title">Điều 7: Chấm dứt hợp đồng</div>
-        <div class="indent">
-            <div>Hợp đồng chấm dứt trong các trường hợp sau:</div>
-            <div>- Hết thời hạn hợp đồng.</div>
-            <div>- Hai bên thỏa thuận chấm dứt trước hạn.</div>
-            <div>- Bên thuê vi phạm nghiêm trọng các điều khoản của hợp đồng.</div>
-            <div>- Bên thuê không thanh toán tiền thuê quá 2 tháng liên tiếp.</div>
+        <!-- ĐIỀU 2 -->
+        <div class="clause">
+            <div class="clause-title">Điều 2: Thời hạn thuê</div>
+            <div class="clause-content">
+                <div>Thời hạn thuê nhà: <span class="highlight">${contractDuration} tháng</span></div>
+                <div>Từ ngày: <span class="highlight">${startDate}</span></div>
+                <div>Đến ngày: <span class="highlight">${endDate}</span></div>
+                <div>Hợp đồng có hiệu lực kể từ ngày ký và bàn giao nhà.</div>
+            </div>
         </div>
-    </div>
 
-    <!-- ĐIỀU 8: GIẢI QUYẾT TRANH CHẤP -->
-    <div class="section">
-        <div class="clause-title">Điều 8: Giải quyết tranh chấp</div>
-        <div class="indent">
-            <div>- Mọi tranh chấp phát sinh được giải quyết trên cơ sở thương lượng, hòa giải.</div>
-            <div>- Nếu không thỏa thuận được, tranh chấp sẽ được giải quyết tại Tòa án có thẩm quyền.</div>
+        <!-- ĐIỀU 3 -->
+        <div class="clause">
+            <div class="clause-title">Điều 3: Giá thuê và phương thức thanh toán</div>
+            <div class="clause-content">
+                <div>Giá thuê nhà: <span class="highlight">${monthlyRent} VNĐ/tháng</span></div>
+                <div>Tiền đặt cọc: <span class="highlight">${deposit} VNĐ</span> (tương đương ${depositMonths} tháng tiền nhà)</div>
+                <div>Thời hạn thanh toán: ${paymentDate} hàng tháng</div>
+                <div>Phương thức thanh toán: ${paymentMethod}</div>
+                <div>Các chi phí khác (điện, nước, internet, vệ sinh) do Bên B thanh toán theo thực tế sử dụng.</div>
+            </div>
         </div>
-    </div>
 
-    <!-- ĐIỀU 9: ĐIỀU KHOẢN CHUNG -->
-    <div class="section">
-        <div class="clause-title">Điều 9: Điều khoản chung</div>
-        <div class="indent">
-            <div>- Hợp đồng này có hiệu lực kể từ ngày ký.</div>
-            <div>- Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản.</div>
-            <div>- Mọi sửa đổi, bổ sung hợp đồng phải được lập thành văn bản và có sự đồng ý của cả hai bên.</div>
+        <!-- ĐIỀU 4 -->
+        <div class="clause">
+            <div class="clause-title">Điều 4: Tiện ích và trang thiết bị</div>
+            <div class="clause-content">
+                <div>Nhà được trang bị các tiện ích: <span class="highlight">${amenities}</span></div>
+                <div>Bên A cam kết bàn giao nhà đúng hiện trạng như đã thỏa thuận.</div>
+            </div>
         </div>
-    </div>
 
-    <!-- CHỮ KÝ -->
-    <table class="signature-table">
-        <tr>
-            <td class="signature-cell">
-                <div style="font-weight: 700; text-transform: uppercase;">BÊN CHO THUÊ</div>
-                <div style="font-style: italic;">(Ký, ghi rõ họ tên)</div>
-                <div class="signature-space"></div>
+        <!-- ĐIỀU 5 -->
+        <div class="clause">
+            <div class="clause-title">Điều 5: Quyền và nghĩa vụ của bên cho thuê</div>
+            <div class="clause-content">
+                <div><strong>Quyền của Bên A:</strong></div>
+                <div class="sub-clause">- Được nhận tiền thuê nhà đúng thời hạn theo thỏa thuận;</div>
+                <div class="sub-clause">- Được kiểm tra, giám sát việc sử dụng nhà của Bên B;</div>
+                <div class="sub-clause">- Được đơn phương chấm dứt hợp đồng nếu Bên B vi phạm nghiêm trọng.</div>
 
-            </td>
-            <td class="signature-cell">
-                <div style="font-weight: 700; text-transform: uppercase;">BÊN THUÊ</div>
-                <div style="font-style: italic;">(Ký, ghi rõ họ tên)</div>
-                <div class="signature-space"></div>
+                <div style="margin-top: 10px;"><strong>Nghĩa vụ của Bên A:</strong></div>
+                <div class="sub-clause">- Bàn giao nhà cho Bên B đúng thời hạn, đúng hiện trạng đã thỏa thuận;</div>
+                <div class="sub-clause">- Đảm bảo Bên B sử dụng nhà ổn định trong thời hạn hợp đồng;</div>
+                <div class="sub-clause">- Sửa chữa những hư hỏng do lỗi kỹ thuật của nhà;</div>
+                <div class="sub-clause">- Không được tăng giá thuê trong thời hạn hợp đồng.</div>
+            </div>
+        </div>
 
-            </td>
-        </tr>
-    </table>
+        <!-- ĐIỀU 6 -->
+        <div class="clause">
+            <div class="clause-title">Điều 6: Quyền và nghĩa vụ của bên thuê</div>
+            <div class="clause-content">
+                <div><strong>Quyền của Bên B:</strong></div>
+                <div class="sub-clause">- Được sử dụng nhà theo đúng mục đích đã thỏa thuận;</div>
+                <div class="sub-clause">- Được yêu cầu Bên A sửa chữa những hư hỏng không do lỗi của mình;</div>
+                <div class="sub-clause">- Được gia hạn hợp đồng nếu hai bên thỏa thuận.</div>
 
-    <!-- FOOTER -->
-    <div class="footer">
-        <div>Hợp đồng được tạo bởi hệ thống Nhà Trọ Xanh</div>
-        <div>Ngày tạo: ${new Date().toLocaleDateString('vi-VN')}</div>
+                <div style="margin-top: 10px;"><strong>Nghĩa vụ của Bên B:</strong></div>
+                <div class="sub-clause">- Thanh toán tiền thuê nhà đúng hạn theo thỏa thuận;</div>
+                <div class="sub-clause">- Sử dụng nhà đúng mục đích, giữ gìn và bảo quản tài sản;</div>
+                <div class="sub-clause">- Không được chuyển nhượng hợp đồng cho người thứ ba;</div>
+                <div class="sub-clause">- Trả nhà trong tình trạng ban đầu khi hết hạn hợp đồng;</div>
+                <div class="sub-clause">- Chấp hành đầy đủ các quy định của pháp luật và nội quy khu vực.</div>
+            </div>
+        </div>
+
+        <!-- ĐIỀU 7 -->
+        <div class="clause">
+            <div class="clause-title">Điều 7: Chấm dứt hợp đồng</div>
+            <div class="clause-content">
+                <div>Hợp đồng chấm dứt trong các trường hợp sau:</div>
+                <div class="sub-clause">- Hết thời hạn hợp đồng;</div>
+                <div class="sub-clause">- Hai bên thỏa thuận chấm dứt trước hạn;</div>
+                <div class="sub-clause">- Bên thuê vi phạm nghiêm trọng nghĩa vụ trong hợp đồng;</div>
+                <div class="sub-clause">- Các trường hợp khác theo quy định của pháp luật.</div>
+            </div>
+        </div>
+
+        <!-- ĐIỀU 8 -->
+        <div class="clause">
+            <div class="clause-title">Điều 8: Giải quyết tranh chấp</div>
+            <div class="clause-content">
+                <div>Trong quá trình thực hiện hợp đồng, nếu có tranh chấp phát sinh, hai bên cùng
+                bàn bạc giải quyết trên tinh thần thiện chí, hợp tác.</div>
+                <div>Trường hợp không thể thỏa thuận được, tranh chấp sẽ được giải quyết tại
+                Tòa án nhân dân có thẩm quyền theo quy định của pháp luật.</div>
+            </div>
+        </div>
+
+        <!-- ĐIỀU 9 -->
+        <div class="clause">
+            <div class="clause-title">Điều 9: Điều khoản chung</div>
+            <div class="clause-content">
+                <div>Hợp đồng này được lập thành 02 (hai) bản có giá trị pháp lý như nhau,
+                mỗi bên giữ 01 bản.</div>
+                <div>Mọi sửa đổi, bổ sung hợp đồng phải được lập thành văn bản và có
+                sự thỏa thuận của cả hai bên.</div>
+                <div>Hợp đồng có hiệu lực kể từ ngày ký.</div>
+            </div>
+        </div>
+
+        <!-- CHỮ KÝ -->
+        <div class="signature-section">
+            <table class="signature-table">
+                <tr>
+                    <td class="signature-cell">
+                        <div class="signature-title">BÊN CHO THUÊ</div>
+                        <div class="signature-note">(Ký, ghi rõ họ tên)</div>
+                        <div class="signature-name">${landlordName}</div>
+                    </td>
+                    <td class="signature-cell">
+                        <div class="signature-title">BÊN THUÊ</div>
+                        <div class="signature-note">(Ký, ghi rõ họ tên)</div>
+                        <div class="signature-name">${tenantName}</div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="footer">
+            <div>Hợp đồng được lập bởi hệ thống Nhà Trọ Xanh</div>
+            <div>Ngày tạo: ${contractSignDate} | Mã hợp đồng: ${Date.now()}</div>
+        </div>
     </div>
 </body>
 </html>`;
 
             return contractHtml;
         }
+
+
+
+        // Hàm format ngày theo chuẩn Việt Nam
+        function formatDate(dateString) {
+            if (!dateString) return 'Chưa nhập';
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Hàm xây dựng địa chỉ đầy đủ
+        function buildFullAddress(street, ward, district, province) {
+            const parts = [];
+            if (street && street.trim()) parts.push(street.trim());
+            if (ward && ward.trim() && !ward.includes('Chọn')) parts.push(ward.trim());
+            if (district && district.trim() && !district.includes('Chọn')) parts.push(district.trim());
+            if (province && province.trim() && !province.includes('Chọn')) parts.push(province.trim());
+
+            return parts.length > 0 ? parts.join(', ') : 'Chưa nhập địa chỉ';
+        }
+
+
+
+
+
         // ✅ CẬP NHẬT NÚT DOWNLOAD PDF
         $('#btn-download-pdf').on('click', function () {
             console.log('📄 Downloading PDF...');
