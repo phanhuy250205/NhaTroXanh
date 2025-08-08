@@ -1250,8 +1250,12 @@ window.NhaTroContract = {
             // ✅ BƯỚC 5: Xử lý trạng thái tenant type
             this.handleTenantTypeStatus(tenant);
 
-            // ✅ BƯỚC 6: Cập nhật preview cuối cùng
-            this.updateAllPreview();
+            // ✅ BƯỚC 6 (ĐÃ SỬA): Gọi hàm cập nhật preview đầy đủ
+            // Thay thế hàm updateAllPreview() bằng hàm updateContractPreview()
+            if (typeof updateContractPreview === 'function') {
+                console.log("Forcing preview update after filling tenant fields...");
+                updateContractPreview();
+            }
 
         } catch (error) {
             console.error("Error filling tenant fields:", error);
@@ -2802,7 +2806,7 @@ window.NhaTroContract = {
         this.sendSaveRequest(formData);
     },
 
-// ✅ HÀM PHỤ: Validate thông tin cơ bản
+    // ✅ HÀM PHỤ: Validate thông tin cơ bản
     validateBasicContractInfo() {
         const requiredFields = [
             { id: 'tenant-name', name: 'Tên người thuê' },
@@ -2825,7 +2829,7 @@ window.NhaTroContract = {
         return true;
     },
 
-// ✅ HÀM PHỤ: Lấy thông tin phòng
+    // ✅ HÀM PHỤ: Lấy thông tin phòng
     getRoomInfo() {
         const roomSelect = document.getElementById('roomSelect');
         const roomIdValue = roomSelect?.value;
@@ -2846,7 +2850,7 @@ window.NhaTroContract = {
         return { roomIdNumber, roomSelect };
     },
 
-// ✅ HÀM PHỤ: Validate dữ liệu người thuê
+    // ✅ HÀM PHỤ: Validate dữ liệu người thuê
     validateTenantData(contractData) {
         const tenantPhone = contractData.tenantType === "UNREGISTERED" ?
             this.unregisteredTenantData?.phone : contractData.tenant?.phone;
@@ -2877,7 +2881,7 @@ window.NhaTroContract = {
         return true;
     },
 
-// ✅ HÀM PHỤ: Chuẩn bị form data
+    // ✅ HÀM PHỤ: Chuẩn bị form data
     prepareFormData(contractData) {
         const formData = new FormData();
         formData.append("contract", JSON.stringify(contractData));
@@ -2917,7 +2921,7 @@ window.NhaTroContract = {
         return formData;
     },
 
-// ✅ HÀM PHỤ: Set loading state
+    // ✅ HÀM PHỤ: Set loading state
     setLoadingState(isLoading) {
         const saveButton = document.getElementById('btn-save');
         const sendEmailButton = document.getElementById('btn-send-email');
@@ -2937,7 +2941,7 @@ window.NhaTroContract = {
         console.log(isLoading ? "🔄 Loading state ON" : "✅ Loading state OFF");
     },
 
-// ✅ HÀM PHỤ: Gửi request save
+    // ✅ HÀM PHỤ: Gửi request save
     async sendSaveRequest(formData) {
         try {
             console.log("📤 Sending save request to /api/contracts...");
@@ -2970,7 +2974,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý khi save thành công
+    // ✅ HÀM PHỤ: Xử lý khi save thành công
     async handleSaveSuccess(data) {
         if (data.success) {
             console.log("✅ Contract saved successfully!");
@@ -3014,7 +3018,7 @@ window.NhaTroContract = {
         }
     },
 
-// ✅ HÀM PHỤ: Xử lý khi save lỗi
+    // ✅ HÀM PHỤ: Xử lý khi save lỗi
     handleSaveError(error) {
         console.error("❌ Contract save failed:", error);
 
@@ -3805,7 +3809,7 @@ window.NhaTroContract = {
         document.getElementById("tenant-id-place").value = issuePlace;
         document.getElementById("tenant-email").value = email;
         document.getElementById("tenant-street").value = street;
-
+        document.getElementById("tenant-email").value = email;
         // 🔥 BẮT ĐẦU KHỐI CODE SỬA LỖI ĐỊA CHỈ 🔥
         const tenantProvinceSelect = document.getElementById("tenant-province");
         const tenantDistrictSelect = document.getElementById("tenant-district");
@@ -4026,7 +4030,7 @@ window.NhaTroContract = {
             title: message
         };
 
-        switch(type) {
+        switch (type) {
             case 'success':
                 config.icon = 'success';
                 break;

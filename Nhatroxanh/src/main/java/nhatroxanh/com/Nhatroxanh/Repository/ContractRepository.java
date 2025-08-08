@@ -215,4 +215,5 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         long countByTenantUserIdAndStatus(Integer userId, Contracts.Status status);
 
+    
 }

@@ -518,7 +518,9 @@ public class ContractController {
         unregisteredTenant.setIssueDate(tenantDto.getIssueDate());
         unregisteredTenant.setIssuePlace(tenantDto.getIssuePlace());
         unregisteredTenant.setBirthday(tenantDto.getBirthday());
-
+        if (StringUtils.hasText(tenantDto.getEmail())) {
+            unregisteredTenant.setEmail(tenantDto.getEmail());
+        }
         StringBuilder addressBuilder = new StringBuilder();
         if (StringUtils.hasText(tenantDto.getStreet()))
             addressBuilder.append(tenantDto.getStreet());
@@ -1211,8 +1213,12 @@ public class ContractController {
                         String encryptedCccd = tenantCccd.getCccdNumber();
                         String decryptedCccd = encryptionService.decrypt(encryptedCccd);
 
-                        logger.info("🔓 Encrypted CCCD: {}", encryptedCccd != null ? encryptedCccd.substring(0, Math.min(10, encryptedCccd.length())) + "..." : "null");
-                        logger.info("🔓 Decrypted CCCD: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+                        logger.info("🔓 Encrypted CCCD: {}",
+                                encryptedCccd != null
+                                        ? encryptedCccd.substring(0, Math.min(10, encryptedCccd.length())) + "..."
+                                        : "null");
+                        logger.info("🔓 Decrypted CCCD: {}",
+                                decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
 
                         tenantData.put("cccdNumber", decryptedCccd != null ? decryptedCccd : ""); // ✅ SỐ ĐÃ GIẢI MÃ
 
@@ -1221,7 +1227,8 @@ public class ContractController {
                         tenantData.put("cccdNumber", ""); // Nếu lỗi thì để trống
                     }
 
-                    tenantData.put("issueDate", tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
+                    tenantData.put("issueDate",
+                            tenantCccd.getIssueDate() != null ? tenantCccd.getIssueDate().toString() : null);
                     tenantData.put("issuePlace", tenantCccd.getIssuePlace() != null ? tenantCccd.getIssuePlace() : "");
                 } else {
                     tenantData.put("cccdNumber", "");
@@ -1264,6 +1271,7 @@ public class ContractController {
             return ResponseEntity.status(500).body(response);
         }
     }
+
     // ✅ THÊM METHOD HELPER ĐỂ MASK CCCD CHO LOG
     private String maskCccdForLog(String cccd) {
         if (cccd == null || cccd.length() < 8) {
@@ -1271,6 +1279,7 @@ public class ContractController {
         }
         return cccd.substring(0, 3) + "*****" + cccd.substring(cccd.length() - 3);
     }
+
     private Map<String, String> parseAddress(String addressString) {
         Map<String, String> addressParts = new HashMap<>();
         if (addressString == null || addressString.trim().isEmpty()) {
@@ -1988,7 +1997,8 @@ public class ContractController {
                         String tenantName = "Chưa xác định";
                         if (contract.getTenant() != null && StringUtils.hasText(contract.getTenant().getFullname())) {
                             tenantName = contract.getTenant().getFullname();
-                        } else if (contract.getUnregisteredTenant() != null && StringUtils.hasText(contract.getUnregisteredTenant().getFullName())) {
+                        } else if (contract.getUnregisteredTenant() != null
+                                && StringUtils.hasText(contract.getUnregisteredTenant().getFullName())) {
                             tenantName = contract.getUnregisteredTenant().getFullName();
                         }
                         dto.setTenantName(tenantName);
@@ -1997,7 +2007,8 @@ public class ContractController {
                         dto.setTenantPhone(StringUtils.hasText(phoneNumber) ? phoneNumber : "Chưa cập nhật");
 
                         dto.setStatus(String.valueOf(contract.getStatus()));
-                        dto.setStartDate(contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
+                        dto.setStartDate(
+                                contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
                         dto.setEndDate(contract.getEndDate() != null ? contract.getEndDate().toLocalDate() : null);
 
                         return dto;
@@ -2025,7 +2036,6 @@ public class ContractController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
-
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -2586,7 +2596,8 @@ public class ContractController {
                     String decryptedCccd = encryptionService.decrypt(encryptedCccd);
 
                     tenant.setCccdNumber(decryptedCccd != null ? decryptedCccd : ""); // ✅ SỐ ĐÃ GIẢI MÃ
-                    logger.info("🔓 Decrypted CCCD for contract: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+                    logger.info("🔓 Decrypted CCCD for contract: {}",
+                            decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
 
                 } catch (Exception e) {
                     logger.error("❌ Lỗi giải mã CCCD trong contract: {}", e.getMessage());
@@ -2622,8 +2633,7 @@ public class ContractController {
                     }
                 }
 
-                }
-
+            }
 
             dto.setTenant(tenant);
             dto.setTenantType("REGISTERED");
@@ -2641,7 +2651,7 @@ public class ContractController {
             unregTenant.setIssueDate(unregUser.getIssueDate());
             unregTenant.setIssuePlace(unregUser.getIssuePlace());
             unregTenant.setBirthday(unregUser.getBirthday());
-
+            unregTenant.setEmail(unregUser.getEmail());
             String address = unregUser.getAddress();
             if (StringUtils.hasText(address)) {
                 Map<String, String> addressParts = parseAddress(address);
@@ -2695,7 +2705,8 @@ public class ContractController {
                     logger.info("🔐 Owner Encrypted CCCD: {}", encryptedCccd);
 
                     String decryptedCccd = encryptionService.decrypt(encryptedCccd);
-                    logger.info("🔓 Owner Decrypted CCCD: {}", decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
+                    logger.info("🔓 Owner Decrypted CCCD: {}",
+                            decryptedCccd != null ? maskCccdForLog(decryptedCccd) : "null");
 
                     owner.setCccdNumber(decryptedCccd != null ? decryptedCccd : "");
 
@@ -2866,7 +2877,6 @@ public class ContractController {
         return ResponseEntity.notFound().build();
     }
 
-
     // ✅ THÊM METHOD NÀY VÀO CONTROLLER
     private String getTenantEmail(Map<String, Object> requestData, Contracts contract) {
         // Kiểm tra email từ request trước
@@ -2889,113 +2899,115 @@ public class ContractController {
     }
 
     // ✅ ENDPOINT SEND PDF VIA EMAIL
-@PostMapping("/send-email-pdf")
-@ResponseBody
-public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request, Authentication authentication) {
-    Map<String, Object> response = new HashMap<>();
+    @PostMapping("/send-email-pdf")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map<String, Object> request,
+            Authentication authentication) {
+        Map<String, Object> response = new HashMap<>();
 
-    try {
-        String recipientEmail = (String) request.get("recipientEmail");
-        String recipientName = (String) request.get("recipientName");
-        String contractHtml = (String) request.get("contractHtml");
-        String subject = (String) request.get("subject");
-        String contractIdStr = (String) request.get("contractId");
+        try {
+            String recipientEmail = (String) request.get("recipientEmail");
+            String recipientName = (String) request.get("recipientName");
+            String contractHtml = (String) request.get("contractHtml");
+            String subject = (String) request.get("subject");
+            String contractIdStr = (String) request.get("contractId");
 
-        // ✅ VALIDATE
-        if (recipientEmail == null || contractHtml == null) {
-            response.put("success", false);
-            response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
-            return ResponseEntity.badRequest().body(response);
-        }
+            // ✅ VALIDATE
+            if (recipientEmail == null || contractHtml == null) {
+                response.put("success", false);
+                response.put("message", "Email hoặc nội dung hợp đồng không được để trống");
+                return ResponseEntity.badRequest().body(response);
+            }
 
-        System.out.println("📧 Đang tạo PDF và gửi email tới: " + recipientEmail);
+            System.out.println("📧 Đang tạo PDF và gửi email tới: " + recipientEmail);
 
-        // ✅ TẠO PDF TỪ HTML
-        byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
+            // ✅ TẠO PDF TỪ HTML
+            byte[] pdfBytes = pdfService.generateContractPdf(contractHtml);
 
-        // ✅ TẠO TÊN FILE
-        String fileName = String.format("HopDong_%s_%s",
-                recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
-                contractIdStr != null ? contractIdStr : System.currentTimeMillis());
+            // ✅ TẠO TÊN FILE
+            String fileName = String.format("HopDong_%s_%s",
+                    recipientName != null ? recipientName.replaceAll("\\s+", "_") : "KhachHang",
+                    contractIdStr != null ? contractIdStr : System.currentTimeMillis());
 
-        // ✅ GỬI EMAIL VỚI FILE PDF ĐÍNH KÈM
-        emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
+            // ✅ GỬI EMAIL VỚI FILE PDF ĐÍNH KÈM
+            emailService.sendContractPDF(recipientEmail, recipientName, subject, pdfBytes, fileName);
 
-        // =================================================================
-        // ✅ BẮT ĐẦU LOGIC TẠO THÔNG BÁO CHO NGƯỜI DÙNG
-        // =================================================================
-        log.info("Bắt đầu tạo thông báo cho việc gửi hợp đồng...");
+            // =================================================================
+            // ✅ BẮT ĐẦU LOGIC TẠO THÔNG BÁO CHO NGƯỜI DÙNG
+            // =================================================================
+            log.info("Bắt đầu tạo thông báo cho việc gửi hợp đồng...");
 
-        // 1. Tìm người dùng (khách thuê) bằng địa chỉ email
-        Optional<Users> tenantOptional = userRepository.findByEmail(recipientEmail);
+            // 1. Tìm người dùng (khách thuê) bằng địa chỉ email
+            Optional<Users> tenantOptional = userRepository.findByEmail(recipientEmail);
 
-        if (tenantOptional.isPresent()) {
-            Users tenant = tenantOptional.get();
+            if (tenantOptional.isPresent()) {
+                Users tenant = tenantOptional.get();
 
-            // 2. Lấy thông tin chủ trọ đang đăng nhập từ Authentication
-            CustomUserDetails ownerDetails = (CustomUserDetails) authentication.getPrincipal();
-            Users owner = userRepository.findById(ownerDetails.getUserId()).orElse(null);
+                // 2. Lấy thông tin chủ trọ đang đăng nhập từ Authentication
+                CustomUserDetails ownerDetails = (CustomUserDetails) authentication.getPrincipal();
+                Users owner = userRepository.findById(ownerDetails.getUserId()).orElse(null);
 
-            // 3. Tìm phòng trọ từ contractId để liên kết (nếu có)
-            Rooms associatedRoom = null;
-            if (contractIdStr != null && !contractIdStr.isEmpty()) {
-                try {
-                    Integer contractId = Integer.parseInt(contractIdStr);
-                    // Lấy phòng từ hợp đồng
-                    associatedRoom = contractsRepository.findById(contractId)
-                                        .map(Contracts::getRoom)
-                                        .orElse(null);
-                } catch (NumberFormatException e) {
-                    log.warn("Không thể chuyển đổi contractId thành số: {}", contractIdStr);
+                // 3. Tìm phòng trọ từ contractId để liên kết (nếu có)
+                Rooms associatedRoom = null;
+                if (contractIdStr != null && !contractIdStr.isEmpty()) {
+                    try {
+                        Integer contractId = Integer.parseInt(contractIdStr);
+                        // Lấy phòng từ hợp đồng
+                        associatedRoom = contractsRepository.findById(contractId)
+                                .map(Contracts::getRoom)
+                                .orElse(null);
+                    } catch (NumberFormatException e) {
+                        log.warn("Không thể chuyển đổi contractId thành số: {}", contractIdStr);
+                    }
                 }
+
+                // 4. Tạo tiêu đề và nội dung cho thông báo
+                String notificationTitle = "Hợp đồng thuê nhà mới";
+                String notificationMessage = "Chủ trọ " + (owner != null ? owner.getFullname() : "Chủ trọ") +
+                        " đã gửi cho bạn hợp đồng thuê nhà qua email. Vui lòng kiểm tra hộp thư đến của bạn.";
+
+                // 5. Tạo đối tượng Notification theo đúng cấu trúc entity của bạn
+                Notification newNotification = new Notification();
+                newNotification.setUser(tenant); // Gán thông báo cho người thuê
+                newNotification.setTitle(notificationTitle);
+                newNotification.setMessage(notificationMessage);
+                newNotification.setType(Notification.NotificationType.CONTRACT); // Đặt loại là hợp đồng
+                newNotification.setIsRead(false); // Trạng thái: chưa đọc
+                newNotification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));
+
+                if (associatedRoom != null) {
+                    newNotification.setRoom(associatedRoom); // Liên kết thông báo với phòng trọ
+                }
+
+                // 6. Lưu thông báo vào cơ sở dữ liệu
+                notificationRepository.save(newNotification);
+
+                log.info("✅ Đã tạo thông báo hợp đồng thành công cho người dùng: {}", tenant.getEmail());
+
+            } else {
+                log.warn("⚠️ Không tìm thấy người dùng với email '{}' để tạo thông báo.", recipientEmail);
             }
+            // =================================================================
+            // ✅ KẾT THÚC LOGIC TẠO THÔNG BÁO
+            // =================================================================
 
-            // 4. Tạo tiêu đề và nội dung cho thông báo
-            String notificationTitle = "Hợp đồng thuê nhà mới";
-            String notificationMessage = "Chủ trọ " + (owner != null ? owner.getFullname() : "Chủ trọ") +
-                                         " đã gửi cho bạn hợp đồng thuê nhà qua email. Vui lòng kiểm tra hộp thư đến của bạn.";
+            response.put("success", true);
+            response.put("message", "Hợp đồng PDF đã được gửi thành công qua email và đã tạo thông báo.");
+            response.put("fileName", fileName + ".pdf");
+            response.put("recipientEmail", recipientEmail);
 
-            // 5. Tạo đối tượng Notification theo đúng cấu trúc entity của bạn
-            Notification newNotification = new Notification();
-            newNotification.setUser(tenant); // Gán thông báo cho người thuê
-            newNotification.setTitle(notificationTitle);
-            newNotification.setMessage(notificationMessage);
-            newNotification.setType(Notification.NotificationType.CONTRACT); // Đặt loại là hợp đồng
-            newNotification.setIsRead(false); // Trạng thái: chưa đọc
-            newNotification.setCreateAt(new java.sql.Timestamp(System.currentTimeMillis()));
+            return ResponseEntity.ok(response);
 
-            if (associatedRoom != null) {
-                newNotification.setRoom(associatedRoom); // Liên kết thông báo với phòng trọ
-            }
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi trong quá trình gửi email và tạo thông báo: " + e.getMessage());
+            e.printStackTrace();
 
-            // 6. Lưu thông báo vào cơ sở dữ liệu
-            notificationRepository.save(newNotification);
-
-            log.info("✅ Đã tạo thông báo hợp đồng thành công cho người dùng: {}", tenant.getEmail());
-
-        } else {
-            log.warn("⚠️ Không tìm thấy người dùng với email '{}' để tạo thông báo.", recipientEmail);
+            response.put("success", false);
+            response.put("message", "Lỗi hệ thống: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-        // =================================================================
-        // ✅ KẾT THÚC LOGIC TẠO THÔNG BÁO
-        // =================================================================
-
-        response.put("success", true);
-        response.put("message", "Hợp đồng PDF đã được gửi thành công qua email và đã tạo thông báo.");
-        response.put("fileName", fileName + ".pdf");
-        response.put("recipientEmail", recipientEmail);
-
-        return ResponseEntity.ok(response);
-
-    } catch (Exception e) {
-        System.err.println("❌ Lỗi trong quá trình gửi email và tạo thông báo: " + e.getMessage());
-        e.printStackTrace();
-
-        response.put("success", false);
-        response.put("message", "Lỗi hệ thống: " + e.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
-}
+
     @PostMapping("/generate-pdf")
     public ResponseEntity<byte[]> generateContractPdf(@RequestBody Map<String, Object> request) {
         try {
@@ -3100,11 +3112,11 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
         return ResponseEntity.ok(response);
     }
 
-
     /**
      * Tính tổng số hợp đồng theo trạng thái cho chủ trọ.
      * Endpoint: GET /api/contracts/count-by-status
      * Yêu cầu quyền: OWNER
+     * 
      * @param authentication Thông tin xác thực của người dùng
      * @return ResponseEntity chứa số lượng hợp đồng theo từng trạng thái
      */
@@ -3145,7 +3157,8 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
      * Tìm kiếm hợp đồng theo số điện thoại của người thuê.
      * Endpoint: GET /api/contracts/search-by-phone
      * Yêu cầu quyền: OWNER
-     * @param phone Số điện thoại của người thuê (bắt buộc)
+     * 
+     * @param phone          Số điện thoại của người thuê (bắt buộc)
      * @param authentication Thông tin xác thực của người dùng
      * @return ResponseEntity chứa danh sách hợp đồng phù hợp
      */
@@ -3176,9 +3189,11 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
                     .map(contract -> {
                         ContractListDto dto = new ContractListDto();
                         dto.setContractId(Long.valueOf(contract.getContractId()));
-//                        dto.setRoomName(contract.getRoom().getNamerooms());
-                        dto.setTenantName(contract.getTenant() != null ? contract.getTenant().getFullname() :
-                                contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName() : "");
+                        // dto.setRoomName(contract.getRoom().getNamerooms());
+                        dto.setTenantName(contract.getTenant() != null ? contract.getTenant().getFullname()
+                                : contract.getUnregisteredTenant() != null
+                                        ? contract.getUnregisteredTenant().getFullName()
+                                        : "");
                         dto.setTenantPhone(contract.getTenantPhone());
                         dto.setStatus(String.valueOf(contract.getStatus()));
                         dto.setStartDate(contract.getStartDate().toLocalDate());
@@ -3209,13 +3224,13 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
         }
     }
 
-
     /**
      * Tìm kiếm hợp đồng theo số điện thoại hoặc CCCD của người thuê.
      * Endpoint: GET /api/contracts/search
      * Yêu cầu quyền: OWNER
-     * @param phone Số điện thoại của người thuê (tùy chọn)
-
+     * 
+     * @param phone          Số điện thoại của người thuê (tùy chọn)
+     * 
      * @param authentication Thông tin xác thực của người dùng
      * @return ResponseEntity chứa danh sách hợp đồng phù hợp
      */
@@ -3228,7 +3243,8 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "5") int size,
             Authentication authentication) {
-        logger.info("🔍 Nhận yêu cầu tìm kiếm hợp đồng - Phone: {}, RoomName: {}, Page: {}, Size: {}", phone, roomName, page, size);
+        logger.info("🔍 Nhận yêu cầu tìm kiếm hợp đồng - Phone: {}, RoomName: {}, Page: {}, Size: {}", phone, roomName,
+                page, size);
         Map<String, Object> response = new HashMap<>();
 
         try {
@@ -3276,20 +3292,22 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
                 // Tìm theo cả phone và roomName (kết hợp OR)
                 contractsPage = contractsRepository.findByTenantPhoneAndOwnerUserId(phone, ownerId, pageable);
                 if (contractsPage.isEmpty()) {
-                    contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+                    contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%",
+                            ownerId, pageable);
                 } else {
                     // Nếu tìm thấy theo phone, thêm kết quả tìm theo roomName
-                    Page<Contracts> roomContractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+                    Page<Contracts> roomContractsPage = contractsRepository
+                            .findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
                     List<Contracts> combinedContracts = Stream.concat(
                             contractsPage.getContent().stream(),
-                            roomContractsPage.getContent().stream()
-                    ).distinct().collect(Collectors.toList());
+                            roomContractsPage.getContent().stream()).distinct().collect(Collectors.toList());
                     contractsPage = new PageImpl<>(combinedContracts, pageable, combinedContracts.size());
                 }
             } else if (StringUtils.hasText(phone)) {
                 contractsPage = contractsRepository.findByTenantPhoneAndOwnerUserId(phone, ownerId, pageable);
             } else {
-                contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%", ownerId, pageable);
+                contractsPage = contractsRepository.findByRoomNameAndOwnerUserId("%" + roomName.toLowerCase() + "%",
+                        ownerId, pageable);
             }
 
             // Chuyển đổi sang ContractListDto
@@ -3298,12 +3316,15 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
                         ContractListDto dto = new ContractListDto();
                         dto.setContractId(Long.valueOf(contract.getContractId()));
                         dto.setRoomName(contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A");
-                        String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname() :
-                                (contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName() : "N/A");
+                        String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname()
+                                : (contract.getUnregisteredTenant() != null
+                                        ? contract.getUnregisteredTenant().getFullName()
+                                        : "N/A");
                         dto.setTenantName(tenantName);
                         dto.setTenantPhone(contract.getTenantPhone() != null ? contract.getTenantPhone() : "N/A");
                         dto.setStatus(String.valueOf(contract.getStatus()));
-                        dto.setStartDate(contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
+                        dto.setStartDate(
+                                contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
                         dto.setEndDate(contract.getEndDate() != null ? contract.getEndDate().toLocalDate() : null);
                         return dto;
                     })
@@ -3315,7 +3336,8 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
             response.put("totalContracts", contractsPage.getTotalElements());
             response.put("totalPages", contractsPage.getTotalPages());
             response.put("currentPage", contractsPage.getNumber());
-            response.put("message", contractDtos.isEmpty() ? "Không tìm thấy hợp đồng nào" : "Tìm kiếm hợp đồng thành công");
+            response.put("message",
+                    contractDtos.isEmpty() ? "Không tìm thấy hợp đồng nào" : "Tìm kiếm hợp đồng thành công");
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
@@ -3325,10 +3347,12 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
     /**
      * Đếm số hợp đồng sắp hết hạn (trong 3 ngày) cho chủ trọ.
      * Endpoint: GET /api/contracts/count-expiring
      * Yêu cầu quyền: OWNER
+     * 
      * @param authentication Thông tin xác thực của người dùng
      * @return ResponseEntity chứa số lượng hợp đồng sắp hết hạn
      */
@@ -3349,8 +3373,7 @@ public ResponseEntity<Map<String, Object>> sendContractEmailPdf(@RequestBody Map
                     ownerId,
                     Date.valueOf(today),
                     Date.valueOf(threeDaysLater),
-                    Contracts.Status.ACTIVE
-            );
+                    Contracts.Status.ACTIVE);
 
             response.put("success", true);
             response.put("expiringCount", count);

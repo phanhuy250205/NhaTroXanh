@@ -190,4 +190,7 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
                         "LEFT JOIN FETCH c.unregisteredTenant ut " +
                         "WHERE c.owner.userId = :ownerId")
         Page<Contracts> findByOwnerUserIdWithRoom(@Param("ownerId") Integer ownerId, Pageable pageable);
+
+        List<Contracts> findByStatusAndEndDateBetween(Contracts.Status status, Date startDate, Date endDate);
+
 }
