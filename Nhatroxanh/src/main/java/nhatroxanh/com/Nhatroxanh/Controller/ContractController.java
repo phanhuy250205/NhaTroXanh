@@ -63,6 +63,7 @@ public class ContractController {
     @Autowired
     private ResidentRepository residentRepository;
 
+
     @Autowired
     private RoomsRepository roomsRepository;
 
