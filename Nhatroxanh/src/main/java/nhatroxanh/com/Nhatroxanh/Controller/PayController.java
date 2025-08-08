@@ -2,14 +2,11 @@ package nhatroxanh.com.Nhatroxanh.Controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import nhatroxanh.com.Nhatroxanh.Model.entity.Address;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.entity.DetailPayments;
-import nhatroxanh.com.Nhatroxanh.Model.entity.District;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Payments;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Rooms;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
-import nhatroxanh.com.Nhatroxanh.Model.entity.Ward;
 import nhatroxanh.com.Nhatroxanh.Repository.AddressRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ContractsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.DetailPaymentsRepository;
@@ -27,6 +24,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -268,6 +266,11 @@ public class PayController {
                 throw new IllegalStateException("Hóa đơn đã được thanh toán.");
             }
 
+            if (payment.getPaymentStatus() == Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT) {
+                throw new IllegalStateException("Hóa đơn này đang chờ xác nhận thanh toán tiền mặt vào " +
+                        payment.getScheduledPaymentDate() + " lúc " + payment.getScheduledPaymentTime() + ".");
+            }
+
             // Apply voucher if provided
             Float discount = 0f;
             String appliedVoucherCode = null;
@@ -325,15 +328,20 @@ public class PayController {
             payment.setPaymentMethod(methodEnum);
 
             if ("cash".equalsIgnoreCase(paymentMethod) && paymentDate != null && paymentTime != null) {
-                // Check if payment already has a cash appointment scheduled
-                if (paymentsRepository.hasCashAppointmentScheduled(paymentIdInt)) {
-                    throw new IllegalStateException("Hóa đơn này đã được hẹn thanh toán tiền mặt trước đó. Mỗi hóa đơn chỉ được hẹn thanh toán tiền mặt một lần duy nhất.");
+                // Check if payment is already paid
+                if (paymentsRepository.isPaymentAlreadyPaid(paymentIdInt)) {
+                    throw new IllegalStateException(
+                            "Hóa đơn này đã được thanh toán. Không thể đặt lịch hẹn cho hóa đơn đã thanh toán.");
                 }
 
-                // Check if payment is currently waiting for cash confirmation
-                if (paymentsRepository.isWaitingForCashConfirmation(paymentIdInt)) {
-                    throw new IllegalStateException("Hóa đơn này đang chờ xác nhận thanh toán tiền mặt. Vui lòng chờ chủ trọ xác nhận.");
+                // Check if payment has ever had an appointment scheduled (prevents duplicate
+                // appointments)
+                if (paymentsRepository.hasEverHadAppointmentScheduled(paymentIdInt)) {
+                    throw new IllegalStateException(
+                            "Hóa đơn này đã được đặt lịch hẹn thanh toán tiền mặt trước đó. Mỗi hóa đơn chỉ được phép đặt lịch hẹn một lần duy nhất.");
                 }
+
+                // Additional check: if payment is currently waiting for cash confirmation
 
                 // Set payment status to waiting for cash payment confirmation
                 payment.setPaymentStatus(Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT);
@@ -342,11 +350,12 @@ public class PayController {
                 payment.setScheduledPaymentTime(paymentTime);
                 payment.setPaymentNote(paymentNote);
                 payment.setLandlordNotified(false);
-                
+
                 // Increment cash appointment count
-                Integer currentCount = payment.getCashAppointmentCount() != null ? payment.getCashAppointmentCount() : 0;
+                Integer currentCount = payment.getCashAppointmentCount() != null ? payment.getCashAppointmentCount()
+                        : 0;
                 payment.setCashAppointmentCount(currentCount + 1);
-                
+
                 paymentsRepository.save(payment);
 
                 // Send email to landlord with appointment details
@@ -354,16 +363,16 @@ public class PayController {
                 if (contract != null && contract.getRoom() != null && contract.getRoom().getHostel() != null) {
                     String landlordEmail = contract.getRoom().getHostel().getOwner().getEmail();
                     String landlordName = contract.getRoom().getHostel().getOwner().getFullname();
-                    String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname() : "Khách thuê";
+                    String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname()
+                            : "Khách thuê";
                     String roomName = contract.getRoom().getNamerooms();
                     String hostelName = contract.getRoom().getHostel().getName();
                     String amount = CURRENCY_FORMAT.format(payment.getTotalAmount()) + " VNĐ";
 
                     try {
                         emailService.sendCashPaymentAppointmentEmail(
-                            landlordEmail, landlordName, tenantName, roomName, hostelName,
-                            paymentDate, paymentTime, amount, paymentNote, payment.getId()
-                        );
+                                landlordEmail, landlordName, tenantName, roomName, hostelName,
+                                paymentDate, paymentTime, amount, paymentNote, payment.getId());
                         log.info("Sent cash payment appointment email to landlord {}", landlordEmail);
                     } catch (Exception e) {
                         log.error("Failed to send cash payment appointment email: {}", e.getMessage());
@@ -373,9 +382,8 @@ public class PayController {
                     if (contract.getTenant() != null) {
                         try {
                             notificationService.createCashPaymentAppointmentNotification(
-                                contract.getTenant(), payment, paymentDate, paymentTime, paymentNote
-                            );
-                            log.info("Created cash payment appointment notification for tenant {}", 
+                                    contract.getTenant(), payment, paymentDate, paymentTime, paymentNote);
+                            log.info("Created cash payment appointment notification for tenant {}",
                                     contract.getTenant().getUserId());
                         } catch (Exception e) {
                             log.error("Failed to create cash payment appointment notification: {}", e.getMessage());
@@ -384,7 +392,8 @@ public class PayController {
                 }
 
                 response.put("success", true);
-                response.put("message", "Đã đặt lịch thanh toán tiền mặt thành công! Chủ trọ sẽ liên hệ để xác nhận. Vui lòng chờ xác nhận từ chủ trọ.");
+                response.put("message",
+                        "Đã đặt lịch thanh toán tiền mặt thành công! Chủ trọ sẽ liên hệ để xác nhận. Vui lòng chờ xác nhận từ chủ trọ.");
                 response.put("appointmentScheduled", true);
                 // Không redirect, giữ nguyên trang thanh toán
                 return ResponseEntity.ok(response);
@@ -428,7 +437,8 @@ public class PayController {
             response.put("success", false);
             response.put("error", "Lỗi do xung đột dữ liệu voucher. Vui lòng thử lại.");
             response.put("failureUrl",
-                    "/guest/failure-thanhtoan?invoiceId=" + invoiceId + "&errorMessage=Lỗi do xung đột dữ liệu voucher");
+                    "/guest/failure-thanhtoan?invoiceId=" + invoiceId
+                            + "&errorMessage=Lỗi do xung đột dữ liệu voucher");
             return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
         } catch (Exception e) {
             log.error("Unexpected error processing payment for invoice {} at {}: {}", invoiceId, LocalDateTime.now(),
@@ -480,7 +490,8 @@ public class PayController {
                 room = roomsRepository.findById(roomId)
                         .filter(r -> r.getHostel() != null && r.getHostel().getHostelId().equals(hostelId))
                         .orElseThrow(() -> {
-                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId, LocalDateTime.now());
+                            log.error("Room not found or hostel mismatch for room_id: {} at {}", roomId,
+                                    LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found or hostel mismatch for room_id: " + roomId);
                         });
@@ -492,7 +503,8 @@ public class PayController {
                         });
                 room = roomsRepository.findById(contract.getRoom().getRoomId())
                         .orElseThrow(() -> {
-                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(), LocalDateTime.now());
+                            log.error("Room not found for contract ID: {} at {}", contract.getContractId(),
+                                    LocalDateTime.now());
                             return new IllegalArgumentException(
                                     "Room not found for contract ID: " + contract.getContractId());
                         });
@@ -520,7 +532,7 @@ public class PayController {
                     .map(date -> String.format("Tháng %02d/%d", date.toLocalDate().getMonthValue(),
                             date.toLocalDate().getYear()))
                     .orElse("N/A"));
-             // Set totals explicitly for clarity
+            // Set totals explicitly for clarity
             model.addAttribute("originalTotal", Optional.ofNullable(model.getAttribute("originalTotal"))
                     .map(obj -> (String) obj)
                     .orElse("0 VNĐ"));
@@ -550,7 +562,8 @@ public class PayController {
             model.addAttribute("error", e.getMessage());
             return "guest/success-thanhtoan";
         } catch (Exception e) {
-            log.error("Unexpected error loading payment success page at {}: {}", LocalDateTime.now(), e.getMessage(), e);
+            log.error("Unexpected error loading payment success page at {}: {}", LocalDateTime.now(), e.getMessage(),
+                    e);
             model.addAttribute("error", "Lỗi hệ thống: Vui lòng thử lại sau.");
             return "guest/success-thanhtoan";
         }
@@ -610,7 +623,8 @@ public class PayController {
             model.addAttribute("invoiceId", invoiceId);
             return "guest/failure-thanhtoan";
         } catch (Exception e) {
-            log.error("Unexpected error loading payment failure page at {}: {}", LocalDateTime.now(), e.getMessage(), e);
+            log.error("Unexpected error loading payment failure page at {}: {}", LocalDateTime.now(), e.getMessage(),
+                    e);
             model.addAttribute("errorMessage", "Lỗi hệ thống: Vui lòng thử lại sau.");
             model.addAttribute("invoiceId", invoiceId);
             return "guest/failure-thanhtoan";
@@ -739,7 +753,8 @@ public class PayController {
                     }
                 }
             } catch (Exception e) {
-                log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(), e);
+                log.error("Error processing detail payment item: {} at {}", detail.getItemName(), LocalDateTime.now(),
+                        e);
             }
         }
 
@@ -923,7 +938,8 @@ public class PayController {
                 // Create cash payment success notification for tenant
                 try {
                     notificationService.createCashPaymentSuccessNotification(contract.getTenant(), payment);
-                    log.info("Created cash payment success notification for tenant {}", contract.getTenant().getUserId());
+                    log.info("Created cash payment success notification for tenant {}",
+                            contract.getTenant().getUserId());
                 } catch (Exception e) {
                     log.error("Failed to create cash payment success notification: {}", e.getMessage());
                 }
@@ -973,6 +989,50 @@ public class PayController {
             }
         } catch (Exception e) {
             log.error("Error decreasing voucher quantity for payment {}: {}", invoiceId, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping("/api/invoice/{invoiceId}/appointment-status")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> checkAppointmentStatus(@PathVariable("invoiceId") String invoiceId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            log.info("Checking appointment status for invoiceId: {} at {}", invoiceId, LocalDateTime.now());
+            Integer paymentIdInt = Integer.parseInt(invoiceId);
+            Payments payment = paymentsRepository.findById(paymentIdInt)
+                    .orElseThrow(() -> new IllegalArgumentException("Payment not found with id: " + invoiceId));
+
+            boolean hasAppointment = payment.getPaymentStatus() == Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT
+                    || paymentsRepository.hasEverHadAppointmentScheduled(paymentIdInt);
+
+            response.put("success", true);
+            response.put("hasAppointment", hasAppointment);
+            if (hasAppointment && payment.getScheduledPaymentDate() != null) {
+                response.put("paymentDate", payment.getScheduledPaymentDate().toString());
+                response.put("paymentTime",
+                        payment.getScheduledPaymentTime() != null ? payment.getScheduledPaymentTime() : "N/A");
+            } else {
+                response.put("paymentDate", null);
+                response.put("paymentTime", null);
+            }
+
+            log.info("Appointment status checked for invoiceId: {}, hasAppointment: {}", invoiceId, hasAppointment);
+            return ResponseEntity.ok(response);
+        } catch (NumberFormatException e) {
+            log.error("Invalid invoiceId format: {} at {}", invoiceId, LocalDateTime.now(), e);
+            response.put("success", false);
+            response.put("error", "Mã hóa đơn không hợp lệ");
+            return ResponseEntity.badRequest().body(response);
+        } catch (IllegalArgumentException e) {
+            log.error("Payment not found for invoiceId: {} at {}", invoiceId, LocalDateTime.now(), e);
+            response.put("success", false);
+            response.put("error", "Không tìm thấy thông tin thanh toán");
+            return ResponseEntity.badRequest().body(response);
+        } catch (Exception e) {
+            log.error("Error checking appointment status for invoiceId: {} at {}", invoiceId, LocalDateTime.now(), e);
+            response.put("success", false);
+            response.put("error", "Lỗi hệ thống: Không thể kiểm tra trạng thái lịch hẹn");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 }

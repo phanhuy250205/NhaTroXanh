@@ -1018,9 +1018,9 @@
                         </div>
                         <div class="data-content-notifications">
                             <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
-                            <strong>Loại phòng:</strong> ${notification.room.category?.name || 'Không xác định'}<br>
+                            <strong>Khu trọ:</strong> ${notification.room.hostel?.name || 'Không xác định'}<br>
                             <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
-                            <strong>Giá phòng:</strong> ${formatCurrency(notification.room.price) || '0'} VNĐ
+                            <strong>Giá phòng:</strong> ${notification.room.price || '0'} 
                         </div>
                     </div>
                 ` : '<p>Không có thông tin phòng liên quan.</p>'}
@@ -1087,11 +1087,11 @@
                 <div class="data-content-notifications">
                     <strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không xác định'}<br>
                     <strong>Tháng:</strong> ${paymentDetails.month || 'Không xác định'}<br>
-                    <strong>Tổng tiền:</strong> ${formatCurrency(paymentDetails.total) || '0'} VNĐ<br>
+                    <strong>Tổng tiền:</strong> ${paymentDetails.total || '0'} <br>
                     ${paymentDetails.status === 'SUCCESS' ? `
                         <strong>Phương thức thanh toán:</strong> ${paymentDetails.paymentMethod || 'Không xác định'}<br>
                         <strong>Phòng:</strong> ${paymentDetails.roomName || 'Không xác định'}<br>
-                        <strong>Nhà trọ:</strong> ${paymentDetails.hostelName || 'Không xác định'}<br>
+                        <strong>Khu trọ:</strong> ${paymentDetails.hostelName || 'Không xác định'}<br>
                     ` : `
                         <strong>Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}<br>
                     `}
@@ -1108,9 +1108,9 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
-                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Khu trọ:</strong> ${room.hostel?.name || 'Không xác định'}<br>
                     <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
-                    <strong>Giá phòng:</strong> ${formatCurrency(room.price) || '0'} VNĐ
+                    <strong>Giá phòng:</strong> ${room.price || '0'} 
                 </div>
             </div>`;
                 }
@@ -1150,9 +1150,9 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
-                    <strong>Loại phòng:</strong> ${room.category?.name || 'Không xác định'}<br>
+                    <strong>Khu trọ:</strong> ${room.hostel?.name || 'Không xác định'}<br>
                     <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
-                    <strong>Giá phòng:</strong> ${room.price || '0 VNĐ'}
+                    <strong>Giá phòng:</strong> ${room.price || '0'} 
                 </div>
             </div>`;
                 }
@@ -1176,8 +1176,8 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
-                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0 VNĐ'}<br>
-                    <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0 VNĐ'}<br>
+                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0'} VNĐ<br>
+                    <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0'} VNĐ<br>
                     <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
                 </div>
             </div>
@@ -1275,9 +1275,9 @@
                     </div>
                     <div class="data-content-notifications">
                         <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
-                        <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
+                        <strong>Khu trọ:</strong> ${room?.hostel?.name || 'Không xác định'}<br>
                         <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                        <strong>Giá phòng:</strong> ${room?.price || '0 VNĐ'}
+                        <strong>Giá phòng:</strong> ${room?.price|| '0'} 
                     </div>
                 </div>
                 <div class="data-block-notifications">
@@ -1286,7 +1286,7 @@
                         Thông tin thanh toán
                     </div>
                     <div class="data-content-notifications">
-                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total|| '0'} <br>
                         <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
                         <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
                     </div>
@@ -1296,7 +1296,7 @@
         <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
             <div class="payment-summary-notifications">
                 <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0 VNĐ'}</div>
+                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0'} </div>
             </div>
             <div class="payment-info-notifications">
                 <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
@@ -1309,53 +1309,53 @@
 
                 // Handle pending notifications
                 return `
-                    <div class="message-body-notifications">
-                        <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Thông báo thanh toán</h4>
-                        <p>Khoản thanh toán tiền phòng tháng ${paymentDetails.month || 'Không xác định'} của bạn đã đến hạn. Vui lòng thanh toán để tránh bị gián đoạn dịch vụ.</p>
-                        <div class="data-layout-notifications">
-                            <div class="data-block-notifications">
-                                <div class="data-title-notifications">
-                                    <i class="fas fa-home"></i>
-                                    Thông tin phòng
-                                </div>
-                                <div class="data-content-notifications">
-                                    <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
-                                    <strong>Loại phòng:</strong> ${room?.category?.name || 'Không xác định'}<br>
-                                    <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                                    <strong>Giá phòng:</strong> ${room?.price || '0'} 
-                                </div>
-                            </div>
-                            <div class="data-block-notifications">
-                                <div class="data-title-notifications">
-                                    <i class="fas fa-dollar-sign"></i>
-                                    Chi phí cần thanh toán
-                                </div>
-                                <div class="data-content-notifications">
-                                    <strong style="color: #dc2626;">Tổng cộng:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
-                                    <strong style="color: #dc2626;">Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}
-                                </div>
-                            </div>
+            <div class="message-body-notifications">
+                <h4><i class="fas fa-exclamation-triangle" style="color: #f59e0b;"></i> Thông báo thanh toán</h4>
+                <p>Khoản thanh toán tiền phòng tháng ${paymentDetails.month || 'Không xác định'} của bạn đã đến hạn. Vui lòng thanh toán để tránh bị gián đoạn dịch vụ.</p>
+                <div class="data-layout-notifications">
+                    <div class="data-block-notifications">
+                        <div class="data-title-notifications">
+                            <i class="fas fa-home"></i>
+                            Thông tin phòng
+                        </div>
+                        <div class="data-content-notifications">
+                            <strong>Phòng:</strong> ${room?.namerooms || 'Không có thông tin phòng'}<br>
+                            <strong>Khu trọ:</strong> ${room?.hostel?.name || 'Không xác định'}<br>
+                            <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
+                            <strong>Giá phòng:</strong> ${room?.price || '0'} 
                         </div>
                     </div>
-                    <div class="payment-record-notifications">
-                        <div class="payment-summary-notifications">
-                            <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                            <div class="payment-value-notifications" style="color: #dc2626;">${paymentDetails.total || '0 VNĐ'}</div>
+                    <div class="data-block-notifications">
+                        <div class="data-title-notifications">
+                            <i class="fas fa-dollar-sign"></i>
+                            Chi phí cần thanh toán
                         </div>
-                        <div class="payment-info-notifications">
-                            <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
-                            <div><strong>Ngày phát hành:</strong> ${paymentDetails.dueDate ? paymentDetails.dueDate.split('-').reverse().join('/') : 'Không xác định'}</div>
-                            <div><strong>Trạng thái:</strong> <span style="color: #dc2626;">Chưa thanh toán</span></div>
-                            <div><strong>Hạn thanh toán:</strong> <span style="color: #dc2626;">${paymentDetails.dueDate || 'Không xác định'}</span></div>
-                        </div>
-                        <div class="payment-button-container">
-                            <button class="payment-button-notifications" onclick="handlePayment('${paymentDetails.invoiceId}', '${(paymentDetails.total || '0').replace(/[^0-9]/g, '')}', '${roomId}', '${hostelId}', '${addressId}')">
-                                <i class="fas fa-credit-card"></i>
-                                Thanh toán ngay
-                            </button>
+                        <div class="data-content-notifications">
+                            <strong style="color: #dc2626;">Tổng cộng:</strong> ${paymentDetails.total || '0'} <br>
+                            <strong style="color: #dc2626;">Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}
                         </div>
                     </div>
-                `;
+                </div>
+            </div>
+            <div class="payment-record-notifications">
+                <div class="payment-summary-notifications">
+                    <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
+                    <div class="payment-value-notifications" style="color: #dc2626;">${paymentDetails.total|| '0'} </div>
+                </div>
+                <div class="payment-info-notifications">
+                    <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
+                    <div><strong>Ngày phát hành:</strong> ${paymentDetails.dueDate ? paymentDetails.dueDate.split('-').reverse().join('/') : 'Không xác định'}</div>
+                    <div><strong>Trạng thái:</strong> <span style="color: #dc2626;">Chưa thanh toán</span></div>
+                    <div><strong>Hạn thanh toán:</strong> <span style="color: #dc2626;">${paymentDetails.dueDate || 'Không xác định'}</span></div>
+                </div>
+                <div class="payment-button-container">
+                    <button class="payment-button-notifications" onclick="handlePayment('${paymentDetails.invoiceId}', '${(paymentDetails.total || '0').replace(/[^0-9]/g, '')}', '${roomId}', '${hostelId}', '${addressId}')">
+                        <i class="fas fa-credit-card"></i>
+                        Thanh toán ngay
+                    </button>
+                </div>
+            </div>
+        `;
             }
 
             // Mark notification as read
@@ -1463,13 +1463,12 @@
                 alertContainer.className = `alert alert-${type} alert-dismissible fade show`;
                 alertContainer.role = 'alert';
                 alertContainer.innerHTML = `
-                    ${message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                `;
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
                 document.body.prepend(alertContainer);
                 setTimeout(() => alertContainer.remove(), 5000);
             }
-
 
             // Load notifications on page load
             loadNotifications();
