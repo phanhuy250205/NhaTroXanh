@@ -272,7 +272,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
+                    paymentDetails.put("total", successMatcher.group(5).trim());
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
