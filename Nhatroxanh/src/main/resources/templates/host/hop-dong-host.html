@@ -1088,34 +1088,58 @@
                                 <label class="form-label">Tên đường/Số nhà</label>
                                 <input type="text" class="form-control nha-tro-host-input" id="newCustomer-street">
                             </div>
+                            <!-- ẢNH CCCD MẶT TRƯỚC NGƯỜI BẢO HỘ -->
                             <div class="col-md-6">
                                 <label class="form-label">Ảnh CCCD mặt trước <span class="text-danger">*</span></label>
-                                <div class="nha-tro-image-upload"
-                                    onclick="document.getElementById('newCustomer-cccd-front').click()">
-                                    <input type="file" id="newCustomer-cccd-front" accept="image/*"
-                                        style="display: none;">
-                                    <div id="newCustomer-cccd-front-preview" class="nha-tro-image-preview">
-                                        <i class="fa fa-camera fa-2x"></i>
-                                        <div class="mt-2">Tải ảnh mặt trước</div>
-                                        <small class="text-muted">Nhấn để chọn ảnh</small>
+                                <!-- 🔥 THÊM CONTAINER VALIDATION -->
+                                <div class="cccd-validation-container">
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('newCustomer-cccd-front').click()">
+                                        <input type="file" id="newCustomer-cccd-front" accept="image/*" style="display: none;">
+                                        <div id="newCustomer-cccd-front-preview" class="nha-tro-image-preview">
+                                            <i class="fa fa-camera fa-2x"></i>
+                                            <div class="mt-2">Tải ảnh mặt trước</div>
+                                            <small class="text-muted">Nhấn để chọn ảnh</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔥 THÊM PROGRESS BAR -->
+                                    <div class="cccd-progress-container" style="display: none;">
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar cccd-progress-bar" role="progressbar" style="width: 0%">0%</div>
+                                        </div>
+                                        <small class="text-muted">Đang kiểm tra tính hợp lệ của CCCD...</small>
                                     </div>
                                 </div>
                                 <div class="invalid-feedback" id="newCustomer-cccd-front-error"></div>
                             </div>
+
+                            <!-- ẢNH CCCD MẶT SAU NGƯỜI BẢO HỘ -->
                             <div class="col-md-6">
                                 <label class="form-label">Ảnh CCCD mặt sau <span class="text-danger">*</span></label>
-                                <div class="nha-tro-image-upload"
-                                    onclick="document.getElementById('newCustomer-cccd-back').click()">
-                                    <input type="file" id="newCustomer-cccd-back" accept="image/*"
-                                        style="display: none;">
-                                    <div id="newCustomer-cccd-back-preview" class="nha-tro-image-preview">
-                                        <i class="fa fa-camera fa-2x"></i>
-                                        <div class="mt-2">Tải ảnh mặt sau</div>
-                                        <small class="text-muted">Nhấn để chọn ảnh</small>
+                                <!-- 🔥 THÊM CONTAINER VALIDATION -->
+                                <div class="cccd-validation-container">
+                                    <div class="nha-tro-image-upload" onclick="document.getElementById('newCustomer-cccd-back').click()">
+                                        <input type="file" id="newCustomer-cccd-back" accept="image/*" style="display: none;">
+                                        <div id="newCustomer-cccd-back-preview" class="nha-tro-image-preview">
+                                            <i class="fa fa-camera fa-2x"></i>
+                                            <div class="mt-2">Tải ảnh mặt sau</div>
+                                            <small class="text-muted">Nhấn để chọn ảnh</small>
+                                        </div>
+                                    </div>
+
+                                    <!-- 🔥 THÊM PROGRESS BAR -->
+                                    <div class="cccd-progress-container" style="display: none;">
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar cccd-progress-bar" role="progressbar" style="width: 0%">0%</div>
+                                        </div>
+                                        <small class="text-muted">Đang kiểm tra tính hợp lệ của CCCD...</small>
                                     </div>
                                 </div>
                                 <div class="invalid-feedback" id="newCustomer-cccd-back-error"></div>
                             </div>
+
+
+
                             <div class="col-12">
                                 <label class="form-label">Ghi chú (tùy chọn)</label>
                                 <textarea class="form-control nha-tro-host-input" id="newCustomer-notes" rows="3"
@@ -1168,10 +1192,9 @@
                 }
             });
         });
+
+
     </script>
-
-
-
 
     <!-- ✅ LOAD CONTRACT.JS IF EXISTS -->
     <script th:src="@{/js/contract.js}"
@@ -1187,8 +1210,20 @@
 
     <script th:src="@{/js/contrastPDF.js}"
             onerror="console.log('⚠️ contract.js not found - using inline script')"></script>
-
-
 </body>
+<style>
+    /* Ẩn hoàn toàn phần verification result */
+    #cccd-verification-result {
+        display: none !important;
+    }
+
+    /* Ẩn container verification */
+    .cccd-verification-container {
+        display: none !important;
+    }
+
+
+
+</style>
 
 </html>
