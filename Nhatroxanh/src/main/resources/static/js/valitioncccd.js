@@ -1,6 +1,6 @@
 // ✅ CCCD VALIDATOR CLASS - PHIÊN BẢN NGHIÊM NGẶT
 class CCCDValidator {
-    constructor() { 
+    constructor() { b
         // ✅ SỬA LẠI TỪNG KHÓA BẮT BUỘC MẶT SAU
         this.mandatoryKeywords = {
             front: [
