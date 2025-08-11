@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
@@ -32,6 +35,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +60,9 @@ public class DemoController {
 
     @Autowired
     private RoomsService roomsService;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/tro-da-luu")
     public String savedPosts(Model model, Authentication authentication) {
@@ -307,6 +314,28 @@ public String showRentalHistory(
         return userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
                 .getUserId();
+    }
+
+    @PostMapping("/newsletter/subscribe")
+    public String subscribeNewsletter(
+            @RequestParam("email") String email,
+            @RequestParam(value = "privacy", required = false) String privacy,
+            RedirectAttributes redirectAttributes) {
+
+        if (privacy == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đồng ý với chính sách bảo mật!");
+            return "redirect:/";
+        }
+
+        Optional<Users> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            emailService.sendPrivacyPolicyEmail(email);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi email thông báo đến " + email);
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Email này chưa đăng ký tài khoản, không thể nhận thông báo.");
+        }
+
+        return "redirect:/";
     }
 
 }

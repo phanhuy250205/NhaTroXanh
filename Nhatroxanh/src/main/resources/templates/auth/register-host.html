@@ -13,9 +13,86 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/css/register-host.css}">
+    <!-- Tesseract.js for OCR -->
+    <script src="https://unpkg.com/tesseract.js@v4.0.2/dist/tesseract.min.js"></script>
 
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS for valid/invalid upload status */
+        .upload-item.valid::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #22c55e;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+        }
+
+        .upload-item.invalid::after {
+            content: '\f00d';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #ef4444;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+        }
+
+        .upload-item {
+            position: relative;
+        }
+
+        /* CSS for upload loading overlay */
+        .upload-loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border-radius: 8px;
+        }
+
+        .upload-loading-overlay.active {
+            display: flex;
+        }
+
+        .upload-loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1196f5;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .upload-loading-text {
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+    </style>
 </head>
 
 <body>
@@ -112,7 +189,6 @@
                                                     <option value="">Chọn giới tính</option>
                                                     <option value="true">Nam</option>
                                                     <option value="false">Nữ</option>
-
                                                 </select>
                                             </div>
                                             <div class="invalid-feedback">Vui lòng chọn giới tính</div>
@@ -330,6 +406,10 @@
                                                                 từ thiết bị</span></p>
                                                         <div class="upload-formats">JPG, PNG (tối đa 5MB)</div>
                                                     </div>
+                                                    <div class="upload-loading-overlay" id="frontIdLoading">
+                                                        <div class="upload-loading-spinner"></div>
+                                                        <div class="upload-loading-text">Đang kiểm tra ảnh CCCD</div>
+                                                    </div>
                                                 </div>
                                                 <input type="file" id="frontId" accept="image/*" style="display: none;"
                                                     required>
@@ -343,7 +423,8 @@
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div class="invalid-feedback">Vui lòng chọn ảnh CCCD mặt trước</div>
+                                                <div class="invalid-feedback">Vui lòng chọn ảnh CCCD mặt trước hợp lệ
+                                                </div>
                                             </div>
 
                                             <!-- Back ID Upload -->
@@ -360,6 +441,10 @@
                                                                 từ thiết bị</span></p>
                                                         <div class="upload-formats">JPG, PNG (tối đa 5MB)</div>
                                                     </div>
+                                                    <div class="upload-loading-overlay" id="backIdLoading">
+                                                        <div class="upload-loading-spinner"></div>
+                                                        <div class="upload-loading-text">Đang kiểm tra ảnh CCCD</div>
+                                                    </div>
                                                 </div>
                                                 <input type="file" id="backId" accept="image/*" style="display: none;"
                                                     required>
@@ -373,7 +458,8 @@
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <div class="invalid-feedback">Vui lòng chọn ảnh CCCD mặt sau</div>
+                                                <div class="invalid-feedback">Vui lòng chọn ảnh CCCD mặt sau hợp lệ
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

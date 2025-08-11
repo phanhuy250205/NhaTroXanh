@@ -77,7 +77,7 @@ public class SecurityConfig {
                     "/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
                     "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher",
                     "/momo/**", "/zalopay/**", "/vnpay/**", "/tat-ca-phong-tro",
-                    "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**"
+                    "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**","/newsletter/subscribe"
                 ).permitAll()
                 .requestMatchers("/chu-tro/**").hasRole("OWNER")
                 .requestMatchers("/nhan-vien/**").hasRole("STAFF")
