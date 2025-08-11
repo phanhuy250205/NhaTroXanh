@@ -129,51 +129,51 @@ document.addEventListener("DOMContentLoaded", () => {
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => {
-                // Log raw response for debugging
-                return response.text().then(text => {
-                    try {
-                        const data = JSON.parse(text);
-                        return { response, data };
-                    } catch (e) {
-                        console.error('Invalid JSON response:', text);
-                        throw new Error(`Invalid JSON: ${e.message}`);
+                .then(response => {
+                    // Log raw response for debugging
+                    return response.text().then(text => {
+                        try {
+                            const data = JSON.parse(text);
+                            return { response, data };
+                        } catch (e) {
+                            console.error('Invalid JSON response:', text);
+                            throw new Error(`Invalid JSON: ${e.message}`);
+                        }
+                    });
+                })
+                .then(({ response, data }) => {
+                    // Hide loading indicator
+                    loadingIndicator.classList.add('d-none');
+
+                    if (data.error) {
+                        console.error('Backend error:', data.error);
+                        showAlert('danger', 'Không thể tải thông báo: ' + data.error);
+                        return;
                     }
-                });
-            })
-            .then(({ response, data }) => {
-                // Hide loading indicator
-                loadingIndicator.classList.add('d-none');
 
-                if (data.error) {
-                    console.error('Backend error:', data.error);
-                    showAlert('danger', 'Không thể tải thông báo: ' + data.error);
-                    return;
-                }
+                    // Update badge and header
+                    badge.textContent = data.unreadCount || 0;
+                    badge.style.display = data.unreadCount > 0 ? 'inline' : 'none';
+                    headerCount.textContent = `${data.unreadCount || 0} mới`;
 
-                // Update badge and header
-                badge.textContent = data.unreadCount || 0;
-                badge.style.display = data.unreadCount > 0 ? 'inline' : 'none';
-                headerCount.textContent = `${data.unreadCount || 0} mới`;
+                    // Clear existing notification items
+                    const existingItems = dropdownMenu.querySelectorAll('.notification-item');
+                    existingItems.forEach(item => item.remove());
 
-                // Clear existing notification items
-                const existingItems = dropdownMenu.querySelectorAll('.notification-item');
-                existingItems.forEach(item => item.remove());
+                    // Find the first divider
+                    const divider = dropdownMenu.querySelector('.dropdown-divider');
+                    if (!divider || divider.parentNode !== dropdownMenu) {
+                        console.warn(`Divider not found in dropdown ${dropdownId}, appending to end`);
+                    }
 
-                // Find the first divider
-                const divider = dropdownMenu.querySelector('.dropdown-divider');
-                if (!divider || divider.parentNode !== dropdownMenu) {
-                    console.warn(`Divider not found in dropdown ${dropdownId}, appending to end`);
-                }
-
-                // Add new notifications
-                if (data.notifications && data.notifications.length > 0) {
-                    data.notifications.forEach(notification => {
-                        const iconClass = getIconClass(notification);
-                        const bgClass = getBgClass(notification);
-                        const link = getNotificationLink(notification);
-                        const item = document.createElement('li');
-                        item.innerHTML = `
+                    // Add new notifications
+                    if (data.notifications && data.notifications.length > 0) {
+                        data.notifications.forEach(notification => {
+                            const iconClass = getIconClass(notification);
+                            const bgClass = getBgClass(notification);
+                            const link = getNotificationLink(notification);
+                            const item = document.createElement('li');
+                            item.innerHTML = `
                             <a href="${link}" class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" data-notification-id="${notification.notificationId}">
                                 <div class="notification-icon ${bgClass}">
                                     <i class="${iconClass} text-white"></i>
@@ -185,28 +185,28 @@ document.addEventListener("DOMContentLoaded", () => {
                                 ${notification.isRead ? '' : '<div class="notification-dot"></div>'}
                             </a>
                         `;
-                        if (divider && divider.parentNode === dropdownMenu) {
-                            dropdownMenu.insertBefore(item, divider);
-                        } else {
-                            dropdownMenu.appendChild(item);
-                        }
-                    });
-                } else {
-                    // Show empty state
-                    const emptyItem = document.createElement('li');
-                    emptyItem.innerHTML = '<div class="dropdown-item text-center">Không có thông báo</div>';
-                    if (divider && divider.parentNode === dropdownMenu) {
-                        dropdownMenu.insertBefore(emptyItem, divider);
+                            if (divider && divider.parentNode === dropdownMenu) {
+                                dropdownMenu.insertBefore(item, divider);
+                            } else {
+                                dropdownMenu.appendChild(item);
+                            }
+                        });
                     } else {
-                        dropdownMenu.appendChild(emptyItem);
+                        // Show empty state
+                        const emptyItem = document.createElement('li');
+                        emptyItem.innerHTML = '<div class="dropdown-item text-center">Không có thông báo</div>';
+                        if (divider && divider.parentNode === dropdownMenu) {
+                            dropdownMenu.insertBefore(emptyItem, divider);
+                        } else {
+                            dropdownMenu.appendChild(emptyItem);
+                        }
                     }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading notifications:', error);
-                loadingIndicator.classList.add('d-none');
-                showAlert('danger', 'Không thể tải thông báo: ' + error.message);
-            });
+                })
+                .catch(error => {
+                    console.error('Error loading notifications:', error);
+                    loadingIndicator.classList.add('d-none');
+                    showAlert('danger', 'Không thể tải thông báo: ' + error.message);
+                });
         });
     }
 
@@ -218,24 +218,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 'Content-Type': 'application/json'
             }
         })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            element.classList.remove('unread');
-            element.querySelector('.notification-dot')?.remove();
-            document.querySelectorAll('.notification-badge').forEach(badge => {
-                const currentCount = parseInt(badge.textContent) || 0;
-                if (currentCount > 0) {
-                    badge.textContent = currentCount - 1;
-                    badge.style.display = badge.textContent > 0 ? 'inline' : 'none';
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-            });
-            document.querySelectorAll('.notification-header small').forEach(headerCount => {
-                headerCount.textContent = `${document.querySelector('.notification-badge').textContent} mới`;
-            });
-        })
-        .catch(error => console.error('Error marking notification as read:', error));
+                element.classList.remove('unread');
+                element.querySelector('.notification-dot')?.remove();
+                document.querySelectorAll('.notification-badge').forEach(badge => {
+                    const currentCount = parseInt(badge.textContent) || 0;
+                    if (currentCount > 0) {
+                        badge.textContent = currentCount - 1;
+                        badge.style.display = badge.textContent > 0 ? 'inline' : 'none';
+                    }
+                });
+                document.querySelectorAll('.notification-header small').forEach(headerCount => {
+                    headerCount.textContent = `${document.querySelector('.notification-badge').textContent} mới`;
+                });
+            })
+            .catch(error => console.error('Error marking notification as read:', error));
     }
 
     // Cập nhật icon cho từng loại thông báo
@@ -284,13 +284,33 @@ document.addEventListener("DOMContentLoaded", () => {
     function getNotificationLink(notification) {
         switch (notification.type) {
             case 'PAYMENT':
-                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý thanh toán
+                // Check payment status to determine redirect URL
+                if (notification.paymentDetails && notification.paymentDetails.status === 'SUCCESS') {
+                    // If payment is completed, redirect to payment history
+                    return '/khach-thue/lich-su-thanh-toan';
+                } else if (notification.invoiceId && notification.roomId && notification.hostelId) {
+                    // If payment is pending and has required parameters, redirect to payment page
+                    return `/thanh-toan?invoiceId=${notification.invoiceId}&room_id=${notification.roomId}&hostel_id=${notification.hostelId}`;
+                } else {
+                    // Fallback to management page if parameters are missing
+                    return '/khach-thue/quan-ly-thue-tra';
+                }
             case 'CONTRACT':
                 return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý hợp đồng
             case 'REPORT':
                 return '/khach-thue/bao-cao-su-co'; // Liên kết đến trang báo cáo sự cố
             case 'ACCOUNT':
-                return '/khach-thue/thong-tin-tai-khoan'; // Liên kết đến trang thông tin tài khoản
+                // Determine profile page based on current URL or user role
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('/admin/')) {
+                    return '/admin/profile';
+                } else if (currentPath.includes('/chu-tro/')) {
+                    return '/chu-tro/profile-host';
+                } else if (currentPath.includes('/nhan-vien/')) {
+                    return '/nhan-vien/profile-staff';
+                } else {
+                    return '/khach-thue/profile-khach-thue'; // Default to guest profile
+                }
             case 'HOSTEL_ACTIVITY':
                 return '/khach-thue/hoat-dong-nha-tro'; // Liên kết đến trang hoạt động nhà trọ
             default:
@@ -343,7 +363,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(loadNotifications, 30000);
 });
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const notificationDropdown = document.getElementById('notificationDropdown');
     if (!notificationDropdown) {
         console.log("Không tìm thấy chuông thông báo, script thông báo sẽ không chạy.");
@@ -421,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    notificationContainer.addEventListener('click', async function(e) {
+    notificationContainer.addEventListener('click', async function (e) {
         const target = e.target.closest('.notification-item');
         if (!target) return;
 
@@ -433,8 +453,8 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const csrfToken = document.querySelector('meta[name="_csrf"]')?.content || "";
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || "X-CSRF-TOKEN";
-                
-                let headers = {'Content-Type': 'application/json'};
+
+                let headers = { 'Content-Type': 'application/json' };
                 if (csrfToken) {
                     headers[csrfHeader] = csrfToken;
                 }
@@ -511,17 +531,37 @@ document.addEventListener('DOMContentLoaded', function() {
     function getNotificationLink(notification) {
         switch (notification.type) {
             case 'PAYMENT':
-                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý thanh toán
+                // Check payment status to determine redirect URL
+                if (notification.paymentDetails && notification.paymentDetails.status === 'SUCCESS') {
+                    // If payment is completed, redirect to payment history
+                    return '/khach-thue/lich-su-thanh-toan';
+                } else if (notification.invoiceId && notification.roomId && notification.hostelId) {
+                    // If payment is pending and has required parameters, redirect to payment page
+                    return `/thanh-toan?invoiceId=${notification.invoiceId}&room_id=${notification.roomId}&hostel_id=${notification.hostelId}`;
+                } else {
+                    // Fallback to management page if parameters are missing
+                    return '/khach-thue/quan-ly-thue-tra';
+                }
             case 'CONTRACT':
-                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý hợp đồng
+                return '/khach-thue/quan-ly-thue-tra';
             case 'REPORT':
-                return '/khach-thue/bao-cao-su-co'; // Liên kết đến trang báo cáo sự cố
+                return '/khach-thue/bao-cao-su-co';
             case 'ACCOUNT':
-                return '/khach-thue/thong-tin-tai-khoan'; // Liên kết đến trang thông tin tài khoản
+                // Determine profile page based on current URL or user role
+                const currentPath = window.location.pathname;
+                if (currentPath.includes('/admin/')) {
+                    return '/admin/profile';
+                } else if (currentPath.includes('/chu-tro/')) {
+                    return '/chu-tro/profile-host';
+                } else if (currentPath.includes('/nhan-vien/')) {
+                    return '/nhan-vien/profile-staff';
+                } else {
+                    return '/khach-thue/profile-khach-thue'; // Default to guest profile
+                }
             case 'HOSTEL_ACTIVITY':
-                return '/khach-thue/hoat-dong-nha-tro'; // Liên kết đến trang hoạt động nhà trọ
+                return '/khach-thue/hoat-dong-nha-tro';
             default:
-                return '#!'; // Không chuyển hướng nếu không xác định
+                return '#!';
         }
     }
 

@@ -293,6 +293,38 @@ public class NotificationService {
     }
 
     /**
+     * Create account-related notification for password recovery
+     */
+    public Notification createPasswordRecoveryNotification(Users user) {
+        try {
+            String title = "Mật khẩu đã được khôi phục";
+            String message = String.format(
+                "Mật khẩu tài khoản của bạn đã được khôi phục thành công vào lúc %s thông qua tính năng quên mật khẩu. " +
+                "Nếu bạn không thực hiện thao tác này, vui lòng liên hệ với chúng tôi ngay lập tức để bảo mật tài khoản.",
+                java.time.LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))
+                    .format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+            );
+
+            Notification notification = Notification.builder()
+                    .user(user)
+                    .title(title)
+                    .message(message)
+                    .type(Notification.NotificationType.ACCOUNT)
+                    .isRead(false)
+                    .createAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))))
+                    .room(null)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("Created password recovery notification for user {}: {}", user.getUserId(), message);
+            return savedNotification;
+        } catch (Exception e) {
+            log.error("Error creating password recovery notification for user {}: {}", user.getUserId(), e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
      * Create account-related notification for profile updates
      */
     public Notification createProfileUpdateNotification(Users user, String updatedFields) {

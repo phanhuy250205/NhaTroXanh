@@ -6,6 +6,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,7 @@ public class ForgotPassword {
     @Autowired private UserRepository userRepository;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private EmailService emailService;
+    @Autowired private NotificationService notificationService;
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPass(@RequestBody Map<String, String> request) {
@@ -129,6 +131,17 @@ public class ForgotPassword {
         try {
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
+            
+            // Create password recovery notification
+            try {
+                notificationService.createPasswordRecoveryNotification(user);
+                logger.info("Password recovery notification created for user: {}", user.getUserId());
+            } catch (Exception notificationException) {
+                logger.error("Failed to create password recovery notification for user {}: {}", 
+                           user.getUserId(), notificationException.getMessage());
+                // Don't fail the password reset if notification creation fails
+            }
+            
             logger.info("Password reset successfully for: {}", email);
             return ResponseEntity.ok(Map.of("message", "Đặt lại mật khẩu thành công."));
         } catch (Exception e) {
