@@ -1,5 +1,6 @@
 package nhatroxanh.com.Nhatroxanh.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,5 +58,24 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     // Find all payment notifications for a user
     @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND n.type = 'PAYMENT'")
     List<Notification> findAllPaymentNotificationsByUserId(@Param("userId") Integer userId);
+    
+    // Find contract notifications by user and room
+    @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND n.type = :type AND n.room.roomId = :roomId")
+    List<Notification> findContractNotificationsByUserAndRoom(@Param("userId") Integer userId, 
+                                                              @Param("type") Notification.NotificationType type, 
+                                                              @Param("roomId") Integer roomId);
+    
+    // Find all contract notifications for a user
+    @Query("SELECT n FROM Notification n WHERE n.user.userId = :userId AND n.type = 'CONTRACT'")
+    List<Notification> findAllContractNotificationsByUserId(@Param("userId") Integer userId);
+    
     boolean existsByUserAndMessageContaining(Users user, String messageSubstring);
+    
+    // Find notifications older than specified days
+    @Query("SELECT n FROM Notification n WHERE n.createAt < :cutoffDate")
+    List<Notification> findNotificationsOlderThan(@Param("cutoffDate") Timestamp cutoffDate);
+    
+    // Count notifications older than specified days
+    @Query("SELECT COUNT(n) FROM Notification n WHERE n.createAt < :cutoffDate")
+    long countNotificationsOlderThan(@Param("cutoffDate") Timestamp cutoffDate);
 }

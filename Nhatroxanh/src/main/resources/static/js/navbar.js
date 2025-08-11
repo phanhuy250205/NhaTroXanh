@@ -169,18 +169,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Add new notifications
                 if (data.notifications && data.notifications.length > 0) {
                     data.notifications.forEach(notification => {
-                        const iconClass = getIconClass(notification.type);
-                        const bgClass = getBgClass(notification.type);
+                        const iconClass = getIconClass(notification);
+                        const bgClass = getBgClass(notification);
+                        const link = getNotificationLink(notification);
                         const item = document.createElement('li');
                         item.innerHTML = `
-                            <a class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" data-notification-id="${notification.notificationId}">
+                            <a href="${link}" class="dropdown-item notification-item ${notification.isRead ? '' : 'unread'}" data-notification-id="${notification.notificationId}">
                                 <div class="notification-icon ${bgClass}">
                                     <i class="${iconClass} text-white"></i>
                                 </div>
                                 <div class="notification-content">
                                     <div class="notification-title">${notification.title}</div>
-                                    <div class="notification-text">${notification.message}</div>
-                                    <div class="notification-time">${formatTime(notification.createAt)}</div>
+                                    <div class="notification-time ">${notification.createAt}</div>
                                 </div>
                                 ${notification.isRead ? '' : '<div class="notification-dot"></div>'}
                             </a>
@@ -238,69 +238,95 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error('Error marking notification as read:', error));
     }
 
-    // Map notification type to icon
-    function getIconClass(type) {
-        switch (type) {
-            case 'PAYMENT': return 'fas fa-exclamation';
-            case 'CONTRACT': return 'fas fa-file-contract';
-            case 'SYSTEM': return 'fas fa-bell';
-            case 'REPORT': return 'fas fa-exclamation-triangle';
-            default: return 'fas fa-bell';
+    // Cập nhật icon cho từng loại thông báo
+    function getIconClass(notification) {
+        if (notification.type === 'PAYMENT') {
+            if (notification.title.includes('Lịch hẹn thanh toán tiền mặt')) {
+                return 'fas fa-calendar-alt'; // Icon lịch cho lịch hẹn thanh toán
+            }
+            if (notification.title.includes('thành công') || notification.message.includes('thành công')) {
+                return 'fas fa-check-circle'; // Icon check cho thanh toán thành công
+            }
+            return 'fas fa-money-bill-wave'; // Icon ví tiền cho nhắc nhở thanh toán
+        }
+        switch (notification.type) {
+            case 'CONTRACT': return 'fas fa-file-signature'; // Icon hợp đồng
+            case 'SYSTEM': return 'fas fa-cog'; // Icon bánh răng cho hệ thống
+            case 'REPORT': return 'fas fa-flag'; // Icon cờ cho báo cáo
+            case 'ACCOUNT': return 'fas fa-user-cog'; // Icon tài khoản cho thông báo tài khoản
+            case 'HOSTEL_ACTIVITY': return 'fas fa-home'; // Icon nhà cho hoạt động nhà trọ
+            default: return 'fas fa-bell'; // Icon chuông mặc định
         }
     }
 
-    // Map notification type to background class
-    function getBgClass(type) {
-        switch (type) {
-            case 'PAYMENT': return 'bg-warning';
-            case 'CONTRACT': return 'bg-primary';
-            case 'SYSTEM': return 'bg-secondary';
-            case 'REPORT': return 'bg-danger';
-            default: return 'bg-info';
+    // Cập nhật màu nền cho từng loại thông báo
+    function getBgClass(notification) {
+        if (notification.type === 'PAYMENT') {
+            if (notification.title.includes('Lịch hẹn thanh toán tiền mặt')) {
+                return 'bg-info'; // Màu xanh dương nhạt cho lịch hẹn thanh toán
+            }
+            if (notification.title.includes('thành công') || notification.message.includes('thành công')) {
+                return 'bg-success'; // Màu xanh lá cho thanh toán thành công
+            }
+            return 'bg-warning'; // Màu vàng cho nhắc nhở thanh toán
+        }
+        switch (notification.type) {
+            case 'CONTRACT': return 'bg-info'; // Màu xanh dương nhạt cho hợp đồng
+            case 'SYSTEM': return 'bg-dark'; // Màu xám đậm cho hệ thống
+            case 'REPORT': return 'bg-danger'; // Màu đỏ cho báo cáo
+            case 'ACCOUNT': return 'bg-primary'; // Màu xanh dương cho thông báo tài khoản
+            case 'HOSTEL_ACTIVITY': return 'bg-info'; // Màu xanh dương nhạt cho hoạt động nhà trọ
+            default: return 'bg-secondary'; // Màu xám mặc định
         }
     }
 
-  
+    // Hàm xác định liên kết cho thông báo
+    function getNotificationLink(notification) {
+        switch (notification.type) {
+            case 'PAYMENT':
+                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý thanh toán
+            case 'CONTRACT':
+                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý hợp đồng
+            case 'REPORT':
+                return '/khach-thue/bao-cao-su-co'; // Liên kết đến trang báo cáo sự cố
+            case 'ACCOUNT':
+                return '/khach-thue/thong-tin-tai-khoan'; // Liên kết đến trang thông tin tài khoản
+            case 'HOSTEL_ACTIVITY':
+                return '/khach-thue/hoat-dong-nha-tro'; // Liên kết đến trang hoạt động nhà trọ
+            default:
+                return '#!'; // Không chuyển hướng nếu không xác định
+        }
+    }
 
-    // Format time for Date object in Vietnam timezone (GMT+7)
+    // Format time for Date object in Vietnam timezone (GMT+7) - Chỉ hiển thị ngày
     function formatTime(date) {
-        // Chuyển đổi đầu vào thành đối tượng Date
         const notificationDate = new Date(date);
         const now = new Date();
 
-        // Kiểm tra xem notificationDate có hợp lệ không
         if (isNaN(notificationDate.getTime())) {
             console.warn(`Invalid date format: ${date}`);
             return "Không xác định";
         }
 
-        // Lấy thời gian theo múi giờ Việt Nam (Asia/Ho_Chi_Minh)
         const vnOptions = { timeZone: 'Asia/Ho_Chi_Minh' };
         const nowVN = new Date(now.toLocaleString('en-US', vnOptions));
         const notificationVN = new Date(notificationDate.toLocaleString('en-US', vnOptions));
 
-        // Tính chênh lệch thời gian (theo giây)
         const diff = (nowVN - notificationVN) / 1000;
 
-        // Xử lý trường hợp thời gian âm (tương lai)
         if (diff < 0) {
             console.warn(`Notification date is in the future: ${date}`);
-            return "Vừa xong";
+            return "Hôm nay";
         }
 
-        // Các ngưỡng thời gian
-        if (diff < 60) return `${Math.floor(diff)} giây trước`;
-        if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
-        if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
-        if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`; // Dưới 7 ngày
+        if (diff < 86400) return "Hôm nay";
+        if (diff < 172800) return "Hôm qua";
+        if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
 
-        // Nếu trên 7 ngày, hiển thị ngày tháng theo định dạng Việt Nam
-        return notificationVN.toLocaleString('vi-VN', {
+        return notificationVN.toLocaleDateString('vi-VN', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
             timeZone: 'Asia/Ho_Chi_Minh'
         });
     }
@@ -308,7 +334,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // Show alert (assuming it's defined elsewhere)
     function showAlert(type, message) {
         console.log(`Alert [${type}]: ${message}`);
-        // Implement your alert display logic here
     }
 
     // Load notifications on page load
@@ -318,10 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setInterval(loadNotifications, 30000);
 });
 
-
-
 document.addEventListener('DOMContentLoaded', function() {
-    
     const notificationDropdown = document.getElementById('notificationDropdown');
     if (!notificationDropdown) {
         console.log("Không tìm thấy chuông thông báo, script thông báo sẽ không chạy.");
@@ -332,14 +354,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationHeaderCount = document.querySelector('.notification-header .text-muted');
     const notificationContainer = document.querySelector('.notification-container');
     const notificationLoading = document.querySelector('.notification-loading');
+
     async function fetchNotifications() {
         if (notificationLoading) notificationLoading.classList.remove('d-none');
 
         try {
-            // API này đã có sẵn trong NotificationController của bạn
             const response = await fetch('/api/notifications');
             if (!response.ok) {
-                 throw new Error(`Lỗi server: ${response.status}`);
+                throw new Error(`Lỗi server: ${response.status}`);
             }
 
             const data = await response.json();
@@ -354,8 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 notificationHeaderCount.textContent = `0 mới`;
             }
 
-            // Hiển thị danh sách thông báo
-            notificationContainer.innerHTML = ''; // Xóa thông báo cũ
+            notificationContainer.innerHTML = '';
             if (notifications.length === 0) {
                 notificationContainer.innerHTML = `
                     <li>
@@ -367,19 +388,18 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 notifications.forEach(noti => {
                     const isUnreadClass = !noti.isRead ? 'notification-unread' : '';
-                    
-                    // Logic xác định link chuyển hướng
-                    let link = '#!'; // Link mặc định
-                    if (noti.type === 'CONTRACT') {
-                        link = '/khach-thue/quan-ly-thue-tra';
-                    }
-                    
+                    const iconClass = getIconClass(noti);
+                    const bgClass = getBgClass(noti);
+                    const link = getNotificationLink(noti);
+
                     const notiElement = document.createElement('li');
                     notiElement.innerHTML = `
                         <a href="${link}" class="dropdown-item notification-item ${isUnreadClass}" data-notification-id="${noti.notificationId}">
+                            <div class="notification-icon ${bgClass}">
+                                <i class="${iconClass} text-white"></i>
+                            </div>
                             <div class="item-content">
                                 <p class="mb-1 fw-bold">${noti.title}</p>
-                                <p class="mb-1 small">${noti.message}</p>
                                 <small class="text-muted">${formatTimeAgo(noti.createAt)}</small>
                             </div>
                         </a>
@@ -400,6 +420,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (notificationLoading) notificationLoading.classList.add('d-none');
         }
     }
+
     notificationContainer.addEventListener('click', async function(e) {
         const target = e.target.closest('.notification-item');
         if (!target) return;
@@ -414,7 +435,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content || "X-CSRF-TOKEN";
                 
                 let headers = {'Content-Type': 'application/json'};
-                if(csrfToken) {
+                if (csrfToken) {
                     headers[csrfHeader] = csrfToken;
                 }
 
@@ -429,21 +450,81 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         window.location.href = link;
     });
+
+    // Hàm định dạng thời gian - Chỉ hiển thị ngày
     function formatTimeAgo(dateString) {
         const date = new Date(dateString);
         const now = new Date();
         const seconds = Math.floor((now - date) / 1000);
 
-        if (seconds < 60) return "Vừa xong";
-        const minutes = Math.floor(seconds / 60);
-        if (minutes < 60) return `${minutes} phút trước`;
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `${hours} giờ trước`;
-        const days = Math.floor(hours / 24);
-        if (days < 7) return `${days} ngày trước`;
-        
+        if (seconds < 0) return "Hôm nay";
+        if (seconds < 86400) return "Hôm nay";
+        if (seconds < 172800) return "Hôm qua";
+        if (seconds < 604800) return `${Math.floor(seconds / 86400)} ngày trước`;
+
         return date.toLocaleDateString('vi-VN');
     }
+
+    // Cập nhật icon cho từng loại thông báo
+    function getIconClass(notification) {
+        if (notification.type === 'PAYMENT') {
+            if (notification.title.includes('Lịch hẹn thanh toán tiền mặt')) {
+                return 'fas fa-calendar-alt'; // Icon lịch cho lịch hẹn thanh toán
+            }
+            if (notification.title.includes('thành công') || notification.message.includes('thành công')) {
+                return 'fas fa-check-circle'; // Icon check cho thanh toán thành công
+            }
+            return 'fas fa-money-bill-wave'; // Icon ví tiền cho nhắc nhở thanh toán
+        }
+        switch (notification.type) {
+            case 'CONTRACT': return 'fas fa-file-signature'; // Icon hợp đồng
+            case 'SYSTEM': return 'fas fa-cog'; // Icon bánh răng cho hệ thống
+            case 'REPORT': return 'fas fa-flag'; // Icon cờ cho báo cáo
+            case 'ACCOUNT': return 'fas fa-user-cog'; // Icon tài khoản cho thông báo tài khoản
+            case 'HOSTEL_ACTIVITY': return 'fas fa-home'; // Icon nhà cho hoạt động nhà trọ
+            default: return 'fas fa-bell'; // Icon chuông mặc định
+        }
+    }
+
+    // Cập nhật màu nền cho từng loại thông báo
+    function getBgClass(notification) {
+        if (notification.type === 'PAYMENT') {
+            if (notification.title.includes('Lịch hẹn thanh toán tiền mặt')) {
+                return 'bg-info'; // Màu xanh dương nhạt cho lịch hẹn thanh toán
+            }
+            if (notification.title.includes('thành công') || notification.message.includes('thành công')) {
+                return 'bg-success'; // Màu xanh lá cho thanh toán thành công
+            }
+            return 'bg-warning'; // Màu vàng cho nhắc nhở thanh toán
+        }
+        switch (notification.type) {
+            case 'CONTRACT': return 'bg-info'; // Màu xanh dương nhạt cho hợp đồng
+            case 'SYSTEM': return 'bg-dark'; // Màu xám đậm cho hệ thống
+            case 'REPORT': return 'bg-danger'; // Màu đỏ cho báo cáo
+            case 'ACCOUNT': return 'bg-primary'; // Màu xanh dương cho thông báo tài khoản
+            case 'HOSTEL_ACTIVITY': return 'bg-info'; // Màu xanh dương nhạt cho hoạt động nhà trọ
+            default: return 'bg-secondary'; // Màu xám mặc định
+        }
+    }
+
+    // Hàm xác định liên kết cho thông báo
+    function getNotificationLink(notification) {
+        switch (notification.type) {
+            case 'PAYMENT':
+                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý thanh toán
+            case 'CONTRACT':
+                return '/khach-thue/quan-ly-thue-tra'; // Liên kết đến trang quản lý hợp đồng
+            case 'REPORT':
+                return '/khach-thue/bao-cao-su-co'; // Liên kết đến trang báo cáo sự cố
+            case 'ACCOUNT':
+                return '/khach-thue/thong-tin-tai-khoan'; // Liên kết đến trang thông tin tài khoản
+            case 'HOSTEL_ACTIVITY':
+                return '/khach-thue/hoat-dong-nha-tro'; // Liên kết đến trang hoạt động nhà trọ
+            default:
+                return '#!'; // Không chuyển hướng nếu không xác định
+        }
+    }
+
     notificationDropdown.addEventListener('show.bs.dropdown', fetchNotifications);
     fetchNotifications();
     setInterval(fetchNotifications, 30000);
