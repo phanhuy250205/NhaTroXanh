@@ -27,130 +27,154 @@ public class ScheduledTasksService {
     private NotificationRepository notificationRepository;
 
     @Autowired
+    private NotificationService notificationService;
+
+    @Autowired
     private EmailService emailService;
 
-   // Trong file: ScheduledTasksService.java
+    // Trong file: ScheduledTasksService.java
 
-@Scheduled(cron = "0 0 1 * * *") 
-@Transactional
-public void checkExpiringContractsAndNotifyTenants() {
-    log.info("⏰ Bắt đầu tác vụ quét hợp đồng sắp hết hạn để thông báo cho KHÁCH THUÊ...");
+    @Scheduled(cron = "0 0 1 * * *")
+    @Transactional
+    public void checkExpiringContractsAndNotifyTenants() {
+        log.info("⏰ Bắt đầu tác vụ quét hợp đồng sắp hết hạn để thông báo cho KHÁCH THUÊ...");
 
-    LocalDate today = LocalDate.now();
-    LocalDate sevenDaysLater = today.plusDays(3);
+        LocalDate today = LocalDate.now();
+        LocalDate sevenDaysLater = today.plusDays(3);
 
-    List<Contracts> expiringContracts = contractsRepository.findByStatusAndEndDateBetween(
-        Contracts.Status.ACTIVE,
-        Date.valueOf(today),
-        Date.valueOf(sevenDaysLater)
-    );
+        List<Contracts> expiringContracts = contractsRepository.findByStatusAndEndDateBetween(
+                Contracts.Status.ACTIVE,
+                Date.valueOf(today),
+                Date.valueOf(sevenDaysLater));
 
-    log.info("🔍 Tìm thấy {} hợp đồng sắp hết hạn.", expiringContracts.size());
+        log.info("🔍 Tìm thấy {} hợp đồng sắp hết hạn.", expiringContracts.size());
 
-    for (Contracts contract : expiringContracts) {
-        if (contract.getTenant() != null) {
-            Users tenant = contract.getTenant();
-            String uniqueMessageIdentifier = String.format("Hợp đồng thuê phòng %s của bạn sắp hết hạn", contract.getRoom().getNamerooms());
-            boolean alreadyNotified = notificationRepository.existsByUserAndMessageContaining(
-                tenant, uniqueMessageIdentifier
-            );
+        for (Contracts contract : expiringContracts) {
+            if (contract.getTenant() != null) {
+                Users tenant = contract.getTenant();
+                String uniqueMessageIdentifier = String.format("Hợp đồng thuê phòng %s của bạn sắp hết hạn",
+                        contract.getRoom().getNamerooms());
+                boolean alreadyNotified = notificationRepository.existsByUserAndMessageContaining(
+                        tenant, uniqueMessageIdentifier);
 
-            if (!alreadyNotified) {
-                // --- PHẦN TẠO THÔNG BÁO TRÊN CHUÔNG VẪN GIỮ NGUYÊN ---
-                log.info("✅ Tạo thông báo trên chuông cho người thuê ID {}.", tenant.getUserId());
-                Notification tenantNotification = new Notification();
-                tenantNotification.setUser(tenant);
-                tenantNotification.setTitle("Hợp đồng của bạn sắp hết hạn");
-                String message = String.format("Hợp đồng thuê phòng %s của bạn sẽ hết hạn vào ngày %s. Vui lòng liên hệ chủ trọ để gia hạn nếu cần.",
-                        contract.getRoom().getNamerooms(),
-                        contract.getEndDate()
-                );
-                tenantNotification.setMessage(message);
-                tenantNotification.setType(Notification.NotificationType.CONTRACT);
-                tenantNotification.setRoom(contract.getRoom());
-                tenantNotification.setIsRead(false);
-                tenantNotification.setCreateAt(new Timestamp(System.currentTimeMillis()));
-                notificationRepository.save(tenantNotification);
-                log.info("✅ Đã lưu thông báo trên chuông vào CSDL.");
+                if (!alreadyNotified) {
+                    // --- SỬ DỤNG PHƯƠNG THỨC MỚI VỚI CLEANUP ---
+                    log.info("✅ Tạo thông báo trên chuông cho người thuê ID {} với cleanup.", tenant.getUserId());
+                    String title = "Hợp đồng của bạn sắp hết hạn";
+                    String message = String.format(
+                            "Hợp đồng thuê phòng %s của bạn sẽ hết hạn vào ngày %s. Vui lòng liên hệ chủ trọ để gia hạn nếu cần.",
+                            contract.getRoom().getNamerooms(),
+                            contract.getEndDate());
 
-                // ==========================================================
-                // ✅ BẮT ĐẦU TẠO NỘI DUNG EMAIL HTML
-                // ==========================================================
-                if (tenant.getEmail() != null && !tenant.getEmail().isEmpty()) {
-                    try {
-                        log.info("📧 Chuẩn bị gửi email HTML thông báo hết hạn đến: {}", tenant.getEmail());
-                        String emailSubject = "Thông báo: Hợp đồng thuê nhà của bạn sắp hết hạn";
-                        
-                        // Mẫu email HTML
-                        String htmlTemplate = """
-                        <!DOCTYPE html>
-                        <html lang="vi">
-                        <head>
-                            <meta charset="UTF-8">
-                            <style>
-                                body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
-                                .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-                                .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
-                                .header img { max-width: 150px; }
-                                .content { padding: 30px; line-height: 1.6; color: #333333; }
-                                .content h2 { color: #007bff; }
-                                .info-box { background-color: #e9f5ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; }
-                                .button { display: inline-block; background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
-                                .footer { background-color: #f8f9fa; color: #6c757d; text-align: center; padding: 20px; font-size: 12px; }
-                            </style>
-                        </head>
-                        <body>
-                            <div class="container">
-                                <div class="header">
-                                    <img src="/images/logo/nhatroxanh(title).png" alt="Nhà Trọ Xanh Logo">
-                                </div>
-                                <div class="content">
-                                    <h2>Thông báo Hợp đồng sắp hết hạn</h2>
-                                    <p>Xin chào <strong>{{tenantName}}</strong>,</p>
-                                    <p>Hệ thống Nhà Trọ Xanh xin thông báo hợp đồng thuê nhà của bạn sắp đến ngày hết hạn.</p>
-                                    <div class="info-box">
-                                        <p><strong>Phòng trọ:</strong> {{roomName}}</p>
-                                        <p><strong>Ngày hết hạn:</strong> <strong>{{endDate}}</strong></p>
-                                    </div>
-                                    <p>Vui lòng liên hệ với chủ trọ của bạn để thảo luận về việc gia hạn hợp đồng nếu bạn có nhu cầu tiếp tục thuê. </p>
-                                    <p>Trân trọng,<br>Đội ngũ Nhà Trọ Xanh</p>
-                                </div>
-                                <div class="footer">
-                                    <p>&copy; 2025 Nhà Trọ Xanh. All rights reserved.</p>
-                                    <p>Đây là email tự động, vui lòng không trả lời.</p>
-                                </div>
-                            </div>
-                        </body>
-                        </html>
-                        """;
+                    // Sử dụng phương thức mới để tự động xóa thông báo cũ trước khi tạo mới
+                    notificationService.createContractNotificationWithCleanup(tenant, contract.getRoom(), title,
+                            message);
+                    log.info("✅ Đã lưu thông báo trên chuông vào CSDL với cleanup.");
 
-                        // Thay thế các placeholder bằng dữ liệu thực tế
-                        String finalHtmlBody = htmlTemplate
-                            .replace("{{tenantName}}", tenant.getFullname())
-                            .replace("{{roomName}}", contract.getRoom().getNamerooms())
-                            .replace("{{endDate}}", contract.getEndDate().toString());
+                    // ==========================================================
+                    // ✅ BẮT ĐẦU TẠO NỘI DUNG EMAIL HTML
+                    // ==========================================================
+                    if (tenant.getEmail() != null && !tenant.getEmail().isEmpty()) {
+                        try {
+                            log.info("📧 Chuẩn bị gửi email HTML thông báo hết hạn đến: {}", tenant.getEmail());
+                            String emailSubject = "Thông báo: Hợp đồng thuê nhà của bạn sắp hết hạn";
 
-                        // Gọi phương thức gửi email HTML
-                        emailService.sendHtmlEmail(tenant.getEmail(), emailSubject, finalHtmlBody);
+                            // Mẫu email HTML
+                            String htmlTemplate = """
+                                    <!DOCTYPE html>
+                                    <html lang="vi">
+                                    <head>
+                                        <meta charset="UTF-8">
+                                        <style>
+                                            body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; }
+                                            .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+                                            .header { background-color: #007bff; color: white; padding: 20px; text-align: center; }
+                                            .header img { max-width: 150px; }
+                                            .content { padding: 30px; line-height: 1.6; color: #333333; }
+                                            .content h2 { color: #007bff; }
+                                            .info-box { background-color: #e9f5ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; }
+                                            .button { display: inline-block; background-color: #28a745; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-top: 20px; }
+                                            .footer { background-color: #f8f9fa; color: #6c757d; text-align: center; padding: 20px; font-size: 12px; }
+                                        </style>
+                                    </head>
+                                    <body>
+                                        <div class="container">
+                                            <div class="header">
+                                                <img src="/images/logo/nhatroxanh(title).png" alt="Nhà Trọ Xanh Logo">
+                                            </div>
+                                            <div class="content">
+                                                <h2>Thông báo Hợp đồng sắp hết hạn</h2>
+                                                <p>Xin chào <strong>{{tenantName}}</strong>,</p>
+                                                <p>Hệ thống Nhà Trọ Xanh xin thông báo hợp đồng thuê nhà của bạn sắp đến ngày hết hạn.</p>
+                                                <div class="info-box">
+                                                    <p><strong>Phòng trọ:</strong> {{roomName}}</p>
+                                                    <p><strong>Ngày hết hạn:</strong> <strong>{{endDate}}</strong></p>
+                                                </div>
+                                                <p>Vui lòng liên hệ với chủ trọ của bạn để thảo luận về việc gia hạn hợp đồng nếu bạn có nhu cầu tiếp tục thuê. </p>
+                                                <p>Trân trọng,<br>Đội ngũ Nhà Trọ Xanh</p>
+                                            </div>
+                                            <div class="footer">
+                                                <p>&copy; 2025 Nhà Trọ Xanh. All rights reserved.</p>
+                                                <p>Đây là email tự động, vui lòng không trả lời.</p>
+                                            </div>
+                                        </div>
+                                    </body>
+                                    </html>
+                                    """;
 
-                        log.info("✅ Gửi email HTML thành công đến {}.", tenant.getEmail());
+                            // Thay thế các placeholder bằng dữ liệu thực tế
+                            String finalHtmlBody = htmlTemplate
+                                    .replace("{{tenantName}}", tenant.getFullname())
+                                    .replace("{{roomName}}", contract.getRoom().getNamerooms())
+                                    .replace("{{endDate}}", contract.getEndDate().toString());
 
-                    } catch (Exception e) {
-                        log.error("❌ Lỗi khi gửi email HTML thông báo hết hạn cho {}: {}", tenant.getEmail(), e.getMessage());
+                            // Gọi phương thức gửi email HTML
+                            emailService.sendHtmlEmail(tenant.getEmail(), emailSubject, finalHtmlBody);
+
+                            log.info("✅ Gửi email HTML thành công đến {}.", tenant.getEmail());
+
+                        } catch (Exception e) {
+                            log.error("❌ Lỗi khi gửi email HTML thông báo hết hạn cho {}: {}", tenant.getEmail(),
+                                    e.getMessage());
+                        }
+                    } else {
+                        log.warn("⏩ Người thuê ID {} không có email. Bỏ qua việc gửi email.", tenant.getUserId());
                     }
+                    // ==========================================================
+                    // ✅ KẾT THÚC PHẦN GỬI EMAIL
+                    // ==========================================================
                 } else {
-                    log.warn("⏩ Người thuê ID {} không có email. Bỏ qua việc gửi email.", tenant.getUserId());
+                    log.info("⏩ Người thuê của hợp đồng ID {} đã được thông báo trước đó. Bỏ qua.",
+                            contract.getContractId());
                 }
-                // ==========================================================
-                // ✅ KẾT THÚC PHẦN GỬI EMAIL
-                // ==========================================================
-            } else {
-                log.info("⏩ Người thuê của hợp đồng ID {} đã được thông báo trước đó. Bỏ qua.", contract.getContractId());
             }
         }
+        log.info("🎉 Hoàn thành tác vụ quét hợp đồng cho khách thuê.");
     }
-    log.info("🎉 Hoàn thành tác vụ quét hợp đồng cho khách thuê.");
-  }
-  
+
+    /**
+     * Scheduled task to automatically cleanup notifications older than 10 days
+     * Runs daily at 2:00 AM
+     */
+    @Scheduled(cron = "0 0 2 * * *")
+    @Transactional
+    public void cleanupOldNotifications() {
+        log.info("🧹 Bắt đầu tác vụ tự động xóa thông báo cũ hơn 10 ngày...");
+
+        try {
+            int deletedCount = notificationService.cleanupOldNotifications();
+
+            if (deletedCount > 0) {
+                log.info("✅ Đã xóa thành công {} thông báo cũ hơn 10 ngày.", deletedCount);
+            } else {
+                log.info("ℹ️ Không có thông báo nào cũ hơn 10 ngày cần xóa.");
+            }
+
+        } catch (Exception e) {
+            log.error("❌ Lỗi khi thực hiện tác vụ xóa thông báo cũ: {}", e.getMessage(), e);
+        }
+
+        log.info("🎉 Hoàn thành tác vụ xóa thông báo cũ.");
+    }
 
 }

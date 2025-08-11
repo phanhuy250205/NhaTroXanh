@@ -475,4 +475,143 @@ public class NotificationService {
             return null;
         }
     }
+
+    /**
+     * Delete all contract notifications for a specific user and room
+     */
+    public void deleteContractNotifications(Integer userId, Integer roomId) {
+        try {
+            List<Notification> notifications = notificationRepository.findContractNotificationsByUserAndRoom(
+                    userId, Notification.NotificationType.CONTRACT, roomId);
+            
+            if (!notifications.isEmpty()) {
+                List<Integer> notificationIds = notifications.stream()
+                        .map(Notification::getNotificationId)
+                        .toList();
+                
+                notificationRepository.deleteByNotificationIds(notificationIds);
+                log.info("Deleted {} contract notifications for user {} and room {}", 
+                        notificationIds.size(), userId, roomId);
+            } else {
+                log.debug("No contract notifications found to delete for user {} and room {}", userId, roomId);
+            }
+        } catch (Exception e) {
+            log.error("Error deleting contract notifications for user {} and room {}: {}", 
+                    userId, roomId, e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Create contract notification with automatic cleanup of old notifications
+     */
+    public Notification createContractNotificationWithCleanup(Users user, Rooms room, String title, String message) {
+        try {
+            if (user == null || room == null) {
+                log.error("Cannot create contract notification: user or room is null");
+                return null;
+            }
+
+            // Delete old contract notifications for this user and room
+            deleteContractNotifications(user.getUserId(), room.getRoomId());
+
+            // Create new contract notification
+            Notification notification = Notification.builder()
+                    .user(user)
+                    .title(title)
+                    .message(message)
+                    .type(Notification.NotificationType.CONTRACT)
+                    .isRead(false)
+                    .createAt(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh"))))
+                    .room(room)
+                    .build();
+
+            Notification savedNotification = notificationRepository.save(notification);
+            log.info("Created contract notification with cleanup for user {} and room {}: {}", 
+                    user.getUserId(), room.getRoomId(), message);
+            return savedNotification;
+        } catch (Exception e) {
+            log.error("Error creating contract notification with cleanup for user {} and room {}: {}", 
+                    user.getUserId(), room != null ? room.getRoomId() : "null", e.getMessage(), e);
+            return null;
+        }
+    }
+
+    /**
+     * Cleanup obsolete contract notifications for a user
+     */
+    public int cleanupObsoleteContractNotifications(Integer userId) {
+        try {
+            log.info("Starting cleanup of obsolete contract notifications for user {}", userId);
+            List<Notification> contractNotifications = notificationRepository.findAllContractNotificationsByUserId(userId);
+            List<Integer> notificationsToDelete = new ArrayList<>();
+            
+            for (Notification notification : contractNotifications) {
+                // Check if the room still exists and is associated with an active contract
+                if (notification.getRoom() == null) {
+                    notificationsToDelete.add(notification.getNotificationId());
+                    log.debug("Marking notification {} for deletion - no room associated", 
+                            notification.getNotificationId());
+                }
+                // Additional logic can be added here to check contract status if needed
+            }
+            
+            if (!notificationsToDelete.isEmpty()) {
+                notificationRepository.deleteByNotificationIds(notificationsToDelete);
+                log.info("Deleted {} obsolete contract notifications for user {}", notificationsToDelete.size(), userId);
+            } else {
+                log.info("No obsolete contract notifications found for user {}", userId);
+            }
+            
+            return notificationsToDelete.size();
+        } catch (Exception e) {
+            log.error("Error cleaning up obsolete contract notifications for user {}: {}", userId, e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    /**
+     * Cleanup notifications older than 10 days
+     * This method will be called by scheduled task to automatically delete old notifications
+     */
+    public int cleanupOldNotifications() {
+        try {
+            log.info("Starting cleanup of notifications older than 10 days");
+            
+            // Calculate cutoff date (10 days ago)
+            LocalDateTime cutoffDateTime = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).minusDays(10);
+            Timestamp cutoffDate = Timestamp.valueOf(cutoffDateTime);
+            
+            // Count notifications to be deleted for logging
+            long countToDelete = notificationRepository.countNotificationsOlderThan(cutoffDate);
+            
+            if (countToDelete == 0) {
+                log.info("No notifications older than 10 days found to delete");
+                return 0;
+            }
+            
+            // Find notifications older than 10 days
+            List<Notification> oldNotifications = notificationRepository.findNotificationsOlderThan(cutoffDate);
+            
+            if (!oldNotifications.isEmpty()) {
+                List<Integer> notificationIds = oldNotifications.stream()
+                        .map(Notification::getNotificationId)
+                        .toList();
+                
+                // Delete old notifications
+                notificationRepository.deleteByNotificationIds(notificationIds);
+                
+                log.info("Successfully deleted {} notifications older than 10 days (cutoff date: {})", 
+                        notificationIds.size(), cutoffDateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+                
+                return notificationIds.size();
+            } else {
+                log.info("No notifications older than 10 days found to delete");
+                return 0;
+            }
+            
+        } catch (Exception e) {
+            log.error("Error cleaning up old notifications: {}", e.getMessage(), e);
+            return 0;
+        }
+    }
 }
