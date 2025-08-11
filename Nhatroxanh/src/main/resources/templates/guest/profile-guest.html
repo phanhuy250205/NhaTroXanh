@@ -1008,7 +1008,7 @@
                             <div class="mb-3">
                                 <label class="form-label-guest">Mật khẩu hiện tại *</label>
                                 <div class="password-input-container-guest">
-                                    <input type="password" class="form-control form-control-guest" id="currentPassword" name="currentPassword" required>
+                                    <input type="password" class="form-control form-control-guest" id="currentPassword" name="currentPassword">
                                     <button type="button" class="password-toggle-guest" onclick="togglePassword('currentPassword')">
                                         <i class="fas fa-eye" id="currentPasswordIcon"></i>
                                     </button>
@@ -1019,7 +1019,7 @@
                             <div class="mb-3">
                                 <label class="form-label-guest">Mật khẩu mới *</label>
                                 <div class="password-input-container-guest">
-                                    <input type="password" class="form-control form-control-guest" id="newPassword" name="newPassword" required>
+                                    <input type="password" class="form-control form-control-guest" id="newPassword" name="newPassword">
                                     <button type="button" class="password-toggle-guest" onclick="togglePassword('newPassword')">
                                         <i class="fas fa-eye" id="newPasswordIcon"></i>
                                     </button>
@@ -1028,15 +1028,15 @@
                                     <div class="password-strength-bar-guest"></div>
                                 </div>
                                 <div class="invalid-feedback-guest" id="newPasswordError" style="display: none;"></div>
-                                <div class="field-info-guest text-info" style="display: flex;">
+                                <!-- <div class="field-info-guest text-info" style="display: flex;">
                                     <i class="fas fa-info-circle"></i> Mật khẩu phải có ít nhất 6 ký tự
-                                </div>
+                                </div> -->
                             </div>
                             
                             <div class="mb-3">
                                 <label class="form-label-guest">Xác nhận mật khẩu mới *</label>
                                 <div class="password-input-container-guest">
-                                    <input type="password" class="form-control form-control-guest" id="confirmPassword" name="confirmPassword" required>
+                                    <input type="password" class="form-control form-control-guest" id="confirmPassword" name="confirmPassword">
                                     <button type="button" class="password-toggle-guest" onclick="togglePassword('confirmPassword')">
                                         <i class="fas fa-eye" id="confirmPasswordIcon"></i>
                                     </button>
@@ -1061,7 +1061,7 @@
                         <div class="col-md-6">
                             <label class="form-label-guest">Họ và tên *</label>
                             <input type="text" class="form-control form-control-guest" id="fullname" th:field="*{guestInfo.fullname}" 
-                                   form="guestProfileForm" required>
+                                   form="guestProfileForm">
                             <div class="invalid-feedback-guest" id="fullnameError" style="display: none;"></div>
                             <div class="valid-feedback-guest" id="fullnameSuccess" style="display: none;"></div>
                         </div>
@@ -1117,14 +1117,14 @@
                         <div class="col-md-6">
                             <label class="form-label-guest">Email *</label>
                             <input type="email" class="form-control form-control-guest" id="email" th:field="*{guestInfo.email}" 
-                                   form="guestProfileForm" required>
+                                   form="guestProfileForm">
                             <div class="invalid-feedback-guest" id="emailError" style="display: none;"></div>
                             <div class="valid-feedback-guest" id="emailSuccess" style="display: none;"></div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label-guest">Số điện thoại *</label>
                             <input type="tel" class="form-control form-control-guest" id="phone" th:field="*{guestInfo.phone}" 
-                                   form="guestProfileForm" required>
+                                   form="guestProfileForm">
                             <div class="invalid-feedback-guest" id="phoneError" style="display: none;"></div>
                             <div class="valid-feedback-guest" id="phoneSuccess" style="display: none;"></div>
                             <div class="field-info-guest" id="phoneInfo" style="display: none;"></div>
@@ -1199,7 +1199,7 @@
                                name="issueTitle" 
                                id="issueTitle"
                                placeholder="Nhập tiêu đề ngắn gọn về sự cố..." 
-                               required>
+                            >
                         <div class="report-invalid-feedback" id="issueTitleError"></div>
                     </div>
 
@@ -1208,7 +1208,7 @@
                         <label class="report-form-label">
                             <i class="fas fa-flag me-2"></i>Mức độ ưu tiên
                         </label>
-                        <select class="report-form-control" name="priority" id="priority" required>
+                        <select class="report-form-control" name="priority" id="priority">
                             <option value="">Chọn mức độ ưu tiên</option>
                             <option value="low">Thấp - Không ảnh hưởng nhiều</option>
                             <option value="medium">Trung bình - Cần xử lý sớm</option>
@@ -1228,7 +1228,7 @@
                                   id="description"
                                   rows="4" 
                                   placeholder="Mô tả chi tiết về sự cố, vị trí, thời gian xảy ra..." 
-                                  required></textarea>
+                                ></textarea>
                         <div class="report-invalid-feedback" id="descriptionError"></div>
                     </div>
 
@@ -1674,7 +1674,7 @@
             constructor() {
                 this.formElements = [
                     "fullname", "email", "phone", "birthday", "cccdNumber",
-                    "issueDate", "issuePlace", "street"
+                    "issueDate", "issuePlace", "street", "province", "district", "ward"
                 ];
                 this.passwordElements = [
                     "currentPassword", "newPassword", "confirmPassword"
@@ -1819,55 +1819,64 @@
 
             // Enhanced password validation
             validatePasswordField(fieldId) {
-                const element = document.getElementById(fieldId);
-                if (!element) return true;
+    const element = document.getElementById(fieldId);
+    if (!element) return true;
 
-                let isValid = true;
-                let errorMessage = "";
-                const value = element.value;
+    let isValid = true;
+    let errorMessage = "";
+    const value = element.value;
 
-                switch (fieldId) {
-                    case "currentPassword":
-                        if (!value) {
-                            isValid = false;
-                            errorMessage = "Vui lòng nhập mật khẩu hiện tại";
-                        }
-                        break;
-
-                    case "newPassword":
-                        if (!value) {
-                            isValid = false;
-                            errorMessage = "Vui lòng nhập mật khẩu mới";
-                        } else if (value.length < 6) {
-                            isValid = false;
-                            errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
-                        } else {
-                            this.updatePasswordStrength(value);
-                        }
-                        
-                        // Validate confirm password if it has value
-                        const confirmPassword = document.getElementById("confirmPassword");
-                        if (confirmPassword && confirmPassword.value) {
-                            this.validatePasswordField("confirmPassword");
-                        }
-                        break;
-
-                    case "confirmPassword":
-                        const newPassword = document.getElementById("newPassword").value;
-                        if (!value) {
-                            isValid = false;
-                            errorMessage = "Vui lòng xác nhận mật khẩu mới";
-                        } else if (value !== newPassword) {
-                            isValid = false;
-                            errorMessage = "Mật khẩu xác nhận không khớp";
-                        }
-                        break;
-                }
-
-                // Update UI
-                this.updateValidationUI(fieldId, isValid, errorMessage, "");
-                return isValid;
+    switch (fieldId) {
+        case "currentPassword":
+            if (!value) {
+                isValid = false;
+                errorMessage = "Vui lòng nhập mật khẩu hiện tại";
             }
+            break;
+
+        case "newPassword":
+            if (!value) {
+                isValid = false;
+                errorMessage = "Vui lòng nhập mật khẩu mới";
+            } else if (value.length < 6) {
+                isValid = false;
+                errorMessage = "Mật khẩu mới phải có ít nhất 6 ký tự";
+            } else if (!/[A-Z]/.test(value)) {
+                isValid = false;
+                errorMessage = "Mật khẩu mới phải chứa ít nhất một ký tự in hoa";
+            } else if (!/[0-9]/.test(value)) {
+                isValid = false;
+                errorMessage = "Mật khẩu mới phải có ký tự số";
+            } else if (!/[!@#$%^&*]/.test(value)) {
+                isValid = false;
+                errorMessage = "Mật khẩu mới phải có ký tự đặc biệt";
+            } else {
+                this.updatePasswordStrength(value);
+            }
+            
+            // Validate confirm password if it has value
+            const confirmPassword = document.getElementById("confirmPassword");
+            if (confirmPassword && confirmPassword.value) {
+                this.validatePasswordField("confirmPassword");
+            }
+            break;
+
+        case "confirmPassword":
+            const newPassword = document.getElementById("newPassword").value;
+            if (!value) {
+                isValid = false;
+                errorMessage = "Vui lòng xác nhận mật khẩu mới";
+            } else if (value !== newPassword) {
+                isValid = false;
+                errorMessage = "Mật khẩu xác nhận không khớp";
+            }
+            break;
+    }
+
+    // Update UI
+    this.updateValidationUI(fieldId, isValid, errorMessage, "");
+    return isValid;
+}
 
             // Update password strength indicator
             updatePasswordStrength(password) {
@@ -2031,6 +2040,34 @@
                         }
 
                         break;
+                        
+                    case "province":
+                       if (value) {
+                            successMessage = "Tỉnh/TP hợp lệ";
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Tỉnh/TP không được để trống";
+                        }
+                    break;
+
+                    case "district":
+                       if (value) {
+                            successMessage = "Quận/Huyện hợp lệ";
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Quận/Huyện không được để trống";
+                        }
+                    break;
+
+                    case "ward":
+                       if (value) {
+                            successMessage = "Phường/Xã hợp lệ";
+                        } else if (!value) {
+                            isValid = false;
+                            errorMessage = "Phường/Xã không được để trống";
+                        }
+                    break;
+                        
                 }
 
                 // Update UI

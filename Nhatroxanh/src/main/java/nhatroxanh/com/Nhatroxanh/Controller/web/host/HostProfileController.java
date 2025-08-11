@@ -2,10 +2,11 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 
 import java.io.IOException;
 import java.sql.Date;
-import java.util.Optional;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,11 +25,9 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
-import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 
 @Controller
 @RequestMapping("/chu-tro")
@@ -45,19 +44,18 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
-
+    
     @Autowired
     private TenantService tenantService;
 
     @Autowired
-    private EncryptionService encryptionService;
-    private NotificationService notificationService;
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Users user = usersRepository.findById(userDetails.getUser().getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
-        UserCccd cccd = userCccdRepository.findByUser(user);
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
 
         int totalHostels = hostelService.countByOwner(user);
 
@@ -68,17 +66,11 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
+        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
 
-        if (cccd != null && cccd.getCccdNumber() != null) {
-            try {
-                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
-                dto.setCccdNumber(decryptedCccd);
-                dto.setIssueDate(cccd.getIssueDate());
-                dto.setIssuePlace(cccd.getIssuePlace());
-            } catch (Exception e) {
-                model.addAttribute("error", "Không thể giải mã CCCD: " + e.getMessage());
-                dto.setCccdNumber(null);
-            }
+        if (cccd != null) {
+            dto.setIssueDate(cccd.getIssueDate());
+            dto.setIssuePlace(cccd.getIssuePlace());
         }
 
         model.addAttribute("hostInfo", dto);
@@ -104,6 +96,7 @@ public class HostProfileController {
             return "host/profile-host";
         }
 
+        // ✅ Kiểm tra trùng email
         if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
             Optional<Users> existingEmail = usersRepository.findByEmail(dto.getEmail().trim());
             if (existingEmail.isPresent() && !existingEmail.get().getUserId().equals(user.getUserId())) {
@@ -115,6 +108,7 @@ public class HostProfileController {
             }
         }
 
+        // ✅ Kiểm tra trùng số điện thoại
         if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
             Optional<Users> existingPhone = usersRepository.findByPhone(dto.getPhone().trim());
             if (existingPhone.isPresent() && !existingPhone.get().getUserId().equals(user.getUserId())) {
@@ -146,15 +140,6 @@ public class HostProfileController {
         }
 
         try {
-            // Store original values for comparison
-            Users originalUser = new Users();
-            originalUser.setFullname(user.getFullname());
-            originalUser.setEmail(user.getEmail());
-            originalUser.setPhone(user.getPhone());
-            originalUser.setAddress(user.getAddress());
-            originalUser.setGender(user.getGender());
-            originalUser.setBirthday(user.getBirthday());
-
             // Cập nhật user
             user.setFullname(dto.getFullname());
             user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
@@ -163,10 +148,10 @@ public class HostProfileController {
             user.setEmail(dto.getEmail());
             user.setAddress(dto.getAddress());
 
+            // Xử lý CCCD
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
@@ -182,7 +167,7 @@ public class HostProfileController {
                     cccd = new UserCccd();
                     cccd.setUser(user);
                 }
-                cccd.setCccdNumber(encryptedCccd);
+                cccd.setCccdNumber(trimmedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
@@ -194,41 +179,6 @@ public class HostProfileController {
             }
 
             usersRepository.save(user);
-
-            // Create profile update notification
-            try {
-                java.util.List<String> updatedFields = new java.util.ArrayList<>();
-                if (!java.util.Objects.equals(originalUser.getFullname(), user.getFullname())) {
-                    updatedFields.add("Họ tên");
-                }
-                if (!java.util.Objects.equals(originalUser.getEmail(), user.getEmail())) {
-                    updatedFields.add("Email");
-                }
-                if (!java.util.Objects.equals(originalUser.getPhone(), user.getPhone())) {
-                    updatedFields.add("Số điện thoại");
-                }
-                if (!java.util.Objects.equals(originalUser.getAddress(), user.getAddress())) {
-                    updatedFields.add("Địa chỉ");
-                }
-                if (!java.util.Objects.equals(originalUser.getGender(), user.getGender())) {
-                    updatedFields.add("Giới tính");
-                }
-                if (!java.util.Objects.equals(originalUser.getBirthday(), user.getBirthday())) {
-                    updatedFields.add("Ngày sinh");
-                }
-                if (avatarFile != null && !avatarFile.isEmpty()) {
-                    updatedFields.add("Ảnh đại diện");
-                }
-
-                if (!updatedFields.isEmpty()) {
-                    String fieldsString = String.join(", ", updatedFields);
-                    notificationService.createProfileUpdateNotification(user, fieldsString);
-                }
-            } catch (Exception e) {
-                // Log error but don't fail the update
-                System.err.println("Failed to create profile update notification: " + e.getMessage());
-            }
-
             redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
 
         } catch (Exception e) {
@@ -239,17 +189,82 @@ public class HostProfileController {
         return "redirect:/chu-tro/profile-host";
     }
 
-    @PostMapping("/chi-tiet-khach-thue/update")
+    // TÁCH RIÊNG - Endpoint riêng cho đổi mật khẩu
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+                                @RequestParam("newPassword") String newPassword,
+                                @RequestParam("confirmPassword") String confirmPassword,
+                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                RedirectAttributes redirectAttributes) {
 
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validation cơ bản
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng xác nhận mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu hiện tại không đúng!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Cập nhật mật khẩu
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
+
+            redirectAttributes.addFlashAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
+            return "redirect:/chu-tro/profile-host";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("passwordError", "Có lỗi xảy ra khi đổi mật khẩu: " + e.getMessage());
+            return "redirect:/chu-tro/profile-host";
+        }
+    }
+
+    @PostMapping("/chi-tiet-khach-thue/update")
     public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
             @RequestParam("status") Boolean newStatus,
             RedirectAttributes redirectAttributes) {
 
-
         try {
             tenantService.updateContractStatus(contractId, newStatus);
+            // Gửi một thông báo thành công về trang chi tiết
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
         } catch (Exception e) {
+            // Gửi một thông báo lỗi về trang chi tiết
             redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
         }
         return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;

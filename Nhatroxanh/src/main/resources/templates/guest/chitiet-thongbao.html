@@ -1176,8 +1176,8 @@
                 </div>
                 <div class="data-content-notifications">
                     <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
-                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0'} VNĐ<br>
-                    <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0'} VNĐ<br>
+                    <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0'} <br>
+                    <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0'} <br>
                     <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
                 </div>
             </div>
@@ -1286,7 +1286,7 @@
                         Thông tin thanh toán
                     </div>
                     <div class="data-content-notifications">
-                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total|| '0'} <br>
+                        <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total|| '0'} VNĐ <br>
                         <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'VNPay'}<br>
                         <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
                     </div>
@@ -1296,7 +1296,7 @@
         <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
             <div class="payment-summary-notifications">
                 <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0'} </div>
+                <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0'} VNĐ </div>
             </div>
             <div class="payment-info-notifications">
                 <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>

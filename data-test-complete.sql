@@ -118,10 +118,10 @@ INSERT INTO users (password,fullname, phone, birthday, bank_account, balance, ge
 -- 6. USER CCCD DATA
 -- =====================================================
 
-INSERT INTO User_CCCD (id, user_id, cccd_number, full_name, date_of_birth, gender, nationality, place_of_origin, place_of_residence, date_of_issue, date_of_expiry, issuing_authority, front_image_url, back_image_url, verification_status, created_at, updated_at) VALUES
-(1, 3, '079085001234', 'Lê Văn Chủ Trọ', '1980-05-10', 'Nam', 'Việt Nam', 'TP. Hồ Chí Minh', '789 Đường Chủ Trọ 1, Q.1, TP.HCM', '2015-05-10', '2030-05-10', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-1.jpg', '/uploads/cccd-back-1.jpg', 'VERIFIED', '2024-01-03 08:30:00', '2024-01-03 09:00:00'),
-(2, 4, '079082002345', 'Phạm Thị Lan Anh', '1982-07-25', 'Nữ', 'Việt Nam', 'TP. Hồ Chí Minh', '321 Đường Chủ Trọ 2, Q.1, TP.HCM', '2017-07-25', '2032-07-25', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-2.jpg', '/uploads/cccd-back-2.jpg', 'VERIFIED', '2024-01-04 08:30:00', '2024-01-04 09:00:00'),
-(3, 5, '079078003456', 'Hoàng Minh Tuấn', '1978-12-03', 'Nam', 'Việt Nam', 'TP. Hồ Chí Minh', '654 Đường Chủ Trọ 3, Q.1, TP.HCM', '2013-12-03', '2028-12-03', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-3.jpg', '/uploads/cccd-back-3.jpg', 'VERIFIED', '2024-01-05 08:30:00', '2024-01-05 09:00:00');
+INSERT INTO user_cccd (user_id, cccd_number, front_image_url, back_image_url) VALUES
+(33, '079085001234', '2015-05-10', '2030-05-10', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-1.jpg', '/uploads/cccd-back-1.jpg', 'VERIFIED', '2024-01-03 08:30:00', '2024-01-03 09:00:00'),
+(4, '079082002345', '2017-07-25', '2032-07-25', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-2.jpg', '/uploads/cccd-back-2.jpg', 'VERIFIED', '2024-01-04 08:30:00', '2024-01-04 09:00:00'),
+(5, '079078003456', '2013-12-03', '2028-12-03', 'Cục Cảnh sát QLHC về TTXH', '/uploads/cccd-front-3.jpg', '/uploads/cccd-back-3.jpg', 'VERIFIED', '2024-01-05 08:30:00', '2024-01-05 09:00:00');
 
 -- =====================================================
 -- 7. HOSTELS DATA
@@ -226,16 +226,16 @@ INSERT INTO Images (image_id, image_url, post_id, room_id, contract_id) VALUES
 -- =====================================================
 
 INSERT INTO unregistered_tenants (id,user_id, full_name, phone, cccd_number, address, status, created_at) VALUES
-(1,12, 'Nguyễn Văn Khách', '0987654321', '079095001111', '123 Đường ABC, Q.1, TP.HCM', 'ACTIVE', '2024-02-01 10:00:00'),
-(33,9, 'Trần Thị Linh', '0987654322', '079096002222', '456 Đường DEF, Q.2, TP.HCM', 'ACTIVE', '2024-02-05 11:00:00'),
-(3,10, 'Lê Minh Tâm', '0987654323', '079097003333', '789 Đường GHI, Q.3, TP.HCM', 'INACTIVE', '2024-02-10 12:00:00');
+(1,6, 'Nguyễn Văn Khách', '0987654321', '079095001111', '123 Đường ABC, Q.1, TP.HCM', 'ACTIVE', '2024-02-01 10:00:00'),
+(33,7, 'Trần Thị Linh', '0987654322', '079096002222', '456 Đường DEF, Q.2, TP.HCM', 'ACTIVE', '2024-02-05 11:00:00'),
+(44,8, 'Lê Minh Tâm', '0987654323', '079097003333', '789 Đường GHI, Q.3, TP.HCM', 'INACTIVE', '2024-02-10 12:00:00');
 
 -- =====================================================
 -- 14. CONTRACTS DATA
 -- =====================================================
 
-INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_tenant_id, user_id, contract_date, created_at, start_date, end_date, price, deposit, duration, terms, status, tenant_phone, return_status) VALUES
-(33, 10, 8, 4, 3, 8, '2024-02-25', '2024-02-25', '2024-03-01', '2024-12-01', 5500000.00, 11000000.00, 9.0, 'Hợp đồng thuê homestay 9 tháng. Có thể sử dụng khu vực chung. Thanh toán đúng hạn.', 'ACTIVE', '0901000008', NULL);
+INSERT INTO contracts (contract_id, room_id, tenant_id, owner_id, unregistered_tenant_id, contract_date, created_at, start_date, end_date, price, deposit, duration, terms, status, tenant_phone, return_status) VALUES
+(33, 10, 8, 3, 44, '2024-02-25', '2024-02-25', '2024-03-01', '2024-12-01', 5500000.00, 11000000.00, 9.0, 'Hợp đồng thuê homestay 9 tháng. Có thể sử dụng khu vực chung. Thanh toán đúng hạn.', 'ACTIVE', '0901000008', NULL);
 (44, 14, 9, 4, 33, 9, '2024-03-01', '2024-03-01', '2024-03-15', '2024-09-15', 3200000.00, 6400000.00, 6.0, 'Hợp đồng thuê phòng sinh viên 6 tháng. Giá rẻ, phù hợp sinh viên. Không ồn ào sau 22h.', 'ACTIVE', '0901000009', NULL),
 (55, 16, 10, 5, 33, 10, '2024-03-05', '2024-03-05', '2024-03-15', '2025-03-15', 4200000.00, 8400000.00, 12.0, 'Hợp đồng thuê phòng 12 tháng. Có chỗ để xe miễn phí. Bảo trì định kỳ.', 'ACTIVE', '0901000010', NULL),
 (66, 19, 11, 5, 33, 11, '2024-03-10', '2024-03-10', '2024-04-01', '2025-04-01', 7500000.00, 15000000.00, 12.0, 'Hợp đồng thuê studio cao cấp 12 tháng. Đầy đủ nội thất. Dịch vụ dọn dẹp hàng tuần.', 'ACTIVE', '0901000011', NULL),

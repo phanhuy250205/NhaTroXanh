@@ -141,7 +141,8 @@
                 </div>
 
                 <!-- User dropdown -->
-                <div class="nav-item dropdown user-dropdown me-3">
+                <div class="nav-item dropdown user-dropdown me-3"
+                    xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
                     <a class="nav-link dropdown-toggle user-avatar" href="#" id="userDropdown" role="button"
                         data-bs-toggle="dropdown" aria-expanded="false">
                         <img th:src="${#authentication.principal.avatar != null ? #authentication.principal.avatar : '/images/avatars/default.png'}"
@@ -150,6 +151,7 @@
                             th:text="${#authentication.principal.fullName != null ? #authentication.principal.fullName : 'Khách'}"></span>
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end user-dropdown-menu" aria-labelledby="userDropdown">
+                        <!-- Header -->
                         <li class="dropdown-header">
                             <div class="user-info">
                                 <img th:src="${#authentication.principal.avatar != null ? #authentication.principal.avatar : '/images/avatars/default.png'}"
@@ -164,17 +166,38 @@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        <li><a class="dropdown-item" th:href="@{/khach-thue/profile-khach-thue}"><i
-                                    class="fas fa-user me-2"></i>Thông tin tài khoản</a></li>
-                        <li><a class="dropdown-item" th:href="@{/tro-da-luu}"><i class="fas fa-heart me-2"></i>Danh sách
-                                trọ yêu thích</a></li>
-                        <li><a class="dropdown-item" th:href="@{/khach-thue/lich-su-thanh-toan}"><i
-                                    class="fas fa-credit-card me-2"></i>Lịch Sử Thanh Toán</a></li>
-                        <li><a class="dropdown-item" th:href="@{/khach-thue/quan-ly-thue-tra}"><i
-                                    class="fas fa-file-contract me-2"></i>Quản lý thuê trả</a></li>
+
+                        <!-- Menu cho CUSTOMER -->
+                        <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item"
+                                th:href="@{/khach-thue/profile-khach-thue}"><i class="fas fa-user me-2"></i>Thông tin
+                                tài khoản</a></li>
+                        <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item" th:href="@{/tro-da-luu}"><i
+                                    class="fas fa-heart me-2"></i>Danh sách trọ yêu thích</a></li>
+                        <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item"
+                                th:href="@{/khach-thue/lich-su-thanh-toan}"><i class="fas fa-credit-card me-2"></i>Lịch
+                                Sử Thanh Toán</a></li>
+                        <li sec:authorize="hasRole('CUSTOMER')"><a class="dropdown-item"
+                                th:href="@{/khach-thue/quan-ly-thue-tra}"><i class="fas fa-file-contract me-2"></i>Quản
+                                lý thuê trả</a></li>
+
+                        <!-- Menu cho STAFF -->
+                        <li sec:authorize="hasRole('STAFF')"><a class="dropdown-item"
+                                th:href="@{/nhan-vien/bai-dang}"><i class="fas fa-tools me-2"></i>Trang quản trị nhân
+                                viên</a></li>
+
+                        <!-- Menu cho OWNER -->
+                        <li sec:authorize="hasRole('OWNER')"><a class="dropdown-item" th:href="@{/chu-tro/tong-quan}"><i
+                                    class="fas fa-home me-2"></i>Trang quản trị chủ trọ</a></li>
+
+                        <!-- Menu cho ADMIN -->
+                        <li sec:authorize="hasRole('ADMIN')"><a class="dropdown-item" th:href="@{/admin/thong-ke}"><i
+                                    class="fas fa-chart-line me-2"></i>Trang quản trị Admin</a></li>
+
                         <li>
                             <hr class="dropdown-divider">
                         </li>
+
+                        <!-- Logout -->
                         <li>
                             <form id="logoutForm" th:action="@{/perform_logout}" method="post">
                                 <button type="submit" class="dropdown-item text-danger">
@@ -184,11 +207,12 @@
                         </li>
                     </ul>
                 </div>
+
             </div>
 
             <!-- Anonymous user -->
             <div class="d-flex justify-content-center" sec:authorize="isAnonymous()">
-             
+
 
                 <button class="btn btn-login me-2" type="button" id="loginBtnTrigger">
                     <i class="fas fa-sign-in-alt"></i> <span>Đăng nhập</span>

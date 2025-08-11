@@ -216,9 +216,9 @@ class FavoriteHandler {
         } else {
             // Nếu không có modal, chuyển hướng
             this.showNotification('Vui lòng đăng nhập để sử dụng tính năng này', 'warning');
-            setTimeout(() => {
-                window.location.href = '/';
-            }, 2000);
+            // setTimeout(() => {
+            //     window.location.href = '/';
+            // }, 2000);
         }
     }
 

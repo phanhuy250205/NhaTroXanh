@@ -443,7 +443,7 @@
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -531,9 +531,24 @@
                         );
                     });
 
-                    await Promise.all(promises);
-                    location.reload(); // Reload to show empty state
-                    showNotification('Đã xóa tất cả nhà trọ đã lưu', 'success');
+                    try {
+                        await Promise.all(promises);
+                        setTimeout(() => {
+                            const loginModalOverlay = document.getElementById('loginModalOverlay');
+                            if (loginModalOverlay) {
+                                loginModalOverlay.style.display = 'none'; // Hide overlay before notification
+                            }
+                            showNotification('Đã xóa tất cả nhà trọ đã lưu', 'success');
+                            setTimeout(() => {
+                                location.reload(); // Reload after notification is shown
+                            }, 3000); // Additional delay to ensure notification visibility
+                        }, 500); // Delay for the success notification
+                    } catch (error) {
+                        console.error('Error deleting rentals:', error);
+                        setTimeout(() => {
+                            showNotification('Có lỗi khi xóa nhà trọ', 'error');
+                        }, 3000); // Delay for error notification
+                    }
                 }
             } catch (error) {
                 console.error('Error clearing all favorites:', error);
