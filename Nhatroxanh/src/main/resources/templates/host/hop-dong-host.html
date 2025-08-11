@@ -84,7 +84,7 @@
                                             <option value="">Chọn trạng thái</option>
                                             <option value="DRAFT">Bản nháp</option>
                                             <option value="ACTIVE">Đang hiệu lực</option>
-                                            <option value="TERMINATED">Đã Chấm Dứt</option>
+                                            <option value="TERMINATED">Sắp Hết Hạn</option>
                                             <option value="EXPIRED">Hết Hạn</option>
                                         </select>
                                     </div>
@@ -646,8 +646,7 @@
                                         <!-- Trường ẩn để lưu số tiền đặt cọc gửi về server -->
                                         <input type="hidden" id="deposit-amount" name="terms.deposit"
                                             th:value="${contract.terms.deposit != null ? contract.terms.deposit : 0}">
-                                        <!-- Hiển thị tiền đặt cọc (chỉ để xem) -->
-                                        <div class="form-text" id="deposit-amount-display">0 VNĐ</div>
+
                                     </div>
 
                                     <div class="col-12">

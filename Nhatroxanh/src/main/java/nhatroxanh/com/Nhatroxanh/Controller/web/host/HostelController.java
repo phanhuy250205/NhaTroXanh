@@ -72,6 +72,10 @@ public class HostelController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
+            if (hostelDTO.getRoomNumber() > 20) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Số phòng tối đa là 20!");
+                return "redirect:/chu-tro/them-khu-tro";
+            }
             System.out.println("Received: provinceName=" + provinceName + ", districtName=" + districtName
                     + ", wardName=" + wardName + ", street=" + street + ", houseNumber=" + houseNumber);
             hostelDTO.setOwnerId(userDetails.getUser().getUserId());

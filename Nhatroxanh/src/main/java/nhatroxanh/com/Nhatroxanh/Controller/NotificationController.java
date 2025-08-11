@@ -535,13 +535,22 @@ public class NotificationController {
         roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
         if (room.getHostel() != null) {
             roomMap.put("hostel", Map.of("name", room.getHostel().getName()));
+            // Add hostelId for payment URL generation
+            map.put("hostelId", room.getHostel().getHostelId());
         }
         map.put("room", roomMap);
+        // Add roomId for payment URL generation
+        map.put("roomId", room.getRoomId());
     }
 
     switch (notification.getType()) {
         case PAYMENT:
-            map.put("paymentDetails", parsePaymentNotification(notification.getMessage()));
+            Map<String, Object> paymentDetails = parsePaymentNotification(notification.getMessage());
+            if (paymentDetails != null) {
+                // Add the invoiceId to the top level for easy access in JavaScript
+                map.put("invoiceId", paymentDetails.get("invoiceId"));
+                map.put("paymentDetails", paymentDetails);
+            }
             break;
         case REPORT:
             map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));

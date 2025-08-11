@@ -7,18 +7,18 @@ let availableContracts = []; // Store contracts globally for access
 // Load specific page
 function loadPage(page) {
     currentPage = page;
-    
+
     // Build URL with parameters
     let url = '/api/payments/paginated?page=' + page + '&size=8';
-    
+
     if (currentSearch && currentSearch.trim() !== '') {
         url += '&search=' + encodeURIComponent(currentSearch.trim());
     }
-    
+
     if (currentStatus && currentStatus !== '') {
         url += '&status=' + encodeURIComponent(currentStatus);
     }
-    
+
     // Make AJAX request
     fetch(url)
         .then(response => response.json())
@@ -38,7 +38,7 @@ function loadPage(page) {
 function updateTable(payments) {
     const tbody = document.getElementById('paymentsTableBody');
     tbody.innerHTML = '';
-    
+
     if (payments.length === 0) {
         tbody.innerHTML = `
             <tr>
@@ -50,12 +50,24 @@ function updateTable(payments) {
         `;
         return;
     }
-    
+
     payments.forEach(payment => {
-        const statusClass = payment.paymentStatus === 'ĐÃ_THANH_TOÁN' ? 'status-paid' : 'status-unpaid';
-        const statusIcon = payment.paymentStatus === 'ĐÃ_THANH_TOÁN' ? 'fas fa-check' : 'fas fa-exclamation-triangle';
-        const statusText = payment.paymentStatus === 'ĐÃ_THANH_TOÁN' ? 'Đã thanh toán' : 'Chưa thanh toán';
-        
+        let statusClass, statusIcon, statusText;
+        if (payment.paymentStatus === 'ĐÃ_THANH_TOÁN') {
+            statusClass = 'status-paid';
+            statusIcon = 'fas fa-check';
+            statusText = 'Đã thanh toán';
+        } else if (payment.paymentStatus === 'CHỜ_XÁC_NHẬN_TIỀN_MẶT') {
+            statusClass = 'status-pending';
+            statusIcon = 'fas fa-hourglass-half';
+            statusText = 'Chờ xác nhận';
+        } else {
+            statusClass = 'status-unpaid';
+            statusIcon = 'fas fa-exclamation-triangle';
+            statusText = 'Chưa thanh toán';
+        }
+
+
         const row = `
             <tr>
                 <td><strong>${payment.hostelName || ''}</strong></td>
@@ -96,7 +108,7 @@ function updateTable(payments) {
 function updatePagination(data) {
     const paginationSection = document.querySelector('.pagination-section');
     const paginationInfo = document.querySelector('.pagination-info span');
-    
+
     // Update pagination info
     if (paginationInfo) {
         paginationInfo.innerHTML = `
@@ -104,7 +116,7 @@ function updatePagination(data) {
             <span>${data.totalElements}</span> thanh toán
         `;
     }
-    
+
     // Show/hide pagination section
     if (data.totalPages <= 1) {
         if (paginationSection) {
@@ -116,68 +128,68 @@ function updatePagination(data) {
             paginationSection.style.display = 'block';
         }
     }
-    
+
     // Update pagination controls
     const pagination = document.querySelector('.pagination-custom');
     if (!pagination) return;
-    
+
     pagination.innerHTML = '';
-    
+
     // First page button
     const firstDisabled = data.currentPage === 0 ? 'disabled' : '';
     pagination.innerHTML += `
         <li class="page-item ${firstDisabled}">
-            ${data.currentPage === 0 ? 
-                '<span class="page-link"><i class="fas fa-angle-double-left"></i></span>' :
-                '<a class="page-link" href="#" onclick="loadPage(0)"><i class="fas fa-angle-double-left"></i></a>'
-            }
+            ${data.currentPage === 0 ?
+            '<span class="page-link"><i class="fas fa-angle-double-left"></i></span>' :
+            '<a class="page-link" href="#" onclick="loadPage(0)"><i class="fas fa-angle-double-left"></i></a>'
+        }
         </li>
     `;
-    
+
     // Previous page button
     pagination.innerHTML += `
         <li class="page-item ${firstDisabled}">
-            ${data.currentPage === 0 ? 
-                '<span class="page-link"><i class="fas fa-angle-left"></i></span>' :
-                '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage - 1) + ')"><i class="fas fa-angle-left"></i></a>'
-            }
+            ${data.currentPage === 0 ?
+            '<span class="page-link"><i class="fas fa-angle-left"></i></span>' :
+            '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage - 1) + ')"><i class="fas fa-angle-left"></i></a>'
+        }
         </li>
     `;
-    
+
     // Page numbers
     const startPage = Math.max(0, data.currentPage - 2);
     const endPage = Math.min(data.totalPages - 1, data.currentPage + 2);
-    
+
     for (let i = startPage; i <= endPage; i++) {
         const activeClass = i === data.currentPage ? 'active' : '';
         pagination.innerHTML += `
             <li class="page-item ${activeClass}">
-                ${i === data.currentPage ? 
-                    '<span class="page-link">' + (i + 1) + '</span>' :
-                    '<a class="page-link" href="#" onclick="loadPage(' + i + ')">' + (i + 1) + '</a>'
-                }
+                ${i === data.currentPage ?
+                '<span class="page-link">' + (i + 1) + '</span>' :
+                '<a class="page-link" href="#" onclick="loadPage(' + i + ')">' + (i + 1) + '</a>'
+            }
             </li>
         `;
     }
-    
+
     // Next page button
     const lastDisabled = data.currentPage >= data.totalPages - 1 ? 'disabled' : '';
     pagination.innerHTML += `
         <li class="page-item ${lastDisabled}">
-            ${data.currentPage >= data.totalPages - 1 ? 
-                '<span class="page-link"><i class="fas fa-angle-right"></i></span>' :
-                '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage + 1) + ')"><i class="fas fa-angle-right"></i></a>'
-            }
+            ${data.currentPage >= data.totalPages - 1 ?
+            '<span class="page-link"><i class="fas fa-angle-right"></i></span>' :
+            '<a class="page-link" href="#" onclick="loadPage(' + (data.currentPage + 1) + ')"><i class="fas fa-angle-right"></i></a>'
+        }
         </li>
     `;
-    
+
     // Last page button
     pagination.innerHTML += `
         <li class="page-item ${lastDisabled}">
-            ${data.currentPage >= data.totalPages - 1 ? 
-                '<span class="page-link"><i class="fas fa-angle-double-right"></i></span>' :
-                '<a class="page-link" href="#" onclick="loadPage(' + (data.totalPages - 1) + ')"><i class="fas fa-angle-double-right"></i></a>'
-            }
+            ${data.currentPage >= data.totalPages - 1 ?
+            '<span class="page-link"><i class="fas fa-angle-double-right"></i></span>' :
+            '<a class="page-link" href="#" onclick="loadPage(' + (data.totalPages - 1) + ')"><i class="fas fa-angle-double-right"></i></a>'
+        }
         </li>
     `;
 }
@@ -260,7 +272,7 @@ function populateInvoiceModal(payment) {
     document.getElementById('invoiceMonth').textContent = payment.month || '';
     document.getElementById('invoiceRoom').textContent = payment.roomCode || '';
     document.getElementById('invoiceTenant').textContent = payment.tenantName || '';
-    
+
     // Populate payment details
     if (payment.details && payment.details.length > 0) {
         payment.details.forEach(detail => {
@@ -280,17 +292,20 @@ function populateInvoiceModal(payment) {
             }
         });
     }
-    
+
     document.getElementById('totalAmount').textContent = formatCurrency(payment.totalAmount);
     document.getElementById('dueDate').textContent = formatDate(payment.dueDate);
-    
+
     const statusElement = document.getElementById('invoiceStatus');
     if (payment.paymentStatus === 'ĐÃ_THANH_TOÁN') {
         statusElement.innerHTML = '<span class="status-badge status-paid"><i class="fas fa-check me-1"></i>Đã thanh toán</span>';
+    } else if (payment.paymentStatus === 'CHỜ_XÁC_NHẬN_TIỀN_MẶT') {
+        statusElement.innerHTML = '<span class="status-badge status-pending"><i class="fas fa-hourglass-half me-1"></i>Chờ xác nhận</span>';
     } else {
         statusElement.innerHTML = '<span class="status-badge status-unpaid"><i class="fas fa-exclamation-triangle me-1"></i>Chưa thanh toán</span>';
     }
-    
+
+
     // Store payment ID for actions
     document.getElementById('invoiceModal').setAttribute('data-payment-id', payment.paymentId);
 }
@@ -299,15 +314,15 @@ function populateInvoiceModal(payment) {
 function markAsPaid() {
     const modal = document.getElementById('invoiceModal');
     const paymentId = modal.getAttribute('data-payment-id');
-    
+
     if (!paymentId) {
         showAlert('error', 'Không tìm thấy ID hóa đơn');
         return;
     }
-    
+
     // Show confirmation dialog
-    showAlert('warning', 'Bạn có chắc chắn muốn đánh dấu hóa đơn này đã thanh toán bằng tiền mặt?', { 
-        showConfirm: true, 
+    showAlert('warning', 'Bạn có chắc chắn muốn đánh dấu hóa đơn này đã thanh toán bằng tiền mặt?', {
+        showConfirm: true,
         onConfirm: () => {
             // Call the cash payment confirmation endpoint
             fetch('/landlord/confirm-cash-payment', {
@@ -317,23 +332,23 @@ function markAsPaid() {
                 },
                 body: `paymentId=${paymentId}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showAlert('success', 'Đã xác nhận thanh toán tiền mặt thành công! Thông báo đã được gửi đến người thuê.');
-                    // Close modal
-                    const bsModal = bootstrap.Modal.getInstance(modal);
-                    bsModal.hide();
-                    // Reload current page
-                    loadPage(currentPage);
-                } else {
-                    showAlert('error', data.message || 'Có lỗi xảy ra khi xác nhận thanh toán');
-                }
-            })
-            .catch(error => {
-                console.error('Error confirming cash payment:', error);
-                showAlert('error', 'Có lỗi xảy ra khi xác nhận thanh toán tiền mặt');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showAlert('success', 'Đã xác nhận thanh toán tiền mặt thành công! Thông báo đã được gửi đến người thuê.');
+                        // Close modal
+                        const bsModal = bootstrap.Modal.getInstance(modal);
+                        bsModal.hide();
+                        // Reload current page
+                        loadPage(currentPage);
+                    } else {
+                        showAlert('error', data.message || 'Có lỗi xảy ra khi xác nhận thanh toán');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error confirming cash payment:', error);
+                    showAlert('error', 'Có lỗi xảy ra khi xác nhận thanh toán tiền mặt');
+                });
         }
     });
 }
@@ -342,40 +357,42 @@ function markAsPaid() {
 function deleteInvoice() {
     const modal = document.getElementById('invoiceModal');
     const paymentId = modal.getAttribute('data-payment-id');
-    
+
     if (!paymentId) {
         showAlert('error', 'Không tìm thấy ID hóa đơn');
         return;
     }
-    
+
     // Confirm deletion
-    showAlert('warning', 'Bạn có chắc chắn muốn xóa hóa đơn này?', { showConfirm: true, onConfirm: () => {
-        fetch(`/api/payments/${paymentId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                return response.json().catch(() => ({})); // Handle empty response
-            } else {
-                throw new Error('Failed to delete payment');
-            }
-        })
-        .then(data => {
-            showAlert('success', 'Đã xóa hóa đơn thành công');
-            // Close modal
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            bsModal.hide();
-            // Reload current page
-            loadPage(currentPage);
-        })
-        .catch(error => {
-            console.error('Error deleting payment:', error);
-            showAlert('error', 'Có lỗi xảy ra khi xóa hóa đơn');
-        });
-    }});
+    showAlert('warning', 'Bạn có chắc chắn muốn xóa hóa đơn này?', {
+        showConfirm: true, onConfirm: () => {
+            fetch(`/api/payments/${paymentId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json().catch(() => ({})); // Handle empty response
+                    } else {
+                        throw new Error('Failed to delete payment');
+                    }
+                })
+                .then(data => {
+                    showAlert('success', 'Đã xóa hóa đơn thành công');
+                    // Close modal
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    bsModal.hide();
+                    // Reload current page
+                    loadPage(currentPage);
+                })
+                .catch(error => {
+                    console.error('Error deleting payment:', error);
+                    showAlert('error', 'Có lỗi xảy ra khi xóa hóa đơn');
+                });
+        }
+    });
 }
 
 // Download invoice (placeholder function)
@@ -385,55 +402,57 @@ function downloadInvoice() {
 
 // Send unpaid invoices (placeholder function)
 function sendUnpaidInvoices() {
-    showAlert('warning', 'Bạn có chắc muốn gửi tất cả hóa đơn chưa thanh toán và quá hạn đến người thuê?', { showConfirm: true, onConfirm: () => {
-        const button = document.getElementById('send-invoices-btn');
-        const spinner = button.querySelector('.spinner-border');
-        const buttonText = button.querySelector('.d-none.d-sm-inline');
-        const originalText = buttonText.textContent;
+    showAlert('warning', 'Bạn có chắc muốn gửi tất cả hóa đơn chưa thanh toán và quá hạn đến người thuê?', {
+        showConfirm: true, onConfirm: () => {
+            const button = document.getElementById('send-invoices-btn');
+            const spinner = button.querySelector('.spinner-border');
+            const buttonText = button.querySelector('.d-none.d-sm-inline');
+            const originalText = buttonText.textContent;
 
-        // Disable button and show spinner
-        button.disabled = true;
-        spinner.classList.remove('d-none');
-        buttonText.textContent = 'Đang gửi...';
+            // Disable button and show spinner
+            button.disabled = true;
+            spinner.classList.remove('d-none');
+            buttonText.textContent = 'Đang gửi...';
 
-        fetch('/api/payments/send-unpaid', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // Add CSRF token if required: 'X-CSRF-TOKEN': getCsrfToken()
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Re-enable button and hide spinner
-            button.disabled = false;
-            spinner.classList.add('d-none');
-            buttonText.textContent = originalText;
-
-            if (data.success) {
-                if (data.sentCount > 0) {
-                    showAlert('success', data.message + ` (${data.sentCount} hóa đơn)`);
-                } else {
-                    showAlert('warning', 'Không có hóa đơn nào được gửi. Có thể tất cả hóa đơn đã đạt giới hạn 2 lần gửi thông báo hôm nay.');
+            fetch('/api/payments/send-unpaid', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add CSRF token if required: 'X-CSRF-TOKEN': getCsrfToken()
                 }
-                // Refresh notifications
-                if (typeof loadNotifications === 'function') {
-                    loadNotifications();
-                }
-            } else {
-                showAlert('error', 'Lỗi: ' + data.message);
-            }
-        })
-        .catch(error => {
-            // Re-enable button and hide spinner
-            button.disabled = false;
-            spinner.classList.add('d-none');
-            buttonText.textContent = originalText;
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Re-enable button and hide spinner
+                    button.disabled = false;
+                    spinner.classList.add('d-none');
+                    buttonText.textContent = originalText;
 
-            console.error('Error sending unpaid invoices:', error);
-            showAlert('error', 'Đã xảy ra lỗi khi gửi hóa đơn: ' + error.message + '. Vui lòng kiểm tra kết nối hoặc cấu hình email.');
-        });
-    }});
+                    if (data.success) {
+                        if (data.sentCount > 0) {
+                            showAlert('success', data.message + ` (${data.sentCount} hóa đơn)`);
+                        } else {
+                            showAlert('warning', 'Không có hóa đơn nào được gửi. Có thể tất cả hóa đơn đã đạt giới hạn 2 lần gửi thông báo hôm nay.');
+                        }
+                        // Refresh notifications
+                        if (typeof loadNotifications === 'function') {
+                            loadNotifications();
+                        }
+                    } else {
+                        showAlert('error', 'Lỗi: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    // Re-enable button and hide spinner
+                    button.disabled = false;
+                    spinner.classList.add('d-none');
+                    buttonText.textContent = originalText;
+
+                    console.error('Error sending unpaid invoices:', error);
+                    showAlert('error', 'Đã xảy ra lỗi khi gửi hóa đơn: ' + error.message + '. Vui lòng kiểm tra kết nối hoặc cấu hình email.');
+                });
+        }
+    });
 }
 
 // Check if payment already exists for the selected contract and month
@@ -450,7 +469,7 @@ function checkExistingPayment(contractId, month) {
 // Create new invoice with duplicate validation
 function createNewInvoice() {
     const form = document.getElementById('createInvoiceForm');
-    
+
     if (!form.checkValidity()) {
         showAlert('error', 'Vui lòng điền đầy đủ thông tin bắt buộc');
         return;
@@ -458,7 +477,7 @@ function createNewInvoice() {
 
     const contractId = document.getElementById('invoiceRoomSelect').value;
     const monthInput = document.getElementById('invoiceMonthInput').value;
-    
+
     if (!contractId || !monthInput) {
         showAlert('error', 'Vui lòng chọn phòng và tháng');
         return;
@@ -467,13 +486,13 @@ function createNewInvoice() {
     // Convert month input (YYYY-MM) to MM/YYYY format for checking
     const [year, month] = monthInput.split('-');
     const formattedMonth = `${month}/${year}`;
-    
+
     // Show loading state
     const createButton = document.querySelector('button[onclick="createNewInvoice()"]');
     const originalText = createButton.innerHTML;
     createButton.disabled = true;
     createButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang kiểm tra...';
-    
+
     // Check for existing payment first
     checkExistingPayment(contractId, formattedMonth)
         .then(exists => {
@@ -481,9 +500,9 @@ function createNewInvoice() {
                 // Get contract info for better error message
                 const selectedContract = availableContracts.find(contract => contract.contractId == contractId);
                 const roomInfo = selectedContract ? `${selectedContract.hostelName} - ${selectedContract.roomCode}` : 'phòng đã chọn';
-                
+
                 showAlert('warning', `Hóa đơn cho tháng ${formattedMonth} đã tồn tại cho ${roomInfo}. Không thể tạo hóa đơn trùng lặp.`);
-                
+
                 // Reset button
                 createButton.disabled = false;
                 createButton.innerHTML = originalText;
@@ -492,7 +511,7 @@ function createNewInvoice() {
                 if (validateInvoiceForm()) {
                     // Reset button text but keep it disabled during submission
                     createButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tạo hóa đơn...';
-                    
+
                     // Submit form
                     form.submit();
                 } else {
@@ -505,7 +524,7 @@ function createNewInvoice() {
         .catch(error => {
             console.error('Error during invoice creation:', error);
             showAlert('error', 'Có lỗi xảy ra khi kiểm tra hóa đơn. Vui lòng thử lại.');
-            
+
             // Reset button
             createButton.disabled = false;
             createButton.innerHTML = originalText;
@@ -514,6 +533,7 @@ function createNewInvoice() {
 
 // Validate invoice form data
 function validateInvoiceForm() {
+    const monthInput = document.getElementById('invoiceMonthInput').value;
     const roomFee = parseFloat(document.getElementById('roomFeeInput').value) || 0;
     const wifiFee = parseFloat(document.getElementById('wifiFeeInput').value) || 0;
     const electricityPrev = parseInt(document.getElementById('electricityPrevInput').value) || 0;
@@ -523,6 +543,17 @@ function validateInvoiceForm() {
     const waterCurr = parseInt(document.getElementById('waterCurrInput').value) || 0;
     const waterUnitPrice = parseFloat(document.getElementById('waterUnitPriceInput').value) || 0;
     const trashFee = parseFloat(document.getElementById('trashFeeInput').value) || 0;
+
+    // Validate month range - landlords can only create invoices within ±2 months from current month
+    if (monthInput) {
+        const [year, month] = monthInput.split('-');
+        const requestedMonth = parseInt(month);
+        const requestedYear = parseInt(year);
+        
+        if (!validateInvoiceMonth(requestedMonth, requestedYear)) {
+            return false;
+        }
+    }
 
     // Validate electricity readings
     if (electricityCurr < electricityPrev) {
@@ -568,6 +599,38 @@ function validateInvoiceForm() {
     return true;
 }
 
+// Validate that the invoice month is within the allowed range (current month ±2 months)
+function validateInvoiceMonth(month, year) {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const currentYear = currentDate.getFullYear();
+    
+    // Create date objects for comparison (using first day of month)
+    const currentMonthDate = new Date(currentYear, currentMonth - 1, 1);
+    const requestedMonthDate = new Date(year, month - 1, 1);
+    
+    // Calculate difference in months
+    const monthsDifference = (requestedMonthDate.getFullYear() - currentMonthDate.getFullYear()) * 12 + 
+                            (requestedMonthDate.getMonth() - currentMonthDate.getMonth());
+    
+    // Allow creation for current month ±2 months
+    if (Math.abs(monthsDifference) > 2) {
+        const currentMonthYear = String(currentMonth).padStart(2, '0') + '/' + currentYear;
+        const requestedMonthYear = String(month).padStart(2, '0') + '/' + year;
+        
+        if (monthsDifference > 2) {
+            showAlert('error', 
+                `Không thể tạo hóa đơn cho tháng ${requestedMonthYear}. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong tương lai từ tháng hiện tại (${currentMonthYear}).`);
+        } else {
+            showAlert('error', 
+                `Không thể tạo hóa đơn cho tháng ${requestedMonthYear}. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong quá khứ từ tháng hiện tại (${currentMonthYear}).`);
+        }
+        return false;
+    }
+    
+    return true;
+}
+
 // Remove modal backdrop (utility function)
 function removeModalBackdrop() {
     const backdrop = document.querySelector('.modal-backdrop');
@@ -590,31 +653,87 @@ function formatDate(dateString) {
 }
 
 // Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Set up search input event listener
     const searchInput = document.getElementById('searchInput');
     if (searchInput) {
-        searchInput.addEventListener('keypress', function(e) {
+        searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 performSearch();
             }
         });
     }
-    
+
     // Set up status filter event listener
     const statusFilter = document.getElementById('statusFilter');
     if (statusFilter) {
-        statusFilter.addEventListener('change', function() {
+        statusFilter.addEventListener('change', function () {
             performSearch();
         });
     }
-    
+
     // Load available contracts for create invoice modal
     loadAvailableContracts();
-    
+
     // Setup auto-calculation for utility costs
     setupAutoCalculation();
+
+    // Setup month input validation
+    setupMonthInputValidation();
 });
+
+// Setup month input validation to restrict date selection
+function setupMonthInputValidation() {
+    const monthInput = document.getElementById('invoiceMonthInput');
+    if (monthInput) {
+        // Set min and max dates for the month input (±2 months from current)
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+        
+        // Calculate min date (2 months ago)
+        let minYear = currentYear;
+        let minMonth = currentMonth - 2;
+        if (minMonth <= 0) {
+            minMonth += 12;
+            minYear -= 1;
+        }
+        
+        // Calculate max date (2 months ahead)
+        let maxYear = currentYear;
+        let maxMonth = currentMonth + 2;
+        if (maxMonth > 12) {
+            maxMonth -= 12;
+            maxYear += 1;
+        }
+        
+        // Format dates for input (YYYY-MM)
+        const minDate = `${minYear}-${String(minMonth).padStart(2, '0')}`;
+        const maxDate = `${maxYear}-${String(maxMonth).padStart(2, '0')}`;
+        
+        monthInput.setAttribute('min', minDate);
+        monthInput.setAttribute('max', maxDate);
+        
+        // Add event listener for real-time validation
+        monthInput.addEventListener('change', function() {
+            const selectedValue = this.value;
+            if (selectedValue) {
+                const [year, month] = selectedValue.split('-');
+                const selectedMonth = parseInt(month);
+                const selectedYear = parseInt(year);
+                
+                if (!validateInvoiceMonth(selectedMonth, selectedYear)) {
+                    // Clear the invalid selection
+                    this.value = '';
+                }
+            }
+        });
+        
+        // Set default to current month
+        const defaultDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+        monthInput.value = defaultDate;
+    }
+}
 
 // Load available contracts for create invoice modal
 function loadAvailableContracts() {
@@ -633,7 +752,7 @@ function loadAvailableContracts() {
                 });
             }
             // Add event listener to update room fee when a room is selected
-            select.addEventListener('change', function() {
+            select.addEventListener('change', function () {
                 const selectedContractId = select.value;
                 const roomFeeInput = document.getElementById('roomFeeInput');
                 if (roomFeeInput && selectedContractId) {
@@ -662,7 +781,7 @@ function calculateUtilityCost(previousReading, currentReading, utilityType, unit
         utilityType: utilityType,
         unitPrice: unitPrice
     };
-    
+
     return fetch('/api/payments/calculate-utility', {
         method: 'POST',
         headers: {
@@ -670,14 +789,14 @@ function calculateUtilityCost(previousReading, currentReading, utilityType, unit
         },
         body: JSON.stringify(requestData)
     })
-    .then(response => response.json())
-    .then(data => {
-        return data;
-    })
-    .catch(error => {
-        console.error('Error calculating utility cost:', error);
-        return null;
-    });
+        .then(response => response.json())
+        .then(data => {
+            return data;
+        })
+        .catch(error => {
+            console.error('Error calculating utility cost:', error);
+            return null;
+        });
 }
 
 // Auto-calculate electricity cost when values change
@@ -688,13 +807,13 @@ function setupAutoCalculation() {
     const waterPrevInput = document.getElementById('waterPrevInput');
     const waterCurrInput = document.getElementById('waterCurrInput');
     const waterUnitPriceInput = document.getElementById('waterUnitPriceInput');
-    
+
     // Function to calculate and display electricity cost
     function calculateElectricityCost() {
         const prev = parseInt(electricityPrevInput.value) || 0;
         const curr = parseInt(electricityCurrInput.value) || 0;
         const unitPrice = parseFloat(electricityUnitPriceInput.value) || 0;
-        
+
         if (curr > prev && unitPrice > 0) {
             calculateUtilityCost(prev, curr, 'electricity', unitPrice)
                 .then(result => {
@@ -705,13 +824,13 @@ function setupAutoCalculation() {
                 });
         }
     }
-    
+
     // Function to calculate and display water cost
     function calculateWaterCost() {
         const prev = parseInt(waterPrevInput.value) || 0;
         const curr = parseInt(waterCurrInput.value) || 0;
         const unitPrice = parseFloat(waterUnitPriceInput.value) || 0;
-        
+
         if (curr > prev && unitPrice > 0) {
             calculateUtilityCost(prev, curr, 'water', unitPrice)
                 .then(result => {
@@ -722,14 +841,14 @@ function setupAutoCalculation() {
                 });
         }
     }
-    
+
     // Add event listeners
     if (electricityPrevInput && electricityCurrInput && electricityUnitPriceInput) {
         electricityPrevInput.addEventListener('input', calculateElectricityCost);
         electricityCurrInput.addEventListener('input', calculateElectricityCost);
         electricityUnitPriceInput.addEventListener('input', calculateElectricityCost);
     }
-    
+
     if (waterPrevInput && waterCurrInput && waterUnitPriceInput) {
         waterPrevInput.addEventListener('input', calculateWaterCost);
         waterCurrInput.addEventListener('input', calculateWaterCost);
