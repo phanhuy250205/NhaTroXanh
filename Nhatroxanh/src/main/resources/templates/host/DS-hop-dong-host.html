@@ -41,15 +41,26 @@
       </div>
     </div>
     <div class="col-md-6 col-xl-3">
-      <div class="host-card-stat host-stat-purple">
-        <div class="host-stat-icon"><i class="fa fa-calendar-times"></i></div>
+      <div class="host-card-stat host-stat-orange"> <!-- Đổi từ purple sang orange -->
+        <div class="host-stat-icon"><i class="fa fa-clock"></i></div> <!-- Đổi icon -->
         <div class="host-stat-text">
-          <div class="host-stat-label">Sắp Hết Hạn</div>
-          <div class="host-stat-number" id="expiring-contracts">0</div>
+          <div class="host-stat-label">Sắp hết hạn</div> <!-- Đổi label -->
+          <div class="host-stat-number" id="expired-contracts">0</div> <!-- Đổi id -->
+        </div>
+      </div>
+    </div>
+    <!-- Thêm card mới cho TERMINATED -->
+    <div class="col-md-6 col-xl-3">
+      <div class="host-card-stat host-stat-red">
+        <div class="host-stat-icon"><i class="fa fa-times-circle"></i></div>
+        <div class="host-stat-text">
+          <div class="host-stat-label">Đã chấm dứt</div>
+          <div class="host-stat-number" id="terminated-contracts">0</div>
         </div>
       </div>
     </div>
   </div>
+
 
   <div class="search-section">
     <div class="search-input-group">
@@ -124,6 +135,38 @@
   let isSearching = false;
   let searchQuery = '';
 
+  // 🎯 ===== CẤU HÌNH STATUS =====
+  const CONTRACT_STATUS = {
+    DRAFT: {
+      label: 'Bản nháp',
+      badgeClass: 'bg-secondary',
+      iconClass: 'fa-edit',
+      canEdit: true,
+      description: 'Hợp đồng đang được soạn thảo'
+    },
+    ACTIVE: {
+      label: 'Đang hoạt động',
+      badgeClass: 'bg-success',
+      iconClass: 'fa-check-circle',
+      canEdit: false,
+      description: 'Hợp đồng đang có hiệu lực'
+    },
+    EXPIRED: {
+      label: 'Sắp hết hạn',
+      badgeClass: 'bg-warning text-dark',
+      iconClass: 'fa-clock',
+      canEdit: true,
+      description: 'Hợp đồng sắp hết hạn, cần gia hạn'
+    },
+    TERMINATED: {
+      label: 'Đã chấm dứt',
+      badgeClass: 'bg-danger',
+      iconClass: 'fa-times-circle',
+      canEdit: false,
+      description: 'Hợp đồng đã kết thúc'
+    }
+  };
+
   // 🚀 ===== HÀM TIỆN ÍCH =====
 
   // Hàm debounce để tối ưu hóa tìm kiếm
@@ -152,9 +195,9 @@
     toast.className = 'alert alert-danger position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideInRight 0.3s ease-out;';
     toast.innerHTML = `
-    <i class="fa fa-exclamation-circle"></i> ${message}
-    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
-  `;
+      <i class="fa fa-exclamation-circle"></i> ${message}
+      <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+    `;
     document.body.appendChild(toast);
 
     setTimeout(() => {
@@ -170,9 +213,9 @@
     toast.className = 'alert alert-success position-fixed';
     toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; animation: slideInRight 0.3s ease-out;';
     toast.innerHTML = `
-    <i class="fa fa-check-circle"></i> ${message}
-    <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
-  `;
+      <i class="fa fa-check-circle"></i> ${message}
+      <button type="button" class="btn-close float-end" onclick="this.parentElement.remove()"></button>
+    `;
     document.body.appendChild(toast);
 
     setTimeout(() => {
@@ -182,141 +225,185 @@
     }, 5000);
   }
 
-  // Format ngày tháng
+  // Format ngày tháng an toàn
   function formatDate(dateString) {
-    if (!dateString) return 'N/A';
+    if (!dateString) return '<span class="text-muted">Chưa có</span>';
+
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'N/A';
+      if (isNaN(date.getTime())) return '<span class="text-muted">Không hợp lệ</span>';
+
       return date.toLocaleDateString('vi-VN', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
     } catch (error) {
-      console.error('Error formatting date:', error);
-      return 'N/A';
+      console.error('❌ Error formatting date:', error);
+      return '<span class="text-danger">Lỗi định dạng</span>';
     }
   }
 
-  // Kiểm tra hợp đồng sắp hết hạn
-  function isExpiringSoon(endDate) {
-    if (!endDate) return false;
-    try {
-      const today = new Date();
-      const end = new Date(endDate);
-      if (isNaN(end.getTime())) return false;
+  // 🎯 ===== HÀM XỬ LÝ STATUS =====
 
-      const daysUntilExpiry = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
-      return daysUntilExpiry <= 3 && daysUntilExpiry > 0;
-    } catch (error) {
-      console.error('Error checking expiry date:', error);
-      return false;
-    }
+  // Lấy thông tin status
+  function getStatusInfo(status) {
+    return CONTRACT_STATUS[status] || {
+      label: status || 'Không xác định',
+      badgeClass: 'bg-secondary',
+      iconClass: 'fa-question',
+      canEdit: false,
+      description: 'Trạng thái không xác định'
+    };
   }
 
   // Kiểm tra có thể chỉnh sửa hợp đồng
   function canEditContract(contract) {
-    if (!contract || typeof contract !== 'object') {
+    if (!contract || typeof contract !== 'object' || !contract.status) {
       return false;
     }
 
-    // Nếu hợp đồng không phải ACTIVE thì có thể edit
-    if (contract.status !== 'ACTIVE') {
-      return true;
+    const statusInfo = getStatusInfo(contract.status);
+    return statusInfo.canEdit;
+  }
+
+  // Hiển thị trạng thái dưới dạng badge
+  function getStatusBadge(status, showIcon = true) {
+    const statusInfo = getStatusInfo(status);
+    const icon = showIcon ? `<i class="fa ${statusInfo.iconClass} me-1"></i>` : '';
+
+    return `<span class="badge ${statusInfo.badgeClass}" title="${statusInfo.description}">
+      ${icon}${statusInfo.label}
+    </span>`;
+  }
+
+  // Tạo nút edit với logic khóa/mở
+  function getEditButton(contractId, status) {
+    if (!contractId) {
+      return '<span class="text-muted">N/A</span>';
     }
 
-    // Nếu hợp đồng ACTIVE và sắp hết hạn thì có thể edit
-    if (contract.status === 'ACTIVE' && isExpiringSoon(contract.endDate)) {
-      return true;
-    }
+    const statusInfo = getStatusInfo(status);
 
-    return false;
+    if (statusInfo.canEdit) {
+      return `
+        <button class="btn btn-sm btn-outline-primary"
+                onclick="editContract(${contractId})"
+                title="Chỉnh sửa hợp đồng">
+          <i class="fa fa-pen"></i>
+        </button>
+      `;
+    } else {
+      const tooltipText = getEditTooltip(status);
+      return `
+        <button class="btn btn-sm btn-secondary"
+                disabled
+                title="${tooltipText}"
+                data-bs-toggle="tooltip">
+          <i class="fa fa-lock"></i>
+        </button>
+      `;
+    }
+  }
+
+  // Lấy tooltip cho nút edit bị khóa
+  function getEditTooltip(status) {
+    const tooltips = {
+      'ACTIVE': 'Hợp đồng đang hoạt động không thể chỉnh sửa',
+      'TERMINATED': 'Hợp đồng đã chấm dứt không thể chỉnh sửa'
+    };
+
+    return tooltips[status] || 'Không thể chỉnh sửa hợp đồng này';
+  }
+
+  // Lấy class CSS cho hàng trong bảng
+  function getRowClass(status) {
+    const rowClasses = {
+      'EXPIRED': 'table-warning', // Sắp hết hạn - màu vàng
+      'TERMINATED': 'table-danger', // Đã chấm dứt - màu đỏ nhạt
+      'DRAFT': 'table-secondary' // Bản nháp - màu xám nhạt
+    };
+
+    return rowClasses[status] || '';
   }
 
   // 🌟 ===== HÀM LOAD DỮ LIỆU =====
 
-  // Sửa hàm loadContractStats
+  // Load thống kê hợp đồng (đơn giản hóa)
   async function loadContractStats() {
     try {
-      const [statusResponse, contractsResponse] = await Promise.all([
-        fetch('/api/contracts/count-by-status', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        }),
-        // Lấy tất cả hợp đồng để tính sắp hết hạn
-        fetch('/api/contracts/list?page=0&size=1000', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        })
-      ]);
+      const response = await fetch('/api/contracts/count-by-status', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      });
 
-      if (!statusResponse.ok || !contractsResponse.ok) {
+      if (!response.ok) {
         throw new Error('Không thể tải thống kê hợp đồng');
       }
 
-      const statusData = await statusResponse.json();
-      const contractsData = await contractsResponse.json();
+      const data = await response.json();
 
-      if (statusData.success && contractsData.success) {
-        // Tính số hợp đồng sắp hết hạn
-        const expiringCount = calculateExpiringSoonCount(contractsData.contracts);
-        updateStats(statusData.statusCounts, expiringCount);
+      if (data.success) {
+        updateStats(data.statusCounts); // Trực tiếp dùng data từ backend
       } else {
-        showError(statusData.message || contractsData.message || 'Không thể tải thống kê hợp đồng');
+        showError(data.message || 'Không thể tải thống kê hợp đồng');
       }
     } catch (error) {
-      console.error('Error loading contract stats:', error);
+      console.error('❌ Error loading contract stats:', error);
       showError('Lỗi kết nối khi tải thống kê. Vui lòng thử lại sau.');
     }
   }
 
-  // Sửa hàm calculateExpiringSoonCount để khớp với logic hiển thị
-  function calculateExpiringSoonCount(contracts, days = 30) {
-    if (!contracts || !Array.isArray(contracts)) {
-      return 0;
-    }
-
-    return contracts.filter(contract => {
-      // Kiểm tra theo trạng thái từ backend
-      if (contract.status === 'TERMINATED') return true;
-
-      // HOẶC tính theo ngày (tùy logic của bạn)
-      if (contract.status === 'ACTIVE') {
-        return isExpiringSoon(contract.endDate, 30);
-      }
-
-      return false;
-    }).length;
-  }
-
-
-
-  // Cập nhật thống kê
-  function updateStats(statusCounts, expiringCount) {
+  // Cập nhật thống kê với hiệu ứng đếm số
+  function updateStats(statusCounts) {
     try {
-      const total = Object.values(statusCounts || {}).reduce((sum, count) => sum + count, 0);
+      const total = Object.values(statusCounts || {}).reduce((sum, count) => sum + (count || 0), 0);
 
-      const elements = {
-        total: document.getElementById('total-contracts'),
-        active: document.getElementById('active-contracts'),
-        draft: document.getElementById('draft-contracts'),
-        expiring: document.getElementById('expiring-contracts')
+      // Mapping ID elements với status
+      const statusElements = {
+        'total-contracts': total,
+        'active-contracts': statusCounts?.ACTIVE || 0,
+        'draft-contracts': statusCounts?.DRAFT || 0,
+        'expired-contracts': statusCounts?.EXPIRED || 0,
+        'terminated-contracts': statusCounts?.TERMINATED || 0
       };
 
-      if (elements.total) elements.total.textContent = total;
-      if (elements.active) elements.active.textContent = statusCounts?.ACTIVE || 0;
-      if (elements.draft) elements.draft.textContent = statusCounts?.DRAFT || 0;
-      if (elements.expiring) elements.expiring.textContent = expiringCount || 0;
+      // Cập nhật từng element với hiệu ứng
+      Object.entries(statusElements).forEach(([elementId, value]) => {
+        const element = document.getElementById(elementId);
+        if (element) {
+          animateNumber(element, parseInt(element.textContent) || 0, value, 500);
+        }
+      });
+
+      console.log('✅ Stats updated successfully:', statusElements);
     } catch (error) {
-      console.error('Error updating stats:', error);
+      console.error('❌ Error updating stats:', error);
     }
+  }
+
+  // Hiệu ứng đếm số cho thống kê
+  function animateNumber(element, start, end, duration) {
+    if (start === end) {
+      element.textContent = end;
+      return;
+    }
+
+    const range = end - start;
+    const increment = range / (duration / 16); // 60fps
+    let current = start;
+
+    const timer = setInterval(() => {
+      current += increment;
+      if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+        current = end;
+        clearInterval(timer);
+      }
+      element.textContent = Math.round(current);
+    }, 16);
   }
 
   // Load danh sách hợp đồng
@@ -349,7 +436,7 @@
         showError(data.message || 'Không thể tải dữ liệu hợp đồng');
       }
     } catch (error) {
-      console.error('Error loading contracts:', error);
+      console.error('❌ Error loading contracts:', error);
       showError('Lỗi kết nối. Vui lòng thử lại sau.');
     } finally {
       showLoading(false);
@@ -408,7 +495,7 @@
         hideSearchInfo();
       }
     } catch (error) {
-      console.error('Error searching contracts:', error);
+      console.error('❌ Error searching contracts:', error);
       showError(error.message || 'Lỗi kết nối khi tìm kiếm hợp đồng. Vui lòng thử lại sau.');
       hideSearchInfo();
     } finally {
@@ -456,56 +543,12 @@
 
   // 🎨 ===== HÀM HIỂN THỊ GIAO DIỆN =====
 
-
-  // Hiển thị trạng thái dưới dạng badge (không thể chỉnh sửa)
-  function getStatusBadge(status) {
-    const statusConfig = {
-      'DRAFT': { label: 'Bản nháp', class: 'bg-secondary' },
-      'ACTIVE': { label: 'Đang thuê', class: 'bg-success' },
-      'TERMINATED': { label: 'Sắp Hết Hạn', class: 'bg-danger' },
-      'EXPIRED': { label: 'Hết hạn', class: 'bg-warning text-dark' }
-    };
-
-    const config = statusConfig[status] || { label: status, class: 'bg-secondary' };
-
-    return `<span class="badge ${config.class}">${config.label}</span>`;
-  }
-
-  // Tạo nút edit với logic khóa/mở
-  function getEditButton(contractId, canEdit, status, isExpiring) {
-    if (!contractId) {
-      return '<span class="text-muted">N/A</span>';
-    }
-
-    if (canEdit) {
-      return `
-      <button class="btn btn-sm btn-outline-primary"
-              onclick="editContract(${contractId})"
-              title="Chỉnh sửa hợp đồng">
-        <i class="fa fa-pen"></i>
-      </button>
-    `;
-    } else {
-      const tooltipText = status === 'ACTIVE' && !isExpiring
-              ? 'Hợp đồng đang hoạt động không thể chỉnh sửa. Chỉ có thể chỉnh sửa khi sắp hết hạn (3 ngày trước).'
-              : 'Không thể chỉnh sửa hợp đồng này';
-
-      return `
-      <button class="btn btn-sm btn-secondary"
-              disabled
-              title="${tooltipText}"
-              data-bs-toggle="tooltip">
-        <i class="fa fa-lock"></i>
-      </button>
-    `;
-    }
-  }
-
-  // Hiển thị danh sách hợp đồng
+  // Hiển thị danh sách hợp đồng với status hoàn hảo
+  // Hiển thị danh sách hợp đồng - ĐÃ LOẠI BỎ NÚT MẮT VÀ MÀU NỀN
   function displayContracts(contracts) {
     const tbody = document.getElementById('contracts-tbody');
     if (!tbody) {
-      console.error('Contracts table body not found');
+      console.error('❌ Contracts table body not found');
       showError('Không tìm thấy bảng hợp đồng');
       return;
     }
@@ -513,64 +556,110 @@
     if (!contracts || contracts.length === 0) {
       tbody.innerHTML = `
       <tr>
-        <td colspan="8" class="text-center text-muted py-4">
-          <i class="fa fa-inbox fa-2x mb-2"></i><br>
-          Không có hợp đồng nào
+        <td colspan="8" class="text-center text-muted py-5">
+          <i class="fa fa-inbox fa-3x mb-3 d-block"></i>
+          <h5>Không có hợp đồng nào</h5>
+          <p class="mb-0">Chưa có dữ liệu hợp đồng để hiển thị</p>
         </td>
       </tr>
     `;
       return;
     }
 
-    tbody.innerHTML = contracts.map(contract => {
+    tbody.innerHTML = contracts.map((contract, index) => {
       if (!contract || typeof contract !== 'object') {
-        console.warn('Invalid contract object:', contract);
+        console.warn('⚠️ Invalid contract object:', contract);
         return '';
       }
 
       try {
         const canEdit = canEditContract(contract);
-        const isExpiring = isExpiringSoon(contract.endDate);
+        const statusInfo = getStatusInfo(contract.status);
 
         return `
-        <tr ${isExpiring ? 'class="table-warning"' : ''}>
-          <td><strong>${contract.contractId || 'N/A'}</strong></td>
-          <td>${contract.tenantName || 'N/A'}</td>
-          <td>${contract.roomName || 'N/A'}</td>
-          <td>${formatDate(contract.startDate)}</td>
+        <tr data-contract-id="${contract.contractId}">
           <td>
-            ${formatDate(contract.endDate)}
-            ${isExpiring ? '<br><small class="text-danger"><i class="fa fa-exclamation-triangle"></i> Sắp hết hạn</small>' : ''}
+            <strong class="text-primary">#${contract.contractId || 'N/A'}</strong>
           </td>
-          <td>${contract.tenantPhone || 'N/A'}</td>
           <td>
-            ${getStatusBadge(contract.status)}
-            ${!canEdit ? '<br><small class="text-muted mt-1"><i class="fa fa-lock"></i></small>' : ''}
+            <div class="d-flex align-items-center">
+              <div class="avatar-sm bg-light rounded-circle me-2 d-flex align-items-center justify-content-center">
+                <i class="fa fa-user text-muted"></i>
+              </div>
+              <span>${contract.tenantName || 'N/A'}</span>
+            </div>
           </td>
-          <td>${getEditButton(contract.contractId, canEdit, contract.status, isExpiring)}</td>
+          <td>
+            <span class="badge bg-light text-dark">
+              <i class="fa fa-home me-1"></i>${contract.roomName || 'N/A'}
+            </span>
+          </td>
+          <td>
+            <strong>${formatDate(contract.startDate)}</strong>
+          </td>
+          <td>
+            <small class="text-muted d-block">Kết thúc</small>
+            <strong>${formatDate(contract.endDate)}</strong>
+            ${contract.status === 'EXPIRED' ?
+                '<br><small class="text-warning"><i class="fa fa-exclamation-triangle"></i> Sắp hết hạn!</small>' :
+                ''}
+          </td>
+          <td>
+            <a href="tel:${contract.tenantPhone || ''}" class="text-decoration-none">
+              <i class="fa fa-phone text-success me-1"></i>
+              ${contract.tenantPhone || 'N/A'}
+            </a>
+          </td>
+          <td>
+            ${getStatusBadge(contract.status, true)}
+            ${!canEdit ? '<br><small class="text-muted mt-1"><i class="fa fa-lock me-1"></i>Khóa</small>' : ''}
+          </td>
+          <td>
+            ${getEditButton(contract.contractId, contract.status)}
+          </td>
         </tr>
       `;
       } catch (error) {
-        console.error('Error rendering contract row:', error, contract);
+        console.error('❌ Error rendering contract row:', error, contract);
         return `
-        <tr>
-          <td colspan="8" class="text-danger text-center">
-            <i class="fa fa-exclamation-triangle"></i>
-            Lỗi hiển thị hợp đồng ID: ${contract?.contractId || 'Unknown'}
+        <tr class="table-danger">
+          <td colspan="8" class="text-center py-3">
+            <i class="fa fa-exclamation-triangle text-danger me-2"></i>
+            <strong>Lỗi hiển thị hợp đồng ID: ${contract?.contractId || 'Unknown'}</strong>
+            <br><small class="text-muted">${error.message}</small>
           </td>
         </tr>
       `;
       }
     }).join('');
 
+    // Hiển thị bảng và khởi tạo tooltips
     document.getElementById('contracts-table').style.display = 'block';
+    initializeTooltips();
 
-    // Khởi tạo tooltips nếu có Bootstrap
+    console.log(`✅ Displayed ${contracts.length} contracts successfully`);
+  }
+
+
+  // Khởi tạo tooltips Bootstrap
+  function initializeTooltips() {
     setTimeout(() => {
       if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+        // Xóa tooltips cũ
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => {
+          const existingTooltip = bootstrap.Tooltip.getInstance(el);
+          if (existingTooltip) {
+            existingTooltip.dispose();
+          }
+        });
+
+        // Tạo tooltips mới
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function (tooltipTriggerEl) {
-          return new bootstrap.Tooltip(tooltipTriggerEl);
+          return new bootstrap.Tooltip(tooltipTriggerEl, {
+            placement: 'top',
+            trigger: 'hover'
+          });
         });
       }
     }, 100);
@@ -582,7 +671,7 @@
     const paginationInfo = document.getElementById('pagination-info');
 
     if (!pagination || !paginationInfo) {
-      console.error('Pagination elements not found');
+      console.error('❌ Pagination elements not found');
       return;
     }
 
@@ -599,16 +688,16 @@
     // Nút Previous
     if (currentPageFromServer > 0) {
       pagination.innerHTML += `
-      <li class="page-item">
-        <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${currentPageFromServer - 1}, ${size})` : `loadContracts(${currentPageFromServer - 1}, ${size})`}; return false;">Trước</a>
-      </li>
-    `;
+        <li class="page-item">
+          <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${currentPageFromServer - 1}, ${size})` : `loadContracts(${currentPageFromServer - 1}, ${size})`}; return false;">Trước</a>
+        </li>
+      `;
     } else {
       pagination.innerHTML += `
-      <li class="page-item disabled">
-        <span class="page-link">Trước</span>
-      </li>
-    `;
+        <li class="page-item disabled">
+          <span class="page-link">Trước</span>
+        </li>
+      `;
     }
 
     // Các trang số
@@ -622,33 +711,42 @@
 
     for (let i = startPage; i <= endPage; i++) {
       pagination.innerHTML += `
-      <li class="page-item ${i === currentPageFromServer ? 'active' : ''}">
-        <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${i}, ${size})` : `loadContracts(${i}, ${size})`}; return false;">${i + 1}</a>
-      </li>
-    `;
+        <li class="page-item ${i === currentPageFromServer ? 'active' : ''}">
+          <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${i}, ${size})` : `loadContracts(${i}, ${size})`}; return false;">${i + 1}</a>
+        </li>
+      `;
     }
 
     // Nút Next
     if (currentPageFromServer < totalPages - 1) {
       pagination.innerHTML += `
-      <li class="page-item">
-        <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${currentPageFromServer + 1}, ${size})` : `loadContracts(${currentPageFromServer + 1}, ${size})`}; return false;">Sau</a>
-      </li>
-    `;
+        <li class="page-item">
+          <a class="page-link" href="#" onclick="${isSearchMode ? `searchContracts(${currentPageFromServer + 1}, ${size})` : `loadContracts(${currentPageFromServer + 1}, ${size})`}; return false;">Sau</a>
+        </li>
+      `;
     } else {
       pagination.innerHTML += `
-      <li class="page-item disabled">
-        <span class="page-link">Sau</span>
-      </li>
-    `;
+        <li class="page-item disabled">
+          <span class="page-link">Sau</span>
+        </li>
+      `;
     }
   }
 
   // 🔧 ===== HÀM CẬP NHẬT DỮ LIỆU =====
 
+  // Hàm xem chi tiết hợp đồng
+  function viewContract(contractId) {
+    if (contractId) {
+      window.open(`/chu-tro/hop-dong/view/${contractId}`, '_blank');
+    } else {
+      showError('ID hợp đồng không hợp lệ');
+    }
+  }
+
   // Chỉnh sửa hợp đồng
   function editContract(contractId) {
-    console.log('🔍 Editing contract:', contractId);
+    console.log('🔧 Editing contract:', contractId);
     if (contractId) {
       window.location.href = `/chu-tro/hop-dong/edit/${contractId}`;
     } else {
@@ -659,7 +757,7 @@
   // 🚀 ===== KHỞI TẠO TRANG =====
 
   document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Initializing contract management page...');
+    console.log('🚀 Initializing contract management page with perfect status handling...');
 
     // Load dữ liệu ban đầu
     loadContractStats();
@@ -691,7 +789,7 @@
       });
     }
 
-    console.log('✅ Contract management page initialized successfully');
+    console.log('✅ Contract management page initialized successfully with status:', Object.keys(CONTRACT_STATUS));
   });
 
   // 🔄 ===== HÀM XỬ LÝ SỰ KIỆN =====
@@ -706,13 +804,17 @@
     }
   }
 
-  // Gán sự kiện cho các hàm global
+  // 🌟 ===== EXPORT GLOBAL FUNCTIONS =====
   window.searchContracts = searchContracts;
   window.clearSearch = clearSearch;
   window.loadContracts = loadContracts;
   window.editContract = editContract;
+  window.viewContract = viewContract;
+  window.getStatusInfo = getStatusInfo;
+  window.CONTRACT_STATUS = CONTRACT_STATUS;
 
 </script>
+
 
 
 
@@ -906,6 +1008,7 @@
       right: 48px;
     }
   }
+
 </style>
 </body>
 </html>
