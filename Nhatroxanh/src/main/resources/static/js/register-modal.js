@@ -7,8 +7,42 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordToggles = document.querySelectorAll(".register-modal .password-toggle");
 
     // --- PHẦN 2: CÁC HÀM VÀ SỰ KIỆN ĐIỀU KHIỂN GIAO DIỆN (UI) ---
+     let currentToast = null;
 
-    // Hàm để mở modal
+   function showToast(message, type = 'error') {
+    let backgroundColor;
+   
+     if (currentToast) {
+            currentToast.hideToast();
+        }
+    switch (type) {
+        case 'success':
+            backgroundColor = "#28a745"; // Màu xanh lá cây Bootstrap success
+            break;
+        case 'info':
+             backgroundColor = "#3498DB"; // Màu xanh dương nhạt Bootstrap info
+            break;
+        case 'error':
+        default:
+            backgroundColor = "#dc3545"; // Màu đỏ Bootstrap danger
+            break;
+    }
+    currentToast = Toastify({
+            text: message,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+            style: {
+                background: backgroundColor,
+            },
+        });
+        
+        currentToast.showToast();
+    
+}
+
     function openModal() {
         if (registerModalOverlay) {
             registerModalOverlay.classList.add("show");
@@ -69,95 +103,81 @@ document.addEventListener("DOMContentLoaded", () => {
     // --- PHẦN 4: LOGIC XỬ LÝ SUBMIT FORM ĐĂNG KÝ ---
     if (registerForm) {
         registerForm.addEventListener("submit", function (e) {
-            e.preventDefault(); // Ngăn form tự gửi đi
+            e.preventDefault();
 
             const submitBtn = this.querySelector(".btn-register-submit");
-            const errorMessageDiv = document.getElementById("register-error-message");
-            if(errorMessageDiv) { // Kiểm tra nếu có ô báo lỗi
-                 errorMessageDiv.style.display = 'none'; // Ẩn thông báo lỗi cũ
-            }
-            
-            // Lấy dữ liệu từ các ô input bằng ID
+
             const fullNameValue = document.getElementById("fullName").value;
-            // ### THAY ĐỔI 1: Không lấy username từ form nữa ###
-            // const usernameValue = document.getElementById("username").value; 
             const emailValue = document.getElementById("email").value;
             const phoneNumberValue = document.getElementById("phoneNumber").value;
             const passwordValue = document.getElementById("password").value;
             const confirmPasswordValue = document.getElementById("confirmPassword").value;
 
-            // ### THAY ĐỔI 2: Cập nhật lại logic kiểm tra ###
-            if (!fullNameValue || !emailValue || !phoneNumberValue || !passwordValue) {
-                if (errorMessageDiv) {
-                    errorMessageDiv.textContent = "Vui lòng điền đầy đủ thông tin!";
-                    errorMessageDiv.style.display = "block";
-                }
+            // <<< THÊM VÀO: Validation phía client >>>
+            if (!fullNameValue || !emailValue || !phoneNumberValue || !passwordValue || !confirmPasswordValue) {
+                showToast("Vui lòng điền đầy đủ thông tin!");
+                return;
+            }
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+            if (!emailRegex.test(emailValue)) {
+                showToast("Email bạn nhập không đúng định dạng.");
                 return;
             }
             if (passwordValue !== confirmPasswordValue) {
-                if (errorMessageDiv) {
-                    errorMessageDiv.textContent = "Mật khẩu xác nhận không khớp!";
-                    errorMessageDiv.style.display = "block";
-                }
+                showToast("Mật khẩu xác nhận không khớp!");
+                return;
+            }
+            // Kiểm tra định dạng mật khẩu bằng Regex
+            const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{6,}$/;
+            if (!passwordRegex.test(passwordValue)) {
+                showToast("Mật khẩu phải từ 6 ký tự, có ít nhất 1 chữ hoa và 1 ký tự đặc biệt.");
                 return;
             }
 
-            // ### THAY ĐỔI 3: Dùng email làm username ###
-            // Tạo đối tượng dữ liệu để gửi đi, gán giá trị của email cho username
             const userData = {
                 fullName: fullNameValue,
-                username: emailValue, // Sử dụng email làm tên đăng nhập
                 email: emailValue,
                 phoneNumber: phoneNumberValue,
                 password: passwordValue
             };
 
-            // Vô hiệu hóa nút và hiển thị trạng thái đang xử lý
-            submitBtn.textContent = 'ĐANG XỬ LÝ...';
             submitBtn.disabled = true;
+            submitBtn.textContent = 'ĐANG XỬ LÝ...';
 
-            // Gọi API của backend để đăng ký
             fetch('/api/users/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(userData),
             })
-            .then(response => {
-                if (response.ok) {
-                    // THÀNH CÔNG: Đóng modal đăng ký, mở modal xác thực
-                    closeModal();
-                    const verificationModal = document.getElementById('verificationModalOverlay');
-                    if (verificationModal) {
-                        verificationModal.classList.add('show');
-                        document.body.style.overflow = "hidden";
-                        // Cập nhật email trong modal xác thực
-                        verificationModal.querySelector('.verification-alert b').textContent = emailValue;
-                        verificationModal.dataset.email = emailValue; // Lưu email để dùng cho việc gửi lại OTP
+                .then(async (response) => { // Dùng async để xử lý response.text()
+                    if (response.ok) {
+                        // THÀNH CÔNG
+                        showToast("Mã xác thực đã được gửi đến email của bạn!", 'success');
+                        closeModal();
+                        // Mở modal xác thực
+                        const verificationModal = document.getElementById('verificationModalOverlay');
+                        if (verificationModal) {
+                            verificationModal.classList.add('show');
+                            verificationModal.querySelector('.verification-alert b').textContent = emailValue;
+                            verificationModal.dataset.email = emailValue;
+                        }
+                    } else {
+                        // THẤT BẠI: Lấy lỗi từ server
+                        const errorText = await response.text();
+                        throw new Error(errorText || "Đã xảy ra lỗi không xác định.");
                     }
-                } else {
-                    // THẤT BẠI: Đọc và hiển thị lỗi từ server
-                    return response.text().then(text => {
-                        // Ném lỗi để khối .catch() có thể bắt được
-                        throw new Error(text || "Đã xảy ra lỗi không xác định. Vui lòng thử lại.");
-                    });
-                }
-            })
-            .catch(error => {
-                // Hiển thị thông báo lỗi cho người dùng
-                if (errorMessageDiv) {
-                    errorMessageDiv.textContent = error.message;
-                    errorMessageDiv.style.display = "block";
-                }
-            })
-            .finally(() => {
-                // Kích hoạt lại nút submit dù thành công hay thất bại
-                submitBtn.textContent = 'ĐĂNG KÝ';
-                submitBtn.disabled = false;
-            });
+                })
+                .catch(error => {
+                    // <<< THAY ĐỔI: Hiển thị lỗi bằng Toast >>>
+                    showToast(error.message);
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'ĐĂNG KÝ';
+                });
         });
     }
+
 
     // --- PHẦN 5: CÁC CHỨC NĂNG KHÁC ---
     const loginLink = document.querySelector(".register-modal .login-now");

@@ -20,6 +20,9 @@
 </head>
 
 <body>
+    <!-- FORGOTPASSWORD MODAL -->
+    <div th:replace="~{/layouts/modal_quen_MK}"></div>
+
     <div class="login-page-wrapper">
         <div class="login-card shadow-sm">
             <section class="login-left">
@@ -81,14 +84,13 @@
                         tục
                     </p>
 
-                    <form id="loginFormHost" th:action="@{/login-processing}" method="post">
+                    <form id="loginFormHost" th:action="@{/login-processing}" method="post" novalidate>
 
                         <div class="form-group">
                             <label for="emailPhone">Email hoặc Số điện
                                 thoại</label>
                             <input type="text" class="form-control" id="emailPhone" name="emailPhone"
-                                placeholder="Nhập email hoặc Số điện thoại của bạn" required
-                                aria-describedby="emailPhoneHelp" />
+                                placeholder="Nhập email hoặc Số điện thoại của bạn" aria-describedby="emailPhoneHelp" />
                             <div class="invalid-feedback">
                                 Vui lòng nhập Email hoặc số điện thoại hợp
                                 lệ.
@@ -288,7 +290,10 @@
         <script th:src="@{/js/quenmk-modal.js}"></script>
         <script th:src="@{/js/modalOTP.js}"></script>
         <script th:src="@{/js/reset-password-modal.js}"></script>
+        
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 
 </html>

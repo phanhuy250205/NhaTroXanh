@@ -145,4 +145,8 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
         List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
 
         List<Users> findByRole(String role);
+
+        Optional<Users> findByEmailAndEnabledIsTrue(String email);
+
+    Optional<Users> findByPhoneAndEnabledIsTrue(String phone);
 }

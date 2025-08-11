@@ -90,14 +90,15 @@ document.addEventListener("DOMContentLoaded", () => {
             const username = document.getElementById("loginUsername").value;
             const password = document.getElementById("loginPassword").value;
             const rememberMe = document.getElementById("rememberMe").checked;
-
+            // 2. Chuẩn bị dữ liệu dạng form-urlencoded để gửi cho Spring Security
             const formData = new URLSearchParams();
-            formData.append('username', username);
+            formData.append('username', username); // Tên param phải là "username"
             formData.append('password', password);
             if (rememberMe) {
+                // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
-
+            // 3. Gọi đến cổng xử lý đăng nhập chung của Spring Security
             fetch('/login-processing', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

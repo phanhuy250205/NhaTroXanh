@@ -31,9 +31,9 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
-import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Controller
 @RequestMapping("/nhan-vien")
@@ -53,7 +53,7 @@ public class ProfileStaffController {
     private FileUploadService fileUploadService;
 
     @Autowired
-    private EncryptionService encryptionService; // Thêm service mã hóa
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("/profile-nhan-vien")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -72,22 +72,17 @@ public class ProfileStaffController {
             dto.setGender(user.getGender());
             dto.setEmail(user.getEmail());
             dto.setAddress(user.getAddress());
+            
+            // Set bank account information
             dto.setBankId(user.getBankId());
             dto.setBankName(user.getBankName());
             dto.setBankAccount(user.getBankAccount());
             dto.setAccountHolderName(user.getAccountHolderName());
 
-            // Giải mã CCCD để hiển thị
-            if (cccd != null && cccd.getCccdNumber() != null) {
-                try {
-                    String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
-                    dto.setCccdNumber(decryptedCccd);
-                    dto.setIssueDate(cccd.getIssueDate());
-                    dto.setIssuePlace(cccd.getIssuePlace());
-                } catch (Exception e) {
-                    model.addAttribute("errorMessage", "Không thể giải mã CCCD: " + e.getMessage());
-                    dto.setCccdNumber(null); // Đặt null để tránh hiển thị sai
-                }
+            if (cccd != null) {
+                dto.setCccdNumber(cccd.getCccdNumber());
+                dto.setIssueDate(cccd.getIssueDate());
+                dto.setIssuePlace(cccd.getIssuePlace());
             }
 
             model.addAttribute("hostInfo", dto);
@@ -193,9 +188,9 @@ public class ProfileStaffController {
 
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-                // Mã hóa số CCCD
-                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
+
+                // Kiểm tra CCCD đã tồn tại chưa
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
@@ -212,7 +207,7 @@ public class ProfileStaffController {
                     cccd.setUser(user);
                 }
 
-                cccd.setCccdNumber(encryptedCccd);
+                cccd.setCccdNumber(trimmedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
@@ -236,6 +231,9 @@ public class ProfileStaffController {
         }
     }
 
+    /**
+     * Update bank account information for staff
+     */
     @PostMapping("/update-bank-account")
     @Transactional
     @ResponseBody
@@ -245,9 +243,9 @@ public class ProfileStaffController {
             @RequestParam("bankName") String bankName,
             @RequestParam("bankAccount") String bankAccount,
             @RequestParam("accountHolderName") String accountHolderName) {
-
+        
         Map<String, Object> response = new HashMap<>();
-
+        
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
                     .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -289,15 +287,99 @@ public class ProfileStaffController {
 
             response.put("success", true);
             response.put("message", "Cập nhật thông tin ngân hàng thành công");
-
+            
             log.info("Bank account updated successfully for staff user {}", user.getUserId());
-
+            
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
             log.error("Error updating bank account for staff: {}", e.getMessage());
             response.put("success", false);
             response.put("message", "Có lỗi xảy ra khi cập nhật thông tin ngân hàng: " + e.getMessage());
+            return ResponseEntity.badRequest().body(response);
+        }
+    }
+
+    /**
+     * Change password for staff
+     */
+    @PostMapping("/change-password")
+    @Transactional
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam("currentPassword") String currentPassword,
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword) {
+        
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validation cơ bản
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập mật khẩu hiện tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng nhập mật khẩu mới!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Vui lòng xác nhận mật khẩu mới!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu hiện tại không đúng!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (newPassword.length() < 6) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                response.put("success", false);
+                response.put("message", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Cập nhật mật khẩu
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
+
+            response.put("success", true);
+            response.put("message", "Đổi mật khẩu thành công!");
+            
+            log.info("Password changed successfully for staff user {}", user.getUserId());
+            
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            log.error("Error changing password for staff: {}", e.getMessage());
+            response.put("success", false);
+            response.put("message", "Có lỗi xảy ra khi đổi mật khẩu: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         }
     }

@@ -1374,11 +1374,9 @@
                         const card = element.closest('.notification-card-item');
                         card.querySelector('.unpaid-status-badge')?.remove();
                         card.querySelector('.notification-card-header').style.opacity = '0.7';
-                        showAlert('success', 'Thông báo đã được đánh dấu là đã đọc');
                     })
                     .catch(error => {
                         console.error('Error marking notification as read:', error);
-                        showAlert('danger', 'Không thể đánh dấu thông báo là đã đọc: ' + error.message);
                     });
             }
 

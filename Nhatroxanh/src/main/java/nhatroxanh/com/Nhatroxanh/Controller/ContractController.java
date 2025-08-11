@@ -63,6 +63,7 @@ public class ContractController {
     @Autowired
     private ResidentRepository residentRepository;
 
+
     @Autowired
     private RoomsRepository roomsRepository;
 
@@ -147,11 +148,8 @@ public class ContractController {
             Integer ownerId = userDetails.getUserId();
             String cccd = userDetails.getCccd();
             String phone = userDetails.getPhone();
-            String cccdNumber = userDetails.getCccdNumber();
-            Date issueDate = userDetails.getIssueDate();
-            String issuePlace = userDetails.getIssuePlace();
-            logger.info("User CCCD: {}, Phone: {}, CCCD Number: {}, Issue Date: {}, Issue Place: {}",
-                    cccd, phone, cccdNumber, issueDate, issuePlace);
+
+            logger.info("User CCCD: {}, Phone: {}", cccd, phone);
 
             Users user = userService.findOwnerByCccdOrPhone(authentication, cccd, phone);
 
@@ -162,17 +160,37 @@ public class ContractController {
                 return "host/hop-dong-host";
             }
 
+            // ✅ GIẢI MÃ CCCD CHỦ TRỌ
+            Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByUser_UserId(user.getUserId());
+            String decryptedOwnerCccd = "";
+
+            if (ownerCccdOpt.isPresent() && ownerCccdOpt.get().getCccdNumber() != null) {
+                UserCccd ownerCccd = ownerCccdOpt.get();
+                try {
+                    String encryptedCccd = ownerCccd.getCccdNumber();
+                    decryptedOwnerCccd = encryptionService.decrypt(encryptedCccd);
+                    logger.info("🔓 Đã giải mã CCCD chủ trọ: {}", maskCccdForLog(decryptedOwnerCccd));
+                } catch (Exception e) {
+                    logger.error("❌ Lỗi giải mã CCCD chủ trọ: {}", e.getMessage());
+                    decryptedOwnerCccd = ownerCccd.getCccdNumber(); // Fallback
+                }
+
+                // ✅ GÁN THÔNG TIN CHỦ TRỌ ĐÃ GIẢI MÃ
+                contract.getOwner().setIssueDate(ownerCccd.getIssueDate());
+                contract.getOwner().setIssuePlace(ownerCccd.getIssuePlace());
+            }
+
             contract.getOwner().setFullName(user.getFullname());
             contract.getOwner().setPhone(user.getPhone());
-            contract.getOwner().setCccdNumber(cccdNumber != null ? cccdNumber : cccd);
+            contract.getOwner().setCccdNumber(decryptedOwnerCccd); // ✅ SỐ ĐÃ GIẢI MÃ
             contract.getOwner().setEmail(user.getEmail());
+
             if (user.getBirthday() != null) {
                 contract.getOwner().setBirthday(new Date(user.getBirthday().getTime()));
             }
             contract.getOwner().setBankAccount(user.getBankAccount());
-            contract.getOwner().setIssueDate(issueDate);
-            contract.getOwner().setIssuePlace(issuePlace);
 
+            // Xử lý địa chỉ
             String address = user.getAddress();
             if (StringUtils.hasText(address)) {
                 Map<String, String> addressParts = parseAddress(address);
@@ -184,6 +202,7 @@ public class ContractController {
                 logger.warn("No address found for user ID: {}", user.getUserId());
             }
 
+            // Load hostels và rooms
             List<Hostel> hostels = hostelService.getHostelsWithRoomsByOwnerId(ownerId);
             if (hostels.isEmpty()) {
                 logger.warn("No hostels found for ownerId: {}. Check owner_id in hostels table.", ownerId);
@@ -221,10 +240,10 @@ public class ContractController {
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
             model.addAttribute("hostels", hostelService.getHostelsWithRoomsByOwnerId(userDetails.getUserId()));
             initializeModelAttributes(model, contract);
-
             return "host/hop-dong-host";
         }
     }
+
 
     @GetMapping("/get-rooms-by-hostel")
     @PreAuthorize("hasRole('OWNER')")
@@ -400,6 +419,50 @@ public class ContractController {
             } else {
                 throw new IllegalArgumentException("Phải cung cấp thông tin người thuê hợp lệ!");
             }
+            // Bước 3.5: Giải mã CCCD để lưu vào hợp đồng
+            String ownerCccdDecrypted = null;
+            String tenantCccdDecrypted = null;
+
+// Giải mã CCCD chủ trọ
+            Optional<UserCccd> ownerCccdOpt = userCccdRepository.findByUser_UserId(owner.getUserId());
+            if (ownerCccdOpt.isPresent() && ownerCccdOpt.get().getCccdNumber() != null) {
+                UserCccd ownerCccd = ownerCccdOpt.get();
+                try {
+                    ownerCccdDecrypted = encryptionService.decrypt(ownerCccd.getCccdNumber());
+                    logger.info("✅ Đã giải mã CCCD chủ trọ");
+                } catch (Exception e) {
+                    logger.error("❌ Lỗi giải mã CCCD chủ trọ: {}", e.getMessage());
+                    ownerCccdDecrypted = ownerCccd.getCccdNumber();
+                }
+            }
+
+
+            // Giải mã CCCD người thuê
+            if ("REGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && registeredTenant != null) {
+                Optional<UserCccd> tenantCccdOpt = userCccdRepository.findByUser_UserId(registeredTenant.getUserId());
+                if (tenantCccdOpt.isPresent() && tenantCccdOpt.get().getCccdNumber() != null) {
+                    UserCccd tenantCccd = tenantCccdOpt.get();
+                    try {
+                        tenantCccdDecrypted = encryptionService.decrypt(tenantCccd.getCccdNumber());
+                        logger.info("✅ Đã giải mã CCCD người thuê đã đăng ký");
+                    } catch (Exception e) {
+                        logger.error("❌ Lỗi giải mã CCCD người thuê: {}", e.getMessage());
+                        tenantCccdDecrypted = tenantCccd.getCccdNumber(); // Fallback
+                    }
+                }
+            } else if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType()) && unregisteredTenant != null) {
+                if (unregisteredTenant.getCccdNumber() != null) {
+                    try {
+                        tenantCccdDecrypted = encryptionService.decrypt(unregisteredTenant.getCccdNumber());
+                        logger.info("✅ Đã giải mã CCCD người thuê chưa đăng ký");
+                    } catch (Exception e) {
+                        logger.error("❌ Lỗi giải mã CCCD người thuê chưa đăng ký: {}", e.getMessage());
+                        tenantCccdDecrypted = unregisteredTenant.getCccdNumber(); // Fallback
+                    }
+                }
+            }
+
+
 
             // 🔥 SỬA LỖI: Xử lý utilities trước khi save room
             Rooms room = roomsRepository.findById(contractDto.getRoom().getRoomId())
@@ -596,10 +659,17 @@ public class ContractController {
                     return newCccd;
                 });
 
-        userCccd.setCccdNumber(tenantDto.getCccdNumber()); // Sử dụng CCCD đầy đủ
-
-        if (StringUtils.hasText(tenantDto.getCccdNumber()))
-            userCccd.setCccdNumber(tenantDto.getCccdNumber());
+        // ✅ MÃ HÓA CCCD TRƯỚC KHI LƯU
+        if (StringUtils.hasText(tenantDto.getCccdNumber())) {
+            try {
+                String encryptedCccd = encryptionService.encrypt(tenantDto.getCccdNumber());
+                userCccd.setCccdNumber(encryptedCccd);
+                logger.info("✅ Đã mã hóa CCCD cho tenant: {}", maskCccdForLog(tenantDto.getCccdNumber()));
+            } catch (Exception e) {
+                logger.error("❌ Lỗi mã hóa CCCD: {}", e.getMessage());
+                throw new RuntimeException("Lỗi mã hóa CCCD: " + e.getMessage());
+            }
+        }
         if (tenantDto.getIssueDate() != null)
             userCccd.setIssueDate(tenantDto.getIssueDate());
         if (StringUtils.hasText(tenantDto.getIssuePlace()))
@@ -2839,9 +2909,7 @@ public class ContractController {
             response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            logger.error("Lỗi khi lấy ảnh CCCD: {}", e.getMessage(), e);
             response.put("success", false);
-            response.put("message", "Lỗi khi lấy ảnh CCCD: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }

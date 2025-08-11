@@ -388,6 +388,14 @@ public class PaymentController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            // Parse month and year for validation
+            String[] monthYear = month.split("-");
+            int year = Integer.parseInt(monthYear[0]);
+            int monthNum = Integer.parseInt(monthYear[1]);
+            
+            // Validate month range - landlords can only create invoices within ±2 months from current month
+            validateInvoiceMonth(monthNum, year);
+
             // Tính toán các khoản phí với đơn giá do chủ trọ nhập
             Integer electricityUsage = electricityCurr - electricityPrev;
             Float electricityFee = electricityUsage * electricityUnitPrice;
@@ -396,9 +404,6 @@ public class PaymentController {
             Float waterFee = waterUsage * waterUnitPrice;
 
             // Tạo due date (ngày 10 của tháng tiếp theo)
-            String[] monthYear = month.split("-");
-            int year = Integer.parseInt(monthYear[0]);
-            int monthNum = Integer.parseInt(monthYear[1]);
             LocalDate dueDate = LocalDate.of(year, monthNum, 10);
             String formattedMonth = String.format("%02d/%d", monthNum, year);
 
@@ -471,6 +476,40 @@ public class PaymentController {
         }
 
         return "redirect:/chu-tro/thanh-toan";
+    }
+
+    /**
+     * Validates that the invoice month is within the allowed range (current month ±2 months)
+     * @param month The month to validate (1-12)
+     * @param year The year to validate
+     * @throws RuntimeException if the month is outside the allowed range
+     */
+    private void validateInvoiceMonth(int month, int year) {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate requestedDate = LocalDate.of(year, month, 1);
+        
+        // Calculate the difference in months
+        long monthsDifference = java.time.temporal.ChronoUnit.MONTHS.between(
+            currentDate.withDayOfMonth(1), requestedDate);
+        
+        // Allow creation for current month ±2 months
+        if (Math.abs(monthsDifference) > 2) {
+            String currentMonthYear = String.format("%02d/%d", currentDate.getMonthValue(), currentDate.getYear());
+            String requestedMonthYear = String.format("%02d/%d", month, year);
+            
+            if (monthsDifference > 2) {
+                throw new RuntimeException(String.format(
+                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong tương lai từ tháng hiện tại (%s).",
+                    requestedMonthYear, currentMonthYear));
+            } else {
+                throw new RuntimeException(String.format(
+                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong quá khứ từ tháng hiện tại (%s).",
+                    requestedMonthYear, currentMonthYear));
+            }
+        }
+        
+        log.info("Invoice month validation passed for {}/{} (current: {}/{})", 
+                month, year, currentDate.getMonthValue(), currentDate.getYear());
     }
 
     /**

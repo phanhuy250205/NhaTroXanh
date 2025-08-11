@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-blue: #3498DB;
@@ -550,7 +551,7 @@
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255,255,255,.3);
+            border: 2px solid rgba(255, 255, 255, .3);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
@@ -622,7 +623,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes slideDown {
@@ -630,6 +633,7 @@
                 opacity: 0;
                 transform: translateY(-10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -752,6 +756,7 @@
         }
     </style>
 </head>
+
 <body>
     <div th:replace="~{/layouts/sidebar-host}"></div>
     <div class="main-container-host">
@@ -865,7 +870,8 @@
 
                         <div class="custom-amount-host">
                             <label class="form-label-host">Hoặc nhập số tiền tùy chỉnh:</label>
-                            <input type="number" class="amount-input-host" id="customAmount" placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
+                            <input type="number" class="amount-input-host" id="customAmount"
+                                placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
                         </div>
                     </div>
                 </div>
@@ -883,7 +889,8 @@
                             <!-- Bank Transfer -->
                             <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
                                 <div class="payment-header-host">
-                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank" class="payment-radio-host">
+                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank"
+                                        class="payment-radio-host">
                                     <div class="payment-icon-host">
                                         <i class="fas fa-university"></i>
                                     </div>
@@ -897,7 +904,8 @@
                             <!-- VietQR -->
                             <div class="payment-option-host" onclick="selectPaymentMethod('vietqr')">
                                 <div class="payment-header-host">
-                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr" class="payment-radio-host">
+                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr"
+                                        class="payment-radio-host">
                                     <div class="payment-icon-host">
                                         <i class="fas fa-qrcode"></i>
                                     </div>
@@ -951,8 +959,9 @@
                     <div class="card-body-host">
                         <div class="balance-display-host">
                             <div class="balance-label-host">Số dư tài khoản</div>
-                            <div class="balance-amount-host" id="currentBalance-host" 
-                                 th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ</div>
+                            <div class="balance-amount-host" id="currentBalance-host"
+                                th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ
+                            </div>
                             <div class="balance-status-host">
                                 <i class="fas fa-check-circle"></i>
                                 Tài khoản hoạt động bình thường
@@ -961,7 +970,7 @@
                     </div>
                 </div>
 
-                
+
 
                 <!-- Quick Actions -->
                 <div class="card-host">
@@ -973,8 +982,9 @@
                     </div>
                     <div class="card-body-host">
                         <div class="quick-actions-host">
-                            <div class="quick-action-host" onclick="viewTransactionHistory()">
-                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));">
+                            <div class="quick-action-host">
+                                <div class="quick-action-icon-host"
+                                    style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));">
                                     <i class="fas fa-history"></i>
                                 </div>
                                 <div>
@@ -982,8 +992,9 @@
                                     <p class="mb-0 text-muted small">Xem chi tiết các giao dịch</p>
                                 </div>
                             </div>
-                            <div class="quick-action-host" onclick="downloadStatement()">
-                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
+                            <div class="quick-action-host">
+                                <div class="quick-action-icon-host"
+                                    style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
                                     <i class="fas fa-download"></i>
                                 </div>
                                 <div>
@@ -991,8 +1002,9 @@
                                     <p class="mb-0 text-muted small">Xuất báo cáo tài chính</p>
                                 </div>
                             </div>
-                            <div class="quick-action-host" onclick="setAutoTopup()">
-                                <div class="quick-action-icon-host" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
+                            <div class="quick-action-host">
+                                <div class="quick-action-icon-host"
+                                    style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
                                     <i class="fas fa-sync-alt"></i>
                                 </div>
                                 <div>
@@ -1015,7 +1027,8 @@
                     <div class="card-body-host">
                         <div class="d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
+                                <div class="info-icon-host"
+                                    style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
                                     <i class="fas fa-phone"></i>
                                 </div>
                                 <div>
@@ -1024,7 +1037,8 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
+                                <div class="info-icon-host"
+                                    style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
                                     <i class="fas fa-envelope"></i>
                                 </div>
                                 <div>
@@ -1033,7 +1047,8 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <div class="info-icon-host" style="background: linear-gradient(135deg, var(--warning-orange), #e67e22); width: 35px; height: 35px;">
+                                <div class="info-icon-host"
+                                    style="background: linear-gradient(135deg, var(--warning-orange), #e67e22); width: 35px; height: 35px;">
                                     <i class="fas fa-comments"></i>
                                 </div>
                                 <div>
@@ -1069,30 +1084,41 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr th:each="deposit : ${recentDeposits}" th:if="${recentDeposits != null and !recentDeposits.empty}">
+                            <tr th:each="deposit : ${recentDeposits}"
+                                th:if="${recentDeposits != null and !recentDeposits.empty}">
                                 <td>
-                                    <strong th:text="${#temporals.format(deposit.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30</strong>
+                                    <strong
+                                        th:text="${#temporals.format(deposit.createdAt, 'dd/MM/yyyy HH:mm')}">15/12/2024
+                                        14:30</strong>
                                 </td>
                                 <td th:text="${deposit.transactionReference}">TXN001234567</td>
                                 <td>
-                                    <strong style="color: var(--success-green);" 
-                                            th:text="'+' + ${#numbers.formatInteger(deposit.amount, 0, 'COMMA')} + ' VNĐ'">+1,000,000 VNĐ</strong>
+                                    <strong style="color: var(--success-green);"
+                                        th:text="'+' + ${#numbers.formatInteger(deposit.amount, 0, 'COMMA')} + ' VNĐ'">+1,000,000
+                                        VNĐ</strong>
                                 </td>
                                 <td>
-                                    <i class="fas fa-mobile-alt text-primary me-1" th:if="${deposit.paymentMethod == 'ewallet'}"></i>
-                                    <i class="fas fa-university text-primary me-1" th:if="${deposit.paymentMethod == 'bank'}"></i>
-                                    <i class="fas fa-credit-card text-primary me-1" th:if="${deposit.paymentMethod == 'card'}"></i>
-                                    <span th:text="${deposit.paymentMethod == 'ewallet'} ? 'Ví điện tử' : 
+                                    <i class="fas fa-mobile-alt text-primary me-1"
+                                        th:if="${deposit.paymentMethod == 'ewallet'}"></i>
+                                    <i class="fas fa-university text-primary me-1"
+                                        th:if="${deposit.paymentMethod == 'bank'}"></i>
+                                    <i class="fas fa-credit-card text-primary me-1"
+                                        th:if="${deposit.paymentMethod == 'card'}"></i>
+                                    <span
+                                        th:text="${deposit.paymentMethod == 'ewallet'} ? 'Ví điện tử' : 
                                                    (${deposit.paymentMethod == 'bank'} ? 'Ngân hàng' : 'Thẻ tín dụng')">VNPay</span>
                                 </td>
                                 <td>
-                                    <span class="status-badge-host" 
-                                          th:classappend="${deposit.status.name() == 'COMPLETED'} ? 'status-success-host' : 
+                                    <span class="status-badge-host"
+                                        th:classappend="${deposit.status.name() == 'COMPLETED'} ? 'status-success-host' : 
                                                          (${deposit.status.name() == 'PENDING'} ? 'status-pending-host' : 'status-failed-host')">
-                                        <i th:class="${deposit.status.name() == 'COMPLETED'} ? 'fas fa-check' : 
+                                        <i
+                                            th:class="${deposit.status.name() == 'COMPLETED'} ? 'fas fa-check' : 
                                                      (${deposit.status.name() == 'PENDING'} ? 'fas fa-clock' : 'fas fa-times')"></i>
-                                        <span th:text="${deposit.status.name() == 'COMPLETED'} ? 'Thành công' : 
-                                                       (${deposit.status.name() == 'PENDING'} ? 'Đang xử lý' : 'Thất bại')">Thành công</span>
+                                        <span
+                                            th:text="${deposit.status.name() == 'COMPLETED'} ? 'Thành công' : 
+                                                       (${deposit.status.name() == 'PENDING'} ? 'Đang xử lý' : 'Thất bại')">Thành
+                                            công</span>
                                     </span>
                                 </td>
                                 <td th:text="${deposit.description ?: 'Nạp tiền thành công'}">Nạp tiền thành công</td>
@@ -1119,55 +1145,55 @@
         let selectedWallet = '';
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateBalanceDisplay();
         });
 
         function selectAmount(amount) {
             selectedAmount = amount;
-            
+
             // Remove active class from all amount options
             document.querySelectorAll('.amount-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             // Add active class to selected amount
             event.currentTarget.classList.add('active-host');
-            
+
             // Clear custom amount input
             document.getElementById('customAmount').value = '';
-            
+
             updateSummary();
         }
 
         function selectPaymentMethod(method) {
             selectedPaymentMethod = method;
-            
+
             // Remove active class from all payment methods
             document.querySelectorAll('.payment-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             // Add active class to selected method
             event.currentTarget.classList.add('active-host');
-            
+
             // Check the radio button
             document.getElementById(method + '-host').checked = true;
-            
+
         }
 
         function selectWallet(wallet) {
             event.stopPropagation();
             selectedWallet = wallet;
-            
+
             // Remove active class from all wallet options
             document.querySelectorAll('.wallet-item-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             // Add active class to selected wallet
             event.currentTarget.classList.add('active-host');
-            
+
             // Check the radio button
             document.getElementById(wallet + '-host').checked = true;
         }
@@ -1195,26 +1221,26 @@
             const customAmount = document.getElementById('customAmount').value;
             const finalAmount = customAmount ? parseInt(customAmount) : selectedAmount;
             const topupBtn = document.getElementById('topupBtn-host');
-            
+
             // Validation
             if (!finalAmount || finalAmount < 50000) {
                 showAlert('Vui lòng chọn hoặc nhập số tiền nạp (tối thiểu 50,000 VNĐ)!', 'warning');
                 return;
             }
-            
+
             if (finalAmount > 50000000) {
                 showAlert('Số tiền nạp không được vượt quá 50,000,000 VNĐ!', 'warning');
                 return;
             }
-            
+
             if (!selectedPaymentMethod) {
                 showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
                 return;
             }
-            
+
             let message = `Xác nhận nạp ${formatCurrency(finalAmount)} bằng `;
-            
-            switch(selectedPaymentMethod) {
+
+            switch (selectedPaymentMethod) {
                 case 'bank':
                     message += 'chuyển khoản ngân hàng?';
                     break;
@@ -1225,12 +1251,12 @@
                     message += 'thẻ tín dụng/ghi nợ?';
                     break;
             }
-            
+
             if (confirm(message)) {
                 // Show loading state
                 topupBtn.innerHTML = '<span class="loading-host me-2"></span>Đang xử lý giao dịch...';
                 topupBtn.disabled = true;
-                
+
                 // Process payment based on selected method
                 if (selectedPaymentMethod === 'vietqr') {
                     processVietQRPayment(finalAmount);
@@ -1253,21 +1279,21 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.qrCodeUrl) {
-                    // Show QR code modal for payment
-                    showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
-                } else {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.qrCodeUrl) {
+                        // Show QR code modal for payment
+                        showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
+                    } else {
+                        resetButton();
+                        showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     resetButton();
-                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                resetButton();
-                showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
-            });
+                    showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                });
         }
 
         function showVietQRModal(qrCodeUrl, amount, transactionId) {
@@ -1351,23 +1377,23 @@
                     </div>
                 </div>
             `;
-            
+
             // Remove existing modal if any
             const existingModal = document.getElementById('vietqrModal');
             if (existingModal) {
                 existingModal.remove();
             }
-            
+
             // Add modal to body
             document.body.insertAdjacentHTML('beforeend', modalHtml);
-            
+
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('vietqrModal'));
             modal.show();
-            
+
             // Start countdown timer (15 minutes = 900 seconds)
             startCountdown(900);
-            
+
             resetButton();
         }
 
@@ -1387,23 +1413,23 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                resetButton();
-                if (data.success) {
-                    showAlert(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 2000);
-                } else {
-                    showAlert(data.message || 'Có lỗi xảy ra khi tạo yêu cầu nạp tiền', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                resetButton();
-                showAlert('Có lỗi xảy ra khi gửi yêu cầu nạp tiền', 'error');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    resetButton();
+                    if (data.success) {
+                        showAlert(data.message, 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        showAlert(data.message || 'Có lỗi xảy ra khi tạo yêu cầu nạp tiền', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    resetButton();
+                    showAlert('Có lỗi xảy ra khi gửi yêu cầu nạp tiền', 'error');
+                });
         }
 
         function resetButton() {
@@ -1418,22 +1444,22 @@
             selectedAmount = 0;
             selectedPaymentMethod = '';
             selectedWallet = '';
-            
+
             document.querySelectorAll('.amount-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             document.querySelectorAll('.payment-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             document.querySelectorAll('.wallet-item-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             document.getElementById('customAmount').value = '';
             document.getElementById('walletOptions-host').style.display = 'none';
-            
+
             document.querySelectorAll('input[type="radio"]').forEach(el => {
                 el.checked = false;
             });
@@ -1466,7 +1492,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             document.body.appendChild(alertDiv);
-            
+
             setTimeout(() => {
                 if (alertDiv.parentNode) {
                     alertDiv.remove();
@@ -1475,7 +1501,7 @@
         }
 
         // Handle custom amount input
-        document.getElementById('customAmount').addEventListener('input', function() {
+        document.getElementById('customAmount').addEventListener('input', function () {
             const customAmount = parseInt(this.value);
             if (customAmount && customAmount >= 50000) {
                 selectedAmount = 0;
@@ -1486,7 +1512,7 @@
         });
 
         // Add click handlers for wallet selection
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.closest('.wallet-item-host')) {
                 const walletItem = e.target.closest('.wallet-item-host');
                 const radio = walletItem.querySelector('input[type="radio"]');
@@ -1498,7 +1524,7 @@
         });
 
         // Prevent form submission on Enter key
-        document.addEventListener('keypress', function(e) {
+        document.addEventListener('keypress', function (e) {
             if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
                 e.preventDefault();
             }
@@ -1508,7 +1534,7 @@
         document.documentElement.style.scrollBehavior = 'smooth';
 
         // Format number input
-        document.getElementById('customAmount').addEventListener('input', function() {
+        document.getElementById('customAmount').addEventListener('input', function () {
             let value = this.value.replace(/\D/g, '');
             if (value) {
                 this.value = parseInt(value);
@@ -1517,34 +1543,34 @@
 
         // Countdown timer functions
         let countdownInterval;
-        
+
         function startCountdown(seconds) {
             let timeLeft = seconds;
             const countdownElement = document.getElementById('countdown');
             const countdownAlert = document.getElementById('countdownAlert');
-            
+
             countdownInterval = setInterval(() => {
                 const minutes = Math.floor(timeLeft / 60);
                 const secs = timeLeft % 60;
-                
+
                 countdownElement.textContent = `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                
+
                 // Change color when time is running out
                 if (timeLeft <= 300) { // 5 minutes
                     countdownAlert.classList.remove('alert-warning');
                     countdownAlert.classList.add('alert-danger');
                 }
-                
+
                 if (timeLeft <= 0) {
                     clearInterval(countdownInterval);
                     expireQRCode();
                     return;
                 }
-                
+
                 timeLeft--;
             }, 1000);
         }
-        
+
         function expireQRCode() {
             const countdownAlert = document.getElementById('countdownAlert');
             countdownAlert.innerHTML = `
@@ -1554,7 +1580,7 @@
             `;
             countdownAlert.classList.remove('alert-warning', 'alert-danger');
             countdownAlert.classList.add('alert-danger');
-            
+
             // Disable complete transaction button
             const completeBtn = document.getElementById('completeTransactionBtn');
             if (completeBtn) {
@@ -1562,16 +1588,16 @@
                 completeBtn.innerHTML = '<i class="fas fa-clock me-2"></i>Đã hết hạn';
             }
         }
-        
+
         function cancelQRPayment() {
             if (countdownInterval) {
                 clearInterval(countdownInterval);
             }
-            
+
             // Get transaction ID from modal
             const modal = document.getElementById('vietqrModal');
             const transactionId = modal ? modal.getAttribute('data-transaction-id') : null;
-            
+
             if (transactionId) {
                 // Call API to cancel transaction
                 fetch('/host/wallet/cancel-transaction', {
@@ -1581,37 +1607,37 @@
                     },
                     body: `transactionId=${transactionId}`
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showAlert(data.message, 'success');
-                    } else {
-                        showAlert(data.message || 'Có lỗi xảy ra khi hủy giao dịch', 'warning');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error cancelling transaction:', error);
-                    showAlert('Có lỗi xảy ra khi hủy giao dịch', 'error');
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showAlert(data.message, 'success');
+                        } else {
+                            showAlert(data.message || 'Có lỗi xảy ra khi hủy giao dịch', 'warning');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error cancelling transaction:', error);
+                        showAlert('Có lỗi xảy ra khi hủy giao dịch', 'error');
+                    });
             }
-            
+
             // Close modal
             const modalInstance = bootstrap.Modal.getInstance(modal);
             if (modalInstance) {
                 modalInstance.hide();
             }
-            
+
             // Reset form to allow new deposit request
             resetForm();
         }
-        
+
         function refreshQRCode(transactionId, amount) {
             // Show loading state
             const refreshBtn = event.currentTarget;
             const originalContent = refreshBtn.innerHTML;
             refreshBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang tạo mới...';
             refreshBtn.disabled = true;
-            
+
             // Call API to create new QR code
             const formData = new FormData();
             formData.append('amount', amount);
@@ -1621,70 +1647,70 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.qrCodeUrl) {
-                    // Update QR code image
-                    const qrImage = document.querySelector('#vietqrModal .qr-code-container img');
-                    if (qrImage) {
-                        qrImage.src = data.qrCodeUrl;
-                    }
-                    
-                    // Reset countdown
-                    if (countdownInterval) {
-                        clearInterval(countdownInterval);
-                    }
-                    startCountdown(900); // 15 minutes
-                    
-                    // Reset countdown alert
-                    const countdownAlert = document.getElementById('countdownAlert');
-                    countdownAlert.innerHTML = `
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.qrCodeUrl) {
+                        // Update QR code image
+                        const qrImage = document.querySelector('#vietqrModal .qr-code-container img');
+                        if (qrImage) {
+                            qrImage.src = data.qrCodeUrl;
+                        }
+
+                        // Reset countdown
+                        if (countdownInterval) {
+                            clearInterval(countdownInterval);
+                        }
+                        startCountdown(900); // 15 minutes
+
+                        // Reset countdown alert
+                        const countdownAlert = document.getElementById('countdownAlert');
+                        countdownAlert.innerHTML = `
                         <i class="fas fa-clock me-2"></i>
                         <strong>Thời gian còn lại: <span id="countdown">15:00</span></strong>
                         <br><small>Mã QR sẽ hết hạn sau thời gian trên</small>
                     `;
-                    countdownAlert.classList.remove('alert-danger');
-                    countdownAlert.classList.add('alert-warning');
-                    
-                    // Re-enable complete transaction button
-                    const completeBtn = document.getElementById('completeTransactionBtn');
-                    if (completeBtn) {
-                        completeBtn.disabled = false;
-                        completeBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Hoàn thành giao dịch';
+                        countdownAlert.classList.remove('alert-danger');
+                        countdownAlert.classList.add('alert-warning');
+
+                        // Re-enable complete transaction button
+                        const completeBtn = document.getElementById('completeTransactionBtn');
+                        if (completeBtn) {
+                            completeBtn.disabled = false;
+                            completeBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Hoàn thành giao dịch';
+                        }
+
+                        showAlert('Mã QR đã được làm mới thành công', 'success');
+                    } else {
+                        showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR mới', 'error');
                     }
-                    
-                    showAlert('Mã QR đã được làm mới thành công', 'success');
-                } else {
-                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR mới', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showAlert('Có lỗi xảy ra khi tạo mã QR mới', 'error');
-            })
-            .finally(() => {
-                // Reset button state
-                refreshBtn.innerHTML = originalContent;
-                refreshBtn.disabled = false;
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showAlert('Có lỗi xảy ra khi tạo mã QR mới', 'error');
+                })
+                .finally(() => {
+                    // Reset button state
+                    refreshBtn.innerHTML = originalContent;
+                    refreshBtn.disabled = false;
+                });
         }
-        
+
         function completeTransaction(transactionId) {
             // Show confirmation
             if (!confirm('Bạn đã hoàn thành thanh toán qua ngân hàng? Nhân viên sẽ xác nhận giao dịch của bạn.')) {
                 return;
             }
-            
+
             // Show loading state
             const completeBtn = document.getElementById('completeTransactionBtn');
             const originalContent = completeBtn.innerHTML;
             completeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
             completeBtn.disabled = true;
-            
+
             // Show payment status
             const paymentStatus = document.getElementById('paymentStatus');
             paymentStatus.style.display = 'block';
-            
+
             // Call API to mark transaction as completed (waiting for staff confirmation)
             fetch('/host/wallet/vietqr-confirm', {
                 method: 'POST',
@@ -1693,78 +1719,78 @@
                 },
                 body: `transactionId=${transactionId}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update payment status
-                    paymentStatus.innerHTML = `
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update payment status
+                        paymentStatus.innerHTML = `
                         <div class="text-success">
                             <i class="fas fa-check-circle me-2"></i>
                             <span>Giao dịch đã được ghi nhận! Số dư đã được cập nhật.</span>
                         </div>
                     `;
-                    paymentStatus.classList.remove('alert-secondary');
-                    paymentStatus.classList.add('alert-success');
-                    
-                    // Update button
-                    completeBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đã hoàn thành';
-                    completeBtn.classList.remove('btn-success');
-                    completeBtn.classList.add('btn-outline-success');
-                    
-                    // Stop countdown
-                    if (countdownInterval) {
-                        clearInterval(countdownInterval);
-                    }
-                    
-                    showAlert('Giao dịch đã được xác nhận thành công! Số dư đã được cập nhật.', 'success');
-                    
-                    // Auto close modal after 3 seconds
-                    setTimeout(() => {
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('vietqrModal'));
-                        if (modal) {
-                            modal.hide();
+                        paymentStatus.classList.remove('alert-secondary');
+                        paymentStatus.classList.add('alert-success');
+
+                        // Update button
+                        completeBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đã hoàn thành';
+                        completeBtn.classList.remove('btn-success');
+                        completeBtn.classList.add('btn-outline-success');
+
+                        // Stop countdown
+                        if (countdownInterval) {
+                            clearInterval(countdownInterval);
                         }
-                        // Reload page to update balance
-                        window.location.reload();
-                    }, 3000);
-                    
-                } else {
-                    // Show error
-                    paymentStatus.innerHTML = `
+
+                        showAlert('Giao dịch đã được xác nhận thành công! Số dư đã được cập nhật.', 'success');
+
+                        // Auto close modal after 3 seconds
+                        setTimeout(() => {
+                            const modal = bootstrap.Modal.getInstance(document.getElementById('vietqrModal'));
+                            if (modal) {
+                                modal.hide();
+                            }
+                            // Reload page to update balance
+                            window.location.reload();
+                        }, 3000);
+
+                    } else {
+                        // Show error
+                        paymentStatus.innerHTML = `
                         <div class="text-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>
                             <span>${data.message || 'Có lỗi xảy ra khi xác nhận giao dịch'}</span>
                         </div>
                     `;
-                    paymentStatus.classList.remove('alert-secondary');
-                    paymentStatus.classList.add('alert-danger');
-                    
-                    // Reset button
-                    completeBtn.innerHTML = originalContent;
-                    completeBtn.disabled = false;
-                    
-                    showAlert(data.message || 'Có lỗi xảy ra khi xác nhận giao dịch', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                
-                // Show error
-                paymentStatus.innerHTML = `
+                        paymentStatus.classList.remove('alert-secondary');
+                        paymentStatus.classList.add('alert-danger');
+
+                        // Reset button
+                        completeBtn.innerHTML = originalContent;
+                        completeBtn.disabled = false;
+
+                        showAlert(data.message || 'Có lỗi xảy ra khi xác nhận giao dịch', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+
+                    // Show error
+                    paymentStatus.innerHTML = `
                     <div class="text-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <span>Có lỗi xảy ra khi kết nối với server</span>
                     </div>
                 `;
-                paymentStatus.classList.remove('alert-secondary');
-                paymentStatus.classList.add('alert-danger');
-                
-                // Reset button
-                completeBtn.innerHTML = originalContent;
-                completeBtn.disabled = false;
-                
-                showAlert('Có lỗi xảy ra khi xác nhận giao dịch', 'error');
-            });
+                    paymentStatus.classList.remove('alert-secondary');
+                    paymentStatus.classList.add('alert-danger');
+
+                    // Reset button
+                    completeBtn.innerHTML = originalContent;
+                    completeBtn.disabled = false;
+
+                    showAlert('Có lỗi xảy ra khi xác nhận giao dịch', 'error');
+                });
         }
 
         // QR Code handling functions
@@ -1773,7 +1799,7 @@
             const qrImage = document.getElementById('qrCodeImage');
             const loadingState = document.getElementById('qrLoadingState');
             const errorState = document.getElementById('qrErrorState');
-            
+
             if (qrImage) qrImage.classList.remove('d-none');
             if (loadingState) loadingState.classList.add('d-none');
             if (errorState) errorState.classList.add('d-none');
@@ -1784,11 +1810,11 @@
             const qrImage = document.getElementById('qrCodeImage');
             const loadingState = document.getElementById('qrLoadingState');
             const errorState = document.getElementById('qrErrorState');
-            
+
             if (qrImage) qrImage.classList.add('d-none');
             if (loadingState) loadingState.classList.add('d-none');
             if (errorState) errorState.classList.remove('d-none');
-            
+
             showAlert('Không thể tải mã QR. Vui lòng thử lại hoặc liên hệ hỗ trợ.', 'warning');
         }
 
@@ -1796,10 +1822,10 @@
             const qrImage = document.getElementById('qrCodeImage');
             const loadingState = document.getElementById('qrLoadingState');
             const errorState = document.getElementById('qrErrorState');
-            
+
             if (errorState) errorState.classList.add('d-none');
             if (loadingState) loadingState.classList.remove('d-none');
-            
+
             // Retry loading the QR image
             if (qrImage && qrImage.src) {
                 // Force reload by adding timestamp
@@ -1813,11 +1839,128 @@
             const qrImage = document.getElementById('qrCodeImage');
             const loadingState = document.getElementById('qrLoadingState');
             const errorState = document.getElementById('qrErrorState');
-            
+
             if (qrImage) qrImage.classList.add('d-none');
             if (loadingState) loadingState.classList.remove('d-none');
             if (errorState) errorState.classList.add('d-none');
         }
+        function showConfirmModal(amount, paymentMethod) {
+            // Tạo modal HTML
+          const modalHtml = `
+        <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+                    <div class="modal-body text-center" style="padding: 30px 25px;">
+                        <!-- Icon xác nhận lớn -->
+                        <div class="confirm-icon" style="width: 80px; height: 80px; background: #e8f5e9; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="#4CAF50">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                            </svg>
+                        </div>
+                        
+                        <h5 style="font-weight: 600; margin-bottom: 15px; color: #2c3e50;">Xác nhận nạp tiền</h5>
+                        
+                        <div style="background-color: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 25px; text-align: left;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                                <span style="color: #666; font-size: 14px;">Số tiền:</span>
+                                <span style="font-weight: 600; color: #2c3e50; font-size: 15px;">${formatCurrency(amount)}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span style="color: #666; font-size: 14px;">Phương thức:</span>
+                                <span style="font-weight: 600; color: #2c3e50; font-size: 15px;">
+                                    ${paymentMethod === 'vietqr' ? 'VietQR' : 
+                                      paymentMethod === 'bank' ? 'Chuyển khoản ngân hàng' : 
+                                      'Thẻ tín dụng/ghi nợ'}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <p style="color: #666; font-size: 14px; margin-bottom: 25px;">Bạn có chắc chắn muốn thực hiện giao dịch này?</p>
+                        
+                        <div style="display: flex; gap: 15px;">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" 
+                                style="flex: 1; padding: 10px; border-radius: 8px; font-weight: 500;">
+                                <i class="fas fa-times me-2"></i>Hủy bỏ
+                            </button>
+                            <button type="button" class="btn btn-success" id="confirmActionBtn" 
+                                style="flex: 1; padding: 10px; border-radius: 8px; font-weight: 500;">
+                                <i class="fas fa-check me-2"></i>Xác nhận
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+            // Remove existing modal if any
+            const existingModal = document.getElementById('confirmModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            // Add modal to body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+            modal.show();
+
+            // Return promise for confirmation
+            return new Promise((resolve) => {
+                document.getElementById('confirmActionBtn').addEventListener('click', () => {
+                    modal.hide();
+                    resolve(true);
+                });
+
+                modal._element.addEventListener('hidden.bs.modal', () => {
+                    resolve(false);
+                });
+            });
+        }
+
+        // Cập nhật lại hàm processTopup để sử dụng confirm modal mới
+        async function processTopup() {
+            const customAmount = document.getElementById('customAmount').value;
+            const finalAmount = customAmount ? parseInt(customAmount) : selectedAmount;
+            const topupBtn = document.getElementById('topupBtn-host');
+
+            // Validation (giữ nguyên phần validation cũ)
+            if (!finalAmount || finalAmount < 50000) {
+                showAlert('Vui lòng chọn hoặc nhập số tiền nạp (tối thiểu 50,000 VNĐ)!', 'warning');
+                return;
+            }
+
+            if (finalAmount > 50000000) {
+                showAlert('Số tiền nạp không được vượt quá 50,000,000 VNĐ!', 'warning');
+                return;
+            }
+
+            if (!selectedPaymentMethod) {
+                showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
+                return;
+            }
+
+            // Hiển thị confirm modal mới
+            const isConfirmed = await showConfirmModal(finalAmount, selectedPaymentMethod);
+
+            if (isConfirmed) {
+                // Show loading state
+                topupBtn.innerHTML = '<span class="loading-host me-2"></span>Đang xử lý giao dịch...';
+                topupBtn.disabled = true;
+
+                // Process payment based on selected method
+                if (selectedPaymentMethod === 'vietqr') {
+                    processVietQRPayment(finalAmount);
+                } else if (selectedPaymentMethod === 'bank') {
+                    processDepositRequest(finalAmount, 'bank');
+                } else {
+                    processDepositRequest(finalAmount, selectedPaymentMethod);
+                }
+            }
+        }
+
     </script>
 </body>
+
 </html>

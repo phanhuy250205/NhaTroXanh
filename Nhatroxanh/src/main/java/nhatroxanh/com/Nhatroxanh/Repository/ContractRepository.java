@@ -160,28 +160,25 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
     Optional<Contracts> findByTenantId(@Param("tenantId") Integer tenantId); // Giữ lại cho Registered Tenant
                                                                              // (Users)
 
-    @Query("""
-                SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO(
-                    c.tenant.userId,
-                    c.tenant.fullname,
-                    c.tenant.phone,
-                    COUNT(c.contractId),
-                    c.tenant.enabled
-                )
-                FROM Contracts c
-                WHERE c.room.hostel.owner.userId = :ownerId
-                  AND c.status != :excludeStatus
-                  AND (
-                        :keyword IS NULL OR
-                        LOWER(c.tenant.fullname) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                        OR c.tenant.phone LIKE CONCAT('%', :keyword, '%')
-                  )
-                GROUP BY c.tenant.userId, c.tenant.fullname, c.tenant.phone, c.tenant.enabled
-            """)
+    @Query("SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantSummaryDTO(" +
+           "    MAX(c.contractId), " + // Lấy contractId mới nhất để làm link chi tiết
+           "    COALESCE(t.userId, ut.id), " +
+           "    COALESCE(t.fullname, ut.fullName), " +
+           "    c.tenantPhone, " +
+           "    COUNT(c.contractId)" +
+           ") " +
+           "FROM Contracts c " +
+           "LEFT JOIN c.tenant t ON c.tenant.userId = t.userId " +
+           "LEFT JOIN c.unregisteredTenant ut ON c.unregisteredTenant.id = ut.id " +
+           "WHERE c.owner.userId = :ownerId " +
+           "AND c.status <> nhatroxanh.com.Nhatroxanh.Model.entity.Contracts$Status.DRAFT " +
+           "AND (:keyword IS NULL OR " +
+           "     LOWER(COALESCE(t.fullname, ut.fullName)) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "     LOWER(c.tenantPhone) LIKE LOWER(CONCAT('%', :keyword, '%')))" +
+           "GROUP BY COALESCE(t.userId, ut.id), COALESCE(t.fullname, ut.fullName), c.tenantPhone")
     Page<TenantSummaryDTO> getTenantSummaryByOwnerWithFilters(
             @Param("ownerId") Integer ownerId,
             @Param("keyword") String keyword,
-            @Param("excludeStatus") Status excludeStatus,
             Pageable pageable);
 
     @Query("""
