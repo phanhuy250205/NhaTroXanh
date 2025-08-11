@@ -479,7 +479,6 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-
     @Override
     public void sendVoucherDeactivationEmail(Vouchers voucher) {
         Users creator = voucher.getUser();
@@ -593,63 +592,146 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
-                                              String roomName, String hostelName, String paymentDate, 
-                                              String paymentTime, String amount, String note, Integer paymentId) {
+    public void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName,
+            String roomName, String hostelName, String paymentDate,
+            String paymentTime, String amount, String note, Integer paymentId) {
         String title = "Lịch hẹn thanh toán tiền mặt - Hóa đơn #" + paymentId;
-        
+
         String content = String.format(
-            "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
-            "<h3 style='color: #28a745; margin-bottom: 15px;'>📅 Thông tin lịch hẹn thanh toán</h3>" +
-            "<table style='width: 100%%; border-collapse: collapse;'>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Người thuê:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Giờ hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
-            "%s" +
-            "</table>" +
-            "</div>" +
-            "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
-            "<p style='margin: 0; color: #856404;'><strong>⚠️ Lưu ý:</strong> Vui lòng xác nhận việc nhận thanh toán trong hệ thống sau khi người thuê đã thanh toán.</p>" +
-            "</div>",
-            tenantName, roomName, hostelName, paymentDate, paymentTime, amount,
-            (note != null && !note.trim().isEmpty()) ? 
-                String.format("<tr><td style='padding: 8px 0; font-weight: bold;'>Ghi chú:</td><td style='padding: 8px 0;'>%s</td></tr>", note) : ""
-        );
+                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
+                        "<h3 style='color: #28a745; margin-bottom: 15px;'>📅 Thông tin lịch hẹn thanh toán</h3>" +
+                        "<table style='width: 100%%; border-collapse: collapse;'>" +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Người thuê:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Giờ hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>"
+                        +
+                        "%s" +
+                        "</table>" +
+                        "</div>" +
+                        "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>"
+                        +
+                        "<p style='margin: 0; color: #856404;'><strong>⚠️ Lưu ý:</strong> Vui lòng xác nhận việc nhận thanh toán trong hệ thống sau khi người thuê đã thanh toán.</p>"
+                        +
+                        "</div>",
+                tenantName, roomName, hostelName, paymentDate, paymentTime, amount,
+                (note != null && !note.trim().isEmpty()) ? String.format(
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ghi chú:</td><td style='padding: 8px 0;'>%s</td></tr>",
+                        note) : "");
 
         String greeting = String.format("Xin chào %s", landlordName);
         String footer = "Vui lòng đăng nhập vào hệ thống để xác nhận thanh toán sau khi nhận tiền từ người thuê.";
-        
+
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
     }
 
     @Override
-    public void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
-                                          String hostelName, String amount, String paymentDate, Integer paymentId) {
+    public void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName,
+            String hostelName, String amount, String paymentDate, Integer paymentId) {
         String title = "Thanh toán thành công - Hóa đơn #" + paymentId;
-        
+
         String content = String.format(
-            "<div style='background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
-            "<h3 style='color: #155724; margin-bottom: 15px;'>✅ Thanh toán đã được xác nhận</h3>" +
-            "<table style='width: 100%%; border-collapse: collapse;'>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền đã thanh toán:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày thanh toán:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phương thức:</td><td style='padding: 8px 0;'>Tiền mặt</td></tr>" +
-            "</table>" +
-            "</div>" +
-            "<div style='background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
-            "<p style='margin: 0; color: #0c5460;'><strong>💡 Thông tin:</strong> Chủ trọ đã xác nhận đã nhận được thanh toán của bạn. Cảm ơn bạn đã thanh toán đúng hạn!</p>" +
-            "</div>",
-            roomName, hostelName, amount, paymentDate
-        );
+                "<div style='background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;'>"
+                        +
+                        "<h3 style='color: #155724; margin-bottom: 15px;'>✅ Thanh toán đã được xác nhận</h3>" +
+                        "<table style='width: 100%%; border-collapse: collapse;'>" +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền đã thanh toán:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày thanh toán:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phương thức:</td><td style='padding: 8px 0;'>Tiền mặt</td></tr>"
+                        +
+                        "</table>" +
+                        "</div>" +
+                        "<div style='background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>"
+                        +
+                        "<p style='margin: 0; color: #0c5460;'><strong>💡 Thông tin:</strong> Chủ trọ đã xác nhận đã nhận được thanh toán của bạn. Cảm ơn bạn đã thanh toán đúng hạn!</p>"
+                        +
+                        "</div>",
+                roomName, hostelName, amount, paymentDate);
 
         String greeting = String.format("Xin chào %s", tenantName);
         String footer = "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!";
-        
+
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
+    }
+
+    @Override
+    public void sendPrivacyPolicyEmail(String to) {
+        String title = "Chính sách bảo mật & Điều khoản sử dụng";
+
+        String content = "<div style='background: #f8f9fa; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin: 20px 0;'>"
+                +
+                "<h3 style='color: #1a73e8; margin-top: 0;'>CHÍNH SÁCH BẢO MẬT & ĐIỀU KHOẢN SỬ DỤNG</h3>" +
+                "<p style='font-size: 14px; color: #555;'>(Áp dụng cho hệ thống Quản lý Nhà trọ Xanh)</p>" +
+
+                "<h4 style='color: #1a73e8;'>1. Mục đích</h4>" +
+                "<p>Chính sách này nhằm bảo vệ thông tin cá nhân của người dùng và quy định cách thức sử dụng dịch vụ quản lý nhà trọ của chúng tôi, đảm bảo quyền lợi hợp pháp của tất cả các bên tham gia.</p>"
+                +
+
+                "<h4 style='color: #1a73e8;'>2. Thu thập thông tin</h4>" +
+                "<ul style='margin-top: 0; padding-left: 18px;'>" +
+                "<li>Họ tên, số điện thoại, email, ngày sinh.</li>" +
+                "<li>Thông tin tài khoản ngân hàng (nếu có giao dịch tài chính).</li>" +
+                "<li>Địa chỉ nhà trọ, thông tin phòng, hợp đồng thuê.</li>" +
+                "<li>Lịch sử giao dịch, thanh toán và trao đổi với chủ nhà/khách thuê.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>3. Mục đích sử dụng thông tin</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Quản lý nhà trọ, phòng cho thuê và hợp đồng.</li>" +
+                "<li>Liên hệ, gửi thông báo, hóa đơn, hoặc thông tin liên quan.</li>" +
+                "<li>Hỗ trợ kỹ thuật và xử lý khiếu nại.</li>" +
+                "<li>Cải thiện chất lượng dịch vụ và trải nghiệm người dùng.</li>" +
+                "<li>Đáp ứng yêu cầu của cơ quan quản lý nhà nước khi cần thiết.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>4. Bảo mật thông tin</h4>" +
+                "<p>Chúng tôi cam kết không bán, trao đổi hoặc chia sẻ thông tin cá nhân của bạn cho bên thứ ba, trừ khi có sự đồng ý của bạn hoặc yêu cầu từ cơ quan pháp luật.</p>"
+                +
+                "<p>Thông tin được lưu trữ trên hệ thống bảo mật cao, có cơ chế mã hóa dữ liệu và sao lưu định kỳ.</p>"
+                +
+                "<p>Nhân viên chỉ được truy cập thông tin trong phạm vi cần thiết để thực hiện công việc.</p>" +
+
+                "<h4 style='color: #1a73e8;'>5. Quyền của người dùng</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Yêu cầu xem, chỉnh sửa hoặc xóa thông tin cá nhân của mình.</li>" +
+                "<li>Yêu cầu ngừng nhận thông báo hoặc email quảng bá.</li>" +
+                "<li>Gửi khiếu nại về việc sử dụng thông tin cá nhân.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>6. Trách nhiệm của người dùng</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Cung cấp thông tin chính xác và cập nhật kịp thời.</li>" +
+                "<li>Không sử dụng hệ thống vào mục đích trái pháp luật.</li>" +
+                "<li>Bảo mật tài khoản và không chia sẻ thông tin đăng nhập cho người khác.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>7. Thay đổi chính sách</h4>" +
+                "<p>Chúng tôi có thể cập nhật chính sách này theo từng thời điểm để phù hợp với yêu cầu pháp luật và nhu cầu dịch vụ. Mọi thay đổi sẽ được thông báo trên website và/hoặc qua email.</p>"
+                +
+
+                "<h4 style='color: #1a73e8;'>8. Liên hệ</h4>" +
+                "<p>📧 Email: <a href='mailto:nhatroxanh123@gmail.com' style='color: #1a73e8; text-decoration: none;'>nhatroxanh123@gmail.com</a><br>"
+                +
+                "📞 Hotline: <a href='tel:09888999999' style='color: #1a73e8; text-decoration: none;'>0988 999 999</a></p>"
+                +
+                "</div>";
+
+        String greeting = "Xin chào Quý khách";
+        String footer = "Cảm ơn bạn đã sử dụng dịch vụ của Nhà Trọ Xanh!";
+
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
     }
 

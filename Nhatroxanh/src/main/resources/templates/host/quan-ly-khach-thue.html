@@ -529,6 +529,7 @@
             border-radius: 15px;
             font-weight: 500;
         }
+
         .custom-toast-container {
             position: fixed;
             top: 20px;
@@ -609,17 +610,17 @@
         <div class="page-header-host">
             <h1 class="page-title-host">QUẢN LÝ KHÁCH THUÊ</h1>
             <div class="custom-toast-container">
-            <div th:if="${successMessage}" class="custom-toast success">
-                <i class="toast-icon fas fa-check-circle"></i>
-                <span class="toast-message" th:text="${successMessage}"></span>
-                <button class="toast-close" aria-label="Đóng">×</button>
+                <div th:if="${successMessage}" class="custom-toast success">
+                    <i class="toast-icon fas fa-check-circle"></i>
+                    <span class="toast-message" th:text="${successMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
+                <div th:if="${errorMessage}" class="custom-toast error">
+                    <i class="toast-icon fas fa-exclamation-circle"></i>
+                    <span class="toast-message" th:text="${errorMessage}"></span>
+                    <button class="toast-close" aria-label="Đóng">×</button>
+                </div>
             </div>
-            <div th:if="${errorMessage}" class="custom-toast error">
-                <i class="toast-icon fas fa-exclamation-circle"></i>
-                <span class="toast-message" th:text="${errorMessage}"></span>
-                <button class="toast-close" aria-label="Đóng">×</button>
-            </div>
-        </div>
 
             <form th:action="@{/chu-tro/khach-thue}" method="get" class="search-section-host">
                 <div class="search-bar-host">
@@ -640,6 +641,7 @@
                         <th>Họ tên</th>
                         <th>Số điện thoại</th>
                         <th>Số lượng phòng đang và đã thuê</th>
+                        <th>Trạng thái</th>
                         <th>Hành động</th>
                     </tr>
                 </thead>
@@ -652,6 +654,8 @@
                         <td data-label="Họ tên" th:text="${tenant.fullName}"></td>
                         <td data-label="Số điện thoại" th:text="${tenant.phone}"></td>
                         <td data-label="Số lượng phòng" th:text="${tenant.totalContracts} + ' phòng'"></td>
+                        <td th:text="${tenant.enabled} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></td>
+
                         <td data-label="Hành động">
                             <a th:href="@{/chu-tro/chi-tiet-khach-thue/{id}(id=${tenant.userId})}"
                                 class="action-btn-host">
