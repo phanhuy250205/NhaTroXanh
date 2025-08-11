@@ -431,3 +431,33 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+const roomNumberField = document.getElementById("roomCountHost");
+const errorField = document.getElementById("error-roomCountHost");
+
+// Kiểm tra realtime khi nhập
+roomNumberField.addEventListener("input", function() {
+    const value = parseInt(roomNumberField.value, 10);
+
+    if (isNaN(value) || value < 1) {
+        errorField.innerText = "Số phòng phải từ 1 trở lên";
+        roomNumberField.classList.add("is-invalid");
+    }
+    else if (value > 100) {
+        errorField.innerText = "Số phòng tối đa là 100";
+        roomNumberField.classList.add("is-invalid");
+    }
+    else {
+        errorField.innerText = "";
+        roomNumberField.classList.remove("is-invalid");
+    }
+});
+
+// Kiểm tra lại khi submit
+document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
+    const value = parseInt(roomNumberField.value, 10);
+
+    if (isNaN(value) || value < 1 || value > 100) {
+        e.preventDefault();
+    }
+});
