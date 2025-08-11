@@ -144,7 +144,7 @@ public class PayController {
                     .orElse("0 VNĐ"));
             model.addAttribute("roomName", Optional.ofNullable(room).map(Rooms::getNamerooms).orElse("Không xác định"));
             model.addAttribute("hostName", Optional.ofNullable(room)
-                    .map(Rooms::getHostel)
+                    .map(Rooms::getHostel)  
                     .map(hostel -> hostel.getOwner())
                     .map(owner -> owner.getFullname())
                     .orElse("Không xác định"));

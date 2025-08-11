@@ -26,6 +26,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
+import nhatroxanh.com.Nhatroxanh.Service.NotificationService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,9 @@ public class ProfileGuest {
 
     @Autowired
     private EncryptionService encryptionService; // Thêm service mã hóa
+
+    @Autowired
+    private NotificationService notificationService;
 
     @GetMapping("/profile-khach-thue")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -251,6 +255,16 @@ public class ProfileGuest {
             // Cập nhật mật khẩu
             user.setPassword(passwordEncoder.encode(newPassword));
             usersRepository.save(user);
+
+            // Create password change notification
+            try {
+                notificationService.createPasswordChangeNotification(user);
+                System.out.println("Password change notification created for user: " + user.getUserId());
+            } catch (Exception notificationException) {
+                System.err.println("Failed to create password change notification for user " + 
+                                 user.getUserId() + ": " + notificationException.getMessage());
+                // Don't fail the password change if notification creation fails
+            }
 
             redirectAttributes.addFlashAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
             return "redirect:/khach-thue/profile-khach-thue";
