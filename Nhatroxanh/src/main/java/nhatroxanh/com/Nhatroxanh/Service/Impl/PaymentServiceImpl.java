@@ -131,6 +131,9 @@ public class PaymentServiceImpl implements PaymentService {
             int month = Integer.parseInt(monthYear[0]);
             int year = Integer.parseInt(monthYear[1]);
 
+            // Validate month range - landlords can only create invoices within ±2 months from current month
+            validateInvoiceMonth(month, year);
+
             // Check for existing payment for the same contract and month/year
             Optional<Payments> existingPayment = paymentsRepository.findByContractIdAndMonth(
                     request.getContractId(), month, year);
@@ -702,5 +705,39 @@ public class PaymentServiceImpl implements PaymentService {
     public Payments findPaymentById(Integer paymentId) {
         return paymentsRepository.findById(paymentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn với ID: " + paymentId));
+    }
+
+    /**
+     * Validates that the invoice month is within the allowed range (current month ±2 months)
+     * @param month The month to validate (1-12)
+     * @param year The year to validate
+     * @throws RuntimeException if the month is outside the allowed range
+     */
+    private void validateInvoiceMonth(int month, int year) {
+        LocalDate currentDate = LocalDate.now();
+        LocalDate requestedDate = LocalDate.of(year, month, 1);
+        
+        // Calculate the difference in months
+        long monthsDifference = java.time.temporal.ChronoUnit.MONTHS.between(
+            currentDate.withDayOfMonth(1), requestedDate);
+        
+        // Allow creation for current month ±2 months
+        if (Math.abs(monthsDifference) > 2) {
+            String currentMonthYear = String.format("%02d/%d", currentDate.getMonthValue(), currentDate.getYear());
+            String requestedMonthYear = String.format("%02d/%d", month, year);
+            
+            if (monthsDifference > 2) {
+                throw new RuntimeException(String.format(
+                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong tương lai từ tháng hiện tại (%s).",
+                    requestedMonthYear, currentMonthYear));
+            } else {
+                throw new RuntimeException(String.format(
+                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong quá khứ từ tháng hiện tại (%s).",
+                    requestedMonthYear, currentMonthYear));
+            }
+        }
+        
+        log.info("Invoice month validation passed for {}/{} (current: {}/{})", 
+                month, year, currentDate.getMonthValue(), currentDate.getYear());
     }
 }

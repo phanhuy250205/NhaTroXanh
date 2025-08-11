@@ -532,48 +532,56 @@
         font-size: 0.85rem;
       }
     }
+    .status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
   </style>
 </head>
 
 <body>
   <div th:replace="~{/layouts/sidebar-host}" style="z-index: 1020;"></div>
   <div class="main-content">
-  <!-- Toast Container -->
-  <div class="toast-container">
-    <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-check-circle me-2"></i>
-        <span class="toast-message">Thao tác thành công!</span>
+    <!-- Toast Container -->
+    <div class="toast-container">
+      <div id="successToast" class="toast toast-success" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-check-circle me-2"></i>
+          <span class="toast-message">Thao tác thành công!</span>
+        </div>
+      </div>
+
+      <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-exclamation-circle me-2"></i>
+          <span class="toast-message">Có lỗi xảy ra!</span>
+        </div>
+      </div>
+
+      <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-body d-flex align-items-center">
+          <i class="fas fa-info-circle me-2"></i>
+          <span class="toast-message">Thông tin!</span>
+        </div>
       </div>
     </div>
 
-    <div id="errorToast" class="toast toast-error" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-exclamation-circle me-2"></i>
-        <span class="toast-message">Có lỗi xảy ra!</span>
-      </div>
+    <!-- Flash Messages Display -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert"
+      style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+      <i class="fas fa-check-circle me-2"></i>
+      <span th:text="${successMessage}">Thành công!</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div id="infoToast" class="toast toast-info" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-body d-flex align-items-center">
-        <i class="fas fa-info-circle me-2"></i>
-        <span class="toast-message">Thông tin!</span>
-      </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert"
+      style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-  </div>
-
-  <!-- Flash Messages Display -->
-  <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-    <i class="fas fa-check-circle me-2"></i>
-    <span th:text="${successMessage}">Thành công!</span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-
-  <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;">
-    <i class="fas fa-exclamation-triangle me-2"></i>
-    <span th:text="${errorMessage}">Có lỗi xảy ra!</span>
-    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
 
     <div class="container-fluid">
       <div class="main-container">
@@ -645,6 +653,7 @@
                       <option value="">Tất cả trạng thái</option>
                       <option value="paid">Đã thanh toán</option>
                       <option value="unpaid">Chưa thanh toán</option>
+                      <option value="pending">Chờ xác nhận</option>
                     </select>
                   </div>
 
@@ -726,14 +735,20 @@
                       <span th:text="${payment.month}">06/2025</span>
                     </td>
                     <td>
-                      <span
-                        th:class="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'status-badge status-paid' : 'status-badge status-unpaid'">
-                        <i
-                          th:class="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'fas fa-check me-1' : 'fas fa-exclamation-triangle me-1'"></i>
-                        <span
-                          th:text="${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'Đã thanh toán' : 'Chưa thanh toán'">Chưa
-                          thanh toán</span>
-                      </span>
+                    <span th:class="
+    ${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'status-badge status-paid' :
+    (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'status-badge status-pending' : 'status-badge status-unpaid')
+">
+    <i th:class="
+        ${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'fas fa-check me-1' :
+        (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'fas fa-hourglass-half me-1' : 'fas fa-exclamation-triangle me-1')
+    "></i>
+    <span th:text="
+        ${payment.paymentStatus.name() == 'ĐÃ_THANH_TOÁN'} ? 'Đã thanh toán' :
+        (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'Chờ xác nhận' : 'Chưa thanh toán')
+    ">Chưa thanh toán</span>
+</span>
+
                     </td>
                     <td>
                       <a href="#" class="action-link" th:onclick="'showInvoiceModalById(' + ${payment.paymentId} + ')'">
@@ -943,13 +958,11 @@
           <button type="button" class="btn btn-primary" onclick="markAsPaid()">
             <i class="fas fa-check me-2"></i>Đánh dấu đã thanh toán
           </button>
-          <button type="button" class="btn btn-danger" onclick="deleteInvoice()">
-            <i class="fas fa-trash me-2"></i>Xóa
-          </button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
             onclick="document.querySelector('.modal-backdrop').remove();">
             <i class="fas fa-times me-2"></i>Đóng
           </button>
+
         </div>
       </div>
     </div>

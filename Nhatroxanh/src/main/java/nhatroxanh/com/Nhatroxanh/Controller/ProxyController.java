@@ -18,7 +18,7 @@ public class ProxyController {
 
     @GetMapping("/provinces")
     public ResponseEntity<String> getAllProvinces() throws IOException {
-        URL url = new URL("https://provinces.open-api.vn/api/p/");
+        URL url = new URL("https://provinces.open-api.vn/api/v2/p/");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         StringBuilder response = new StringBuilder();
@@ -33,7 +33,7 @@ public class ProxyController {
 
     @GetMapping("/provinces/{code}")
     public ResponseEntity<String> getProvincesByCode(@PathVariable String code) throws IOException {
-        URL url = new URL("https://provinces.open-api.vn/api/p/" + code + "?depth=2");
+        URL url = new URL("https://provinces.open-api.vn/api/v2/p/" + code + "?depth=2");
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
         StringBuilder response = new StringBuilder();
