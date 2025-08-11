@@ -23,123 +23,126 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends JpaRepository<Users, Integer> {
-    Optional<Users> findByEmail(String email);
+        Optional<Users> findByEmail(String email);
 
-    Optional<Users> findByPhone(String phone);
+        Optional<Users> findByPhone(String phone);
 
-    List<Users> findByRole(Users.Role role);
+        List<Users> findByRole(Users.Role role);
 
-    @Query("SELECT u FROM Users u LEFT JOIN u.userCccd uc WHERE (uc.cccdNumber = :cccd OR u.phone = :phone) AND u.role = :role")
-    Optional<Users> findByCccdOrPhoneAndRole(
-            @Param("cccd") String cccd,
-            @Param("phone") String phone,
-            @Param("role") Users.Role role);
+        @Query("SELECT u FROM Users u LEFT JOIN u.userCccd uc WHERE (uc.cccdNumber = :cccd OR u.phone = :phone) AND u.role = :role")
+        Optional<Users> findByCccdOrPhoneAndRole(
+                        @Param("cccd") String cccd,
+                        @Param("phone") String phone,
+                        @Param("role") Users.Role role);
 
-    @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
-    Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
+        @Query("SELECT uc FROM UserCccd uc WHERE uc.user.userId = :userId")
+        Optional<UserCccd> findUserCccdByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
-    String findAddressByUserId(@Param("userId") Integer userId);
+        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+        String findAddressByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
-    Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
+        @Query("SELECT u.address FROM Users u WHERE u.userId = :userId")
+        Optional<Address> findAddressEntityByUserId(@Param("userId") Integer userId);
 
-    @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
-    Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
+        @Query("SELECT u.userId FROM Users u WHERE u.role = :role")
+        Page<Integer> findCustomerIds(@Param("role") Users.Role role, Pageable pageable);
 
-    @Query("""
-                SELECT DISTINCT u FROM Users u
-                LEFT JOIN FETCH u.userCccd
-                LEFT JOIN FETCH u.rentedContracts c
-                LEFT JOIN FETCH c.room r
-                LEFT JOIN FETCH r.hostel h
-                WHERE u.userId IN :userIds
-            """)
-    List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
+        @Query("""
+                                SELECT DISTINCT u FROM Users u
+                                LEFT JOIN FETCH u.userCccd
+                                LEFT JOIN FETCH u.rentedContracts c
+                                LEFT JOIN FETCH c.room r
+                                LEFT JOIN FETCH r.hostel h
+                                WHERE u.userId IN :userIds
+                                AND (c.status IS NULL OR c.status != 'DRAFT')
+                        """)
+        List<Users> findCustomersWithDetails(@Param("userIds") List<Integer> userIds);
 
-    @Query("SELECT u FROM Users u " +
-            "WHERE u.role = :role " +
-            "AND u.status = :status " +
-            "AND (:enabled IS NULL OR u.enabled = :enabled) " +
-            "AND (:keyword IS NULL OR LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Users> searchOwners(@Param("role") Users.Role role,
-            @Param("status") Users.Status status,
-            @Param("keyword") String keyword,
-            @Param("enabled") Boolean enabled,
-            Pageable pageable);
+        @Query("SELECT u FROM Users u " +
+                        "WHERE u.role = :role " +
+                        "AND u.status = :status " +
+                        "AND (:enabled IS NULL OR u.enabled = :enabled) " +
+                        "AND (:keyword IS NULL OR LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Users> searchOwners(@Param("role") Users.Role role,
+                        @Param("status") Users.Status status,
+                        @Param("keyword") String keyword,
+                        @Param("enabled") Boolean enabled,
+                        Pageable pageable);
 
-    boolean existsByEmail(String email);
+        boolean existsByEmail(String email);
 
-    boolean existsByPhone(String phone);
+        boolean existsByPhone(String phone);
 
-    long countByRole(Users.Role role);
+        long countByRole(Users.Role role);
 
-    long countByRoleAndEnabled(Users.Role role, boolean enabled);
+        long countByRoleAndEnabled(Users.Role role, boolean enabled);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND " +
-            "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Users> findByRoleAndKeyword(@Param("role") Users.Role role,
-            @Param("keyword") String keyword,
-            Pageable pageable);
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND " +
+                        "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Users> findByRoleAndKeyword(@Param("role") Users.Role role,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND " +
-            "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
-    Page<Users> findByRoleAndEnabledAndKeyword(@Param("role") Users.Role role,
-            @Param("enabled") boolean enabled,
-            @Param("keyword") String keyword,
-            Pageable pageable);
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND " +
+                        "(LOWER(u.fullname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+        Page<Users> findByRoleAndEnabledAndKeyword(@Param("role") Users.Role role,
+                        @Param("enabled") boolean enabled,
+                        @Param("keyword") String keyword,
+                        Pageable pageable);
 
-    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.email = :email AND u.userId <> :userId")
-    boolean existsByEmailAndNotUserId(@Param("email") String email, @Param("userId") Integer userId);
+        @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.email = :email AND u.userId <> :userId")
+        boolean existsByEmailAndNotUserId(@Param("email") String email, @Param("userId") Integer userId);
 
-    @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.phone = :phone AND u.userId <> :userId")
-    boolean existsByPhoneAndNotUserId(@Param("phone") String phone, @Param("userId") Integer userId);
+        @Query("SELECT COUNT(u) > 0 FROM Users u WHERE u.phone = :phone AND u.userId <> :userId")
+        boolean existsByPhoneAndNotUserId(@Param("phone") String phone, @Param("userId") Integer userId);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL")
-    Optional<Users> findByRoleAndEnabledAndBankAccountIsNotNull(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL")
+        Optional<Users> findByRoleAndEnabledAndBankAccountIsNotNull(@Param("role") Users.Role role,
+                        @Param("enabled") boolean enabled);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
-           "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
-           "AND u.accountHolderName IS NOT NULL " +
-           "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
-           "ORDER BY u.createdAt ASC")
-    List<Users> findActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
+                        "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
+                        "AND u.accountHolderName IS NOT NULL " +
+                        "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
+                        "ORDER BY u.createdAt ASC")
+        List<Users> findActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role,
+                        @Param("enabled") boolean enabled);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
-           "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
-           "AND u.accountHolderName IS NOT NULL " +
-           "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
-           "ORDER BY u.createdAt ASC")
-    Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role, @Param("enabled") boolean enabled);
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.enabled = :enabled " +
+                        "AND u.bankAccount IS NOT NULL AND u.bankId IS NOT NULL " +
+                        "AND u.accountHolderName IS NOT NULL " +
+                        "AND TRIM(u.bankAccount) != '' AND TRIM(u.bankId) != '' AND TRIM(u.accountHolderName) != '' " +
+                        "ORDER BY u.createdAt ASC")
+        Optional<Users> findFirstActiveStaffWithCompleteBankInfo(@Param("role") Users.Role role,
+                        @Param("enabled") boolean enabled);
 
+        @Query("SELECT u FROM Users u " +
+                        "LEFT JOIN u.userCccd uc " + // LEFT JOIN với UserCccd
+                        "WHERE (uc.cccdNumber = :cccd OR :cccd IS NULL) " + // Tìm theo CCCD nếu cccd không null
+                        "AND (u.phone = :phone OR :phone IS NULL)") // Tìm theo Phone nếu phone không null
+        Optional<Users> findByCccdOrPhone(@Param("cccd") String cccd, @Param("phone") String phone);
 
-    @Query("SELECT u FROM Users u " +
-           "LEFT JOIN u.userCccd uc " + // LEFT JOIN với UserCccd
-           "WHERE (uc.cccdNumber = :cccd OR :cccd IS NULL) " + // Tìm theo CCCD nếu cccd không null
-           "AND (u.phone = :phone OR :phone IS NULL)")        // Tìm theo Phone nếu phone không null
-    Optional<Users> findByCccdOrPhone(@Param("cccd") String cccd, @Param("phone") String phone);
+        Page<Users> findByRoleAndStatus(Users.Role role, Users.Status status, Pageable pageable);
 
+        @Query("SELECT u FROM Users u WHERE u.role = :role AND u.status = :status AND (LOWER(u.fullname) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :search, '%')))")
+        Page<Users> findPendingOwnersBySearch(@Param("role") Users.Role role, @Param("status") Users.Status status,
+                        @Param("search") String search, Pageable pageable);
 
-    Page<Users> findByRoleAndStatus(Users.Role role, Users.Status status, Pageable pageable);
+        @Query("SELECT DISTINCT u FROM Users u " +
+                        "LEFT JOIN FETCH u.rentedContracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH r.hostel h " +
+                        "WHERE h.hostelId = :hostelId")
+        List<Users> findByHostelId(@Param("hostelId") Integer hostelId);
 
-    @Query("SELECT u FROM Users u WHERE u.role = :role AND u.status = :status AND (LOWER(u.fullname) LIKE LOWER(CONCAT('%', :search, '%')) OR LOWER(u.phone) LIKE LOWER(CONCAT('%', :search, '%')))")
-    Page<Users> findPendingOwnersBySearch(@Param("role") Users.Role role, @Param("status") Users.Status status,
-            @Param("search") String search, Pageable pageable);
+        @Query("SELECT DISTINCT u FROM Users u " +
+                        "LEFT JOIN FETCH u.rentedContracts c " +
+                        "LEFT JOIN FETCH c.room r " +
+                        "LEFT JOIN FETCH r.hostel h " +
+                        "WHERE h.hostelId = :hostelId AND u.role = :role")
+        List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
 
-    @Query("SELECT DISTINCT u FROM Users u " +
-           "LEFT JOIN FETCH u.rentedContracts c " +
-           "LEFT JOIN FETCH c.room r " +
-           "LEFT JOIN FETCH r.hostel h " +
-           "WHERE h.hostelId = :hostelId")
-    List<Users> findByHostelId(@Param("hostelId") Integer hostelId);
-
-     @Query("SELECT DISTINCT u FROM Users u " +
-           "LEFT JOIN FETCH u.rentedContracts c " +
-           "LEFT JOIN FETCH c.room r " +
-           "LEFT JOIN FETCH r.hostel h " +
-           "WHERE h.hostelId = :hostelId AND u.role = :role")
-    List<Users> findByHostelIdAndRole(@Param("hostelId") Integer hostelId, @Param("role") Users.Role role);
         List<Users> findByRole(String role);
-}  
+}

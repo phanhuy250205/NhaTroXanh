@@ -272,7 +272,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
+                    paymentDetails.put("total", successMatcher.group(5).trim());
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
@@ -507,7 +507,7 @@ public class NotificationController {
     // CÁC HÀM HELPER ĐỂ XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU
     // =================================================================
 
-   private Map<String, Object> enrichNotification(Notification notification) {
+  private Map<String, Object> enrichNotification(Notification notification) {
     Map<String, Object> map = new HashMap<>();
     map.put("notificationId", notification.getNotificationId());
     map.put("title", notification.getTitle());
@@ -515,7 +515,7 @@ public class NotificationController {
     map.put("type", notification.getType().toString());
     map.put("isRead", notification.getIsRead());
     
-    // Định dạng createAt thành chuỗi
+    // Format createAt as a string
     if (notification.getCreateAt() != null) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         String formattedDateTime = notification.getCreateAt().toLocalDateTime().format(formatter);
@@ -533,8 +533,8 @@ public class NotificationController {
         roomMap.put("namerooms", room.getNamerooms());
         roomMap.put("acreage", room.getAcreage());
         roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
-        if (room.getCategory() != null) {
-            roomMap.put("category", Map.of("name", room.getCategory().getName()));
+        if (room.getHostel() != null) {
+            roomMap.put("hostel", Map.of("name", room.getHostel().getName()));
         }
         map.put("room", roomMap);
     }

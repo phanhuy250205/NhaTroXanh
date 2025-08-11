@@ -176,7 +176,7 @@ public class RoomsController {
             @RequestParam("namerooms") String namerooms,
             @RequestParam("price") Float price,
             @RequestParam("acreage") Float acreage,
-            @RequestParam("status") String status,
+            @RequestParam(value = "status", required = false) String status, // status không bắt buộc
             @RequestParam("maxTenants") Integer maxTenants,
             @RequestParam("hostelId") Integer hostelId,
             @RequestParam(value = "description", required = false) String description,
@@ -201,14 +201,18 @@ public class RoomsController {
         room.setNamerooms(namerooms);
         room.setPrice(price);
         room.setAcreage(acreage);
-        try {
-            if (!Arrays.asList("unactive", "active", "repair").contains(status)) {
-                throw new IllegalArgumentException("Invalid status: " + status);
+        // Đặt trạng thái mặc định là unactive
+        room.setStatus(RoomStatus.unactive);
+        if (status != null && !status.trim().isEmpty()) {
+            try {
+                if (Arrays.asList("unactive", "active", "repair").contains(status)) {
+                    room.setStatus(RoomStatus.valueOf(status));
+                } else {
+                    log.warning("Invalid status: " + status + ", defaulting to unactive");
+                }
+            } catch (IllegalArgumentException e) {
+                log.warning("Invalid status: " + status + ", defaulting to unactive");
             }
-            room.setStatus(RoomStatus.valueOf(status));
-        } catch (IllegalArgumentException e) {
-            log.warning("Invalid status: " + status + ", defaulting to unactive");
-            room.setStatus(RoomStatus.unactive);
         }
         room.setMax_tenants(maxTenants);
         room.setHostel(hostelOpt.get());
@@ -284,6 +288,21 @@ public class RoomsController {
         }
 
         Rooms room = roomOpt.get();
+        // Kiểm tra trạng thái chuyển đổi
+        if (room.getStatus() == RoomStatus.active && !"active".equalsIgnoreCase(status)) {
+            log.warning("Invalid status transition: from active to " + status + " for roomId: " + roomId);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Không thể thay đổi trạng thái phòng từ 'Đã thuê' sang trạng thái khác.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
+        }
+        if (room.getStatus() == RoomStatus.unactive && !"repair".equalsIgnoreCase(status)
+                && !"unactive".equalsIgnoreCase(status)) {
+            log.warning("Invalid status transition: from unactive to " + status + " for roomId: " + roomId);
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Phòng ở trạng thái 'Trống' chỉ có thể chuyển sang 'Bảo trì'.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
+        }
+
         room.setNamerooms(namerooms);
         room.setPrice(price);
         room.setAcreage(acreage);
@@ -293,8 +312,10 @@ public class RoomsController {
             }
             room.setStatus(RoomStatus.valueOf(status));
         } catch (IllegalArgumentException e) {
-            log.warning("Invalid status: " + status + ", defaulting to unactive");
-            room.setStatus(RoomStatus.unactive);
+            log.warning("Invalid status: " + status + ", keeping current status");
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Trạng thái không hợp lệ, giữ nguyên trạng thái hiện tại.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
         room.setMax_tenants(maxTenants);
         room.setDescription(description);
@@ -309,10 +330,10 @@ public class RoomsController {
 
         // Handle existing images
         List<Image> currentImages = imageRepository.findByRoom(room);
-        List<String> imagesToKeep = existingImages != null && !existingImages.isEmpty() 
-            ? Arrays.asList(existingImages.split(","))
-            : new ArrayList<>();
-        
+        List<String> imagesToKeep = existingImages != null && !existingImages.isEmpty()
+                ? Arrays.asList(existingImages.split(","))
+                : new ArrayList<>();
+
         // Delete images that are not in the keep list
         for (Image currentImage : currentImages) {
             if (!imagesToKeep.contains(currentImage.getUrl())) {
