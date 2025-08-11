@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chi Tiết Bài Đăng</title>
+  <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+  <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+  <style>
+    :root {
+      --primary-blue: #3E83CC;
+      --secondary-blue: #549eed;
+      --dark-blue: #1f2937;
+      --light-blue: #f0f8ff;
+      --accent-blue: #2563eb;
+      --gradient-primary: linear-gradient(135deg, #3E83CC 0%, #549eed 100%);
+      --shadow-primary: 0 2px 8px rgba(62, 131, 204, 0.15);
+      --shadow-hover: 0 3px 12px rgba(62, 131, 204, 0.2);
+      --success-green: #10b981;
+      --warning-orange: #f59e0b;
+      --danger-red: #ef4444;
+      --text-muted: #6b7280;
+    }
+
+    .post-detail-body-host {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+      min-height: 100vh;
+      color: var(--dark-blue);
+      overflow-x: hidden;
+    }
+
+    .main-container-host {
+      margin-left: 100px;
+      padding: 20px;
+      transition: margin-left 0.3s ease;
+    }
+
+    .page-header-host {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+    }
+
+    .back-link-host {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .back-link-host:hover {
+      color: var(--secondary-blue);
+      transform: translateX(-2px);
+    }
+
+    .header-actions-host {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .edit-btn-host {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: var(--shadow-primary);
+      text-decoration: none;
+    }
+
+    .edit-btn-host:hover {
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .status-container-host {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-label-host {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark-blue);
+    }
+
+    .status-badge-host {
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      background: var(--warning-orange);
+      color: white;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge-host.APPROVED {
+      background: var(--success-green);
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+
+    .status-badge-host.PENDING {
+      background: var(--warning-orange);
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
+    }
+
+    .status-badge-host.REJECTED {
+      background: var(--danger-red);
+      box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
+    .form-status-update {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+    }
+
+    .form-status-update .form-label-host {
+      margin-bottom: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark-blue);
+    }
+
+    .form-status-update .form-control-host {
+      border: 1px solid rgba(62, 131, 204, 0.2);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 13px;
+      color: var(--dark-blue);
+      background: white;
+      transition: all 0.2s ease;
+      width: 120px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 8px center;
+      background-repeat: no-repeat;
+      background-size: 12px;
+      padding-right: 28px;
+    }
+
+    .form-status-update .form-control-host:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+    }
+
+    .form-status-update .form-control-host.green {
+      border-color: var(--success-green);
+      background-color: rgba(16, 185, 129, 0.05);
+    }
+
+    .form-status-update .form-control-host.red {
+      border-color: var(--danger-red);
+      background-color: rgba(239, 68, 68, 0.05);
+    }
+
+    .form-status-update .btn-status-submit {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .form-status-update .btn-status-submit:hover {
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .toast-container-host {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1050;
+      width: 350px;
+      max-width: 90%;
+      pointer-events: none;
+    }
+
+    .alert-host {
+      display: flex;
+      align-items: center;
+      background: white;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      border-left: 4px solid transparent;
+      border-image: var(--gradient-primary) 1;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    .alert-host.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .alert-host:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .alert-host.success {
+      border-image: linear-gradient(135deg, var(--success-green) 0%, #34d399 100%) 1;
+      background-color: #ecfdf5;
+    }
+
+    .alert-host.danger {
+      border-image: linear-gradient(135deg, var(--danger-red) 0%, #f87171 100%) 1;
+      background-color: #fef2f2;
+    }
+
+    .alert-host .alert-icon {
+      font-size: 18px;
+      margin-right: 12px;
+      color: var(--dark-blue);
+    }
+
+    .alert-host.success .alert-icon {
+      color: var(--success-green);
+    }
+
+    .alert-host.danger .alert-icon {
+      color: var(--danger-red);
+    }
+
+    .alert-host .alert-message {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dark-blue);
+      line-height: 1.4;
+    }
+
+    .alert-host .btn-close {
+      background: none;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0 8px;
+      transition: color 0.2s ease;
+    }
+
+    .alert-host .btn-close:hover {
+      color: var(--dark-blue);
+    }
+
+    .content-section-host {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(62, 131, 204, 0.1);
+      box-shadow: var(--shadow-primary);
+      transition: all 0.2s ease;
+    }
+
+    .content-section-host:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .gallery-section-host {
+      margin-bottom: 20px;
+    }
+
+    .image-gallery {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .main-image-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .main-image-container:hover {
+      transform: scale(1.02);
+    }
+
+    .main-image {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 16px;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .main-image:hover {
+      opacity: 0.95;
+      transform: scale(1.05);
+    }
+
+    .image-overlay {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      z-index: 10;
+    }
+
+    .btn-favorite-large {
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 18px;
+      color: var(--danger-red);
+      box-shadow: var(--shadow-primary);
+      transition: all 0.3s ease;
+    }
+
+    .btn-favorite-large:hover {
+      background: var(--danger-red);
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+    }
+
+    .thumbnail-container {
+      position: relative;
+      margin-top: 15px;
+      padding: 0 40px;
+    }
+
+    .thumbnail-scroll {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      padding: 5px 0;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar-thumb {
+      background: var(--primary-blue);
+      border-radius: 3px;
+    }
+
+    .thumbnail-scroll::-webkit-scrollbar-track {
+      background: rgba(62, 131, 204, 0.1);
+    }
+
+    .thumbnail-item {
+      flex: 0 0 auto;
+      border: 2px solid rgba(62, 131, 204, 0.2);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      scroll-snap-align: start;
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .thumbnail-item img {
+      width: 80px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+      transition: opacity 0.3s ease;
+    }
+
+    .thumbnail-item.active {
+      border-color: var(--primary-blue);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+      transform: scale(1.05);
+    }
+
+    .thumbnail-item:hover {
+      border-color: var(--secondary-blue);
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.2);
+    }
+
+    .thumbnail-item:hover img {
+      opacity: 0.9;
+    }
+
+    .thumbnail-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255, 255, 255, 0.9);
+      border: none;
+      border-radius: 50%;
+      width: 35px;
+      height: 35px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--dark-blue);
+      box-shadow: var(--shadow-primary);
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .thumbnail-nav.prev {
+      left: 0;
+    }
+
+    .thumbnail-nav.next {
+      right: 0;
+    }
+
+    .thumbnail-nav:hover {
+      background: var(--primary-blue);
+      color: white;
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
+    }
+
+    .thumbnail-nav i {
+      font-size: 14px;
+    }
+
+    .btn-view-all-photos {
+      background: var(--gradient-primary);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      box-shadow: var(--shadow-primary);
+    }
+
+    .btn-view-all-photos:hover {
+      background: linear-gradient(135deg, #2a6ab5 0%, #6ba6f0 100%);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .btn-view-all-photos i {
+      font-size: 16px;
+    }
+
+    .info-section-host {
+      background: linear-gradient(135deg, rgba(62, 131, 204, 0.05) 0%, rgba(37, 99, 235, 0.02) 100%);
+      border-left: 4px solid var(--primary-blue);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: var(--shadow-primary);
+    }
+
+    .property-title-host {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--dark-blue);
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+
+    .price-container-host {
+      margin-bottom: 20px;
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .price-host {
+      font-size: 28px;
+      font-weight: 800;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+
+    .price-note-host {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .info-item-host {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+    }
+
+    .info-item-host:last-child {
+      border-bottom: none;
+    }
+
+    .info-icon-host {
+      width: 20px;
+      height: 20px;
+      color: var(--primary-blue);
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .info-item-host:hover .info-icon-host {
+      transform: scale(1.1);
+    }
+
+    .info-text-host {
+      font-size: 14px;
+      color: var(--dark-blue);
+      line-height: 1.4;
+    }
+
+    .info-text-host strong {
+      font-weight: 600;
+      margin-right: 8px;
+      color: var(--accent-blue);
+    }
+
+    .description-section-host {
+      margin-bottom: 24px;
+    }
+
+    .section-title-host {
+      font-size: 20px;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      position: relative;
+    }
+
+    .section-title-host::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--gradient-primary);
+      border-radius: 1px;
+    }
+
+    .description-text-host {
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--dark-blue);
+      margin-bottom: 20px;
+    }
+
+    .details-grid-host {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 20px;
+    }
+
+    .details-card-host {
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(62, 131, 204, 0.1);
+      box-shadow: 0 2px 8px rgba(62, 131, 204, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .details-card-host:hover {
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .details-card-title-host {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-blue);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .details-table-host {
+      width: 100%;
+    }
+
+    .details-table-host tr {
+      border-bottom: 1px solid rgba(62, 131, 204, 0.1);
+    }
+
+    .details-table-host tr:last-child {
+      border-bottom: none;
+    }
+
+    .details-table-host td {
+      padding: 12px 0;
+      font-size: 14px;
+      vertical-align: top;
+    }
+
+    .details-table-host td:first-child {
+      font-weight: 600;
+      color: var(--dark-blue);
+      width: 40%;
+    }
+
+    .details-table-host td:last-child {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .room-item-host {
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      background: rgba(255, 255, 255, 0.9);
+      margin-bottom: 10px;
+    }
+
+    .room-item-host:hover {
+      background: rgba(62, 131, 204, 0.1);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-hover);
+    }
+
+    .room-item-title-host {
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 8px;
+    }
+
+    .room-item-info-host {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    .modal-content {
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header {
+      background: var(--gradient-primary);
+      color: white;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .room-modal-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .room-modal-details {
+      font-size: 14px;
+      line-height: 1.6;
+      color: var(--dark-blue);
+    }
+
+    .room-modal-details strong {
+      color: var(--accent-blue);
+    }
+
+    .room-modal-utilities {
+      margin-top: 16px;
+    }
+
+    .room-modal-utilities ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .room-modal-utilities li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    @media (max-width: 1200px) {
+      .main-container-host {
+        margin-left: 80px;
+        padding: 16px;
+      }
+
+      .main-image {
+        height: 350px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .main-container-host {
+        margin-left: 0;
+        padding: 12px;
+        padding-top: 70px;
+        width: 100%;
+      }
+
+      .main-image {
+        height: 300px;
+      }
+
+      .thumbnail-container {
+        padding: 0 30px;
+      }
+
+      .thumbnail-item img {
+        width: 70px;
+        height: 50px;
+      }
+
+      .header-actions-host {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .form-status-update {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+      }
+
+      .form-status-update .form-control-host {
+        width: 100px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 40px);
+        right: 20px;
+        top: 80px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .main-container-host {
+        padding: 10px;
+      }
+
+      .main-image {
+        height: 250px;
+      }
+
+      .thumbnail-item img {
+        width: 60px;
+        height: 45px;
+      }
+
+      .thumbnail-nav {
+        width: 30px;
+        height: 30px;
+        font-size: 12px;
+      }
+
+      .thumbnail-nav.prev {
+        left: -5px;
+      }
+
+      .thumbnail-nav.next {
+        right: -5px;
+      }
+
+      .form-status-update {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+      }
+
+      .form-status-update .form-control-host {
+        width: 100%;
+      }
+
+      .form-status-update .btn-status-submit {
+        width: 100%;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 20px);
+        right: 10px;
+        top: 70px;
+      }
+
+      .alert-host {
+        padding: 10px 12px;
+        font-size: 13px;
+      }
+
+      .alert-host .alert-icon {
+        font-size: 16px;
+        margin-right: 8px;
+      }
+
+      .alert-host .alert-message {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-container-host {
+        padding: 8px;
+      }
+
+      .main-image {
+        height: 200px;
+      }
+
+      .thumbnail-item img {
+        width: 50px;
+        height: 40px;
+      }
+
+      .btn-view-all-photos {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 20px);
+        right: 10px;
+        top: 60px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-image {
+        height: 180px;
+        border-radius: 10px;
+      }
+
+      .thumbnail-item img {
+        width: 45px;
+        height: 35px;
+      }
+
+      .btn-favorite-large {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .main-image {
+        height: 160px;
+      }
+
+      .thumbnail-item img {
+        width: 40px;
+        height: 30px;
+      }
+
+      .thumbnail-nav {
+        width: 25px;
+        height: 25px;
+        font-size: 10px;
+      }
+
+      .toast-container-host {
+        width: calc(100% - 10px);
+        right: 5px;
+        top: 50px;
+      }
+
+      .alert-host {
+        padding: 8px 10px;
+        font-size: 12px;
+      }
+
+      .alert-host .alert-icon {
+        font-size: 14px;
+      }
+
+      .alert-host .alert-message {
+        font-size: 12px;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .page-header-host {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+
+      .back-link-host {
+        align-self: flex-start;
+      }
+
+      .header-actions-host {
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .details-grid-host {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .content-section-host {
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .property-title-host {
+        font-size: 20px;
+      }
+
+      .price-host {
+        font-size: 24px;
+      }
+
+      .edit-btn-host {
+        justify-content: center;
+        width: 100%;
+      }
+
+      .status-container-host {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .main-container-host {
+        padding: 8px;
+      }
+
+      .content-section-host {
+        padding: 12px;
+      }
+
+      .property-title-host {
+        font-size: 18px;
+      }
+
+      .price-host {
+        font-size: 20px;
+      }
+
+      .info-item-host {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+      }
+
+      .details-card-host {
+        padding: 16px;
+      }
+
+      .details-table-host td {
+        padding: 8px 0;
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-container-host {
+        padding: 6px;
+      }
+
+      .content-section-host {
+        padding: 10px;
+        border-radius: 12px;
+      }
+
+      .property-title-host {
+        font-size: 16px;
+      }
+
+      .price-host {
+        font-size: 18px;
+      }
+
+      .section-title-host {
+        font-size: 18px;
+      }
+
+      .description-text-host {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .main-container-host {
+        padding: 4px;
+      }
+
+      .content-section-host {
+        padding: 8px;
+      }
+
+      .property-title-host {
+        font-size: 14px;
+      }
+
+      .price-host {
+        font-size: 16px;
+      }
+
+      .info-text-host {
+        font-size: 12px;
+      }
+
+      .details-table-host td {
+        padding: 6px 0;
+        font-size: 12px;
+      }
+
+      .edit-btn-host {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(62, 131, 204, 0.1);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--gradient-primary);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--secondary-blue);
+    }
+
+    .status-badge-host.rejected-clickable {
+      background-color: #dc3545;
+      /* đỏ đậm */
+      color: #fff;
+      /* chữ trắng */
+      border: none;
+      /* xóa border đen */
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background-color 0.2s;
+    }
+
+    .status-badge-host.rejected-clickable:hover {
+      background-color: #c82333;
+      /* đỏ đậm hơn khi hover */
+    }
+
+    .form-label-host {
+      font-weight: 600;
+      font-size: 16px;
+      color: #333;
+    }
+
+    .btn-toggle-status {
+      border: none;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 15px;
+      color: white;
+      font-weight: 600;
+      box-shadow: none;
+      outline: none;
+    }
+
+    .btn-hide {
+      background-color: #ffc107;
+      /* Màu vàng */
+    }
+
+    .btn-hide:hover {
+      background-color: #e0a800;
+    }
+
+    .btn-show {
+      background-color: var(--success-green);
+      /* Màu xanh */
+    }
+
+    .btn-show:hover {
+      background-color: #33752f;
+    }
+  </style>
+</head>
+
+<body class="post-detail-body-host">
+  <div th:replace="~{/layouts/sidebar-host}"></div>
+
+  <div class="main-container-host">
+
+    <div class="page-header-host">
+      <a th:href="@{/chu-tro/bai-dang}" class="back-link-host">
+        <i class="fa fa-arrow-left"></i> Quay lại
+      </a>
+      <div class="header-actions-host">
+        <a th:href="@{'/chu-tro/sua-bai-dang/' + ${post.postId}}" class="edit-btn-host">
+          <i class="fas fa-edit"></i> Sửa bài đăng
+        </a>
+        <div class="status-container-host">
+          <span class="status-label-host">Trạng thái duyệt:</span>
+          <form th:if="${post.approvalStatus?.name() == 'REJECTED'}"
+            th:action="@{/chu-tro/{postId}/reset-approval(postId=${post.postId})}" method="post"
+            style="display: inline;">
+            <button type="submit" class="status-badge-host rejected-clickable" title="Nhấn để chuyển sang Chờ duyệt">
+              Bị từ chối
+            </button>
+          </form>
+          <span th:if="${post.approvalStatus?.name() != 'REJECTED'}" class="status-badge-host"
+            th:classappend="| ${post.approvalStatus?.name()} |"
+            th:text="|${post.approvalStatus?.name() == 'APPROVED' ? 'Đã duyệt' : post.approvalStatus?.name() == 'PENDING' ? 'Chờ duyệt' : 'Chưa xác định'}|">
+          </span>
+        </div>
+        <form th:action="@{/chu-tro/cap-nhat-trang-thai}" method="post"
+          class="form-status-update d-flex align-items-center gap-3">
+          <input type="hidden" name="postId" th:value="${post.postId}" />
+          <label class="form-label-host m-0">Trạng thái hiển thị:</label>
+
+          <input type="hidden" name="status" th:value="${!post.status}" />
+          <button type="submit"
+            th:classappend="${post.status} ? 'btn-toggle-status btn-hide' : 'btn-toggle-status btn-show'"
+            th:text="${post.status} ? 'ẨN BÀI ĐĂNG' : 'HIỂN THỊ BÀI ĐĂNG'">
+          </button>
+        </form>
+
+      </div>
+    </div>
+    <div class="toast-container-host" id="toastContainer">
+      <div th:if="${successMessage}" class="alert-host success" role="alert">
+        <i class="alert-icon fas fa-check-circle"></i>
+        <span class="alert-message" th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+      </div>
+      <div th:if="${errorMessage}" class="alert-host danger" role="alert">
+        <i class="alert-icon fas fa-exclamation-circle"></i>
+        <span class="alert-message" th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
+      </div>
+    </div>
+    <hr>
+
+    <div class="content-section-host gallery-section-host">
+      <div class="row">
+        <div class="col-lg-8 col-md-12">
+          <div class="image-gallery">
+            <div class="main-image-container">
+              <img th:if="${images != null and !#lists.isEmpty(images)}" th:src="${images[0]}" alt="Hình ảnh chính"
+                class="main-image" id="mainImage" onerror="this.src='/images/cards/default.jpg';">
+              <img th:unless="${images != null and !#lists.isEmpty(images)}" src="/images/cards/default.jpg"
+                alt="Hình ảnh chính" class="main-image" id="mainImage">
+            </div>
+            <div class="thumbnail-container">
+              <button class="thumbnail-nav prev" onclick="scrollThumbnails('prev')">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <div class="thumbnail-scroll" id="thumbnailScroll">
+                <div th:each="image, iterStat : ${images}"
+                  th:class="${iterStat.first} ? 'thumbnail-item active' : 'thumbnail-item'" th:data-image="${image}"
+                  onclick="changeMainImage(this.getAttribute('data-image'), this)">
+                  <img th:src="${image}" th:alt="'Hình ' + ${iterStat.count}" style="width: 80px; height: 60px; ">
+                </div>
+              </div>
+              <button class="thumbnail-nav next" onclick="scrollThumbnails('next')">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+            <button class="btn-view-all-photos" onclick="openPhotoModal()">
+              <i class="fas fa-images"></i> Xem tất cả ảnh
+            </button>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-12">
+          <div class="info-section-host">
+            <h1 class="property-title-host"
+              th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}">NHÀ TRỌ SỐ 123, ĐƯỜNG
+              ABC, P.THANH KHÊ ĐÔNG, Q.THANH KHÊ, TP.ĐÀ NẴNG</h1>
+            <div class="price-container-host">
+              <div class="price-host"
+                th:text="|${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')} VNĐ/tháng|">2.5 triệu/tháng
+              </div>
+              <div class="price-note-host">(Chưa bao gồm phí dịch vụ)</div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-bounding-box-circles info-icon-host"></i>
+              <div class="info-text-host"><strong>Diện tích:</strong> <span
+                  th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'">20m²</span></div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-house-heart info-icon-host"></i>
+              <div class="info-text-host"><strong>Loại hình:</strong> <span
+                  th:text="${post.category != null ? post.category.name : 'Chưa xác định'}">Nhà trọ, phòng trọ</span>
+              </div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-geo-alt-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Địa chỉ:</strong> <span
+                  th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">Thanh
+                  Khê, TP. Đà Nẵng</span></div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-clock-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Ngày đăng:</strong> <span
+                  th:text="${post != null && post.createdAt != null ? #dates.format(post.createdAt, 'dd/MM/yyyy') : '01/01/2024'}">28/05/2025</span>
+              </div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-houses-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Nhà trọ:</strong> <span
+                  th:text="${hostel != null ? hostel.name : 'Không liên kết nhà trọ'}">Nhà trọ ABC</span></div>
+            </div>
+            <div class="info-item-host">
+              <i class="bi bi-door-open-fill info-icon-host"></i>
+              <div class="info-text-host"><strong>Số lượng phòng:</strong> <span
+                  th:text="${roomCount != null ? roomCount : 0}">0</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="content-section-host">
+      <div class="description-section-host">
+        <h2 class="section-title-host">Mô tả chi tiết</h2>
+        <p class="description-text-host" th:utext="${post.description != null ? post.description : 'Chưa có mô tả'}">
+
+        <div class="details-grid-host">
+          <div class="details-card-host">
+            <h3 class="details-card-title-host">
+              <i class="fas fa-info-circle"></i>
+              Thông tin tiện ích cơ bản
+            </h3>
+            <div class="amenity-list">
+              <p th:if="${utilities == null or #sets.isEmpty(utilities)}" class="text-muted">
+                Phòng này hiện không có tiện ích nào.
+              </p>
+              <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
+                <ul class="list-unstyled">
+                  <li class="amenity-item mb-2" th:each="utility : ${utilities}">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <span th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="details-card-host">
+            <h3 class="details-card-title-host">
+              <i class="fas fa-door-open"></i>
+              Danh sách phòng
+            </h3>
+
+            <div th:if="${rooms == null or #lists.isEmpty(rooms)}" class="text-muted">
+              Nhà trọ này hiện không có phòng nào.
+            </div>
+
+            <div th:unless="${rooms == null or #lists.isEmpty(rooms)}">
+              <div th:each="room : ${rooms}" class="room-item-host" th:data-room-id="${room.roomId}"
+                onclick="openRoomModal(this.getAttribute('data-room-id'))">
+
+                <div class="room-item-title-host"
+                  th:text="${room.namerooms != null ? room.namerooms : 'Phòng không tên'}"></div>
+
+                <div class="room-item-info-host">
+                  <span
+                    th:text="'Giá: ' + ${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'"></span>
+                  |
+                  <span
+                    th:text="'Diện tích: ' + ${#numbers.formatDecimal(room.acreage, 1, 'COMMA', 0, 'POINT')} + ' m²'"></span>
+                  |
+                  <span
+                    th:text="'Số người tối đa: ' + ${room.max_tenants != null ? room.max_tenants : 'Chưa xác định'}"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script th:src="@{/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/js/sidebar.js}"></script>
+
+  <script>
+    function changeMainImage(src, element) {
+      const mainImage = document.getElementById('mainImage');
+      mainImage.src = src;
+      document.querySelectorAll('.thumbnail-item').forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    function scrollThumbnails(direction) {
+      const container = document.querySelector('.thumbnail-scroll');
+      const scrollAmount = 120;
+      if (!container) return;
+      if (direction === 'prev') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+      } else if (direction === 'next') {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      }
+    }
+
+    function openPhotoModal() {
+      $('#photoModal').modal('show');
+    }
+
+    async function openRoomModal(roomId) {
+      try {
+        const response = await fetch(`/api/rooms/${roomId}`);
+        if (!response.ok) throw new Error('Không thể tải thông tin phòng');
+        const room = await response.json();
+
+        if (room.error) {
+          showAlert('danger', 'Lỗi: ' + room.error);
+          return;
+        }
+
+        document.getElementById('roomModalName').textContent = room.name || 'Chưa xác định';
+        document.getElementById('roomModalPrice').textContent = room.price ? new Intl.NumberFormat('vi-VN').format(room.price) + ' VNĐ/tháng' : 'Chưa xác định';
+        document.getElementById('roomModalAcreage').textContent = room.acreage ? room.acreage.toFixed(1) + ' m²' : 'Chưa xác định';
+        document.getElementById('roomModalMaxTenants').textContent = room.maxTenants || 'Chưa xác định';
+        document.getElementById('roomModalCategory').textContent = room.category || 'Chưa xác định';
+        document.getElementById('roomModalStatus').textContent = room.status || 'Chưa xác định';
+        document.getElementById('roomModalImage').src = room.images && room.images.length > 0 ? room.images[0] : '/images/cards/default.jpg';
+
+        const utilitiesList = document.getElementById('roomModalUtilities');
+        utilitiesList.innerHTML = '';
+        if (room.utilities && room.utilities.length > 0) {
+          room.utilities.forEach(utility => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${utility}`;
+            utilitiesList.appendChild(li);
+          });
+        } else {
+          const li = document.createElement('li');
+          li.textContent = 'Không có tiện ích';
+          utilitiesList.appendChild(li);
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('roomModal'));
+        modal.show();
+      } catch (error) {
+        console.error('Lỗi khi tải chi tiết phòng:', error);
+        showAlert('danger', 'Không thể tải thông tin phòng. Vui lòng thử lại.');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const mainImage = document.getElementById('mainImage');
+      const thumbnails = document.querySelectorAll('.thumbnail-item');
+      const statusSelect = document.getElementById('statusSelect');
+
+      mainImage.addEventListener('load', function () {
+        this.style.opacity = '0';
+        setTimeout(() => {
+          this.style.transition = 'opacity 0.3s ease';
+          this.style.opacity = '1';
+        }, 50);
+      });
+
+      thumbnails.forEach(thumb => {
+        thumb.addEventListener('mouseenter', function () {
+          if (!this.classList.contains('active')) {
+            this.style.transform = 'scale(1.05)';
+          }
+        });
+
+        thumb.addEventListener('mouseleave', function () {
+          if (!this.classList.contains('active')) {
+            this.style.transform = 'scale(1)';
+          }
+        });
+      });
+
+      if (statusSelect) {
+        function updateSelectColor() {
+          statusSelect.classList.remove('green', 'red');
+          statusSelect.classList.add(statusSelect.value === 'true' ? 'green' : 'red');
+        }
+        updateSelectColor();
+        statusSelect.addEventListener('change', updateSelectColor);
+      }
+
+      // Initialize toasts
+      const toasts = document.querySelectorAll('.alert-host');
+      toasts.forEach(toast => {
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateX(100%)';
+          setTimeout(() => toast.remove(), 400);
+        }, 5000);
+
+        const closeBtn = toast.querySelector('.btn-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            setTimeout(() => toast.remove(), 400);
+          });
+        }
+      });
+    });
+
+    function showAlert(type, message) {
+      const toastContainer = document.getElementById('toastContainer');
+      const alert = document.createElement('div');
+      alert.className = `alert-host ${type}`;
+      alert.setAttribute('role', 'alert');
+
+      const icon = document.createElement('i');
+      icon.className = `alert-icon fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}`;
+      alert.appendChild(icon);
+
+      const messageSpan = document.createElement('span');
+      messageSpan.className = 'alert-message';
+      messageSpan.textContent = message;
+      alert.appendChild(messageSpan);
+
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn-close';
+      closeBtn.type = 'button';
+      closeBtn.innerHTML = '×';
+      closeBtn.setAttribute('aria-label', 'Đóng thông báo');
+      closeBtn.onclick = () => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => alert.remove(), 400);
+      };
+      alert.appendChild(closeBtn);
+
+      toastContainer.appendChild(alert);
+      setTimeout(() => alert.classList.add('show'), 100);
+      setTimeout(() => {
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateX(100%)';
+        setTimeout(() => alert.remove(), 400);
+      }, 5000);
+    }
+  </script>
+</body>
+
+</html>

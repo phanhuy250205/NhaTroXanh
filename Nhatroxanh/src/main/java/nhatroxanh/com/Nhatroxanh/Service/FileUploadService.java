@@ -5,103 +5,102 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.Objects;
 
 @Service
 public class FileUploadService {
-    private static final String UPLOAD_DIR = "src/main/resources/static/uploads/";
+    // 🔧 Lấy thư mục gốc của project (tuyệt đối)
+    private static final String ROOT_DIR = Paths.get("").toAbsolutePath().toString();
+
+    // 🔧 Đường dẫn upload đầy đủ: [project]/src/main/resources/static/uploads/
+    private static final String UPLOAD_ROOT_DIR = ROOT_DIR + "/src/main/resources/static/uploads/";
 
     /**
      * Kiểm tra file có phải là ảnh hợp lệ không
-     *
-     * @param fileName Tên file cần kiểm tra
-     * @return true nếu là ảnh, false nếu không
      */
     private boolean isValidImageFile(String fileName) {
         String lowerCaseName = fileName.toLowerCase();
-        return lowerCaseName.endsWith(".jpg") || lowerCaseName.endsWith(".jpeg") ||
-                lowerCaseName.endsWith(".png") || lowerCaseName.endsWith(".gif") || lowerCaseName.endsWith(".webp");
+        return lowerCaseName.endsWith(".jpg") || lowerCaseName.endsWith(".jpeg")
+                || lowerCaseName.endsWith(".png") || lowerCaseName.endsWith(".gif")
+                || lowerCaseName.endsWith(".webp");
     }
 
     /**
-     * Upload file ảnh vào thư mục `static/uploads/`
+     * Upload file ảnh vào thư mục `static/uploads/[subFolder]/`
      *
-     * @param file      Ảnh tải lên từ người dùng
-     * @param subFolder Tên thư mục con (VD: "avatars", "products")
-     * @return Đường dẫn tương đối để hiển thị trên web (VD:
-     *         "/uploads/avatars/123456_avatar.jpg")
-     * @throws IOException Nếu xảy ra lỗi khi lưu file
+     * @param file      ảnh người dùng upload
+     * @param subFolder thư mục con (vd: avatars, products)
+     * @return đường dẫn tương đối để hiển thị trên web (vd:
+     *         /uploads/avatars/123.png)
      */
     public String uploadFile(MultipartFile file, String subFolder) throws IOException {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("❌ File tải lên bị rỗng!");
         }
 
-        // 🔹 Kiểm tra phần mở rộng file (Chỉ chấp nhận ảnh)
         String originalFileName = Objects.requireNonNull(file.getOriginalFilename()).toLowerCase();
         if (!isValidImageFile(originalFileName)) {
-            throw new IllegalArgumentException("❌ Chỉ chấp nhận các định dạng ảnh JPG, JPEG, PNG, GIF!");
+            throw new IllegalArgumentException("❌ Chỉ chấp nhận ảnh JPG, JPEG, PNG, GIF, WEBP!");
         }
 
-        // 🔹 Tạo đường dẫn thư mục lưu ảnh
-        String uploadPath = UPLOAD_DIR + subFolder + "/";
+        // 🔧 Đường dẫn tuyệt đối tới thư mục con
+        String uploadPath = UPLOAD_ROOT_DIR + subFolder ;
         File directory = new File(uploadPath);
         if (!directory.exists() && !directory.mkdirs()) {
-            throw new IOException("❌ Không thể tạo thư mục lưu ảnh!");
+            throw new IOException("❌ Không thể tạo thư mục lưu ảnh: " + uploadPath);
         }
 
-        // 🔹 Tạo tên file duy nhất
+        // 🔧 Tạo tên file duy nhất
         String fileName = System.currentTimeMillis() + "_" + originalFileName;
         Path filePath = Paths.get(uploadPath, fileName);
 
-        // 🔹 Kiểm tra xem file có bị trùng tên không, nếu có thì tạo tên mới
         while (Files.exists(filePath)) {
             fileName = System.currentTimeMillis() + "_" + originalFileName;
             filePath = Paths.get(uploadPath, fileName);
         }
 
-        // 🔹 Lưu file vào thư mục đã chỉ định
+        // 📁 Ghi file
         Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
         System.out.println("🟢 Ảnh đã lưu vào: " + filePath.toString());
 
-        // 🔹 **CHỈ TRẢ VỀ `/uploads/avatars/[file_name]`**
-        return "/uploads/" + subFolder + "/" + fileName;
+        // 📤 Trả về đường dẫn web
+        return "/uploads/"  + fileName;
     }
 
     /**
-     * Xóa file ảnh từ thư mục
+     * Xóa file từ thư mục uploads
      *
-     * @param filePath Đường dẫn của file cần xóa (VD:
-     *                 "/uploads/avatars/123456_avatar.jpg")
-     * @return true nếu xóa thành công, false nếu thất bại
+     * @param filePath đường dẫn từ `/uploads/...`
      */
     public boolean deleteFile(String filePath) {
         if (filePath == null || filePath.isEmpty()) {
             System.out.println("❌ Đường dẫn file không hợp lệ.");
             return false;
         }
-
-        // 🔹 Chuyển đường dẫn từ `/uploads/avatars/xxx.jpg` thành
-        // `src/main/resources/static/uploads/avatars/xxx.jpg`
-        String absolutePath = "src/main/resources/static" + filePath;
+        String absolutePath = ROOT_DIR + "/src/main/resources/static" + filePath;
+        String backupPath = ROOT_DIR + "/src/main/resources/static/uploads/backup/" + filePath.substring(filePath.lastIndexOf("/") + 1);
 
         File file = new File(absolutePath);
         if (file.exists()) {
-            boolean deleted = file.delete();
-            if (deleted) {
-                System.out.println("🟢 Đã xóa file: " + absolutePath);
-            } else {
-                System.out.println("❌ Không thể xóa file: " + absolutePath);
+            // Di chuyển file vào thư mục backup
+            File backupDir = new File(backupPath).getParentFile();
+            if (!backupDir.exists()) {
+                backupDir.mkdirs();
             }
-            return deleted;
+            boolean moved = file.renameTo(new File(backupPath));
+            if (moved) {
+                System.out.println("🟢 Đã di chuyển file vào backup: " + backupPath);
+                return true;
+            } else {
+                System.out.println("❌ Không thể di chuyển file: " + absolutePath);
+                return false;
+            }
         } else {
             System.out.println("⚠ File không tồn tại: " + absolutePath);
+            return false;
         }
-
-        return false;
     }
+
+
 }

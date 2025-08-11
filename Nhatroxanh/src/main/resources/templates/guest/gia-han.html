@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/layouts/head}">
+    <title>Gia hạn thời gian thuê phòng</title>
+</head>
+<style>
+    /* General Styles */
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .container-guest {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 20px;
+    }
+
+    .page-title-guest {
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .page-title-guest i {
+        color: #3498db;
+    }
+
+    /* Contract Info Box */
+    .contract-info-box-guest {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid #3498db;
+    }
+
+    .contract-info-box-guest h4 {
+        color: #2c3e50;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .contract-info-box-guest h4 i {
+        color: #3498db;
+    }
+
+    .contract-details-guest {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .contract-details-guest li {
+        padding: 8px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+    }
+
+    .contract-details-guest li:last-child {
+        border-bottom: none;
+    }
+
+    .contract-details-guest strong {
+        min-width: 120px;
+        display: inline-block;
+        color: #7f8c8d;
+    }
+
+    /* Form Styles */
+    .extend-form-guest {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+    }
+
+    .form-group-guest {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group-guest label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+        color: #2c3e50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .form-group-guest label i {
+        color: #3498db;
+        width: 20px;
+        text-align: center;
+    }
+
+    .form-input-guest {
+        width: 100%;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+    }
+
+    .form-input-guest:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    }
+
+    textarea.form-input-guest {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    /* Button Styles */
+    .form-actions-guest {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        border: none;
+        font-size: 16px;
+    }
+
+    .btn-primary-guest {
+        background-color: #3498db;
+        color: white;
+    }
+
+    .btn-primary-guest:hover {
+        background-color: #2980b9;
+        transform: translateY(-2px);
+    }
+
+    .btn-secondary-guest {
+        background-color: #95a5a6;
+        color: white;
+    }
+
+    .btn-secondary-guest:hover {
+        background-color: #7f8c8d;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 768px) {
+        .container-guest {
+            padding: 0 15px;
+        }
+
+        .contract-details-guest li {
+            flex-direction: column;
+        }
+
+        .contract-details-guest strong {
+            margin-bottom: 4px;
+        }
+
+        .form-actions-guest {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    input[type="date"] {
+        position: relative;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    .text-danger {
+        color: #e74c3c;
+    }
+</style>
+
+<body>
+    <div th:replace="~{/layouts/navbar}"></div>
+    <div class="container-guest">
+        <h2 class="page-title-guest">
+            <i class="fas fa-calendar-plus"></i> Gửi yêu cầu gia hạn hợp đồng
+        </h2>
+        <div class="contract-info-box-guest">
+            <h4><i class="fas fa-home"></i> Thông tin hợp đồng</h4>
+            <ul class="contract-details-guest">
+                <li><strong>Phòng:</strong>
+                    <span th:text="${contract?.room?.namerooms}">Phòng</span>
+                </li>
+                <li><strong>Loại phòng:</strong>
+                    <span th:text="${contract?.room?.category?.name}">Loại phòng</span>
+                </li>
+                <!-- <li><strong>Địa chỉ:</strong>
+                    <span th:if="${contract?.room?.hostel?.address != null}"
+                          th:text="${contract.room.hostel.address.fullAddress}">Địa chỉ</span>
+                    <span th:unless="${contract?.room?.hostel?.address != null}">(Chưa cập nhật)</span>
+                </li> -->
+                <li><strong>Ngày bắt đầu:</strong>
+                    <span th:text="${#dates.format(contract?.startDate, 'dd/MM/yyyy')}">01/01/2024</span>
+                </li>
+                <li><strong>Ngày kết thúc:</strong>
+                    <span th:text="${#dates.format(contract?.endDate, 'dd/MM/yyyy')}">31/12/2024</span>
+                </li>
+                <li><strong>Giá thuê:</strong>
+                    <span th:text="${#numbers.formatDecimal(contract?.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
+                        1,000,000 VNĐ/tháng
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Form yêu cầu gia hạn -->
+        <form th:action="@{/khach-thue/gia-han/{id}(id=${contract?.contractId})}" method="post"
+            class="extend-form-guest">
+            <div class="form-group-guest">
+                <label for="requestedExtendDate">
+                    <i class="fas fa-calendar-day"></i> Ngày kết thúc mong muốn
+                    <span class="text-danger">*</span>
+                </label>
+                <input type="date" id="requestedExtendDate" name="requestedExtendDate" class="form-input-guest" required
+                    th:min="${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}" />
+            </div>
+
+            <div class="form-group-guest">
+                <label for="message"><i class="fas fa-comment-dots"></i> Lời nhắn gửi chủ nhà</label>
+                <textarea id="message" name="message" rows="4" class="form-input-guest"
+                    placeholder="Chia sẻ lý do bạn muốn gia hạn hợp đồng..."></textarea>
+            </div>
+
+            <div class="form-actions-guest">
+                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract?.contractId})}" class="btn btn-secondary-guest">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+                <button type="submit" class="btn btn-primary-guest">
+                    <i class="fas fa-paper-plane"></i> Gửi yêu cầu
+                </button>
+            </div>
+        </form>
+    </div>
+    <div th:replace="~{/layouts/footer}"></div>
+</body>
+
+</html>

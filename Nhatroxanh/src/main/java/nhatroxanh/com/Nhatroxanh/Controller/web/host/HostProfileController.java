@@ -1,0 +1,272 @@
+package nhatroxanh.com.Nhatroxanh.Controller.web.host;
+
+import java.io.IOException;
+import java.sql.Date;
+
+import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import jakarta.validation.Valid;
+import nhatroxanh.com.Nhatroxanh.Model.Dto.HostInfoDTO;
+import nhatroxanh.com.Nhatroxanh.Model.entity.UserCccd;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
+import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
+import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
+import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
+import nhatroxanh.com.Nhatroxanh.Service.HostelService;
+import nhatroxanh.com.Nhatroxanh.Service.TenantService;
+
+@Controller
+@RequestMapping("/chu-tro")
+public class HostProfileController {
+
+    @Autowired
+    private UserRepository usersRepository;
+
+    @Autowired
+    private UserCccdRepository userCccdRepository;
+
+    @Autowired
+    private HostelService hostelService;
+
+    @Autowired
+    private FileUploadService fileUploadService;
+    
+    @Autowired
+    private TenantService tenantService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @GetMapping("/profile-host")
+    public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        UserCccd cccd = userCccdRepository.findByUser(user); // không dùng .orElse(null)
+
+        int totalHostels = hostelService.countByOwner(user);
+
+        HostInfoDTO dto = new HostInfoDTO();
+        dto.setFullname(user.getFullname());
+        dto.setBirthday(user.getBirthday());
+        dto.setPhone(user.getPhone());
+        dto.setGender(user.getGender());
+        dto.setEmail(user.getEmail());
+        dto.setAddress(user.getAddress());
+        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
+
+        if (cccd != null) {
+            dto.setIssueDate(cccd.getIssueDate());
+            dto.setIssuePlace(cccd.getIssuePlace());
+        }
+
+        model.addAttribute("hostInfo", dto);
+        model.addAttribute("user", user);
+        model.addAttribute("totalHostels", totalHostels);
+        return "host/profile-host";
+    }
+
+    @PostMapping("/profile-host")
+    public String updateProfile(@Valid @ModelAttribute("hostInfo") HostInfoDTO dto,
+            BindingResult bindingResult,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
+            RedirectAttributes redirectAttributes) {
+
+        Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("hostInfo", dto);
+            model.addAttribute("user", user);
+            model.addAttribute("totalHostels", hostelService.countByOwner(user));
+            return "host/profile-host";
+        }
+
+        // ✅ Kiểm tra trùng email
+        if (dto.getEmail() != null && !dto.getEmail().trim().isEmpty()) {
+            Optional<Users> existingEmail = usersRepository.findByEmail(dto.getEmail().trim());
+            if (existingEmail.isPresent() && !existingEmail.get().getUserId().equals(user.getUserId())) {
+                model.addAttribute("hostInfo", dto);
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                model.addAttribute("error", "Email đã được sử dụng bởi tài khoản khác.");
+                return "host/profile-host";
+            }
+        }
+
+        // ✅ Kiểm tra trùng số điện thoại
+        if (dto.getPhone() != null && !dto.getPhone().trim().isEmpty()) {
+            Optional<Users> existingPhone = usersRepository.findByPhone(dto.getPhone().trim());
+            if (existingPhone.isPresent() && !existingPhone.get().getUserId().equals(user.getUserId())) {
+                model.addAttribute("hostInfo", dto);
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                model.addAttribute("error", "Số điện thoại đã được sử dụng bởi tài khoản khác.");
+                return "host/profile-host";
+            }
+        }
+
+        UserCccd cccd = userCccdRepository.findByUser(user);
+
+        MultipartFile avatarFile = dto.getAvatarFile();
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            try {
+                if (user.getAvatar() != null && !user.getAvatar().isEmpty()) {
+                    fileUploadService.deleteFile(user.getAvatar());
+                }
+                String avatarPath = fileUploadService.uploadFile(avatarFile, "");
+                user.setAvatar(avatarPath);
+            } catch (IOException e) {
+                model.addAttribute("hostInfo", dto);
+                model.addAttribute("user", user);
+                model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                model.addAttribute("error", "Không thể upload ảnh đại diện: " + e.getMessage());
+                return "host/profile-host";
+            }
+        }
+
+        try {
+            // Cập nhật user
+            user.setFullname(dto.getFullname());
+            user.setBirthday(dto.getBirthday() != null ? new Date(dto.getBirthday().getTime()) : null);
+            user.setPhone(dto.getPhone());
+            user.setGender(dto.getGender());
+            user.setEmail(dto.getEmail());
+            user.setAddress(dto.getAddress());
+
+            // Xử lý CCCD
+            if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
+                String trimmedCccd = dto.getCccdNumber().trim();
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                if (existingCccdOptional.isPresent()) {
+                    UserCccd existingCccd = existingCccdOptional.get();
+                    if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
+                        model.addAttribute("hostInfo", dto);
+                        model.addAttribute("user", user);
+                        model.addAttribute("totalHostels", hostelService.countByOwner(user));
+                        model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                        return "host/profile-host";
+                    }
+                }
+
+                if (cccd == null) {
+                    cccd = new UserCccd();
+                    cccd.setUser(user);
+                }
+                cccd.setCccdNumber(trimmedCccd);
+                cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
+                cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
+                        ? dto.getIssuePlace().trim()
+                        : null);
+
+                userCccdRepository.save(cccd);
+            } else if (cccd != null) {
+                userCccdRepository.delete(cccd);
+            }
+
+            usersRepository.save(user);
+            redirectAttributes.addFlashAttribute("success", "Cập nhật thông tin thành công!");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Đã xảy ra lỗi khi cập nhật: " + e.getMessage());
+        }
+
+        return "redirect:/chu-tro/profile-host";
+    }
+
+    // TÁCH RIÊNG - Endpoint riêng cho đổi mật khẩu
+    @PostMapping("/change-password")
+    public String changePassword(@RequestParam("currentPassword") String currentPassword,
+                                @RequestParam("newPassword") String newPassword,
+                                @RequestParam("confirmPassword") String confirmPassword,
+                                @AuthenticationPrincipal CustomUserDetails userDetails,
+                                RedirectAttributes redirectAttributes) {
+
+        try {
+            Users user = usersRepository.findById(userDetails.getUser().getUserId())
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            // Validation cơ bản
+            if (currentPassword == null || currentPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (newPassword == null || newPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng nhập mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            if (confirmPassword == null || confirmPassword.trim().isEmpty()) {
+                redirectAttributes.addFlashAttribute("passwordError", "Vui lòng xác nhận mật khẩu mới!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu hiện tại
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu hiện tại không đúng!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới và xác nhận
+            if (!newPassword.equals(confirmPassword)) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra độ dài mật khẩu
+            if (newPassword.length() < 6) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải có ít nhất 6 ký tự!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Kiểm tra mật khẩu mới không giống mật khẩu cũ
+            if (passwordEncoder.matches(newPassword, user.getPassword())) {
+                redirectAttributes.addFlashAttribute("passwordError", "Mật khẩu mới phải khác mật khẩu hiện tại!");
+                return "redirect:/chu-tro/profile-host";
+            }
+
+            // Cập nhật mật khẩu
+            user.setPassword(passwordEncoder.encode(newPassword));
+            usersRepository.save(user);
+
+            redirectAttributes.addFlashAttribute("passwordSuccess", "Đổi mật khẩu thành công!");
+            return "redirect:/chu-tro/profile-host";
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("passwordError", "Có lỗi xảy ra khi đổi mật khẩu: " + e.getMessage());
+            return "redirect:/chu-tro/profile-host";
+        }
+    }
+
+    @PostMapping("/chi-tiet-khach-thue/update")
+    public String updateTenantStatus(@RequestParam("contractId") Integer contractId,
+            @RequestParam("status") Boolean newStatus,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            tenantService.updateContractStatus(contractId, newStatus);
+            // Gửi một thông báo thành công về trang chi tiết
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái thành công!");
+        } catch (Exception e) {
+            // Gửi một thông báo lỗi về trang chi tiết
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra: " + e.getMessage());
+        }
+        return "redirect:/chu-tro/chi-tiet-khach-thue/" + contractId;
+    }
+}

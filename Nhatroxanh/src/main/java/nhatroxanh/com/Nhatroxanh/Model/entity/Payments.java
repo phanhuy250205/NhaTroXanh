@@ -1,0 +1,86 @@
+package nhatroxanh.com.Nhatroxanh.Model.entity;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Data
+@Entity
+@Table(name = "Payments")
+public class Payments {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @ManyToOne
+    @JoinColumn(name = "contract_id", nullable = false)
+    private Contracts contract;
+
+    @Column(name = "total_amount")
+    private Double totalAmount;
+
+    @Column(name = "due_date")
+    private Date dueDate;
+
+    @Column(name = "payment_date")
+    private Timestamp paymentDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status")
+    private PaymentStatus paymentStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
+
+    private String appTransId;
+    @Column(name = "notification_attempts_today", nullable = false)
+    private Integer notificationAttemptsToday = 0;
+
+    @Column(name = "last_notification_date")
+    private Date lastNotificationDate;
+
+    @Column(name = "scheduled_payment_date")
+    private Date scheduledPaymentDate;
+
+    @Column(name = "scheduled_payment_time")
+    private String scheduledPaymentTime;
+
+    @Column(name = "payment_note")
+    private String paymentNote;
+
+    @Column(name = "landlord_notified")
+    private Boolean landlordNotified = false;
+
+    @Column(name = "cash_appointment_count", nullable = false)
+    private Integer cashAppointmentCount = 0;
+
+    public enum PaymentStatus {
+        CHƯA_THANH_TOÁN, ĐÃ_THANH_TOÁN, QUÁ_HẠN_THANH_TOÁN, CHỜ_XÁC_NHẬN_TIỀN_MẶT
+    }
+
+    public enum PaymentMethod {
+        TIỀN_MẶT,
+        VNPAY,
+        MOMO,
+        ZALOPAY
+    }
+    
+}

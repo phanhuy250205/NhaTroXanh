@@ -40,22 +40,39 @@ document.addEventListener("DOMContentLoaded", () => {
         })
     })
 
-    // Contact button functionality
-    const contactButtons = document.querySelectorAll(".btn-contact")
+    function isMobileDevice() {
+        return /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    }
+
+    const contactButtons = document.querySelectorAll(".btn-contact");
+
     contactButtons.forEach((button) => {
         button.addEventListener("click", function (e) {
-            e.preventDefault()
-            createRipple(e, this)
+            e.preventDefault();
+            createRipple(e, this); // hiệu ứng ripple nếu có
 
-            // Get property title
-            const card = this.closest(".property-card")
-            const title = card.querySelector(".property-title").textContent
+            const phone = this.getAttribute("data-phone");
+            const btnText = this.querySelector(".btn-text");
+            const card = this.closest(".property-card");
+            const title = card?.querySelector(".property-title")?.textContent || "";
 
-            setTimeout(() => {
-                alert(`Liên hệ cho thuê: ${title}\nSố điện thoại: 0123 456 789`)
-            }, 200)
-        })
-    })
+            if (phone && phone.trim() !== '') {
+                // Thay "Liên hệ" bằng số điện thoại
+                btnText.textContent = phone;
+
+                // Chỉ thực hiện gọi nếu là thiết bị di động
+                if (isMobileDevice()) {
+                    setTimeout(() => {
+                        window.location.href = `tel:${phone}`;
+                    }, 200);
+                }
+            } else {
+                alert(`Không có số điện thoại cho phòng "${title}"`);
+            }
+        });
+    });
+
+
 
     // View detail button functionality
     // const viewButtons = document.querySelectorAll(".btn-view")
@@ -75,17 +92,17 @@ document.addEventListener("DOMContentLoaded", () => {
     // })
 
     // View more button functionality
-    const viewMoreButton = document.querySelector(".btn-view-more")
-    if (viewMoreButton) {
-        viewMoreButton.addEventListener("click", function (e) {
-            e.preventDefault()
-            createRipple(e, this)
+    // const viewMoreButton = document.querySelector(".btn-view-more")
+    // if (viewMoreButton) {
+    //     viewMoreButton.addEventListener("click", function (e) {
+    //         e.preventDefault()
+    //         createRipple(e, this)
 
-            setTimeout(() => {
-                alert("Đang tải thêm nhà trọ...\nChức năng đang được phát triển")
-            }, 200)
-        })
-    }
+    //         setTimeout(() => {
+    //             alert("Đang tải thêm nhà trọ...\nChức năng đang được phát triển")
+    //         }, 200)
+    //     })
+    // }
 
     // Card hover effects
     const propertyCards = document.querySelectorAll(".property-card")

@@ -2,71 +2,63 @@ package nhatroxanh.com.Nhatroxanh.Service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-import nhatroxanh.com.Nhatroxanh.Model.enity.ApprovalStatus;
-import nhatroxanh.com.Nhatroxanh.Model.enity.Post;
-import nhatroxanh.com.Nhatroxanh.Repository.PostRepository;
+import nhatroxanh.com.Nhatroxanh.Model.entity.ApprovalStatus;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 
-@Service
-public class PostService {
-    @Autowired
-    private PostRepository postRepository;
+import java.util.Date;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-    public List<Post> findTopApprovedActivePostsByViews(int limit) {
-        return postRepository.findByStatusTrueAndApprovalStatusOrderByViewDesc(
-                ApprovalStatus.APPROVED, PageRequest.of(0, limit)).getContent();
-    }
+public interface PostService {
+        List<Post> findTopApprovedActivePostsByViews(int limit);
 
-    public List<Post> filterPosts(List<Integer> utilityIds, Float minArea, Float maxArea, String sort) {
-        List<Post> posts;
-        if (utilityIds != null && !utilityIds.isEmpty()) {
-            posts = postRepository.findActivePostsWithUtilityFilter(utilityIds, minArea, maxArea);
-        } else {
-            posts = postRepository.findAllActivePostsWithAreaFilter(minArea, maxArea);
-        }
+        List<Post> filterPosts(List<Integer> utilityIds, Float minArea, Float maxArea, String sort);
 
-        applySorting(posts, sort);
+        List<Post> filterPostsByCategory(Integer categoryId, List<Integer> utilityIds, Float minArea, Float maxArea,
+                        String sort);
 
-        return posts;
-    }
+        List<Post> getAllActivePosts();
 
-    public List<Post> filterPostsByCategory(Integer categoryId, List<Integer> utilityIds, Float minArea, Float maxArea,
-            String sort) {
-        List<Post> posts;
+        Page<Post> getPostsByUserId(Integer userId, Pageable pageable);
 
-        if (utilityIds != null && !utilityIds.isEmpty()) {
-            posts = postRepository.findActiveCategoryPostsWithUtilityFilter(categoryId, utilityIds, minArea, maxArea);
-        } else {
-            posts = postRepository.findActiveCategoryPostsWithAreaFilter(categoryId, minArea, maxArea);
-        }
+        Page<Post> searchPosts(String keyword, Integer categoryId, ApprovalStatus status,
+                        Date fromDate, Date toDate, String sort, Integer userId, Pageable pageable);
 
-        applySorting(posts, sort);
+        Post getPostById(Integer postId);
 
-        return posts;
-    }
+        void deletePost(Integer postId);
 
-    private void applySorting(List<Post> posts, String sort) {
-        if (sort != null) {
-            switch (sort) {
-                case "price_asc":
-                    posts.sort((a, b) -> Float.compare(a.getPrice(), b.getPrice()));
-                    break;
-                case "price_desc":
-                    posts.sort((a, b) -> Float.compare(b.getPrice(), a.getPrice()));
-                    break;
-                case "latest":
-                    posts.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
+        void savePost(Post post);
 
-    public List<Post> getAllActivePosts() {
-        return postRepository.findByStatusTrueAndApprovalStatusOrderByCreatedAtDesc("APPROVED");
-    }
+        Post createPost(String title, String description, Float price, Float area,
+                        Integer categoryId, String wardCode, String street, String houseNumber,
+                        List<Integer> utilityIds, MultipartFile[] images, Integer hostelId, Users user,
+                        String provinceCode, String districtCode, String provinceName,
+                        String districtName, String wardName) throws Exception;
+
+        Post updatePost(Integer postId, String title, String description, Float price, Float area,
+                        Integer categoryId, String wardCode, String street, String houseNumber,
+                        List<Integer> utilityIds, MultipartFile[] images, List<Integer> imagesToDelete,
+                        List<Integer> imagesToKeep, Integer hostelId, Users user, String provinceCode,
+                        String districtCode,
+                        String provinceName, String districtName, String wardName) throws Exception;
+
+        void save(Post post);
+
+        void approvePost(Integer postId, Users approvedBy);
+
+        void hidePost(Integer postId);
+
+        List<Post> getFilteredPosts(String status, String type, String sortBy, String search);
+
+        Page<Post> getFilteredPostsByApprovalStatus(
+        ApprovalStatus approvalStatus,
+        String type,
+        String search,
+        Pageable pageable);
+
+
 }

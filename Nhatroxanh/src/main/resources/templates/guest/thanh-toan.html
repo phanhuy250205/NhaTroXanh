@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{/layouts/head}" />
+
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh Toán Tiền Phòng - Hệ Thống Quản Lý Phòng Trọ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/thanhtoan-guest.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <div th:replace="~{/layouts/navbar}"></div>
+
+    <div class="main-container-guest">
+        <!-- Header Section -->
+        <div class="header-section-guest">
+            <div class="header-content-guest">
+                <h1 class="header-title-guest">
+                    <i class="fas fa-credit-card me-3"></i>
+                    Thanh Toán
+                </h1>
+                <p class="header-subtitle-guest">Thanh toán nhanh chóng và an toàn</p>
+                <div class="breadcrumb-nav-guest">
+                    <a href="/"><i class="fas fa-home"></i> Trang chủ</a>
+                    <span class="mx-2">/</span>
+                    <span>Thanh toán</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="content-grid-guest">
+            <!-- Left Column -->
+            <div class="left-column-guest">
+                <!-- Room Information -->
+                <div class="card-guest room-info-card-guest">
+                    <div class="card-header-guest">
+                        <h3 class="card-title-guest">
+                            <i class="fas fa-home"></i>
+                            Thông Tin Phòng & Thanh Toán
+                        </h3>
+                    </div>
+                    <div class="card-body-guest">
+                        <div class="room-info-grid-guest">
+                            <div class="info-item-guest">
+                                <div class="info-icon-guest"
+                                    style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue));">
+                                    <i class="fas fa-door-open"></i>
+                                </div>
+                                <div class="info-content-guest">
+                                    <h6>Phòng</h6>
+                                    <p th:text="${roomName} ?: 'Không xác định'" id="roomName"></p>
+                                </div>
+                            </div>
+                            <div class="info-item-guest">
+                                <div class="info-icon-guest"
+                                    style="background: linear-gradient(135deg, var(--success-green), #2ecc71);">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </div>
+                                <div class="info-content-guest">
+                                    <h6>Địa chỉ</h6>
+                                    <p th:text="${hostelAddress} ?: 'Không xác định'"></p>
+                                </div>
+                            </div>
+                            <div class="info-item-guest">
+                                <div class="info-icon-guest"
+                                    style="background: linear-gradient(135deg, var(--warning-orange), #e67e22);">
+                                    <i class="fas fa-user-tie"></i>
+                                </div>
+                                <div class="info-content-guest">
+                                    <h6>Chủ trọ</h6>
+                                    <p th:text="${hostName} ?: 'Không xác định'"></p>
+                                </div>
+                            </div>
+                            <div class="info-item-guest">
+                                <div class="info-icon-guest"
+                                    style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="info-content-guest">
+                                    <h6>Hạn thanh toán</h6>
+                                    <p th:text="${dueDate} ?: 'Không xác định'"></p>
+                                </div>
+                            </div>
+                            <div class="info-item-guest">
+                                <div class="info-icon-guest"
+                                    style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="info-content-guest">
+                                    <h6>Kỳ thanh toán</h6>
+                                    <p th:text="${month} ?: 'Không xác định'"></p>
+                                </div>
+                            </div>
+                            <div class="info-item-guest">
+                                <div class="status-badge-guest"
+                                    th:classappend="${status == 'PENDING' ? 'status-pending-guest' : status == 'OVERDUE' ? 'status-overdue-guest' : 'status-paid-guest'}">
+                                    <i
+                                        th:class="'fas fa-' + (${status == 'PENDING' ? 'clock' : status == 'OVERDUE' ? 'exclamation-triangle' : 'check'})"></i>
+                                    <span
+                                        th:text="${status == 'PENDING' ? 'Chưa thanh toán' : status == 'OVERDUE' ? 'Quá hạn' : 'Đã thanh toán'}"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utility Meters -->
+                <div class="card-guest utility-info-card-guest">
+                    <div class="card-header-guest">
+                        <h3 class="card-title-guest">
+                            <i class="fas fa-tachometer-alt"></i>
+                            Chỉ Số Điện Nước
+                            <span th:text="'Tháng ' + ${month}"></span>
+                        </h3>
+                    </div>
+                    <div class="card-body-guest">
+                        <div class="utility-grid-guest">
+                            <!-- Electric Meter -->
+                            <div class="meter-card-guest">
+                                <div class="meter-header-guest">
+                                    <div>
+                                        <div class="meter-icon-wrapper-guest electric-gradient-guest mb-2">
+                                            <i class="fas fa-bolt"></i>
+                                        </div>
+                                        <div class="meter-type-guest">Điện</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="usage-display-guest" th:text="${electricUsage} ?: '0 kWh'"></div>
+                                        <div class="usage-range-guest">
+                                            <span th:text="${prevElectricReading} ?: '0'"></span>
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span th:text="${currElectricReading} ?: '0'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="meter-stats-guest">
+                                    <div class="stat-item-guest">
+                                        <div class="stat-value-guest" th:text="${electricUnitPrice} ?: '0 VNĐ'"></div>
+                                        <div class="stat-label-guest">Đơn giá/kWh</div>
+                                    </div>
+                                    <div class="stat-item-guest">
+                                        <div class="stat-value-guest" th:text="${electricCost} ?: '0 VNĐ'"></div>
+                                        <div class="stat-label-guest">Thành tiền</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Water Meter -->
+                            <div class="meter-card-guest">
+                                <div class="meter-header-guest">
+                                    <div>
+                                        <div class="meter-icon-wrapper-guest water-gradient-guest mb-2">
+                                            <i class="fas fa-tint"></i>
+                                        </div>
+                                        <div class="meter-type-guest">Nước</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="usage-display-guest" th:text="${waterUsage} ?: '0 m³'"></div>
+                                        <div class="usage-range-guest">
+                                            <span th:text="${prevWaterReading} ?: '0'"></span>
+                                            <i class="fas fa-arrow-right"></i>
+                                            <span th:text="${currWaterReading} ?: '0'"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="meter-stats-guest">
+                                    <div class="stat-item-guest">
+                                        <div class="stat-value-guest" th:text="${waterUnitPrice} ?: '0 VNĐ'"></div>
+                                        <div class="stat-label-guest">Đơn giá/m³</div>
+                                    </div>
+                                    <div class="stat-item-guest">
+                                        <div class="stat-value-guest" th:text="${waterCost} ?: '0 VNĐ'"></div>
+                                        <div class="stat-label-guest">Thành tiền</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Methods -->
+                <div class="card-guest payment-info-card-guest">
+                    <div class="card-header-guest">
+                        <h3 class="card-title-guest">
+                            <i class="fas fa-payment"></i>
+                            Chọn Phương Thức Thanh Toán
+                        </h3>
+                    </div>
+                    <div class="card-body-guest">
+                        <div class="payment-methods-guest">
+
+                            <!-- E-Wallet -->
+                            <div class="payment-option-guest" onclick="selectPaymentMethod('ewallet')">
+                                <div class="payment-header-guest">
+                                    <input type="radio" name="payment_method" id="ewallet" value="ewallet"
+                                        class="payment-radio-guest">
+                                    <div class="payment-icon-guest">
+                                        <i class="fas fa-mobile-alt"></i>
+                                    </div>
+                                    <div class="payment-info-guest">
+                                        <h5>Ví Điện Tử</h5>
+                                        <p>Thanh toán qua ví điện tử - Dễ dàng, tiện lợi</p>
+                                    </div>
+                                </div>
+                                <div class="wallet-options-guest" id="walletOptions">
+                                    <h6 class="mb-3 text-primary">
+                                        <i class="fas fa-wallet me-2"></i>
+                                        Chọn ví điện tử:
+                                    </h6>
+                                    <div class="wallet-grid-guest">
+                                        <div class="wallet-item-guest" onclick="selectWallet('vnpay')">
+                                            <input type="radio" name="wallet" id="vnpay" value="vnpay">
+                                            <img src="https://vnpay.vn/s1/statics.vnpay.vn/2023/6/0oxhzjmxbksr1686814746087.png"
+                                                alt="VNPay" class="wallet-logo-guest">
+                                            <div>
+                                                <strong>VNPay</strong>
+                                                <p class="mb-0 text-muted small">Ví điện tử VNPay</p>
+                                            </div>
+                                        </div>
+                                        <div class="wallet-item-guest" onclick="selectWallet('momo')">
+                                            <input type="radio" name="wallet" id="momo" value="momo">
+                                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-MoMo-Square.png"
+                                                alt="Momo" class="wallet-logo-guest">
+                                            <div>
+                                                <strong>Momo</strong>
+                                                <p class="mb-0 text-muted small">Ví điện tử Momo</p>
+                                            </div>
+                                        </div>
+                                        <div class="wallet-item-guest" onclick="selectWallet('zalopay')">
+                                            <input type="radio" name="wallet" id="zalopay" value="zalopay">
+                                            <img src="https://cdn.haitrieu.com/wp-content/uploads/2022/10/Logo-ZaloPay-Square.png"
+                                                alt="ZaloPay" class="wallet-logo-guest">
+                                            <div>
+                                                <strong>ZaloPay</strong>
+                                                <p class="mb-0 text-muted small">Ví điện tử ZaloPay</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Cash Payment -->
+                            <div class="payment-option-guest" onclick="selectPaymentMethod('cash')">
+                                <div class="payment-header-guest">
+                                    <input type="radio" name="payment_method" id="cash" value="cash"
+                                        class="payment-radio-guest">
+                                    <div class="payment-icon-guest">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                    <div class="payment-info-guest">
+                                        <h5>Tiền Mặt</h5>
+                                        <p>Thanh toán trực tiếp - Đặt lịch hẹn trước</p>
+                                    </div>
+                                </div>
+                                <div class="cash-options-guest" id="cashOptions">
+                                    <h6 class="mb-3 text-primary">
+                                        <i class="fas fa-calendar-check me-2"></i>
+                                        Chọn thời gian thanh toán:
+                                    </h6>
+                                    <div class="date-grid-guest">
+                                        <div class="form-group-guest">
+                                            <label class="form-label-guest">Ngày thanh toán</label>
+                                            <input type="date" class="form-control-guest" id="paymentDate"
+                                                th:value="${dueDate}" min="">
+                                        </div>
+                                        <div class="form-group-guest">
+                                            <label class="form-label-guest">Giờ thanh toán</label>
+                                            <select class="form-select-guest" id="paymentTime">
+                                                <option value="">Chọn giờ</option>
+                                                <option value="08:00">08:00 - Sáng</option>
+                                                <option value="09:00">09:00 - Sáng</option>
+                                                <option value="10:00">10:00 - Sáng</option>
+                                                <option value="14:00">14:00 - Chiều</option>
+                                                <option value="15:00">15:00 - Chiều</option>
+                                                <option value="16:00">16:00 - Chiều</option>
+                                                <option value="17:00">17:00 - Chiều</option>
+                                                <option value="18:00">18:00 - Tối</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group-guest">
+                                        <label class="form-label-guest">Ghi chú (tùy chọn)</label>
+                                        <textarea class="form-control-guest" id="paymentNote" rows="3"
+                                            placeholder="Nhập ghi chú nếu có..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="action-buttons-guest mb-3">
+                            <button class="btn-guest btn-primary-guest" onclick="processPayment()" id="paymentBtn">
+                                <i class="fas fa-credit-card"></i>
+                                Thanh Toán Ngay
+                            </button>
+                            <button class="btn-guest btn-outline-guest" onclick="goBack()">
+                                <i class="fas fa-arrow-left"></i>
+                                Quay Lại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column - Sidebar -->
+            <div class="right-column-guest">
+                <!-- Sticky Wrapper for Invoice Summary -->
+                <div class="sticky-wrapper-guest">
+                    <!-- Invoice Summary -->
+                    <div class="card-guest invoice-info-card-guest">
+                        <div class="card-header-guest">
+                            <h3 class="card-title-guest">
+                                <i class="fas fa-file-invoice-dollar"></i>
+                                Tóm Tắt Hóa Đơn
+                            </h3>
+                        </div>
+                        <div class="card-body-guest">
+                            <div class="invoice-summary-guest">
+                                <table class="invoice-table-guest">
+                                    <tr>
+                                        <td>Tiền phòng</td>
+                                        <td th:text="${roomPrice} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tiền điện (<span th:text="${electricUsage} ?: '0'"></span> kWh)</td>
+                                        <td th:text="${electricCost} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tiền nước (<span th:text="${waterUsage} ?: '0'"></span> m³)</td>
+                                        <td th:text="${waterCost} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Phí dịch vụ</td>
+                                        <td th:text="${serviceFee} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                </table>
+                                <div class="voucher-section">
+                                    <h4>Áp dụng Voucher</h4>
+                                    <div class="input-group">
+                                        <input type="text" id="voucherCode" class="form-control"
+                                            placeholder="Nhập mã voucher">
+                                        <button id="applyVoucherBtn" class="btn btn-primary">Áp dụng</button>
+                                    </div>
+                                    <p id="voucherMessage" class="text-success" style="display: none;"></p>
+                                    <p id="voucherError" class="text-danger" style="display: none;"></p>
+                                    <input type="hidden" id="appliedDiscount" value="0">
+                                </div>
+                                <table class="invoice-table-guest">
+                                    <tr>
+                                        <td>Tổng cộng ban đầu:</td>
+                                        <td id="originalTotal" th:text="${totalAmount} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                    <tr>
+                                      <td>Giảm giá voucher:</td>
+                                        <td  id="discountAmount">0 VNĐ</td>
+                                    </tr>
+                                    <tr>
+                                       <td>Tổng thanh toán:</td>
+                                        <td id="finalTotal"
+                                                th:text="${totalAmount} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                </table>
+                            
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Info -->
+                    <div class="card-guest quick-info-card-guest">
+                        <div class="card-header-guest">
+                            <h3 class="card-title-guest">
+                                <i class="fas fa-info-circle"></i>
+                                Thông Tin Hữu Ích
+                            </h3>
+                        </div>
+                        <div class="card-body-guest">
+                            <div class="d-flex flex-column gap-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="info-icon-guest"
+                                        style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
+                                        <i class="fas fa-shield-alt"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Thanh toán an toàn</h6>
+                                        <p class="mb-0 text-muted small">Được bảo mật SSL 256-bit</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="info-icon-guest"
+                                        style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Xử lý nhanh chóng</h6>
+                                        <p class="mb-0 text-muted small">Giao dịch được xử lý trong 1-2 phút</p>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="info-icon-guest"
+                                        style="background: linear-gradient(135deg, var(--warning-orange), #e67e22); width: 35px; height: 35px;">
+                                        <i class="fas fa-headset"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-1">Hỗ trợ 24/7</h6>
+                                        <p class="mb-0 text-muted small">Liên hệ: 0123.456.789</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="~{/layouts/footer}"></div>
+
+    <!-- Success Modal for Cash Payment -->
+    <div class="modal fade" id="appointmentExistsModal" tabindex="-1" aria-labelledby="appointmentExistsModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="appointmentExistsModalLabel">Thông báo lịch hẹn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="appointmentDetails">
+                    <!-- Nội dung được thêm động bởi JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Success Modal for Cash Payment -->
+    <div class="modal fade" id="cashPaymentSuccessModal" tabindex="-1" aria-labelledby="cashPaymentSuccessModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="cashPaymentSuccessModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Đặt Lịch Thành Công
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="mb-4">
+                        <i class="fas fa-calendar-check text-success" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="text-success mb-3">Bạn đã đặt lịch hẹn thành công!</h4>
+                    <p class="mb-3">Vui lòng thanh toán đúng hẹn theo thời gian đã đặt.</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Lưu ý:</strong> Chủ trọ sẽ liên hệ với bạn để xác nhận thời gian thanh toán.
+                    </div>
+                    <div id="appointmentDetails" class="mt-3">
+                        <!-- Appointment details will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">
+                        <i class="fas fa-check me-2"></i>
+                        Đã hiểu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome (for icons) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+    <script>
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function () {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('paymentDate').setAttribute('min', today);
+
+            // Fetch room data
+            const urlParams = new URLSearchParams(window.location.search);
+            const invoiceId = urlParams.get('invoiceId');
+            const roomId = urlParams.get('room_id');
+            const hostelId = urlParams.get('hostel_id');
+            const addressId = urlParams.get('address_id');
+
+            if (invoiceId && roomId) {
+                fetch(`/api/rooms/${roomId}`)
+                    .then(response => response.json())
+
+                    .catch(error => console.error('Error fetching room data:', error));
+            }
+            if (invoiceId) {
+                fetch(`/api/invoice/${invoiceId}/appointment-status`, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.hasAppointment) {
+                            showAppointmentExistsModal(data.paymentDate, data.paymentTime);
+                            const paymentForm = document.getElementById('paymentForm');
+                            if (paymentForm) {
+                                paymentForm.querySelectorAll('input, button').forEach(element => {
+                                    element.disabled = true;
+                                });
+                            }
+                            const applyVoucherBtn = document.getElementById('applyVoucherBtn');
+                            if (applyVoucherBtn) {
+                                applyVoucherBtn.disabled = true;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi kiểm tra trạng thái lịch hẹn:', error);
+                        showAlert('Không thể kiểm tra trạng thái lịch hẹn. Vui lòng thử lại.', 'danger');
+                    });
+            }
+            // Voucher logic
+            const applyVoucherBtn = document.getElementById('applyVoucherBtn');
+            if (applyVoucherBtn) {
+                applyVoucherBtn.addEventListener('click', function () {
+                    const voucherCode = document.getElementById('voucherCode').value.trim();
+
+                    if (!invoiceId) {
+                        showError('Không tìm thấy mã hóa đơn. Vui lòng thử lại.');
+                        return;
+                    }
+
+                    if (!voucherCode) {
+                        showError('Vui lòng nhập mã voucher');
+                        return;
+                    }
+
+                    fetch('/apply-voucher', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ invoiceId: invoiceId, voucherCode: voucherCode })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                const discount = data.discountValue;
+                                const finalTotal = data.finalTotal; // Use finalTotal from backend response
+                                document.getElementById('appliedDiscount').value = discount;
+                                document.getElementById('discountAmount').innerText = formatCurrency(discount) + ' VNĐ';
+                                document.getElementById('finalTotal').innerText = formatCurrency(finalTotal) + ' VNĐ';
+                                showMessage(data.message || `Voucher áp dụng thành công! `);
+                            } else {
+                                showError(data.error);
+                                // Reset discount and final total if voucher application fails
+                                document.getElementById('appliedDiscount').value = 0;
+                                document.getElementById('discountAmount').innerText = '0 VNĐ';
+                                const originalTotalElement = document.querySelector('#originalTotal');
+                                if (originalTotalElement) {
+                                    let originalTotalText = originalTotalElement.innerText || originalTotalElement.textContent || '0 VNĐ';
+                                    document.getElementById('finalTotal').innerText = originalTotalText;
+                                }
+                            }
+                        })
+                        .catch(error => showError('Lỗi hệ thống: ' + error.message));
+                });
+            }
+
+            // Payment submission logic
+            const paymentForm = document.getElementById('paymentForm'); // Assuming a form with id="paymentForm"
+            if (paymentForm) {
+                paymentForm.addEventListener('submit', function (event) {
+                    event.preventDefault();
+                    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value;
+                    const wallet = document.getElementById('wallet')?.value || '';
+                    const paymentDate = document.getElementById('paymentDate')?.value;
+                    const paymentTime = document.getElementById('paymentTime')?.value;
+                    const paymentNote = document.getElementById('paymentNote')?.value || '';
+                    const appliedDiscount = parseFloat(document.getElementById('appliedDiscount').value) || 0;
+
+                    if (!paymentMethod) {
+                        showError('Vui lòng chọn phương thức thanh toán');
+                        return;
+                    }
+
+                    // Prepare data for payment
+                    const paymentData = {
+                        invoiceId: invoiceId,
+                        room_id: roomId,
+                        hostel_id: hostelId,
+                        address_id: addressId,
+                        paymentMethod: paymentMethod,
+                        wallet: wallet,
+                        paymentDate: paymentDate,
+                        paymentTime: paymentTime,
+                        paymentNote: paymentNote,
+                        voucherCode: document.getElementById('voucherCode').value.trim() || ''
+                    };
+
+                    // Handle payment gateway requests
+                    if (['VNPAY', 'MOMO', 'ZALOPAY'].includes(paymentMethod.toUpperCase())) {
+                        const endpoint = paymentMethod.toLowerCase() === 'vnpay' ? '/vnpay/create-order' :
+                            paymentMethod.toLowerCase() === 'momo' ? '/momo/create-order' :
+                                '/zalopay/create-order';
+
+                        fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ invoiceId: invoiceId })
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Redirect to payment gateway URL
+                                    window.location.href = data.payUrl || data.paymentUrl;
+                                } else {
+                                    showError(data.message || 'Không thể khởi tạo thanh toán. Vui lòng thử lại.');
+                                }
+                            })
+                            .catch(error => showError('Lỗi hệ thống khi khởi tạo thanh toán: ' + error.message));
+                    } else {
+                        // Handle cash or other payment methods
+                        fetch('/thanh-toan', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(paymentData)
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    showMessage(data.message);
+                                    window.location.href = data.redirectUrl;
+                                } else {
+                                    showError(data.error);
+                                    if (data.failureUrl) {
+                                        window.location.href = data.failureUrl;
+                                    }
+                                }
+                            })
+                            .catch(error => showError('Lỗi hệ thống: ' + error.message));
+                    }
+                });
+            }
+        });
+
+        function selectPaymentMethod(method) {
+            document.querySelectorAll('.payment-option-guest').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            document.getElementById(method).checked = true;
+            document.getElementById('walletOptions').style.display = 'none';
+            document.getElementById('cashOptions').style.display = 'none';
+            if (method === 'ewallet') {
+                document.getElementById('walletOptions').style.display = 'block';
+            } else if (method === 'cash') {
+                document.getElementById('cashOptions').style.display = 'block';
+            }
+        }
+        function showAppointmentExistsModal(paymentDate, paymentTime) {
+            const modal = new bootstrap.Modal(document.getElementById('appointmentExistsModal'));
+            const appointmentDetailsDiv = document.getElementById('appointmentDetails');
+            appointmentDetailsDiv.innerHTML = `
+        <div class="alert alert-info">
+            <p class="mb-2"><strong>Thông báo:</strong> Hóa đơn này đã được đặt lịch hẹn thanh toán!</p>
+        </div>
+        <div class="appointment-info">
+            <p><strong>Ngày thanh toán:</strong> ${formatDate(paymentDate)}</p>
+            <p><strong>Giờ thanh toán:</strong> ${paymentTime}</p>
+        </div>
+    `;
+            modal.show();
+        }
+        function selectWallet(wallet) {
+            event.stopPropagation();
+            document.querySelectorAll('.wallet-item-guest').forEach(el => {
+                el.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            document.getElementById(wallet).checked = true;
+        }
+
+        function processPayment() {
+            if (!validatePaymentForm()) {
+                return;
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const invoiceId = urlParams.get('invoiceId');
+            const roomId = urlParams.get('room_id');
+            const hostelId = urlParams.get('hostel_id');
+            const addressId = urlParams.get('address_id');
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+            const paymentBtn = document.getElementById('paymentBtn');
+
+            // Get payment details for confirmation
+            const totalAmountElement = document.getElementById('finalTotal');
+            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
+            const numericAmount = totalAmountElement ? totalAmountElement.textContent.replace(/[^\d]/g, '') : '0';
+
+            // Handle e-wallet payments with confirmation modal
+            if (selectedMethod.value === 'ewallet') {
+                const selectedWallet = document.querySelector('input[name="wallet"]:checked');
+                if (!selectedWallet) {
+                    showAlert('Vui lòng chọn ví điện tử!', 'warning');
+                    return;
+                }
+
+                const walletName = selectedWallet.value === 'momo' ? 'MoMo' : 
+                                 selectedWallet.value === 'vnpay' ? 'VNPay' : 'ZaloPay';
+                
+                showConfirmationModal(numericAmount, null, null, `ví điện tử ${walletName}`, () => {
+                    if (selectedWallet.value === 'momo') {
+                        processMoMoPayment(invoiceId, paymentBtn);
+                    } else if (selectedWallet.value === 'vnpay') {
+                        processVNPayPayment(invoiceId, paymentBtn);
+                    } else if (selectedWallet.value === 'zalopay') {
+                        processZaloPayPayment(invoiceId, paymentBtn);
+                    }
+                });
+                return;
+            }
+
+            // Handle cash payments with confirmation modal
+            if (selectedMethod.value === 'cash') {
+                const paymentDate = document.getElementById('paymentDate').value;
+                const paymentTime = document.getElementById('paymentTime').value;
+                
+                showConfirmationModal(numericAmount, paymentDate, paymentTime, 'tiền mặt', () => {
+                    processCashPayment(invoiceId, roomId, hostelId, addressId, paymentDate, paymentTime);
+                });
+                return;
+            }
+
+            // Handle bank payments with confirmation modal
+            if (selectedMethod.value === 'bank') {
+                showConfirmationModal(numericAmount, null, null, 'chuyển khoản ngân hàng', () => {
+                    processBankPayment(invoiceId, roomId, hostelId, addressId);
+                });
+                return;
+            }
+        }
+
+        // Separate function for cash payment processing
+        function processCashPayment(invoiceId, roomId, hostelId, addressId, paymentDate, paymentTime) {
+            const paymentBtn = document.getElementById('paymentBtn');
+            const originalButtonText = paymentBtn.innerHTML;
+            
+            // Prepare form data for cash payment
+            let formData = new FormData();
+            formData.append('invoiceId', invoiceId);
+            if (roomId) formData.append('room_id', roomId);
+            if (hostelId) formData.append('hostel_id', hostelId);
+            if (addressId) formData.append('address_id', addressId);
+            formData.append('paymentMethod', 'cash');
+            formData.append('paymentDate', paymentDate);
+            formData.append('paymentTime', paymentTime);
+            
+            const paymentNote = document.getElementById('paymentNote').value || '';
+            formData.append('paymentNote', paymentNote);
+
+            // Add voucher code if present
+            const voucherCode = document.getElementById('voucherCode').value.trim();
+            if (voucherCode) {
+                formData.append('voucherCode', voucherCode);
+            }
+
+            // Update button state
+            paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            paymentBtn.disabled = true;
+
+            fetch('/thanh-toan', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        if (data.appointmentScheduled) {
+                            // Handle cash payment appointment scheduling
+                            paymentBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Đã đặt lịch thành công!';
+                            paymentBtn.classList.remove('btn-primary-guest');
+                            paymentBtn.classList.add('btn-success-guest');
+
+                            const totalAmountElement = document.getElementById('finalTotal');
+                            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
+
+                            // Show success modal for cash payment
+                            showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount, data.message);
+
+                            // Reset form after showing modal
+                            setTimeout(() => {
+                                resetPaymentForm();
+                            }, 3000);
+                        } else {
+                            handleSuccessfulPayment(data, paymentBtn);
+                        }
+                    } else {
+                        handlePaymentError(data, paymentBtn, originalButtonText, invoiceId);
+                    }
+                })
+                .catch(error => {
+                    handlePaymentError({ error: 'Lỗi kết nối mạng' }, paymentBtn, originalButtonText, invoiceId);
+                });
+        }
+
+        // Separate function for bank payment processing
+        function processBankPayment(invoiceId, roomId, hostelId, addressId) {
+            const paymentBtn = document.getElementById('paymentBtn');
+            const originalButtonText = paymentBtn.innerHTML;
+            
+            // Prepare form data for bank payment
+            let formData = new FormData();
+            formData.append('invoiceId', invoiceId);
+            if (roomId) formData.append('room_id', roomId);
+            if (hostelId) formData.append('hostel_id', hostelId);
+            if (addressId) formData.append('address_id', addressId);
+            formData.append('paymentMethod', 'bank');
+
+            // Add voucher code if present
+            const voucherCode = document.getElementById('voucherCode').value.trim();
+            if (voucherCode) {
+                formData.append('voucherCode', voucherCode);
+            }
+
+            // Update button state
+            paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            paymentBtn.disabled = true;
+
+            fetch('/thanh-toan', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        handleSuccessfulPayment(data, paymentBtn);
+                    } else {
+                        handlePaymentError(data, paymentBtn, originalButtonText, invoiceId);
+                    }
+                })
+                .catch(error => {
+                    handlePaymentError({ error: 'Lỗi kết nối mạng' }, paymentBtn, originalButtonText, invoiceId);
+                });
+        }
+
+        // Helper function to handle successful payments
+        function handleSuccessfulPayment(data, paymentBtn) {
+            paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
+            paymentBtn.classList.remove('btn-primary-guest');
+            paymentBtn.classList.add('btn-success-guest');
+
+            showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn.', 'success');
+
+            setTimeout(() => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    window.location.reload();
+                }
+            }, 2000);
+        }
+
+        // Helper function to handle payment errors
+        function handlePaymentError(data, paymentBtn, originalButtonText, invoiceId) {
+            const errorMessage = data.error || 'Thanh toán thất bại: Lỗi hệ thống.';
+
+            // Check if this is a duplicate appointment error
+            if (errorMessage.includes('đã được đặt lịch hẹn') || errorMessage.includes('đã được hẹn thanh toán')) {
+                showDuplicateAppointmentError(errorMessage);
+            } else if (errorMessage.includes('đã được thanh toán')) {
+                showAlreadyPaidError(errorMessage);
+            } else if (errorMessage.includes('đang chờ xác nhận')) {
+                showPendingConfirmationError(errorMessage);
+            } else {
+                showAlert(errorMessage, 'danger');
+            }
+
+            paymentBtn.innerHTML = originalButtonText;
+            paymentBtn.disabled = false;
+
+            // Don't redirect immediately for appointment-related errors
+            if (!errorMessage.includes('đã được đặt lịch hẹn') &&
+                !errorMessage.includes('đã được hẹn thanh toán') &&
+                !errorMessage.includes('đang chờ xác nhận') &&
+                data.failureUrl) {
+                setTimeout(() => {
+                    window.location.href = data.failureUrl;
+                }, 3000);
+            }
+        }
+
+        // Show cash payment success modal with appointment details
+        function showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount, message) {
+            const modal = new bootstrap.Modal(document.getElementById('cashPaymentSuccessModal'));
+            const appointmentDetailsDiv = document.getElementById('appointmentDetails');
+            appointmentDetailsDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <p class="mb-2"><strong>Thông báo:</strong> ${message || 'Đã đặt lịch thanh toán tiền mặt thành công!'}</p>
+                </div>
+                <div class="appointment-info">
+                    <p><strong>Ngày thanh toán:</strong> ${paymentDate}</p>
+                    <p><strong>Giờ thanh toán:</strong> ${paymentTime}</p>
+                    <p><strong>Số tiền:</strong> ${totalAmount}</p>
+                </div>
+            `;
+            modal.show();
+        }
+
+        // Reset payment form after successful cash payment scheduling
+        function resetPaymentForm() {
+            const paymentBtn = document.getElementById('paymentBtn');
+
+            // Reset button to original state
+            paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+            paymentBtn.classList.remove('btn-success-guest');
+            paymentBtn.classList.add('btn-primary-guest');
+            paymentBtn.disabled = false;
+
+            // Clear payment method selections
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                radio.checked = false;
+            });
+
+            // Clear wallet selections
+            document.querySelectorAll('input[name="wallet"]').forEach(radio => {
+                radio.checked = false;
+            });
+
+            // Hide payment options
+            document.getElementById('walletOptions').style.display = 'none';
+            document.getElementById('cashOptions').style.display = 'none';
+
+            // Clear cash payment form
+            document.getElementById('paymentDate').value = '';
+            document.getElementById('paymentTime').value = '';
+            document.getElementById('paymentNote').value = '';
+
+            // Remove active classes from payment options
+            document.querySelectorAll('.payment-option-guest').forEach(el => {
+                el.classList.remove('active');
+            });
+
+            // Clear voucher form
+            document.getElementById('voucherCode').value = '';
+            document.getElementById('voucherMessage').style.display = 'none';
+            document.getElementById('voucherError').style.display = 'none';
+        }
+
+
+        function processMoMoPayment(invoiceId, paymentBtn) {
+            paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán MoMo...';
+            paymentBtn.disabled = true;
+
+            fetch('/momo/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'invoiceId': invoiceId })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đang chuyển hướng...';
+                        paymentBtn.classList.remove('btn-primary-guest');
+                        paymentBtn.classList.add('btn-success-guest');
+
+                        setTimeout(() => {
+                            window.location.href = data.payUrl; // Redirect to MoMo payment page
+                        }, 1000);
+                    } else {
+                        showAlert(data.error || 'Tạo đơn hàng MoMo thất bại.', 'danger');
+                        paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                        paymentBtn.classList.remove('btn-success-guest');
+                        paymentBtn.classList.add('btn-primary-guest');
+                        paymentBtn.disabled = false;
+
+                        // Redirect to failure page after showing error
+                        setTimeout(() => {
+                            window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(data.error || 'Tạo đơn hàng MoMo thất bại')}`;
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error processing MoMo payment:', error);
+                    showAlert('Tạo đơn hàng MoMo thất bại: Lỗi kết nối. Chi tiết: ' + error.message, 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent('Lỗi kết nối MoMo')}`;
+                    }, 3000);
+                });
+        }
+
+        function processVNPayPayment(invoiceId, paymentBtn) {
+            paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán VNPay...';
+            paymentBtn.disabled = true;
+
+            fetch('/vnpay/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'invoiceId': invoiceId })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status + ' ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.paymentUrl) {
+                        paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đang chuyển hướng đến VNPay...';
+                        paymentBtn.classList.remove('btn-primary-guest');
+                        paymentBtn.classList.add('btn-success-guest');
+
+                        showAlert('Tạo đơn hàng thành công! Đang chuyển hướng đến VNPay...', 'success');
+
+                        setTimeout(() => {
+                            window.location.href = data.paymentUrl; // Redirect to VNPay payment page
+                        }, 1500);
+                    } else {
+                        const errorMessage = data.message || 'Tạo đơn hàng VNPay thất bại';
+                        showAlert(errorMessage, 'danger');
+                        paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                        paymentBtn.classList.remove('btn-success-guest');
+                        paymentBtn.classList.add('btn-primary-guest');
+                        paymentBtn.disabled = false;
+
+                        // Redirect to failure page after showing error
+                        setTimeout(() => {
+                            window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    const errorMessage = 'Lỗi kết nối VNPay: ' + error.message;
+                    showAlert(errorMessage, 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                    }, 3000);
+                });
+        }
+
+        function processZaloPayPayment(invoiceId, paymentBtn) {
+            paymentBtn.innerHTML = '<span class="loading-guest me-2"></span>Đang xử lý thanh toán ZaloPay...';
+            paymentBtn.disabled = true;
+
+            fetch('/zalopay/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: new URLSearchParams({ 'invoiceId': invoiceId })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.status + ' ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success && data.payUrl) {
+                        paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Đang chuyển hướng đến ZaloPay...';
+                        paymentBtn.classList.remove('btn-primary-guest');
+                        paymentBtn.classList.add('btn-success-guest');
+
+                        showAlert('Tạo đơn hàng thành công! Đang chuyển hướng đến ZaloPay...', 'success');
+
+                        setTimeout(() => {
+                            window.location.href = data.payUrl; // Redirect to ZaloPay payment page
+                        }, 1500);
+                    } else {
+                        const errorMessage = data.message || 'Tạo đơn hàng ZaloPay thất bại';
+                        showAlert(errorMessage, 'danger');
+                        paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                        paymentBtn.classList.remove('btn-success-guest');
+                        paymentBtn.classList.add('btn-primary-guest');
+                        paymentBtn.disabled = false;
+
+                        // Redirect to failure page after showing error
+                        setTimeout(() => {
+                            window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                        }, 3000);
+                    }
+                })
+                .catch(error => {
+                    const errorMessage = 'Lỗi kết nối ZaloPay: ' + error.message;
+                    showAlert(errorMessage, 'danger');
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+                    paymentBtn.classList.remove('btn-success-guest');
+                    paymentBtn.classList.add('btn-primary-guest');
+                    paymentBtn.disabled = false;
+
+                    // Redirect to failure page after showing error
+                    setTimeout(() => {
+                        window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent(errorMessage)}`;
+                    }, 3000);
+                });
+        }
+
+        function goBack() {
+            if (confirm('Bạn có chắc chắn muốn quay lại? Thông tin đã nhập sẽ không được lưu.')) {
+                window.history.back();
+            }
+        }
+
+        // Prevent form submission on Enter key
+        document.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+                e.preventDefault();
+            }
+        });
+
+        // Auto-hide alerts after 5 seconds
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+        function showConfirmationModal(amount, paymentDate, paymentTime, paymentMethod, onConfirm) {
+            // Tạo modal HTML nếu chưa tồn tại
+            if (!document.getElementById('customConfirmationModal')) {
+                const modalHTML = `
+            <div class="modal fade" id="customConfirmationModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Xác nhận thanh toán
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="d-flex flex-column align-items-center text-center mb-3">
+                                <div class="confirmation-icon mb-3">
+                                    <i class="fas fa-money-check-alt text-primary" style="font-size: 4rem;"></i>
+                                </div>
+                                <div id="confirmationContent">
+                                    <!-- Content will be dynamically updated -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i>
+                                Hủy
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn">
+                                <i class="fas fa-check me-1"></i>
+                                Xác nhận thanh toán
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            // Cập nhật nội dung modal dựa trên phương thức thanh toán
+            const confirmationContent = document.getElementById('confirmationContent');
+            let contentHTML = `
+                <h4 class="text-primary mb-3">Thông tin thanh toán</h4>
+                <div class="payment-details">
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Số tiền:</span>
+                        <span class="text-success fw-bold fs-5">${formatCurrency(amount)} VNĐ</span>
+                    </div>
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Phương thức:</span>
+                        <span class="text-primary fw-bold">${paymentMethod}</span>
+                    </div>
+            `;
+
+            // Thêm thông tin ngày giờ cho thanh toán tiền mặt
+            if (paymentDate && paymentTime) {
+                contentHTML += `
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Ngày thanh toán:</span>
+                        <span class="text-info">${formatDate(paymentDate)}</span>
+                    </div>
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Giờ thanh toán:</span>
+                        <span class="text-info">${paymentTime}</span>
+                    </div>
+                `;
+            }
+
+            contentHTML += `
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <small>Vui lòng kiểm tra thông tin trước khi xác nhận thanh toán.</small>
+                </div>
+            `;
+
+            confirmationContent.innerHTML = contentHTML;
+
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(document.getElementById('customConfirmationModal'));
+            modal.show();
+
+            // Xử lý sự kiện khi click nút xác nhận
+            document.getElementById('confirmPaymentBtn').onclick = function () {
+                modal.hide();
+                if (onConfirm && typeof onConfirm === 'function') {
+                    onConfirm(); // Gọi callback function được truyền vào
+                }
+            };
+        }
+
+
+        // Enhanced form validation
+        function validatePaymentForm() {
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+
+            if (!selectedMethod) {
+                showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
+                return false;
+            }
+
+            if (selectedMethod.value === 'ewallet') {
+                const selectedWallet = document.querySelector('input[name="wallet"]:checked');
+                if (!selectedWallet) {
+                    showAlert('Vui lòng chọn ví điện tử!', 'warning');
+                    return false;
+                }
+            }
+
+            if (selectedMethod.value === 'cash') {
+                return validateCashPayment();
+            }
+
+            return true;
+        }
+
+        // Add click handlers for wallet selection
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('.wallet-item-guest')) {
+                const walletItem = e.target.closest('.wallet-item-guest');
+                const radio = walletItem.querySelector('input[type="radio"]');
+                if (radio) {
+                    radio.checked = true;
+                    selectWallet(radio.value);
+                }
+            }
+        });
+
+        function showMessage(msg) {
+            document.getElementById('voucherMessage').innerText = msg;
+            document.getElementById('voucherMessage').style.display = 'block';
+            document.getElementById('voucherError').style.display = 'none';
+        }
+
+        function showError(msg) {
+            document.getElementById('voucherError').innerText = msg;
+            document.getElementById('voucherError').style.display = 'block';
+            document.getElementById('voucherMessage').style.display = 'none';
+        }
+
+        function formatCurrency(amount) {
+            // Convert to number if it's a string
+            const numericAmount = typeof amount === 'string' ? parseFloat(amount.replace(/[^\d]/g, '')) : amount;
+            
+            // Format as Vietnamese currency with proper thousand separators
+            return numericAmount.toLocaleString('vi-VN', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+        }
+
+        // Helper function to format date for display
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        // Enhanced cash payment validation
+        function validateCashPayment() {
+            const paymentDate = document.getElementById('paymentDate').value;
+            const paymentTime = document.getElementById('paymentTime').value;
+
+            if (!paymentDate) {
+                showAlert('Vui lòng chọn ngày thanh toán!', 'warning');
+                return false;
+            }
+
+            if (!paymentTime) {
+                showAlert('Vui lòng chọn giờ thanh toán!', 'warning');
+                return false;
+            }
+
+            // Check if selected date is not in the past
+            const selectedDate = new Date(paymentDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (selectedDate < today) {
+                showAlert('Không thể chọn ngày trong quá khứ!', 'warning');
+                return false;
+            }
+
+            // Check if selected datetime is not in the past (for today)
+            const selectedDateTime = new Date(paymentDate + ' ' + paymentTime);
+            const now = new Date();
+
+            if (selectedDate.getTime() === today.getTime() && selectedDateTime <= now) {
+                showAlert('Vui lòng chọn thời gian trong tương lai!', 'warning');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Update button text based on payment method
+        function updatePaymentButtonText() {
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+            const paymentBtn = document.getElementById('paymentBtn');
+
+            if (!selectedMethod || !paymentBtn) return;
+
+            switch (selectedMethod.value) {
+                case 'cash':
+                    paymentBtn.innerHTML = '<i class="fas fa-calendar-plus"></i> Đặt Lịch Thanh Toán';
+                    break;
+                case 'bank':
+                    paymentBtn.innerHTML = '<i class="fas fa-university"></i> Thanh Toán Ngân Hàng';
+                    break;
+                case 'ewallet':
+                    paymentBtn.innerHTML = '<i class="fas fa-mobile-alt"></i> Thanh Toán Ví Điện Tử';
+                    break;
+                default:
+                    paymentBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh Toán Ngay';
+            }
+        }
+
+        // Add event listeners for payment method changes
+        document.addEventListener('DOMContentLoaded', function () {
+
+            // Add listeners to payment method radio buttons
+            document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
+                radio.addEventListener('change', updatePaymentButtonText);
+            });
+        });
+
+    </script>
+
+</body>
+
+</html>

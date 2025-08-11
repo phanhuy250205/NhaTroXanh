@@ -3,7 +3,454 @@
 
 <head th:replace="~{/layouts/head}">
     <title>Nhà Trọ Xanh</title>
+    <!-- Include favorite styles -->
+    <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
+<style>
+    /* Chat Widget Styles - Updated for smaller size */
+    .chat-widget {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 999;
+        /* Giảm z-index để không đè lên các element quan trọng khác */
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* Chat Icon - Smaller */
+    .chat-icon {
+        width: 50px;
+        /* Giảm từ 60px xuống 50px */
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+        /* Giảm shadow */
+        transition: all 0.3s ease;
+        position: relative;
+        animation: pulse 3s infinite;
+        /* Tăng thời gian pulse để ít gây chú ý hơn */
+    }
+
+    .chat-icon:hover {
+        transform: scale(1.05);
+        /* Giảm scale khi hover */
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .chat-icon i {
+        color: white;
+        font-size: 20px;
+        /* Giảm từ 24px xuống 20px */
+    }
+
+    .chat-badge {
+        position: absolute;
+        top: -3px;
+        /* Điều chỉnh vị trí */
+        right: -3px;
+        background: #ff4757;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        /* Giảm từ 20px xuống 18px */
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        /* Giảm từ 12px xuống 10px */
+        font-weight: bold;
+        border: 2px solid white;
+        /* Thêm border trắng để nổi bật hơn */
+    }
+
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+        }
+
+        50% {
+            box-shadow: 0 3px 15px rgba(102, 126, 234, 0.3);
+            /* Giảm opacity */
+        }
+
+        100% {
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.12);
+        }
+    }
+
+    /* Chat Box - Smaller */
+    .chat-box {
+        position: absolute;
+        bottom: 65px;
+        /* Giảm từ 80px xuống 65px */
+        right: 0;
+        width: 320px;
+        /* Giảm từ 350px xuống 320px */
+        height: 400px;
+        /* Giảm từ 450px xuống 400px */
+        background: white;
+        border-radius: 12px;
+        /* Giảm border-radius */
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        /* Giảm shadow */
+        display: none;
+        flex-direction: column;
+        overflow: hidden;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .chat-box.active {
+        display: flex;
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    /* Chat Header - Smaller */
+    .chat-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 16px;
+        /* Giảm padding */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .chat-header-info {
+        display: flex;
+        align-items: center;
+    }
+
+    .chat-avatar {
+        width: 32px;
+        /* Giảm từ 40px xuống 32px */
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 10px;
+        /* Giảm margin */
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .chat-header-text h4 {
+        margin: 0;
+        font-size: 14px;
+        /* Giảm từ 16px xuống 14px */
+        font-weight: 600;
+    }
+
+    .chat-status {
+        font-size: 11px;
+        /* Giảm từ 12px xuống 11px */
+        opacity: 0.8;
+    }
+
+    .chat-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        /* Giảm từ 18px xuống 16px */
+        cursor: pointer;
+        padding: 4px;
+        /* Giảm padding */
+        border-radius: 50%;
+        transition: background 0.3s ease;
+        width: 28px;
+        /* Thêm width/height cố định */
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .chat-close:hover {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Chat Messages - Smaller */
+    .chat-messages {
+        flex: 1;
+        padding: 16px;
+        /* Giảm từ 20px xuống 16px */
+        overflow-y: auto;
+        background: #f8f9fa;
+    }
+
+    .message {
+        margin-bottom: 12px;
+        /* Giảm từ 15px xuống 12px */
+        display: flex;
+    }
+
+    .message.received {
+        justify-content: flex-start;
+    }
+
+    .message.sent {
+        justify-content: flex-end;
+    }
+
+    .message-content {
+        max-width: 75%;
+        /* Tăng từ 70% lên 75% để tận dụng không gian */
+        position: relative;
+    }
+
+    .message.received .message-content {
+        background: white;
+        padding: 10px 14px;
+        /* Giảm padding */
+        border-radius: 16px 16px 16px 4px;
+        /* Giảm border-radius */
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        /* Giảm shadow */
+    }
+
+    .message.sent .message-content {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 14px;
+        /* Giảm padding */
+        border-radius: 16px 16px 4px 16px;
+        /* Giảm border-radius */
+    }
+
+    .message-content p {
+        margin: 0;
+        font-size: 13px;
+        /* Giảm từ 14px xuống 13px */
+        line-height: 1.4;
+    }
+
+    .message-time {
+        font-size: 10px;
+        /* Giảm từ 11px xuống 10px */
+        opacity: 0.7;
+        display: block;
+        margin-top: 4px;
+        /* Giảm margin */
+    }
+
+    /* Chat Input - Smaller */
+    .chat-input-container {
+        padding: 12px 16px;
+        /* Giảm padding */
+        background: white;
+        border-top: 1px solid #eee;
+    }
+
+    .chat-input-wrapper {
+        display: flex;
+        align-items: center;
+        background: #f1f3f4;
+        border-radius: 20px;
+        /* Giảm border-radius */
+        padding: 4px;
+        /* Giảm padding */
+    }
+
+    .chat-input {
+        flex: 1;
+        border: none;
+        background: none;
+        padding: 8px 12px;
+        /* Giảm padding */
+        font-size: 13px;
+        /* Giảm font-size */
+        outline: none;
+    }
+
+    .chat-send {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        width: 30px;
+        /* Giảm từ 35px xuống 30px */
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .chat-send:hover {
+        transform: scale(1.05);
+        /* Giảm scale */
+    }
+
+    .chat-send i {
+        font-size: 12px;
+        /* Thêm font-size cho icon */
+    }
+
+    /* Responsive - Updated */
+    @media (max-width: 768px) {
+        .chat-widget {
+            bottom: 15px;
+            right: 15px;
+        }
+
+        .chat-icon {
+            width: 45px;
+            /* Giảm thêm trên mobile */
+            height: 45px;
+        }
+
+        .chat-icon i {
+            font-size: 18px;
+        }
+
+        .chat-badge {
+            width: 16px;
+            height: 16px;
+            font-size: 9px;
+            top: -2px;
+            right: -2px;
+        }
+
+        .chat-box {
+            width: 280px;
+            /* Giảm width trên tablet */
+            height: 350px;
+            /* Giảm height */
+            bottom: 55px;
+            right: -5px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .chat-widget {
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .chat-icon {
+            width: 40px;
+            /* Nhỏ hơn nữa trên mobile */
+            height: 40px;
+        }
+
+        .chat-icon i {
+            font-size: 16px;
+        }
+
+        .chat-badge {
+            width: 14px;
+            height: 14px;
+            font-size: 8px;
+        }
+
+        .chat-box {
+            width: calc(100vw - 30px);
+            /* Full width trừ margin */
+            right: -10px;
+            left: 10px;
+            height: 300px;
+            /* Giảm height trên mobile */
+            bottom: 50px;
+        }
+
+        .chat-header {
+            padding: 10px 12px;
+        }
+
+        .chat-avatar {
+            width: 28px;
+            height: 28px;
+        }
+
+        .chat-header-text h4 {
+            font-size: 13px;
+        }
+
+        .chat-status {
+            font-size: 10px;
+        }
+
+        .chat-messages {
+            padding: 12px;
+        }
+
+        .message-content p {
+            font-size: 12px;
+        }
+
+        .message-time {
+            font-size: 9px;
+        }
+
+        .chat-input-container {
+            padding: 10px 12px;
+        }
+
+        .chat-input {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .chat-send {
+            width: 26px;
+            height: 26px;
+        }
+
+        .chat-send i {
+            font-size: 11px;
+        }
+    }
+
+    /* Scrollbar styling - Thinner */
+    .chat-messages::-webkit-scrollbar {
+        width: 3px;
+        /* Giảm từ 4px xuống 3px */
+    }
+
+    .chat-messages::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 2px;
+    }
+
+    .chat-messages::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+    }
+
+    /* Thêm CSS để tránh xung đột với các element khác */
+    .chat-widget * {
+        box-sizing: border-box;
+    }
+
+    /* Đảm bảo chat widget không ảnh hưởng đến layout */
+    .chat-widget {
+        pointer-events: auto;
+    }
+
+    .chat-widget .chat-box {
+        pointer-events: auto;
+    }
+
+    /* Tránh chat widget đè lên các nút quan trọng */
+    @media (max-width: 768px) {
+
+        /* Nếu có nút ở góc dưới phải, có thể điều chỉnh vị trí chat */
+        .chat-widget {
+            bottom: 80px;
+            /* Tăng khoảng cách từ đáy nếu cần */
+        }
+    }
+</style>
 
 <body>
     <!-- NAVBAR -->
@@ -17,6 +464,15 @@
 
     <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
+
+    <!-- FORGOTPASSWORD MODAL -->
+    <div th:replace="~{/layouts/modal_quen_MK}"></div>
+
+    <!-- VERIFICATION MODAL -->
+    <div th:replace="~{/layouts/modalOTP}"></div>
+
+    <!-- RESET PASSWORD MODAL -->
+    <div th:replace="~{/layouts/resetPasswordModal}"></div>
 
 
     <!-- Slder -->
@@ -35,7 +491,7 @@
                                     <p class="slide-description">Khám phá hàng ngàn phòng trọ chất lượng với giá cả phải
                                         chăng</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-search"></i> Tìm kiếm ngay
+                                        <i class="fas fa-search me-2"></i> Tìm kiếm ngay
                                     </button>
                                 </div>
                             </div>
@@ -53,7 +509,7 @@
                                     <h2 class="slide-title">Căn Hộ Cao Cấp</h2>
                                     <p class="slide-description">Không gian sống hiện đại với đầy đủ tiện nghi</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </div>
                             </div>
@@ -71,7 +527,7 @@
                                     <h2 class="slide-title">Nhà Nguyên Căn</h2>
                                     <p class="slide-description">Sự riêng tư tuyệt đối cho gia đình bạn</p>
                                     <button class="btn btn-primary btn-lg slide-btn">
-                                        <i class="fas fa-home"></i> Khám phá
+                                        <i class="fas fa-home me-2"></i> Khám phá
                                     </button>
                                 </div>
                             </div>
@@ -86,6 +542,36 @@
 
             <!-- Pagination -->
             <div class="swiper-pagination"></div>
+        </div>
+    </section>
+
+    <div th:replace="~{/layouts/loc-danhmuc}"></div>
+    <section class="owner-register-section">
+        <div class="owner-register-container">
+            <div class="owner-register-left">
+                <h1 class="owner-title">Bạn là chủ nhà?</h1>
+                <p class="owner-subtitle">Đăng ký để quản lý hiệu quả và tăng doanh thu!</p>
+                <ul class="owner-benefits">
+                    <li><i class="fa-solid fa-check"></i> Miễn phí đăng tin 30 ngày đầu</li>
+                    <li><i class="fa-solid fa-check"></i> Công cụ quản lý hiện đại</li>
+                    <li><i class="fa-solid fa-check"></i> Hỗ trợ 24/7</li>
+                </ul>
+                <a href="/dang-ky-chu-tro">
+                    <button class="owner-register-btn"><i class="fa-solid fa-plus"></i> Đăng ký ngay</button>
+                </a>
+
+            </div>
+
+            <div class="owner-register-right">
+                <img th:src="@{/images/slider/slider4.jpg}" alt="Hình ảnh nhà" class="owner-house-image">
+                <div class="owner-revenue-box">
+                    <div class="owner-revenue-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="owner-revenue-text">
+                        <p class="owner-revenue-title">Doanh thu tăng</p>
+                        <p class="owner-revenue-percent">+35% so với tháng trước</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -109,9 +595,6 @@
                                 alt="Hình ảnh bài viết" class="card-img-top" style="height: 200px; object-fit: cover;">
 
                             <div class="card-overlay">
-                                <button class="btn-favorite">
-                                    <i class="far fa-heart"></i>
-                                </button>
                                 <div class="card-badges">
                                     <span class="badge badge-featured" th:if="${post.approvalStatus == 'APPROVED'}">Nổi
                                         bật</span>
@@ -135,8 +618,8 @@
                             </div>
                             <div class="property-location">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span th:text="${post.address != null ? 
-                        post.address.street + ', ' + 
+                                <span th:text="${post.address != null ?
+                        post.address.street + ', ' +
                         post.address.ward.name + ', ' +
                         post.address.ward.district.name + ', ' +
                         post.address.ward.district.province.name : 'Chưa xác định'}">
@@ -152,12 +635,14 @@
                                 </span>
                             </div>
                             <div class="card-actions">
-                                <button class="btn btn-contact">
-                                    <i class="fas fa-phone"></i> Liên hệ
+                                <button class="btn btn-contact"
+                                    th:attr="data-phone=${post.user != null ? post.user.phone : ''}">
+                                    <i class="fas fa-phone me-2"></i> <span class="btn-text">Liên hệ</span>
                                 </button>
+
                                 <a th:href="@{'/chi-tiet/' + ${post.postId}}">
                                     <button class="btn btn-view">
-                                        <i class="fas fa-eye"></i> Xem chi tiết
+                                        <i class="fas fa-eye me-2"></i> Xem chi tiết
                                     </button>
                                 </a>
                             </div>
@@ -169,13 +654,316 @@
             <!-- View More Button -->
             <div class="row mt-5">
                 <div class="col-12 text-center">
-                    <button class="btn btn-view-more">
-                        <i class="fas fa-plus"></i> Xem thêm
-                    </button>
+                    <a th:href="@{/tat-ca-phong-tro}">
+                        <button class="btn btn-view-more">
+                            <i class="fas fa-plus"></i> Xem tất cả phòng
+                        </button>
+                    </a>
                 </div>
             </div>
         </div>
     </section>
+
+    <!-- Interior Showcase Section -->
+    <section class="interior-showcase-index">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="showcase-title-index">Khám phá không gian sống lý tưởng</h2>
+                <p class="showcase-subtitle-index">Hàng ngàn phòng trọ chất lượng cao đang chờ bạn</p>
+            </div>
+
+            <div class="row g-2">
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh1.jpg}" alt="Phòng khách hiện đại" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh2.jpg}" alt="Phòng ăn sang trọng" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh3.jpg}" alt="Phòng ngủ thoải mái" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh4.jpg}" alt="Không gian sống hiện đại"
+                            class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh5.jpg}" alt="Phòng khách tối giản" class="interior-img-index">
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="interior-card-index">
+                        <img th:src="@{/images/banner/anh6.jpg}" alt="Không gian xanh" class="interior-img-index">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div th:replace="~{/layouts/footer}"></div>
+    <script>
+        function applySearch() {
+            // Lấy giá trị các bộ lọc
+            const provinceCode = document.getElementById("provinceSelect").value;
+            const districtCode = document.getElementById("districtSelect").value;
+            const wardCode = document.getElementById("wardSelect").value;
+
+            const searchTerm = document.getElementById("searchInput").value.trim();
+
+            const selectedPriceRadio = document.querySelector('input[name="price"]:checked');
+            const priceValue = selectedPriceRadio ? selectedPriceRadio.value : "";
+
+            // Tạo URL chuyển hướng
+            let url = "/tat-ca-phong-tro?";
+            const params = [];
+
+            if (provinceCode) params.push("provinceCode=" + encodeURIComponent(provinceCode));
+            if (districtCode) params.push("districtCode=" + encodeURIComponent(districtCode));
+            if (wardCode) params.push("wardCode=" + encodeURIComponent(wardCode));
+            if (searchTerm) params.push("search=" + encodeURIComponent(searchTerm));
+            if (priceValue) params.push("priceRange=" + encodeURIComponent(priceValue));
+
+            url += params.join("&");
+
+            // Điều hướng sang trang lọc kết quả
+            window.location.href = url;
+        }
+
+        // Nếu bạn muốn xử lý luôn khi nhấn "Tìm ngay" trong dropdown
+        function applyLocationFilter() {
+            applySearch(); // Gọi chung 1 hàm để đảm bảo logic giống nhau
+        }
+
+        // Nếu bạn muốn xử lý mức giá riêng
+        function applyPriceFilter() {
+            applySearch();
+        }
+
+
+        // Chat Widget JavaScript
+        document.addEventListener('DOMContentLoaded', function () {
+            const chatIcon = document.getElementById('chatIcon');
+            const chatBox = document.getElementById('chatBox');
+            const chatClose = document.getElementById('chatClose');
+            const chatInput = document.getElementById('chatInput');
+            const chatSend = document.getElementById('chatSend');
+            const chatMessages = document.getElementById('chatMessages');
+            const chatBadge = document.getElementById('chatBadge');
+
+            let isOpen = false;
+            let stompClient = null;
+            let connected = false;
+            let currentUserId = 'user_' + Math.random().toString(36).substr(2, 9); // Generate random user ID
+
+            // WebSocket Connection Setup
+            function connectWebSocket() {
+                const socket = new SockJS('/ws');
+                stompClient = Stomp.over(socket);
+
+                stompClient.connect({}, function(frame) {
+                    console.log('Connected to WebSocket: ' + frame);
+                    connected = true;
+                    updateChatStatus('Đang hoạt động');
+
+                    // Subscribe to receive messages
+                    stompClient.subscribe('/topic/messages', function(message) {
+                        const messageData = JSON.parse(message.body);
+                        if (messageData.sender !== currentUserId) {
+                            addMessage(messageData.content, 'received', messageData.timestamp);
+
+                            // Show notification badge if chat is closed
+                            if (!isOpen) {
+                                showNotificationBadge();
+                            }
+                        }
+                    });
+
+                    // Send welcome message from server
+                    setTimeout(() => {
+                        addMessage('Xin chào! Tôi có thể giúp gì cho bạn?', 'received');
+                    }, 1000);
+
+                }, function(error) {
+                    console.log('WebSocket connection error: ' + error);
+                    connected = false;
+                    updateChatStatus('Mất kết nối');
+
+                    // Retry connection after 3 seconds
+                    setTimeout(connectWebSocket, 3000);
+                });
+            }
+
+            // Update chat status
+            function updateChatStatus(status) {
+                const statusElement = document.querySelector('.chat-status');
+                if (statusElement) {
+                    statusElement.textContent = status;
+                }
+            }
+
+            // Show notification badge
+            function showNotificationBadge() {
+                chatBadge.style.display = 'flex';
+                const currentCount = parseInt(chatBadge.textContent) || 0;
+                chatBadge.textContent = currentCount + 1;
+            }
+
+            // Toggle chat box
+            function toggleChat() {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    chatBox.classList.add('active');
+                    chatBadge.style.display = 'none';
+                    chatBadge.textContent = '0';
+                } else {
+                    chatBox.classList.remove('active');
+                }
+            }
+
+            // Close chat
+            function closeChat() {
+                isOpen = false;
+                chatBox.classList.remove('active');
+            }
+
+            // Send message via WebSocket
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (message && connected && stompClient) {
+                    const messageData = {
+                        content: message,
+                        sender: currentUserId,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Send to server
+                    stompClient.send('/app/sendMessage', {}, JSON.stringify(messageData));
+
+                    // Add to local chat
+                    addMessage(message, 'sent');
+                    chatInput.value = '';
+                } else if (!connected) {
+                    addMessage('Đang kết nối lại... Vui lòng thử lại sau.', 'received');
+                }
+            }
+
+            // Add message to chat
+            function addMessage(text, type, timestamp = null) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${type}`;
+
+                const messageTime = timestamp ?
+                    new Date(timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) :
+                    new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                messageDiv.innerHTML = `
+            <div class="message-content">
+                <p>${text}</p>
+                <span class="message-time">${messageTime}</span>
+            </div>
+        `;
+
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Event listeners
+            chatIcon.addEventListener('click', toggleChat);
+            chatClose.addEventListener('click', closeChat);
+            chatSend.addEventListener('click', sendMessage);
+
+            // Send message on Enter key
+            chatInput.addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Close chat when clicking outside
+            document.addEventListener('click', function (e) {
+                if (isOpen && !chatBox.contains(e.target) && !chatIcon.contains(e.target)) {
+                    closeChat();
+                }
+            });
+
+            // Initialize WebSocket connection
+            connectWebSocket();
+
+            // Auto show welcome badge after 3 seconds
+            setTimeout(() => {
+                if (!isOpen) {
+                    chatBadge.style.display = 'flex';
+                }
+            }, 3000);
+
+            // Cleanup on page unload
+            window.addEventListener('beforeunload', function() {
+                if (stompClient && connected) {
+                    stompClient.disconnect();
+                }
+            });
+        });
+
+    </script>
+
+    <!-- Include favorite handler -->
+    <script src="/js/favorite-handler.js"></script>
+
+    <!-- Chat Widget -->
+    <div class="chat-widget">
+        <!-- Chat Icon -->
+        <div class="chat-icon" id="chatIcon">
+            <i class="fas fa-comments"></i>
+            <span class="chat-badge" id="chatBadge">3</span>
+        </div>
+
+        <!-- Chat Box -->
+        <div class="chat-box" id="chatBox">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <img src="/images/avatar/support-avatar.jpg" alt="Support" class="chat-avatar">
+                    <div class="chat-header-text">
+                        <h4>Hỗ trợ khách hàng</h4>
+                        <span class="chat-status">Đang hoạt động</span>
+                    </div>
+                </div>
+                <button class="chat-close" id="chatClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message received">
+                    <div class="message-content">
+                        <p>Xin chào! Tôi có thể giúp gì cho bạn?</p>
+                        <span class="message-time">10:30</span>
+                    </div>
+                </div>
+                <div class="message received">
+                    <div class="message-content">
+                        <p>Bạn cần hỗ trợ tìm phòng trọ phù hợp không?</p>
+                        <span class="message-time">10:31</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="chat-input-wrapper">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Nhập tin nhắn...">
+                    <button class="chat-send" id="chatSend">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 

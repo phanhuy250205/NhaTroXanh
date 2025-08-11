@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết đăng ký chủ trọ</title>
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
+    <link rel="stylesheet" th:href="@{/css/QL-chu-tro.css}" />
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+</head>
+<style>
+    /* ===== Main Layout ===== */
+    .management-body-staff {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+    }
+
+    .main-content-staff {
+        transition: all 0.3s;
+    }
+
+    @media (max-width: 992px) {
+        .main-content-staff {
+            margin-left: 0;
+            padding: 20px;
+        }
+    }
+
+    /* ===== Page Header ===== */
+    .page-header-staff {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #e0e6ed;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .page-title-staff {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .page-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+
+    .btn-back {
+        background-color: #6c757d;
+        color: white;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-back:hover {
+        background-color: #5a6268;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .approval-buttons {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        transform: translateY(-2px);
+    }
+
+    /* ===== Detail Sections ===== */
+    .detail-section-staff {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 25px;
+    }
+
+    .detail-section-title-staff {
+        font-size: 18px;
+        font-weight: 600;
+        color: #3498db;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .detail-section-title-staff i {
+        margin-right: 10px;
+        color: #3498db;
+    }
+
+    .detail-info-staff {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .detail-row-staff {
+        display: flex;
+        align-items: flex-start;
+    }
+
+    .detail-row-staff label {
+        font-weight: 500;
+        color: #555;
+        min-width: 180px;
+        margin-right: 15px;
+    }
+
+    .detail-row-staff span {
+        color: #2c3e50;
+        word-break: break-word;
+        flex: 1;
+    }
+
+    /* ===== Document Images ===== */
+    .document-images-staff {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .document-image-item-staff {
+        position: relative;
+        width: calc(50% - 10px);
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s;
+    }
+
+    .document-image-item-staff:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .document-image-item-staff a {
+        display: block;
+        position: relative;
+    }
+
+    .document-image-item-staff img {
+        width: 100%;
+        height: 300px;
+        object-fit: contain;
+        display: block;
+    }
+
+    .document-image-overlay-staff {
+        position: absolute;
+        top: 140px;
+        left: 317px;
+        width: 118%;
+        height: 215%;
+        background-color: rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .document-image-overlay-staff i {
+        color: white;
+        font-size: 30px;
+    }
+
+    .document-image-item-staff:hover .document-image-overlay-staff {
+        opacity: 1;
+    }
+
+    .document-image-label-staff {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 8px;
+        text-align: center;
+        font-size: 14px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .page-header-staff {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .page-header-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .approval-buttons {
+            width: 100%;
+            justify-content: flex-end;
+        }
+
+        .document-image-item-staff {
+            width: 100%;
+        }
+
+        .detail-row-staff {
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .detail-row-staff label {
+            min-width: auto;
+            margin-right: 0;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .main-content-staff {
+            padding: 15px;
+        }
+
+        .detail-section-staff {
+            padding: 15px;
+        }
+
+        .page-header-actions {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .approval-buttons {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .btn-back,
+        .btn-danger,
+        .btn-success {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+
+<body class="management-body-staff">
+    <div th:replace="~{/layouts/sidebar-staff}"></div>
+    <div class="main-content-staff" id="main-content">
+        <div class="page-header-staff">
+            <h1 class="page-title-staff">Chi tiết đăng ký chủ trọ</h1>
+
+            <div class="page-header-actions">
+                <a th:href="@{/nhan-vien/chu-tro(activeTab='approve', approvalPage=${approvalPage}, approvalSearch=${approvalSearch})}"
+                    class="btn btn-secondary btn-back">
+                    <i class="fas fa-arrow-left"></i> Quay lại
+                </a>
+
+                <div class="approval-buttons">
+                    <form th:if="${user != null}" th:action="@{/nhan-vien/chu-tro/reject-owner/__${user.userId}__}"
+                        method="post" style="display: inline;">
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <input type="hidden" name="approvalSearch" th:value="${approvalSearch}" />
+                        <input type="hidden" name="activeTab" value="approve" />
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-times-circle"></i> Từ chối
+                        </button>
+                    </form>
+                    <form th:if="${user != null}" th:action="@{/nhan-vien/chu-tro/approve-owner/__${user.userId}__}"
+                        method="post" style="display: inline;">
+                        <input type="hidden" name="userId" th:value="${user.userId}" />
+                        <input type="hidden" name="approvalPage" th:value="${approvalPage}" />
+                        <input type="hidden" name="approvalSearch" th:value="${approvalSearch}" />
+                        <input type="hidden" name="activeTab" value="approve" />
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check-circle"></i> Phê duyệt
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Content -->
+        <div class="detail-section-staff">
+            <div class="row">
+                <!-- Personal Information -->
+                <div class="col-md-6">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-user"></i>
+                            Thông tin cá nhân
+                        </h6>
+                        <div class="detail-info-staff">
+                            <div class="detail-row-staff">
+                                <label>Họ và tên:</label>
+                                <span th:text="${user != null} ? ${user.fullname} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Ngày sinh:</label>
+                                <span th:text="${user != null} ? ${user.birthday} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Giới tính:</label>
+                                <span
+                                    th:text="${user != null and user.gender != null} ? (${user.gender} ? 'Nam' : 'Nữ') : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Số CCCD:</label>
+                                <span th:text="${cccd != null} ? ${cccd.cccdNumber} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Ngày cấp CCCD:</label>
+                                <span th:text="${cccd != null} ? ${cccd.issueDate} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Nơi cấp:</label>
+                                <span th:text="${cccd != null} ? ${cccd.issuePlace} : '-'">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="col-md-6">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-phone"></i>
+                            Thông tin liên hệ
+                        </h6>
+                        <div class="detail-info-staff">
+                            <div class="detail-row-staff">
+                                <label>Số điện thoại:</label>
+                                <span th:text="${user != null} ? ${user.phone} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Email:</label>
+                                <span th:text="${user != null} ? ${user.email} : '-'">-</span>
+                            </div>
+                            <div class="detail-row-staff">
+                                <label>Địa chỉ thường trú:</label>
+                                <span th:text="${user != null} ? ${user.address} : '-'">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Document Images -->
+            <div class="row mt-3">
+                <div class="col-12">
+                    <div class="detail-section-staff">
+                        <h6 class="detail-section-title-staff">
+                            <i class="fas fa-images"></i>
+                            Hình ảnh giấy tờ
+                        </h6>
+                        <div class="document-images-staff">
+                            <div th:if="${cccd != null and cccd.frontImageUrl != null}"
+                                class="document-image-item-staff">
+                                <a th:href="@{${cccd.frontImageUrl}}" target="_blank">
+                                    <img th:src="@{${cccd.frontImageUrl}}" alt="CCCD mặt trước">
+                                    <div class="document-image-overlay-staff">
+                                        <i class="fas fa-search-plus"></i>
+                                    </div>
+                                    <div class="document-image-label-staff">CCCD mặt trước</div>
+                                </a>
+                            </div>
+                            <div th:if="${cccd != null and cccd.backImageUrl != null}"
+                                class="document-image-item-staff">
+                                <a th:href="@{${cccd.backImageUrl}}" target="_blank">
+                                    <img th:src="@{${cccd.backImageUrl}}" alt="CCCD mặt sau">
+                                    <div class="document-image-overlay-staff">
+                                        <i class="fas fa-search-plus"></i>
+                                    </div>
+                                    <div class="document-image-label-staff">CCCD mặt sau</div>
+                                </a>
+                            </div>
+                            <div th:if="${cccd == null or (cccd.frontImageUrl == null and cccd.backImageUrl == null)}"
+                                class="text-center">
+                                <p>Không có hình ảnh giấy tờ.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:src="@{/js/sidebar.js}"></script>
+</body>
+
+</html>
