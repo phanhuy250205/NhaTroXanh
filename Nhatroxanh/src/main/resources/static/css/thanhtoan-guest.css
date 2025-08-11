@@ -1420,3 +1420,26 @@
         font-size: 0.75rem;
     }
 }
+
+#customConfirmationModal .modal-content {
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+#customConfirmationModal .btn-primary {
+    background-color: #4e73df;
+    border-color: #4e73df;
+    min-width: 120px;
+}
+
+#customConfirmationModal .btn-secondary {
+    min-width: 120px;
+}
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: stretch;
+    width: 100%;
+    gap: 10px;
+}

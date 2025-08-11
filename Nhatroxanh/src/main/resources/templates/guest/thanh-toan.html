@@ -350,15 +350,22 @@
                                     <p id="voucherError" class="text-danger" style="display: none;"></p>
                                     <input type="hidden" id="appliedDiscount" value="0">
                                 </div>
-                                <div class="invoice-total-guest">
-                                    <div class="summary-total">
-                                        <p>Tổng cộng ban đầu: <span id="originalTotal"
-                                                th:text="${totalAmount} ?: '0 VNĐ'"></span></p>
-                                        <p>Giảm giá voucher: <span id="discountAmount">0 VNĐ</span></p>
-                                        <p>Tổng thanh toán: <span id="finalTotal"
-                                                th:text="${totalAmount} ?: '0 VNĐ'"></span></p>
-                                    </div>
-                                </div>
+                                <table class="invoice-table-guest">
+                                    <tr>
+                                        <td>Tổng cộng ban đầu:</td>
+                                        <td id="originalTotal" th:text="${totalAmount} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                    <tr>
+                                      <td>Giảm giá voucher:</td>
+                                        <td  id="discountAmount">0 VNĐ</td>
+                                    </tr>
+                                    <tr>
+                                       <td>Tổng thanh toán:</td>
+                                        <td id="finalTotal"
+                                                th:text="${totalAmount} ?: '0 VNĐ'"></td>
+                                    </tr>
+                                </table>
+                            
                             </div>
                         </div>
                     </div>
@@ -488,11 +495,7 @@
             if (invoiceId && roomId) {
                 fetch(`/api/rooms/${roomId}`)
                     .then(response => response.json())
-                    .then(roomData => {
-                        if (roomData) {
-                            document.getElementById('roomName').textContent = roomData.namerooms || 'Không xác định';
-                        }
-                    })
+
                     .catch(error => console.error('Error fetching room data:', error));
             }
             if (invoiceId) {
@@ -694,7 +697,12 @@
             const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
             const paymentBtn = document.getElementById('paymentBtn');
 
-            // Handle e-wallet payments separately
+            // Get payment details for confirmation
+            const totalAmountElement = document.getElementById('finalTotal');
+            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
+            const numericAmount = totalAmountElement ? totalAmountElement.textContent.replace(/[^\d]/g, '') : '0';
+
+            // Handle e-wallet payments with confirmation modal
             if (selectedMethod.value === 'ewallet') {
                 const selectedWallet = document.querySelector('input[name="wallet"]:checked');
                 if (!selectedWallet) {
@@ -702,38 +710,58 @@
                     return;
                 }
 
-                if (selectedWallet.value === 'momo') {
-                    processMoMoPayment(invoiceId, paymentBtn);
-                    return;
-                } else if (selectedWallet.value === 'vnpay') {
-                    processVNPayPayment(invoiceId, paymentBtn);
-                    return;
-                } else if (selectedWallet.value === 'zalopay') {
-                    processZaloPayPayment(invoiceId, paymentBtn);
-                    return;
-                }
+                const walletName = selectedWallet.value === 'momo' ? 'MoMo' : 
+                                 selectedWallet.value === 'vnpay' ? 'VNPay' : 'ZaloPay';
+                
+                showConfirmationModal(numericAmount, null, null, `ví điện tử ${walletName}`, () => {
+                    if (selectedWallet.value === 'momo') {
+                        processMoMoPayment(invoiceId, paymentBtn);
+                    } else if (selectedWallet.value === 'vnpay') {
+                        processVNPayPayment(invoiceId, paymentBtn);
+                    } else if (selectedWallet.value === 'zalopay') {
+                        processZaloPayPayment(invoiceId, paymentBtn);
+                    }
+                });
+                return;
             }
 
-            // Prepare form data for cash and bank payments
+            // Handle cash payments with confirmation modal
+            if (selectedMethod.value === 'cash') {
+                const paymentDate = document.getElementById('paymentDate').value;
+                const paymentTime = document.getElementById('paymentTime').value;
+                
+                showConfirmationModal(numericAmount, paymentDate, paymentTime, 'tiền mặt', () => {
+                    processCashPayment(invoiceId, roomId, hostelId, addressId, paymentDate, paymentTime);
+                });
+                return;
+            }
+
+            // Handle bank payments with confirmation modal
+            if (selectedMethod.value === 'bank') {
+                showConfirmationModal(numericAmount, null, null, 'chuyển khoản ngân hàng', () => {
+                    processBankPayment(invoiceId, roomId, hostelId, addressId);
+                });
+                return;
+            }
+        }
+
+        // Separate function for cash payment processing
+        function processCashPayment(invoiceId, roomId, hostelId, addressId, paymentDate, paymentTime) {
+            const paymentBtn = document.getElementById('paymentBtn');
+            const originalButtonText = paymentBtn.innerHTML;
+            
+            // Prepare form data for cash payment
             let formData = new FormData();
             formData.append('invoiceId', invoiceId);
             if (roomId) formData.append('room_id', roomId);
             if (hostelId) formData.append('hostel_id', hostelId);
             if (addressId) formData.append('address_id', addressId);
-
-            // Set payment method correctly
-            if (selectedMethod.value === 'cash') {
-                formData.append('paymentMethod', 'cash');
-                const paymentDate = document.getElementById('paymentDate').value;
-                const paymentTime = document.getElementById('paymentTime').value;
-                const paymentNote = document.getElementById('paymentNote').value || '';
-
-                formData.append('paymentDate', paymentDate);
-                formData.append('paymentTime', paymentTime);
-                formData.append('paymentNote', paymentNote);
-            } else if (selectedMethod.value === 'bank') {
-                formData.append('paymentMethod', 'bank');
-            }
+            formData.append('paymentMethod', 'cash');
+            formData.append('paymentDate', paymentDate);
+            formData.append('paymentTime', paymentTime);
+            
+            const paymentNote = document.getElementById('paymentNote').value || '';
+            formData.append('paymentNote', paymentNote);
 
             // Add voucher code if present
             const voucherCode = document.getElementById('voucherCode').value.trim();
@@ -741,117 +769,138 @@
                 formData.append('voucherCode', voucherCode);
             }
 
-            // Create confirmation message
-            const totalAmountElement = document.getElementById('finalTotal');
-            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
-            let message = `Xác nhận thanh toán ${totalAmount} bằng `;
+            // Update button state
+            paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            paymentBtn.disabled = true;
 
-            switch (selectedMethod.value) {
-                case 'bank':
-                    message += 'chuyển khoản ngân hàng?';
-                    break;
-                case 'cash':
-                    const paymentDate = document.getElementById('paymentDate').value;
-                    const paymentTime = document.getElementById('paymentTime').value;
-                    message += `tiền mặt vào ngày ${formatDate(paymentDate)} lúc ${paymentTime}?`;
-                    break;
-                default:
-                    message += 'phương thức đã chọn?';
+            fetch('/thanh-toan', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        if (data.appointmentScheduled) {
+                            // Handle cash payment appointment scheduling
+                            paymentBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Đã đặt lịch thành công!';
+                            paymentBtn.classList.remove('btn-primary-guest');
+                            paymentBtn.classList.add('btn-success-guest');
+
+                            const totalAmountElement = document.getElementById('finalTotal');
+                            const totalAmount = totalAmountElement ? totalAmountElement.textContent : '0 VNĐ';
+
+                            // Show success modal for cash payment
+                            showCashPaymentSuccessModal(paymentDate, paymentTime, totalAmount, data.message);
+
+                            // Reset form after showing modal
+                            setTimeout(() => {
+                                resetPaymentForm();
+                            }, 3000);
+                        } else {
+                            handleSuccessfulPayment(data, paymentBtn);
+                        }
+                    } else {
+                        handlePaymentError(data, paymentBtn, originalButtonText, invoiceId);
+                    }
+                })
+                .catch(error => {
+                    handlePaymentError({ error: 'Lỗi kết nối mạng' }, paymentBtn, originalButtonText, invoiceId);
+                });
+        }
+
+        // Separate function for bank payment processing
+        function processBankPayment(invoiceId, roomId, hostelId, addressId) {
+            const paymentBtn = document.getElementById('paymentBtn');
+            const originalButtonText = paymentBtn.innerHTML;
+            
+            // Prepare form data for bank payment
+            let formData = new FormData();
+            formData.append('invoiceId', invoiceId);
+            if (roomId) formData.append('room_id', roomId);
+            if (hostelId) formData.append('hostel_id', hostelId);
+            if (addressId) formData.append('address_id', addressId);
+            formData.append('paymentMethod', 'bank');
+
+            // Add voucher code if present
+            const voucherCode = document.getElementById('voucherCode').value.trim();
+            if (voucherCode) {
+                formData.append('voucherCode', voucherCode);
             }
 
-            if (confirm(message)) {
-                // Update button state
-                const originalButtonText = paymentBtn.innerHTML;
-                paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
-                paymentBtn.disabled = true;
+            // Update button state
+            paymentBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang xử lý...';
+            paymentBtn.disabled = true;
 
-                fetch('/thanh-toan', {
-                    method: 'POST',
-                    body: formData
+            fetch('/thanh-toan', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
                 })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok: ' + response.statusText);
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            if (selectedMethod.value === 'cash' && data.appointmentScheduled) {
-                                // Handle cash payment appointment scheduling
-                                paymentBtn.innerHTML = '<i class="fas fa-calendar-check me-2"></i>Đã đặt lịch thành công!';
-                                paymentBtn.classList.remove('btn-primary-guest');
-                                paymentBtn.classList.add('btn-success-guest');
+                .then(data => {
+                    if (data.success) {
+                        handleSuccessfulPayment(data, paymentBtn);
+                    } else {
+                        handlePaymentError(data, paymentBtn, originalButtonText, invoiceId);
+                    }
+                })
+                .catch(error => {
+                    handlePaymentError({ error: 'Lỗi kết nối mạng' }, paymentBtn, originalButtonText, invoiceId);
+                });
+        }
 
-                                // Get the actual values from the form elements
-                                const paymentDateValue = document.getElementById('paymentDate').value;
-                                const paymentTimeValue = document.getElementById('paymentTime').value;
+        // Helper function to handle successful payments
+        function handleSuccessfulPayment(data, paymentBtn) {
+            paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
+            paymentBtn.classList.remove('btn-primary-guest');
+            paymentBtn.classList.add('btn-success-guest');
 
-                                // Show success modal for cash payment and keep user on page
-                                showCashPaymentSuccessModal(paymentDateValue, paymentTimeValue, totalAmount, data.message);
+            showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn.', 'success');
 
-                                // Reset form after showing modal (optional)
-                                setTimeout(() => {
-                                    resetPaymentForm();
-                                }, 3000);
-                            } else {
-                                // Handle other payment methods (bank, etc.)
-                                paymentBtn.innerHTML = '<i class="fas fa-check me-2"></i>Thanh toán thành công!';
-                                paymentBtn.classList.remove('btn-primary-guest');
-                                paymentBtn.classList.add('btn-success-guest');
+            setTimeout(() => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    window.location.reload();
+                }
+            }, 2000);
+        }
 
-                                showAlert('Thanh toán thành công! Cảm ơn bạn đã thanh toán đúng hạn.', 'success');
+        // Helper function to handle payment errors
+        function handlePaymentError(data, paymentBtn, originalButtonText, invoiceId) {
+            const errorMessage = data.error || 'Thanh toán thất bại: Lỗi hệ thống.';
 
-                                setTimeout(() => {
-                                    if (data.redirectUrl) {
-                                        window.location.href = data.redirectUrl;
-                                    } else {
-                                        window.location.reload();
-                                    }
-                                }, 2000);
-                            }
-                        } else {
-                            // Handle different types of errors with appropriate styling
-                            const errorMessage = data.error || 'Thanh toán thất bại: Lỗi hệ thống.';
+            // Check if this is a duplicate appointment error
+            if (errorMessage.includes('đã được đặt lịch hẹn') || errorMessage.includes('đã được hẹn thanh toán')) {
+                showDuplicateAppointmentError(errorMessage);
+            } else if (errorMessage.includes('đã được thanh toán')) {
+                showAlreadyPaidError(errorMessage);
+            } else if (errorMessage.includes('đang chờ xác nhận')) {
+                showPendingConfirmationError(errorMessage);
+            } else {
+                showAlert(errorMessage, 'danger');
+            }
 
-                            // Check if this is a duplicate appointment error
-                            if (errorMessage.includes('đã được đặt lịch hẹn') || errorMessage.includes('đã được hẹn thanh toán')) {
-                                showDuplicateAppointmentError(errorMessage);
-                            } else if (errorMessage.includes('đã được thanh toán')) {
-                                showAlreadyPaidError(errorMessage);
-                            } else if (errorMessage.includes('đang chờ xác nhận')) {
-                                showPendingConfirmationError(errorMessage);
-                            } else {
-                                showAlert(errorMessage, 'danger');
-                            }
+            paymentBtn.innerHTML = originalButtonText;
+            paymentBtn.disabled = false;
 
-                            paymentBtn.innerHTML = originalButtonText;
-                            paymentBtn.disabled = false;
-
-                            // Don't redirect immediately for appointment-related errors
-                            if (!errorMessage.includes('đã được đặt lịch hẹn') &&
-                                !errorMessage.includes('đã được hẹn thanh toán') &&
-                                !errorMessage.includes('đang chờ xác nhận') &&
-                                data.failureUrl) {
-                                setTimeout(() => {
-                                    window.location.href = data.failureUrl;
-                                }, 3000);
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error processing payment:', error);
-                        showAlert('Thanh toán thất bại: Lỗi kết nối. Vui lòng thử lại.', 'danger');
-                        paymentBtn.innerHTML = originalButtonText;
-                        paymentBtn.disabled = false;
-
-                        // Redirect to failure page after showing error
-                        setTimeout(() => {
-                            if (invoiceId) {
-                                window.location.href = `/guest/failure-thanhtoan?invoiceId=${invoiceId}&errorMessage=${encodeURIComponent('Lỗi kết nối mạng')}`;
-                            }
-                        }, 3000);
-                    });
+            // Don't redirect immediately for appointment-related errors
+            if (!errorMessage.includes('đã được đặt lịch hẹn') &&
+                !errorMessage.includes('đã được hẹn thanh toán') &&
+                !errorMessage.includes('đang chờ xác nhận') &&
+                data.failureUrl) {
+                setTimeout(() => {
+                    window.location.href = data.failureUrl;
+                }, 3000);
             }
         }
 
@@ -1111,6 +1160,99 @@
                 }
             }, 5000);
         }
+        function showConfirmationModal(amount, paymentDate, paymentTime, paymentMethod, onConfirm) {
+            // Tạo modal HTML nếu chưa tồn tại
+            if (!document.getElementById('customConfirmationModal')) {
+                const modalHTML = `
+            <div class="modal fade" id="customConfirmationModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Xác nhận thanh toán
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="d-flex flex-column align-items-center text-center mb-3">
+                                <div class="confirmation-icon mb-3">
+                                    <i class="fas fa-money-check-alt text-primary" style="font-size: 4rem;"></i>
+                                </div>
+                                <div id="confirmationContent">
+                                    <!-- Content will be dynamically updated -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i>
+                                Hủy
+                            </button>
+                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn">
+                                <i class="fas fa-check me-1"></i>
+                                Xác nhận thanh toán
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            }
+
+            // Cập nhật nội dung modal dựa trên phương thức thanh toán
+            const confirmationContent = document.getElementById('confirmationContent');
+            let contentHTML = `
+                <h4 class="text-primary mb-3">Thông tin thanh toán</h4>
+                <div class="payment-details">
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Số tiền:</span>
+                        <span class="text-success fw-bold fs-5">${formatCurrency(amount)} VNĐ</span>
+                    </div>
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Phương thức:</span>
+                        <span class="text-primary fw-bold">${paymentMethod}</span>
+                    </div>
+            `;
+
+            // Thêm thông tin ngày giờ cho thanh toán tiền mặt
+            if (paymentDate && paymentTime) {
+                contentHTML += `
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Ngày thanh toán:</span>
+                        <span class="text-info">${formatDate(paymentDate)}</span>
+                    </div>
+                    <div class="detail-row mb-2">
+                        <span class="fw-bold">Giờ thanh toán:</span>
+                        <span class="text-info">${paymentTime}</span>
+                    </div>
+                `;
+            }
+
+            contentHTML += `
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <small>Vui lòng kiểm tra thông tin trước khi xác nhận thanh toán.</small>
+                </div>
+            `;
+
+            confirmationContent.innerHTML = contentHTML;
+
+            // Hiển thị modal
+            const modal = new bootstrap.Modal(document.getElementById('customConfirmationModal'));
+            modal.show();
+
+            // Xử lý sự kiện khi click nút xác nhận
+            document.getElementById('confirmPaymentBtn').onclick = function () {
+                modal.hide();
+                if (onConfirm && typeof onConfirm === 'function') {
+                    onConfirm(); // Gọi callback function được truyền vào
+                }
+            };
+        }
+
 
         // Enhanced form validation
         function validatePaymentForm() {
@@ -1161,7 +1303,15 @@
         }
 
         function formatCurrency(amount) {
-            return amount.toLocaleString('vi-VN');
+            // Convert to number if it's a string
+            const numericAmount = typeof amount === 'string' ? parseFloat(amount.replace(/[^\d]/g, '')) : amount;
+            
+            // Format as Vietnamese currency with proper thousand separators
+            return numericAmount.toLocaleString('vi-VN', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
         }
 
         // Helper function to format date for display
@@ -1236,11 +1386,13 @@
 
         // Add event listeners for payment method changes
         document.addEventListener('DOMContentLoaded', function () {
+
             // Add listeners to payment method radio buttons
             document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
                 radio.addEventListener('change', updatePaymentButtonText);
             });
         });
+
     </script>
 
 </body>
