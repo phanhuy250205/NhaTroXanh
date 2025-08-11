@@ -168,13 +168,9 @@ $(document).ready(function () {
                                     alert('Không tìm thấy ảnh CCCD: ' + imageResponse.message);
                                 }
                             },
-                            error: function (xhr) {
-                                alert('Lỗi khi lấy ảnh CCCD: ' + xhr.responseJSON.message);
-                            }
+
                         });
                     }
-                } else {
-                    alert('Không tìm thấy người thuê!');
                 }
             },
             error: function (xhr) {

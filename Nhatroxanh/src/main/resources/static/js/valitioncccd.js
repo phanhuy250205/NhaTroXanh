@@ -1,6 +1,7 @@
 // ✅ CCCD VALIDATOR CLASS - PHIÊN BẢN NGHIÊM NGẶT
 class CCCDValidator {
-    constructor() { b
+    constructor() {
+        // Từ khóa BẮT BUỘC phải có (không thể thiếu)
         // ✅ SỬA LẠI TỪNG KHÓA BẮT BUỘC MẶT SAU
         this.mandatoryKeywords = {
             front: [
@@ -72,295 +73,13 @@ class CCCDValidator {
         this.isProcessing = false;
         console.log('🔒 CCCD Validator STRICT MODE initialized');
     }
-    async extractCCCDFromImage(file) {
-        try {
-            console.log("🔍 Extracting CCCD number from image...");
-
-            const { data: { text } } = await Tesseract.recognize(
-                file,
-                'eng', // Chỉ dùng tiếng Anh cho số
-                {
-                    logger: m => {
-                        if (m.status === 'recognizing text') {
-                            const progress = Math.round(m.progress * 100);
-                            console.log(`📖 OCR Progress: ${progress}%`);
-                        }
-                    },
-                    tessedit_pageseg_mode: 6,
-                    tessedit_char_whitelist: '0123456789 \n', // Chỉ số và space
-                    tessedit_ocr_engine_mode: 2
-                }
-            );
-
-            console.log("📝 Raw OCR text:", text);
-
-            // Tìm số CCCD (12 chữ số)
-            const numbers = this.findCCCDNumbersInText(text);
-
-            return {
-                success: true,
-                numbers: numbers,
-                rawText: text
-            };
-
-        } catch (error) {
-            console.error("❌ OCR failed:", error);
-            return {
-                success: false,
-                numbers: [],
-                error: error.message
-            };
-        }
-    }
-
-    findCCCDNumbersInText(text) {
-        const numbers = [];
-
-        // Làm sạch text - chỉ giữ số và space
-        const cleanText = text.replace(/[^\d\s]/g, ' ').replace(/\s+/g, ' ');
-        console.log("🧹 Clean OCR text:", cleanText);
-
-        // Pattern tìm 12 chữ số
-        const cccdPattern = /\b\d{12}\b/g;
-        const matches = cleanText.match(cccdPattern);
-
-        if (matches) {
-            const uniqueNumbers = [...new Set(matches)];
-
-            for (const num of uniqueNumbers) {
-                if (this.isValidCCCDFormat(num)) {
-                    numbers.push(num);
-                }
-            }
-        }
-
-        console.log("🔢 Valid CCCD numbers found:", numbers);
-        return numbers;
-    }
-
-// 🔄 HIỂN THỊ LOADING
-    showCCCDVerificationLoading() {
-        const container = this.getCCCDVerificationContainer();
-        container.innerHTML = `
-        <div class="alert alert-info">
-            <i class="fas fa-spinner fa-spin me-2"></i>
-            <strong>Đang xác thực số CCCD...</strong>
-            <div class="progress mt-2" style="height: 4px;">
-                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
-            </div>
-        </div>
-    `;
-    }
-
-// 🎨 HIỂN THỊ KẾT QUẢ VERIFICATION (CHỈ TOAST)
-    showCCCDVerificationResult(result) {
-        // ❌ XÓA PHẦN TẠO CONTAINER CHI TIẾT
-        // const container = this.getCCCDVerificationContainer();
-
-        if (!result.success) {
-            // Hiển thị lỗi bằng toast
-            this.showNotification(`❌ Lỗi xác thực CCCD: ${result.error}`, "error");
-            return;
-        }
-
-        const isValid = result.isMatch;
-        const confidencePercent = Math.round(result.confidence * 100);
-
-        let statusMessage, toastType;
-
-        if (result.matchType === 'exact') {
-            statusMessage = '✅ Số CCCD khớp hoàn toàn!';
-            toastType = 'success';
-        } else if (result.matchType === 'similar') {
-            statusMessage = `✅ Số CCCD khớp (${confidencePercent}% độ tin cậy)`;
-            toastType = 'success';
-        } else if (result.matchType === 'different') {
-            statusMessage = `❌ Số CCCD không khớp (${confidencePercent}% độ tin cậy)`;
-            toastType = 'error';
-        } else {
-            statusMessage = '❌ Không tìm thấy số CCCD trong ảnh';
-            toastType = 'warning';
-        }
-
-        // 🎯 CHỈ HIỂN THỊ TOAST Ở GÓC MÀN HÌNH
-        this.showNotification(statusMessage, toastType);
-
-        // Highlight form input
-        const tenantIdInput = document.getElementById("tenant-id");
-        if (tenantIdInput) {
-            if (isValid) {
-                tenantIdInput.classList.remove('is-invalid');
-                tenantIdInput.classList.add('is-valid');
-            } else {
-                tenantIdInput.classList.remove('is-valid');
-                tenantIdInput.classList.add('is-invalid');
-            }
-        }
-    }
-
-
-    // 📏 TÍNH ĐỘ TƯƠNG TỰ
-    calculateSimilarity(str1, str2) {
-        if (str1.length !== str2.length) return 0;
-
-        let matches = 0;
-        for (let i = 0; i < str1.length; i++) {
-            if (str1[i] === str2[i]) matches++;
-        }
-
-        return matches / str1.length;
-    }
-
-// 📊 SO SÁNH SỐ FORM VỚI SỐ ẢNH
-    compareCCCDNumbers(formNumber, imageNumbers) {
-        if (imageNumbers.length === 0) {
-            return {
-                isMatch: false,
-                confidence: 0,
-                matchType: 'no_image_number',
-                similarity: 0
-            };
-        }
-
-        // Kiểm tra khớp chính xác
-        if (imageNumbers.includes(formNumber)) {
-            return {
-                isMatch: true,
-                confidence: 1.0,
-                matchType: 'exact',
-                similarity: 1.0
-            };
-        }
-
-        // Kiểm tra khớp gần đúng (cho phép OCR sai)
-        let bestSimilarity = 0;
-        for (const imageNumber of imageNumbers) {
-            const similarity = this.calculateSimilarity(formNumber, imageNumber);
-            if (similarity > bestSimilarity) {
-                bestSimilarity = similarity;
-            }
-        }
-
-        const threshold = 0.83; // Chấp nhận nếu giống 83%+ (10/12 số đúng)
-
-        return {
-            isMatch: bestSimilarity >= threshold,
-            confidence: bestSimilarity,
-            matchType: bestSimilarity >= threshold ? 'similar' : 'different',
-            similarity: bestSimilarity
-        };
-    }
-
-    // ✅ VALIDATE FORMAT SỐ CCCD
-    isValidCCCDFormat(number) {
-        if (!/^\d{12}$/.test(number)) return false;
-        if (/^0{12}$/.test(number) || /^1{12}$/.test(number)) return false;
-        if (/(\d)\1{7,}/.test(number)) return false; // Không quá 7 số giống liên tiếp
-        return true;
-    }
-
-    getCCCDFromForm() {
-        // Ưu tiên lấy từ unregisteredTenantData (người bảo hộ)
-        if (this.unregisteredTenantData && this.unregisteredTenantData.cccdNumber) {
-            console.log("📋 CCCD from unregistered tenant:", this.unregisteredTenantData.cccdNumber);
-            return this.unregisteredTenantData.cccdNumber.replace(/\D/g, '');
-        }
-
-        // Lấy từ input tenant-id (người thuê thường)
-        const tenantIdInput = document.getElementById("tenant-id");
-        if (tenantIdInput && tenantIdInput.value.trim()) {
-            const cleanNumber = tenantIdInput.value.replace(/\D/g, '');
-            console.log("📋 CCCD from tenant input:", cleanNumber);
-            return cleanNumber;
-        }
-
-        console.log("❌ No CCCD found in form");
-        return null;
-    }
-
-    getCCCDImageFile() {
-        // Ưu tiên ảnh mặt trước
-        const frontFile = document.getElementById("cccd-front")?.files[0];
-        if (frontFile) {
-            console.log("📷 Using front CCCD image:", frontFile.name);
-            return frontFile;
-        }
-
-        // Fallback: ảnh mặt sau
-        const backFile = document.getElementById("cccd-back")?.files[0];
-        if (backFile) {
-            console.log("📷 Using back CCCD image:", backFile.name);
-            return backFile;
-        }
-
-        console.log("❌ No CCCD image file found");
-        return null;
-    }
-
-    async verifyCCCDNumber() {
-        console.log("🔍 Starting CCCD verification...");
-
-        try {
-            // 1. Lấy số CCCD từ form
-            const cccdNumber = this.getCCCDFromForm();
-            if (!cccdNumber) {
-                this.showCCCDVerificationResult({
-                    success: false,
-                    error: "Không tìm thấy số CCCD trong form"
-                });
-                return;
-            }
-
-            // 2. Lấy file ảnh CCCD
-            const imageFile = this.getCCCDImageFile();
-            if (!imageFile) {
-                this.showCCCDVerificationResult({
-                    success: false,
-                    error: "Vui lòng chọn ảnh CCCD để xác thực"
-                });
-                return;
-            }
-
-            // 3. Hiển thị loading
-            this.showCCCDVerificationLoading();
-
-            // 4. Extract số từ ảnh bằng OCR
-            const extractResult = await this.extractCCCDFromImage(imageFile);
-            if (!extractResult.success) {
-                this.showCCCDVerificationResult({
-                    success: false,
-                    error: "Không thể đọc số CCCD từ ảnh: " + extractResult.error
-                });
-                return;
-            }
-
-            // 5. So sánh số form vs số từ ảnh
-            const compareResult = this.compareCCCDNumbers(cccdNumber, extractResult.numbers);
-
-            // 6. Hiển thị kết quả
-            this.showCCCDVerificationResult({
-                success: true,
-                formNumber: cccdNumber,
-                imageNumbers: extractResult.numbers,
-                isMatch: compareResult.isMatch,
-                confidence: compareResult.confidence,
-                matchType: compareResult.matchType,
-                similarity: compareResult.similarity
-            });
-
-        } catch (error) {
-            console.error("❌ CCCD verification error:", error);
-            this.showCCCDVerificationResult({
-                success: false,
-                error: "Lỗi khi xác thực CCCD: " + error.message
-            });
-        }
-    }
 
     async validateCCCDImage(file, side) {
         console.log(`🔍 STRICT validation for ${side} side`);
 
-
+        if (this.isProcessing) {
+            throw new Error('Đang xử lý ảnh khác, vui lòng chờ...');
+        }
 
         this.isProcessing = true;
 
@@ -480,8 +199,6 @@ class CCCDValidator {
     }
 
 
-
-
     async performStrictOCR(file, side) {
         try {
             console.log('🤖 Starting STRICT OCR...');
@@ -521,42 +238,6 @@ class CCCDValidator {
                 detectedText: ''
             };
         }
-    }
-
-    // 📍 LẤY CONTAINER HIỂN THỊ KẾT QUẢ
-    getCCCDVerificationContainer() {
-        let container = document.getElementById('cccd-verification-result');
-
-        if (!container) {
-            // Tạo container mới nếu chưa có
-            container = document.createElement('div');
-            container.id = 'cccd-verification-result';
-            container.className = 'mt-3';
-
-            // Chèn sau phần upload ảnh CCCD
-            const cccdSection = document.querySelector('.cccd-upload-section') ||
-                document.getElementById('cccd-back-preview')?.parentElement?.parentElement;
-
-            if (cccdSection) {
-                cccdSection.insertAdjacentElement('afterend', container);
-            } else {
-                // Fallback: chèn vào cuối form tenant
-                const tenantForm = document.querySelector('#tenantInfo .card-body');
-                if (tenantForm) {
-                    tenantForm.appendChild(container);
-                }
-            }
-        }
-
-        return container;
-    }
-
-    // 🔥 THÊM HÀM Tự ĐỘNG VERIFY CCCD
-    async autoVerifyCCCD() {
-        // Đợi một chút để ảnh được preview xong
-        setTimeout(async () => {
-            await this.verifyCCCDNumber();
-        }, 500);
     }
 
     strictAnalysis(text, side) {
@@ -864,8 +545,11 @@ $(document).ready(function() {
         const progressContainer = container.querySelector('.cccd-progress-container');
         const uploadDiv = container.querySelector('.nha-tro-image-upload');
 
-        progressContainer.style.display = 'block';
+        // ✅ RESET KHUNG VỀ TRẠNG THÁI ĐANG KIỂM TRA
+        uploadDiv.classList.remove('validation-success', 'validation-error');
         uploadDiv.classList.add('cccd-validating');
+
+        progressContainer.style.display = 'block';
 
         // Reset progress
         const progressBar = container.querySelector('.cccd-progress-bar');
@@ -876,20 +560,29 @@ $(document).ready(function() {
             // Thực hiện validation
             const result = await window.cccdValidator.validateCCCDImage(file, side);
 
-            // Hiển thị kết quả
-            const isValid = result.valid;
+            // ✅ THAY ĐỔI MÀU KHUNG DỰA TRÊN KẾT QUẢ
+            uploadDiv.classList.remove('cccd-validating');
+
+            if (result.valid) {
+                // 🟢 KHUNG XANH KHI ĐÚNG
+                uploadDiv.classList.add('validation-success');
+                uploadDiv.classList.remove('validation-error');
+            } else {
+                // 🔴 KHUNG ĐỎ KHI SAI
+                uploadDiv.classList.add('validation-error');
+                uploadDiv.classList.remove('validation-success');
+            }
 
             // Hiển thị thông báo toast
-            if (isValid) {
+            if (result.valid) {
                 Toast.fire({
                     icon: 'success',
                     title: `✅ CCCD ${side === 'front' ? 'mặt trước' : 'mặt sau'} hợp lệ!`,
                     html: `
-                        <div class="text-start">
-                            <small>Độ tin cậy: ${Math.round(result.confidence * 100)}%</small><br>
-
-                        </div>
-                    `,
+                    <div class="text-start">
+                        <small>Độ tin cậy: ${Math.round(result.confidence * 100)}%</small><br>
+                    </div>
+                `,
                     timer: 4000
                 });
             } else {
@@ -903,6 +596,11 @@ $(document).ready(function() {
 
         } catch (error) {
             console.error('❌ Validation error:', error);
+
+            // 🔴 KHUNG ĐỎ KHI LỖI
+            uploadDiv.classList.remove('cccd-validating', 'validation-success');
+            uploadDiv.classList.add('validation-error');
+
             Toast.fire({
                 icon: 'error',
                 title: 'Lỗi kiểm tra ảnh',
@@ -913,10 +611,91 @@ $(document).ready(function() {
             // Ẩn loading state
             setTimeout(() => {
                 progressContainer.style.display = 'none';
-                uploadDiv.classList.remove('cccd-validating');
+                // ✅ GIỮ NGUYÊN MÀU KHUNG, KHÔNG XÓA
             }, 1000);
         }
     }
+
+
+    const style = document.createElement('style');
+    style.textContent = `
+    /* CSS cũ giữ nguyên... */
+    .keyword-tag {
+        display: inline-block;
+        background: #e3f2fd;
+        color: #1976d2;
+        padding: 2px 6px;
+        margin: 1px;
+        border-radius: 3px;
+        font-size: 11px;
+    }
+    .keyword-tag.mandatory {
+        background: #c8e6c9;
+        color: #388e3c;
+        font-weight: bold;
+    }
+    .keyword-tag.support {
+        background: #fff3e0;
+        color: #f57c00;
+    }
+    .confidence-fill.success {
+        background: linear-gradient(90deg, #4caf50, #8bc34a);
+    }
+    .confidence-fill.danger {
+        background: linear-gradient(90deg, #f44336, #ff9800);
+    }
+
+    /* ✅ THÊM CSS CHO KHUNG MÀU */
+    .nha-tro-image-upload {
+        transition: all 0.3s ease;
+        border: 2px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    /* 🟢 KHUNG XANH KHI ĐÚNG */
+    .nha-tro-image-upload.validation-success {
+        border-color: #28a745 !important;
+        background-color: rgba(40, 167, 69, 0.1);
+        box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
+    }
+
+    /* 🔴 KHUNG ĐỎ KHI SAI */
+    .nha-tro-image-upload.validation-error {
+        border-color: #dc3545 !important;
+        background-color: rgba(220, 53, 69, 0.1);
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+    }
+
+    /* 🟡 KHUNG VÀNG KHI ĐANG KIỂM TRA */
+    .nha-tro-image-upload.cccd-validating {
+        border-color: #ffc107 !important;
+        background-color: rgba(255, 193, 7, 0.1);
+        box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+    }
+
+    /* Animation cho khung */
+    .nha-tro-image-upload.validation-success {
+        animation: successPulse 0.6s ease-in-out;
+    }
+
+    .nha-tro-image-upload.validation-error {
+        animation: errorShake 0.6s ease-in-out;
+    }
+
+    @keyframes successPulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+        100% { transform: scale(1); }
+    }
+
+    @keyframes errorShake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+
 
     // Hàm preview ảnh (giữ lại cho compatibility)
     window.NhaTroContract = {

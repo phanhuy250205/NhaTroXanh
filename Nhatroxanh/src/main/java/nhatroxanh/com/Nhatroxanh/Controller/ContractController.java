@@ -2909,9 +2909,7 @@ public class ContractController {
             response.put("message", "Dữ liệu không hợp lệ: " + e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            logger.error("Lỗi khi lấy ảnh CCCD: {}", e.getMessage(), e);
             response.put("success", false);
-            response.put("message", "Lỗi khi lấy ảnh CCCD: " + e.getMessage());
             return ResponseEntity.status(500).body(response);
         }
     }
