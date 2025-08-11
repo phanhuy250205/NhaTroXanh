@@ -41,7 +41,6 @@
             <div class="row mt-3">
                 <!-- Form Column -->
                 <div class="col-lg-7">
-
                     <!-- ✅ SỬA DÒNG 274 -->
                     <form
                         th:action="${(isEditMode != null and isEditMode == true) and (contractId != null)} ? @{/api/contracts/update/{contractId}(contractId=${contractId})} : @{/api/contracts}"
@@ -84,10 +83,11 @@
                                             <option value="">Chọn trạng thái</option>
                                             <option value="DRAFT">Bản nháp</option>
                                             <option value="ACTIVE">Đang hiệu lực</option>
-                                            <option value="TERMINATED">Sắp Hết Hạn</option>
-                                            <option value="EXPIRED">Hết Hạn</option>
+                                            <option value="EXPIRED">Sắp hết hạn</option>
+                                            <option value="TERMINATED">Đã kết thúc</option>
                                         </select>
                                     </div>
+
                                 </div>
                             </div>
                         </div>

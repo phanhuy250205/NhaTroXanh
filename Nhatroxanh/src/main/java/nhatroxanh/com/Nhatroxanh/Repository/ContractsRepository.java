@@ -193,4 +193,10 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
 
         List<Contracts> findByStatusAndEndDateBetween(Contracts.Status status, Date startDate, Date endDate);
 
+        // ✅ Tìm hợp đồng trước ngày
+        List<Contracts> findByStatusAndEndDateLessThan(
+                Contracts.Status status,
+                Date date
+        );
+
 }

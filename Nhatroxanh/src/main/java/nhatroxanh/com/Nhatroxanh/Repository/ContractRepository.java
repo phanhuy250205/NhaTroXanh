@@ -215,5 +215,13 @@ public interface ContractRepository extends JpaRepository<Contracts, Integer> {
 
         long countByTenantUserIdAndStatus(Integer userId, Contracts.Status status);
 
-    
+        // Trong ContractRepository
+        List<Contracts> findByStatusAndEndDateBetween(
+                Contracts.Status status,
+                Date startDate,
+                Date endDate
+        );
+
+
+
 }
