@@ -817,6 +817,9 @@
             } else if (isNaN(maxTenants) || Number(maxTenants) <= 0) {
                 isValid = false;
                 showError("roomCapacityHost", "Số người tối đa phải là số lớn hơn 0.");
+            } else if (Number(maxTenants) > 10) {
+                isValid = false;
+                showError("roomCapacityHost", "Số người tối đa không được vượt quá 10.");
             }
 
             const hostelId = document.getElementById("roomAreaSelectHost").value;
