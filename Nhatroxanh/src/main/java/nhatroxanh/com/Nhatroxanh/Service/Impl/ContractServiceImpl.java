@@ -352,7 +352,7 @@ public class ContractServiceImpl implements ContractService {
         if (contractDto.getTenantType() != null && "UNREGISTERED".equals(contractDto.getTenantType()) &&
                 contractDto.getUnregisteredTenant() != null &&
                 StringUtils.hasText(contractDto.getUnregisteredTenant().getFullName())) {
-            logger.info("SERVICE: Phát hiện thông tin Người bảo hộ/Thuê mới. Đang xử lý...");
+           
             guardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner, cccdFrontFile,
                     cccdBackFile);
             finalTenantPhone = guardian.getPhone();
@@ -1336,7 +1336,7 @@ public class ContractServiceImpl implements ContractService {
             MultipartFile cccdBackFile) {
         logger.info("=== SERVICE: Handling Unregistered Tenant ===");
         if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại người bảo hộ không được để trống!");
+            throw new IllegalArgumentException("Số điện thoại không được để trống!");
         }
 
         UnregisteredTenants unregisteredTenant = new UnregisteredTenants();

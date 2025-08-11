@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TenantSummaryDTO {
 
-    private Integer contractId; // ID của hợp đồng mới nhất
-    private Integer userId;     // ID của khách thuê hoặc người bảo hộ
+    private Integer contractId; 
+    private Integer userId;     
     private String fullName;
     private String phone;
     private Long totalContracts;

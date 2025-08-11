@@ -4,7 +4,7 @@ window.NhaTroContract = {
     zoomLevel: 1,
     residents: [],
     contractTerms: [], // New array to store individual terms
-    unregisteredTenantData: null, // Biến mới để lưu thông tin người bảo hộ tạm thời
+    unregisteredTenantData: null, 
     unregisteredTenantCccdFrontFile: null, // File ảnh tạm thời
     unregisteredTenantCccdBackFile: null,
 
@@ -1025,7 +1025,7 @@ window.NhaTroContract = {
 
 // 🔍 LẤY SỐ CCCD TỪ FORM
     getCCCDFromForm() {
-        // Ưu tiên lấy từ unregisteredTenantData (người bảo hộ)
+
         if (this.unregisteredTenantData && this.unregisteredTenantData.cccdNumber) {
             console.log("📋 CCCD from unregistered tenant:", this.unregisteredTenantData.cccdNumber);
             return this.unregisteredTenantData.cccdNumber.replace(/\D/g, '');
@@ -3281,7 +3281,7 @@ window.NhaTroContract = {
 
         // Thêm file CCCD
         if (contractData.tenantType === "UNREGISTERED") {
-            // Người bảo hộ - lấy file từ biến tạm
+           
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
                 console.log("📎 Added unregistered tenant front CCCD file");
@@ -4151,7 +4151,7 @@ window.NhaTroContract = {
         const notes = document.getElementById("newCustomer-notes")?.value || null;
 
         if (!fullName || !phone || !cccdNumber) {
-            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
+            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho Khách thuê khác!", "warning");
             return;
         }
 
@@ -4255,7 +4255,7 @@ window.NhaTroContract = {
 
         $('#addCustomerModal-host').modal('hide');
 
-        this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
+        this.showNotification(`Đã thêm thông tin Khách thuê khác "${fullName}" vào form tạm thời!`, "success");
         this.updateAllPreview();
     },
     toggleTenantInputFields: function (enable) {
@@ -4298,7 +4298,7 @@ window.NhaTroContract = {
         this.unregisteredTenantCccdFrontFile = null;
         this.unregisteredTenantCccdBackFile = null;
 
-        // Ẩn khung hiển thị người bảo hộ và hiện lại nút "Thêm người bảo hộ"
+        
         $('#guardian-display-container').hide();
         $('#btn-add-customer-host').show();
 
@@ -4334,7 +4334,7 @@ window.NhaTroContract = {
             tenantTypeSelect.value = "REGISTERED";
         }
 
-        this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
+        this.showNotification("Đã xóa thông tin khách thuê khác khỏi form.", "info");
         this.updateAllPreview();
     },
 
