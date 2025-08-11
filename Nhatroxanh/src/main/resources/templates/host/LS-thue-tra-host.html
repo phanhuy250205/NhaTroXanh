@@ -324,7 +324,6 @@
       </div>
     </div>
 
-
     <!-- Search and Filters -->
     <form method="get" th:action="@{/chu-tro/lich-su-thue}">
       <div class="search-container">
@@ -345,13 +344,13 @@
                 <span class="text-muted me-2">Lọc:</span>
               </div>
 
-              <!-- Lọc theo khu trọ -->
+           
               <select class="form-select filter-select" name="hostelId">
                 <option value="">Tất cả khu trọ</option>
                 <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
                   th:selected="${hostel.hostelId == selectedHostelId}" th:text="${hostel.name}">Khu trọ</option>
               </select>
-              <!-- Lọc theo trạng thái -->
+            
               <select class="form-select filter-select" name="status">
                 <option value="">Tất cả trạng thái</option>
                 <option th:value="'ACTIVE'" th:selected="${selectedStatus == 'ACTIVE'}">Đang thuê</option>

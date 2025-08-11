@@ -331,7 +331,7 @@
             <div>
                 <h1 class="page-title-guest">Chi Tiết Phòng Đang Thuê</h1>
                 <p class="page-subtitle-guest"
-                    th:text="'Thông tin chi tiết và báo cáo sự cố của phòng ' + ${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">
+                    th:text="'Thông tin chi tiết và báo cáo sự cố của phòng ' + ${contract.room.namerooms}">
                 </p>
             </div>
         </div>
@@ -347,7 +347,7 @@
                 <div class="room-title-section-guest">
                     <div class="room-title-info-guest">
                         <h3 class="room-name-guest"
-                            th:text="${contract.room.namerooms} + ' - ' + ${contract.room.category.name}">
+                            th:text="${contract.room.namerooms}">
                             Phòng A101 - Deluxe</h3>
                         <p class="room-type-guest" th:text="${contract.room.description}">
                             Phòng cao cấp với đầy đủ tiện nghi</p>

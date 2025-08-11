@@ -295,7 +295,7 @@ function populateInvoiceModal(payment) {
     document.getElementById('invoiceModal').setAttribute('data-payment-id', payment.paymentId);
 }
 
-// Mark payment as paid
+// Mark payment as paid (for cash payments)
 function markAsPaid() {
     const modal = document.getElementById('invoiceModal');
     const paymentId = modal.getAttribute('data-payment-id');
@@ -305,29 +305,36 @@ function markAsPaid() {
         return;
     }
     
-    fetch(`/api/payments/${paymentId}/status`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'ĐÃ_THANH_TOÁN' })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showAlert('success', 'Đã cập nhật trạng thái thanh toán');
-            // Close modal
-            const bsModal = bootstrap.Modal.getInstance(modal);
-            bsModal.hide();
-            // Reload current page
-            loadPage(currentPage);
-        } else {
-            showAlert('error', data.message || 'Có lỗi xảy ra');
+    // Show confirmation dialog
+    showAlert('warning', 'Bạn có chắc chắn muốn đánh dấu hóa đơn này đã thanh toán bằng tiền mặt?', { 
+        showConfirm: true, 
+        onConfirm: () => {
+            // Call the cash payment confirmation endpoint
+            fetch('/landlord/confirm-cash-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `paymentId=${paymentId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showAlert('success', 'Đã xác nhận thanh toán tiền mặt thành công! Thông báo đã được gửi đến người thuê.');
+                    // Close modal
+                    const bsModal = bootstrap.Modal.getInstance(modal);
+                    bsModal.hide();
+                    // Reload current page
+                    loadPage(currentPage);
+                } else {
+                    showAlert('error', data.message || 'Có lỗi xảy ra khi xác nhận thanh toán');
+                }
+            })
+            .catch(error => {
+                console.error('Error confirming cash payment:', error);
+                showAlert('error', 'Có lỗi xảy ra khi xác nhận thanh toán tiền mặt');
+            });
         }
-    })
-    .catch(error => {
-        console.error('Error updating payment status:', error);
-        showAlert('error', 'Có lỗi xảy ra khi cập nhật trạng thái');
     });
 }
 
@@ -429,14 +436,136 @@ function sendUnpaidInvoices() {
     }});
 }
 
-// Create new invoice
+// Check if payment already exists for the selected contract and month
+function checkExistingPayment(contractId, month) {
+    return fetch(`/api/payments/check-existing?contractId=${contractId}&month=${month}`)
+        .then(response => response.json())
+        .then(data => data.exists)
+        .catch(error => {
+            console.error('Error checking existing payment:', error);
+            return false;
+        });
+}
+
+// Create new invoice with duplicate validation
 function createNewInvoice() {
     const form = document.getElementById('createInvoiceForm');
-    if (form.checkValidity()) {
-        form.submit();
-    } else {
-        showAlert('error', 'Vui lòng điền đầy đủ thông tin');
+    
+    if (!form.checkValidity()) {
+        showAlert('error', 'Vui lòng điền đầy đủ thông tin bắt buộc');
+        return;
     }
+
+    const contractId = document.getElementById('invoiceRoomSelect').value;
+    const monthInput = document.getElementById('invoiceMonthInput').value;
+    
+    if (!contractId || !monthInput) {
+        showAlert('error', 'Vui lòng chọn phòng và tháng');
+        return;
+    }
+
+    // Convert month input (YYYY-MM) to MM/YYYY format for checking
+    const [year, month] = monthInput.split('-');
+    const formattedMonth = `${month}/${year}`;
+    
+    // Show loading state
+    const createButton = document.querySelector('button[onclick="createNewInvoice()"]');
+    const originalText = createButton.innerHTML;
+    createButton.disabled = true;
+    createButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang kiểm tra...';
+    
+    // Check for existing payment first
+    checkExistingPayment(contractId, formattedMonth)
+        .then(exists => {
+            if (exists) {
+                // Get contract info for better error message
+                const selectedContract = availableContracts.find(contract => contract.contractId == contractId);
+                const roomInfo = selectedContract ? `${selectedContract.hostelName} - ${selectedContract.roomCode}` : 'phòng đã chọn';
+                
+                showAlert('warning', `Hóa đơn cho tháng ${formattedMonth} đã tồn tại cho ${roomInfo}. Không thể tạo hóa đơn trùng lặp.`);
+                
+                // Reset button
+                createButton.disabled = false;
+                createButton.innerHTML = originalText;
+            } else {
+                // Validate form data before submission
+                if (validateInvoiceForm()) {
+                    // Reset button text but keep it disabled during submission
+                    createButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang tạo hóa đơn...';
+                    
+                    // Submit form
+                    form.submit();
+                } else {
+                    // Reset button if validation fails
+                    createButton.disabled = false;
+                    createButton.innerHTML = originalText;
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error during invoice creation:', error);
+            showAlert('error', 'Có lỗi xảy ra khi kiểm tra hóa đơn. Vui lòng thử lại.');
+            
+            // Reset button
+            createButton.disabled = false;
+            createButton.innerHTML = originalText;
+        });
+}
+
+// Validate invoice form data
+function validateInvoiceForm() {
+    const roomFee = parseFloat(document.getElementById('roomFeeInput').value) || 0;
+    const wifiFee = parseFloat(document.getElementById('wifiFeeInput').value) || 0;
+    const electricityPrev = parseInt(document.getElementById('electricityPrevInput').value) || 0;
+    const electricityCurr = parseInt(document.getElementById('electricityCurrInput').value) || 0;
+    const electricityUnitPrice = parseFloat(document.getElementById('electricityUnitPriceInput').value) || 0;
+    const waterPrev = parseInt(document.getElementById('waterPrevInput').value) || 0;
+    const waterCurr = parseInt(document.getElementById('waterCurrInput').value) || 0;
+    const waterUnitPrice = parseFloat(document.getElementById('waterUnitPriceInput').value) || 0;
+    const trashFee = parseFloat(document.getElementById('trashFeeInput').value) || 0;
+
+    // Validate electricity readings
+    if (electricityCurr < electricityPrev) {
+        showAlert('error', 'Chỉ số điện mới phải lớn hơn hoặc bằng chỉ số điện cũ');
+        return false;
+    }
+
+    // Validate water readings
+    if (waterCurr < waterPrev) {
+        showAlert('error', 'Chỉ số nước mới phải lớn hơn hoặc bằng chỉ số nước cũ');
+        return false;
+    }
+
+    // Validate unit prices
+    if (electricityUnitPrice <= 0) {
+        showAlert('error', 'Đơn giá điện phải lớn hơn 0');
+        return false;
+    }
+
+    if (waterUnitPrice <= 0) {
+        showAlert('error', 'Đơn giá nước phải lớn hơn 0');
+        return false;
+    }
+
+    // Validate fees
+    if (roomFee <= 0) {
+        showAlert('error', 'Tiền phòng phải lớn hơn 0');
+        return false;
+    }
+
+    // Calculate total to ensure it's reasonable
+    const electricityUsage = electricityCurr - electricityPrev;
+    const waterUsage = waterCurr - waterPrev;
+    const electricityFee = electricityUsage * electricityUnitPrice;
+    const waterFee = waterUsage * waterUnitPrice;
+    const totalAmount = roomFee + wifiFee + electricityFee + waterFee + trashFee;
+
+    if (totalAmount <= 0) {
+        showAlert('error', 'Tổng số tiền hóa đơn phải lớn hơn 0');
+        return false;
+    }
+
+    return true;
 }
 
 // Remove modal backdrop (utility function)

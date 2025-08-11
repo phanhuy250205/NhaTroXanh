@@ -59,7 +59,9 @@ public class UnregisteredTenants {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    
+    @Column(name = "email")
+    private String email;
+
     public enum Status {
         ACTIVE, INACTIVE
     }

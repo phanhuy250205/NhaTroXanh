@@ -122,31 +122,53 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto request) {
         try {
+            // Validate contract exists
             Contracts contract = contractsRepository.findById(request.getContractId())
-                    .orElseThrow(() -> new RuntimeException("Contract not found with id: " + request.getContractId()));
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + request.getContractId()));
 
+            // Parse month and year from request
             String[] monthYear = request.getMonth().split("/");
             int month = Integer.parseInt(monthYear[0]);
             int year = Integer.parseInt(monthYear[1]);
 
+            // Check for existing payment for the same contract and month/year
             Optional<Payments> existingPayment = paymentsRepository.findByContractIdAndMonth(
                     request.getContractId(), month, year);
             if (existingPayment.isPresent()) {
-                throw new RuntimeException("Payment already exists for this month");
+                String roomCode = contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A";
+                String tenantName = "";
+                if (contract.getTenant() != null) {
+                    tenantName = contract.getTenant().getFullname();
+                } else if (contract.getUnregisteredTenant() != null) {
+                    tenantName = contract.getUnregisteredTenant().getFullName();
+                }
+                
+                throw new RuntimeException(String.format(
+                    "Hóa đơn cho tháng %02d/%d đã tồn tại cho phòng %s (Khách thuê: %s). " +
+                    "Không thể tạo hóa đơn trùng lặp cho cùng một tháng.", 
+                    month, year, roomCode, tenantName));
             }
 
+            // Validate payment details
             if (request.getDetails() == null || request.getDetails().isEmpty()) {
-                throw new RuntimeException("Payment details cannot be empty");
+                throw new RuntimeException("Chi tiết hóa đơn không được để trống");
             }
 
+            // Calculate total amount and validate details
             Float totalAmount = 0f;
             for (PaymentRequestDto.PaymentDetailDto detail : request.getDetails()) {
                 if (detail.getAmount() == null || detail.getAmount() < 0) {
-                    throw new RuntimeException("Invalid amount for item: " + detail.getItemName());
+                    throw new RuntimeException("Số tiền không hợp lệ cho khoản mục: " + detail.getItemName());
                 }
                 totalAmount += detail.getAmount();
             }
 
+            // Validate total amount
+            if (totalAmount <= 0) {
+                throw new RuntimeException("Tổng số tiền hóa đơn phải lớn hơn 0");
+            }
+
+            // Create payment entity
             Payments payment = Payments.builder()
                     .contract(contract)
                     .totalAmount(totalAmount.doubleValue())
@@ -155,10 +177,13 @@ public class PaymentServiceImpl implements PaymentService {
                     .paymentMethod(request.getPaymentMethod())
                     .notificationAttemptsToday(0)
                     .lastNotificationDate(null)
+                    .cashAppointmentCount(0)
+                    .landlordNotified(false)
                     .build();
 
             payment = paymentsRepository.save(payment);
 
+            // Create payment details
             for (PaymentRequestDto.PaymentDetailDto detail : request.getDetails()) {
                 DetailPayments detailPayment = DetailPayments.builder()
                         .payment(payment)
@@ -170,13 +195,19 @@ public class PaymentServiceImpl implements PaymentService {
                 detailPaymentsRepository.save(detailPayment);
             }
 
-            log.info("Created payment with id: {} for contract: {} with payment method: {}",
-                    payment.getId(), contract.getContractId(), payment.getPaymentMethod());
+            log.info("Successfully created payment with id: {} for contract: {} (Room: {}, Month: {}/{}) with total amount: {}",
+                    payment.getId(), contract.getContractId(), 
+                    contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A",
+                    month, year, totalAmount);
+            
             return convertToResponseDto(payment);
 
+        } catch (NumberFormatException e) {
+            log.error("Invalid month/year format in request: {}", request.getMonth(), e);
+            throw new RuntimeException("Định dạng tháng/năm không hợp lệ: " + request.getMonth());
         } catch (Exception e) {
-            log.error("Error creating payment: ", e);
-            throw new RuntimeException("Failed to create payment: " + e.getMessage());
+            log.error("Error creating payment for contract {}: ", request.getContractId(), e);
+            throw new RuntimeException("Lỗi tạo hóa đơn: " + e.getMessage());
         }
     }
 
@@ -635,6 +666,36 @@ public class PaymentServiceImpl implements PaymentService {
 
     public List<DetailPayments> getDetailPaymentsByPaymentId(Integer paymentId) {
         return detailPaymentsRepository.findByPaymentId(paymentId);
+    }
+
+    @Override
+    public boolean checkPaymentExists(Integer contractId, int month, int year, Integer ownerId) {
+        try {
+            // Validate that the contract belongs to the owner for security
+            Contracts contract = contractsRepository.findById(contractId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
+            
+            // Check if the contract belongs to the owner
+            if (!contract.getRoom().getHostel().getOwner().getUserId().equals(ownerId)) {
+                log.warn("Owner {} attempted to check payment for contract {} which doesn't belong to them", 
+                        ownerId, contractId);
+                throw new RuntimeException("Bạn không có quyền truy cập hợp đồng này");
+            }
+            
+            // Check if payment exists for this contract and month/year
+            Optional<Payments> existingPayment = paymentsRepository.findByContractIdAndMonth(contractId, month, year);
+            boolean exists = existingPayment.isPresent();
+            
+            log.info("Payment existence check for contract {} and month {}/{}: {}", 
+                    contractId, month, year, exists);
+            
+            return exists;
+            
+        } catch (Exception e) {
+            log.error("Error checking payment existence for contract {} and month {}/{}: ", 
+                    contractId, month, year, e);
+            throw new RuntimeException("Lỗi kiểm tra hóa đơn: " + e.getMessage());
+        }
     }
 
     @Override

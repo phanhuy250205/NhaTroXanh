@@ -38,8 +38,7 @@ public interface EmailService {
     void sendContractPDF(String to, String tenantName, String roomName, byte[] pdfData, String fileName)
             throws Exception;
 
-    // ✅ METHOD MỚI GỬI HTML
-    void sendContractHtml(String recipientEmail, String recipientName, String subject, String contractHtml);
+
 
     void sendVoucherDeactivationEmail(Vouchers voucher);
 
@@ -58,5 +57,13 @@ public interface EmailService {
     void sendTextEmail(String to, String subject, String text) throws Exception;
 
     void sendHtmlEmail(String to, String subject, String htmlContent) throws Exception;
+
+    // Cash payment appointment email methods
+    void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
+                                       String roomName, String hostelName, String paymentDate, 
+                                       String paymentTime, String amount, String note, Integer paymentId);
+
+    void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
+                                   String hostelName, String amount, String paymentDate, Integer paymentId);
 
 }
