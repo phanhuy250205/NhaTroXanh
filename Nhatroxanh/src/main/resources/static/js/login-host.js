@@ -3,50 +3,87 @@ document.addEventListener("DOMContentLoaded", () => {
     const passwordToggles = document.querySelectorAll(".password-toggle-host");
     const loginForm = document.getElementById("loginFormHost");
 
+    function showToast(message, type = 'error') {
+        let backgroundColor;
+        switch (type) {
+            case 'success':
+                backgroundColor = "#28a745"; // Xanh lá
+                break;
+            case 'info':
+                backgroundColor = "#3498DB"; // Xanh dương
+                break;
+            case 'error':
+            default:
+                backgroundColor = "#dc3545"; // Đỏ
+                break;
+        }
+        Toastify({
+            text: message,
+            duration: 3000,
+            close: true,
+            gravity: "top",
+            position: "right",
+            stopOnFocus: true,
+            style: {
+                background: backgroundColor,
+            },
+        }).showToast();
+    }
     // Xử lý form đăng nhập
-    if (loginForm) {
+      if (loginForm) {
         loginForm.addEventListener("submit", function (event) {
             event.preventDefault(); // Ngăn form tự gửi đi
+            
+            // Lấy nút submit
+            const submitBtn = this.querySelector('.btn-login-host');
 
             const usernameOrEmail = document.getElementById("emailPhone").value;
             const password = document.getElementById("password").value;
             const rememberMe = document.getElementById("rememberMe").checked;
+
+            // <<< THÊM VÀO: Kiểm tra dữ liệu trống (validation) >>>
+            if (!usernameOrEmail.trim() || !password.trim()) {
+                showToast("Vui lòng nhập đầy đủ thông tin đăng nhập.");
+                return; // Dừng lại nếu có lỗi
+            }
             
-            // Dùng URLSearchParams để gửi dữ liệu dạng form, không phải JSON
             const formData = new URLSearchParams();
-            formData.append("username", usernameOrEmail); // Tên param phải khớp với SecurityConfig
+            formData.append("username", usernameOrEmail);
             formData.append("password", password);
-            
             if (rememberMe) {
-                // Tên parameter phải là 'remember-me' theo mặc định của Spring Security
                 formData.append('remember-me', 'on');
             }
             
-            // Gọi đến URL xử lý đăng nhập của Spring Security
+            // <<< THÊM VÀO: Vô hiệu hóa nút bấm >>>
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'ĐANG XỬ LÝ...';
+
             fetch("/login-processing", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: formData,
             })
-                .then(response => {
-                    if (response.redirected) {
-                        // Nếu Spring Security redirect, thì chuyển luôn
-                        window.location.href = response.url;
-                    } else if (response.ok) {
-                        // Nếu backend trả JSON (tùy chỉnh), parse JSON
-                        return response.json().then(data => {
-                            window.location.href = data.redirectUrl;
-                        });
-                    } else {
-                        throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Lỗi đăng nhập:", error);
-                    alert(error.message);
-                });
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                } else if (response.ok) {
+                    return response.json().then(data => {
+                        window.location.href = data.redirectUrl;
+                    });
+                } else {
+                    // Ném lỗi để .catch() xử lý
+                    throw new Error("Tên đăng nhập hoặc mật khẩu không chính xác.");
+                }
+            })
+            .catch(error => {
+                // <<< THAY ĐỔI: Dùng showToast thay cho alert >>>
+                showToast(error.message);
+            })
+            .finally(() => {
+                // <<< THÊM VÀO: Kích hoạt lại nút bấm >>>
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'ĐĂNG NHẬP';
+            });
         });
     }
 

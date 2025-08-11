@@ -12,24 +12,22 @@ public class UserRequest {
     @Size(min = 2, message = "Họ tên phải có ít nhất 2 ký tự.")
     private String fullName;
 
-    @NotBlank(message = "Email không được để trống.")
-    @Email(message = "Email không hợp lệ.")
+     @NotBlank(message = "Email không được để trống.")
+    @Pattern(
+        regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$",
+        message = "Email không đúng định dạng."
+    )
     private String email;
 
+    // <<< THAY ĐỔI QUAN TRỌNG Ở ĐÂY >>>
     @NotBlank(message = "Mật khẩu không được để trống.")
-    @Size(min = 6, message = "Mật khẩu phải có ít nhất 6 ký tự.")
+    @Pattern(
+        regexp = "^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{6,}$",
+        message = "Mật khẩu phải từ 6 ký tự, có ít nhất 1 chữ viết hoa và 1 ký tự đặc biệt."
+    )
     private String password;
 
     @NotBlank(message = "Số điện thoại không được để trống.")
-    @Pattern(regexp = "^[0-9]{10,11}$", message = "Số điện thoại phải có 10-11 chữ số.")
+    @Pattern(regexp = "^(0[3|5|7|8|9])+([0-9]{8})$", message = "Số điện thoại không đúng định dạng Việt Nam.")
     private String phoneNumber;
-
-    @Pattern(
-        regexp = "^$|^\\d{4}-\\d{2}-\\d{2}$",
-        message = "Ngày cấp CCCD phải đúng định dạng yyyy-MM-dd hoặc để trống."
-    )
-    private String issueDate;
-
-    @Size(min = 2, max = 100, message = "Nơi cấp CCCD phải có từ 2 đến 100 ký tự hoặc để trống.")
-    private String issuePlace;
 }

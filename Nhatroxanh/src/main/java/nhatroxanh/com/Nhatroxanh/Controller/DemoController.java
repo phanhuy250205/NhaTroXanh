@@ -154,40 +154,39 @@ public class DemoController {
         }
     }
 
-    @GetMapping("/chu-tro/lich-su-thue")
-    public String showRentalHistory(
-            Model model,
-            @AuthenticationPrincipal CustomUserDetails loggedInUser,
-            @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "keyword", required = false) String keyword,
-            @RequestParam(name = "hostelId", required = false) Integer selectedHostelId,
-            @RequestParam(name = "status", required = false) Contracts.Status statusFilter) {
+@GetMapping("/chu-tro/lich-su-thue")
+public String showRentalHistory(
+        Model model,
+        @AuthenticationPrincipal CustomUserDetails loggedInUser,
+        @RequestParam(name = "page", defaultValue = "0") int page,
+        @RequestParam(name = "keyword", required = false) String keyword,
+        @RequestParam(name = "hostelId", required = false) Integer selectedHostelId,
+        @RequestParam(name = "status", required = false) Contracts.Status statusFilter) {
 
-        Integer ownerId = loggedInUser.getUserId();
+    Integer ownerId = loggedInUser.getUserId();
 
-        Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
-                ownerId, keyword, selectedHostelId, statusFilter, PageRequest.of(page, 10));
+    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+            ownerId, keyword, selectedHostelId, statusFilter, PageRequest.of(page, 10)); 
 
-        List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
-        Map<String, Long> stats = tenantService.getContractStatusStats(ownerId);
+    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+    Map<String, Long> stats = tenantService.getContractStatusStats(ownerId);
 
-        System.out.println("📊 Stats map truyền ra view: " + stats);
-        model.addAttribute("tenants", tenantPage.getContent());
-        model.addAttribute("totalPages", tenantPage.getTotalPages());
-        model.addAttribute("currentPage", tenantPage.getNumber());
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("selectedHostelId", selectedHostelId);
-        model.addAttribute("hostels", ownerHostels);
-        model.addAttribute("selectedStatus", statusFilter);
-        model.addAttribute("isHistoryPage", true);
-        model.addAttribute("contractStatuses", Arrays.stream(Contracts.Status.values())
-                .filter(s -> s != Contracts.Status.DRAFT)
-                .toList());
-        model.addAttribute("contractStats", stats);
+    // Dữ liệu cũ đã có
+    model.addAttribute("tenants", tenantPage.getContent());
+    model.addAttribute("totalPages", tenantPage.getTotalPages());
+    model.addAttribute("currentPage", tenantPage.getNumber());
+    model.addAttribute("keyword", keyword);
+    model.addAttribute("selectedHostelId", selectedHostelId);
+    model.addAttribute("hostels", ownerHostels);
+    model.addAttribute("selectedStatus", statusFilter);
+    model.addAttribute("isHistoryPage", true);
+    model.addAttribute("contractStats", stats);
+    
+    // ** THÊM DÒNG NÀY VÀO ĐỂ SỬA LỖI **
+    model.addAttribute("tenantPage", tenantPage); 
 
-        return "host/LS-thue-tra-host";
-    }
-
+    return "host/LS-thue-tra-host";
+}
     @GetMapping("/chu-tro/thanh-toan")
     public String Thanhtoan(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated() &&

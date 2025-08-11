@@ -344,13 +344,13 @@
                 <span class="text-muted me-2">Lọc:</span>
               </div>
 
-           
+
               <select class="form-select filter-select" name="hostelId">
                 <option value="">Tất cả khu trọ</option>
                 <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
                   th:selected="${hostel.hostelId == selectedHostelId}" th:text="${hostel.name}">Khu trọ</option>
               </select>
-            
+
               <select class="form-select filter-select" name="status">
                 <option value="">Tất cả trạng thái</option>
                 <option th:value="'ACTIVE'" th:selected="${selectedStatus == 'ACTIVE'}">Đang thuê</option>
@@ -381,13 +381,6 @@
           </tr>
         </thead>
         <tbody>
-          <tr th:if="${#lists.isEmpty(tenants)}">
-            <td colspan="6" class="text-center empty-state">
-              <i class="fas fa-box-open"></i>
-              <p>Không có dữ liệu lịch sử thuê trả.</p>
-            </td>
-          </tr>
-
           <tr th:each="tenant : ${tenants}">
             <td>
               <div class="d-flex align-items-center justify-content-center">
@@ -406,7 +399,8 @@
                 <div>
                   <strong th:text="${tenant.fullName}">Tên khách</strong><br>
                   <small class="text-muted">
-                    <i class="fas fa-phone me-1"></i> <span th:text="${tenant.phone}">SĐT</span>
+                    <i class="fas fa-phone me-1"></i>
+                    <span th:text="${tenant.phone}">SĐT</span>
                   </small>
                 </div>
               </div>
@@ -417,7 +411,6 @@
                 <span th:text="${#dates.format(tenant.moveInDate, 'dd/MM/yyyy')}">Ngày thuê</span>
               </div>
             </td>
-
             <td>
               <div class="date-info" th:if="${tenant.endDate != null}">
                 <i class="fas fa-calendar me-1 text-danger"></i>
@@ -430,12 +423,13 @@
             <td>
               <span class="status-badge d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill fw-semibold"
                 th:classappend="
-      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? ' bg-success text-white' :
-      (${tenant.contractStatus.name() == 'TERMINATED'} ? ' bg-danger text-white' : ' bg-secondary')">
+                      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? ' bg-success text-white' :
+                      (${tenant.contractStatus.name() == 'TERMINATED'} ? ' bg-danger text-white' : ' bg-secondary')">
 
-                <i th:class="
-      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? 'fas fa-door-open' :
-      (${tenant.contractStatus.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-question-circle')">
+                <i
+                  th:class="
+                      ${tenant.contractStatus.name() == 'ACTIVE' || tenant.contractStatus.name() == 'EXPIRED'} ? 'fas fa-door-open' :
+                      (${tenant.contractStatus.name() == 'TERMINATED'} ? 'fas fa-times-circle' : 'fas fa-question-circle')">
                 </i>
 
                 <span th:switch="${tenant.contractStatus.name()}">
@@ -452,22 +446,30 @@
     </div>
 
     <!-- Pagination -->
-    <div class="d-flex justify-content-between align-items-center mt-4">
+    <div th:if="${totalPages > 0}" class="d-flex justify-content-between align-items-center mt-4">
       <div class="text-muted">
-        Hiển thị 1-3 trong tổng số 3 kết quả
+        <span
+          th:text="'Hiển thị ' + (${currentPage * 2} + 1) + '-' + (${(currentPage * 2) + tenants.size()}) + ' trong tổng số ' + ${tenantPage.totalElements} + ' kết quả'"></span>
       </div>
-      <nav aria-label="Page navigation">
+      <nav th:if="${totalPages > 1}" aria-label="Page navigation">
         <ul class="pagination mb-0">
-          <li class="page-item disabled">
-            <a class="page-link" href="#" tabindex="-1">
+          <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+            <a class="page-link"
+              th:href="@{/chu-tro/lich-su-thue(page=${currentPage - 1}, keyword=${keyword}, hostelId=${selectedHostelId}, status=${selectedStatus})}">
               <i class="fas fa-chevron-left"></i>
             </a>
           </li>
-          <li class="page-item active">
-            <a class="page-link" href="#">1</a>
+
+          <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+            th:classappend="${currentPage == i} ? 'active'">
+            <a class="page-link"
+              th:href="@{/chu-tro/lich-su-thue(page=${i}, keyword=${keyword}, hostelId=${selectedHostelId}, status=${selectedStatus})}"
+              th:text="${i + 1}"></a>
           </li>
-          <li class="page-item disabled">
-            <a class="page-link" href="#">
+
+          <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
+            <a class="page-link"
+              th:href="@{/chu-tro/lich-su-thue(page=${currentPage + 1}, keyword=${keyword}, hostelId=${selectedHostelId}, status=${selectedStatus})}">
               <i class="fas fa-chevron-right"></i>
             </a>
           </li>

@@ -19,16 +19,7 @@ import java.util.Optional;
 
 public interface UserService {
 
-    /**
-     * Dùng để đăng ký một người dùng mới.
-     * Phương thức này sẽ xử lý việc kiểm tra email, mã hóa mật khẩu,
-     * lưu người dùng vào cơ sở dữ liệu với trạng thái chưa kích hoạt,
-     * và gọi dịch vụ để gửi mã OTP.
-     *
-     * @param userRequest Đối tượng chứa thông tin đăng ký từ người dùng.
-     * @return Đối tượng Users sau khi đã được lưu.
-     */
-    Users registerNewUser(UserRequest userRequest);
+
 
     /**
      * Dùng để đăng ký một chủ trọ mới.
@@ -93,5 +84,6 @@ public interface UserService {
 
     void rejectOwner(int id);
 
+    void createVerifiedUser(UserRequest userRequest);
 
 }
