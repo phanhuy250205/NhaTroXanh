@@ -191,4 +191,12 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
        @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Payments p " +
                      "WHERE p.id = :paymentId AND p.paymentStatus = 'ĐÃ_THANH_TOÁN'")
        boolean isPaymentAlreadyPaid(@Param("paymentId") Integer paymentId);
+
+       @Query("SELECT COUNT(DISTINCT p) FROM Payments p WHERE p.contract.owner.userId = :ownerId " +
+                     "AND p.paymentStatus = 'ĐÃ_THANH_TOÁN'")
+       long countSuccessRoomsByOwnerId(Integer ownerId);
+
+       @Query("SELECT COUNT(DISTINCT p) FROM Payments p WHERE p.contract.owner.userId = :ownerId " +
+                     "AND p.paymentStatus = 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'")
+       long countPendingInvoicesByOwnerId(Integer ownerId);
 }

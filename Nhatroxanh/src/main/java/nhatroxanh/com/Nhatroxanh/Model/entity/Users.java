@@ -116,10 +116,6 @@ public class Users {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    // @ManyToOne
-    // @JoinColumn(name = "address_id")
-    // private Address addressEntity;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
     private Role role;

@@ -41,7 +41,7 @@
                     <div class="form-group">
                         <div class="input-wrapper">
                             <i class="fas fa-phone input-icon"></i>
-                            <input id="phoneNumber" type="tel" class="form-control-register" placeholder="Nhập SĐT" pattern="[0-9]{10,11}" >
+                            <input id="phoneNumber" type="tel" class="form-control-register" placeholder="Nhập SĐT"  >
                         </div>
                     </div>
                 </div>
@@ -68,11 +68,11 @@
 
                 <div class="register-divider"><span>Hoặc</span></div>
                 <div class="social-login">
-                    <a th:href="@{/oauth2/authorization/google}" class="btn-icon btn-google">
+                    <a th:href="@{/oauth2/authorization/google}" class="btn-icon btn-google text-decoration-none">
                         <i class="fab fa-google"></i>
                     </a>
 
-                    <a th:href="@{/oauth2/authorization/facebook}" class="btn-icon btn-facebook">
+                    <a th:href="@{/oauth2/authorization/facebook}" class="btn-icon btn-facebook text-decoration-none">
                         <i class="fab fa-facebook-f"></i>
                     </a>
                 </div>
@@ -83,3 +83,7 @@
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

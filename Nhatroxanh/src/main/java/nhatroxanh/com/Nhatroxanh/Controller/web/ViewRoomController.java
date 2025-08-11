@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -276,6 +277,7 @@ public class ViewRoomController {
         try {
             long startTime = System.currentTimeMillis();
 
+            // Load utilities and provinces
             List<Utility> utilities = utilityRepository.findUtilitiesWithActivePosts();
             List<Province> provinces = provinceRepository.findAll();
             if (utilities == null)
@@ -286,6 +288,7 @@ public class ViewRoomController {
             model.addAttribute("utilities", utilities);
             model.addAttribute("provinces", provinces);
 
+            // Parse price range
             Float minPrice = null;
             Float maxPrice = null;
             if (priceRange != null && !priceRange.isEmpty()) {
@@ -307,27 +310,40 @@ public class ViewRoomController {
                 }
             }
 
+            // Parse area range
+            if (minArea != null && maxArea != null && minArea > maxArea) {
+                Float temp = minArea;
+                minArea = maxArea;
+                maxArea = temp;
+            }
+
+            // Create sort object
             Sort pageSort = switch (sort.toLowerCase()) {
                 case "price_asc" -> Sort.by(Sort.Direction.ASC, "price");
                 case "price_desc" -> Sort.by(Sort.Direction.DESC, "price");
+                case "area_asc" -> Sort.by(Sort.Direction.ASC, "area");
+                case "area_desc" -> Sort.by(Sort.Direction.DESC, "area");
                 default -> Sort.by(Sort.Direction.DESC, "createdAt");
             };
-            Pageable pageable = PageRequest.of(page, 10, pageSort);
 
+            Pageable pageable = PageRequest.of(page, 10, pageSort);
             Page<Post> postPage = postRepository.filterPostsWithAllConditions(
                     null, provinceCode, districtCode, wardCode,
                     utilityIds, minArea, maxArea,
                     minPrice, maxPrice,
                     searchTerm,
                     pageable);
-            
-            model.addAttribute("posts", postPage.getContent()); 
+
+            // Add data to model
+            model.addAttribute("posts", postPage.getContent());
             model.addAttribute("totalPosts", postPage.getTotalElements());
             model.addAttribute("currentPage", postPage.getNumber());
             model.addAttribute("totalPages", postPage.getTotalPages());
             model.addAttribute("pageSize", 10);
+            model.addAttribute("hasNext", postPage.hasNext());
+            model.addAttribute("hasPrevious", postPage.hasPrevious());
 
-            // Gửi dữ liệu lọc lại về view
+            // Preserve filter parameters
             model.addAttribute("selectedProvinceCode", provinceCode);
             model.addAttribute("selectedDistrictCode", districtCode);
             model.addAttribute("selectedWardCode", wardCode);
@@ -350,7 +366,6 @@ public class ViewRoomController {
             model.addAttribute("pageSize", 10);
             e.printStackTrace();
         }
-
         return "guest/tat-ca-phong";
     }
 

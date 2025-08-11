@@ -1,5 +1,17 @@
 <footer class="main-footer">
     <!-- Main Footer Content -->
+    <div class="custom-toast-container">
+        <div th:if="${successMessage}" class="custom-toast success">
+            <i class="toast-icon fas fa-check-circle"></i>
+            <span class="toast-message" th:text="${successMessage}"></span>
+            <button class="toast-close" aria-label="Đóng">×</button>
+        </div>
+        <div th:if="${errorMessage}" class="custom-toast error">
+            <i class="toast-icon fas fa-exclamation-circle"></i>
+            <span class="toast-message" th:text="${errorMessage}"></span>
+            <button class="toast-close" aria-label="Đóng">×</button>
+        </div>
+    </div>
     <div class="footer-main">
         <div class="footer-container">
             <!-- Company Info Section -->
@@ -205,7 +217,7 @@
                     </div>
                     <div class="newsletter-card">
                         <p class="newsletter-description">
-                            Đăng ký để nhận thông tin về phòng trọ mới, ưu đãi đặc biệt và tin tức bất động sản.
+                            Đăng ký để nhận thông tin về chính sách và bảo mật của quản lý nhà trọ.
                         </p>
                         <form class="newsletter-form" action="/newsletter/subscribe" method="post">
                             <div class="newsletter-input-wrapper">
@@ -214,6 +226,7 @@
                                 <button type="submit" class="newsletter-btn">
                                     <span class="btn-text">NHẬN THÔNG BÁO</span>
                                     <i class="fas fa-paper-plane"></i>
+                                    <span class="loading-spinner" style="display: none;"></span>
                                 </button>
                             </div>
                             <div class="newsletter-privacy">
@@ -305,4 +318,36 @@
         <div class="floating-circle circle-2"></div>
         <div class="floating-circle circle-3"></div>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const form = document.querySelector(".newsletter-form");
+            if (!form) return;
+
+            const btn = form.querySelector(".newsletter-btn");
+            const btnText = btn.querySelector(".btn-text");
+            const spinner = btn.querySelector(".loading-spinner");
+
+            form.addEventListener("submit", () => {
+                btn.classList.add("loading");
+                btnText.textContent = "Đang xử lý...";
+                spinner.style.display = "inline-block";
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelectorAll('.toast-close').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const toast = btn.closest('.custom-toast');
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+            setTimeout(() => {
+                document.querySelectorAll('.custom-toast').forEach(toast => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            }, 3000);
+        });
+    </script>
+
 </footer>

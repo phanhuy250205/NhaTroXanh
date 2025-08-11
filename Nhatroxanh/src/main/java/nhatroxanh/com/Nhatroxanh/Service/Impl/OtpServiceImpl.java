@@ -82,66 +82,14 @@ public class OtpServiceImpl implements OtpService {
                 COMPANY_NAME, footerNote, new Date().getYear() + 1900, COMPANY_NAME);
     }
 
-    @Override
-    public void createAndSendOtp(Users user) {
-        String otpCode = String.valueOf(100000 + new SecureRandom().nextInt(900000));
-        user.setOtpCode(otpCode);
-        user.setOtpExpiration(LocalDateTime.now().plusMinutes(OTP_VALID_DURATION_MINUTES));
-        userRepository.save(user);
 
-        String title = "Mã OTP Của Bạn";
-        String greeting = "Xin chào " + user.getFullname();
-        String content = String.format(
-                """
-                        <div style="max-width: 600px; margin: 0 auto; font-family: Arial, sans-serif; color: #333333;">
-                            <div style="text-align: center; margin-bottom: 30px;">
-                                <h2 style="color: %s;">Mã OTP Của Bạn</h2>
-                            </div>
-
-                            <p>Xin cảm ơn bạn đã sử dụng dịch vụ của <strong>Nhà Trọ Xanh</strong>.</p>
-                            <p>Vui lòng sử dụng mã OTP sau để hoàn tất thủ tục xác thực:</p>
-                            <p style="font-size: 13px; color: #666666;">Mã có hiệu lực trong 5 phút. Không chia sẻ mã này với người khác, bao gồm cả nhân viên Nhà Trọ Xanh.</p>
-
-                            <div style="text-align: center; margin: 30px 0;">
-                                <div style="font-size: 32px; letter-spacing: 10px; font-weight: bold; color: %s;">
-                                    %s
-                                </div>
-                            </div>
-
-                            <div style="border-top: 1px solid #eeeeee; padding-top: 20px; margin-top: 30px;">
-                                <p style="font-size: 13px; color: #666666;">Cần hỗ trợ? Liên hệ <a href="mailto:support@nhatroxanh.com" style="color: %s;">support@nhatroxanh.com</a> hoặc truy cập Trung tâm hỗ trợ của chúng tôi</p>
-                            </div>
-                        </div>
-                        """,
-                PRIMARY_COLOR,
-                PRIMARY_COLOR,
-                otpCode,
-                PRIMARY_COLOR);
-
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setFrom("nhatroxanh123@gmail.com", "Nhà Trọ Xanh");
-            helper.setTo(user.getEmail());
-            helper.setSubject("Mã OTP của bạn - Nhà Trọ Xanh");
-            helper.setText(content, true);
-
-            mailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Không thể gửi email OTP: " + e.getMessage());
-        }
-    }
-
-    @Override
+   @Override
     public void createAndSendWithdrawalOtp(Users user, Double amount) {
-        String otpCode = String.valueOf(100000 + new SecureRandom().nextInt(900000));
+        String otpCode = generateOtp(); // Tái sử dụng phương thức tạo OTP
         user.setOtpCode(otpCode);
         user.setOtpExpiration(LocalDateTime.now().plusMinutes(OTP_VALID_DURATION_MINUTES));
         userRepository.save(user);
 
-        // Format amount to Vietnamese currency
         NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
         String formattedAmount = formatter.format(amount) + " VNĐ";
 
@@ -149,83 +97,117 @@ public class OtpServiceImpl implements OtpService {
         String greeting = "Xin chào " + user.getFullname();
         String content = String.format("""
                 <p>Bạn đang thực hiện giao dịch rút tiền từ tài khoản %s.</p>
-
                 <div class="highlight">
                     <p><strong>Số tiền:</strong> %s</p>
                     <p><strong>Thời gian yêu cầu:</strong> %s</p>
                 </div>
-
                 <div style="text-align: center; margin: 25px 0;">
                     <p>Vui lòng nhập mã OTP sau để xác nhận giao dịch:</p>
                     <div class="otp-code">%s</div>
-                    <p style="color: %s;">(Mã có hiệu lực trong 5 phút)</p>
                 </div>
+                """, COMPANY_NAME, formattedAmount, new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(new Date()), otpCode);
 
-                <div class="warning">
-                    <p>⚠️ CẢNH BÁO BẢO MẬT: Không chia sẻ mã này với bất kỳ ai!</p>
-                    <p>%s sẽ không bao giờ yêu cầu bạn cung cấp mã OTP.</p>
-                </div>
-
-                <p>Nếu bạn không thực hiện giao dịch này, vui lòng liên hệ hỗ trợ ngay lập tức.</p>
-                """,
-                COMPANY_NAME,
-                formattedAmount,
-                new SimpleDateFormat("HH:mm:ss dd/MM/yyyy").format(new Date()),
-                otpCode,
-                WARNING_COLOR,
-                COMPANY_NAME);
-
-        sendHtmlEmail(user.getEmail(), title, content, greeting,
-                "Bảo mật tài khoản của bạn là ưu tiên hàng đầu của chúng tôi");
+        sendHtmlEmail(user.getEmail(), title, content, greeting, "Bảo mật tài khoản của bạn là ưu tiên hàng đầu của chúng tôi");
     }
 
-    private void sendHtmlEmail(String to, String subject, String content,
-            String greeting, String footerNote) {
+  private void sendHtmlEmail(String to, String subject, String content, String greeting, String footerNote) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom("nhatroxanh123@gmail.com");
+            helper.setFrom("nhatroxanh123@gmail.com", "Nhà Trọ Xanh");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(getEmailTemplate(subject, content, greeting, footerNote), true);
 
             mailSender.send(message);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Không thể gửi email OTP: " + e.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException("Không thể gửi email: " + e.getMessage(), e);
         }
     }
 
-    @Override
-    public boolean verifyOtp(Users user, String providedOtp) {
-        if (isValidOtp(user, providedOtp)) {
-            user.setEnabled(true);
-            clearOtp(user);
-            return true;
-        }
-        return false;
-    }
-
-    @Override
+ @Override
     public boolean verifyWithdrawalOtp(Users user, String providedOtp) {
         if (isValidOtp(user, providedOtp)) {
-            clearOtp(user);
+            clearOtp(user); // <<< LỖI CỦA BẠN LÀ DO PHƯƠNG THỨC NÀY BỊ THIẾU
             return true;
         }
         return false;
     }
 
-    private boolean isValidOtp(Users user, String providedOtp) {
+   private boolean isValidOtp(Users user, String providedOtp) {
         return user.getOtpCode() != null &&
                 user.getOtpCode().equals(providedOtp) &&
                 user.getOtpExpiration() != null &&
                 user.getOtpExpiration().isAfter(LocalDateTime.now());
     }
 
-    private void clearOtp(Users user) {
+ private void clearOtp(Users user) {
         user.setOtpCode(null);
         user.setOtpExpiration(null);
         userRepository.save(user);
     }
+@Override
+    public void sendVerificationEmail(String toEmail, String fullName, String otp) {
+        String title = "Mã OTP Xác Thực Tài Khoản";
+        String greeting = "Xin chào " + fullName;
+        String content = String.format(
+                """
+                <p>Cảm ơn bạn đã đăng ký tài khoản tại Nhà Trọ Xanh.</p>
+                <p>Vui lòng sử dụng mã OTP dưới đây để hoàn tất việc xác thực. Mã có hiệu lực trong 5 phút.</p>
+                <div style="text-align: center; margin: 30px 0;">
+                   <div style="font-size: 32px; letter-spacing: 10px; font-weight: bold; color: %s;">
+                        %s
+                   </div>
+                </div>
+                """, PRIMARY_COLOR, otp);
+        
+        sendHtmlEmail(toEmail, title, content, greeting, "Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email.");
+    }
+
+
+
+
+   @Override
+public String generateOtp() {
+    // Tạo một số ngẫu nhiên có 6 chữ số (từ 100000 đến 999999)
+    return String.valueOf(100000 + new java.security.SecureRandom().nextInt(900000));
+}
+
+
+@Override
+public void createAndSendPasswordResetOtp(Users user) {
+    // 1. Tạo mã OTP ngẫu nhiên
+    String otpCode = generateOtp(); 
+    
+    // 2. Lưu mã OTP và thời gian hết hạn vào đối tượng user
+    user.setOtpCode(otpCode);
+    user.setOtpExpiration(java.time.LocalDateTime.now().plusMinutes(5)); // Hết hạn sau 5 phút
+    
+    // 3. Cập nhật thông tin user vào database
+    userRepository.save(user);
+
+    // 4. Gửi email chứa mã OTP
+    sendVerificationEmail(user.getEmail(), user.getFullname(), otpCode);
+}
+
+
+ @Override
+public boolean verifyPasswordResetOtp(Users user, String otp) {
+    // 1. Kiểm tra xem OTP có khớp và còn hạn hay không
+    boolean isValid = user.getOtpCode() != null &&
+                      user.getOtpCode().equals(otp) &&
+                      user.getOtpExpiration() != null &&
+                      user.getOtpExpiration().isAfter(java.time.LocalDateTime.now());
+    
+    // 2. Nếu OTP hợp lệ, xóa nó khỏi database để tránh dùng lại
+    if (isValid) {
+        user.setOtpCode(null);
+        user.setOtpExpiration(null);
+        userRepository.save(user);
+    }
+    
+    // 3. Trả về kết quả
+    return isValid;
+}
 }

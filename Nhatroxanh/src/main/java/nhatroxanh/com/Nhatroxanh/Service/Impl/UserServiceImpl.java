@@ -69,32 +69,29 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public Users registerNewUser(UserRequest userRequest) {
-        logger.info("Registering new user with email: {}", userRequest.getEmail());
+    public void createVerifiedUser(UserRequest userRequest) {
+        logger.info("Tạo người dùng đã xác thực với email: {}", userRequest.getEmail());
+
+        // Kiểm tra lần cuối để đảm bảo an toàn
         if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
-            logger.error("Email already exists: {}", userRequest.getEmail());
-            throw new RuntimeException("Email đã được sử dụng!");
+            throw new RuntimeException("Lỗi: Email này đã tồn tại.");
         }
-        if (userRepository.findByPhone(userRequest.getPhoneNumber()).isPresent()) {
-            logger.error("Phone already exists: {}", userRequest.getPhoneNumber());
-            throw new RuntimeException("Số điện thoại đã được sử dụng!");
-        }
+
         Users newUser = new Users();
         newUser.setFullname(userRequest.getFullName());
         newUser.setEmail(userRequest.getEmail());
         newUser.setPhone(userRequest.getPhoneNumber());
-        newUser.setPassword(passwordEncoder.encode(userRequest.getPassword()));
-        newUser.setEnabled(false);
+        // Mật khẩu đã được mã hóa từ trước khi đưa vào cache
+        newUser.setPassword(userRequest.getPassword());
+
+        // Kích hoạt tài khoản ngay lập tức
+        newUser.setEnabled(true);
         newUser.setRole(Users.Role.CUSTOMER);
         newUser.setStatus(Users.Status.APPROVED);
         newUser.setCreatedAt(LocalDateTime.now());
 
-        Users savedUser = userRepository.save(newUser);
-        logger.info("Saved new user with ID: {}", savedUser.getUserId());
-
-        otpService.createAndSendOtp(savedUser);
-
-        return savedUser;
+        userRepository.save(newUser);
+        logger.info("Đã tạo thành công người dùng đã xác thực với email: {}", userRequest.getEmail());
     }
 
     @Transactional
@@ -471,5 +468,7 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.delete(user);
     }
+
+   
 
 }

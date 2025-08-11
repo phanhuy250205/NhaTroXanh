@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -399,7 +400,94 @@
             /* xanh lá */
             color: #fff;
         }
-        
+
+        /* Pagination Styles */
+        .pagination-staff {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: 12px !important;
+            font-weight: 600;
+            margin: 0 0.25rem;
+            border: none !important;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .page-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-item.active .page-link {
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.6;
+            background-color: transparent;
+        }
+
+        .page-item:first-child .page-link,
+        .page-item:last-child .page-link {
+            border-radius: 12px !important;
+        }
+
+        /* Responsive pagination */
+        @media (max-width: 576px) {
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-item {
+                margin-bottom: 0.5rem;
+            }
+
+            .page-link {
+                padding: 0.5rem 0.75rem;
+                min-width: 36px;
+            }
+        }
+
+        .priority-badge-host {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .priority-badge-host i.fas {
+            font-size: 8px;
+            margin-right: 4px;
+        }
+
+        .priority-high-host {
+            color: #d32f2f;
+            /* Màu chữ đỏ đậm */
+            background-color: #ffebee;
+            /* Màu nền đỏ nhạt */
+        }
+
+        .priority-medium-host {
+            color: #ff9800;
+            /* Màu chữ cam */
+            background-color: #fff3e0;
+            /* Màu nền cam nhạt */
+        }
+
+        .priority-low-host {
+            color: #388e3c;
+            /* Màu chữ xanh lá */
+            background-color: #e8f5e9;
+            /* Màu nền xanh lá nhạt */
+        }
     </style>
 </head>
 
@@ -446,22 +534,19 @@
                             <td th:text="${report.user.fullname}">Nguyễn Văn An</td>
                             <td th:text="${report.incidentType}">Sự cố điện</td>
                             <td>
-                                <span th:switch="${report.level}">
-                                    <span th:case="'CAO'" class="priority-badge-staff priority-high-staff">
-                                        <i class="fas fa-exclamation-triangle"></i> Cao
-                                    </span>
-                                    <span th:case="'TRUNG_BINH'" class="priority-badge-staff priority-medium-staff">
-                                        <i class="fas fa-exclamation-circle"></i> Trung bình
-                                    </span>
-                                    <span th:case="'THAP'" class="priority-badge-staff priority-low-staff">
-                                        <i class="fas fa-info-circle"></i> Thấp
-                                    </span>
-                                    <span th:case="*" class="priority-badge-staff">
-                                        <i class="fas fa-question-circle"></i> <span th:text="${report.level}"></span>
+                                <span th:classappend="
+        ${report.level.name() == 'CAO'} ? 'priority-high-host' :
+        (${report.level.name() == 'TRUNG_BINH'} ? 'priority-medium-host' : 'priority-low-host')"
+                                    class="priority-badge-host">
+
+                                    <i class="fas fa-circle"></i>
+
+                                    <span th:text="
+            ${report.level.name() == 'CAO'} ? 'Cao' :
+            (${report.level.name() == 'TRUNG_BINH'} ? 'Trung bình' : 'Thấp')">
                                     </span>
                                 </span>
                             </td>
-
                             <td th:text="${report.room.hostel.name}">KTX A1</td>
                             <td th:text="${#dates.format(report.reportedAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30</td>
                             <td>
@@ -506,7 +591,6 @@
                         </li>
                     </ul>
                 </div>
-
             </div>
         </div>
     </div>
@@ -584,4 +668,5 @@
         document.head.appendChild(style);
     </script>
 </body>
+
 </html>

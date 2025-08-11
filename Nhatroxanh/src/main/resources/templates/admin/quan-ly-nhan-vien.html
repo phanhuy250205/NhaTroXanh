@@ -466,111 +466,183 @@
             transform: translateY(-2px);
         }
 
-        /* View Employee Modal */
-        #viewEmployeeModal .modal-body {
-            padding: 2rem;
-            background: linear-gradient(180deg, #f8f9fa 0%, #fff 100%);
-        }
-
-        #viewEmployeeModal .img-fluid {
-            border: 3px solid var(--border-color);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease;
-        }
-
-        #viewEmployeeModal .img-fluid:hover {
-            transform: scale(1.05);
-        }
-
-        #viewEmployeeModal h4 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin-bottom: 1rem;
-        }
-
-        #viewEmployeeModal h5 {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 0.5rem;
-        }
-
-        #viewEmployeeModal p {
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            margin-bottom: 0.75rem;
-        }
-
-        #viewEmployeeModal p strong {
-            color: var(--text-dark);
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        #viewEmployeeModal .btn-disable-staff {
-            margin-top: 1rem;
-            padding: 0.75rem 1.5rem;
+        /* Input Styles for View Employee Modal */
+        #viewEmployeeModal .form-control {
+            border: 2px solid #e2e8f0;
             border-radius: 10px;
-            font-weight: 600;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            color: #334155;
+            background-color: #ffffff;
             transition: all 0.3s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            height: auto;
+            line-height: 1.5;
+        }
+
+        #viewEmployeeModal .form-control:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+            background-color: #ffffff;
+        }
+
+        #viewEmployeeModal .form-control:disabled {
+            background-color: #f8fafc;
+            color: #64748b;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+
+        #viewEmployeeModal .form-control[readonly] {
+            background-color: #f8fafc;
+        }
+
+        /* Label Styles */
+        #viewEmployeeModal .form-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin: 0 auto;
+            font-size: 0.95rem;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
         }
 
-        #viewEmployeeModal .btn-primary {
-            background: var(--primary-color);
-            border: none;
+        #viewEmployeeModal .form-label i {
+            margin-right: 8px;
+            color: #3b82f6;
+            width: 20px;
+            text-align: center;
+            font-size: 1rem;
         }
 
-        #viewEmployeeModal .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
+        /* Input Group Styles */
+        #viewEmployeeModal .input-group {
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            width: 100%;
         }
 
-        #viewEmployeeModal .btn-danger {
-            background: var(--danger-color);
-            border: none;
+        #viewEmployeeModal .input-group-text {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            color: #64748b;
+            text-align: center;
+            white-space: nowrap;
+            background-color: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
         }
 
-        #viewEmployeeModal .btn-danger:hover {
-            background: #d32f2f;
-            transform: translateY(-2px);
+        /* Date Input Specific Styles */
+        #viewEmployeeModal input[type="date"] {
+            position: relative;
+            padding-right: 1rem;
         }
 
-        /* Responsive Design */
+        #viewEmployeeModal input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            color: transparent;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        #viewEmployeeModal input[type="date"]::before {
+            content: attr(placeholder);
+            position: absolute;
+            color: #94a3b8;
+            width: 100%;
+        }
+
+        #viewEmployeeModal input[type="date"]:focus::before,
+        #viewEmployeeModal input[type="date"]:valid::before {
+            display: none;
+        }
+
+        /* Gender Select Styles */
+        #viewEmployeeModal .gender-select {
+            display: flex;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        #viewEmployeeModal .gender-option {
+            flex: 1;
+            position: relative;
+        }
+
+        #viewEmployeeModal .gender-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        #viewEmployeeModal .gender-option label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            background-color: #ffffff;
+            color: #64748b;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #viewEmployeeModal .gender-option input[type="radio"]:checked+label {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            color: #3b82f6;
+        }
+
+        #viewEmployeeModal .gender-option label:hover {
+            border-color: #cbd5e1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            #viewEmployeeModal .form-control {
+                padding: 0.65rem 0.9rem;
+                font-size: 0.95rem;
+            }
+
+            #viewEmployeeModal .form-label {
+                font-size: 0.9rem;
+            }
+
+            #viewEmployeeModal .form-label i {
+                font-size: 0.9rem;
+            }
+        }
+
         @media (max-width: 576px) {
-            .modal-dialog {
-                margin: 0.5rem;
+            #viewEmployeeModal .form-control {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
             }
 
-            .modal-content {
-                border-radius: 10px;
+            #viewEmployeeModal .form-label {
+                font-size: 0.85rem;
             }
 
-            .modal-header {
-                padding: 1rem 1.5rem;
-            }
-
-            .modal-body {
-                padding: 1.5rem;
-            }
-
-            .modal-footer {
-                padding: 0.75rem 1.5rem;
-            }
-
-            #viewEmployeeModal .col-md-4 {
-                margin-bottom: 1.5rem;
-            }
-
-            #viewEmployeeModal p strong {
-                width: 100%;
-                display: block;
-                margin-bottom: 0.25rem;
+            #viewEmployeeModal .gender-select {
+                flex-direction: column;
+                gap: 0.5rem;
             }
         }
 
@@ -749,6 +821,109 @@
             .btn-disable-staff i {
                 font-size: 0.9rem;
             }
+        }
+
+        .password-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Password input styling */
+        .password-input {
+            padding-right: 3rem !important;
+            /* Make space for the icon */
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+            width: 100%;
+        }
+
+        .password-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
+            background: #fff;
+            outline: none;
+        }
+
+        .password-input::placeholder {
+            color: var(--text-light);
+            opacity: 0.7;
+        }
+
+        /* Password toggle button inside input */
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .password-toggle-btn:hover {
+            color: var(--primary-color);
+            background-color: rgba(62, 131, 204, 0.1);
+        }
+
+        .password-toggle-btn:focus {
+            outline: none;
+            color: var(--primary-color);
+            background-color: rgba(62, 131, 204, 0.15);
+        }
+
+        .password-toggle-btn i {
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        /* Active state when password is visible */
+        .password-toggle-btn.active {
+            color: var(--primary-color);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .password-input {
+                padding-right: 2.5rem !important;
+                font-size: 16px;
+                /* Prevent zoom on iOS */
+            }
+
+            .password-toggle-btn {
+                right: 0.5rem;
+                width: 1.75rem;
+                height: 1.75rem;
+            }
+
+            .password-toggle-btn i {
+                font-size: 14px;
+            }
+        }
+
+        /* Fix for input group in modal */
+        #createEmployeeModal .password-input-wrapper .password-input {
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+        }
+
+        #createEmployeeModal .password-input-wrapper .password-input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(62, 131, 204, 0.1);
         }
     </style>
 
@@ -951,17 +1126,30 @@
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label"><i class="fas fa-lock me-1"></i> Mật
                                     khẩu</label>
-                                <input type="password" class="form-control" id="password" name="password">
+                                <div class="password-input-wrapper">
+                                    <input type="password" class="form-control password-input" id="password"
+                                        name="password">
+                                    <button class="password-toggle-btn" type="button" data-target="password"
+                                        title="Hiện mật khẩu">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 <span class="text-danger" id="passwordError"></span>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="confirmPassword" class="form-label"><i class="fas fa-key me-1"></i> Nhập lại
                                     mật khẩu</label>
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                                <div class="password-input-wrapper">
+                                    <input type="password" class="form-control password-input" id="confirmPassword"
+                                        name="confirmPassword">
+                                    <button class="password-toggle-btn" type="button" data-target="confirmPassword"
+                                        title="Hiện mật khẩu">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
                                 <span class="text-danger" id="confirmPasswordError"></span>
                             </div>
                         </div>
-
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                 <i class="fas fa-times me-1"></i> Hủy
@@ -982,7 +1170,8 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title text-white"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên</h5>
+                        <h5 class="modal-title text-white"><i class="fas fa-user-circle me-2"></i>Chi tiết nhân viên
+                        </h5>
                         <a th:href="@{/admin/quan-ly-nhan-vien(page=${currentPage})}" class="btn-close"></a>
                     </div>
                     <div class="modal-body">
@@ -1007,31 +1196,39 @@
                                 <h4 class="mb-4">Thông tin cá nhân</h4>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label for="phone" class="form-label"> <i class="fas fa-phone me-1"></i> <strong>Số điện thoại:</strong></label>
+                                        <label for="phone" class="form-label"> <i class="fas fa-phone me-1"></i>
+                                            <strong>Số điện thoại:</strong></label>
                                         <input type="text" id="phone" name="phone" th:value="${staffDetail.phone}"
                                             class="form-control" disabled />
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="form-label"><i class="fas fa-venus-mars me-1"></i> <strong>Giới tính:</strong></label>
+                                        <label class="form-label"><i class="fas fa-venus-mars me-1"></i> <strong>Giới
+                                                tính:</strong></label>
                                         <input type="text" id="cccdNumber" name="cccdNumber"
-                                            th:value="${staffDetail.gender == true ? 'Nam' : (staffDetail.gender == false ? 'Nữ' : '---')}" class="form-control" disabled/>
+                                            th:value="${staffDetail.gender == true ? 'Nam' : (staffDetail.gender == false ? 'Nữ' : '---')}"
+                                            class="form-control" disabled />
                                     </div>
 
                                     <div class="col-md-6">
-                                        <label for="birthday" class="form-label"><i class="fas fa-birthday-cake me-1"></i> <strong>Ngày sinh:</strong></label>
+                                        <label for="birthday" class="form-label"><i
+                                                class="fas fa-birthday-cake me-1"></i> <strong>Ngày
+                                                sinh:</strong></label>
                                         <input type="date" id="birthday" name="birthday"
                                             th:value="${#dates.format(staffDetail.birthday, 'yyyy-MM-dd')}"
                                             class="form-control" disabled />
                                     </div>
                                     <div class="col-md-6">
-                                        <label for="cccdNumber" class="form-label"><i class="fas fa-id-card me-1"></i> <strong>Số CCCD:</strong></label>
+                                        <label for="cccdNumber" class="form-label"><i class="fas fa-id-card me-1"></i>
+                                            <strong>Số CCCD:</strong></label>
                                         <input type="text" id="cccdNumber" name="cccdNumber"
-                                            th:value="${cccd != null ? cccd.cccdNumber : ''}" class="form-control" disabled/>
+                                            th:value="${cccd != null ? cccd.cccdNumber : ''}" class="form-control"
+                                            disabled />
                                     </div>
 
                                     <!-- Ngày cấp -->
                                     <div class="col-md-6">
-                                        <label for="issueDate" class="form-label"><i class="fas fa-calendar-alt me-1"></i> <strong>Ngày cấp:</strong></label>
+                                        <label for="issueDate" class="form-label"><i
+                                                class="fas fa-calendar-alt me-1"></i> <strong>Ngày cấp:</strong></label>
                                         <input type="date" id="issueDate" name="issueDate"
                                             th:value="${cccd != null && cccd.issueDate != null ? #dates.format(cccd.issueDate, 'yyyy-MM-dd') : ''}"
                                             class="form-control" disabled />
@@ -1039,14 +1236,18 @@
 
                                     <!-- Nơi cấp -->
                                     <div class="col-md-6">
-                                        <label for="issuePlace" class="form-label"><i class="fas fa-map-marker-alt me-1"></i> <strong>Nơi cấp:</strong></label>
+                                        <label for="issuePlace" class="form-label"><i
+                                                class="fas fa-map-marker-alt me-1"></i> <strong>Nơi
+                                                cấp:</strong></label>
                                         <input type="text" id="issuePlace" name="issuePlace"
-                                            th:value="${cccd != null ? cccd.issuePlace : ''}" class="form-control" disabled />
+                                            th:value="${cccd != null ? cccd.issuePlace : ''}" class="form-control"
+                                            disabled />
                                     </div>
 
                                     <!-- Địa chỉ -->
                                     <div class="col-12">
-                                        <label for="address" class="form-label"><i class="fas fa-home me-1"></i> <strong>Địa chỉ:</strong></label>
+                                        <label for="address" class="form-label"><i class="fas fa-home me-1"></i>
+                                            <strong>Địa chỉ:</strong></label>
                                         <input type="text" id="address" name="address" th:value="${staffDetail.address}"
                                             class="form-control" disabled />
                                     </div>
@@ -1138,7 +1339,7 @@
 
                 // Họ tên
                 if (fullname.length < 2) {
-                    document.getElementById("fullnameError").textContent = "Họ tên phải có ít nhất 2 ký tự.";
+                    document.getElementById("fullnameError").textContent = "Vui lòng nhập họ và tên.";
                     valid = false;
                 }
 
@@ -1173,6 +1374,37 @@
                 if (!valid) {
                     e.preventDefault();
                 }
+            });
+        });
+        document.addEventListener('DOMContentLoaded', function () {
+            // Handle password visibility toggle
+            document.querySelectorAll('.password-toggle-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const targetInput = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+
+                    if (targetInput.type === 'password') {
+                        targetInput.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                        this.classList.add('active');
+                        this.setAttribute('title', 'Ẩn mật khẩu');
+                    } else {
+                        targetInput.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                        this.classList.remove('active');
+                        this.setAttribute('title', 'Hiện mật khẩu');
+                    }
+                });
+            });
+
+            // Prevent form submission when clicking toggle button
+            document.querySelectorAll('.password-toggle-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                });
             });
         });
     </script>

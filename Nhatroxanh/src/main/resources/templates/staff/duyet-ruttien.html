@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -901,7 +902,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Responsive Design */
@@ -909,7 +912,7 @@
             .main-container-host {
                 padding: 1.5rem;
             }
-            
+
             .stats-overview-host {
                 grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             }
@@ -1020,6 +1023,7 @@
                 opacity: 0;
                 transform: translateY(20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -1036,16 +1040,17 @@
 
         /* Print styles */
         @media print {
+
             .request-actions-host,
             .custom-modal-overlay,
             .custom-alert-overlay {
                 display: none !important;
             }
-            
+
             .main-container-host {
                 padding: 0;
             }
-            
+
             .card-host {
                 box-shadow: none;
                 border: 1px solid #ddd;
@@ -1053,6 +1058,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="main-container-host">
         <!-- Header Section -->
@@ -1071,14 +1077,16 @@
             <div class="card-body-host">
                 <ul class="nav nav-tabs" id="transactionTabs" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="withdrawal-tab" data-bs-toggle="tab" data-bs-target="#withdrawal" type="button" role="tab">
+                        <button class="nav-link active" id="withdrawal-tab" data-bs-toggle="tab"
+                            data-bs-target="#withdrawal" type="button" role="tab">
                             <i class="fas fa-minus-circle me-2"></i>
                             Duyệt Rút Tiền
                             <span class="badge bg-warning ms-2">3</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="deposit-tab" data-bs-toggle="tab" data-bs-target="#deposit" type="button" role="tab">
+                        <button class="nav-link" id="deposit-tab" data-bs-toggle="tab" data-bs-target="#deposit"
+                            type="button" role="tab">
                             <i class="fas fa-plus-circle me-2"></i>
                             Duyệt Nạp Tiền
                             <span class="badge bg-info ms-2">2</span>
@@ -1143,7 +1151,8 @@
                     <div class="request-item-host" data-status="pending">
                         <div class="request-header-host">
                             <div class="requester-info-host">
-                                <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <img src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1"
+                                    alt="Avatar" class="requester-avatar-host">
                                 <div class="requester-details-host">
                                     <h5 class="requester-name-host">Nguyễn Văn An</h5>
                                     <p class="requester-info-text-host">Chủ trọ</p>
@@ -1190,7 +1199,8 @@
                     <div class="request-item-host" data-status="pending">
                         <div class="request-header-host">
                             <div class="requester-info-host">
-                                <img src="https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <img src="https://images.pexels.com/photos/1130626/pexels-photo-1130626.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1"
+                                    alt="Avatar" class="requester-avatar-host">
                                 <div class="requester-details-host">
                                     <h5 class="requester-name-host">Trần Thị Bình</h5>
                                     <p class="requester-info-text-host">Chủ trọ</p>
@@ -1237,7 +1247,8 @@
                     <div class="request-item-host" data-status="pending">
                         <div class="request-header-host">
                             <div class="requester-info-host">
-                                <img src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1" alt="Avatar" class="requester-avatar-host">
+                                <img src="https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=150&h=150&dpr=1"
+                                    alt="Avatar" class="requester-avatar-host">
                                 <div class="requester-details-host">
                                     <h5 class="requester-name-host">Lê Minh Cường</h5>
                                     <p class="requester-info-text-host">Chủ trọ</p>
@@ -1260,7 +1271,8 @@
                                 <div class="detail-item-host full-width-host">
                                     <i class="fas fa-sticky-note"></i>
                                     <span class="detail-label-host">Ghi chú:</span>
-                                    <span class="detail-value-host">Chi phí sửa chữa và đầu tư cải thiện phòng trọ</span>
+                                    <span class="detail-value-host">Chi phí sửa chữa và đầu tư cải thiện phòng
+                                        trọ</span>
                                 </div>
                             </div>
                         </div>
@@ -1310,7 +1322,8 @@
                             <tr>
                                 <td>
                                     <div class="requester-mini-host">
-                                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <img src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1"
+                                            alt="Avatar" class="requester-mini-avatar-host">
                                         <div>
                                             <div class="requester-mini-name-host">Phạm Văn Đức</div>
                                             <div class="requester-mini-id-host">CT004</div>
@@ -1320,7 +1333,8 @@
                                 <td><strong>WTH001234568</strong></td>
                                 <td><strong style="color: var(--success-green);">2,000,000 VNĐ</strong></td>
                                 <td><i class="fas fa-university text-primary me-1"></i> Vietcombank</td>
-                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã duyệt</span></td>
+                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã
+                                        duyệt</span></td>
                                 <td>Nguyễn Thu Hà</td>
                                 <td>15/12/2024 13:15</td>
                                 <td>
@@ -1332,7 +1346,8 @@
                             <tr>
                                 <td>
                                     <div class="requester-mini-host">
-                                        <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <img src="https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1"
+                                            alt="Avatar" class="requester-mini-avatar-host">
                                         <div>
                                             <div class="requester-mini-name-host">Võ Thị Lan</div>
                                             <div class="requester-mini-id-host">CT005</div>
@@ -1342,7 +1357,8 @@
                                 <td><strong>WTH001234567</strong></td>
                                 <td><strong style="color: var(--success-green);">1,500,000 VNĐ</strong></td>
                                 <td><i class="fas fa-university text-primary me-1"></i> Techcombank</td>
-                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã duyệt</span></td>
+                                <td><span class="status-badge-host status-success-host"><i class="fas fa-check"></i> Đã
+                                        duyệt</span></td>
                                 <td>Trần Minh Tâm</td>
                                 <td>14/12/2024 11:30</td>
                                 <td>
@@ -1354,7 +1370,8 @@
                             <tr>
                                 <td>
                                     <div class="requester-mini-host">
-                                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1" alt="Avatar" class="requester-mini-avatar-host">
+                                        <img src="https://images.pexels.com/photos/1516680/pexels-photo-1516680.jpeg?auto=compress&cs=tinysrgb&w=50&h=50&dpr=1"
+                                            alt="Avatar" class="requester-mini-avatar-host">
                                         <div>
                                             <div class="requester-mini-name-host">Hoàng Minh Tuấn</div>
                                             <div class="requester-mini-id-host">CT006</div>
@@ -1364,7 +1381,8 @@
                                 <td><strong>WTH001234566</strong></td>
                                 <td><strong style="color: var(--danger-red);">800,000 VNĐ</strong></td>
                                 <td><i class="fas fa-university text-primary me-1"></i> ACB</td>
-                                <td><span class="status-badge-host status-failed-host"><i class="fas fa-times"></i> Từ chối</span></td>
+                                <td><span class="status-badge-host status-failed-host"><i class="fas fa-times"></i> Từ
+                                        chối</span></td>
                                 <td>Nguyễn Thu Hà</td>
                                 <td>13/12/2024 16:20</td>
                                 <td>
@@ -1413,12 +1431,13 @@
                         <span class="approval-value-host" id="approvalAccountName-host">NGUYEN VAN AN</span>
                     </div>
                 </div>
-                
+
                 <div class="custom-modal-input-group">
                     <label class="custom-modal-label">Ghi chú xử lý (tùy chọn)</label>
-                    <textarea class="custom-modal-input" id="approvalNote-host" rows="2" placeholder="Nhập ghi chú về việc duyệt yêu cầu này..."></textarea>
+                    <textarea class="custom-modal-input" id="approvalNote-host" rows="2"
+                        placeholder="Nhập ghi chú về việc duyệt yêu cầu này..."></textarea>
                 </div>
-                
+
                 <div style="text-align: center; color: #6c757d; font-size: 0.8rem;">
                     <i class="fas fa-info-circle" style="color: var(--primary-blue); margin-right: 0.5rem;"></i>
                     Sau khi duyệt, tiền sẽ được chuyển vào tài khoản chủ trọ trong 5-10 phút
@@ -1449,7 +1468,7 @@
                     <label class="custom-modal-label">Mã giao dịch</label>
                     <input type="text" class="custom-modal-input" id="rejectionRequestId-host" readonly>
                 </div>
-                
+
                 <div class="custom-modal-input-group">
                     <label class="custom-modal-label">Lý do từ chối *</label>
                     <select class="custom-modal-input" id="rejectionReason-host">
@@ -1462,20 +1481,23 @@
                         <option value="other">Lý do khác</option>
                     </select>
                 </div>
-                
+
                 <div class="custom-modal-input-group">
                     <label class="custom-modal-label">Ghi chú chi tiết *</label>
-                    <textarea class="custom-modal-input" id="rejectionNote-host" rows="3" placeholder="Nhập mô tả chi tiết lý do từ chối yêu cầu..." required></textarea>
+                    <textarea class="custom-modal-input" id="rejectionNote-host" rows="3"
+                        placeholder="Nhập mô tả chi tiết lý do từ chối yêu cầu..." required></textarea>
                 </div>
-                
+
                 <div style="text-align: center; color: #6c757d; font-size: 0.8rem;">
-                    <i class="fas fa-exclamation-triangle" style="color: var(--warning-orange); margin-right: 0.5rem;"></i>
+                    <i class="fas fa-exclamation-triangle"
+                        style="color: var(--warning-orange); margin-right: 0.5rem;"></i>
                     Chủ trọ sẽ nhận được thông báo từ chối kèm lý do
                 </div>
             </div>
             <div class="custom-modal-footer">
                 <button class="custom-modal-btn secondary" onclick="closeRejectionModal()">Hủy bỏ</button>
-                <button class="custom-modal-btn primary" onclick="confirmRejection()" id="confirmRejectionBtn-host" style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
+                <button class="custom-modal-btn primary" onclick="confirmRejection()" id="confirmRejectionBtn-host"
+                    style="background: linear-gradient(135deg, var(--danger-red), #e74c3c);">
                     <i class="fas fa-times"></i>
                     Từ chối yêu cầu
                 </button>
@@ -1601,7 +1623,7 @@
 
             // Set icon and style based on type
             alertIcon.className = 'custom-alert-icon ' + type;
-            switch(type) {
+            switch (type) {
                 case 'success':
                     alertIcon.innerHTML = '<i class="fas fa-check-circle"></i>';
                     break;
@@ -1617,7 +1639,7 @@
 
             alertTitle.textContent = title;
             alertMessage.textContent = message;
-            
+
             overlay.classList.add('show');
         }
 
@@ -1629,13 +1651,13 @@
         // Approval Modal
         function showApprovalModal(requestId) {
             currentRequestId = requestId;
-            
+
             // Get request details from requestDetails object
             const request = requestDetails[requestId];
             if (!request) return;
-            
+
             currentRequestAmount = request.amount;
-            
+
             const modal = document.getElementById('approvalModal-host');
             document.getElementById('approvalRequestId-host').textContent = requestId;
             document.getElementById('approvalAmount-host').textContent = formatCurrency(request.amount);
@@ -1643,14 +1665,14 @@
             document.getElementById('approvalAccountNumber-host').textContent = request.accountNumber;
             document.getElementById('approvalAccountName-host').textContent = request.accountName;
             document.getElementById('approvalNote-host').value = '';
-            
+
             modal.classList.add('show');
         }
 
         function closeApprovalModal() {
             const modal = document.getElementById('approvalModal-host');
             modal.classList.remove('show');
-            
+
             // Reset button state
             const confirmBtn = document.getElementById('confirmApprovalBtn-host');
             confirmBtn.innerHTML = '<i class="fas fa-check"></i> Duyệt yêu cầu';
@@ -1660,39 +1682,41 @@
         function confirmApproval() {
             const note = document.getElementById('approvalNote-host').value;
             const confirmBtn = document.getElementById('confirmApprovalBtn-host');
-            
+
             // Show loading state
             confirmBtn.innerHTML = '<span class="modal-loading"></span> Đang xử lý...';
             confirmBtn.disabled = true;
-            
+
             // Simulate API call
             setTimeout(() => {
                 closeApprovalModal();
-                
-                showAlert(
-                    `Đã duyệt thành công yêu cầu ${currentRequestId}. Tiền sẽ được chuyển vào tài khoản của chủ trọ trong 5-10 phút.`, 
-                    'success', 
-                    'Duyệt thành công'
-                );
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Duyệt thành công',
+                    text: `Đã duyệt thành công yêu cầu ${currentRequestId}. Tiền sẽ được chuyển vào tài khoản của chủ trọ trong 5-10 phút.`,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
             }, 2000);
         }
 
         // Rejection Modal
         function showRejectionModal(requestId) {
             currentRequestId = requestId;
-            
+
             const modal = document.getElementById('rejectionModal-host');
             document.getElementById('rejectionRequestId-host').value = requestId;
             document.getElementById('rejectionReason-host').value = '';
             document.getElementById('rejectionNote-host').value = '';
-            
+
             modal.classList.add('show');
         }
 
         function closeRejectionModal() {
             const modal = document.getElementById('rejectionModal-host');
             modal.classList.remove('show');
-            
+
             // Reset button state
             const confirmBtn = document.getElementById('confirmRejectionBtn-host');
             confirmBtn.innerHTML = '<i class="fas fa-times"></i> Từ chối yêu cầu';
@@ -1703,30 +1727,44 @@
             const reason = document.getElementById('rejectionReason-host').value;
             const note = document.getElementById('rejectionNote-host').value;
             const confirmBtn = document.getElementById('confirmRejectionBtn-host');
-            
+
             if (!reason) {
-                showAlert('Vui lòng chọn lý do từ chối!', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng chọn lý do từ chối!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ffc107'
+                });
                 return;
             }
-            
+
             if (!note.trim()) {
-                showAlert('Vui lòng nhập ghi chú chi tiết!', 'warning');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng nhập ghi chú chi tiết!',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#ffc107'
+                });
                 return;
             }
-            
+
             // Show loading state
             confirmBtn.innerHTML = '<span class="modal-loading"></span> Đang xử lý...';
             confirmBtn.disabled = true;
-            
+
             // Simulate API call
             setTimeout(() => {
                 closeRejectionModal();
-                
-                showAlert(
-                    `Đã từ chối yêu cầu ${currentRequestId}. Chủ trọ sẽ nhận được thông báo từ chối kèm lý do.`, 
-                    'success', 
-                    'Từ chối thành công'
-                );
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Từ chối thành công',
+                    text: `Đã từ chối yêu cầu ${currentRequestId}. Chủ trọ sẽ nhận được thông báo từ chối kèm lý do.`,
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#28a745'
+                });
             }, 2000);
         }
 
@@ -1734,10 +1772,10 @@
         function viewDetails(requestId) {
             const request = requestDetails[requestId];
             if (!request) return;
-            
+
             const modal = document.getElementById('detailsModal-host');
             const detailsContent = document.getElementById('detailsContent-host');
-            
+
             detailsContent.innerHTML = `
                 <div class="approval-details-host">
                     <div class="approval-item-host">
@@ -1788,7 +1826,7 @@
                     </div>
                 </div>
             `;
-            
+
             modal.classList.add('show');
         }
 
@@ -1798,7 +1836,7 @@
         }
 
         // Modal event handlers
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             if (e.target.classList.contains('custom-modal-overlay')) {
                 if (e.target.id === 'approvalModal-host') {
                     closeApprovalModal();
@@ -1808,14 +1846,14 @@
                     closeDetailsModal();
                 }
             }
-            
+
             if (e.target.classList.contains('custom-alert-overlay')) {
                 closeAlert();
             }
         });
 
         // Handle Escape key
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', function (e) {
             if (e.key === 'Escape') {
                 if (document.getElementById('approvalModal-host').classList.contains('show')) {
                     closeApprovalModal();
@@ -1832,5 +1870,7 @@
         // Add smooth scroll behavior
         document.documentElement.style.scrollBehavior = 'smooth';
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
+
 </html>
