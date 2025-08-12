@@ -327,14 +327,6 @@ public class DashboardAdminService {
                         Long count = ((Number) result[1]).longValue();
                         chartData.put(incidentType, count);
                 }
-
-                // Thêm các loại khiếu nại mặc định nếu không có dữ liệu
-                chartData.putIfAbsent("Điện nước", 0L);
-                chartData.putIfAbsent("Tiếng ồn", 0L);
-                chartData.putIfAbsent("Vệ sinh", 0L);
-                chartData.putIfAbsent("An ninh", 0L);
-                chartData.putIfAbsent("Khác", 0L);
-
                 return chartData;
         }
 }

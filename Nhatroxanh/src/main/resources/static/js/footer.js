@@ -23,44 +23,44 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Newsletter form submission
-    const newsletterForm = document.querySelector(".newsletter-form")
-    if (newsletterForm) {
-        newsletterForm.addEventListener("submit", function (e) {
-            e.preventDefault()
+    // const newsletterForm = document.querySelector(".newsletter-form")
+    // if (newsletterForm) {
+    //     newsletterForm.addEventListener("submit", function (e) {
+    //         e.preventDefault()
 
-            const emailInput = this.querySelector('input[name="email"]')
-            const privacyCheckbox = this.querySelector('input[name="privacy"]')
-            const submitButton = this.querySelector(".newsletter-btn")
+    //         const emailInput = this.querySelector('input[name="email"]')
+    //         const privacyCheckbox = this.querySelector('input[name="privacy"]')
+    //         const submitButton = this.querySelector(".newsletter-btn")
 
-            // Validate email
-            if (!emailInput.value || !isValidEmail(emailInput.value)) {
-                showNotification("Vui lòng nhập email hợp lệ!", "error")
-                return
-            }
+    //         // Validate email
+    //         if (!emailInput.value || !isValidEmail(emailInput.value)) {
+    //             showNotification("Vui lòng nhập email hợp lệ!", "error")
+    //             return
+    //         }
 
-            // Validate privacy checkbox
-            if (!privacyCheckbox.checked) {
-                showNotification("Vui lòng đồng ý với chính sách bảo mật!", "error")
-                return
-            }
+    //         // Validate privacy checkbox
+    //         if (!privacyCheckbox.checked) {
+    //             showNotification("Vui lòng đồng ý với chính sách bảo mật!", "error")
+    //             return
+    //         }
 
-            // Show loading state
-            const originalText = submitButton.innerHTML
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...'
-            submitButton.disabled = true
+    //         // Show loading state
+    //         const originalText = submitButton.innerHTML
+    //         submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...'
+    //         submitButton.disabled = true
 
-            // Simulate API call (replace with actual implementation)
-            setTimeout(() => {
-                showNotification("Đăng ký thành công! Cảm ơn bạn đã đăng ký nhận thông báo.", "success")
-                emailInput.value = ""
-                privacyCheckbox.checked = false
+    //         // Simulate API call (replace with actual implementation)
+    //         setTimeout(() => {
+    //             showNotification("Đăng ký thành công! Cảm ơn bạn đã đăng ký nhận thông báo.", "success")
+    //             emailInput.value = ""
+    //             privacyCheckbox.checked = false
 
-                // Reset button
-                submitButton.innerHTML = originalText
-                submitButton.disabled = false
-            }, 2000)
-        })
-    }
+    //             // Reset button
+    //             submitButton.innerHTML = originalText
+    //             submitButton.disabled = false
+    //         }, 2000)
+    //     })
+    // }
 
     // Social link tracking (for analytics)
     const socialLinks = document.querySelectorAll(".social-link")

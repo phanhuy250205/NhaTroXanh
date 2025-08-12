@@ -551,8 +551,61 @@
                 transform: translateX(0);
             }
         }
+
         .text-danger {
             font-size: 12px;
+        }
+
+        /* Pagination Styles */
+        .pagination-container {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: 12px !important;
+            font-weight: 600;
+            margin: 0 0.25rem;
+            border: none !important;
+            transition: all 0.3s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .page-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-item.active .page-link {
+            box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
+        }
+
+        .page-item.disabled .page-link {
+            opacity: 0.6;
+            background-color: transparent;
+        }
+
+        .page-item:first-child .page-link,
+        .page-item:last-child .page-link {
+            border-radius: 12px !important;
+        }
+
+        /* Responsive pagination */
+        @media (max-width: 576px) {
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-item {
+                margin-bottom: 0.5rem;
+            }
+
+            .page-link {
+                padding: 0.5rem 0.75rem;
+                min-width: 36px;
+            }
         }
     </style>
 </head>
@@ -680,10 +733,11 @@
                                         th:onclick="'window.location.href=\'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id} + '\';'">
                                         <i class="fas fa-edit"></i>
                                     </button>
-                                    <form th:action="@{/nhan-vien/khuyen-mai/gui-thong-bao/{id}(id=${voucher.id})}" method="post"
-                                        class="send-notification-form" th:data-id="${voucher.id}" style="display: inline;">
-                                        <button type="submit" class="btn action-btn action-btn-notify" 
-                                                title="Gửi thông báo voucher đến người dùng">
+                                    <form th:action="@{/nhan-vien/khuyen-mai/gui-thong-bao/{id}(id=${voucher.id})}"
+                                        method="post" class="send-notification-form" th:data-id="${voucher.id}"
+                                        style="display: inline;">
+                                        <button type="submit" class="btn action-btn action-btn-notify"
+                                            title="Gửi thông báo voucher đến người dùng">
                                             <i class="fas fa-bell"></i>
                                         </button>
                                     </form>

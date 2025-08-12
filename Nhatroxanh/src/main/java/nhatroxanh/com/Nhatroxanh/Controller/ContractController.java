@@ -45,6 +45,7 @@ import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -2076,6 +2077,10 @@ public class ContractController {
                         String phoneNumber = contract.getTenantPhone();
                         dto.setTenantPhone(StringUtils.hasText(phoneNumber) ? phoneNumber : "Chưa cập nhật");
 
+                        // ✅ SỬ DỤNG METHOD CHUNG CHO TRẠNG THÁI
+                        Map<String, Object> statusInfo = calculateContractDisplayInfo(contract);
+                        dto.setStatus((String) statusInfo.get("displayStatus")); // ← Dùng displayStatus thay vì dbStatus
+
                         dto.setStatus(String.valueOf(contract.getStatus()));
                         dto.setStartDate(
                                 contract.getStartDate() != null ? contract.getStartDate().toLocalDate() : null);
@@ -2106,6 +2111,27 @@ public class ContractController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    // Trong ContractController - thêm endpoint để test
+    @PostMapping("/auto-update-status")
+    public ResponseEntity<?> autoUpdateStatus() {
+        try {
+            int updatedCount = contractService.autoUpdateExpiredContracts();
+
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Đã cập nhật " + updatedCount + " hợp đồng",
+                    "updatedCount", updatedCount
+            ));
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of(
+                    "success", false,
+                    "message", "Lỗi: " + e.getMessage()
+            ));
+        }
+    }
+
 
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN')")
@@ -2329,6 +2355,13 @@ public class ContractController {
                 }
 
                 ContractDto contractDto = convertToContractDto(contract);
+
+                // ✅ SỬ DỤNG METHOD CHUNG
+                Map<String, Object> statusInfo = calculateContractDisplayInfo(contract);
+
+                // ✅ THÊM VÀO MODEL
+                model.addAttribute("statusInfo", statusInfo);
+                model.addAttribute("contract", contractDto);
 
                 System.out.println("📅 Contract Date từ database: " + contract.getContractDate());
                 logger.info("Contract Date từ database cho contract ID {}: {}", contractId, contract.getContractDate());
@@ -3220,6 +3253,66 @@ public class ContractController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    // ✅ THÊM VÀO ContractController
+    private Map<String, Object> calculateContractDisplayInfo(Contracts contract) {
+        Map<String, Object> info = new HashMap<>();
+
+        String dbStatus = contract.getStatus().toString();
+        String displayStatus = dbStatus;
+        long daysRemaining = 0;
+        String statusClass = "";
+        String statusIcon = "";
+
+        // Chỉ tính cho hợp đồng ACTIVE
+        if (contract.getStatus() == Contracts.Status.ACTIVE && contract.getEndDate() != null) {
+            LocalDate today = LocalDate.now();
+            LocalDate endDate = contract.getEndDate().toLocalDate();
+            daysRemaining = ChronoUnit.DAYS.between(today, endDate);
+
+            if (daysRemaining <= 0) {
+                displayStatus = "HẾT HẠN";
+                statusClass = "text-danger";
+                statusIcon = "❌";
+            } else if (daysRemaining <= 3) {
+                displayStatus = "SẮP HẾT HẠN";
+                statusClass = "text-warning";
+                statusIcon = "⚠️";
+            } else {
+                displayStatus = "ĐANG HIỆU LỰC";
+                statusClass = "text-success";
+                statusIcon = "✅";
+            }
+        } else {
+            // Các trạng thái khác
+            switch (contract.getStatus()) {
+                case DRAFT:
+                    displayStatus = "BẢN NHÁP";
+                    statusClass = "text-secondary";
+                    statusIcon = "📝";
+                    break;
+                case TERMINATED:
+                    displayStatus = "ĐÃ KẾT THÚC";
+                    statusClass = "text-dark";
+                    statusIcon = "🚫";
+                    break;
+                case EXPIRED:
+                    displayStatus = "ĐÃ HẾT HẠN";
+                    statusClass = "text-danger";
+                    statusIcon = "❌";
+                    break;
+            }
+        }
+
+        info.put("dbStatus", dbStatus);
+        info.put("displayStatus", displayStatus);
+        info.put("daysRemaining", daysRemaining);
+        info.put("statusClass", statusClass);
+        info.put("statusIcon", statusIcon);
+
+        return info;
+    }
+
 
     /**
      * Tìm kiếm hợp đồng theo số điện thoại của người thuê.

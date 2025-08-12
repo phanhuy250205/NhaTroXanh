@@ -4593,6 +4593,28 @@ $(document).ready(function () {
     // Cập nhật preview ban đầu
     updateContractPreview();
 });
+function updateContractStatus() {
+    fetch('/api/contracts/auto-update-status', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`✅ Đã cập nhật ${data.updatedCount} hợp đồng!`);
+                location.reload(); // Reload trang để thấy thay đổi
+            } else {
+                alert('❌ Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra!');
+        });
+}
 
 
 

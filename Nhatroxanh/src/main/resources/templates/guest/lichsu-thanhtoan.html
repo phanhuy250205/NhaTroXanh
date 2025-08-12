@@ -50,6 +50,96 @@
             /* Ngắt trang nếu cần */
         }
     }
+
+    /* Container phân trang */
+    .pagination-guest {
+        margin-top: 2rem !important;
+    }
+
+    /* Nav pagination */
+    .pagination-guest .pagination {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    /* Các item trang */
+    .pagination-guest .page-item {
+        margin: 0;
+    }
+
+    .pagination-guest .page-link {
+        /* Kiểu cơ bản */
+        color: #4b5563;
+        background-color: #fff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px !important;
+        min-width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+        /* Hiệu ứng hover */
+        &:hover {
+            color: #3b82f6;
+            background-color: #f8fafc;
+            border-color: #e5e7eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Mũi tên */
+        &.arrow {
+            font-size: 1.1rem;
+        }
+    }
+
+    /* Trang active */
+    .pagination-guest .page-item.active .page-link {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        border-color: #3b82f6;
+        color: white !important;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(59, 130, 246, 0.3);
+    }
+
+    /* Trang disabled */
+    .pagination-guest .page-item.disabled .page-link {
+        color: #9ca3af !important;
+        background-color: #f3f4f6;
+        border-color: #e5e7eb;
+        cursor: not-allowed;
+        opacity: 0.7;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 576px) {
+        .pagination-guest .page-link {
+            min-width: 36px;
+            height: 36px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .pagination-guest .pagination {
+            gap: 3px;
+        }
+    }
+
+    .status-waiting-cash-guest {
+        background-color: #ffcc80;
+        /* vàng nhạt */
+        color: #8a6d3b;
+        padding: 11px 9px;
+        border-radius: 40px;
+        font-weight: bold;
+    }
 </style>
 
 <body>
@@ -144,35 +234,49 @@
                                 </td>
 
                                 <td>
-                                    <span th:if="${payment.paymentMethod != null}">
-                                        <i class="fas fa-mobile-alt text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'VNPAY' || payment.paymentMethod == 'MOMO'}"></i>
-                                        <i class="fas fa-university text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'BANK'}"></i>
-                                        <i class="fas fa-money-bill-wave text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'TIỀN_MẶT'}"></i>
-                                        <span th:text="${payment.paymentMethod}"></span>
-                                    </span>
-                                    <span th:unless="${payment.paymentMethod != null}">-</span>
-                                </td>
-                                <td>
                                     <span class="status-badge-guest" th:classappend="
-        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
-        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' : 'status-paid-guest')">
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'status-zalopay-guest' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? 'status-momo-guest' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? 'status-vnpay-guest' : 'status-cash-guest'))">
 
-                                        <i class="fas"
-                                            th:classappend="
-           ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
-           (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' : ' fa-check me-1')">
+                                        <i class="fas" th:classappend="
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? ' fa-wallet me-1' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? ' fa-mobile-alt me-1' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? ' fa-university me-1' : ' fa-money-bill-wave me-1'))">
                                         </i>
 
                                         <span th:text="
-        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
-        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' : 'Đã thanh toán')">
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'ZaloPay' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? 'MoMo' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? 'VNPAY' : 'Tiền mặt'))">
                                             Trạng thái
                                         </span>
                                     </span>
                                 </td>
+
+                                <td>
+                                    <span class="status-badge-guest"
+                                        th:classappend="
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'status-waiting-cash-guest' : 'status-paid-guest'))">
+
+                                        <i class="fas"
+                                            th:classappend="
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? ' fa-hand-holding-usd me-1' : ' fa-check me-1'))">
+                                        </i>
+
+                                        <span th:text="
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'Chờ xác nhận tiền mặt' : 'Đã thanh toán'))">
+                                            Trạng thái
+                                        </span>
+                                    </span>
+                                </td>
+
                                 <td>
                                     <!-- Nút Thanh toán (chỉ hiện khi CHƯA_THANH_TOÁN) -->
                                     <button th:if="${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'}"
@@ -220,19 +324,23 @@
                         <div class="history-card-header-guest">
                             <div class="history-card-title-guest"
                                 th:text="${#dates.format(payment.dueDate, 'MM/yyyy')}"></div>
-                            <span class="status-badge-guest" th:classappend="
-        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
-        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' : 'status-paid-guest')">
+                            <span class="status-badge-guest"
+                                th:classappend="
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'status-pending-guest' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'status-overdue-guest' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'status-waiting-cash-guest' : 'status-paid-guest'))">
 
                                 <i class="fas"
                                     th:classappend="
-           ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
-           (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' : ' fa-check me-1')">
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? ' fa-clock me-1' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? ' fa-exclamation-triangle me-1' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? ' fa-hand-holding-usd me-1' : ' fa-check me-1'))">
                                 </i>
 
                                 <span th:text="
-        ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
-        (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' : 'Đã thanh toán')">
+            ${payment.paymentStatus.name() == 'CHƯA_THANH_TOÁN'} ? 'Chưa thanh toán' :
+            (${payment.paymentStatus.name() == 'QUÁ_HẠN_THANH_TOÁN'} ? 'Quá hạn thanh toán' :
+            (${payment.paymentStatus.name() == 'CHỜ_XÁC_NHẬN_TIỀN_MẶT'} ? 'Chờ xác nhận tiền mặt' : 'Đã thanh toán'))">
                                     Trạng thái
                                 </span>
                             </span>
@@ -251,17 +359,23 @@
                             </div>
                             <div class="history-item-guest">
                                 <span class="history-label-guest">Phương thức</span>
-                                <span class="history-value-guest">
-                                    <span th:if="${payment.paymentMethod != null}">
-                                        <i class="fas fa-mobile-alt text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'VNPAY' || payment.paymentMethod == 'MOMO'}"></i>
-                                        <i class="fas fa-university text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'BANK'}"></i>
-                                        <i class="fas fa-money-bill-wave text-primary me-1"
-                                            th:if="${payment.paymentMethod == 'TIỀN_MẶT'}"></i>
-                                        <span th:text="${payment.paymentMethod}"></span>
+                                <span class="status-badge-guest" th:classappend="
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'status-zalopay-guest' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? 'status-momo-guest' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? 'status-vnpay-guest' : 'status-cash-guest'))">
+
+                                    <i class="fas" th:classappend="
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? ' fa-wallet me-1' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? ' fa-mobile-alt me-1' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? ' fa-university me-1' : ' fa-money-bill-wave me-1'))">
+                                    </i>
+
+                                    <span th:text="
+            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'ZaloPay' :
+            (${payment.paymentMethod.name() == 'MOMO'} ? 'MoMo' :
+            (${payment.paymentMethod.name() == 'VNPAY'} ? 'VNPAY' : 'Tiền mặt'))">
+                                        Trạng thái
                                     </span>
-                                    <span th:unless="${payment.paymentMethod != null}">-</span>
                                 </span>
                             </div>
                             <div class="history-item-guest">
@@ -428,13 +542,19 @@
                     const invoiceInfo = document.getElementById('invoiceInfo');
                     const statusClass = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? 'status-pending-guest' :
                         data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? 'status-overdue-guest' :
-                            'status-paid-guest';
+                            data.payment.paymentStatus === 'CHỜ_XÁC_NHẬN_TIỀN_MẶT' ? 'status-waiting-cash-guest' :
+                                'status-paid-guest';
+
                     const statusIcon = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? '<i class="fas fa-clock"></i>' :
                         data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? '<i class="fas fa-exclamation-triangle"></i>' :
-                            '<i class="fas fa-check"></i>';
+                            data.payment.paymentStatus === 'CHỜ_XÁC_NHẬN_TIỀN_MẶT' ? '<i class="fas fa-hand-holding-usd"></i>' :
+                                '<i class="fas fa-check"></i>';
+
                     const statusText = data.payment.paymentStatus === 'CHƯA_THANH_TOÁN' ? 'Chưa thanh toán' :
                         data.payment.paymentStatus === 'QUÁ_HẠN_THANH_TOÁN' ? 'Trễ hạn' :
-                            'Đã thanh toán';
+                            data.payment.paymentStatus === 'CHỜ_XÁC_NHẬN_TIỀN_MẶT' ? 'Chờ xác nhận tiền mặt' :
+                                'Đã thanh toán';
+
                     invoiceInfo.innerHTML = `
                         <div class="info-row-guest">
                             <span class="info-label-guest">Mã hóa đơn:</span>
