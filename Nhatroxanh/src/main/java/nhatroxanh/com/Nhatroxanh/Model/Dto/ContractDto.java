@@ -582,7 +582,7 @@ public class ContractDto {
         private Integer roomId;
         private String roomName;
         private Float area;
-        private Integer max_tenants; 
+        private Integer max_tenants;
         private Float price;
         private String status;
         private Integer hostelId;
@@ -616,17 +616,6 @@ public class ContractDto {
         public Integer getRoomId() {
             return roomId != null ? roomId : 0; // Tránh null tạm thời để debug
         }
-
-        // Getters and setters
-
-        // public Boolean getCurrent() {
-        // return isCurrent;
-        // }
-        //
-        // public void setCurrent(Boolean current) {
-        // isCurrent = current;
-        // }
-
 
         public String getProvince() {
             return province;
@@ -734,23 +723,90 @@ public class ContractDto {
         private Integer duration;
         private String paymentDateDescription; // Đổi từ paymentDate thành paymentDateDescription
 
-        private String formattedPrice; // Thêm trường này
-        private String formattedDeposit; // Thêm trường này
+        // ✅ THÊM: Helper method convert Float -> Double
+        public static Double floatToDouble(Float floatValue) {
+            if (floatValue == null) {
+                return 0.0;
+            }
+            // Làm tròn để tránh precision errors
+            return (double) Math.round(floatValue.doubleValue());
+        }
 
+        // ✅ THÊM: Helper method convert Double -> Float cho Entity
+        public static Float doubleToFloat(Double doubleValue) {
+            if (doubleValue == null) {
+                return 0.0f;
+            }
+            if (doubleValue > Float.MAX_VALUE) {
+                return Float.MAX_VALUE;
+            }
+            return doubleValue.floatValue();
+        }
+
+        // ✅ THÊM: Method parse VND amount
+        public static Double parseVNDAmount(String amountStr) {
+            if (amountStr == null || amountStr.trim().isEmpty()) {
+                return 0.0;
+            }
+
+            try {
+                String cleanAmount = amountStr
+                        .replace("VND", "")
+                        .replace("₫", "")
+                        .replace(" ", "")
+                        .trim();
+
+                // ✅ Xử lý format Việt Nam: 2.000.000 -> 2000000
+                if (cleanAmount.matches("\\d{1,3}(\\.\\d{3})*")) {
+                    cleanAmount = cleanAmount.replace(".", "");
+                }
+
+                cleanAmount = cleanAmount.replaceAll("[^0-9]", "");
+
+                if (cleanAmount.isEmpty()) {
+                    return 0.0;
+                }
+
+                // ✅ Parse thành Long trước để tránh floating point errors
+                Long longValue = Long.parseLong(cleanAmount);
+                Double result = longValue.doubleValue();
+
+                System.out.println("💰 Parse VND: '" + amountStr + "' -> " + result);
+                return result;
+            } catch (Exception e) {
+                System.err.println("❌ Error parsing VND amount: " + amountStr + " - " + e.getMessage());
+                return 0.0;
+            }
+        }
+
+        // ✅ THÊM: Getter cho formattedPrice - tự động format
         public String getFormattedPrice() {
-            return formattedPrice;
+            return ContractDto.formatVND(this.price);
         }
 
-        public void setFormattedPrice(String formattedPrice) {
-            this.formattedPrice = formattedPrice;
-        }
-
+        // ✅ THÊM: Getter cho formattedDeposit - tự động format
         public String getFormattedDeposit() {
-            return formattedDeposit;
+            return ContractDto.formatVND(this.deposit);
         }
 
+        // ✅ THÊM: Setter cho formattedPrice - parse từ string
+        public void setFormattedPrice(String formattedPrice) {
+            this.price = parseVNDAmount(formattedPrice);
+        }
+
+        // ✅ THÊM: Setter cho formattedDeposit - parse từ string
         public void setFormattedDeposit(String formattedDeposit) {
-            this.formattedDeposit = formattedDeposit;
+            this.deposit = parseVNDAmount(formattedDeposit);
+        }
+
+        // ✅ THÊM: Method để lấy price dưới dạng Float cho Entity
+        public Float getPriceAsFloat() {
+            return doubleToFloat(this.price);
+        }
+
+        // ✅ THÊM: Method để lấy deposit dưới dạng Float cho Entity
+        public Float getDepositAsFloat() {
+            return doubleToFloat(this.deposit);
         }
 
         // Getter và Setter
@@ -772,8 +828,27 @@ public class ContractDto {
             return price;
         }
 
-        public void setPrice(Double price) {
-            this.price = price;
+        // ✅ SỬA: Setter cho price - xử lý cả Float (từ Entity) và String (từ form)
+        public void setPrice(Object priceObj) {
+            System.out.println("💰 Setting price object: " + priceObj + " (Type: " + (priceObj != null ? priceObj.getClass().getSimpleName() : "null") + ")");
+
+            if (priceObj == null) {
+                this.price = 0.0;
+            } else if (priceObj instanceof Float) {
+                // ✅ QUAN TRỌNG: Từ Entity Float -> DTO Double
+                this.price = floatToDouble((Float) priceObj);
+            } else if (priceObj instanceof Double) {
+                this.price = (Double) priceObj;
+            } else if (priceObj instanceof Number) {
+                this.price = floatToDouble(((Number) priceObj).floatValue());
+            } else if (priceObj instanceof String) {
+                // ✅ Từ form input
+                this.price = parseVNDAmount((String) priceObj);
+            } else {
+                this.price = parseVNDAmount(priceObj.toString());
+            }
+
+            System.out.println("💰 Final price set: " + this.price);
         }
 
         // Getters and setters
@@ -783,8 +858,27 @@ public class ContractDto {
             return deposit;
         }
 
-        public void setDeposit(Double deposit) {
-            this.deposit = deposit;
+        // ✅ SỬA: Setter cho deposit - xử lý cả Float (từ Entity) và String (từ form)
+        public void setDeposit(Object depositObj) {
+            System.out.println("💰 Setting deposit object: " + depositObj + " (Type: " + (depositObj != null ? depositObj.getClass().getSimpleName() : "null") + ")");
+
+            if (depositObj == null) {
+                this.deposit = 0.0;
+            } else if (depositObj instanceof Float) {
+                // ✅ QUAN TRỌNG: Từ Entity Float -> DTO Double
+                this.deposit = floatToDouble((Float) depositObj);
+            } else if (depositObj instanceof Double) {
+                this.deposit = (Double) depositObj;
+            } else if (depositObj instanceof Number) {
+                this.deposit = floatToDouble(((Number) depositObj).floatValue());
+            } else if (depositObj instanceof String) {
+                // ✅ Từ form input
+                this.deposit = parseVNDAmount((String) depositObj);
+            } else {
+                this.deposit = parseVNDAmount(depositObj.toString());
+            }
+
+            System.out.println("💰 Final deposit set: " + this.deposit);
         }
 
         @JsonProperty("startDate")
@@ -828,8 +922,6 @@ public class ContractDto {
             calculateEndDate();
         }
 
-       
-
         // Helper method to calculate end date
         private void calculateEndDate() {
             if (this.startDate != null && this.duration != null && this.duration > 0) {
@@ -849,13 +941,24 @@ public class ContractDto {
         private String cccdNumber;
     }
 
-    // Phương thức format tiền Việt Nam
+    // ✅ SỬA: Phương thức format tiền Việt Nam - không hiển thị ".0" cho số nguyên
     public static String formatVND(Double amount) {
         if (amount == null) {
-            return "0 VND";
+            return "0";
         }
+
         NumberFormat formatter = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
-        return formatter.format(amount) + " VND";
+
+        // ✅ Kiểm tra nếu là số nguyên thì không hiển thị decimal
+        if (amount == Math.floor(amount)) {
+            formatter.setMaximumFractionDigits(0);
+            formatter.setMinimumFractionDigits(0);
+        } else {
+            formatter.setMaximumFractionDigits(2);
+            formatter.setMinimumFractionDigits(0);
+        }
+
+        return formatter.format(amount);
     }
 
     // Getter cho price với format VND
