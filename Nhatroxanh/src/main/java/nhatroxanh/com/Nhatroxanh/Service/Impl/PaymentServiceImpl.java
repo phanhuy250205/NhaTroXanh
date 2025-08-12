@@ -441,79 +441,92 @@ public class PaymentServiceImpl implements PaymentService {
      * @return HTML email body
      */
     private String buildEmailBody(PaymentResponseDto payment) {
-        StringBuilder body = new StringBuilder();
-        body.append("<!DOCTYPE html>")
-                .append("<html>")
-                .append("<head>")
-                .append("<meta charset='UTF-8'>")
-                .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
-                .append("<style>")
-                .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; }")
-                .append(".container { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; background-color: #f9f9f9; }")
-                .append("h2 { color: #2c3e50; text-align: center; font-size: 24px; margin: 0 0 20px; }")
-                .append(".header { background-color: #3498db; color: white; padding: 15px; text-align: center; border-radius: 8px 8px 0 0; }")
-                .append("table { width: 100%; border-collapse: collapse; margin: 20px 0; }")
-                .append("th, td { padding: 12px; border: 1px solid #ddd; text-align: left; font-size: 14px; }")
-                .append("th { background-color: #ecf0f1; font-weight: bold; }")
-                .append(".total { font-weight: bold; font-size: 16px; text-align: right; }")
-                .append(".footer { text-align: center; color: #777; font-size: 12px; margin-top: 20px; }")
-                .append(".payment-button { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; margin: 20px 0; }")
-                .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 12px; font-size: 12px; font-weight: bold; }")
-                .append(".status-paid { background-color: #d4edda; color: #155724; }")
-                .append(".status-pending { background-color: #fff3cd; color: #856404; }")
-                .append(".status-overdue { background-color: #f8d7da; color: #721c24; }")
-                .append("@media (max-width: 600px) { .container { padding: 10px; } th, td { font-size: 12px; padding: 8px; } }")
-                .append("</style>")
-                .append("</head>")
-                .append("<body>")
-                .append("<div class='container'>")
-                .append("<div class='header'>")
-                .append("<h2>Hóa Đơn Thanh Toán</h2>")
-                .append("</div>")
-                .append("<p><strong>Mã hóa đơn:</strong> ").append(payment.getPaymentId()).append("</p>")
-                .append("<p><strong>Tháng:</strong> ").append(payment.getMonth()).append("</p>")
-                .append("<p><strong>Hạn thanh toán:</strong> ").append(payment.getDueDate()).append("</p>")
-                .append("<p><strong>Trạng thái:</strong> <span class='status-badge ");
+    StringBuilder body = new StringBuilder();
+    body.append("<!DOCTYPE html>")
+            .append("<html>")
+            .append("<head>")
+            .append("<meta charset='UTF-8'>")
+            .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+            .append("<style>")
+            .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; background-color: #f5f9fc; }")
+            .append(".ticket { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2); background: white; position: relative; }")
+            .append(".ticket:before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(to bottom, transparent, transparent 10px, #3498db 10px, #3498db 20px); }")
+            .append(".header { background-color: #3498db; color: white; padding: 20px; text-align: center; }")
+            .append("h2 { margin: 0; font-size: 24px; font-weight: 600; }")
+            .append(".content { padding: 25px; }")
+            .append(".info-item { display: flex; margin-bottom: 15px; }")
+            .append(".info-label { flex: 1; font-weight: bold; color: #3498db; }")
+            .append(".info-value { flex: 2; }")
+            .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #f0f7fd; color: #3498db; border: 1px solid #3498db; }")
+            .append(".status-paid { background-color: #e6f7ee; color: #28a745; border-color: #28a745; }")
+            .append(".status-overdue { background-color: #fde8e8; color: #dc3545; border-color: #dc3545; }")
+            .append("table { width: 100%; border-collapse: collapse; margin: 25px 0; border-radius: 8px; overflow: hidden; }")
+            .append("th { background-color: #3498db; color: white; padding: 12px; text-align: left; font-weight: 500; }")
+            .append("td { padding: 12px; border-bottom: 1px solid #e0e0e0; }")
+            .append("tr:last-child td { border-bottom: none; }")
+            .append(".total-row td { padding-top: 15px; font-weight: bold; font-size: 16px; }")
+            .append(".total-amount { color: #3498db; font-size: 18px; }")
+            .append(".payment-button { display: block; text-align: center; padding: 12px 0; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 25px 0; transition: background-color 0.3s; }")
+            .append(".payment-button:hover { background-color: #2980b9; }")
+            .append(".footer { text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1; }")
+            .append(".contact-link { color: #3498db; text-decoration: none; }")
+.append("@media (max-width: 600px) { .content { padding: 15px; } th, td { padding: 8px; } }")
+            .append("</style>")
+            .append("</head>")
+            .append("<body>")
+            .append("<div class='ticket'>")
+            .append("<div class='header'>")
+            .append("<h2>HÓA ĐƠN THANH TOÁN</h2>")
+            .append("</div>")
+            .append("<div class='content'>")
+            .append("<div class='info-item'><span class='info-label'>Mã hóa đơn:</span><span class='info-value'>").append(payment.getPaymentId()).append("</span></div>")
+            .append("<div class='info-item'><span class='info-label'>Tháng:</span><span class='info-value'>").append(payment.getMonth()).append("</span></div>")
+            .append("<div class='info-item'><span class='info-label'>Hạn thanh toán:</span><span class='info-value'>").append(payment.getDueDate()).append("</span></div>")
+            .append("<div class='info-item'><span class='info-label'>Trạng thái:</span><span class='info-value'><span class='status-badge ");
 
-        // Handle payment status safely
-        String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase()
-                : "unknown";
-        if (status.contains("đã_thanh_toán")) {
-            body.append("status-paid'>Đã thanh toán");
-        } else if (status.contains("quá_hạn_thanh_toán")) {
-            body.append("status-overdue'>Quá hạn thanh toán");
-        } else {
-            body.append("status-pending'>Chưa thanh toán");
-        }
-        body.append("</span></p>")
-                .append("<table>")
-                .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
-
-        for (PaymentResponseDto.PaymentDetailResponseDto detail : payment.getDetails()) {
-            body.append("<tr>")
-                    .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText())
-                    .append(")</td>")
-                    .append("<td>").append(detail.getQuantity()).append("</td>")
-                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
-                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
-                    .append("</tr>");
-        }
-
-        body.append("</table>")
-                .append("<p class='total'>Tổng cộng: ").append(CURRENCY_FORMAT.format(payment.getTotalAmount()))
-                .append(" VNĐ</p>")
-                .append("<a href='/tenant/payments/").append(payment.getPaymentId())
-                .append("' class='payment-button'>Thanh toán ngay</a>")
-                .append("<p>Vui lòng thanh toán trước ngày đến hạn. Liên hệ chủ trọ nếu có thắc mắc.</p>")
-                .append("<div class='footer'>")
-                .append("Nhà Trọ Xanh - Hỗ trợ: <a href='mailto:support@nhatroxanh.com'>support@nhatroxanh.com</a>")
-                .append("</div>")
-                .append("</div>")
-                .append("</body>")
-                .append("</html>");
-
-        return body.toString();
+    // Handle payment status safely
+    String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase()
+            : "unknown";
+    if (status.contains("đã_thanh_toán")) {
+        body.append("status-paid'>Đã thanh toán");
+    } else if (status.contains("quá_hạn_thanh_toán")) {
+        body.append("status-overdue'>Quá hạn thanh toán");
+    } else {
+        body.append("'>Chưa thanh toán");
     }
+    body.append("</span></span></div>")
+            .append("<table>")
+            .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
+
+    for (PaymentResponseDto.PaymentDetailResponseDto detail : payment.getDetails()) {
+        body.append("<tr>")
+                .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText())
+                .append(")</td>")
+                .append("<td>").append(detail.getQuantity()).append("</td>")
+                .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
+                .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
+                .append("</tr>");
+    }
+
+    body.append("<tr class='total-row'>")
+            .append("<td colspan='3' style='text-align: right;'>Tổng cộng:</td>")
+            .append("<td class='total-amount'>").append(CURRENCY_FORMAT.format(payment.getTotalAmount()))
+            .append(" VNĐ</td>")
+            .append("</tr>")
+            .append("</table>")
+            .append("<a href='/tenant/payments/").append(payment.getPaymentId())
+            .append("' class='payment-button'>THANH TOÁN NGAY</a>")
+            .append("<p style='text-align: center; color: #7f8c8d;'>Vui lòng thanh toán trước ngày đến hạn</p>")
+            .append("<div class='footer'>")
+.append("Nhà Trọ Xanh | <a href='mailto:support@nhatroxanh.com' class='contact-link'>support@nhatroxanh.com</a>")
+            .append("</div>")
+            .append("</div>")
+            .append("</div>")
+            .append("</body>")
+            .append("</html>");
+
+    return body.toString();
+}
 
     /**
      * Sends an email with the specified subject and HTML body.

@@ -497,7 +497,7 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-header-host">
                             <tr>
-                                <th>ID</th>
+                                <!-- <th>ID</th> -->
                                 <th>NGƯỜI GỬI</th>
                                 <th>LOẠI SỰ CỐ</th>
                                 <th>MỨC ĐỘ</th>
@@ -509,7 +509,7 @@
                         </thead>
                         <tbody>
                             <tr th:each="incident : ${incidents}">
-                                <td><strong th:text="${incident.reportId}"></strong></td>
+                                <!-- <td><strong th:text="${incident.reportId}"></strong></td> -->
                                 <td th:text="${incident.user.fullname}"></td>
                                 <td th:text="${incident.incidentType}"></td>
                                 <td>

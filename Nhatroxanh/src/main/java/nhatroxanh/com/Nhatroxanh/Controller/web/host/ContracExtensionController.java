@@ -162,13 +162,7 @@ public class ContracExtensionController {
             }
 
             contract.setEndDate(returnDate);
-            contract.setStatus(Contracts.Status.TERMINATED);
             contract.setReturnStatus(Contracts.ReturnStatus.APPROVED);
-
-            if (contract.getRoom() != null) {
-                contract.getRoom().setStatus(RoomStatus.unactive);
-            }
-
             contractsRepository.save(contract);
 
             // Gửi email thông báo duyệt

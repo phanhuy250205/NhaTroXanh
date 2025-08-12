@@ -184,6 +184,7 @@ public class TenantServiceImpl implements TenantService {
             throw new RuntimeException("Hợp đồng ID: " + contractId + " không có thông tin khách thuê hợp lệ.");
         }
     }
+
     @Override
     @Transactional
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
@@ -586,6 +587,11 @@ public class TenantServiceImpl implements TenantService {
                 .userIssuePlace(issuePlace)
                 .enabled(tenant.isEnabled())
                 .build();
+    }
+
+    public boolean hasPendingExtensionRequest(Integer contractId) {
+        return extensionRequestRepository.existsByContract_ContractIdAndStatus(contractId,
+                ExtensionRequests.RequestStatus.PENDING);
     }
 
 }

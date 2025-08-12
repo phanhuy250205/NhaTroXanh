@@ -518,7 +518,7 @@
                 <table class="complaint-table-staff">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <!-- <th>ID</th> -->
                             <th>Người gửi</th>
                             <th>Loại sự cố</th>
                             <th>Mức độ</th>
@@ -530,7 +530,7 @@
                     </thead>
                     <tbody id="complaintTableBody">
                         <tr th:each="report : ${reportPage.content}">
-                            <td th:text="${report.reportId}">1</td>
+                            <!-- <td th:text="${report.reportId}">1</td> -->
                             <td th:text="${report.user.fullname}">Nguyễn Văn An</td>
                             <td th:text="${report.incidentType}">Sự cố điện</td>
                             <td>

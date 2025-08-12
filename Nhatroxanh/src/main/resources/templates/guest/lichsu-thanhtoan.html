@@ -233,7 +233,7 @@
                                         th:text="${#numbers.formatDecimal(payment.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></strong>
                                 </td>
 
-                                <td>
+                                <td th:if="${payment.paymentMethod != null}">
                                     <span class="status-badge-guest" th:classappend="
             ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'status-zalopay-guest' :
             (${payment.paymentMethod.name() == 'MOMO'} ? 'status-momo-guest' :
@@ -249,9 +249,12 @@
             ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'ZaloPay' :
             (${payment.paymentMethod.name() == 'MOMO'} ? 'MoMo' :
             (${payment.paymentMethod.name() == 'VNPAY'} ? 'VNPAY' : 'Tiền mặt'))">
-                                            Trạng thái
                                         </span>
                                     </span>
+                                </td>
+
+                                <!-- Nếu null thì để trống -->
+                                <td th:if="${payment.paymentMethod == null}">
                                 </td>
 
                                 <td>
@@ -359,24 +362,30 @@
                             </div>
                             <div class="history-item-guest">
                                 <span class="history-label-guest">Phương thức</span>
-                                <span class="status-badge-guest" th:classappend="
-            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'status-zalopay-guest' :
-            (${payment.paymentMethod.name() == 'MOMO'} ? 'status-momo-guest' :
-            (${payment.paymentMethod.name() == 'VNPAY'} ? 'status-vnpay-guest' : 'status-cash-guest'))">
+                                <span class="status-badge-guest" th:if="${payment.paymentMethod != null}"
+                                    th:classappend="
+        ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'status-zalopay-guest' :
+        (${payment.paymentMethod.name() == 'MOMO'} ? 'status-momo-guest' :
+        (${payment.paymentMethod.name() == 'VNPAY'} ? 'status-vnpay-guest' : 'status-cash-guest'))">
 
                                     <i class="fas" th:classappend="
-            ${payment.paymentMethod.name() == 'ZALOPAY'} ? ' fa-wallet me-1' :
-            (${payment.paymentMethod.name() == 'MOMO'} ? ' fa-mobile-alt me-1' :
-            (${payment.paymentMethod.name() == 'VNPAY'} ? ' fa-university me-1' : ' fa-money-bill-wave me-1'))">
+        ${payment.paymentMethod.name() == 'ZALOPAY'} ? ' fa-wallet me-1' :
+        (${payment.paymentMethod.name() == 'MOMO'} ? ' fa-mobile-alt me-1' :
+        (${payment.paymentMethod.name() == 'VNPAY'} ? ' fa-university me-1' : ' fa-money-bill-wave me-1'))">
                                     </i>
 
                                     <span th:text="
-            ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'ZaloPay' :
-            (${payment.paymentMethod.name() == 'MOMO'} ? 'MoMo' :
-            (${payment.paymentMethod.name() == 'VNPAY'} ? 'VNPAY' : 'Tiền mặt'))">
-                                        Trạng thái
+        ${payment.paymentMethod.name() == 'ZALOPAY'} ? 'ZaloPay' :
+        (${payment.paymentMethod.name() == 'MOMO'} ? 'MoMo' :
+        (${payment.paymentMethod.name() == 'VNPAY'} ? 'VNPAY' : 'Tiền mặt'))">
                                     </span>
                                 </span>
+
+                                <!-- Nếu null -->
+                                <span th:if="${payment.paymentMethod == null}">
+                                    Chưa thanh toán
+                                </span>
+
                             </div>
                             <div class="history-item-guest">
                                 <button th:if="${payment.paymentStatus == 'CHƯA_THANH_TOÁN'}"

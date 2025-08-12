@@ -25,6 +25,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
@@ -44,12 +45,15 @@ public class HostProfileController {
 
     @Autowired
     private FileUploadService fileUploadService;
-    
+
     @Autowired
     private TenantService tenantService;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EncryptionService encryptionService;
 
     @GetMapping("/profile-host")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -66,11 +70,16 @@ public class HostProfileController {
         dto.setGender(user.getGender());
         dto.setEmail(user.getEmail());
         dto.setAddress(user.getAddress());
-        dto.setCccdNumber(cccd != null ? cccd.getCccdNumber() : null);
-
-        if (cccd != null) {
-            dto.setIssueDate(cccd.getIssueDate());
-            dto.setIssuePlace(cccd.getIssuePlace());
+        if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                dto.setCccdNumber(decryptedCccd);
+                dto.setIssueDate(cccd.getIssueDate());
+                dto.setIssuePlace(cccd.getIssuePlace());
+            } catch (Exception e) {
+                model.addAttribute("error", "Không thể giải mã CCCD: " + e.getMessage());
+                dto.setCccdNumber(null); // Đặt null để tránh hiển thị sai
+            }
         }
 
         model.addAttribute("hostInfo", dto);
@@ -151,15 +160,14 @@ public class HostProfileController {
             // Xử lý CCCD
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
-                        model.addAttribute("hostInfo", dto);
-                        model.addAttribute("user", user);
-                        model.addAttribute("totalHostels", hostelService.countByOwner(user));
                         model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
-                        return "host/profile-host";
+                        model.addAttribute("user", user);
+                        return "guest/profile-guest";
                     }
                 }
 
@@ -167,12 +175,11 @@ public class HostProfileController {
                     cccd = new UserCccd();
                     cccd.setUser(user);
                 }
-                cccd.setCccdNumber(trimmedCccd);
+                cccd.setCccdNumber(encryptedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
                         : null);
-
                 userCccdRepository.save(cccd);
             } else if (cccd != null) {
                 userCccdRepository.delete(cccd);
@@ -192,10 +199,10 @@ public class HostProfileController {
     // TÁCH RIÊNG - Endpoint riêng cho đổi mật khẩu
     @PostMapping("/change-password")
     public String changePassword(@RequestParam("currentPassword") String currentPassword,
-                                @RequestParam("newPassword") String newPassword,
-                                @RequestParam("confirmPassword") String confirmPassword,
-                                @AuthenticationPrincipal CustomUserDetails userDetails,
-                                RedirectAttributes redirectAttributes) {
+            @RequestParam("newPassword") String newPassword,
+            @RequestParam("confirmPassword") String confirmPassword,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
 
         try {
             Users user = usersRepository.findById(userDetails.getUser().getUserId())
