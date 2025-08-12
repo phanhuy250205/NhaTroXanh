@@ -5,26 +5,121 @@
     <title>Tất Cả Phòng Trọ - Nhà Trọ Xanh</title>
     <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
+<style>
+    .price-filter {
+        display: none;
+    }
+
+    .pagination-container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 8px;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        padding: 0 12px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        background: #ffffff;
+        font-size: 14px;
+        font-weight: 500;
+        color: #4a4a4a;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-link:hover {
+        background: #f5f5f5;
+        border-color: #d0d0d0;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        color: #2c3e50;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #4e73df, #2e59d9);
+        border-color: transparent;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(46, 89, 217, 0.2);
+    }
+
+    .page-item.disabled .page-link {
+        background: #f9f9f9;
+        color: #bdbdbd;
+        border-color: #e0e0e0;
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .page-item:not(.disabled):not(.active) .page-link:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Dots styling */
+    .page-item.disabled:not(.active) .page-link {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* Arrow buttons */
+    .page-item:first-child .page-link,
+    .page-item:last-child .page-link {
+        padding: 0 15px;
+        font-weight: bold;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .pagination {
+            gap: 5px;
+        }
+
+        .page-link {
+            min-width: 36px;
+            height: 36px;
+            font-size: 13px;
+            padding: 0 8px;
+        }
+    }
+</style>
 
 <body>
-    <!-- NAVBAR -->
     <div th:replace="~{/layouts/navbar}"></div>
-
-    <!-- LOGIN MODAL -->
     <div th:replace="~{/layouts/login-modal}"></div>
-
-    <!-- REGISTER MODAL -->
     <div th:replace="~{/layouts/register-modal}"></div>
-
-    <!-- VERIFICATION MODAL -->
     <div th:replace="~{/layouts/verification-modal}"></div>
-
     <div th:replace="~{/layouts/loc-danhmuc}"></div>
 
     <div class="container py-4">
         <h5 class="fw-bold">TẤT CẢ NHÀ TRỌ, PHÒNG TRỌ GIÁ RẺ MỚI NHẤT</h5>
         <div class="row">
-            <!-- Danh sách nhà trọ -->
             <div class="col-md-8 danhmuc-nhatro">
                 <div class="d-flex justify-content-between align-items-center mb-3 px-1">
                     <p class="m-0 fw-semibold">
@@ -36,10 +131,10 @@
                             <option value="latest" th:selected="${selectedSort == 'latest'}">Mới nhất</option>
                             <option value="price_asc" th:selected="${selectedSort == 'price_asc'}">Giá tăng dần</option>
                             <option value="price_desc" th:selected="${selectedSort == 'price_desc'}">Giá giảm dần
-                            </option>
                         </select>
                     </div>
                 </div>
+
                 <div id="debugInfo" class="alert alert-info" style="display: none;"></div>
                 <div id="loading" class="text-center py-4" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
@@ -58,11 +153,7 @@
                                 <img th:unless="${post.images != null and !post.images.isEmpty()}"
                                     src="/images/no-image.jpg" alt="Không có ảnh" class="img-fluid" />
                             </a>
-                            <!-- <button class="btn-favorite" th:attr="data-post-id=${post.postId}">
-                                <i class="far fa-heart"></i>
-                            </button> -->
                         </div>
-
                         <div class="post-info ps-3 d-flex flex-column justify-content-between">
                             <div>
                                 <h6 class="fw-bold mb-1">
@@ -70,7 +161,6 @@
                                         class="text-dark text-decoration-none hover-text-primary"
                                         th:text="${post.title}">Tiêu đề</a>
                                 </h6>
-
                                 <div class="text-muted small mb-1">
                                     <span class="text-dark">Từ</span>
                                     <span class="text-danger fw-bold"
@@ -79,27 +169,24 @@
                                     </span>
                                     <span class="text-muted">/tháng</span>
                                 </div>
-
                                 <div class="d-flex gap-2 mb-2">
                                     <span class="badge bg-light border text-dark small px-2"
                                         th:text="${post.area + 'm²'}">Diện tích</span>
                                     <span class="badge bg-primary text-white small px-2"
                                         th:text="${post.category.name}">Danh mục</span>
                                 </div>
-
                                 <div class="text-muted small">
                                     <i class="fas fa-map-marker-alt me-1 text-danger"></i>
                                     <span th:if="${post.address != null}"
-                                        th:text="${post.address.street != null ? post.address.street + ', ' : ''} + 
-                                                   ${post.address.ward != null ? post.address.ward.name + ', ' : ''} + 
-                                                   ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} + 
-                                                   ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
+                                        th:text="${post.address.street != null ? post.address.street + ', ' : ''} +
+                                                    ${post.address.ward != null ? post.address.ward.name + ', ' : ''} +
+                                                    ${post.address.ward != null and post.address.ward.district != null ? post.address.ward.district.name + ', ' : ''} +
+                                                    ${post.address.ward != null and post.address.ward.district != null and post.address.ward.district.province != null ? post.address.ward.district.province.name : ''}">
                                     </span>
                                     <span th:unless="${post.address != null}">
                                         Địa chỉ chưa cập nhật
                                     </span>
                                 </div>
-
                                 <div class="text-muted small mt-1">
                                     <i class="fas fa-clock me-1"></i>
                                     <span th:text="${#dates.format(post.createdAt, 'dd/MM/yyyy')}">Ngày đăng</span>
@@ -108,75 +195,95 @@
                         </div>
                     </div>
                 </div>
+
                 <div id="noResults" class="text-center py-4" style="display: none;">
                     <i class="fas fa-search fa-3x text-muted mb-3"></i>
                     <h4>Không tìm thấy kết quả</h4>
                     <p class="text-muted">Vui lòng thử lại với các tiêu chí khác</p>
                 </div>
-
-                <!-- Pagination -->
-               <nav class="mt-4">
+                <nav class="mt-4" id="paginationNav">
                     <ul class="pagination justify-content-center" id="pagination">
-                        <li class="page-item" id="firstPage">
-                            <a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(0)">&laquo;</a>
-                        </li>
-                        <li class="page-item active" id="prevPage">
-                            <a class="page-link" href="#" onclick="event.preventDefault();">1</a>
-                        </li>
-                        <li class="page-item" id="nextPage">
-                            <a class="page-link" href="#" onclick="event.preventDefault();">2</a>
-                        </li>
-                        <li class="page-item" id="lastPage">
-                            <a class="page-link" href="#" onclick="event.preventDefault();">&raquo;</a>
-                        </li>
                     </ul>
                 </nav>
-
-
             </div>
-
-            <!-- Bộ lọc -->
             <div class="col-md-4 danhmuc-boloc">
                 <div class="filter-card">
                     <h6 class="filter-title">
                         <i class="fas fa-filter"></i> Lọc tìm kiếm phòng
                     </h6>
-
-                    <!-- Area Filter -->
+                    <div class="filter-section price-filter">
+                        <label class="filter-label">Khoảng giá</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price_all" value=""
+                                th:checked="${selectedPriceRange == null or selectedPriceRange == ''}">
+                            <label class="form-check-label" for="price_all">Tất cả</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price1" value="under_1m"
+                                th:checked="${selectedPriceRange == 'under_1m'}">
+                            <label class="form-check-label" for="price1">Dưới 1 triệu</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price2" value="1_2m"
+                                th:checked="${selectedPriceRange == '1_2m'}">
+                            <label class="form-check-label" for="price2">1 - 2 triệu</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price3" value="2_3m"
+                                th:checked="${selectedPriceRange == '2_3m'}">
+                            <label class="form-check-label" for="price3">2 - 3 triệu</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price4" value="3_5m"
+                                th:checked="${selectedPriceRange == '3_5m'}">
+                            <label class="form-check-label" for="price4">3 - 5 triệu</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price5" value="over_5m"
+                                th:checked="${selectedPriceRange == 'over_5m'}">
+                            <label class="form-check-label" for="price5">Trên 5 triệu</label>
+                        </div>
+                    </div>
                     <div class="filter-section">
                         <label class="filter-label">Diện tích</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area_all" value="all" checked>
+                            <input class="form-check-input" type="radio" name="area" id="area_all" value="all"
+                                th:checked="${minArea == null and maxArea == null}">
                             <label class="form-check-label" for="area_all">Tất cả</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area1" value="0-10">
+                            <input class="form-check-input" type="radio" name="area" id="area1" value="0-10"
+                                th:checked="${minArea != null and minArea == 0 and maxArea != null and maxArea == 10}">
                             <label class="form-check-label" for="area1">Dưới 10m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area2" value="10-20">
+                            <input class="form-check-input" type="radio" name="area" id="area2" value="10-20"
+                                th:checked="${minArea != null and minArea == 10 and maxArea != null and maxArea == 20}">
                             <label class="form-check-label" for="area2">10 - 20m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area3" value="20-25">
+                            <input class="form-check-input" type="radio" name="area" id="area3" value="20-25"
+                                th:checked="${minArea != null and minArea == 20 and maxArea != null and maxArea == 25}">
                             <label class="form-check-label" for="area3">20 - 25m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area4" value="25-30">
+                            <input class="form-check-input" type="radio" name="area" id="area4" value="25-30"
+                                th:checked="${minArea != null and minArea == 25 and maxArea != null and maxArea == 30}">
                             <label class="form-check-label" for="area4">25 - 30m²</label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="area" id="area5" value="30-">
+                            <input class="form-check-input" type="radio" name="area" id="area5" value="30-"
+                                th:checked="${minArea != null and minArea == 30 and maxArea == null}">
                             <label class="form-check-label" for="area5">Trên 30m²</label>
                         </div>
                     </div>
 
-                    <!-- Utilities Filter -->
                     <div class="filter-section">
                         <label class="filter-label">Tiện ích</label>
                         <div th:each="utility : ${utilities}" class="form-check">
                             <input class="form-check-input" type="checkbox" th:id="'utility_' + ${utility.utilityId}"
-                                th:value="${utility.utilityId}" name="utilities">
+                                th:value="${utility.utilityId}" name="utilities"
+                                th:checked="${selectedUtilityIds != null and selectedUtilityIds.contains(utility.utilityId)}">
                             <label class="form-check-label" th:for="'utility_' + ${utility.utilityId}"
                                 th:text="${utility.name}">Tiện ích</label>
                         </div>
@@ -190,78 +297,148 @@
             </div>
         </div>
     </div>
+    <input type="hidden" id="serverProvinceCode" th:value="${selectedProvinceCode}">
+    <input type="hidden" id="serverDistrictCode" th:value="${selectedDistrictCode}">
+    <input type="hidden" id="serverWardCode" th:value="${selectedWardCode}">
+    <input type="hidden" id="serverSearchTerm" th:value="${searchTerm}">
+    <input type="hidden" id="serverCurrentPage" th:value="${currentPage}">
+    <input type="hidden" id="serverTotalPages" th:value="${totalPages}">
 
     <script>
+        // Global variables
+        let currentFilters = {};
+        let isInitialLoad = true;
+
         document.addEventListener('DOMContentLoaded', function () {
             console.log('✅ DOM Loaded');
 
+            // Initialize filters from URL parameters
+            initializeFiltersFromURL();
+
+            // Set up event listeners
+            setupEventListeners();
+
+            // Initialize pagination
+            initializePagination();
+
+            isInitialLoad = false;
+        });
+
+        function initializeFiltersFromURL() {
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // Get current filters from URL or server-side values
+            currentFilters = {
+                page: parseInt(urlParams.get('page')) || parseInt(document.getElementById('serverCurrentPage')?.value) || 0,
+                sort: urlParams.get('sort') || document.getElementById('sortBy')?.value || 'latest',
+                provinceCode: urlParams.get('provinceCode') || document.getElementById('serverProvinceCode')?.value || '',
+                districtCode: urlParams.get('districtCode') || document.getElementById('serverDistrictCode')?.value || '',
+                wardCode: urlParams.get('wardCode') || document.getElementById('serverWardCode')?.value || '',
+                searchTerm: urlParams.get('searchTerm') || document.getElementById('serverSearchTerm')?.value || '',
+                priceRange: urlParams.get('priceRange') || '',
+                minArea: urlParams.get('minArea') || null,
+                maxArea: urlParams.get('maxArea') || null,
+                utilities: urlParams.getAll('utilities').map(id => parseInt(id)) || []
+            };
+
+            // Set form values based on current filters
+            setFormValues();
+
+            console.log('🔧 Initialized filters:', currentFilters);
+        }
+
+        function setFormValues() {
+            // Set sort dropdown
+            const sortSelect = document.getElementById('sortBy');
+            if (sortSelect) {
+                sortSelect.value = currentFilters.sort;
+            }
+
+            // Set price range
+            if (currentFilters.priceRange) {
+                const priceRadio = document.querySelector(`input[name="priceRange"][value="${currentFilters.priceRange}"]`);
+                if (priceRadio) priceRadio.checked = true;
+            }
+
+            // Set area range
+            if (currentFilters.minArea !== null && currentFilters.maxArea !== null) {
+                const areaValue = `${currentFilters.minArea}-${currentFilters.maxArea}`;
+                const areaRadio = document.querySelector(`input[name="area"][value="${areaValue}"]`);
+                if (areaRadio) areaRadio.checked = true;
+            } else if (currentFilters.minArea !== null && currentFilters.maxArea === null) {
+                const areaRadio = document.querySelector(`input[name="area"][value="${currentFilters.minArea}-"]`);
+                if (areaRadio) areaRadio.checked = true;
+            }
+
+            // Set utilities
+            currentFilters.utilities.forEach(utilityId => {
+                const utilityCheckbox = document.querySelector(`input[name="utilities"][value="${utilityId}"]`);
+                if (utilityCheckbox) utilityCheckbox.checked = true;
+            });
+        }
+
+        function setupEventListeners() {
             const filterBtn = document.getElementById('filter-btn');
             const resetBtn = document.getElementById('reset-btn');
             const sortSelect = document.getElementById('sortBy');
 
-            // === GÁN SỰ KIỆN NÚT LỌC ===
             if (filterBtn) {
                 filterBtn.addEventListener('click', function () {
                     console.log('🟢 Filter button clicked');
-                    applyFilter();
+                    applyFilter(0);
                 });
-            } else {
-                console.error('⛔ Không tìm thấy nút lọc (#filter-btn)');
             }
 
-            // === GÁN SỰ KIỆN NÚT RESET ===
             if (resetBtn) {
                 resetBtn.addEventListener('click', function () {
                     console.log('🟡 Reset button clicked');
                     resetFilter();
                 });
-            } else {
-                console.error('⛔ Không tìm thấy nút reset (#reset-btn)');
             }
 
-            // === SỰ KIỆN THAY ĐỔI SẮP XẾP ===
             if (sortSelect) {
                 sortSelect.addEventListener('change', function () {
                     console.log('📊 Sort changed to:', this.value);
-                    applyFilter(0); // Reset về trang đầu khi sort
+                    currentFilters.sort = this.value;
+                    applyFilter(0);
                 });
             }
 
-            // === TỰ ĐỘNG LỌC KHI THAY ĐỔI INPUT (TỪY CHỌN) ===
-            // Bỏ comment dòng dưới nếu muốn tự động lọc khi thay đổi
-            // document.addEventListener('change', function (e) {
-            //     if (e.target.matches('input[name="utilities"], input[name="area"]')) {
-            //         console.log('🔄 Filter input changed:', e.target);
-            //         applyFilter();
-            //     }
-            // });
+            // Auto-apply filter on input change (optional)
+            document.addEventListener('change', function (e) {
+                if (e.target.matches('input[name="priceRange"], input[name="area"]')) {
+                    console.log('🔄 Filter input changed:', e.target);
+                    // Uncomment the line below for auto-filtering
+                    // applyFilter(0);
+                }
+            });
+        }
 
-            // === GỌI BAN ĐẦU ===
-            console.log('Province Code:', provinceCode);
-            console.log('District Code:', districtCode);
-            console.log('Ward Code:', wardCode);
+        function initializePagination() {
+            const totalPages = parseInt(document.getElementById('serverTotalPages')?.value) || 0;
+            const currentPage = parseInt(document.getElementById('serverCurrentPage')?.value) || 0;
 
-            applyFilter();
-        });
+            if (totalPages > 0) {
+                updatePagination(currentPage, totalPages);
+            }
+        }
 
-        function applyFilter(page = 0) {
-            console.log('🔍 Applying filter for page:', page);
-
-            // Hiển thị loading
-            showLoading(true);
-
-            // Lấy giá trị sort
+        function collectFilterData() {
+            // Get sort value
             const selectedSort = document.getElementById('sortBy')?.value || 'latest';
-            const priceRange = document.querySelector('input[name="price"]:checked')?.value || '';
 
-            // Lấy giá trị location
-            const provinceCode = document.getElementById('provinceSelect')?.value?.trim();
-            const districtCode = document.getElementById('districtSelect')?.value?.trim();
-            const wardCode = document.getElementById('wardSelect')?.value?.trim();
+            // Get price range
+            const priceRange = document.querySelector('input[name="priceRange"]:checked')?.value || '';
 
-            // Lấy từ khóa tìm kiếm (nếu có)
-            const searchTerm = document.getElementById('searchInput')?.value?.trim() || '';
+            // Get location values
+            const provinceCode = document.getElementById('provinceSelect')?.value?.trim() || currentFilters.provinceCode;
+            const districtCode = document.getElementById('districtSelect')?.value?.trim() || currentFilters.districtCode;
+            const wardCode = document.getElementById('wardSelect')?.value?.trim() || currentFilters.wardCode;
 
+            // Get search term
+            const searchTerm = document.getElementById('searchInput')?.value?.trim() || currentFilters.searchTerm;
+
+            // Parse price range to min/max
             let minPrice = null;
             let maxPrice = null;
             switch (priceRange) {
@@ -271,12 +448,11 @@
                 case '3_5m': minPrice = 3000000; maxPrice = 5000000; break;
                 case 'over_5m': minPrice = 5000000; break;
             }
-            // Lấy giá trị diện tích
+
+            // Get area values
             let minArea = null;
             let maxArea = null;
             const areaValue = document.querySelector('input[name="area"]:checked')?.value;
-            console.log('Selected area:', areaValue);
-
             if (areaValue && areaValue !== 'all') {
                 const parts = areaValue.split('-');
                 if (parts.length === 2) {
@@ -285,35 +461,63 @@
                 }
             }
 
-            // Lấy tiện ích đã chọn
+            // Get selected utilities
             const selectedUtilities = Array.from(document.querySelectorAll('input[name="utilities"]:checked'))
                 .map(cb => parseInt(cb.value));
 
-            console.log('Filter params:', {
-                page, selectedSort, minArea, maxArea, selectedUtilities,
-                provinceCode, districtCode, wardCode, searchTerm
-            });
+            return {
+                sort: selectedSort,
+                priceRange: priceRange,
+                minPrice: minPrice,
+                maxPrice: maxPrice,
+                provinceCode: provinceCode,
+                districtCode: districtCode,
+                wardCode: wardCode,
+                searchTerm: searchTerm,
+                minArea: minArea,
+                maxArea: maxArea,
+                utilities: selectedUtilities
+            };
+        }
 
-            // Tạo URL với params
+        function applyFilter(page = 0) {
+            console.log('🔍 Applying filter for page:', page);
+
+            showLoading(true);
+
+            const filterData = collectFilterData();
+
+            // Update current filters
+            currentFilters = {
+                ...filterData,
+                page: page
+            };
+
+            console.log('Filter params:', currentFilters);
+
+            // Create URL with params
             const url = new URL('/api/filter-all-posts', window.location.origin);
             url.searchParams.append('page', page);
-            url.searchParams.append('sort', selectedSort);
+            url.searchParams.append('sort', filterData.sort);
 
-            if (minPrice !== null) url.searchParams.append('minPrice', minPrice);
-            if (maxPrice !== null) url.searchParams.append('maxPrice', maxPrice);
-            if (provinceCode) url.searchParams.append('provinceCode', provinceCode);
-            if (districtCode) url.searchParams.append('districtCode', districtCode);
-            if (wardCode) url.searchParams.append('wardCode', wardCode);
-            if (searchTerm) url.searchParams.append('searchTerm', searchTerm);
-            if (minArea !== null) url.searchParams.append('minArea', minArea);
-            if (maxArea !== null) url.searchParams.append('maxArea', maxArea);
+            if (filterData.minPrice !== null) url.searchParams.append('minPrice', filterData.minPrice);
+            if (filterData.maxPrice !== null) url.searchParams.append('maxPrice', filterData.maxPrice);
+            if (filterData.provinceCode) url.searchParams.append('provinceCode', filterData.provinceCode);
+            if (filterData.districtCode) url.searchParams.append('districtCode', filterData.districtCode);
+            if (filterData.wardCode) url.searchParams.append('wardCode', filterData.wardCode);
+            if (filterData.searchTerm) url.searchParams.append('searchTerm', filterData.searchTerm);
+            if (filterData.minArea !== null) url.searchParams.append('minArea', filterData.minArea);
+            if (filterData.maxArea !== null) url.searchParams.append('maxArea', filterData.maxArea);
 
-            // Thêm utilities vào URL
-            selectedUtilities.forEach(id => {
+            // Add utilities to URL
+            filterData.utilities.forEach(id => {
                 url.searchParams.append('utilities', id);
             });
 
             console.log('🌐 Request URL:', url.toString());
+
+            // Update browser URL
+            updateBrowserURL();
 
             fetch(url.toString())
                 .then(response => {
@@ -336,10 +540,35 @@
                 });
         }
 
+        function updateBrowserURL() {
+            const url = new URL(window.location);
+            url.search = ''; // Clear existing params
+
+            // Add current filter parameters to URL
+            if (currentFilters.page > 0) url.searchParams.set('page', currentFilters.page);
+            if (currentFilters.sort !== 'latest') url.searchParams.set('sort', currentFilters.sort);
+            if (currentFilters.priceRange) url.searchParams.set('priceRange', currentFilters.priceRange);
+            if (currentFilters.provinceCode) url.searchParams.set('provinceCode', currentFilters.provinceCode);
+            if (currentFilters.districtCode) url.searchParams.set('districtCode', currentFilters.districtCode);
+            if (currentFilters.wardCode) url.searchParams.set('wardCode', currentFilters.wardCode);
+            if (currentFilters.searchTerm) url.searchParams.set('searchTerm', currentFilters.searchTerm);
+            if (currentFilters.minArea !== null) url.searchParams.set('minArea', currentFilters.minArea);
+            if (currentFilters.maxArea !== null) url.searchParams.set('maxArea', currentFilters.maxArea);
+
+            // Add utilities
+            currentFilters.utilities.forEach(id => {
+                url.searchParams.append('utilities', id);
+            });
+
+            // Update browser URL without reloading
+            window.history.pushState({}, '', url.toString());
+        }
+
         function showLoading(show) {
             const loading = document.getElementById('loading');
             const postsContainer = document.getElementById('postsContainer');
             const noResults = document.getElementById('noResults');
+            const paginationNav = document.getElementById('paginationNav');
 
             if (loading) {
                 loading.style.display = show ? 'block' : 'none';
@@ -347,6 +576,9 @@
             if (show) {
                 if (postsContainer) postsContainer.style.display = 'none';
                 if (noResults) noResults.style.display = 'none';
+                if (paginationNav) paginationNav.style.display = 'none';
+            } else {
+                if (paginationNav) paginationNav.style.display = 'block';
             }
         }
 
@@ -377,7 +609,7 @@
                 ? post.images[0].url
                 : '/images/no-image.jpg';
 
-            // Tạo địa chỉ an toàn
+            // Create safe address
             let address = 'Địa chỉ chưa cập nhật';
             if (post.address) {
                 const parts = [];
@@ -452,8 +684,6 @@
             const totalPostsCount = document.getElementById('totalPostsCount');
             if (totalPostsCount) {
                 totalPostsCount.textContent = count || 0;
-            } else {
-                console.error('❌ Total posts count element not found');
             }
         }
 
@@ -465,14 +695,15 @@
             }
 
             console.log(`🔢 Updating pagination: page ${currentPage + 1} of ${totalPages}`);
-
             pagination.innerHTML = '';
 
-            // Nếu chỉ có 1 trang hoặc không có dữ liệu thì ẩn pagination
+            // Hide pagination if only 1 page or no data
             if (totalPages <= 1) {
-                console.log('📄 Only 1 page, hiding pagination');
+                document.getElementById('paginationNav').style.display = 'none';
                 return;
             }
+
+            document.getElementById('paginationNav').style.display = 'block';
 
             // Previous button
             const prevLi = document.createElement('li');
@@ -480,7 +711,7 @@
             prevLi.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); ${currentPage > 0 ? `applyFilter(${currentPage - 1})` : 'return false;'}">&laquo;</a>`;
             pagination.appendChild(prevLi);
 
-            // Page numbers
+            // Calculate page range
             const startPage = Math.max(0, currentPage - 2);
             const endPage = Math.min(totalPages - 1, currentPage + 2);
 
@@ -515,7 +746,6 @@
                     dots.innerHTML = '<span class="page-link">...</span>';
                     pagination.appendChild(dots);
                 }
-
                 const li = document.createElement('li');
                 li.className = 'page-item';
                 li.innerHTML = `<a class="page-link" href="#" onclick="event.preventDefault(); applyFilter(${totalPages - 1})">${totalPages}</a>`;
@@ -532,40 +762,27 @@
         }
 
         function resetFilter() {
-            console.log('🔄 Resetting filters');
+            console.log('🔄 Resetting only utilities and area filters');
 
-            // Reset utilities checkboxes
-            const utilities = document.querySelectorAll('input[name="utilities"]');
-            utilities.forEach(checkbox => checkbox.checked = false);
+            // Reset tiện ích
+            document.querySelectorAll('input[name="utilities"]').forEach(cb => cb.checked = false);
 
-            // Reset area radio
+            // Reset diện tích
+            document.querySelectorAll('input[name="area"]').forEach(radio => radio.checked = false);
+
+            // Nếu muốn đặt "Tất cả" diện tích làm mặc định
             const areaAll = document.getElementById('area_all');
             if (areaAll) areaAll.checked = true;
 
-            // Reset other filters
-            const priceRange = document.getElementById('priceRange');
-            const province = document.getElementById('province');
-            const district = document.getElementById('district');
-            const ward = document.getElementById('ward');
-            const searchInput = document.getElementById('searchInput');
-            const sortBy = document.getElementById('sortBy');
+            // Chỉ update phần liên quan trong currentFilters
+            currentFilters.utilities = [];
+            currentFilters.minArea = null;
+            currentFilters.maxArea = null;
 
-            if (priceRange) priceRange.value = '';
-            if (province) province.value = '';
-            if (district) {
-                district.value = '';
-                district.disabled = true;
-            }
-            if (ward) {
-                ward.value = '';
-                ward.disabled = true;
-            }
-            if (searchInput) searchInput.value = '';
-            if (sortBy) sortBy.value = 'latest';
-
-            console.log('✅ Filters reset, applying filter');
+            console.log('✅ Utilities & area filters reset, applying filter');
             applyFilter(0);
         }
+
 
         function showError(message) {
             const postsContainer = document.getElementById('postsContainer');
@@ -577,15 +794,18 @@
                 debugInfo.className = 'alert alert-danger';
                 debugInfo.innerHTML = `❌ ${message}`;
             }
-
             if (postsContainer) postsContainer.style.display = 'none';
             if (noResults) noResults.style.display = 'none';
-
             console.error('❌ Error:', message);
         }
-    </script>
 
-    <!-- Include favorite handler -->
+        // Handle browser back/forward buttons
+        window.addEventListener('popstate', function (event) {
+            console.log('🔙 Browser navigation detected');
+            initializeFiltersFromURL();
+            applyFilter(currentFilters.page);
+        });
+    </script>
     <script src="/js/favorite-handler.js"></script>
 </body>
 

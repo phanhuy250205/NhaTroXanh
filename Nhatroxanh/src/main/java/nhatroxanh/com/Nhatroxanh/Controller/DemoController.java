@@ -6,6 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.data.domain.Page;
@@ -32,6 +35,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.HostelRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.ContractService;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
 import nhatroxanh.com.Nhatroxanh.Service.UserService;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -56,6 +60,9 @@ public class DemoController {
 
     @Autowired
     private RoomsService roomsService;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/tro-da-luu")
     public String savedPosts(Model model, Authentication authentication) {
@@ -171,7 +178,7 @@ public class DemoController {
         List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
         Map<String, Long> stats = tenantService.getContractStatusStats(ownerId);
 
-        System.out.println("📊 Stats map truyền ra view: " + stats);
+        // Dữ liệu cũ đã có
         model.addAttribute("tenants", tenantPage.getContent());
         model.addAttribute("totalPages", tenantPage.getTotalPages());
         model.addAttribute("currentPage", tenantPage.getNumber());
@@ -180,10 +187,10 @@ public class DemoController {
         model.addAttribute("hostels", ownerHostels);
         model.addAttribute("selectedStatus", statusFilter);
         model.addAttribute("isHistoryPage", true);
-        model.addAttribute("contractStatuses", Arrays.stream(Contracts.Status.values())
-                .filter(s -> s != Contracts.Status.DRAFT)
-                .toList());
         model.addAttribute("contractStats", stats);
+
+        // ** THÊM DÒNG NÀY VÀO ĐỂ SỬA LỖI **
+        model.addAttribute("tenantPage", tenantPage);
 
         return "host/LS-thue-tra-host";
     }
@@ -258,18 +265,25 @@ public class DemoController {
         return "guest/thanh-toan";
     }
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
-    public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {
+    @GetMapping("/chu-tro/chi-tiet-khach-thue/{contractId}")
+    public String chitietkhachthue(@PathVariable("contractId") Integer contractId, Model model,
+            RedirectAttributes redirectAttributes) {
         try {
-            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByUserId(userId); // 🔁 dùng userId
+            // Sử dụng phương thức getTenantDetailByContractId để lấy chi tiết
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
             model.addAttribute("tenant", tenantDetail);
 
-            // Lấy lịch sử thuê trọ
-            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(userId);
+            // Lấy lịch sử thuê trọ bằng userId từ DTO đã lấy được
+            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(tenantDetail.getUserId());
             model.addAttribute("rentalHistory", historyList);
 
             return "host/chi-tiet-khach-thue";
         } catch (Exception e) {
+            // Ghi lại log lỗi để dễ dàng debug
+            logger.error("Lỗi khi lấy chi tiết hợp đồng ID {}: {}", contractId, e.getMessage());
+            // Gửi thông báo lỗi về trang danh sách
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Không thể tìm thấy thông tin chi tiết cho hợp đồng này.");
             return "redirect:/chu-tro/khach-thue";
         }
     }
@@ -308,6 +322,28 @@ public class DemoController {
         return userService.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"))
                 .getUserId();
+    }
+
+    @PostMapping("/newsletter/subscribe")
+    public String subscribeNewsletter(
+            @RequestParam("email") String email,
+            @RequestParam(value = "privacy", required = false) String privacy,
+            RedirectAttributes redirectAttributes) {
+
+        if (privacy == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng đồng ý với chính sách bảo mật!");
+            return "redirect:/";
+        }
+
+        Optional<Users> existingUser = userRepository.findByEmail(email);
+        if (existingUser.isPresent()) {
+            emailService.sendPrivacyPolicyEmail(email);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi email thông báo đến " + email);
+        } else {
+            redirectAttributes.addFlashAttribute("errorMessage", "Email này chưa đăng ký tài khoản, không thể nhận thông báo.");
+        }
+
+        return "redirect:/";
     }
 
 }

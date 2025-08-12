@@ -4,7 +4,7 @@ window.NhaTroContract = {
     zoomLevel: 1,
     residents: [],
     contractTerms: [], // New array to store individual terms
-    unregisteredTenantData: null, // Biến mới để lưu thông tin người bảo hộ tạm thời
+    unregisteredTenantData: null,
     unregisteredTenantCccdFrontFile: null, // File ảnh tạm thời
     unregisteredTenantCccdBackFile: null,
 
@@ -101,6 +101,67 @@ window.NhaTroContract = {
                 console.error("Error during initialization:", error);
                 this.showNotification("Lỗi khi khởi tạo form: " + error.message, "error");
             });
+    },
+    //cái này là check khách thuê khác
+    checkDuplicateInfo: async function (inputElement) {
+        const value = inputElement.value.trim();
+        const type = inputElement.id.includes('phone') ? 'phone'
+            : inputElement.id.includes('id') ? 'cccd'
+                : 'email';
+
+        const errorElement = document.getElementById(`${inputElement.id}-error`);
+        if (value === '') {
+            inputElement.classList.remove('is-invalid');
+            if (errorElement) {
+                errorElement.textContent = ''; // Xóa nội dung lỗi
+                errorElement.style.display = 'none';
+            }
+            return; // Dừng hàm tại đây
+        }
+        // Chỉ kiểm tra khi có giá trị hợp lệ
+        if ((type === 'phone' && value.length < 10) ||
+            (type === 'cccd' && value.length < 12) ||
+            (type === 'email' && !value.includes('@'))) {
+            inputElement.classList.remove('is-invalid');
+            if (errorElement) errorElement.style.display = 'none';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/contracts/check-duplicates?${type}=${encodeURIComponent(value)}`);
+            const data = await response.json();
+
+            let exists = false;
+            let message = '';
+
+            if (type === 'phone' && data.phoneExists) {
+                exists = true;
+                message = `Số điện thoại "${value}" đã tồn tại.`;
+            } else if (type === 'cccd' && data.cccdExists) {
+                exists = true;
+                message = `Số CCCD "${value}" đã tồn tại.`;
+            } else if (type === 'email' && data.emailExists) {
+                exists = true;
+                message = `Email "${value}" đã tồn tại.`;
+            }
+
+            if (exists) {
+                inputElement.classList.add('is-invalid');
+                if (errorElement) {
+                    errorElement.textContent = message;
+                    errorElement.style.display = 'block';
+                }
+                // Hiển thị thông báo góc phải
+                this.showNotification(message, "warning");
+            } else {
+                inputElement.classList.remove('is-invalid');
+                if (errorElement) errorElement.style.display = 'none';
+            }
+
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra trùng lặp:', error);
+            this.showNotification("Không thể kiểm tra trùng lặp lúc này.", "error");
+        }
     },
 
 
@@ -636,7 +697,7 @@ window.NhaTroContract = {
     },
 
     setupEventListeners() {
-// Thêm vào setupEventListeners()
+        // Thêm vào setupEventListeners()
         document.getElementById("btn-verify-cccd")?.addEventListener("click", () => {
             this.verifyCCCDNumber();
         });
@@ -962,7 +1023,7 @@ window.NhaTroContract = {
         }, 500);
     },
 
-// 🔥 HÀM CHÍNH: VERIFY SỐ CCCD VỚI ẢNH
+    // 🔥 HÀM CHÍNH: VERIFY SỐ CCCD VỚI ẢNH
     async verifyCCCDNumber() {
         console.log("🔍 Starting CCCD verification...");
 
@@ -1023,9 +1084,9 @@ window.NhaTroContract = {
         }
     },
 
-// 🔍 LẤY SỐ CCCD TỪ FORM
+    // 🔍 LẤY SỐ CCCD TỪ FORM
     getCCCDFromForm() {
-        // Ưu tiên lấy từ unregisteredTenantData (người bảo hộ)
+
         if (this.unregisteredTenantData && this.unregisteredTenantData.cccdNumber) {
             console.log("📋 CCCD from unregistered tenant:", this.unregisteredTenantData.cccdNumber);
             return this.unregisteredTenantData.cccdNumber.replace(/\D/g, '');
@@ -1043,7 +1104,7 @@ window.NhaTroContract = {
         return null;
     },
 
-// 📷 LẤY FILE ẢNH CCCD
+    // 📷 LẤY FILE ẢNH CCCD
     getCCCDImageFile() {
         // Ưu tiên ảnh mặt trước
         const frontFile = document.getElementById("cccd-front")?.files[0];
@@ -1063,7 +1124,7 @@ window.NhaTroContract = {
         return null;
     },
 
-// 🔍 EXTRACT SỐ CCCD TỪ ẢNH (sử dụng Tesseract)
+    // 🔍 EXTRACT SỐ CCCD TỪ ẢNH (sử dụng Tesseract)
     async extractCCCDFromImage(file) {
         try {
             console.log("🔍 Extracting CCCD number from image...");
@@ -1105,7 +1166,7 @@ window.NhaTroContract = {
         }
     },
 
-// 🔍 TÌM SỐ CCCD TRONG TEXT
+    // 🔍 TÌM SỐ CCCD TRONG TEXT
     findCCCDNumbersInText(text) {
         const numbers = [];
 
@@ -1131,7 +1192,7 @@ window.NhaTroContract = {
         return numbers;
     },
 
-// ✅ VALIDATE FORMAT SỐ CCCD
+    // ✅ VALIDATE FORMAT SỐ CCCD
     isValidCCCDFormat(number) {
         if (!/^\d{12}$/.test(number)) return false;
         if (/^0{12}$/.test(number) || /^1{12}$/.test(number)) return false;
@@ -1139,7 +1200,7 @@ window.NhaTroContract = {
         return true;
     },
 
-// 📊 SO SÁNH SỐ FORM VỚI SỐ ẢNH
+    // 📊 SO SÁNH SỐ FORM VỚI SỐ ẢNH
     compareCCCDNumbers(formNumber, imageNumbers) {
         if (imageNumbers.length === 0) {
             return {
@@ -1179,7 +1240,7 @@ window.NhaTroContract = {
         };
     },
 
-// 📏 TÍNH ĐỘ TƯƠNG TỰ
+    // 📏 TÍNH ĐỘ TƯƠNG TỰ
     calculateSimilarity(str1, str2) {
         if (str1.length !== str2.length) return 0;
 
@@ -1191,7 +1252,7 @@ window.NhaTroContract = {
         return matches / str1.length;
     },
 
-// 🔄 HIỂN THỊ LOADING
+    // 🔄 HIỂN THỊ LOADING
     showCCCDVerificationLoading() {
         const container = this.getCCCDVerificationContainer();
         container.innerHTML = `
@@ -1205,7 +1266,7 @@ window.NhaTroContract = {
     `;
     },
 
-// 🎨 HIỂN THỊ KẾT QUẢ VERIFICATION
+    // 🎨 HIỂN THỊ KẾT QUẢ VERIFICATION
     showCCCDVerificationResult(result) {
         const container = this.getCCCDVerificationContainer();
 
@@ -1260,9 +1321,9 @@ window.NhaTroContract = {
                             <div class="col-md-6">
                                 <small class="text-muted">Số từ ảnh:</small><br>
                                 ${result.imageNumbers.length > 0 ?
-            result.imageNumbers.map(num => `<code class="fs-6">${num}</code>`).join('<br>') :
-            '<em class="text-muted">Không tìm thấy</em>'
-        }
+                result.imageNumbers.map(num => `<code class="fs-6">${num}</code>`).join('<br>') :
+                '<em class="text-muted">Không tìm thấy</em>'
+            }
                             </div>
                         </div>
                     </div>
@@ -1300,7 +1361,7 @@ window.NhaTroContract = {
         }
     },
 
-// 📍 LẤY CONTAINER HIỂN THỊ KẾT QUẢ
+    // 📍 LẤY CONTAINER HIỂN THỊ KẾT QUẢ
     getCCCDVerificationContainer() {
         let container = document.getElementById('cccd-verification-result');
 
@@ -3281,7 +3342,7 @@ window.NhaTroContract = {
 
         // Thêm file CCCD
         if (contractData.tenantType === "UNREGISTERED") {
-            // Người bảo hộ - lấy file từ biến tạm
+
             if (this.unregisteredTenantCccdFrontFile) {
                 formData.append("cccdFrontFile", this.unregisteredTenantCccdFrontFile);
                 console.log("📎 Added unregistered tenant front CCCD file");
@@ -4075,7 +4136,18 @@ window.NhaTroContract = {
         const saveCustomerBtn = document.getElementById("saveCustomer-host")
         const customerForm = document.getElementById("addCustomerForm-host")
         const modalElement = document.getElementById("addCustomerModal-host")
+        const fieldsToCheck = ['newCustomer-phone', 'newCustomer-id', 'newCustomer-email'];
 
+        fieldsToCheck.forEach(fieldId => {
+            const inputElement = document.getElementById(fieldId);
+            if (inputElement) {
+                // Sử dụng sự kiện 'blur' để kiểm tra khi người dùng nhập xong và rời khỏi ô input
+                inputElement.addEventListener('blur', () => {
+                    // 'this' ở đây sẽ trỏ đúng đến đối tượng NhaTroContract
+                    this.checkDuplicateInfo(inputElement);
+                });
+            }
+        });
         if (addCustomerBtn && modalElement) {
             addCustomerBtn.addEventListener("click", () => {
                 console.log("Add customer button clicked")
@@ -4151,7 +4223,7 @@ window.NhaTroContract = {
         const notes = document.getElementById("newCustomer-notes")?.value || null;
 
         if (!fullName || !phone || !cccdNumber) {
-            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho người bảo hộ!", "warning");
+            this.showNotification("Vui lòng nhập đầy đủ Họ và tên, Số điện thoại và Số CMND/CCCD cho Khách thuê khác!", "warning");
             return;
         }
 
@@ -4255,8 +4327,13 @@ window.NhaTroContract = {
 
         $('#addCustomerModal-host').modal('hide');
 
-        this.showNotification(`Đã thêm thông tin người bảo hộ "${fullName}" vào form tạm thời!`, "success");
-        this.updateAllPreview();
+        this.showNotification(`Đã thêm thông tin Khách thuê khác "${fullName}" vào form tạm thời!`, "success");
+        setTimeout(() => {
+            if (typeof updateContractPreview === 'function') {
+                console.log("Forcing preview update after saving new customer...");
+                updateContractPreview();
+            }
+        }, 100);
     },
     toggleTenantInputFields: function (enable) {
         const fieldsToControl = [
@@ -4298,7 +4375,7 @@ window.NhaTroContract = {
         this.unregisteredTenantCccdFrontFile = null;
         this.unregisteredTenantCccdBackFile = null;
 
-        // Ẩn khung hiển thị người bảo hộ và hiện lại nút "Thêm người bảo hộ"
+
         $('#guardian-display-container').hide();
         $('#btn-add-customer-host').show();
 
@@ -4334,7 +4411,7 @@ window.NhaTroContract = {
             tenantTypeSelect.value = "REGISTERED";
         }
 
-        this.showNotification("Đã xóa thông tin người bảo hộ khỏi form.", "info");
+        this.showNotification("Đã xóa thông tin khách thuê khác khỏi form.", "info");
         this.updateAllPreview();
     },
 
@@ -4443,10 +4520,66 @@ window.NhaTroContract = {
     },
 }
 function updateContractPreview() {
-    // Lấy dữ liệu từ form
+    // Lấy dữ liệu từ form bằng hàm cũ
     const contractData = collectContractData();
 
-    // Định dạng ngày ký hợp đồng
+    // ✅ PHẦN SỬA LỖI BẮT ĐẦU TỪ ĐÂY
+    let finalTenantData = {};
+
+    // Kiểm tra xem có dữ liệu người bảo hộ (khách thuê khác) không
+    if (window.NhaTroContract && window.NhaTroContract.unregisteredTenantData) {
+        console.log("🔍 Using data from Unregistered Tenant (Guardian) for preview.");
+        const guardianData = window.NhaTroContract.unregisteredTenantData;
+        finalTenantData = {
+            name: guardianData.fullName,
+            dob: guardianData.birthday,
+            id: guardianData.cccdNumber,
+            idDate: guardianData.issueDate,
+            idPlace: guardianData.issuePlace,
+            phone: guardianData.phone,
+            email: guardianData.email,
+            // Xây dựng địa chỉ từ dữ liệu người bảo hộ
+            address: [guardianData.street, guardianData.ward, guardianData.district, guardianData.province]
+                .filter(Boolean).join(', ')
+        };
+    } else {
+        console.log("🔍 Using data from form inputs for preview.");
+        // Nếu không có người bảo hộ, dùng dữ liệu từ form như cũ
+        finalTenantData = {
+            name: contractData.tenantName,
+            dob: contractData.tenantBirthday,
+            id: contractData.tenantIdCard,
+            idDate: contractData.tenantIdDate,
+            idPlace: contractData.tenantIdPlace,
+            phone: contractData.tenantPhone,
+            email: contractData.tenantEmail,
+            address: contractData.tenantAddress
+        };
+    }
+    // ✅ KẾT THÚC PHẦN SỬA LỖI
+
+    // ---- Cập nhật các trường trong preview VỚI DỮ LIỆU ĐÃ CHUẨN HÓA ----
+
+    // Cập nhật thông tin BÊN THUÊ (Bên B)
+    $('#preview-tenant-name').text(finalTenantData.name || '........................');
+    $('#preview-tenant-dob').text(finalTenantData.dob || '........................');
+    $('#preview-tenant-id').text(finalTenantData.id || '........................');
+    $('#preview-tenant-id-date').text(finalTenantData.idDate || '........................');
+    $('#preview-tenant-id-place').text(finalTenantData.idPlace || '........................');
+    $('#preview-tenant-address').text(finalTenantData.address || '........................');
+    $('#preview-tenant-phone').text(finalTenantData.phone || '........................');
+
+    // Cập nhật email cho BÊN THUÊ (Bên B)
+    // Giả định bạn đã thêm dòng này vào HTML như hướng dẫn trước
+    const tenantEmailElement = $('#preview-tenant-email');
+    if (tenantEmailElement.length) {
+        tenantEmailElement.text(finalTenantData.email || '........................');
+    }
+
+    $('#preview-tenant-signature').text(finalTenantData.name || '........................');
+
+    // --- Các dòng cập nhật khác cho BÊN CHO THUÊ, PHÒNG TRỌ, ĐIỀU KHOẢN... giữ nguyên như cũ ---
+
     const signDate = contractData.contractDate
         ? new Date(contractData.contractDate).toLocaleDateString('vi-VN', {
             day: '2-digit',
@@ -4455,7 +4588,6 @@ function updateContractPreview() {
         })
         : '........................';
 
-    // Cập nhật các trường trong preview
     $('#preview-sign-date').text(signDate);
     $('#preview-owner-name').text(contractData.ownerName || '........................');
     $('#preview-owner-dob').text(contractData.ownerBirthday || '........................');
@@ -4466,15 +4598,6 @@ function updateContractPreview() {
     $('#preview-owner-phone').text(contractData.ownerPhone || '........................');
     $('#preview-owner-signature').text(contractData.ownerName || '........................');
 
-    $('#preview-tenant-name').text(contractData.tenantName || '........................');
-    $('#preview-tenant-dob').text(contractData.tenantBirthday || '........................');
-    $('#preview-tenant-id').text(contractData.tenantIdCard || '........................');
-    $('#preview-tenant-id-date').text(contractData.tenantIdDate || '........................');
-    $('#preview-tenant-id-place').text(contractData.tenantIdPlace || '........................');
-    $('#preview-tenant-address').text(contractData.tenantAddress || '........................');
-    $('#preview-tenant-phone').text(contractData.tenantPhone || '........................');
-    $('#preview-tenant-signature').text(contractData.tenantName || '........................');
-
     $('#preview-room-address').text(contractData.roomAddress || 'Ký túc xá chưa xác định');
     $('#preview-room-number').text(contractData.roomNumber || '........................');
     $('#preview-room-area').text(contractData.roomArea ? `${contractData.roomArea} m²` : '........................');
@@ -4482,7 +4605,6 @@ function updateContractPreview() {
     $('#preview-duration').text(contractData.contractDuration || '........................');
     $('#preview-start-date').text(contractData.contractStartDate || '........................');
 
-    // Tính ngày kết thúc
     let endDate = '........................';
     if (contractData.contractStartDate && contractData.contractDuration) {
         const start = new Date(contractData.contractStartDate);
@@ -4491,13 +4613,11 @@ function updateContractPreview() {
     }
     $('#preview-end-date').text(endDate);
 
-    // Cập nhật giá thuê
     const monthlyRent = contractData.monthlyRent;
     $('#preview-rent').text(!isNaN(monthlyRent) && monthlyRent > 0
         ? new Intl.NumberFormat('vi-VN').format(monthlyRent) + ' VNĐ/tháng'
         : '........................');
 
-    // Cập nhật thông tin thanh toán
     const paymentMethodText = contractData.paymentMethod === 'TIEN_MAT' ? 'Tiền mặt' : contractData.paymentMethod === 'BANK' ? 'Chuyển khoản' : '';
     const paymentInfo = contractData.paymentDate && paymentMethodText
         ? `vào ngày ${contractData.paymentDate} hàng tháng bằng ${paymentMethodText}`
@@ -4509,27 +4629,18 @@ function updateContractPreview() {
         : '........................');
     $('#preview-deposit-months').text(contractData.depositMonths || '........................');
 
-    // Cập nhật danh sách người ở
     const residents = $('#residents-list').children().not('#no-residents-message').map(function () {
         return $(this).find('.resident-name').text();
     }).get().join(', ') || '........................';
     $('#preview-residents').text(residents);
     $('#preview-residents-section').css('display', residents !== '........................' ? 'block' : 'none');
 
-    // Cập nhật tiện ích
     const amenities = $('.nha-tro-amenities input:checked').map(function () {
         return $(this).siblings('label').text();
     }).get().join(', ') || '........................';
     $('#preview-amenities').text(amenities);
 
-    // Cập nhật điều khoản chung
     $('#preview-terms').text(contractData.terms || 'Không có điều khoản bổ sung.');
-
-    // Debug
-    console.log('🔍 Preview Sign Date:', signDate);
-    console.log('🔍 Preview Rent:', contractData.monthlyRent);
-    console.log('🔍 Preview Payment Info:', paymentInfo);
-    console.log('🔍 Preview Room Address:', contractData.roomAddress);
 }
 
 // Hàm debounce để tối ưu hiệu suất
@@ -4593,6 +4704,28 @@ $(document).ready(function () {
     // Cập nhật preview ban đầu
     updateContractPreview();
 });
+function updateContractStatus() {
+    fetch('/api/contracts/auto-update-status', {
+        method: 'POST',
+        headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token'),
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(`✅ Đã cập nhật ${data.updatedCount} hợp đồng!`);
+                location.reload(); // Reload trang để thấy thay đổi
+            } else {
+                alert('❌ Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('❌ Có lỗi xảy ra!');
+        });
+}
 
 
 

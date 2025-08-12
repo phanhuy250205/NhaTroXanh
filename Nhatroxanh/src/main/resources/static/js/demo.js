@@ -103,14 +103,14 @@ window.NhaTroContract = {
         });
 
         document.getElementById('btn-delete-guardian')?.addEventListener('click', () => {
-            if (confirm('Bạn có chắc chắn muốn xóa thông tin người bảo hộ này?')) {
+            if (confirm('Bạn có chắc chắn muốn xóa thông tin Khách thuê khác này?')) {
                 this.clearGuardianDisplay();
             }
         });
     },
 
     updateGuardianDisplay() {
-        // Hàm này có nhiệm vụ hiển thị thông tin người bảo hộ ra form
+  
         const container = document.getElementById('guardian-display-container');
         const nameEl = document.getElementById('guardian-display-name');
         const addButton = document.getElementById('btn-add-customer-host');
@@ -118,7 +118,7 @@ window.NhaTroContract = {
         if (this.guardianInfo && container && nameEl && addButton) {
             nameEl.textContent = this.guardianInfo.name; // Chỉ hiện tên (khớp với HTML của bạn)
             container.style.display = 'block'; // Hiện khối thông tin
-            addButton.classList.add('d-none-important'); // Ẩn nút "Thêm người bảo hộ"
+            addButton.classList.add('d-none-important'); 
         }
     },
 
@@ -130,7 +130,7 @@ window.NhaTroContract = {
         if (container) container.style.display = 'none'; // Ẩn khối thông tin
         if (addButton) addButton.classList.remove('d-none-important');   // Hiện lại nút "Thêm"
         this.enableTenantFields();
-        this.showNotification('Đã xóa thông tin người bảo hộ.', 'info');
+        this.showNotification('Đã xóa thông tin Khách thuê khác.', 'info');
     },
 
     editGuardian() {
@@ -2558,7 +2558,7 @@ window.NhaTroContract = {
             modal.hide();
         }
 
-        this.showNotification('Đã thêm thông tin người bảo hộ.', 'success');
+        this.showNotification('Đã thêm thông tin Khách thuê khác.', 'success');
     },
 
     previewCustomerImage(event, previewId) {

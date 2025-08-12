@@ -47,7 +47,9 @@ public class DashboardService {
         // Thống kê người thuê
         stats.put("totalTenants", contractsRepository.countActiveTenantsByOwnerId(ownerId, Date.valueOf(currentDate)));
         stats.put("expiringContracts", contractsRepository.countExpiringContractsByOwnerId(
-                ownerId, Date.valueOf(currentDate), Date.valueOf(currentDate.plusDays(30))));
+                ownerId, Date.valueOf(currentDate), Date.valueOf(currentDate.plusDays(3))));
+        stats.put("successRooms", paymentsRepository.countSuccessRoomsByOwnerId(ownerId));
+        stats.put("pendingInvoices", paymentsRepository.countPendingInvoicesByOwnerId(ownerId));   
 
         // Xử lý khoảng thời gian
         if (timeRange.startsWith("month-")) {

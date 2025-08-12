@@ -189,7 +189,7 @@ $('#btn-update').on('click', function () {
 $('#btn-add-customer-host').on('click', function () {
     Toast.fire({
         icon: 'info',
-        title: 'Mở form thêm người bảo hộ'
+        title: 'Mở form thêm Khách thuê khác'
     });
 });
 

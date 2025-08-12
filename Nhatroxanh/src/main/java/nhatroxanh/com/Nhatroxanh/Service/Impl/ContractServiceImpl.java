@@ -258,8 +258,53 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    // Trong ContractServiceImpl
+    @Override
+    @Transactional
+    public int autoUpdateExpiredContracts() {
+        try {
+            // Tính ngày hết hạn (hôm nay + 3 ngày)
+            LocalDate today = LocalDate.now();
+            LocalDate expiredDate = today.plusDays(3);
+
+            // Convert sang java.sql.Date
+            Date sqlExpiredDate = Date.valueOf(expiredDate);
+
+            // Tìm các hợp đồng ACTIVE sắp hết hạn
+            List<Contracts> contractsToUpdate = contractRepository
+                    .findByStatusAndEndDateBetween(
+                            Contracts.Status.ACTIVE,
+                            Date.valueOf(today),
+                            sqlExpiredDate
+                    );
+
+            // Cập nhật trạng thái
+            int updateCount = 0;
+            for (Contracts contract : contractsToUpdate) {
+                contract.setStatus(Contracts.Status.EXPIRED);
+                contractRepository.save(contract);
+                updateCount++;
+            }
+
+            if (updateCount > 0) {
+                System.out.println("✅ Đã cập nhật " + updateCount + " hợp đồng sang trạng thái EXPIRED");
+            }
+
+            return updateCount;
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi khi cập nhật trạng thái: " + e.getMessage());
+            return 0;
+        }
+    }
+
+
     @Override
     public Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable) {
+
+        // ✅ Tự động cập nhật trước khi load
+        autoUpdateExpiredContracts();
+
         logger.info("Getting contracts list for owner ID: {} with pagination, page: {}, size: {}",
                 ownerId, pageable.getPageNumber(), pageable.getPageSize());
         try {
@@ -352,7 +397,7 @@ public class ContractServiceImpl implements ContractService {
         if (contractDto.getTenantType() != null && "UNREGISTERED".equals(contractDto.getTenantType()) &&
                 contractDto.getUnregisteredTenant() != null &&
                 StringUtils.hasText(contractDto.getUnregisteredTenant().getFullName())) {
-            logger.info("SERVICE: Phát hiện thông tin Người bảo hộ/Thuê mới. Đang xử lý...");
+           
             guardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner, cccdFrontFile,
                     cccdBackFile);
             finalTenantPhone = guardian.getPhone();
@@ -1336,7 +1381,7 @@ public class ContractServiceImpl implements ContractService {
             MultipartFile cccdBackFile) {
         logger.info("=== SERVICE: Handling Unregistered Tenant ===");
         if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại người bảo hộ không được để trống!");
+            throw new IllegalArgumentException("Số điện thoại không được để trống!");
         }
 
         UnregisteredTenants unregisteredTenant = new UnregisteredTenants();

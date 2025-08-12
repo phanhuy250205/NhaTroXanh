@@ -95,4 +95,11 @@ public interface ContractService {
 
     // Thêm phương thức tìm kiếm phân trang theo số điện thoại hoặc tên khách hàng
     Page<Contracts> searchContracts(String searchTerm, Pageable pageable);
+
+    /**
+     * Tự động cập nhật trạng thái hợp đồng sắp hết hạn (còn 3 ngày)
+     * @return số lượng hợp đồng đã được cập nhật
+     */
+    @Transactional
+    int autoUpdateExpiredContracts();
 }

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
@@ -18,19 +19,35 @@ import java.util.Optional;
 @Repository
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
 
-        @Query("SELECT c FROM Contracts c " +
-                        "WHERE c.owner.userId = :ownerId " +
-                        "AND c.status <> 'DRAFT' " +
-                        "AND (:keyword IS NULL OR c.tenant.fullname LIKE %:keyword% OR c.tenant.phone LIKE %:keyword%) "
-                        +
-                        "AND (:hostelId IS NULL OR c.room.hostel.hostelId = :hostelId) " +
-                        "AND (:status IS NULL OR c.status = :status)")
-        Page<Contracts> findTenantsByOwnerWithFilters(
-                        @Param("ownerId") Integer ownerId,
-                        @Param("keyword") String keyword,
-                        @Param("hostelId") Integer hostelId,
-                        @Param("status") Contracts.Status status,
-                        Pageable pageable);
+    @Query("SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO(" +
+       "c.contractId, " +
+       "COALESCE(t.userId, ut.id), " +
+       "COALESCE(t.fullname, ut.fullName), " +
+       "c.tenantPhone, " +
+       "h.name, " +
+       "r.namerooms, " +
+       "c.startDate, " +
+       "c.endDate, " +
+       "c.status) " +
+       "FROM Contracts c " +
+       "JOIN c.room r " +
+       "JOIN r.hostel h " +
+       "LEFT JOIN c.tenant t " +
+       "LEFT JOIN c.unregisteredTenant ut " +
+       "WHERE h.owner.userId = :ownerId " +
+       "AND (:keyword IS NULL OR " +
+       "     LOWER(COALESCE(t.fullname, ut.fullName)) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+       "     LOWER(c.tenantPhone) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+       "     LOWER(r.namerooms) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+       "     LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+       "AND (:hostelId IS NULL OR h.hostelId = :hostelId) " +
+       "AND (:status IS NULL OR c.status = :status)")
+Page<TenantInfoDTO> findTenantsByOwnerWithFilters(
+        @Param("ownerId") Integer ownerId,
+        @Param("keyword") String keyword,
+        @Param("hostelId") Integer hostelId,
+        @Param("status") Contracts.Status status,
+        Pageable pageable);
 
         // ✅ THÊM JOIN FETCH
         @Query("SELECT c FROM Contracts c " +
@@ -192,5 +209,11 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         Page<Contracts> findByOwnerUserIdWithRoom(@Param("ownerId") Integer ownerId, Pageable pageable);
 
         List<Contracts> findByStatusAndEndDateBetween(Contracts.Status status, Date startDate, Date endDate);
+
+        // ✅ Tìm hợp đồng trước ngày
+        List<Contracts> findByStatusAndEndDateLessThan(
+                Contracts.Status status,
+                Date date
+        );
 
 }

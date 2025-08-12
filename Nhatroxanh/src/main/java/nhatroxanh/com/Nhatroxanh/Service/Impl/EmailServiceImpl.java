@@ -318,29 +318,28 @@ public class EmailServiceImpl implements EmailService {
                             <meta charset="UTF-8">
                             <meta name="viewport" content="width=device-width, initial-scale=1.0">
                             <title>Hợp đồng thuê trọ - Premium</title>
-                            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
                         </head>
                         <body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); min-height: 100vh;">
                            \s
                             <!-- Main Container -->
-                            <table width="100%%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); min-height: 100vh; padding: 30px 0;">
+                            <table width="100%%" cellpadding="0" cellspacing="0" style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); min-height: 100vh; padding: 20px 0;">
                                 <tr>
                                     <td align="center">
                                         <!-- Email Card -->
-                                        <table width="650" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 24px; box-shadow: 0 25px 50px rgba(0,0,0,0.15); overflow: hidden;">
+                                        <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; max-width: 600px;">
                                            \s
                                             <!-- ✨ PREMIUM HEADER -->
                                             <tr>
-                                                <td style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 45px 40px; text-align: center; position: relative; overflow: hidden;">
-                                                    <!-- Premium Logo -->
+                                                <td style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); padding: 40px 30px; text-align: center; color: white;">
+                                                    <!-- Logo Container -->
                                                     <table width="100%%" cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td align="center">
                                                                 <table cellpadding="0" cellspacing="0">
                                                                     <tr>
-                                                                        <td style="width: 90px; height: 90px; background: rgba(255,255,255,0.15); border-radius: 50%%; text-align: center; vertical-align: middle; backdrop-filter: blur(15px); border: 3px solid rgba(255,255,255,0.2); position: relative;">
-                                                                            <div style="font-size: 40px; line-height: 90px;">🏠</div>
-                                                                            <div style="position: absolute; top: -5px; right: -5px; width: 25px; height: 25px; background: #ffd700; border-radius: 50%%; text-align: center; line-height: 25px; font-size: 12px;">👑</div>
+                                                                        <td style="width: 80px; height: 80px; background: rgba(255,255,255,0.2); border-radius: 50%%; text-align: center; vertical-align: middle; border: 2px solid rgba(255,255,255,0.3);">
+                                                                            <div style="font-size: 32px; line-height: 80px;">🏠</div>
                                                                         </td>
                                                                     </tr>
                                                                 </table>
@@ -348,45 +347,40 @@ public class EmailServiceImpl implements EmailService {
                                                         </tr>
                                                     </table>
                                                    \s
-                                                    <h1 style="color: #ffffff; margin: 25px 0 15px 0; font-size: 36px; font-weight: 800; letter-spacing: -1px; text-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+                                                    <h1 style="color: #ffffff; margin: 20px 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">
                                                         HỢP ĐỒNG THUÊ TRỌ
                                                     </h1>
                                                    \s
-                                                    <!-- Gradient Line -->
-                                                    <div style="width: 80px; height: 5px; background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb); margin: 0 auto 20px; border-radius: 3px;"></div>
-                                                   \s
-                                                    <p style="color: rgba(255,255,255,0.95); margin: 0 0 25px 0; font-size: 18px; font-weight: 500;">
+                                                    <p style="color: rgba(255,255,255,0.9); margin: 0 0 15px 0; font-size: 16px; font-weight: 500;">
                                                         Tài liệu chính thức • Bảo mật cao • Pháp lý đầy đủ
                                                     </p>
                                                    \s
                                                     <!-- Premium Badge -->
-                                                    <div style="background: linear-gradient(135deg, #ffd700, #ffed4e); padding: 10px 25px; border-radius: 30px; display: inline-block;">
-                                                        <span style="color: #333; font-size: 14px; font-weight: 700;">
-                                                            🛡️ PREMIUM VERIFIED
-                                                        </span>
+                                                    <div style="background: rgba(255,255,255,0.2); padding: 8px 20px; border-radius: 20px; display: inline-block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">
+                                                        🛡️ PREMIUM VERIFIED
                                                     </div>
                                                 </td>
                                             </tr>
                                            \s
                                             <!-- 🎯 MAIN CONTENT -->
                                             <tr>
-                                                <td style="padding: 50px 40px;">
-                                                    <!-- Welcome Section -->
+                                                <td style="padding: 40px 30px;">
+                                                    <!-- Greeting Section -->
                                                     <table width="100%%" cellpadding="0" cellspacing="0">
                                                         <tr>
-                                                            <td align="center" style="padding-bottom: 45px;">
-                                                                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px 35px; border-radius: 30px; font-weight: 700; font-size: 16px; margin-bottom: 25px; display: inline-block;">
+                                                            <td align="center" style="padding-bottom: 40px;">
+                                                                <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 12px 24px; border-radius: 25px; font-weight: 600; margin-bottom: 20px; display: inline-block;">
                                                                     👤 Kính gửi: %s
                                                                 </div>
                                                                \s
-                                                                <h2 style="color: #2c3e50; font-size: 32px; margin: 0 0 20px 0; font-weight: 800;">
+                                                                <h2 style="color: #2c3e50; font-size: 24px; margin: 0 0 15px 0; font-weight: 800;">
                                                                     Chào mừng đến với\s
                                                                     <span style="background: linear-gradient(135deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
                                                                         Nhà Trọ Xanh Premium
                                                                     </span>
                                                                 </h2>
                                                                \s
-                                                                <p style="color: #7f8c8d; font-size: 17px; line-height: 1.7; margin: 0; max-width: 520px;">
+                                                                <p style="color: #7f8c8d; font-size: 16px; line-height: 1.6; margin: 0; max-width: 480px;">
                                                                     Chúng tôi vô cùng hân hạnh được phục vụ bạn. Hợp đồng thuê trọ của bạn đã được chuẩn bị hoàn tất với đầy đủ các điều khoản pháp lý.
                                                                 </p>
                                                             </td>
@@ -394,18 +388,18 @@ public class EmailServiceImpl implements EmailService {
                                                     </table>
                                                    \s
                                                     <!-- 📋 CONTRACT DETAILS CARD -->
-                                                    <div style="background: linear-gradient(135deg, #f8faff 0%%, #e8f4f8 100%%); border-radius: 20px; padding: 35px; margin: 40px 0; border: 1px solid rgba(102, 126, 234, 0.1);">
+                                                    <div style="background: linear-gradient(135deg, #f8faff 0%%, #e8f4f8 100%%); border-radius: 16px; padding: 30px; margin: 30px 0; border: 1px solid rgba(102, 126, 234, 0.1);">
                                                         <!-- Header -->
                                                         <table width="100%%" cellpadding="0" cellspacing="0">
                                                             <tr>
-                                                                <td style="padding-bottom: 30px;">
+                                                                <td style="padding-bottom: 25px;">
                                                                     <table cellpadding="0" cellspacing="0">
                                                                         <tr>
-                                                                            <td style="width: 55px; height: 55px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 15px; text-align: center; vertical-align: middle; margin-right: 18px;">
-                                                                                <div style="font-size: 22px; line-height: 55px;">📋</div>
+                                                                            <td style="width: 50px; height: 50px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; text-align: center; vertical-align: middle;">
+                                                                                <div style="font-size: 20px; line-height: 50px;">📋</div>
                                                                             </td>
-                                                                            <td style="padding-left: 18px; vertical-align: middle;">
-                                                                                <h3 style="color: #2c3e50; margin: 0 0 5px 0; font-size: 24px; font-weight: 800;">
+                                                                            <td style="padding-left: 15px; vertical-align: middle;">
+                                                                                <h3 style="color: #2c3e50; margin: 0 0 5px 0; font-size: 20px; font-weight: 800;">
                                                                                     Thông tin hợp đồng
                                                                                 </h3>
                                                                                 <p style="color: #7f8c8d; margin: 0; font-size: 14px;">Chi tiết đầy đủ và chính xác</p>
@@ -416,82 +410,78 @@ public class EmailServiceImpl implements EmailService {
                                                             </tr>
                                                         </table>
                                                        \s
-                                                        <!-- Info Grid -->
-                                                        <table width="100%%" cellpadding="0" cellspacing="0">
+                                                        <!-- Info Grid Row 1 -->
+                                                        <table width="100%%" cellpadding="0" cellspacing="0" style="margin-bottom: 15px;">
                                                             <tr>
-                                                                <td width="50%%" style="padding-right: 12px;">
-                                                                    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border-left: 4px solid #667eea;">
-                                                                        <div style="color: #667eea; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                                                                <td width="50%%" style="padding-right: 7px;">
+                                                                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #667eea;">
+                                                                        <div style="color: #667eea; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.8;">
                                                                             #️⃣ MÃ HỢP ĐỒNG
                                                                         </div>
-                                                                        <div style="color: #2c3e50; font-size: 18px; font-weight: 700;">%s</div>
+                                                                        <div style="color: #2c3e50; font-size: 16px; font-weight: 700;">%s</div>
                                                                     </div>
                                                                 </td>
-                                                                <td width="50%%" style="padding-left: 12px;">
-                                                                    <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border-left: 4px solid #28a745;">
-                                                                        <div style="color: #28a745; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+                                                                <td width="50%%" style="padding-left: 7px;">
+                                                                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #28a745;">
+                                                                        <div style="color: #28a745; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.8;">
                                                                             📅 NGÀY TẠO
                                                                         </div>
-                                                                        <div style="color: #2c3e50; font-size: 18px; font-weight: 700;">%s</div>
+                                                                        <div style="color: #2c3e50; font-size: 16px; font-weight: 700;">%s</div>
                                                                     </div>
                                                                 </td>
                                                             </tr>
+                                                        </table>
+                                                       \s
+                                                        <!-- Info Grid Row 2 -->
+                                                        <table width="100%%" cellpadding="0" cellspacing="0">
                                                             <tr>
-                                                                <td colspan="2" style="padding-top: 25px;">
-                                                                    <table width="100%%" cellpadding="0" cellspacing="0">
-                                                                        <tr>
-                                                                            <td width="50%%" style="padding-right: 12px;">
-                                                                                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border-left: 4px solid #ff6b6b;">
-                                                                                    <div style="color: #ff6b6b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
-                                                                                        📄 ĐỊNH DẠNG
-                                                                                    </div>
-                                                                                    <div style="color: #2c3e50; font-size: 18px; font-weight: 700;">PDF Đính kèm</div>
-                                                                                </div>
-                                                                            </td>
-                                                                            <td width="50%%" style="padding-left: 12px;">
-                                                                                <div style="background: white; padding: 25px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); border-left: 4px solid #feca57;">
-                                                                                    <div style="color: #feca57; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
-                                                                                        ✅ TRẠNG THÁI
-                                                                                    </div>
-                                                                                    <div style="color: #27ae60; font-size: 18px; font-weight: 700;">
-                                                                                        ✅ Hoàn thành
-                                                                                    </div>
-                                                                                </div>
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
+                                                                <td width="50%%" style="padding-right: 7px;">
+                                                                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #ff6b6b;">
+                                                                        <div style="color: #ff6b6b; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.8;">
+                                                                            📄 ĐỊNH DẠNG
+                                                                        </div>
+                                                                        <div style="color: #2c3e50; font-size: 16px; font-weight: 700;">PDF Đính kèm</div>
+                                                                    </div>
+                                                                </td>
+                                                                <td width="50%%" style="padding-left: 7px;">
+                                                                    <div style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-left: 4px solid #feca57;">
+                                                                        <div style="color: #feca57; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; opacity: 0.8;">
+                                                                            ✅ TRẠNG THÁI
+                                                                        </div>
+                                                                        <div style="color: #27ae60; font-size: 16px; font-weight: 700;">✅ Hoàn thành</div>
+                                                                    </div>
                                                                 </td>
                                                             </tr>
                                                         </table>
                                                     </div>
                                                    \s
                                                     <!-- 📄 PDF DOWNLOAD SECTION -->
-                                                    <div style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); border-radius: 25px; padding: 45px; text-align: center; margin: 45px 0;">
+                                                    <div style="background: linear-gradient(135deg, #667eea 0%%, #764ba2 100%%); border-radius: 20px; padding: 40px; text-align: center; color: white; margin: 30px 0;">
                                                         <table width="100%%" cellpadding="0" cellspacing="0">
                                                             <tr>
                                                                 <td align="center">
                                                                     <!-- PDF Icon -->
                                                                     <table cellpadding="0" cellspacing="0">
                                                                         <tr>
-                                                                            <td style="width: 120px; height: 120px; background: rgba(255,255,255,0.15); border-radius: 25px; text-align: center; vertical-align: middle; backdrop-filter: blur(15px); border: 3px solid rgba(255,255,255,0.2);">
-                                                                                <div style="font-size: 55px; line-height: 120px;">📄</div>
+                                                                            <td style="width: 100px; height: 100px; background: rgba(255,255,255,0.15); border-radius: 20px; text-align: center; vertical-align: middle; border: 2px solid rgba(255,255,255,0.2);">
+                                                                                <div style="font-size: 45px; line-height: 100px;">📄</div>
                                                                             </td>
                                                                         </tr>
                                                                     </table>
                                                                    \s
-                                                                    <h3 style="color: white; margin: 30px 0 20px 0; font-size: 28px; font-weight: 800;">
+                                                                    <h3 style="color: white; margin: 25px 0 15px 0; font-size: 24px; font-weight: 800;">
                                                                         Tài liệu hợp đồng
                                                                     </h3>
                                                                    \s
-                                                                    <div style="background: rgba(255,255,255,0.15); padding: 15px 30px; border-radius: 20px; margin: 0 auto 25px; display: inline-block;">
+                                                                    <div style="background: rgba(255,255,255,0.15); padding: 12px 25px; border-radius: 15px; margin: 0 auto 20px; display: inline-block;">
                                                                         <p style="color: white; margin: 0; font-size: 16px; font-weight: 600;">
                                                                             📝 HopDong_%s.pdf
                                                                         </p>
                                                                     </div>
                                                                    \s
                                                                     <!-- Security Badge -->
-                                                                    <div style="background: rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 25px; display: inline-block;">
-                                                                        <span style="color: rgba(255,255,255,0.95); font-size: 14px; font-weight: 600;">
+                                                                    <div style="background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 20px; display: inline-block;">
+                                                                        <span style="color: white; font-size: 13px; font-weight: 600;">
                                                                             🔒 Tệp được mã hóa và bảo mật SSL
                                                                         </span>
                                                                     </div>
@@ -500,65 +490,93 @@ public class EmailServiceImpl implements EmailService {
                                                         </table>
                                                     </div>
                                                    \s
-                                                    <!-- 📋 INSTRUCTIONS -->
-                                                    <div style="background: linear-gradient(135deg, #e8f8f5 0%%, #f0fdf4 100%%); border-left: 6px solid #10b981; padding: 30px; border-radius: 15px; margin: 40px 0;">
+                                                    <!-- 📋 INSTRUCTIONS - FIXED VERSION -->
+                                                    <div style="background: linear-gradient(135deg, #e8f8f5 0%%, #f0fdf4 100%%); border-left: 5px solid #10b981; padding: 25px; border-radius: 12px; margin: 30px 0;">
                                                         <table width="100%%" cellpadding="0" cellspacing="0">
                                                             <tr>
                                                                 <td>
-                                                                    <table cellpadding="0" cellspacing="0">
+                                                                    <!-- Header với icon -->
+                                                                    <table cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                                                                         <tr>
-                                                                            <td style="width: 50px; height: 50px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle; padding-right: 20px;">
-                                                                                <div style="font-size: 20px; line-height: 50px;">📋</div>
+                                                                            <td style="width: 45px; height: 45px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle;">
+                                                                                <span style="font-size: 18px; line-height: 1; color: white;">📋</span>
                                                                             </td>
-                                                                            <td style="vertical-align: top; padding-left: 20px;">
-                                                                                <h4 style="color: #065f46; margin: 0 0 20px 0; font-size: 20px; font-weight: 800;">
+                                                                            <td style="padding-left: 15px; vertical-align: middle;">
+                                                                                <h4 style="color: #065f46; margin: 0; font-size: 18px; font-weight: 800;">
                                                                                     Hướng dẫn xử lý hợp đồng
                                                                                 </h4>
-                                                                               \s
-                                                                                <!-- Step 1 -->
-                                                                                <table width="100%%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                   \s
+                                                                    <!-- Steps -->
+                                                                    <table width="100%%" cellpadding="0" cellspacing="0">
+                                                                        <!-- Step 1 -->
+                                                                        <tr>
+                                                                            <td style="padding-bottom: 12px;">
+                                                                                <table cellpadding="0" cellspacing="0" width="100%%">
                                                                                     <tr>
-                                                                                        <td style="width: 28px; height: 28px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle; padding-right: 15px;">
-                                                                                            <div style="color: white; font-size: 12px; font-weight: 700; line-height: 28px;">1</div>
+                                                                                        <td style="width: 25px; height: 25px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle;">
+                                                                                            <span style="color: white; font-size: 12px; font-weight: 700; line-height: 1;">1</span>
                                                                                         </td>
-                                                                                        <td style="color: #065f46; font-size: 16px; font-weight: 600; vertical-align: middle; padding-left: 15px;">
-                                                                                            Tải và mở file PDF đính kèm
+                                                                                        <td style="padding-left: 12px; vertical-align: middle;">
+                                                                                            <span style="color: #065f46; font-size: 15px; font-weight: 600;">
+                                                                                                Tải và mở file PDF đính kèm
+                                                                                            </span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>
-                                                                               \s
-                                                                                <!-- Step 2 -->
-                                                                                <table width="100%%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                                                                            </td>
+                                                                        </tr>
+                                                                       \s
+                                                                        <!-- Step 2 -->
+                                                                        <tr>
+                                                                            <td style="padding-bottom: 12px;">
+                                                                                <table cellpadding="0" cellspacing="0" width="100%%">
                                                                                     <tr>
-                                                                                        <td style="width: 28px; height: 28px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle; padding-right: 15px;">
-                                                                                            <div style="color: white; font-size: 12px; font-weight: 700; line-height: 28px;">2</div>
+                                                                                        <td style="width: 25px; height: 25px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle;">
+                                                                                            <span style="color: white; font-size: 12px; font-weight: 700; line-height: 1;">2</span>
                                                                                         </td>
-                                                                                        <td style="color: #065f46; font-size: 16px; font-weight: 600; vertical-align: middle; padding-left: 15px;">
-                                                                                            Kiểm tra kỹ thông tin cá nhân và điều khoản
+                                                                                        <td style="padding-left: 12px; vertical-align: middle;">
+                                                                                            <span style="color: #065f46; font-size: 15px; font-weight: 600;">
+                                                                                                Kiểm tra kỹ thông tin cá nhân và điều khoản
+                                                                                            </span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>
-                                                                               \s
-                                                                                <!-- Step 3 -->
-                                                                                <table width="100%%" cellpadding="0" cellspacing="0" style="margin-bottom: 12px;">
+                                                                            </td>
+                                                                        </tr>
+                                                                       \s
+                                                                        <!-- Step 3 -->
+                                                                        <tr>
+                                                                            <td style="padding-bottom: 12px;">
+                                                                                <table cellpadding="0" cellspacing="0" width="100%%">
                                                                                     <tr>
-                                                                                        <td style="width: 28px; height: 28px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle; padding-right: 15px;">
-                                                                                            <div style="color: white; font-size: 12px; font-weight: 700; line-height: 28px;">3</div>
+                                                                                        <td style="width: 25px; height: 25px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle;">
+                                                                                            <span style="color: white; font-size: 12px; font-weight: 700; line-height: 1;">3</span>
                                                                                         </td>
-                                                                                        <td style="color: #065f46; font-size: 16px; font-weight: 600; vertical-align: middle; padding-left: 15px;">
-                                                                                            In 2 bản hợp đồng và ký tên đầy đủ
+                                                                                        <td style="padding-left: 12px; vertical-align: middle;">
+                                                                                            <span style="color: #065f46; font-size: 15px; font-weight: 600;">
+                                                                                                In 2 bản hợp đồng và ký tên đầy đủ
+                                                                                            </span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>
-                                                                               \s
-                                                                                <!-- Step 4 -->
-                                                                                <table width="100%%" cellpadding="0" cellspacing="0">
+                                                                            </td>
+                                                                        </tr>
+                                                                       \s
+                                                                        <!-- Step 4 -->
+                                                                        <tr>
+                                                                            <td>
+                                                                                <table cellpadding="0" cellspacing="0" width="100%%">
                                                                                     <tr>
-                                                                                        <td style="width: 28px; height: 28px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle; padding-right: 15px;">
-                                                                                            <div style="color: white; font-size: 12px; font-weight: 700; line-height: 28px;">4</div>
+                                                                                        <td style="width: 25px; height: 25px; background: #10b981; border-radius: 50%%; text-align: center; vertical-align: middle;">
+                                                                                            <span style="color: white; font-size: 12px; font-weight: 700; line-height: 1;">4</span>
                                                                                         </td>
-                                                                                        <td style="color: #065f46; font-size: 16px; font-weight: 600; vertical-align: middle; padding-left: 15px;">
-                                                                                            Liên hệ chúng tôi nếu có bất kỳ thắc mắc nào
+                                                                                        <td style="padding-left: 12px; vertical-align: middle;">
+                                                                                            <span style="color: #065f46; font-size: 15px; font-weight: 600;">
+                                                                                                Liên hệ chúng tôi nếu có bất kỳ thắc mắc nào
+                                                                                            </span>
                                                                                         </td>
                                                                                     </tr>
                                                                                 </table>
@@ -571,20 +589,20 @@ public class EmailServiceImpl implements EmailService {
                                                     </div>
                                                    \s
                                                     <!-- 📞 CONTACT CARDS -->
-                                                    <table width="100%%" cellpadding="0" cellspacing="0" style="margin: 45px 0;">
+                                                    <table width="100%%" cellpadding="0" cellspacing="0" style="margin: 30px 0;">
                                                         <tr>
-                                                            <td width="50%%" style="padding-right: 12px;">
-                                                                <div style="background: linear-gradient(135deg, #48dbfb 0%%, #0abde3 100%%); padding: 30px; border-radius: 20px; text-align: center; color: white;">
-                                                                    <div style="font-size: 36px; margin-bottom: 15px;">📞</div>
-                                                                    <h4 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700;">Hotline 24/7</h4>
-                                                                    <p style="margin: 0; font-size: 20px; font-weight: 800;">1900-xxxx</p>
+                                                            <td width="50%%" style="padding-right: 7px;">
+                                                                <div style="background: linear-gradient(135deg, #48dbfb 0%%, #0abde3 100%%); padding: 25px; border-radius: 16px; text-align: center; color: white;">
+                                                                    <div style="font-size: 30px; margin-bottom: 12px;">📞</div>
+                                                                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">Hotline 24/7</h4>
+                                                                    <p style="margin: 0; font-size: 18px; font-weight: 800;">1900-xxxx</p>
                                                                 </div>
                                                             </td>
-                                                            <td width="50%%" style="padding-left: 12px;">
-                                                                <div style="background: linear-gradient(135deg, #ff6b6b 0%%, #ee5a52 100%%); padding: 30px; border-radius: 20px; text-align: center; color: white;">
-                                                                    <div style="font-size: 36px; margin-bottom: 15px;">📧</div>
-                                                                    <h4 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700;">Email hỗ trợ</h4>
-                                                                    <p style="margin: 0; font-size: 15px; font-weight: 700;">nhatroxanh123@gmail.com</p>
+                                                            <td width="50%%" style="padding-left: 7px;">
+                                                                <div style="background: linear-gradient(135deg, #ff6b6b 0%%, #ee5a52 100%%); padding: 25px; border-radius: 16px; text-align: center; color: white;">
+                                                                    <div style="font-size: 30px; margin-bottom: 12px;">📧</div>
+                                                                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700;">Email hỗ trợ</h4>
+                                                                    <p style="margin: 0; font-size: 14px; font-weight: 800;">nhatroxanh123@gmail.com</p>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -593,10 +611,10 @@ public class EmailServiceImpl implements EmailService {
                                                     <!-- 🌐 WEBSITE INFO -->
                                                     <table width="100%%" cellpadding="0" cellspacing="0">
                                                         <tr>
-                                                            <td align="center" style="padding: 35px 0;">
-                                                                <div style="background: linear-gradient(135deg, #ffeaa7 0%%, #fdcb6e 100%%); padding: 25px 35px; border-radius: 20px; display: inline-block;">
-                                                                    <div style="font-size: 32px; margin-bottom: 12px;">🌐</div>
-                                                                    <p style="margin: 0; color: #2d3436; font-weight: 800; font-size: 16px;">www.nhatroxanh.com</p>
+                                                            <td align="center" style="padding: 30px 0;">
+                                                                <div style="background: linear-gradient(135deg, #ffeaa7 0%%, #fdcb6e 100%%); padding: 20px 30px; border-radius: 16px; display: inline-block; color: #2d3436;">
+                                                                    <div style="font-size: 28px; margin-bottom: 10px;">🌐</div>
+                                                                    <p style="margin: 0; font-weight: 800; font-size: 16px;">www.nhatroxanh.com</p>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -606,30 +624,30 @@ public class EmailServiceImpl implements EmailService {
                                            \s
                                             <!-- 🏢 PREMIUM FOOTER -->
                                             <tr>
-                                                <td style="background: linear-gradient(135deg, #2c3e50 0%%, #34495e 100%%); padding: 45px 40px; text-align: center; color: white;">
+                                                <td style="background: linear-gradient(135deg, #2c3e50 0%%, #34495e 100%%); padding: 35px 30px; text-align: center; color: white;">
                                                     <table width="100%%" cellpadding="0" cellspacing="0">
                                                         <tr>
                                                             <td align="center">
                                                                 <table cellpadding="0" cellspacing="0">
                                                                     <tr>
-                                                                        <td style="width: 70px; height: 70px; background: rgba(255,255,255,0.1); border-radius: 50%%; text-align: center; vertical-align: middle; border: 2px solid rgba(255,255,255,0.2);">
-                                                                            <div style="font-size: 28px; line-height: 70px;">🏢</div>
+                                                                        <td style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%%; text-align: center; vertical-align: middle; border: 2px solid rgba(255,255,255,0.2);">
+                                                                            <div style="font-size: 24px; line-height: 60px;">🏢</div>
                                                                         </td>
                                                                     </tr>
                                                                 </table>
                                                                \s
-                                                                <h3 style="margin: 20px 0 12px 0; font-size: 24px; font-weight: 800;">
+                                                                <h3 style="margin: 15px 0 10px 0; font-size: 20px; font-weight: 800;">
                                                                     NHÀ TRỌ XANH PREMIUM
                                                                 </h3>
-                                                                <p style="margin: 0 0 30px 0; font-size: 16px; opacity: 0.9;">
+                                                                <p style="margin: 0 0 20px 0; font-size: 14px; opacity: 0.9;">
                                                                     Dịch vụ cho thuê nhà trọ chuyên nghiệp • Uy tín • Chất lượng cao
                                                                 </p>
                                                                \s
-                                                                <div style="border-top: 1px solid rgba(255,255,255,0.15); padding-top: 25px;">
-                                                                    <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 700;">
+                                                                <div style="border-top: 1px solid rgba(255,255,255,0.15); padding-top: 20px;">
+                                                                    <p style="margin: 0 0 10px 0; font-size: 15px; font-weight: 700;">
                                                                         ❤️ Cảm ơn bạn đã tin tưởng dịch vụ của chúng tôi!
                                                                     </p>
-                                                                    <p style="margin: 0; font-size: 13px; opacity: 0.8;">
+                                                                    <p style="margin: 0; font-size: 12px; opacity: 0.8; line-height: 1.5;">
                                                                         © 2024 Nhà Trọ Xanh Premium. Tất cả quyền được bảo lưu.<br>
                                                                         Email này được gửi tự động, vui lòng không trả lời trực tiếp.
                                                                     </p>
@@ -769,9 +787,6 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-
-
-
     @Override
     public void sendVoucherDeactivationEmail(Vouchers voucher) {
         Users creator = voucher.getUser();
@@ -885,63 +900,146 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName, 
-                                              String roomName, String hostelName, String paymentDate, 
-                                              String paymentTime, String amount, String note, Integer paymentId) {
+    public void sendCashPaymentAppointmentEmail(String to, String landlordName, String tenantName,
+            String roomName, String hostelName, String paymentDate,
+            String paymentTime, String amount, String note, Integer paymentId) {
         String title = "Lịch hẹn thanh toán tiền mặt - Hóa đơn #" + paymentId;
-        
+
         String content = String.format(
-            "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
-            "<h3 style='color: #28a745; margin-bottom: 15px;'>📅 Thông tin lịch hẹn thanh toán</h3>" +
-            "<table style='width: 100%%; border-collapse: collapse;'>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Người thuê:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Giờ hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
-            "%s" +
-            "</table>" +
-            "</div>" +
-            "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
-            "<p style='margin: 0; color: #856404;'><strong>⚠️ Lưu ý:</strong> Vui lòng xác nhận việc nhận thanh toán trong hệ thống sau khi người thuê đã thanh toán.</p>" +
-            "</div>",
-            tenantName, roomName, hostelName, paymentDate, paymentTime, amount,
-            (note != null && !note.trim().isEmpty()) ? 
-                String.format("<tr><td style='padding: 8px 0; font-weight: bold;'>Ghi chú:</td><td style='padding: 8px 0;'>%s</td></tr>", note) : ""
-        );
+                "<div style='background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
+                        "<h3 style='color: #28a745; margin-bottom: 15px;'>📅 Thông tin lịch hẹn thanh toán</h3>" +
+                        "<table style='width: 100%%; border-collapse: collapse;'>" +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Người thuê:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Giờ hẹn:</td><td style='padding: 8px 0; color: #dc3545;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>"
+                        +
+                        "%s" +
+                        "</table>" +
+                        "</div>" +
+                        "<div style='background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px; margin: 15px 0;'>"
+                        +
+                        "<p style='margin: 0; color: #856404;'><strong>⚠️ Lưu ý:</strong> Vui lòng xác nhận việc nhận thanh toán trong hệ thống sau khi người thuê đã thanh toán.</p>"
+                        +
+                        "</div>",
+                tenantName, roomName, hostelName, paymentDate, paymentTime, amount,
+                (note != null && !note.trim().isEmpty()) ? String.format(
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ghi chú:</td><td style='padding: 8px 0;'>%s</td></tr>",
+                        note) : "");
 
         String greeting = String.format("Xin chào %s", landlordName);
         String footer = "Vui lòng đăng nhập vào hệ thống để xác nhận thanh toán sau khi nhận tiền từ người thuê.";
-        
+
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
     }
 
     @Override
-    public void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName, 
-                                          String hostelName, String amount, String paymentDate, Integer paymentId) {
+    public void sendCashPaymentSuccessEmail(String to, String tenantName, String roomName,
+            String hostelName, String amount, String paymentDate, Integer paymentId) {
         String title = "Thanh toán thành công - Hóa đơn #" + paymentId;
-        
+
         String content = String.format(
-            "<div style='background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;'>" +
-            "<h3 style='color: #155724; margin-bottom: 15px;'>✅ Thanh toán đã được xác nhận</h3>" +
-            "<table style='width: 100%%; border-collapse: collapse;'>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền đã thanh toán:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày thanh toán:</td><td style='padding: 8px 0;'>%s</td></tr>" +
-            "<tr><td style='padding: 8px 0; font-weight: bold;'>Phương thức:</td><td style='padding: 8px 0;'>Tiền mặt</td></tr>" +
-            "</table>" +
-            "</div>" +
-            "<div style='background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>" +
-            "<p style='margin: 0; color: #0c5460;'><strong>💡 Thông tin:</strong> Chủ trọ đã xác nhận đã nhận được thanh toán của bạn. Cảm ơn bạn đã thanh toán đúng hạn!</p>" +
-            "</div>",
-            roomName, hostelName, amount, paymentDate
-        );
+                "<div style='background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0;'>"
+                        +
+                        "<h3 style='color: #155724; margin-bottom: 15px;'>✅ Thanh toán đã được xác nhận</h3>" +
+                        "<table style='width: 100%%; border-collapse: collapse;'>" +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phòng:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Nhà trọ:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Số tiền đã thanh toán:</td><td style='padding: 8px 0; color: #28a745; font-size: 18px; font-weight: bold;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Ngày thanh toán:</td><td style='padding: 8px 0;'>%s</td></tr>"
+                        +
+                        "<tr><td style='padding: 8px 0; font-weight: bold;'>Phương thức:</td><td style='padding: 8px 0;'>Tiền mặt</td></tr>"
+                        +
+                        "</table>" +
+                        "</div>" +
+                        "<div style='background: #d1ecf1; border: 1px solid #bee5eb; padding: 15px; border-radius: 5px; margin: 15px 0;'>"
+                        +
+                        "<p style='margin: 0; color: #0c5460;'><strong>💡 Thông tin:</strong> Chủ trọ đã xác nhận đã nhận được thanh toán của bạn. Cảm ơn bạn đã thanh toán đúng hạn!</p>"
+                        +
+                        "</div>",
+                roomName, hostelName, amount, paymentDate);
 
         String greeting = String.format("Xin chào %s", tenantName);
         String footer = "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi!";
-        
+
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
+    }
+
+    @Override
+    public void sendPrivacyPolicyEmail(String to) {
+        String title = "Chính sách bảo mật & Điều khoản sử dụng";
+
+        String content = "<div style='background: #f8f9fa; border: 1px solid #e0e0e0; padding: 20px; border-radius: 8px; margin: 20px 0;'>"
+                +
+                "<h3 style='color: #1a73e8; margin-top: 0;'>CHÍNH SÁCH BẢO MẬT & ĐIỀU KHOẢN SỬ DỤNG</h3>" +
+                "<p style='font-size: 14px; color: #555;'>(Áp dụng cho hệ thống Quản lý Nhà trọ Xanh)</p>" +
+
+                "<h4 style='color: #1a73e8;'>1. Mục đích</h4>" +
+                "<p>Chính sách này nhằm bảo vệ thông tin cá nhân của người dùng và quy định cách thức sử dụng dịch vụ quản lý nhà trọ của chúng tôi, đảm bảo quyền lợi hợp pháp của tất cả các bên tham gia.</p>"
+                +
+
+                "<h4 style='color: #1a73e8;'>2. Thu thập thông tin</h4>" +
+                "<ul style='margin-top: 0; padding-left: 18px;'>" +
+                "<li>Họ tên, số điện thoại, email, ngày sinh.</li>" +
+                "<li>Thông tin tài khoản ngân hàng (nếu có giao dịch tài chính).</li>" +
+                "<li>Địa chỉ nhà trọ, thông tin phòng, hợp đồng thuê.</li>" +
+                "<li>Lịch sử giao dịch, thanh toán và trao đổi với chủ nhà/khách thuê.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>3. Mục đích sử dụng thông tin</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Quản lý nhà trọ, phòng cho thuê và hợp đồng.</li>" +
+                "<li>Liên hệ, gửi thông báo, hóa đơn, hoặc thông tin liên quan.</li>" +
+                "<li>Hỗ trợ kỹ thuật và xử lý khiếu nại.</li>" +
+                "<li>Cải thiện chất lượng dịch vụ và trải nghiệm người dùng.</li>" +
+                "<li>Đáp ứng yêu cầu của cơ quan quản lý nhà nước khi cần thiết.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>4. Bảo mật thông tin</h4>" +
+                "<p>Chúng tôi cam kết không bán, trao đổi hoặc chia sẻ thông tin cá nhân của bạn cho bên thứ ba, trừ khi có sự đồng ý của bạn hoặc yêu cầu từ cơ quan pháp luật.</p>"
+                +
+                "<p>Thông tin được lưu trữ trên hệ thống bảo mật cao, có cơ chế mã hóa dữ liệu và sao lưu định kỳ.</p>"
+                +
+                "<p>Nhân viên chỉ được truy cập thông tin trong phạm vi cần thiết để thực hiện công việc.</p>" +
+
+                "<h4 style='color: #1a73e8;'>5. Quyền của người dùng</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Yêu cầu xem, chỉnh sửa hoặc xóa thông tin cá nhân của mình.</li>" +
+                "<li>Yêu cầu ngừng nhận thông báo hoặc email quảng bá.</li>" +
+                "<li>Gửi khiếu nại về việc sử dụng thông tin cá nhân.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>6. Trách nhiệm của người dùng</h4>" +
+                "<ul style='padding-left: 18px;'>" +
+                "<li>Cung cấp thông tin chính xác và cập nhật kịp thời.</li>" +
+                "<li>Không sử dụng hệ thống vào mục đích trái pháp luật.</li>" +
+                "<li>Bảo mật tài khoản và không chia sẻ thông tin đăng nhập cho người khác.</li>" +
+                "</ul>" +
+
+                "<h4 style='color: #1a73e8;'>7. Thay đổi chính sách</h4>" +
+                "<p>Chúng tôi có thể cập nhật chính sách này theo từng thời điểm để phù hợp với yêu cầu pháp luật và nhu cầu dịch vụ. Mọi thay đổi sẽ được thông báo trên website và/hoặc qua email.</p>"
+                +
+
+                "<h4 style='color: #1a73e8;'>8. Liên hệ</h4>" +
+                "<p>📧 Email: <a href='mailto:nhatroxanh123@gmail.com' style='color: #1a73e8; text-decoration: none;'>nhatroxanh123@gmail.com</a><br>"
+                +
+                "📞 Hotline: <a href='tel:09888999999' style='color: #1a73e8; text-decoration: none;'>0988 999 999</a></p>"
+                +
+                "</div>";
+
+        String greeting = "Xin chào Quý khách";
+        String footer = "Cảm ơn bạn đã sử dụng dịch vụ của Nhà Trọ Xanh!";
+
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
     }
 

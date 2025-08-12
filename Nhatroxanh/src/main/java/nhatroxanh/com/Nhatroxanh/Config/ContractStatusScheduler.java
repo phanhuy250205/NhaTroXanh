@@ -20,31 +20,70 @@ public class ContractStatusScheduler {
     private ContractsRepository contractsRepository;
 
     /**
-     * Tác vụ định kỳ kiểm tra và cập nhật trạng thái hợp đồng thành EXPIRED.
+     * ✅ Cập nhật hợp đồng SẮPHET HẠN (còn <= 3 ngày)
      * Chạy mỗi ngày lúc 0:00.
      */
     @Scheduled(cron = "0 0 0 * * ?") // Chạy lúc 0:00 mỗi ngày
     public void updateExpiredContracts() {
-        logger.info("Bắt đầu kiểm tra hợp đồng hết hạn");
+        logger.info("🔄 Bắt đầu kiểm tra hợp đồng sắp hết hạn");
 
         try {
             LocalDate today = LocalDate.now();
+            LocalDate expireThreshold = today.plusDays(3); // Còn 3 ngày
+
             Date sqlToday = Date.valueOf(today);
+            Date sqlExpireThreshold = Date.valueOf(expireThreshold);
 
-            // Tìm tất cả hợp đồng ACTIVE có endDate trước hoặc bằng ngày hiện tại
-            List<Contracts> expiringContracts = contractsRepository.findByStatusAndEndDateLessThanEqual(
-                    Contracts.Status.ACTIVE, sqlToday);
+            // ✅ Tìm hợp đồng ACTIVE sắp hết hạn (endDate <= today + 3 ngày)
+            List<Contracts> expiringContracts = contractsRepository
+                    .findByStatusAndEndDateBetween(
+                            Contracts.Status.ACTIVE,
+                            sqlToday,
+                            sqlExpireThreshold
+                    );
 
+            // ✅ Cập nhật thành EXPIRED
             for (Contracts contract : expiringContracts) {
                 contract.setStatus(Contracts.Status.EXPIRED);
                 contractsRepository.save(contract);
-                logger.info("Cập nhật hợp đồng ID {} thành EXPIRED", contract.getContractId());
+                logger.info("✅ Cập nhật hợp đồng ID {} thành EXPIRED (còn {} ngày)",
+                        contract.getContractId(),
+                        java.time.temporal.ChronoUnit.DAYS.between(today, contract.getEndDate().toLocalDate())
+                );
             }
 
-            logger.info("Hoàn tất kiểm tra hợp đồng hết hạn. Đã cập nhật {} hợp đồng", expiringContracts.size());
+            logger.info("🎯 Hoàn tất! Đã cập nhật {} hợp đồng thành EXPIRED", expiringContracts.size());
 
         } catch (Exception e) {
-            logger.error("Lỗi khi cập nhật trạng thái hợp đồng hết hạn: {}", e.getMessage(), e);
+            logger.error("❌ Lỗi khi cập nhật trạng thái hợp đồng: {}", e.getMessage(), e);
+        }
+    }
+
+    /**
+     * ✅ Cập nhật hợp đồng ĐÃ HẾT HẠN thành TERMINATED
+     */
+    @Scheduled(cron = "0 30 0 * * ?") // Chạy lúc 0:30 mỗi ngày
+    public void updateTerminatedContracts() {
+        logger.info("🔄 Bắt đầu kiểm tra hợp đồng đã hết hạn");
+
+        try {
+            LocalDate yesterday = LocalDate.now().minusDays(1);
+            Date sqlYesterday = Date.valueOf(yesterday);
+
+            // Tìm hợp đồng EXPIRED đã quá hạn
+            List<Contracts> terminatedContracts = contractsRepository
+                    .findByStatusAndEndDateLessThan(Contracts.Status.EXPIRED, sqlYesterday);
+
+            for (Contracts contract : terminatedContracts) {
+                contract.setStatus(Contracts.Status.TERMINATED);
+                contractsRepository.save(contract);
+                logger.info("✅ Cập nhật hợp đồng ID {} thành TERMINATED", contract.getContractId());
+            }
+
+            logger.info("🎯 Hoàn tất! Đã cập nhật {} hợp đồng thành TERMINATED", terminatedContracts.size());
+
+        } catch (Exception e) {
+            logger.error("❌ Lỗi khi cập nhật hợp đồng đã hết hạn: {}", e.getMessage(), e);
         }
     }
 }

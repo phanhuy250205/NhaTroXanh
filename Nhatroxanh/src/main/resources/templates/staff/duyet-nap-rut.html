@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-blue: #3498DB;
@@ -406,6 +407,7 @@
         }
     </style>
 </head>
+
 <body>
     <div th:replace="~{/layouts/sidebar-staff}"></div>
     <div class="main-container">
@@ -465,10 +467,10 @@
                 <div class="filter-grid">
                     <div class="form-group">
                         <label class="form-label">Tìm kiếm</label>
-                        <input type="text" class="form-control" name="keyword" th:value="${keyword}" 
-                               placeholder="Tìm theo tên, mô tả...">
+                        <input type="text" class="form-control" name="keyword" th:value="${keyword}"
+                            placeholder="Tìm theo tên, mô tả...">
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Loại giao dịch</label>
                         <select class="form-control" name="type">
@@ -477,7 +479,7 @@
                             <option value="WITHDRAWAL" th:selected="${selectedType == 'WITHDRAWAL'}">Rút tiền</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <label class="form-label">Trạng thái</label>
                         <select class="form-control" name="status">
@@ -488,7 +490,7 @@
                             <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">Hoàn thành</option>
                         </select>
                     </div>
-                    
+
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i>
@@ -527,58 +529,74 @@
                             </td>
                             <td>
                                 <div>
-                                    <strong th:text="${transaction.user != null ? transaction.user.fullname : 'N/A'}">Nguyễn Văn A</strong>
+                                    <strong
+                                        th:text="${transaction.user != null ? transaction.user.fullname : 'N/A'}">Nguyễn
+                                        Văn A</strong>
                                     <br>
-                                    <small class="text-muted" th:text="${transaction.user != null ? transaction.user.phone : 'N/A'}">0123456789</small>
+                                    <small class="text-muted"
+                                        th:text="${transaction.user != null ? transaction.user.phone : 'N/A'}">0123456789</small>
                                 </div>
                             </td>
                             <td>
-                                <span class="type-badge" 
-                                      th:classappend="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'type-deposit' : 'type-withdrawal'">
-                                    <i th:class="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'fas fa-plus' : 'fas fa-minus'"></i>
-                                    <span th:text="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'Nạp tiền' : 'Rút tiền'">Nạp tiền</span>
+                                <span class="type-badge"
+                                    th:classappend="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'type-deposit' : 'type-withdrawal'">
+                                    <i
+                                        th:class="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'fas fa-plus' : 'fas fa-minus'"></i>
+                                    <span
+                                        th:text="${transaction.transactionType != null && transaction.transactionType.name() == 'DEPOSIT'} ? 'Nạp tiền' : 'Rút tiền'">Nạp
+                                        tiền</span>
                                 </span>
                             </td>
                             <td>
-                                <strong th:text="${transaction.amount != null ? (#numbers.formatInteger(transaction.amount, 0, 'COMMA') + ' VNĐ') : '0 VNĐ'}">1,000,000 VNĐ</strong>
+                                <strong
+                                    th:text="${transaction.amount != null ? (#numbers.formatInteger(transaction.amount, 0, 'COMMA') + ' VNĐ') : '0 VNĐ'}">1,000,000
+                                    VNĐ</strong>
                             </td>
                             <td>
-                                <span class="status-badge" 
-                                      th:classappend="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'status-pending' : 
+                                <span class="status-badge"
+                                    th:classappend="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'status-pending' : 
                                                      (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'status-approved' : 
                                                      (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'status-rejected' : 'status-completed'))">
-                                    <i th:class="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'fas fa-clock' : 
+                                    <i
+                                        th:class="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'fas fa-clock' : 
                                                  (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'fas fa-check' : 
                                                  (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'fas fa-times' : 'fas fa-check-double'))"></i>
-                                    <span th:text="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'Chờ duyệt' : 
+                                    <span
+                                        th:text="${transaction.status != null && transaction.status.name() == 'PENDING'} ? 'Chờ duyệt' : 
                                                    (${transaction.status != null && transaction.status.name() == 'APPROVED'} ? 'Đã duyệt' : 
-                                                   (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'Từ chối' : 'Hoàn thành'))">Chờ duyệt</span>
+                                                   (${transaction.status != null && transaction.status.name() == 'REJECTED'} ? 'Từ chối' : 'Hoàn thành'))">Chờ
+                                        duyệt</span>
                                 </span>
                             </td>
                             <td>
-                                <small th:text="${transaction.createdAt != null ? #temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">15/12/2024 14:30</small>
+                                <small
+                                    th:text="${transaction.createdAt != null ? #temporals.format(transaction.createdAt, 'dd/MM/yyyy HH:mm') : 'N/A'}">15/12/2024
+                                    14:30</small>
                             </td>
                             <td>
                                 <div class="action-buttons">
-                                    <button th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}" 
-                                            class="btn btn-success btn-sm" 
-                                            th:onclick="'approveTransaction(' + ${transaction.transactionId} + ')'">
+                                    <button
+                                        th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}"
+                                        class="btn btn-success btn-sm"
+                                        th:onclick="'approveTransaction(' + ${transaction.transactionId} + ')'">
                                         <i class="fas fa-check"></i>
                                     </button>
-                                    <button th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}" 
-                                            class="btn btn-danger btn-sm" 
-                                            th:onclick="'rejectTransaction(' + ${transaction.transactionId} + ')'">
+                                    <button
+                                        th:if="${transaction.status != null && transaction.status.name() == 'PENDING'}"
+                                        class="btn btn-danger btn-sm"
+                                        th:onclick="'rejectTransaction(' + ${transaction.transactionId} + ')'">
                                         <i class="fas fa-times"></i>
                                     </button>
-                                    <button class="btn btn-primary btn-sm" 
-                                            th:onclick="'viewTransactionDetail(' + ${transaction.transactionId} + ')'">
+                                    <button class="btn btn-primary btn-sm"
+                                        th:onclick="'viewTransactionDetail(' + ${transaction.transactionId} + ')'">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
                             </td>
                         </tr>
                         <!-- Fallback row when no data -->
-                        <tr th:if="${transactions == null || transactions.content == null || transactions.content.empty}">
+                        <tr
+                            th:if="${transactions == null || transactions.content == null || transactions.content.empty}">
                             <td colspan="7" class="text-center text-muted">
                                 <i class="fas fa-info-circle me-2"></i>
                                 Không có giao dịch nào
@@ -593,21 +611,22 @@
         <nav th:if="${transactions != null && transactions.totalPages > 1}">
             <ul class="pagination">
                 <li class="page-item" th:classappend="${transactions.first} ? 'disabled'">
-                    <a class="page-link" th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number - 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
+                    <a class="page-link"
+                        th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number - 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                 </li>
-                
-                <li th:each="pageNum : ${#numbers.sequence(0, transactions.totalPages - 1)}" 
-                    class="page-item" 
+
+                <li th:each="pageNum : ${#numbers.sequence(0, transactions.totalPages - 1)}" class="page-item"
                     th:classappend="${pageNum == transactions.number} ? 'active'">
-                    <a class="page-link" 
-                       th:href="@{/staff/transactions/duyet-nap-rut(page=${pageNum}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}"
-                       th:text="${pageNum + 1}">1</a>
+                    <a class="page-link"
+                        th:href="@{/staff/transactions/duyet-nap-rut(page=${pageNum}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}"
+                        th:text="${pageNum + 1}">1</a>
                 </li>
-                
+
                 <li class="page-item" th:classappend="${transactions.last} ? 'disabled'">
-                    <a class="page-link" th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number + 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
+                    <a class="page-link"
+                        th:href="@{/staff/transactions/duyet-nap-rut(page=${transactions.number + 1}, size=${transactions.size}, type=${selectedType}, status=${selectedStatus})}">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </li>
@@ -630,7 +649,8 @@
                     <p>Bạn có chắc chắn muốn duyệt giao dịch này không?</p>
                     <div class="form-group">
                         <label for="approvalNote">Ghi chú (tùy chọn):</label>
-                        <textarea class="form-control" id="approvalNote" rows="3" placeholder="Nhập ghi chú..."></textarea>
+                        <textarea class="form-control" id="approvalNote" rows="3"
+                            placeholder="Nhập ghi chú..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -658,7 +678,8 @@
                     <p>Vui lòng nhập lý do từ chối giao dịch:</p>
                     <div class="form-group">
                         <label for="rejectionReason">Lý do từ chối *:</label>
-                        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Nhập lý do từ chối..." required></textarea>
+                        <textarea class="form-control" id="rejectionReason" rows="3" placeholder="Nhập lý do từ chối..."
+                            required></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -711,7 +732,7 @@
 
         function confirmApproval() {
             const note = document.getElementById('approvalNote').value;
-            
+
             fetch(`/staff/transactions/approve/${currentTransactionId}`, {
                 method: 'POST',
                 headers: {
@@ -719,31 +740,52 @@
                 },
                 body: `approvalNote=${encodeURIComponent(note)}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Giao dịch đã được duyệt thành công!');
-                    location.reload();
-                } else {
-                    alert('Có lỗi xảy ra: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi duyệt giao dịch!');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: 'Giao dịch đã được duyệt thành công!',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra: ' + data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: 'Có lỗi xảy ra khi duyệt giao dịch!',
+                        confirmButtonText: 'OK'
+                    });
+                });
 
             bootstrap.Modal.getInstance(document.getElementById('approvalModal')).hide();
         }
 
         function confirmRejection() {
             const reason = document.getElementById('rejectionReason').value;
-            
+
             if (!reason.trim()) {
-                alert('Vui lòng nhập lý do từ chối!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Thiếu thông tin!',
+                    text: 'Vui lòng nhập lý do từ chối!',
+                    confirmButtonText: 'OK'
+                });
                 return;
             }
-            
+
             fetch(`/staff/transactions/reject/${currentTransactionId}`, {
                 method: 'POST',
                 headers: {
@@ -751,81 +793,97 @@
                 },
                 body: `rejectionReason=${encodeURIComponent(reason)}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Giao dịch đã được từ chối!');
-                    location.reload();
-                } else {
-                    alert('Có lỗi xảy ra: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi từ chối giao dịch!');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Thành công!',
+                            text: 'Giao dịch đã được từ chối!',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Lỗi!',
+                            text: 'Có lỗi xảy ra: ' + data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi!',
+                        text: 'Có lỗi xảy ra khi từ chối giao dịch!',
+                        confirmButtonText: 'OK'
+                    });
+                });
 
             bootstrap.Modal.getInstance(document.getElementById('rejectionModal')).hide();
         }
 
         function viewTransactionDetail(transactionId) {
             fetch(`/staff/transactions/detail/${transactionId}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    const transaction = data.transaction;
-                    let content = '<div class="row">';
-                    content += '<div class="col-md-6">';
-                    content += '<h6>Thông tin giao dịch</h6>';
-                    content += '<p><strong>Mã giao dịch:</strong> ' + (transaction.transactionReference || 'N/A') + '</p>';
-                    content += '<p><strong>Loại:</strong> ' + (transaction.transactionType === 'DEPOSIT' ? 'Nạp tiền' : 'Rút tiền') + '</p>';
-                    content += '<p><strong>Số tiền:</strong> ' + new Intl.NumberFormat('vi-VN').format(transaction.amount || 0) + ' VNĐ</p>';
-                    content += '<p><strong>Trạng thái:</strong> ' + getStatusText(transaction.status) + '</p>';
-                    content += '<p><strong>Ngày tạo:</strong> ' + new Date(transaction.createdAt).toLocaleString('vi-VN') + '</p>';
-                    content += '</div>';
-                    content += '<div class="col-md-6">';
-                    content += '<h6>Thông tin người dùng</h6>';
-                    content += '<p><strong>Tên:</strong> ' + (transaction.user ? transaction.user.fullname : 'N/A') + '</p>';
-                    content += '<p><strong>Điện thoại:</strong> ' + (transaction.user ? transaction.user.phone : 'N/A') + '</p>';
-                    content += '<p><strong>Email:</strong> ' + (transaction.user && transaction.user.email ? transaction.user.email : 'N/A') + '</p>';
-                    content += '</div>';
-                    content += '</div>';
-                    
-                    if (transaction.bankName) {
-                        content += '<div class="row mt-3">';
-                        content += '<div class="col-12">';
-                        content += '<h6>Thông tin ngân hàng</h6>';
-                        content += '<p><strong>Ngân hàng:</strong> ' + transaction.bankName + '</p>';
-                        content += '<p><strong>Số tài khoản:</strong> ' + (transaction.accountNumber || 'N/A') + '</p>';
-                        content += '<p><strong>Chủ tài khoản:</strong> ' + (transaction.accountHolderName || 'N/A') + '</p>';
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const transaction = data.transaction;
+                        let content = '<div class="row">';
+                        content += '<div class="col-md-6">';
+                        content += '<h6>Thông tin giao dịch</h6>';
+                        content += '<p><strong>Mã giao dịch:</strong> ' + (transaction.transactionReference || 'N/A') + '</p>';
+                        content += '<p><strong>Loại:</strong> ' + (transaction.transactionType === 'DEPOSIT' ? 'Nạp tiền' : 'Rút tiền') + '</p>';
+                        content += '<p><strong>Số tiền:</strong> ' + new Intl.NumberFormat('vi-VN').format(transaction.amount || 0) + ' VNĐ</p>';
+                        content += '<p><strong>Trạng thái:</strong> ' + getStatusText(transaction.status) + '</p>';
+                        content += '<p><strong>Ngày tạo:</strong> ' + new Date(transaction.createdAt).toLocaleString('vi-VN') + '</p>';
+                        content += '</div>';
+                        content += '<div class="col-md-6">';
+                        content += '<h6>Thông tin người dùng</h6>';
+                        content += '<p><strong>Tên:</strong> ' + (transaction.user ? transaction.user.fullname : 'N/A') + '</p>';
+                        content += '<p><strong>Điện thoại:</strong> ' + (transaction.user ? transaction.user.phone : 'N/A') + '</p>';
+                        content += '<p><strong>Email:</strong> ' + (transaction.user && transaction.user.email ? transaction.user.email : 'N/A') + '</p>';
                         content += '</div>';
                         content += '</div>';
+
+                        if (transaction.bankName) {
+                            content += '<div class="row mt-3">';
+                            content += '<div class="col-12">';
+                            content += '<h6>Thông tin ngân hàng</h6>';
+                            content += '<p><strong>Ngân hàng:</strong> ' + transaction.bankName + '</p>';
+                            content += '<p><strong>Số tài khoản:</strong> ' + (transaction.accountNumber || 'N/A') + '</p>';
+                            content += '<p><strong>Chủ tài khoản:</strong> ' + (transaction.accountHolderName || 'N/A') + '</p>';
+                            content += '</div>';
+                            content += '</div>';
+                        }
+
+                        if (transaction.description) {
+                            content += '<div class="row mt-3">';
+                            content += '<div class="col-12">';
+                            content += '<h6>Mô tả</h6>';
+                            content += '<p>' + transaction.description + '</p>';
+                            content += '</div>';
+                            content += '</div>';
+                        }
+
+                        document.getElementById('transactionDetailContent').innerHTML = content;
+                        const modal = new bootstrap.Modal(document.getElementById('detailModal'));
+                        modal.show();
+                    } else {
+                        alert('Không thể lấy thông tin giao dịch!');
                     }
-                    
-                    if (transaction.description) {
-                        content += '<div class="row mt-3">';
-                        content += '<div class="col-12">';
-                        content += '<h6>Mô tả</h6>';
-                        content += '<p>' + transaction.description + '</p>';
-                        content += '</div>';
-                        content += '</div>';
-                    }
-                    
-                    document.getElementById('transactionDetailContent').innerHTML = content;
-                    const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-                    modal.show();
-                } else {
-                    alert('Không thể lấy thông tin giao dịch!');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Có lỗi xảy ra khi lấy thông tin giao dịch!');
-            });
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi lấy thông tin giao dịch!');
+                });
         }
 
         function getStatusText(status) {
-            switch(status) {
+            switch (status) {
                 case 'PENDING': return 'Chờ duyệt';
                 case 'APPROVED': return 'Đã duyệt';
                 case 'REJECTED': return 'Từ chối';
@@ -834,5 +892,7 @@
             }
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
+
 </html>

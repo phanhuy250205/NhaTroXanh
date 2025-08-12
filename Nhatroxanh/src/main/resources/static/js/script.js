@@ -55,7 +55,7 @@ function loadProvinces() {
     const provinceSelect = document.getElementById("provinceSelect");
     provinceSelect.innerHTML = '<option value="">Chọn tỉnh</option>';
 
-    fetch("https://provinces.open-api.vn/api/p")
+    fetch("https://provinces.open-api.vn/api/v1/p")
         .then(res => res.json())
         .then(data => {
             data.forEach(p => {

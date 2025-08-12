@@ -5,6 +5,138 @@
     <title>Chi Tiết - Nhà Trọ Xanh</title>
     <link rel="stylesheet" href="/css/favorite-styles.css">
 </head>
+<style>
+    /* ========== PAGINATION STYLES ========== */
+    .pagination-container {
+        margin-top: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .page-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.5rem;
+        height: 2.5rem;
+        padding: 0 0.75rem;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        background: #ffffff;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #4a5568;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .page-link:hover {
+        background: #f7fafc;
+        border-color: #cbd5e0;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        color: #2d3748;
+    }
+
+    .page-item.active .page-link {
+        background: linear-gradient(135deg, #4e73df 0%, #2e59d9 100%);
+        border-color: transparent;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(78, 115, 223, 0.3);
+    }
+
+    .page-item.disabled .page-link {
+        background: #f8f9fa;
+        color: #a0aec0;
+        border-color: #e2e8f0;
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .page-item:not(.disabled):not(.active) .page-link:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Dots styling */
+    .page-item.disabled:not(.active) .page-link {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        pointer-events: none;
+    }
+
+    /* Arrow buttons */
+    .page-item:first-child .page-link,
+    .page-item:last-child .page-link {
+        padding: 0 1rem;
+        font-weight: bold;
+    }
+
+    /* Page info */
+    .page-info {
+        margin-top: 1rem;
+        font-size: 0.875rem;
+        color: #718096;
+    }
+
+    .page-info span {
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .pagination {
+            gap: 0.25rem;
+        }
+
+        .page-link {
+            min-width: 2.25rem;
+            height: 2.25rem;
+            font-size: 0.8125rem;
+            padding: 0 0.5rem;
+        }
+
+        .page-item:first-child .page-link,
+        .page-item:last-child .page-link {
+            padding: 0 0.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .pagination-container {
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            min-width: 2rem;
+            height: 2rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
 
 <body>
     <!-- NAVBAR -->
@@ -114,33 +246,31 @@
                     <ul class="pagination justify-content-center">
                         <!-- Previous Page -->
                         <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
-                            <a class="page-link" href="#" 
-                               th:data-page="${currentPage - 1}"
-                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
-                               aria-label="Previous">
+                            <a class="page-link" href="#" th:data-page="${currentPage - 1}"
+                                onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                                aria-label="Previous">
                                 <span aria-hidden="true">&laquo;</span>
                             </a>
                         </li>
 
                         <!-- Show first page if current page is far from start -->
                         <li class="page-item" th:if="${currentPage > 2}">
-                            <a class="page-link" href="#"
-                               th:data-page="0"
-                               onclick="navigateToPage(this.getAttribute('data-page')); return false;">1</a>
+                            <a class="page-link" href="#" th:data-page="0"
+                                onclick="navigateToPage(this.getAttribute('data-page')); return false;">1</a>
                         </li>
-                        
+
                         <!-- Show dots if there's a gap -->
                         <li class="page-item disabled" th:if="${currentPage > 3}">
                             <span class="page-link">...</span>
                         </li>
 
                         <!-- Show pages around current page -->
-                        <th:block th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}">
+                        <th:block
+                            th:each="i : ${#numbers.sequence(T(java.lang.Math).max(0, currentPage - 2), T(java.lang.Math).min(totalPages - 1, currentPage + 2))}">
                             <li class="page-item" th:classappend="${currentPage == i} ? 'active'">
-                                <a class="page-link" href="#"
-                                   th:data-page="${i}"
-                                   onclick="navigateToPage(this.getAttribute('data-page')); return false;"
-                                   th:text="${i + 1}">1</a>
+                                <a class="page-link" href="#" th:data-page="${i}"
+                                    onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                                    th:text="${i + 1}">1</a>
                             </li>
                         </th:block>
 
@@ -148,30 +278,28 @@
                         <li class="page-item disabled" th:if="${currentPage < totalPages - 4}">
                             <span class="page-link">...</span>
                         </li>
-                        
+
                         <!-- Show last page if current page is far from end -->
                         <li class="page-item" th:if="${currentPage < totalPages - 3}">
-                            <a class="page-link" href="#"
-                               th:data-page="${totalPages - 1}"
-                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
-                               th:text="${totalPages}">Last</a>
+                            <a class="page-link" href="#" th:data-page="${totalPages - 1}"
+                                onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                                th:text="${totalPages}">Last</a>
                         </li>
 
                         <!-- Next Page -->
                         <li class="page-item" th:classappend="${currentPage >= totalPages - 1} ? 'disabled'">
-                            <a class="page-link" href="#"
-                               th:data-page="${currentPage + 1}"
-                               onclick="navigateToPage(this.getAttribute('data-page')); return false;"
-                               aria-label="Next">
+                            <a class="page-link" href="#" th:data-page="${currentPage + 1}"
+                                onclick="navigateToPage(this.getAttribute('data-page')); return false;"
+                                aria-label="Next">
                                 <span aria-hidden="true">&raquo;</span>
                             </a>
                         </li>
                     </ul>
-                    
+
                     <!-- Page Info -->
                     <div class="text-center mt-2">
                         <small class="text-muted">
-                            Trang <span th:text="${currentPage + 1}">1</span> 
+                            Trang <span th:text="${currentPage + 1}">1</span>
                             trong <span th:text="${totalPages}">10</span> trang
                             (<span th:text="${totalPosts}">100</span> kết quả)
                         </small>
@@ -238,27 +366,27 @@
 
     <script>
         // Thiết lập trạng thái filter từ URL khi trang load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const urlParams = new URLSearchParams(window.location.search);
-            
+
             // Thiết lập sort
             const sort = urlParams.get('sort') || 'latest';
             document.getElementById('sortBy').value = sort;
-            
+
             // Thiết lập utilities
             const utilities = urlParams.getAll('utilities');
             utilities.forEach(utilityId => {
                 const checkbox = document.querySelector(`input[name="utilities"][value="${utilityId}"]`);
                 if (checkbox) checkbox.checked = true;
             });
-            
+
             // Thiết lập area
             const minArea = urlParams.get('minArea');
             const maxArea = urlParams.get('maxArea');
-            
+
             if (minArea || maxArea) {
                 let areaValue = 'all';
-                
+
                 if (minArea && maxArea) {
                     areaValue = `${minArea}-${maxArea}`;
                 } else if (minArea && !maxArea) {
@@ -266,7 +394,7 @@
                 } else if (!minArea && maxArea) {
                     areaValue = `0-${maxArea}`;
                 }
-                
+
                 const areaRadio = document.querySelector(`input[name="area"][value="${areaValue}"]`);
                 if (areaRadio) {
                     areaRadio.checked = true;
@@ -288,7 +416,7 @@
             resetFilter();
         });
 
-        document.getElementById('sortBy').addEventListener('change', function() {
+        document.getElementById('sortBy').addEventListener('change', function () {
             applyFilter();
         });
 
@@ -302,7 +430,7 @@
 
             // Xử lý logic diện tích
             if (selectedArea !== 'all') {
-                switch(selectedArea) {
+                switch (selectedArea) {
                     case '0-10':
                         minArea = 0;
                         maxArea = 10;
@@ -354,7 +482,7 @@
             } else {
                 params.delete('minArea');
             }
-            
+
             if (maxArea !== null) {
                 params.set('maxArea', maxArea);
             } else {
@@ -379,13 +507,13 @@
                 sort,
                 finalURL: url.toString()
             });
-            
+
             // Debug: Log all URL parameters
             console.log('All URL parameters:');
             for (let [key, value] of params.entries()) {
                 console.log(`${key}: ${value}`);
             }
-            
+
             window.location.href = url.toString();
         }
 
@@ -416,10 +544,10 @@
         function navigateToPage(page) {
             const url = new URL(window.location.href);
             const params = url.searchParams;
-            
+
             // Set page
             params.set('page', page);
-            
+
             // Clean up empty parameters
             const keysToCheck = ['sort', 'provinceCode', 'districtCode', 'wardCode', 'priceRange', 'searchTerm', 'minArea', 'maxArea'];
             keysToCheck.forEach(key => {
@@ -428,16 +556,16 @@
                     params.delete(key);
                 }
             });
-            
+
             // Handle utilities specially (multiple values)
             const utilities = params.getAll('utilities');
             if (utilities.length === 0 || (utilities.length === 1 && utilities[0] === '')) {
                 params.delete('utilities');
             }
-            
+
             console.log('Navigating to page:', page);
             console.log('Final URL:', url.toString());
-            
+
             window.location.href = url.toString();
         }
     </script>

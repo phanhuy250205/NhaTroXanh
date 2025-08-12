@@ -95,7 +95,7 @@ public class Contracts {
     private Date requestedReturnDate;
 
     public enum Status {
-        DRAFT, ACTIVE, TERMINATED, EXPIRED
+        DRAFT, ACTIVE, TERMINATED, EXPIRED ,
     }
 
     @Enumerated(EnumType.STRING)

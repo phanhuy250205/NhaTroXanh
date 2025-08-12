@@ -13,6 +13,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
@@ -76,7 +77,7 @@ public class SecurityConfig {
                     "/", "/index", "/trang-chu", "/phong-tro/**", "/chi-tiet/**", "/danh-muc/**",
                     "/khach-thue/**", "/infor-chutro", "/khach-thue/thanh-toan", "/voucher",
                     "/momo/**", "/zalopay/**", "/vnpay/**", "/tat-ca-phong-tro",
-                    "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**"
+                    "/css/**", "/js/**", "/images/**", "/bootstrap/**", "/fonts/**", "/uploads/**","/newsletter/subscribe"
                 ).permitAll()
                 .requestMatchers("/chu-tro/**").hasRole("OWNER")
                 .requestMatchers("/nhan-vien/**").hasRole("STAFF")

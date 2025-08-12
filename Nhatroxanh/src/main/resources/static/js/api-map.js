@@ -431,3 +431,50 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+const roomNumberField = document.getElementById("roomCountHost");
+const errorField = document.getElementById("error-roomCountHost");
+
+// Kiểm tra realtime khi nhập
+roomNumberField.addEventListener("input", function() {
+    const value = parseInt(roomNumberField.value, 10);
+
+    if (isNaN(value) || value < 1) {
+        errorField.innerText = "Số phòng phải từ 1 trở lên";
+        roomNumberField.classList.add("is-invalid");
+    } 
+    else if (value > 20) {
+        errorField.innerText = "Số phòng tối đa là 20";
+        roomNumberField.classList.add("is-invalid");
+    } 
+    else {
+        errorField.innerText = "";
+        roomNumberField.classList.remove("is-invalid");
+    }
+});
+
+// Kiểm tra lại khi submit
+document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
+    const value = parseInt(roomNumberField.value, 10);
+
+    if (isNaN(value) || value < 1 || value > 20) {
+        e.preventDefault();
+    }
+});
+
+document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
+    const hostelNameInput = document.getElementById("hostelNameHost");
+    const errorMsg = document.getElementById("error-hostelNameHost");
+
+    const value = hostelNameInput.value.trim();
+
+    // Kiểm tra có bắt đầu bằng "Khu"
+    if (!/^Khu/i.test(value)) {
+        e.preventDefault(); // Ngăn submit
+        errorMsg.textContent = "Tên khu trọ phải bắt đầu bằng từ 'Khu'.";
+        hostelNameInput.classList.add("is-invalid");
+    } else {
+        errorMsg.textContent = "";
+        hostelNameInput.classList.remove("is-invalid");
+    }
+});
