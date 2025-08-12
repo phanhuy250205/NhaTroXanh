@@ -89,10 +89,10 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private EncryptionService encryptionService;
 
-     @Override
+    @Override
     @Transactional(readOnly = true)
-    public Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId, 
-                                                  Contracts.Status status, Pageable pageable) {
+    public Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId,
+            Contracts.Status status, Pageable pageable) {
         // Bây giờ chỉ cần gọi thẳng phương thức từ repository
         return contractsRepository.findTenantsByOwnerWithFilters(ownerId, keyword, hostelId, status, pageable);
     }
@@ -181,9 +181,11 @@ public class TenantServiceImpl implements TenantService {
                     .build();
         } else {
             // Trường hợp ngoại lệ: Hợp đồng không có thông tin người thuê
-            throw new RuntimeException("Hợp đồng ID: " + contractId + " không có thông tin khách thuê hoặc người bảo hộ.");
+            throw new RuntimeException(
+                    "Hợp đồng ID: " + contractId + " không có thông tin khách thuê hoặc người bảo hộ.");
         }
     }
+
     @Override
     @Transactional
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
@@ -524,7 +526,7 @@ public class TenantServiceImpl implements TenantService {
         extensionRequestRepository.save(request);
     }
 
-  @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable) {
         Page<TenantSummaryDTO> summaryPage = contractRepository.getTenantSummaryByOwnerWithFilters(
                 ownerId, keyword, pageable);
@@ -586,6 +588,11 @@ public class TenantServiceImpl implements TenantService {
                 .userIssuePlace(issuePlace)
                 .enabled(tenant.isEnabled())
                 .build();
+    }
+
+    public boolean hasPendingExtensionRequest(Integer contractId) {
+        return extensionRequestRepository.existsByContract_ContractIdAndStatus(contractId,
+                ExtensionRequests.RequestStatus.PENDING);
     }
 
 }

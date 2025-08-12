@@ -342,6 +342,7 @@
         padding: 1rem;
         border-radius: 15px 0 0 0;
       }
+
       .page-header {
         padding: 1.5rem;
         text-align: center;
@@ -355,6 +356,7 @@
         flex-direction: column;
         align-items: stretch;
       }
+
       .search-input {
         min-width: auto;
         margin-bottom: 1rem;
@@ -376,6 +378,7 @@
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
@@ -549,10 +552,10 @@
       <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th>
+            <!-- <th>
               <i class="fas fa-hashtag me-2"></i>
               ID
-            </th>
+            </th> -->
             <th>
               <i class="fas fa-tag me-2"></i>
               TÊN DANH MỤC
@@ -569,9 +572,9 @@
         </thead>
         <tbody>
           <tr th:each="cat : ${categories}">
-            <td>
+            <!-- <td>
               <span class="fw-bold text-primary" th:text="${cat.categoryId}">#001</span>
-            </td>
+            </td> -->
             <td>
               <div class="d-flex align-items-center">
                 <i class="fas fa-tag text-warning me-2"></i>
@@ -776,4 +779,5 @@
   </style>
 
 </body>
+
 </html>

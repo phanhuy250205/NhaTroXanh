@@ -688,6 +688,11 @@
                         <span th:text="${#dates.format(contract.startDate, 'dd/MM/yyyy')}"></span>
                         – <span th:text="${#dates.format(contract.requestedReturnDate, 'dd/MM/yyyy')}"></span>
                       </div>
+                      <div class="mt-1">
+                        <i class="fa-solid fa-pen me-1 text-secondary"></i>
+                        <strong>Lý do:</strong>
+                        <span th:text="${contract.returnReason}"></span>
+                      </div>
                     </div>
                   </div>
                   <div class="modal-footer border-0 pt-0" th:if="${contract.returnStatus == ReturnStatus.PENDING}">
