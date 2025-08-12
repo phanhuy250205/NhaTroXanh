@@ -37,7 +37,7 @@ public class ContractStatusScheduler {
     private EmailService emailService;
 
     /**
-     * Tác vụ định kỳ kiểm tra và cập nhật trạng thái hợp đồng thành EXPIRED.
+     * ✅ Cập nhật hợp đồng SẮPHET HẠN (còn <= 3 ngày)
      * Chạy mỗi ngày lúc 0:00.
      */
     @Scheduled(cron = "0 0 0 * * ?") 
@@ -151,7 +151,10 @@ public class ContractStatusScheduler {
 
         try {
             LocalDate today = LocalDate.now();
+            LocalDate expireThreshold = today.plusDays(3); // Còn 3 ngày
+
             Date sqlToday = Date.valueOf(today);
+            Date sqlExpireThreshold = Date.valueOf(expireThreshold);
 
             // Lấy hợp đồng ACTIVE hoặc EXPIRED mà endDate < hôm nay
             List<Contracts> expiredContracts = contractsRepository

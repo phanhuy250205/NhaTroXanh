@@ -218,4 +218,9 @@ public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
         List<Contracts> findByStatusesAndEndDateBefore(@Param("statuses") List<Contracts.Status> statuses,
                         @Param("date") Date date);
 
+        // ✅ Tìm hợp đồng trước ngày
+        List<Contracts> findByStatusAndEndDateLessThan(
+                        Contracts.Status status,
+                        Date date);
+
 }
