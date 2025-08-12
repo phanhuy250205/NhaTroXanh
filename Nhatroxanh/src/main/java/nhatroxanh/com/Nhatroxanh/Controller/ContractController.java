@@ -416,7 +416,7 @@ public class ContractController {
 
             if ("UNREGISTERED".equalsIgnoreCase(contractDto.getTenantType())
                     && contractDto.getUnregisteredTenant() != null) {
-                logger.info("Xử lý Người bảo hộ mới...");
+               
                 unregisteredTenant = handleUnregisteredTenantData(contractDto.getUnregisteredTenant(), owner,
                         cccdFrontFile, cccdBackFile);
                 finalTenantPhone = unregisteredTenant.getPhone();
@@ -577,7 +577,7 @@ public class ContractController {
 
         logger.info("SERVICE: Xử lý dữ liệu Unregistered Tenant trong quá trình tạo/cập nhật hợp đồng.");
         if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại người bảo hộ không được để trống!");
+            throw new IllegalArgumentException("Số điện thoại  không được để trống!");
         }
 
         // Tìm kiếm nếu có UnregisteredTenant cũ (ví dụ: từ edit mode)
@@ -1634,7 +1634,7 @@ public class ContractController {
                 if (cccdNumber == null || !cccdNumber.matches("\\d{12}")) {
                     logger.error("❌ Invalid unregistered tenant CCCD: {}", cccdNumber);
                     response.put("success", false);
-                    response.put("message", "Số CCCD của người bảo hộ phải là 12 chữ số!");
+                    response.put("message", "Số CCCD phải là 12 chữ số!");
                     return ResponseEntity.badRequest().body(response);
                 }
             } else {
@@ -2765,7 +2765,7 @@ public class ContractController {
             System.out.println("✅ Mapped registered tenant: " + user.getFullname());
         }
 
-        // Xử lý Unregistered Tenant (người bảo hộ)
+      
         if (contract.getUnregisteredTenant() != null) {
             ContractDto.UnregisteredTenant unregTenant = new ContractDto.UnregisteredTenant();
             UnregisteredTenants unregUser = contract.getUnregisteredTenant();
