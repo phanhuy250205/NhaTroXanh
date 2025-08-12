@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.text.DecimalFormat;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -296,6 +298,15 @@ public class ContractServiceImpl implements ContractService {
             System.err.println("❌ Lỗi khi cập nhật trạng thái: " + e.getMessage());
             return 0;
         }
+    }
+
+    // ✅ THÊM: Method format currency
+    private String formatCurrency(Float amount) {
+        if (amount == null) {
+            return "0 VND";
+        }
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        return formatter.format(Math.round(amount)) + " VND";
     }
 
 

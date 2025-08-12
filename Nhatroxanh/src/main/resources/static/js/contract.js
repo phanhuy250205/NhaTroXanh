@@ -3099,17 +3099,21 @@ window.NhaTroContract = {
     },
 
     calculateDeposit() {
-        const rentPrice = document.getElementById("rent-price")?.value
-        const depositMonths = document.getElementById("deposit-months")?.value
+        const rentPriceValue = document.getElementById("rent-price")?.value;
+        const depositMonthsValue = document.getElementById("deposit-months")?.value;
 
-        if (rentPrice && depositMonths) {
-            const deposit = Number.parseInt(rentPrice) * Number.parseInt(depositMonths)
-            const preview = document.getElementById("preview-deposit")
+        const rentPrice = this.parseVNDAmount(rentPriceValue); // SỬA
+        const depositMonths = parseInt(depositMonthsValue, 10);
+
+        if (rentPrice > 0 && depositMonths > 0) {
+            const deposit = rentPrice * depositMonths;
+            const preview = document.getElementById("preview-deposit");
             if (preview) {
-                preview.textContent = new Intl.NumberFormat("vi-VN").format(deposit)
+                preview.textContent = new Intl.NumberFormat("vi-VN").format(deposit);
             }
         }
     },
+
 
     getSelectText(id) {
         const element = document.getElementById(id)
@@ -3436,6 +3440,19 @@ window.NhaTroContract = {
         }
     },
 
+// Thêm vào object NhaTroContract
+    parseVNDAmount(value) {
+        if (!value) return 0;
+
+        // Chuyển thành string và loại bỏ tất cả ký tự không phải số
+        const cleanValue = value.toString().replace(/[^\d]/g, '');
+
+        // Parse thành số
+        const numericValue = parseInt(cleanValue, 10);
+
+        console.log(`💰 Parse VND: '${value}' -> ${numericValue}`);
+        return isNaN(numericValue) ? 0 : numericValue;
+    },
 
 
 
@@ -3487,13 +3504,18 @@ window.NhaTroContract = {
         const duration = parseInt(document.getElementById("contract-duration")?.value);
         if (!isNaN(duration) && duration > 0) terms.duration = duration;
 
-        const rentPrice = parseFloat(document.getElementById("rent-price")?.value);
-        if (!isNaN(rentPrice) && rentPrice > 0) terms.price = rentPrice;
+        // ✅ ĐÚNG - parse định dạng VN
+        const rentPriceValue = document.getElementById("rent-price")?.value?.trim();
+        const rentPrice = this.parseVNDAmount(rentPriceValue);
+        if (rentPrice > 0) terms.price = rentPrice;
 
+
+        // ✅ ĐÚNG - dùng rentPrice đã parse đúng
         const depositMonths = parseFloat(document.getElementById("deposit-months")?.value);
-        if (!isNaN(depositMonths) && !isNaN(rentPrice) && depositMonths >= 0) {
+        if (!isNaN(depositMonths) && rentPrice > 0 && depositMonths >= 0) {
             terms.deposit = depositMonths * rentPrice;
         }
+
 
         // Tính endDate
         if (terms.startDate && terms.duration) {

@@ -1,7 +1,11 @@
 package nhatroxanh.com.Nhatroxanh.Controller;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
@@ -378,6 +382,11 @@ public class ContractController {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             objectMapper.registerModule(new JavaTimeModule());
+            // ✅ THÊM: Custom deserializer cho VND
+            SimpleModule vndModule = new SimpleModule();
+            vndModule.addDeserializer(Double.class, new VNDDeserializer());
+            objectMapper.registerModule(vndModule);
+
             ContractDto contractDto = objectMapper.readValue(contractDtoJson, ContractDto.class);
             if (contractDto != null && contractDto.getRoom() != null) {
                 logger.info("CONTROLLER: Dữ liệu tiện ích nhận được trong DTO là: {}",
@@ -708,6 +717,19 @@ public class ContractController {
         userCccdRepository.save(userCccd); // Lưu UserCccd đã cập nhật
 
         return userRepository.save(tenant); // Lưu Users đã cập nhật
+    }
+
+    // VND Deserializer
+    public class VNDDeserializer extends JsonDeserializer<Double> {
+        @Override
+        public Double deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+            String value = p.getValueAsString();
+            if (value == null || value.trim().isEmpty()) return 0.0;
+
+            // "2.000.000" → "2000000" → 2000000.0
+            String cleaned = value.replaceAll("\\.", "");
+            return Double.parseDouble(cleaned);
+        }
     }
 
     @PostMapping(value = "/upload-cccd", consumes = { "multipart/form-data" })
@@ -2842,8 +2864,9 @@ public class ContractController {
         terms.setDeposit(contract.getDeposit() != null ? Double.valueOf(contract.getDeposit()) : 0.0);
 
         // Thêm các trường đã format
-        terms.setFormattedPrice(ContractDto.formatVND(terms.getPrice()));
-        terms.setFormattedDeposit(ContractDto.formatVND(terms.getDeposit()));
+        terms.setFormattedPrice(terms.getFormattedPrice());
+        terms.setFormattedDeposit(terms.getFormattedDeposit());
+
         if (contract.getDuration() != null) {
             terms.setDuration(contract.getDuration().intValue());
         }
