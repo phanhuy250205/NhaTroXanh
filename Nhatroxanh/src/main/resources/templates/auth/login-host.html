@@ -289,22 +289,22 @@
         </div>
         <script>
             // ==== 1. Toggle password ở form đăng nhập ====
-            document.querySelectorAll('.password-toggle-host').forEach(toggleBtn => {
-                toggleBtn.addEventListener('click', function () {
-                    const passwordInput = this.previousElementSibling; // input nằm ngay trước nút
-                    const icon = this.querySelector('i');
+            // document.querySelectorAll('.password-toggle-host').forEach(toggleBtn => {
+            //     toggleBtn.addEventListener('click', function () {
+            //         const passwordInput = this.previousElementSibling; 
+            //         const icon = this.querySelector('i');
 
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    } else {
-                        passwordInput.type = 'password';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                    }
-                });
-            });
+            //         if (passwordInput.type === 'password') {
+            //             passwordInput.type = 'text';
+            //             icon.classList.remove('fa-eye-slash');
+            //             icon.classList.add('fa-eye');
+            //         } else {
+            //             passwordInput.type = 'password';
+            //             icon.classList.remove('fa-eye');
+            //             icon.classList.add('fa-eye-slash');
+            //         }
+            //     });
+            // });
 
 
             // ==== 2. Toggle password ở modal đặt lại mật khẩu ====

@@ -461,20 +461,3 @@ document.getElementById("addHostelFormHost").addEventListener("submit", function
         e.preventDefault();
     }
 });
-
-document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
-    const hostelNameInput = document.getElementById("hostelNameHost");
-    const errorMsg = document.getElementById("error-hostelNameHost");
-
-    const value = hostelNameInput.value.trim();
-
-    // Kiểm tra có bắt đầu bằng "Khu"
-    if (!/^Khu/i.test(value)) {
-        e.preventDefault(); // Ngăn submit
-        errorMsg.textContent = "Tên khu trọ phải bắt đầu bằng từ 'Khu'.";
-        hostelNameInput.classList.add("is-invalid");
-    } else {
-        errorMsg.textContent = "";
-        hostelNameInput.classList.remove("is-invalid");
-    }
-});
