@@ -77,7 +77,7 @@ function loadRoomsByHostel(hostelId, callback) {
     },
   })
 }
-// ✅ HÀM GỬI EMAIL (tách riêng)
+// ✅ HÀM GỬI EMAIL (sửa lại - BỎ AUTO REDIRECT)
 function sendContractEmail() {
   const contractHtml = captureContractPreview()
   const contractData = {
@@ -97,38 +97,27 @@ function sendContractEmail() {
     contentType: "application/json",
     data: JSON.stringify(contractData),
   })
-    .then((response) => {
-      if (response.success) {
-        Swal.fire({
-          icon: "success",
-          title: "Gửi email thành công! 🎉",
-          html: `
-                    <div class="text-start">
-                        <p>✅ Email đã được gửi thành công!</p>
-                        <p>📧 <strong>Gửi tới:</strong> ${$("#tenant-email").val()}</p>
-                        <p>🕒 <strong>Thời gian:</strong> ${new Date().toLocaleString("vi-VN")}</p>
-                    </div>
-                `,
-          confirmButtonText: "Về danh sách hợp đồng",
-          confirmButtonColor: "#28a745",
-        }).then(() => {
-          window.location.href = "/chu-tro/DS-hop-dong-host"
-        })
-      } else {
-        throw new Error(response.message)
-      }
-    })
-    .catch((error) => {
-      Swal.fire({
-        icon: "error",
-        title: "Lỗi gửi email!",
-        text: error.message || "Có lỗi xảy ra khi gửi email",
-        confirmButtonText: "Thử lại",
-        confirmButtonColor: "#e74c3c",
+      .then((response) => {
+        if (response.success) {
+          // ✅ CHỈ RETURN RESPONSE - KHÔNG TỰ ĐỘNG CHUYỂN TRANG
+          return response;
+        } else {
+          throw new Error(response.message)
+        }
       })
-      throw error
-    })
+      .catch((error) => {
+        // ✅ HIỂN THỊ LỖI NHƯNG KHÔNG CHUYỂN TRANG
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi gửi email!",
+          text: error.message || "Có lỗi xảy ra khi gửi email",
+          confirmButtonText: "Thử lại",
+          confirmButtonColor: "#e74c3c",
+        })
+        throw error
+      })
 }
+
 
 $(document).ready(() => {
   // Xử lý tìm người thuê theo số điện thoại
@@ -1396,6 +1385,7 @@ $("#btn-send-email").on("click", function () {
     return
   }
   $thisButton.prop("disabled", true)
+
   if (!validateContractForm()) {
     Swal.fire({
       icon: "warning",
@@ -1418,6 +1408,7 @@ $("#btn-send-email").on("click", function () {
     $thisButton.prop("disabled", false)
     return
   }
+
   Swal.fire({
     title: "Xác nhận gửi email",
     html: `Bạn có chắc chắn muốn gửi hợp đồng tới email: <strong>${tenantEmail}</strong>?`,
@@ -1433,10 +1424,39 @@ $("#btn-send-email").on("click", function () {
     },
     allowOutsideClick: () => !Swal.isLoading(),
   }).then((result) => {
-    // Kích hoạt lại nút bấm sau khi hộp thoại Swal đóng lại
     $thisButton.prop("disabled", false)
+
+    // ✅ CHỈ HIỂN THỊ THÔNG BÁO THÀNH CÔNG - KHÔNG TỰ ĐỘNG CHUYỂN
+    if (result.isConfirmed && result.value) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Gửi email thành công! 📧',
+        html: `
+          <div class="text-center">
+            <p>Hợp đồng đã được gửi thành công đến: <strong>${tenantEmail}</strong></p>
+            <div class="mt-3">
+              <p>Bạn muốn làm gì tiếp theo?</p>
+            </div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<i class="fa fa-list me-1"></i>Về danh sách hợp đồng',
+        cancelButtonText: '<i class="fa fa-edit me-1"></i>Tiếp tục chỉnh sửa',
+        confirmButtonColor: '#28a745',
+        cancelButtonColor: '#6c757d',
+        reverseButtons: true
+      }).then((actionResult) => {
+        // ✅ CHỈ CHUYỂN KHI NGƯỜI DÙNG NHẤN "VỀ DANH SÁCH"
+        if (actionResult.isConfirmed) {
+          window.location.href = '/chu-tro/DS-hop-dong-host';
+        }
+        // Nếu nhấn "Tiếp tục chỉnh sửa" hoặc đóng dialog thì ở lại trang
+      });
+    }
   })
 })
+
+
 function validateContractForm() {
   const requiredFields = [
     "#tenant-name",
