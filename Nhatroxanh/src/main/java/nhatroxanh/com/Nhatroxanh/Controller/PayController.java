@@ -924,7 +924,7 @@ public class PayController {
                 String tenantName = contract.getTenant().getFullname();
                 String roomName = contract.getRoom().getNamerooms();
                 String hostelName = contract.getRoom().getHostel().getName();
-                String amount = CURRENCY_FORMAT.format(payment.getTotalAmount()) + " VNĐ";
+                String amount = CURRENCY_FORMAT.format(payment.getTotalAmount());
                 String paymentDateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
                 try {
