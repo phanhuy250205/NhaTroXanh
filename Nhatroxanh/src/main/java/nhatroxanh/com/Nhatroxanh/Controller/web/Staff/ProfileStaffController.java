@@ -31,6 +31,7 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Repository.UserCccdRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EncryptionService;
 import nhatroxanh.com.Nhatroxanh.Service.FileUploadService;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,6 +55,9 @@ public class ProfileStaffController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+     @Autowired
+    private EncryptionService encryptionService; 
 
     @GetMapping("/profile-nhan-vien")
     public String showProfile(Model model, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -79,11 +83,17 @@ public class ProfileStaffController {
             dto.setBankAccount(user.getBankAccount());
             dto.setAccountHolderName(user.getAccountHolderName());
 
-            if (cccd != null) {
-                dto.setCccdNumber(cccd.getCccdNumber());
+            if (cccd != null && cccd.getCccdNumber() != null) {
+            try {
+                String decryptedCccd = encryptionService.decrypt(cccd.getCccdNumber());
+                dto.setCccdNumber(decryptedCccd);
                 dto.setIssueDate(cccd.getIssueDate());
                 dto.setIssuePlace(cccd.getIssuePlace());
+            } catch (Exception e) {
+                model.addAttribute("error", "Không thể giải mã CCCD: " + e.getMessage());
+                dto.setCccdNumber(null); // Đặt null để tránh hiển thị sai
             }
+        }
 
             model.addAttribute("hostInfo", dto);
             model.addAttribute("user", user);
@@ -188,35 +198,28 @@ public class ProfileStaffController {
 
             if (dto.getCccdNumber() != null && !dto.getCccdNumber().trim().isEmpty()) {
                 String trimmedCccd = dto.getCccdNumber().trim();
-
-                // Kiểm tra CCCD đã tồn tại chưa
-                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(trimmedCccd);
+                String encryptedCccd = encryptionService.encrypt(trimmedCccd);
+                Optional<UserCccd> existingCccdOptional = userCccdRepository.findByCccdNumber(encryptedCccd);
                 if (existingCccdOptional.isPresent()) {
                     UserCccd existingCccd = existingCccdOptional.get();
                     if (cccd == null || !existingCccd.getId().equals(cccd.getId())) {
-                        model.addAttribute("errorMessage", "Số CCCD đã được sử dụng bởi tài khoản khác.");
+                        model.addAttribute("error", "Số CCCD đã được sử dụng bởi tài khoản khác.");
                         model.addAttribute("user", user);
-                        model.addAttribute("totalHostels", hostelService.countByOwner(user));
-                        return "staff/profile";
+                        return "guest/profile-guest";
                     }
                 }
 
-                // Tạo mới hoặc cập nhật CCCD
                 if (cccd == null) {
                     cccd = new UserCccd();
                     cccd.setUser(user);
                 }
-
-                cccd.setCccdNumber(trimmedCccd);
+                cccd.setCccdNumber(encryptedCccd);
                 cccd.setIssueDate(dto.getIssueDate() != null ? new Date(dto.getIssueDate().getTime()) : null);
                 cccd.setIssuePlace(dto.getIssuePlace() != null && !dto.getIssuePlace().trim().isEmpty()
                         ? dto.getIssuePlace().trim()
                         : null);
-
                 userCccdRepository.save(cccd);
-
             } else if (cccd != null) {
-                // Xóa CCCD nếu không nhập số CCCD
                 userCccdRepository.delete(cccd);
             }
 

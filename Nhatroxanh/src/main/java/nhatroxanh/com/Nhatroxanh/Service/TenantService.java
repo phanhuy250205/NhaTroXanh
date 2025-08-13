@@ -73,4 +73,5 @@ public interface TenantService {
 
         TenantDetailDTO getTenantDetailByUserId(Integer userId);
 
+        boolean hasPendingExtensionRequest(Integer contractId);
 }

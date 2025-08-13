@@ -381,15 +381,18 @@
                                             <div class="action-buttons-host">
                                                 <button class="btn-edit-host" title="Chỉnh sửa" data-bs-toggle="tab"
                                                     data-bs-target="#add-room-host" role="tab"
-                                                    aria-controls="add-room-host" th:attr="data-room-id=${room.roomId}">
+                                                    aria-controls="add-room-host" th:attr="data-room-id=${room.roomId}"
+                                                    th:disabled="${room.status != null and room.status.name() == 'active'}">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
+
                                                 <form th:action="@{/chu-tro/xoa-phong/{roomId}(roomId=${room.roomId})}"
                                                     method="post" class="delete-room-form"
                                                     th:attr="data-room-id=${room.roomId}, data-hostel-id=${hostelId}"
                                                     style="display:inline;">
                                                     <input type="hidden" name="hostelId" th:value="${hostelId}">
-                                                    <button type="submit" class="btn btn-danger btn-sm delete-room-btn">
+                                                    <button type="submit" class="btn btn-danger btn-sm delete-room-btn"
+                                                        th:disabled="${room.status != null and room.status.name() == 'active'}">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
                                                 </form>
@@ -820,7 +823,7 @@
             } else if (Number(maxTenants) > 10) {
                 isValid = false;
                 showError("roomCapacityHost", "Số người tối đa không được vượt quá 10.");
-            }   
+            }
 
             const hostelId = document.getElementById("roomAreaSelectHost").value;
             if (!hostelId) {

@@ -225,14 +225,10 @@
                 <li><strong>Phòng:</strong>
                     <span th:text="${contract?.room?.namerooms}">Phòng</span>
                 </li>
-                <li><strong>Loại phòng:</strong>
-                    <span th:text="${contract?.room?.category?.name}">Loại phòng</span>
-                </li>
-                <!-- <li><strong>Địa chỉ:</strong>
+                <li><strong>Địa chỉ:</strong>
                     <span th:if="${contract?.room?.hostel?.address != null}"
-                          th:text="${contract.room.hostel.address.fullAddress}">Địa chỉ</span>
-                    <span th:unless="${contract?.room?.hostel?.address != null}">(Chưa cập nhật)</span>
-                </li> -->
+                        th:text="${contract.room.hostel.address}">Địa chỉ</span>
+                </li>
                 <li><strong>Ngày bắt đầu:</strong>
                     <span th:text="${#dates.format(contract?.startDate, 'dd/MM/yyyy')}">01/01/2024</span>
                 </li>
@@ -266,7 +262,8 @@
             </div>
 
             <div class="form-actions-guest">
-                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract?.contractId})}" class="btn btn-secondary-guest">
+                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract?.contractId})}"
+                    class="btn btn-secondary-guest">
                     <i class="fas fa-arrow-left"></i> Quay lại
                 </a>
                 <button type="submit" class="btn btn-primary-guest">

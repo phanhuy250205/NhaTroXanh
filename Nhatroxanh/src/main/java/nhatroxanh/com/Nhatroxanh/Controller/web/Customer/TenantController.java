@@ -1,6 +1,8 @@
 package nhatroxanh.com.Nhatroxanh.Controller.web.Customer;
 
 import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status;
+import nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.ReturnStatus;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Image;
 import nhatroxanh.com.Nhatroxanh.Model.entity.IncidentReports;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Post;
@@ -13,6 +15,7 @@ import nhatroxanh.com.Nhatroxanh.Repository.ImageRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.IncidentReportsRepository;
 import nhatroxanh.com.Nhatroxanh.Repository.ReviewRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import nhatroxanh.com.Nhatroxanh.Service.ReviewService;
 import nhatroxanh.com.Nhatroxanh.Service.RoomsService;
 import nhatroxanh.com.Nhatroxanh.Service.TenantService;
@@ -68,6 +71,9 @@ public class TenantController {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private EmailService emailService;
+
     @GetMapping("/quan-ly-thue-tra")
     public String showRentalManagementPage(Model model,
             @RequestParam(defaultValue = "0") int page,
@@ -104,6 +110,29 @@ public class TenantController {
 
         List<IncidentReports> incidentReports = tenantService.getIncidentReportsByRoom(contract.getRoom().getRoomId());
         Set<Utility> utilities = tenantService.getUtilitiesByRoomId(contract.getRoom().getRoomId());
+
+        boolean hasPendingExtensionRequest = tenantService.hasPendingExtensionRequest(contractId);
+
+        // Tính số ngày còn lại
+        long daysToEnd = java.time.temporal.ChronoUnit.DAYS.between(
+                java.time.LocalDate.now(),
+                contract.getEndDate().toLocalDate());
+
+        boolean hasReviewed = reviewRepository.existsByContract(contract);
+
+        // Điều kiện cho phép gia hạn
+        boolean canExtend = daysToEnd <= 7 // Chỉ khi còn 3 ngày hoặc ít hơn
+                && contract.getStatus() == Contracts.Status.ACTIVE // Hợp đồng phải đang ACTIVE
+                && (contract.getReturnStatus() == null
+                        || !(contract.getReturnStatus() == ReturnStatus.PENDING
+                                || contract.getReturnStatus() == ReturnStatus.APPROVED)) // Không trong trạng thái trả
+                                                                                         // phòng
+                && !hasPendingExtensionRequest; // Không có yêu cầu gia hạn đang chờ
+
+        model.addAttribute("hasReviewed", hasReviewed);
+        model.addAttribute("hasPendingExtensionRequest", hasPendingExtensionRequest);
+        model.addAttribute("daysToEnd", daysToEnd);
+        model.addAttribute("canExtend", canExtend);
 
         model.addAttribute("contract", contract);
         model.addAttribute("incidentReports", incidentReports);
@@ -273,8 +302,34 @@ public class TenantController {
                 return "redirect:/khach-thue/tra-phong/" + contractId;
             }
 
+            // Process the return request
             tenantService.returnRoom(contractId, Date.valueOf(returnDate), returnReason);
-            redirectAttributes.addFlashAttribute("successMessage", "Gửi yêu cầu trả phòng thành công.");
+
+            // Fetch contract details to get landlord information
+            Contracts contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new IllegalArgumentException("Hợp đồng không tồn tại"));
+
+            Users landlord = contract.getOwner();
+            if (landlord == null || landlord.getEmail() == null || landlord.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ hoặc email không hợp lệ");
+            }
+
+            // Get tenant name
+            String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname()
+                    : contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName()
+                            : "Khách thuê";
+
+            // Send email to landlord
+            emailService.sendReturnRequestEmail(
+                    landlord.getEmail(),
+                    landlord.getFullname(),
+                    tenantName,
+                    String.valueOf(contractId), // Using contractId as contractCode
+                    Date.valueOf(returnDate),
+                    returnReason);
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Gửi yêu cầu trả phòng thành công và chủ trọ đã được thông báo.");
             return "redirect:/khach-thue/quan-ly-thue-tra";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Gửi yêu cầu trả phòng thất bại: " + e.getMessage());
@@ -312,8 +367,34 @@ public class TenantController {
             RedirectAttributes redirectAttributes) {
 
         try {
+            // Create the extension request
             tenantService.createExtensionRequest(contractId, requestedExtendDate, message, userDetails.getUser());
-            redirectAttributes.addFlashAttribute("successMessage", "Yêu cầu gia hạn đã được gửi.");
+
+            // Fetch contract details to get landlord information
+            Contracts contract = contractRepository.findById(contractId)
+                    .orElseThrow(() -> new IllegalArgumentException("Hợp đồng không tồn tại"));
+
+            Users landlord = contract.getOwner();
+            if (landlord == null || landlord.getEmail() == null || landlord.getEmail().isEmpty()) {
+                throw new IllegalArgumentException("Không tìm thấy thông tin chủ trọ hoặc email không hợp lệ");
+            }
+
+            // Get tenant name
+            String tenantName = contract.getTenant() != null ? contract.getTenant().getFullname()
+                    : contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName()
+                            : "Khách thuê";
+
+            // Send email to landlord
+            emailService.sendExtensionRequestEmail(
+                    landlord.getEmail(),
+                    landlord.getFullname(),
+                    tenantName,
+                    String.valueOf(contractId), // Using contractId as contractCode
+                    Date.valueOf(requestedExtendDate),
+                    message);
+
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Yêu cầu gia hạn đã được gửi và chủ trọ đã được thông báo.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Gửi yêu cầu thất bại: " + e.getMessage());
         }
