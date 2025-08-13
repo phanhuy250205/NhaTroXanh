@@ -67,7 +67,7 @@
             border-radius: 2px;
         }
 
-       .form-section-host {
+        .form-section-host {
             background: rgba(255, 255, 255, 0.95);
             border: 1px solid rgba(62, 131, 204, 0.1);
             border-radius: 12px;
@@ -156,7 +156,7 @@
             margin-top: 12px;
         }
 
-         .form-check-host {
+        .form-check-host {
             display: flex;
             align-items: center;
             gap: 8px;
@@ -440,6 +440,12 @@
             color: var(--dark-blue);
         }
 
+        /* Style cho textarea description để hiển thị xuống dòng */
+        .description-display {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
         @media (max-width: 992px) {
             .form-container-host {
                 margin-left: 0;
@@ -484,9 +490,6 @@
 
         <form id="postForm" th:action="@{/chu-tro/sua-bai-dang/{postId}(postId=${post.postId})}" method="post"
             enctype="multipart/form-data">
-            <!-- <input type="hidden" name="provinceName" id="provinceName" th:value="${provinceName}" />
-            <input type="hidden" name="districtName" id="districtName" th:value="${districtName}" />
-            <input type="hidden" name="wardName" id="wardName" th:value="${wardName}" /> -->
 
             <div class="form-section-host">
                 <label class="form-label-host">Loại danh mục <span style="color: red;">*</span></label>
@@ -544,20 +547,11 @@
                 </div>
             </div>
 
+            <!-- Đã xóa phần số nhà -->
             <div class="form-section-host">
-                <div class="row-host">
-                    <div class="col-host">
-                        <label class="form-label-host">Số nhà</label>
-                        <input name="houseNumber" type="text" class="form-control-host" placeholder="Nhập số nhà..."
-                            th:value="${houseNumber}">
-                    </div>
-                    <div class="col-host">
-                        <label class="form-label-host">Địa chỉ chi tiết:</label>
-                        <input name="fullAddress" type="text" class="form-control-host" id="displayFullAddress" readonly
-                            th:value="${fullAddress}" />
-                    </div>
-
-                </div>
+                <label class="form-label-host">Địa chỉ chi tiết:</label>
+                <input name="fullAddress" type="text" class="form-control-host" id="displayFullAddress" readonly
+                    th:value="${fullAddress}" />
             </div>
 
             <div class="form-section-host">
@@ -592,9 +586,8 @@
 
             <div class="form-section-host">
                 <label class="form-label-host">Nội dung mô tả</label>
-                <textarea name="description" class="form-control-host"
-                    placeholder="Mô tả chi tiết về phòng trọ, vị trí, tiện ích..." rows="5"
-                    th:text="${post.description}"></textarea>
+                <textarea name="description" class="form-control-host description-display" id="descriptionTextarea"
+                    placeholder="Mô tả chi tiết về phòng trọ, vị trí, tiện ích..." rows="5"></textarea>
             </div>
 
             <div class="form-section-host">
@@ -609,10 +602,12 @@
                     </div>
                 </div>
             </div>
+
             <div id="hiddenInputsContainer">
                 <input type="hidden" name="imagesToDelete" th:each="id : ${imagesToDelete}" th:value="${id}" />
                 <input type="hidden" name="imagesToKeep" th:each="id : ${imagesToKeep}" th:value="${id}" />
             </div>
+
             <div class="form-section-host">
                 <label class="form-label-host">Hình ảnh</label>
                 <div class="image-upload-container-host">
@@ -655,6 +650,7 @@
         const selectedProvinceId = /*[[${provinceId}]]*/ null;
         const selectedDistrictId = /*[[${districtId}]]*/ null;
         const selectedWardId = /*[[${wardId}]]*/ null;
+        const postDescription = /*[[${post.description}]]*/ '';
     </script>
 
     <script>
@@ -664,7 +660,18 @@
             setupAddressCascade();
             setupFormSubmission();
             initializeToasts();
+            initializeDescription();
         });
+
+        // Khởi tạo mô tả với việc xử lý <br> tags
+        function initializeDescription() {
+            const descriptionTextarea = document.getElementById('descriptionTextarea');
+            if (descriptionTextarea && postDescription) {
+                // Chuyển đổi <br> thành xuống dòng thực trong textarea
+                const formattedDescription = postDescription.replace(/<br\s*\/?>/gi, '\n');
+                descriptionTextarea.value = formattedDescription;
+            }
+        }
 
         async function loadProvinces() {
             try {
@@ -749,6 +756,24 @@
             const provinceSelect = document.getElementById('provinceSelect');
             const districtSelect = document.getElementById('districtSelect');
             const wardSelect = document.getElementById('wardSelect');
+            const streetInput = document.querySelector('input[name="street"]');
+            const fullAddressInput = document.getElementById('displayFullAddress');
+
+            // Function to update full address display
+            function updateFullAddress() {
+                const street = streetInput.value.trim();
+                const wardName = document.getElementById("wardName").value.trim();
+                const districtName = document.getElementById("districtName").value.trim();
+                const provinceName = document.getElementById("provinceName").value.trim();
+
+                let addressParts = [];
+                if (street) addressParts.push(street);
+                if (wardName) addressParts.push(wardName);
+                if (districtName) addressParts.push(districtName);
+                if (provinceName) addressParts.push(provinceName);
+
+                fullAddressInput.value = addressParts.join(", ");
+            }
 
             provinceSelect.addEventListener('change', async function () {
                 const provinceCode = this.value;
@@ -762,6 +787,7 @@
                 }
                 updateHiddenInput('districtName', '');
                 updateHiddenInput('wardName', '');
+                updateFullAddress();
             });
 
             districtSelect.addEventListener('change', async function () {
@@ -774,11 +800,19 @@
                     wardSelect.innerHTML = '<option value="">-- Chọn phường/xã --</option>';
                 }
                 updateHiddenInput('wardName', '');
+                updateFullAddress();
             });
 
             wardSelect.addEventListener('change', function () {
                 updateHiddenInput('wardName', this.options[this.selectedIndex]?.dataset.name || '');
+                updateFullAddress();
             });
+
+            // Update address when street changes
+            streetInput.addEventListener('input', updateFullAddress);
+
+            // Initialize full address on load
+            setTimeout(updateFullAddress, 500);
         }
 
         let selectedFiles = [];
@@ -902,6 +936,7 @@
         function setupFormSubmission() {
             const form = document.getElementById("postForm");
             const submitBtn = document.getElementById("submitBtn");
+            const descriptionTextarea = document.getElementById("descriptionTextarea");
 
             if (form && submitBtn) {
                 form.addEventListener("submit", function (e) {
@@ -921,6 +956,11 @@
                         e.preventDefault();
                         showToast('error', 'Vui lòng điền đầy đủ thông tin khu vực và đường phố!');
                         return;
+                    }
+
+                    // Chuyển đổi xuống dòng thành <br> tags trước khi submit
+                    if (descriptionTextarea && descriptionTextarea.value) {
+                        descriptionTextarea.value = descriptionTextarea.value.replace(/\n/g, '<br>');
                     }
                 });
             }
@@ -988,6 +1028,7 @@
             const input = document.getElementById(inputId);
             if (input) input.value = value;
         }
+
         document.addEventListener("DOMContentLoaded", function () {
             const categorySelect = document.getElementById('categorySelect');
             console.log("Category select options:", categorySelect.options);
@@ -996,35 +1037,6 @@
             // Optional: Ensure the correct option is selected
             if (categorySelect.value) {
                 categorySelect.querySelector(`option[value="${categorySelect.value}"]`).selected = true;
-            }
-        });
-        document.addEventListener("DOMContentLoaded", function () {
-            const displayFullAddress = document.getElementById("displayFullAddress");
-
-            const houseNumber = document.querySelector('input[name="houseNumber"]')?.value?.trim() || "";
-            const street = document.querySelector('input[name="street"]')?.value?.trim() || "";
-            const wardName = document.getElementById("wardName")?.value?.trim() || "";
-            const districtName = document.getElementById("districtName")?.value?.trim() || "";
-            const provinceName = document.getElementById("provinceName")?.value?.trim() || "";
-
-            let addressParts = [];
-            if (houseNumber) addressParts.push(houseNumber);
-            if (street) addressParts.push(street);
-            if (wardName) addressParts.push(wardName);
-            if (districtName) addressParts.push(districtName);
-            if (provinceName) addressParts.push(provinceName);
-
-            displayFullAddress.value = addressParts.join(", ");
-        });
-        document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("postForm");
-            if (form) {
-                form.addEventListener("submit", function () {
-                    const textarea = form.querySelector('textarea[name="description"]');
-                    if (textarea) {
-                        textarea.value = textarea.value.replace(/\n/g, '<br>');
-                    }
-                });
             }
         });
     </script>
