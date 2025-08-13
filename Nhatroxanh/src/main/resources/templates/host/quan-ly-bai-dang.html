@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  
+
 
   <style>
     :root {
@@ -509,14 +509,15 @@
             <a th:href="@{'/chu-tro/chi-tiet-bai-dang/' + ${post.postId}}" style="text-decoration: none; color: black;">
               <h5 class="fw-semibold" th:text="${post.title}">Tiêu đề bài đăng</h5>
             </a>
-            <p><strong>Từ:</strong>
-              <span th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT')}"></span>đ/tháng
+            <p>
+              <strong>Từ:</strong>
+              <span th:text="${#numbers.formatDecimal(post.price, 0, 'COMMA', 0, 'POINT') + ' VNĐ/tháng'}"></span>
             </p>
             <p>
               <strong>Diện tích:</strong>
               <span th:text="${#numbers.formatDecimal(post.area, 1, 'COMMA', 0, 'POINT')} + 'm²'"></span>
             </p>
-            <p> <strong>Diện tích:</strong>
+            <p> <strong>Địa chỉ:</strong>
               <span
                 th:text="${post.address != null ? post.address.street + ', ' + post.address.ward.name + ', ' + post.address.ward.district.name + ', ' + post.address.ward.district.province.name : 'Chưa xác định'}">
               </span>

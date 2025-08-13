@@ -45,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/khach-thue")
@@ -84,6 +85,14 @@ public class TenantController {
         List<Contracts> activeContracts = tenantService.getActiveContracts();
         Map<String, Object> quickStats = tenantService.getQuickStats(pageable);
 
+          Set<Integer> canReturnIds = activeContracts.stream()
+        .filter(c -> c.getStatus() == Contracts.Status.ACTIVE
+                && (c.getReturnStatus() == null
+                    || (c.getReturnStatus() != ReturnStatus.PENDING
+                        && c.getReturnStatus() != ReturnStatus.APPROVED)))
+        .map(Contracts::getContractId)
+        .collect(Collectors.toSet());
+
         model.addAttribute("activeContracts", activeContracts);
         model.addAttribute("contractHistory", contractHistoryPage.getContent());
         model.addAttribute("currentPage", page);
@@ -91,6 +100,7 @@ public class TenantController {
         model.addAttribute("totalPages", contractHistoryPage.getTotalPages());
         model.addAttribute("totalItems", contractHistoryPage.getTotalElements());
         model.addAttribute("quickStats", quickStats);
+            model.addAttribute("canReturnIds", canReturnIds);
 
         return "guest/quan-ly-thue-tra";
     }
@@ -121,13 +131,13 @@ public class TenantController {
         boolean hasReviewed = reviewRepository.existsByContract(contract);
 
         // Điều kiện cho phép gia hạn
-        boolean canExtend = daysToEnd <= 7 // Chỉ khi còn 3 ngày hoặc ít hơn
-                && contract.getStatus() == Contracts.Status.ACTIVE // Hợp đồng phải đang ACTIVE
+        boolean canExtend = daysToEnd <= 7 // Còn 7 ngày hoặc ít hơn
+                && (contract.getStatus() == Contracts.Status.ACTIVE
+                        || contract.getStatus() == Contracts.Status.EXPIRED) // Cho phép ACTIVE hoặc EXPIRED
                 && (contract.getReturnStatus() == null
                         || !(contract.getReturnStatus() == ReturnStatus.PENDING
-                                || contract.getReturnStatus() == ReturnStatus.APPROVED)) // Không trong trạng thái trả
-                                                                                         // phòng
-                && !hasPendingExtensionRequest; // Không có yêu cầu gia hạn đang chờ
+                                || contract.getReturnStatus() == ReturnStatus.APPROVED)) // Không đang trả phòng
+                && !hasPendingExtensionRequest;
 
         model.addAttribute("hasReviewed", hasReviewed);
         model.addAttribute("hasPendingExtensionRequest", hasPendingExtensionRequest);

@@ -121,7 +121,7 @@ public class TenantServiceImpl implements TenantService {
         return hostelRepository.findByOwnerUserId(ownerId);
     }
 
- @Override
+    @Override
     @Transactional(readOnly = true)
     public TenantDetailDTO getTenantDetailByContractId(Integer contractId) {
         Contracts contract = contractsRepository.findById(contractId)
@@ -130,7 +130,6 @@ public class TenantServiceImpl implements TenantService {
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
 
-      
         if (contract.getTenant() != null) {
             // Trường hợp 1: Đây là khách thuê đã đăng ký (Users)
             Users tenant = contract.getTenant();
@@ -158,8 +157,9 @@ public class TenantServiceImpl implements TenantService {
                     .build();
 
         } else if (contract.getUnregisteredTenant() != null) {
-            
-            nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants unregisteredTenant = contract.getUnregisteredTenant();
+
+            nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants unregisteredTenant = contract
+                    .getUnregisteredTenant();
 
             return TenantDetailDTO.builder()
                     .contractId(contract.getContractId())
@@ -220,11 +220,22 @@ public class TenantServiceImpl implements TenantService {
                 contract.getStatus());
     }
 
-    private String maskCccd(String cccd) {
-        if (cccd == null || cccd.length() < 7 || "Chưa có".equals(cccd)) {
-            return cccd;
+    private String maskCccd(String cccdEncrypted) {
+        if (cccdEncrypted == null || "Chưa có".equals(cccdEncrypted)) {
+            return cccdEncrypted;
         }
-        return cccd.substring(0, 3) + "******" + cccd.substring(cccd.length() - 3);
+
+        try {
+            // Giải mã trước khi che
+            String decrypted = encryptionService.decrypt(cccdEncrypted);
+
+            if (decrypted.length() < 7) {
+                return "****"; // quá ngắn, che toàn bộ
+            }
+            return decrypted.substring(0, 3) + "******" + decrypted.substring(decrypted.length() - 3);
+        } catch (Exception e) {
+            return "Không thể giải mã";
+        }
     }
 
     private Users getCurrentUser() {

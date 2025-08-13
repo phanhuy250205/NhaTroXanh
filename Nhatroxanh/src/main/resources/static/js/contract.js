@@ -920,7 +920,7 @@ window.NhaTroContract = {
                 .then(data => {
                     if (data.success) {
                         this.showNotification("Cập nhật thành công!", "success");
-                        setTimeout(() => window.location.href = "/api/contracts/list", 1500);
+                        setTimeout(() => window.location.href = "/chu-tro/DS-hop-dong-host", 1500);
                     } else {
                         this.showNotification(data.message || "Lỗi cập nhật!", "error");
                     }
