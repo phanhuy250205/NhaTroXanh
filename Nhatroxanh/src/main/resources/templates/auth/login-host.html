@@ -259,6 +259,7 @@
                                 <i class="fas fa-lock input-icon-guest"></i>
                                 <input type="password" id="newPasswordInputGuest"
                                     class="form-control-reset-password-guest" placeholder="Nhập mật khẩu mới" required>
+                                <i class="fas fa-eye toggle-password" data-target="newPasswordInputGuest"></i>
                             </div>
                         </div>
 
@@ -268,6 +269,7 @@
                                 <input type="password" id="confirmPasswordInputGuest"
                                     class="form-control-reset-password-guest" placeholder="Xác nhận mật khẩu mới"
                                     required>
+                                <i class="fas fa-eye toggle-password" data-target="confirmPasswordInputGuest"></i>
                             </div>
                         </div>
 
@@ -285,15 +287,53 @@
                 </div>
             </div>
         </div>
+        <script>
+            // ==== 1. Toggle password ở form đăng nhập ====
+            document.querySelectorAll('.password-toggle-host').forEach(toggleBtn => {
+                toggleBtn.addEventListener('click', function () {
+                    const passwordInput = this.previousElementSibling; // input nằm ngay trước nút
+                    const icon = this.querySelector('i');
 
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    } else {
+                        passwordInput.type = 'password';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    }
+                });
+            });
+
+
+            // ==== 2. Toggle password ở modal đặt lại mật khẩu ====
+            document.querySelectorAll('.toggle-password').forEach(toggleIcon => {
+                toggleIcon.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-target');
+                    const passwordInput = document.getElementById(targetId);
+
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        this.classList.remove('fa-eye');
+                        this.classList.add('fa-eye-slash');
+                    } else {
+                        passwordInput.type = 'password';
+                        this.classList.remove('fa-eye-slash');
+                        this.classList.add('fa-eye');
+                    }
+                });
+            });
+
+        </script>
         <script th:src="@{/js/login-host.js}"></script>
         <script th:src="@{/js/quenmk-modal.js}"></script>
         <script th:src="@{/js/modalOTP.js}"></script>
         <script th:src="@{/js/reset-password-modal.js}"></script>
-        
+
         <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 </body>
 
 </html>
