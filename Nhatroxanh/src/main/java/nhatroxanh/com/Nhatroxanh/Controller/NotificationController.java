@@ -272,7 +272,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", successMatcher.group(5).trim());
+                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
@@ -284,7 +284,7 @@ public class NotificationController {
 
                 // Alternative success pattern (more flexible)
                 Pattern altSuccessPattern = Pattern.compile(
-                        "thanh toán thành công.*hoá đơn #(\\d+).*tháng ([\\d/]+).*số tiền:?\\s*([\\d.,]+).*VN[DĐ]?.*phương thức:?\\s*([^\\.\\s][^\\.]*)",
+                        "thanh toán thành công.*hoá đơn #(\\d+).*tháng:?\\s*([\\d/]+).*số tiền:?\\s*([\\d.,]+).*VN[DĐ]?.*phương thức:?\\s*([^\\.\\s][^\\.]*)",
                         Pattern.CASE_INSENSITIVE);
                 Matcher altSuccessMatcher = altSuccessPattern.matcher(message);
                 if (altSuccessMatcher.find()) {
@@ -313,23 +313,13 @@ public class NotificationController {
                         paymentDetails.put("total", formatVietnameseCurrency(parseNumber(amountMatcher.group(1))));
                     }
 
-                    // Extract month
-                    Pattern monthPattern = Pattern.compile("tháng:?\\s*([\\d/]+)", Pattern.CASE_INSENSITIVE);
+                    // Extract month (more flexible pattern)
+                    Pattern monthPattern = Pattern.compile("tháng:?\\s*([\\d/]+(?:\\s*năm\\s*\\d+)?)", Pattern.CASE_INSENSITIVE);
                     Matcher monthMatcher = monthPattern.matcher(message);
                     if (monthMatcher.find()) {
                         paymentDetails.put("month", monthMatcher.group(1).trim());
                     } else {
                         paymentDetails.put("month", "Không xác định");
-                    }
-
-                    // Extract payment method
-                    Pattern methodPattern = Pattern.compile("phương thức:?\\s*([^\\.\\s][^\\.]*)",
-                            Pattern.CASE_INSENSITIVE);
-                    Matcher methodMatcher = methodPattern.matcher(message);
-                    if (methodMatcher.find()) {
-                        paymentDetails.put("paymentMethod", methodMatcher.group(1).trim());
-                    } else {
-                        paymentDetails.put("paymentMethod", "VNPay");
                     }
 
                     log.debug("Parsed fallback success payment details: {}", paymentDetails);

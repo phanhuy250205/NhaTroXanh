@@ -331,7 +331,7 @@ public class PostServiceImpl implements PostService {
         post.setCategory(category);
         post.setUtilities(utilities);
         post.setHostel(hostel);
-        post.setCreatedAt(java.sql.Date.valueOf(LocalDate.now()));
+        // post.setCreatedAt(java.sql.Date.valueOf(LocalDate.now()));
 
         if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
             List<Image> imagesToRemove = imageRepository.findAllById(imagesToDelete);

@@ -161,39 +161,40 @@ public class DemoController {
         }
     }
 
-@GetMapping("/chu-tro/lich-su-thue")
-public String showRentalHistory(
-        Model model,
-        @AuthenticationPrincipal CustomUserDetails loggedInUser,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "keyword", required = false) String keyword,
-        @RequestParam(name = "hostelId", required = false) Integer selectedHostelId,
-        @RequestParam(name = "status", required = false) Contracts.Status statusFilter) {
+    @GetMapping("/chu-tro/lich-su-thue")
+    public String showRentalHistory(
+            Model model,
+            @AuthenticationPrincipal CustomUserDetails loggedInUser,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "hostelId", required = false) Integer selectedHostelId,
+            @RequestParam(name = "status", required = false) Contracts.Status statusFilter) {
 
-    Integer ownerId = loggedInUser.getUserId();
+        Integer ownerId = loggedInUser.getUserId();
 
-    Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
-            ownerId, keyword, selectedHostelId, statusFilter, PageRequest.of(page, 10)); 
+        Page<TenantInfoDTO> tenantPage = tenantService.getTenantsForOwner(
+                ownerId, keyword, selectedHostelId, statusFilter, PageRequest.of(page, 10));
 
-    List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
-    Map<String, Long> stats = tenantService.getContractStatusStats(ownerId);
+        List<Hostel> ownerHostels = tenantService.getHostelsForOwner(ownerId);
+        Map<String, Long> stats = tenantService.getContractStatusStats(ownerId);
 
-    // Dữ liệu cũ đã có
-    model.addAttribute("tenants", tenantPage.getContent());
-    model.addAttribute("totalPages", tenantPage.getTotalPages());
-    model.addAttribute("currentPage", tenantPage.getNumber());
-    model.addAttribute("keyword", keyword);
-    model.addAttribute("selectedHostelId", selectedHostelId);
-    model.addAttribute("hostels", ownerHostels);
-    model.addAttribute("selectedStatus", statusFilter);
-    model.addAttribute("isHistoryPage", true);
-    model.addAttribute("contractStats", stats);
-    
-    // ** THÊM DÒNG NÀY VÀO ĐỂ SỬA LỖI **
-    model.addAttribute("tenantPage", tenantPage); 
+        // Dữ liệu cũ đã có
+        model.addAttribute("tenants", tenantPage.getContent());
+        model.addAttribute("totalPages", tenantPage.getTotalPages());
+        model.addAttribute("currentPage", tenantPage.getNumber());
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("selectedHostelId", selectedHostelId);
+        model.addAttribute("hostels", ownerHostels);
+        model.addAttribute("selectedStatus", statusFilter);
+        model.addAttribute("isHistoryPage", true);
+        model.addAttribute("contractStats", stats);
 
-    return "host/LS-thue-tra-host";
-}
+        // ** THÊM DÒNG NÀY VÀO ĐỂ SỬA LỖI **
+        model.addAttribute("tenantPage", tenantPage);
+
+        return "host/LS-thue-tra-host";
+    }
+
     @GetMapping("/chu-tro/thanh-toan")
     public String Thanhtoan(Model model, Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated() &&
@@ -264,18 +265,25 @@ public String showRentalHistory(
         return "guest/thanh-toan";
     }
 
-    @GetMapping("/chu-tro/chi-tiet-khach-thue/{id}")
-    public String chitietkhachthue(@PathVariable("id") Integer userId, Model model) {
+    @GetMapping("/chu-tro/chi-tiet-khach-thue/{contractId}")
+    public String chitietkhachthue(@PathVariable("contractId") Integer contractId, Model model,
+            RedirectAttributes redirectAttributes) {
         try {
-            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByUserId(userId); // 🔁 dùng userId
+            // Sử dụng phương thức getTenantDetailByContractId để lấy chi tiết
+            TenantDetailDTO tenantDetail = tenantService.getTenantDetailByContractId(contractId);
             model.addAttribute("tenant", tenantDetail);
 
-            // Lấy lịch sử thuê trọ
-            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(userId);
+            // Lấy lịch sử thuê trọ bằng userId từ DTO đã lấy được
+            List<TenantRoomHistoryDTO> historyList = tenantService.getTenantRentalHistory(tenantDetail.getUserId());
             model.addAttribute("rentalHistory", historyList);
 
             return "host/chi-tiet-khach-thue";
         } catch (Exception e) {
+            // Ghi lại log lỗi để dễ dàng debug
+            logger.error("Lỗi khi lấy chi tiết hợp đồng ID {}: {}", contractId, e.getMessage());
+            // Gửi thông báo lỗi về trang danh sách
+            redirectAttributes.addFlashAttribute("errorMessage",
+                    "Không thể tìm thấy thông tin chi tiết cho hợp đồng này.");
             return "redirect:/chu-tro/khach-thue";
         }
     }

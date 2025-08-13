@@ -925,6 +925,7 @@
                 padding: 9px 0;
                 border-bottom: 1px solid rgba(62, 131, 204, 0.1);
             }
+
             .room-detail-item:last-child {
                 border-bottom: none;
             }
@@ -1027,7 +1028,6 @@
 
         .stats-icon-guest {
             font-size: 24px;
-            color: #3e83cc;
             margin-bottom: 10px;
         }
 
@@ -1267,8 +1267,7 @@
                 <div class="room-list-guest">
                     <div th:each="contract : ${activeContracts}" class="room-card-guest">
                         <div class="room-card-header-guest">
-                            <h5 class="room-title-guest"
-                                th:text="${contract.room.namerooms}">
+                            <h5 class="room-title-guest" th:text="${contract.room.namerooms}">
                                 Phòng 101
                             </h5>
                             <span class="status-badge-guest" th:classappend="
@@ -1332,8 +1331,9 @@
                                 <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract.contractId})}">
                                     <button class="action-btn-guest"><i class="fas fa-edit"></i> Xem chi tiết</button>
                                 </a>
-                                <a class="action-btn-guest btn-danger-guest"
-                                    th:href="@{'/khach-thue/tra-phong/' + ${contract.contractId}}">
+                                <a th:if="${canReturnIds.contains(contract.contractId)}"
+                                    th:href="@{'/khach-thue/tra-phong/' + ${contract.contractId}}"
+                                    class="action-btn-guest btn-danger-guest">
                                     <i class="fas fa-sign-out-alt"></i> Trả phòng
                                 </a>
                             </div>
@@ -1919,4 +1919,5 @@
         });
     </script>
 </body>
+
 </html>

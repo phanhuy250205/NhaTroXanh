@@ -29,94 +29,96 @@ public class PaymentCustomerController {
     @Autowired
     private PaymentService paymentService;
 
-   @GetMapping("/khach-thue/lich-su-thanh-toan")
-public String lichsuthanhtoan(
-        @RequestParam(name = "year", required = false) Integer year,
-        @RequestParam(name = "status", required = false) String status,
-        @RequestParam(name = "method", required = false) String method,
-        @RequestParam(name = "page", defaultValue = "0") int page,
-        @RequestParam(name = "size", defaultValue = "5") int size,
-        Model model) {
+    @GetMapping("/khach-thue/lich-su-thanh-toan")
+    public String lichsuthanhtoan(
+            @RequestParam(name = "year", required = false) Integer year,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "method", required = false) String method,
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "5") int size,
+            Model model) {
 
-    // Fetch paginated payment history
-    Page<Payments> paymentPage = paymentService.getPaymentHistory(year, status, method, page, size);
+        // Fetch paginated payment history
+        Page<Payments> paymentPage = paymentService.getPaymentHistory(year, status, method, page, size);
 
-    // Format dates for display
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-    paymentPage.getContent().forEach(payment -> {
-        // No need to set paymentDate or dueDate, just ensure they're formatted in the view
-    });
+        // Format dates for display
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        paymentPage.getContent().forEach(payment -> {
+            // No need to set paymentDate or dueDate, just ensure they're formatted in the
+            // view
+        });
 
-    // Add data to model
-    model.addAttribute("payments", paymentPage.getContent());
-    model.addAttribute("currentPage", page);
-    model.addAttribute("totalPages", paymentPage.getTotalPages());
-    model.addAttribute("totalItems", paymentPage.getTotalElements());
-    model.addAttribute("pageSize", size);
-    model.addAttribute("currentYear", year != null ? year : "");
-    model.addAttribute("currentStatus", status != null ? status : "Tất cả");
-    model.addAttribute("currentMethod", method != null ? method : "Tất cả");
+        // Add data to model
+        model.addAttribute("payments", paymentPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", paymentPage.getTotalPages());
+        model.addAttribute("totalItems", paymentPage.getTotalElements());
+        model.addAttribute("pageSize", size);
+        model.addAttribute("currentYear", year != null ? year : "");
+        model.addAttribute("currentStatus", status != null ? status : "Tất cả");
+        model.addAttribute("currentMethod", method != null ? method : "Tất cả");
 
-    return "guest/lichsu-thanhtoan";
-}
-
-   @GetMapping("/khach-thue/invoice/{paymentId}")
-public ResponseEntity<?> getInvoiceDetails(@PathVariable Integer paymentId) {
-    try {
-        Payments payment = paymentService.findPaymentById(paymentId);
-        List<DetailPayments> items = paymentService.getDetailPaymentsByPaymentId(paymentId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("payment", new PaymentResponse(
-                payment.getId(),
-                payment.getTotalAmount() != null ? payment.getTotalAmount().floatValue() : null,
-                payment.getDueDate(),
-                payment.getPaymentDate(), // Now a Timestamp
-                payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString() : null,
-                payment.getPaymentMethod() != null ? payment.getPaymentMethod().toString() : null));
-        response.put("items", items.stream().map(item -> new DetailPaymentResponse(
-                item.getDetailId(),
-                item.getItemName(),
-                item.getQuantity(),
-                item.getUnitPrice(),
-                item.getAmountUnitPrice())).toList());
-
-        Contracts contract = payment.getContract();
-        if (contract == null) {
-            throw new RuntimeException("Hợp đồng không tồn tại cho hóa đơn ID: " + paymentId);
-        }
-        Rooms room = contract.getRoom();
-        if (room == null || room.getHostel() == null) {
-            throw new RuntimeException("Phòng hoặc nhà trọ không tồn tại cho hóa đơn ID: " + paymentId);
-        }
-        Map<String, Object> roomInfo = new HashMap<>();
-        roomInfo.put("roomCode", room.getNamerooms() != null ? room.getNamerooms() : "Không xác định");
-        roomInfo.put("hostelName",
-                room.getHostel().getName() != null ? room.getHostel().getName() : "Không xác định");
-        roomInfo.put("tenantName",
-                contract.getTenant() != null ? contract.getTenant().getFullname()
-                        : contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName()
-                                : "Không xác định");
-        roomInfo.put("tenantPhone", contract.getTenantPhone() != null ? contract.getTenantPhone() : "-");
-        response.put("roomInfo", roomInfo);
-
-        return ResponseEntity.ok(response);
-    } catch (RuntimeException e) {
-        return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
-    } catch (Exception e) {
-        return ResponseEntity.status(500).body("Lỗi server: Không thể tải chi tiết hóa đơn: " + e.getMessage());
+        return "guest/lichsu-thanhtoan";
     }
-}
+
+    @GetMapping("/khach-thue/invoice/{paymentId}")
+    public ResponseEntity<?> getInvoiceDetails(@PathVariable Integer paymentId) {
+        try {
+            Payments payment = paymentService.findPaymentById(paymentId);
+            List<DetailPayments> items = paymentService.getDetailPaymentsByPaymentId(paymentId);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("payment", new PaymentResponse(
+                    payment.getId(),
+                    payment.getTotalAmount() != null ? payment.getTotalAmount().floatValue() : null,
+                    payment.getDueDate(),
+                    payment.getPaymentDate(), // Now a Timestamp
+                    payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString() : null,
+                    payment.getPaymentMethod() != null ? payment.getPaymentMethod().toString() : null));
+            response.put("items", items.stream().map(item -> new DetailPaymentResponse(
+                    item.getDetailId(),
+                    item.getItemName(),
+                    item.getQuantity(),
+                    item.getUnitPrice(),
+                    item.getAmountUnitPrice())).toList());
+
+            Contracts contract = payment.getContract();
+            if (contract == null) {
+                throw new RuntimeException("Hợp đồng không tồn tại cho hóa đơn ID: " + paymentId);
+            }
+            Rooms room = contract.getRoom();
+            if (room == null || room.getHostel() == null) {
+                throw new RuntimeException("Phòng hoặc nhà trọ không tồn tại cho hóa đơn ID: " + paymentId);
+            }
+            Map<String, Object> roomInfo = new HashMap<>();
+            roomInfo.put("roomCode", room.getNamerooms() != null ? room.getNamerooms() : "Không xác định");
+            roomInfo.put("hostelName",
+                    room.getHostel().getName() != null ? room.getHostel().getName() : "Không xác định");
+            roomInfo.put("tenantName",
+                    contract.getTenant() != null ? contract.getTenant().getFullname()
+                            : contract.getUnregisteredTenant() != null ? contract.getUnregisteredTenant().getFullName()
+                                    : "Không xác định");
+            roomInfo.put("tenantPhone", contract.getTenantPhone() != null ? contract.getTenantPhone() : "-");
+            response.put("roomInfo", roomInfo);
+
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("Lỗi: " + e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Lỗi server: Không thể tải chi tiết hóa đơn: " + e.getMessage());
+        }
+    }
 
     // Record để serialize chỉ các trường cần thiết từ Payments
- private record PaymentResponse(
-        Integer id,
-        Float totalAmount,
-        java.sql.Date dueDate,
-        java.sql.Timestamp paymentDate, // Changed to Timestamp
-        String paymentStatus,
-        String paymentMethod) {
-}
+    private record PaymentResponse(
+            Integer id,
+            Float totalAmount,
+            java.sql.Date dueDate,
+            java.sql.Timestamp paymentDate, // Changed to Timestamp
+            String paymentStatus,
+            String paymentMethod) {
+    }
+
     // Record để serialize chỉ các trường cần thiết từ DetailPayments
     private record DetailPaymentResponse(
             Integer detailId,

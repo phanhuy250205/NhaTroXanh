@@ -19,35 +19,37 @@ import java.util.Optional;
 @Repository
 public interface ContractsRepository extends JpaRepository<Contracts, Integer> {
 
-    @Query("SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO(" +
-       "c.contractId, " +
-       "COALESCE(t.userId, ut.id), " +
-       "COALESCE(t.fullname, ut.fullName), " +
-       "c.tenantPhone, " +
-       "h.name, " +
-       "r.namerooms, " +
-       "c.startDate, " +
-       "c.endDate, " +
-       "c.status) " +
-       "FROM Contracts c " +
-       "JOIN c.room r " +
-       "JOIN r.hostel h " +
-       "LEFT JOIN c.tenant t " +
-       "LEFT JOIN c.unregisteredTenant ut " +
-       "WHERE h.owner.userId = :ownerId " +
-       "AND (:keyword IS NULL OR " +
-       "     LOWER(COALESCE(t.fullname, ut.fullName)) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "     LOWER(c.tenantPhone) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "     LOWER(r.namerooms) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
-       "     LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-       "AND (:hostelId IS NULL OR h.hostelId = :hostelId) " +
-       "AND (:status IS NULL OR c.status = :status)")
-Page<TenantInfoDTO> findTenantsByOwnerWithFilters(
-        @Param("ownerId") Integer ownerId,
-        @Param("keyword") String keyword,
-        @Param("hostelId") Integer hostelId,
-        @Param("status") Contracts.Status status,
-        Pageable pageable);
+        @Query("SELECT new nhatroxanh.com.Nhatroxanh.Model.Dto.TenantInfoDTO(" +
+                        "c.contractId, " +
+                        "COALESCE(t.userId, ut.id), " +
+                        "COALESCE(t.fullname, ut.fullName), " +
+                        "c.tenantPhone, " +
+                        "h.name, " +
+                        "r.namerooms, " +
+                        "c.startDate, " +
+                        "c.endDate, " +
+                        "c.status) " +
+                        "FROM Contracts c " +
+                        "JOIN c.room r " +
+                        "JOIN r.hostel h " +
+                        "LEFT JOIN c.tenant t " +
+                        "LEFT JOIN c.unregisteredTenant ut " +
+                        "WHERE h.owner.userId = :ownerId " +
+                        "AND (:status IS NOT NULL OR c.status <> nhatroxanh.com.Nhatroxanh.Model.entity.Contracts.Status.DRAFT) "
+                        + // loại bỏ DRAFT nếu không filter
+                        "AND (:keyword IS NULL OR " +
+                        "     LOWER(COALESCE(t.fullname, ut.fullName)) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "     LOWER(c.tenantPhone) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "     LOWER(r.namerooms) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+                        "     LOWER(h.name) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+                        "AND (:hostelId IS NULL OR h.hostelId = :hostelId) " +
+                        "AND (:status IS NULL OR c.status = :status)")
+        Page<TenantInfoDTO> findTenantsByOwnerWithFilters(
+                        @Param("ownerId") Integer ownerId,
+                        @Param("keyword") String keyword,
+                        @Param("hostelId") Integer hostelId,
+                        @Param("status") Contracts.Status status,
+                        Pageable pageable);
 
         // ✅ THÊM JOIN FETCH
         @Query("SELECT c FROM Contracts c " +
@@ -210,10 +212,15 @@ Page<TenantInfoDTO> findTenantsByOwnerWithFilters(
 
         List<Contracts> findByStatusAndEndDateBetween(Contracts.Status status, Date startDate, Date endDate);
 
+        List<Contracts> findByStatusAndEndDateBefore(Contracts.Status status, Date date);
+
+        @Query("SELECT c FROM Contracts c WHERE c.status IN :statuses AND c.endDate < :date")
+        List<Contracts> findByStatusesAndEndDateBefore(@Param("statuses") List<Contracts.Status> statuses,
+                        @Param("date") Date date);
+
         // ✅ Tìm hợp đồng trước ngày
         List<Contracts> findByStatusAndEndDateLessThan(
-                Contracts.Status status,
-                Date date
-        );
+                        Contracts.Status status,
+                        Date date);
 
 }

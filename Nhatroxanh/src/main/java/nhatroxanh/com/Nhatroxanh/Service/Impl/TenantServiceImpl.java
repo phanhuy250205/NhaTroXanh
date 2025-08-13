@@ -89,10 +89,10 @@ public class TenantServiceImpl implements TenantService {
     @Autowired
     private EncryptionService encryptionService;
 
-     @Override
+    @Override
     @Transactional(readOnly = true)
-    public Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId, 
-                                                  Contracts.Status status, Pageable pageable) {
+    public Page<TenantInfoDTO> getTenantsForOwner(Integer ownerId, String keyword, Integer hostelId,
+            Contracts.Status status, Pageable pageable) {
         // Bây giờ chỉ cần gọi thẳng phương thức từ repository
         return contractsRepository.findTenantsByOwnerWithFilters(ownerId, keyword, hostelId, status, pageable);
     }
@@ -130,7 +130,6 @@ public class TenantServiceImpl implements TenantService {
         Rooms room = contract.getRoom();
         Hostel hostel = room.getHostel();
 
-        // **LOGIC ĐÃ SỬA LỖI: Xử lý cả khách đã đăng ký và người bảo hộ**
         if (contract.getTenant() != null) {
             // Trường hợp 1: Đây là khách thuê đã đăng ký (Users)
             Users tenant = contract.getTenant();
@@ -146,7 +145,7 @@ public class TenantServiceImpl implements TenantService {
                     .contractStatus(contract.getStatus().name())
                     .roomName(room.getNamerooms())
                     .hostelName(hostel.getName())
-                    .userId(tenant.getUserId()) // Lấy userId từ Users
+                    .userId(tenant.getUserId())
                     .userFullName(tenant.getFullname())
                     .userGender(tenant.getGender())
                     .userPhone(tenant.getPhone())
@@ -158,8 +157,9 @@ public class TenantServiceImpl implements TenantService {
                     .build();
 
         } else if (contract.getUnregisteredTenant() != null) {
-            // Trường hợp 2: Đây là người bảo hộ (UnregisteredTenants)
-            UnregisteredTenants unregisteredTenant = contract.getUnregisteredTenant();
+
+            nhatroxanh.com.Nhatroxanh.Model.entity.UnregisteredTenants unregisteredTenant = contract
+                    .getUnregisteredTenant();
 
             return TenantDetailDTO.builder()
                     .contractId(contract.getContractId())
@@ -169,21 +169,22 @@ public class TenantServiceImpl implements TenantService {
                     .contractStatus(contract.getStatus().name())
                     .roomName(room.getNamerooms())
                     .hostelName(hostel.getName())
-                    .userId(unregisteredTenant.getId()) // Lấy id từ UnregisteredTenants
+                    .userId(unregisteredTenant.getId())
                     .userFullName(unregisteredTenant.getFullName())
-                    .userGender(null) // Người bảo hộ không có thông tin giới tính
+                    .userGender(null)
                     .userPhone(unregisteredTenant.getPhone())
                     .userBirthday(unregisteredTenant.getBirthday())
                     .userCccdNumber(unregisteredTenant.getCccdNumber())
                     .userCccdMasked(maskCccd(unregisteredTenant.getCccdNumber()))
                     .userIssuePlace(unregisteredTenant.getIssuePlace())
-                    .enabled(true) // Người bảo hộ luôn được coi là 'active' trong ngữ cảnh hợp đồng
+                    .enabled(true)
                     .build();
         } else {
-            // Trường hợp ngoại lệ: Hợp đồng không có thông tin người thuê
-            throw new RuntimeException("Hợp đồng ID: " + contractId + " không có thông tin khách thuê hoặc người bảo hộ.");
+            // Trường hợp ngoại lệ
+            throw new RuntimeException("Hợp đồng ID: " + contractId + " không có thông tin khách thuê hợp lệ.");
         }
     }
+
     @Override
     @Transactional
     public void updateContractStatus(Integer contractId, Boolean newStatus) {
@@ -219,11 +220,22 @@ public class TenantServiceImpl implements TenantService {
                 contract.getStatus());
     }
 
-    private String maskCccd(String cccd) {
-        if (cccd == null || cccd.length() < 7 || "Chưa có".equals(cccd)) {
-            return cccd;
+    private String maskCccd(String cccdEncrypted) {
+        if (cccdEncrypted == null || "Chưa có".equals(cccdEncrypted)) {
+            return cccdEncrypted;
         }
-        return cccd.substring(0, 3) + "******" + cccd.substring(cccd.length() - 3);
+
+        try {
+            // Giải mã trước khi che
+            String decrypted = encryptionService.decrypt(cccdEncrypted);
+
+            if (decrypted.length() < 7) {
+                return "****"; // quá ngắn, che toàn bộ
+            }
+            return decrypted.substring(0, 3) + "******" + decrypted.substring(decrypted.length() - 3);
+        } catch (Exception e) {
+            return "Không thể giải mã";
+        }
     }
 
     private Users getCurrentUser() {
@@ -524,7 +536,7 @@ public class TenantServiceImpl implements TenantService {
         extensionRequestRepository.save(request);
     }
 
-  @Transactional(readOnly = true)
+    @Transactional(readOnly = true)
     public Page<TenantSummaryDTO> getTenantSummaryForOwner(Integer ownerId, String keyword, Pageable pageable) {
         Page<TenantSummaryDTO> summaryPage = contractRepository.getTenantSummaryByOwnerWithFilters(
                 ownerId, keyword, pageable);
@@ -532,7 +544,7 @@ public class TenantServiceImpl implements TenantService {
         // Cập nhật lại tenantType dựa trên sự tồn tại của userId trong bảng Users
         summaryPage.getContent().forEach(summary -> {
             boolean isRegistered = userRepository.existsById(summary.getUserId());
-            summary.setTenantType(isRegistered ? "Thành viên" : "Người bảo hộ");
+            summary.setTenantType(isRegistered ? "Thành viên" : "Khách thuê khác");
         });
 
         return summaryPage;
@@ -586,6 +598,11 @@ public class TenantServiceImpl implements TenantService {
                 .userIssuePlace(issuePlace)
                 .enabled(tenant.isEnabled())
                 .build();
+    }
+
+    public boolean hasPendingExtensionRequest(Integer contractId) {
+        return extensionRequestRepository.existsByContract_ContractIdAndStatus(contractId,
+                ExtensionRequests.RequestStatus.PENDING);
     }
 
 }

@@ -66,4 +66,10 @@ public interface EmailService {
                         String hostelName, String amount, String paymentDate, Integer paymentId);
 
         void sendPrivacyPolicyEmail(String to);
+
+        void sendExtensionRequestEmail(String to, String landlordName, String tenantName, String contractCode,
+                        Date requestedExtendDate, String message);
+
+        void sendReturnRequestEmail(String to, String landlordName, String tenantName, String contractCode,
+                        Date requestedReturnDate, String returnReason);
 }

@@ -23,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.text.DecimalFormat;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
@@ -298,6 +300,15 @@ public class ContractServiceImpl implements ContractService {
         }
     }
 
+    // ✅ THÊM: Method format currency
+    private String formatCurrency(Float amount) {
+        if (amount == null) {
+            return "0 VND";
+        }
+        DecimalFormat formatter = new DecimalFormat("#,###");
+        return formatter.format(Math.round(amount)) + " VND";
+    }
+
 
     @Override
     public Page<ContractListDto> getContractsListByOwnerId(Integer ownerId, Pageable pageable) {
@@ -397,7 +408,7 @@ public class ContractServiceImpl implements ContractService {
         if (contractDto.getTenantType() != null && "UNREGISTERED".equals(contractDto.getTenantType()) &&
                 contractDto.getUnregisteredTenant() != null &&
                 StringUtils.hasText(contractDto.getUnregisteredTenant().getFullName())) {
-            logger.info("SERVICE: Phát hiện thông tin Người bảo hộ/Thuê mới. Đang xử lý...");
+           
             guardian = handleUnregisteredTenant(contractDto.getUnregisteredTenant(), owner, cccdFrontFile,
                     cccdBackFile);
             finalTenantPhone = guardian.getPhone();
@@ -1381,7 +1392,7 @@ public class ContractServiceImpl implements ContractService {
             MultipartFile cccdBackFile) {
         logger.info("=== SERVICE: Handling Unregistered Tenant ===");
         if (tenantDto.getPhone() == null || tenantDto.getPhone().trim().isEmpty()) {
-            throw new IllegalArgumentException("Số điện thoại người bảo hộ không được để trống!");
+            throw new IllegalArgumentException("Số điện thoại không được để trống!");
         }
 
         UnregisteredTenants unregisteredTenant = new UnregisteredTenants();

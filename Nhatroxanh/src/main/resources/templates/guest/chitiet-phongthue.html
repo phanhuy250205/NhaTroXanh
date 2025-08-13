@@ -297,6 +297,11 @@
             align-items: center;
             gap: 6px;
         }
+
+        .disabled-link {
+            pointer-events: none;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -346,8 +351,7 @@
             <div class="room-info-section-guest">
                 <div class="room-title-section-guest">
                     <div class="room-title-info-guest">
-                        <h3 class="room-name-guest"
-                            th:text="${contract.room.namerooms}">
+                        <h3 class="room-name-guest" th:text="${contract.room.namerooms}">
                             Phòng A101 - Deluxe</h3>
                         <p class="room-type-guest" th:text="${contract.room.description}">
                             Phòng cao cấp với đầy đủ tiện nghi</p>
@@ -442,20 +446,57 @@
                     </button>
                 </a>
                 <a class="action-btn-guest btn-extend-guest"
-                    th:href="@{/khach-thue/gia-han/{id}(id=${contract.contractId})}">
+                    th:href="${canExtend ? '/khach-thue/gia-han/' + contract.contractId : '#'}"
+                    th:classappend="${canExtend ? '' : ' disabled-link'}" th:attr="title=${!canExtend 
+        ? (daysToEnd > 3 
+            ? 'Chỉ có thể gia hạn khi hợp đồng còn 3 ngày hoặc ít hơn'
+            : (contract.returnStatus != null 
+                && (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED')
+                ? 'Đang chờ hoặc đã duyệt trả phòng'
+                : (hasPendingExtensionRequest 
+                    ? 'Đã có yêu cầu gia hạn đang chờ duyệt'
+                    : (contract.status.name() != 'ACTIVE'
+                        ? 'Hợp đồng không còn hiệu lực'
+                        : null))))
+        : null}">
                     <i class="fas fa-calendar-plus"></i>
                     Gia hạn
                 </a>
-                <a class="action-btn-guest btn-return-guest"
-                    th:href="@{'/khach-thue/tra-phong/' + ${contract.contractId}}">
+
+                <a class="action-btn-guest btn-return-guest" th:href="${(contract.returnStatus != null 
+              and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED'))
+              or hasPendingExtensionRequest
+              ? '#'
+              : '/khach-thue/tra-phong/' + contract.contractId}" th:classappend="${(contract.returnStatus != null 
+                    and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED'))
+                    or hasPendingExtensionRequest
+                    ? ' disabled-link'
+                    : ''}" th:attr="title=${(contract.returnStatus != null 
+                    and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED'))
+                    ? 'Đang chờ hoặc đã duyệt trả phòng'
+                    : (hasPendingExtensionRequest 
+                       ? 'Không thể trả phòng khi có yêu cầu gia hạn đang chờ duyệt'
+                       : null)}">
                     <i class="fas fa-sign-out-alt"></i> Trả phòng
                 </a>
+
                 <button class="action-btn-guest btn-report-guest"
-                    th:onclick="'openReportModal(' + ${contract.room.roomId} + ')'">
+                    th:onclick="'openReportModal(' + ${contract.room.roomId} + ')'" th:href="${contract.returnStatus != null 
+            and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED') 
+            ? '#' 
+            : '/khach-thue/tra-phong/' + contract.contractId}" th:classappend="${contract.returnStatus != null 
+                   and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED') 
+                   ? ' disabled-link' 
+                   : ''}" th:attr="title=${contract.returnStatus != null 
+                  and (contract.returnStatus.name() == 'PENDING' or contract.returnStatus.name() == 'APPROVED') 
+                  ? 'Đang chờ hoặc đã duyệt trả phòng' 
+                  : ''}">
                     <i class="fas fa-exclamation-triangle"></i>
                     Báo cáo sự cố
                 </button>
-                <a th:href="@{/khach-thue/danh-gia(contractId=${contract.contractId})}"
+
+                <!-- Nút đánh giá - chỉ hiển thị khi chưa đánh giá -->
+                <a th:if="${!hasReviewed}" th:href="@{/khach-thue/danh-gia(contractId=${contract.contractId})}"
                     class="action-btn-guest btn-rate-guest">
                     <i class="fas fa-star"></i>
                     Đánh giá
@@ -757,7 +798,8 @@
                                 <div class="contract-property-row-guest">
                                     <div class="contract-property-item-guest">
                                         <span class="contract-property-label-guest">Địa chỉ</span>
-                                        <span class="contract-property-value-guest" th:text="${contract.room.hostel.address }">
+                                        <span class="contract-property-value-guest"
+                                            th:text="${contract.room.hostel.address }">
                                         </span>
                                     </div>
                                     <div class="contract-property-item-guest">
