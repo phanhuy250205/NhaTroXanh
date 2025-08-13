@@ -228,57 +228,13 @@ async function handleImageUpload(event, type) {
         loadingOverlay.classList.add("active");
     }
 
-    // Initialize Tesseract worker
-    const { createWorker } = Tesseract;
-    const worker = await createWorker();
     try {
-        // Perform OCR on the image
-        await worker.loadLanguage('eng+vie');
-        await worker.initialize('eng+vie');
-        const { data: { text } } = await worker.recognize(file);
-        // Terminate worker to free resources
-        await worker.terminate();
-
-        // Check if the image is a valid CCCD for the specified type
-        if (!isCCCDImage(text, type)) {
-            showNotification(`Ảnh tải lên không phải ${type === "front" ? "mặt trước" : "mặt sau"} CCCD hợp lệ`, "error");
-            event.target.value = "";
-            removeImage(type);
-            updateImageValidationStatus(type, false);
-            return;
-        }
-
-        // Extract CCCD number from text (for front only)
-        if (type === "front") {
-            const extractedIdNumber = extractCCCDNumber(text);
-            const inputIdNumber = document.getElementById("idNumber").value.trim();
-            if (inputIdNumber && extractedIdNumber !== inputIdNumber) {
-                showNotification("Số CCCD trong ảnh không khớp với số đã nhập", "error");
-                event.target.value = "";
-                removeImage(type);
-                updateImageValidationStatus(type, false);
-                return;
-            }
-        }
-
-        // Check for chip on back image
-        // if (type === "back") {
-        //     const chipDetected = await detectChipInImage(file);
-        //     if (!chipDetected) {
-        //         showNotification("Không tìm thấy chip trên ảnh CCCD mặt sau", "error");
-        //         event.target.value = "";
-        //         removeImage(type);
-        //         updateImageValidationStatus(type, false);
-        //         return;
-        //     }
-        // }
-
-        // If valid, show preview and update validation status
+        // Show preview and update validation status
         const reader = new FileReader();
         reader.onload = (e) => {
             showImagePreview(e.target.result, type);
             updateImageValidationStatus(type, true);
-            showNotification(`Ảnh ${type === "front" ? "mặt trước" : "mặt sau"} CCCD hợp lệ`, "success");
+            showNotification(`Ảnh ${type === "front" ? "mặt trước" : "mặt sau"} CCCD đã được tải lên`, "success");
         };
         reader.readAsDataURL(file);
 
@@ -286,8 +242,8 @@ async function handleImageUpload(event, type) {
         if (type === "front") isFrontIdValid = true;
         if (type === "back") isBackIdValid = true;
     } catch (error) {
-        console.error("OCR error:", error);
-        showNotification("Lỗi khi xử lý ảnh CCCD", "error");
+        console.error("Image upload error:", error);
+        showNotification("Lỗi khi xử lý ảnh", "error");
         event.target.value = "";
         removeImage(type);
         updateImageValidationStatus(type, false);
@@ -311,30 +267,6 @@ function validateImageFile(file) {
         return false;
     }
     return true;
-}
-// Check if image is a valid CCCD
-function isCCCDImage(text, type) {
-    // Normalize text to remove accents and make lowercase
-    const normalizedText = text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, ' ').trim();
-
-    // General CCCD keywords for front (ASCII version)
-    const frontKeywords = /can cuoc cong dan|cmnd|so id|\b\d{9,12}\b/i;
-
-    // Keywords specific to the back of CCCD (ASCII version for robustness)
-    const backKeywords = /dac diem nhan dang|ngon tro|co gia tri den|ngay het han|personal identification|left index finger|right index finger/i;
-
-    if (type === "back") {
-        return backKeywords.test(normalizedText);
-    } else {
-        // Check for general CCCD keywords for front
-        return frontKeywords.test(normalizedText);
-    }
-}
-// Extract CCCD number from text
-function extractCCCDNumber(text) {
-    // Extract 9 or 12-digit number
-    const match = text.match(/\b\d{9,12}\b/);
-    return match ? match[0] : null;
 }
 // Update image validation status
 function updateImageValidationStatus(type, isValid) {
@@ -579,9 +511,10 @@ function validateField(field) {
                 }
                 break;
             case "password":
-                if (value.length < 6) {
+                const passwordRegex = /^(?=.*[A-Z])(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/;
+                if (!passwordRegex.test(value)) {
                     isValid = false;
-                    errorMessage = "Mật khẩu phải có ít nhất 6 ký tự";
+                    errorMessage = "Mật khẩu phải có ít nhất 6 ký tự, bao gồm chữ hoa và ký tự đặc biệt";
                 }
                 break;
             case "confirmPassword":
@@ -827,58 +760,6 @@ function showNotification(message, type = "info") {
             }
         }, 300);
     }, 3000);
-}
-// Chip Detection Function (using OpenCV.js)
-async function detectChipInImage(file) {
-    try {
-        const img = await createImageBitmap(file);
-        const canvas = document.createElement("canvas");
-        canvas.width = img.width;
-        canvas.height = img.height;
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0);
-        const src = cv.imread(canvas);
-
-        // Convert to grayscale
-        const gray = new cv.Mat();
-        cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-
-        // Apply edge detection
-        const edges = new cv.Mat();
-        cv.Canny(gray, edges, 100, 200);
-
-        // Find contours
-        const contours = new cv.MatVector();
-        const hierarchy = new cv.Mat();
-        cv.findContours(edges, contours, hierarchy, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE);
-
-        // Check for rectangular shapes (chip is typically rectangular)
-        let chipDetected = false;
-        for (let i = 0; i < contours.size(); i++) {
-            const contour = contours.get(i);
-            const perimeter = cv.arcLength(contour, true);
-            const approx = new cv.Mat();
-            cv.approxPolyDP(contour, approx, 0.02 * perimeter, true);
-            if (approx.rows === 4) { // Rectangle detected
-                chipDetected = true;
-                break;
-            }
-            approx.delete();
-            contour.delete();
-        }
-
-        // Clean up
-        src.delete();
-        gray.delete();
-        edges.delete();
-        contours.delete();
-        hierarchy.delete();
-
-        return chipDetected;
-    } catch (error) {
-        console.error("Chip detection error:", error);
-        return false;
-    }
 }
 // Global functions for HTML onclick handlers
 window.nextStep = nextStep;
