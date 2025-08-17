@@ -79,11 +79,19 @@
                     </a>
                     <ul class="dropdown-menu" aria-labelledby="phongTroDropdown">
                         <li th:each="category : ${categoryList}">
-                            <a class="dropdown-item" th:href="@{'/danh-muc/' + ${category.categoryId}}"
-                                th:text="${category.name}">Tên danh mục</a>
+                            <a class="dropdown-item" th:href="@{'/danh-muc/' + ${category.categoryId}}">
+                                <span th:switch="${category.name}">
+                                    <i th:case="'Nhà Trọ, Phòng Trọ'" class="fa-solid fa-hotel"></i>
+                                    <i th:case="'Căn Hộ Mini'" class="fa-solid fa-building"></i>
+                                    <i th:case="'Nhà Nguyên Căn'" class="fa-solid fa-house"></i>
+                                    <i th:case="*" class="fa-solid fa-tag"></i>
+                                </span>
+                                <span th:text="${category.name}">Tên danh mục</span>
+                            </a>
                         </li>
                     </ul>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" th:href="@{/blog}" data-page="blog"><i class="fas fa-blog nav-icon"></i> <span
                             class="nav-text">Blog</span></a>
@@ -229,5 +237,12 @@
         </div>
     </div>
 </nav>
-
+<style>
+    .dropdown-menu .dropdown-item i {
+        margin-right: 8px;
+        color: #007bff;
+        width: 18px;
+        text-align: center;
+    }
+</style>
 <script th:src="@{/js/notification.js}"></script>

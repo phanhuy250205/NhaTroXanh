@@ -6,54 +6,73 @@
 </head>
 <style>
     :root {
-        --primary-color: #5e35b1;
-        --primary-hover: #4527a0;
-        --secondary-color: #78909c;
-        --secondary-hover: #607d8b;
-        --accent-color: #ff7043;
-        --text-color: #263238;
-        --light-bg: #f5f7fa;
+        --primary-color: #6c5ce7;
+        --primary-hover: #5649c0;
+        --secondary-color: #a8a8a8;
+        --secondary-hover: #8e8e8e;
+        --accent-color: #fd79a8;
+        --text-color: #2d3436;
+        --light-bg: #f7f7f7;
         --card-bg: #ffffff;
-        --border-color: #e0e0e0;
-        --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --border-color: #dfe6e9;
+        --box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        --success-color: #00b894;
+        --error-color: #d63031;
     }
 
     body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Poppins', sans-serif;
         background-color: var(--light-bg);
         padding: 0;
         margin: 0;
         color: var(--text-color);
-        line-height: 1.7;
-        background-image: radial-gradient(circle at 10% 20%, rgba(233, 236, 239, 0.3) 0%, transparent 90%);
+        line-height: 1.6;
+        background-image: linear-gradient(135deg, rgba(108, 92, 231, 0.03) 0%, rgba(253, 121, 168, 0.03) 100%);
     }
 
     .container {
         max-width: 800px;
-        margin: 60px auto;
+        margin: 80px auto;
         background: var(--card-bg);
         padding: 50px;
-        border-radius: 16px;
+        border-radius: 20px;
         box-shadow: var(--box-shadow);
         transition: var(--transition);
         position: relative;
         overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(10px);
     }
 
     .container:before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(to bottom, var(--primary-color), var(--accent-color));
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg,
+                rgba(108, 92, 231, 0.05) 0%,
+                rgba(253, 121, 168, 0.05) 50%,
+                rgba(108, 92, 231, 0.05) 100%);
+        transform: rotate(45deg);
+        z-index: -1;
+        animation: gradientBG 15s ease infinite;
     }
 
-    .container:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    @keyframes gradientBG {
+        0% {
+            transform: rotate(45deg) translateX(-25%);
+        }
+
+        50% {
+            transform: rotate(45deg) translateX(25%);
+        }
+
+        100% {
+            transform: rotate(45deg) translateX(-25%);
+        }
     }
 
     h2 {
@@ -61,10 +80,9 @@
         color: var(--primary-color);
         margin-bottom: 40px;
         font-weight: 700;
-        font-size: 32px;
+        font-size: 2.5rem;
         position: relative;
         padding-bottom: 15px;
-        letter-spacing: -0.5px;
     }
 
     h2:after {
@@ -73,7 +91,7 @@
         bottom: 0;
         left: 50%;
         transform: translateX(-50%);
-        width: 100px;
+        width: 80px;
         height: 4px;
         background: linear-gradient(to right, var(--primary-color), var(--accent-color));
         border-radius: 2px;
@@ -82,28 +100,30 @@
     .form-group {
         margin-bottom: 30px;
         position: relative;
+        transition: var(--transition);
     }
 
     label {
         font-weight: 600;
         display: block;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         color: var(--text-color);
-        font-size: 16px;
-        letter-spacing: 0.3px;
+        font-size: 1rem;
+        letter-spacing: 0.5px;
     }
 
     select,
     textarea,
     input[type="text"] {
         width: 100%;
-        padding: 15px 20px;
-        font-size: 16px;
-        border: 1px solid var(--border-color);
-        border-radius: 8px;
+        padding: 16px 20px;
+        font-size: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
         transition: var(--transition);
-        background-color: #fff;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        background-color: rgba(255, 255, 255, 0.8);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        font-family: 'Poppins', sans-serif;
     }
 
     select:focus,
@@ -111,42 +131,57 @@
     input[type="text"]:focus {
         outline: none;
         border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(94, 53, 177, 0.2), inset 0 1px 3px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 0 0 4px rgba(108, 92, 231, 0.2);
+        background-color: #fff;
     }
 
     textarea {
         resize: vertical;
-        min-height: 140px;
+        min-height: 150px;
         line-height: 1.6;
     }
 
+    /* Error styling */
+    .is-invalid {
+        border-color: var(--error-color) !important;
+        box-shadow: 0 0 0 4px rgba(214, 48, 49, 0.2) !important;
+    }
+
+    .invalid-feedback {
+        display: none;
+        color: var(--error-color);
+        font-size: 0.875rem;
+        margin-top: 8px;
+        font-weight: 500;
+        animation: fadeIn 0.3s ease;
+    }
+
+    .invalid-feedback.show {
+        display: block;
+    }
+
     .error {
-        color: #e53935;
-        font-size: 14px;
+        color: var(--error-color);
+        font-size: 0.875rem;
         margin-top: 8px;
         display: block;
         font-weight: 500;
-        animation: shake 0.5s;
+        animation: fadeIn 0.3s ease;
     }
 
-    @keyframes shake {
-
-        0%,
-        100% {
-            transform: translateX(0);
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
         }
 
-        20%,
-        60% {
-            transform: translateX(-5px);
-        }
-
-        40%,
-        80% {
-            transform: translateX(5px);
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 
+    /* Button styles */
     .button-group {
         text-align: center;
         margin-top: 50px;
@@ -157,144 +192,134 @@
 
     .submit-btn,
     .back-btn {
-        padding: 15px 35px;
-        font-size: 16px;
+        padding: 16px 40px;
+        font-size: 1rem;
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         cursor: pointer;
         color: white;
         font-weight: 600;
         transition: var(--transition);
         text-decoration: none;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         letter-spacing: 0.5px;
-        text-transform: uppercase;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
     }
 
     .submit-btn {
-        background: linear-gradient(135deg, var(--primary-color), #7e57c2);
+        background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        z-index: 1;
+    }
+
+    .submit-btn:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--primary-hover), #e84393);
+        z-index: -1;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .submit-btn:hover:before {
+        opacity: 1;
     }
 
     .submit-btn:hover {
-        background: linear-gradient(135deg, var(--primary-hover), #6a45b5);
         transform: translateY(-3px);
-        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(108, 92, 231, 0.3);
+    }
+
+    .submit-btn:disabled {
+        background: #b2bec3;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
     }
 
     .back-btn {
-        background: linear-gradient(135deg, var(--secondary-color), #90a4ae);
+        background: linear-gradient(135deg, var(--secondary-color), #b2bec3);
+        z-index: 1;
+    }
+
+    .back-btn:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, var(--secondary-hover), #636e72);
+        z-index: -1;
+        opacity: 0;
+        transition: var(--transition);
+    }
+
+    .back-btn:hover:before {
+        opacity: 1;
     }
 
     .back-btn:hover {
-        background: linear-gradient(135deg, var(--secondary-hover), #78909c);
         transform: translateY(-3px);
-        box-shadow: 0 7px 14px rgba(0, 0, 0, 0.15);
+        box-shadow: 0 8px 25px rgba(168, 168, 168, 0.3);
     }
 
-    /* Rating stars suggestion */
-    .rating-container {
+    /* Character counter */
+    .char-counter {
+        font-size: 0.75rem;
+        float: right;
+        margin-top: 5px;
+        color: #666;
+        transition: var(--transition);
+    }
+
+    .char-counter.warning {
+        color: #ff7675;
+    }
+
+    .char-counter.error {
+        color: var(--error-color);
+        font-weight: 600;
+    }
+
+    /* Room info styling */
+    .room-info {
+        background: rgba(108, 92, 231, 0.05);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 30px;
+        border-left: 4px solid var(--primary-color);
         display: flex;
-        justify-content: space-between;
-        margin: 15px 0;
+        align-items: center;
+        gap: 20px;
     }
 
-    .rating-option {
-        text-align: center;
-        cursor: pointer;
-        transition: var(--transition);
-        padding: 10px;
-        border-radius: 8px;
-    }
-
-    .rating-option:hover {
-        background: rgba(94, 53, 177, 0.1);
-    }
-
-    .rating-stars {
-        font-size: 24px;
-        color: #ffc107;
-        margin-bottom: 5px;
-    }
-
-    .rating-label {
-        font-size: 12px;
-        color: #607d8b;
-        font-weight: 500;
-    }
-
-    /* Floating label effect */
-    .floating-label {
-        position: relative;
-    }
-
-    .floating-label label {
-        position: absolute;
-        top: 15px;
-        left: 20px;
-        transition: var(--transition);
-        background: var(--card-bg);
-        padding: 0 5px;
-        color: #78909c;
-    }
-
-    .floating-label input:focus+label,
-    .floating-label textarea:focus+label,
-    .floating-label input:not(:placeholder-shown)+label,
-    .floating-label textarea:not(:placeholder-shown)+label {
-        top: -10px;
-        left: 15px;
-        font-size: 13px;
+    .room-icon {
+        font-size: 2rem;
         color: var(--primary-color);
     }
 
-    /* Responsive design */
-    @media (max-width: 768px) {
-        .container {
-            padding: 30px;
-            margin: 20px;
-            border-radius: 12px;
-        }
-
-        h2 {
-            font-size: 26px;
-        }
-
-        .button-group {
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .submit-btn,
-        .back-btn {
-            width: 100%;
-            padding: 14px;
-        }
-
-        .rating-container {
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .rating-option {
-            flex: 1 1 40%;
-        }
+    .room-details h3 {
+        margin: 0 0 5px 0;
+        color: var(--primary-color);
     }
 
-    /* Success message styling */
-    .success-message {
-        text-align: center;
-        padding: 20px;
-        background: rgba(75, 181, 67, 0.1);
-        border-radius: 8px;
-        margin-top: 20px;
-        color: var(--success-color);
-        font-weight: 600;
-        display: none;
+    .room-details p {
+        margin: 0;
+        color: var(--text-color);
+        opacity: 0.8;
+        font-size: 0.9rem;
     }
 
     /* Animation for form elements */
-    @keyframes fadeInUp {
+    @keyframes slideIn {
         from {
             opacity: 0;
             transform: translateY(20px);
@@ -307,7 +332,7 @@
     }
 
     .form-group {
-        animation: fadeInUp 0.6s ease forwards;
+        animation: slideIn 0.6s ease forwards;
         opacity: 0;
     }
 
@@ -324,8 +349,54 @@
     }
 
     .button-group {
-        animation: fadeInUp 0.6s ease 0.4s forwards;
+        animation: slideIn 0.6s ease 0.4s forwards;
         opacity: 0;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 30px;
+            margin: 30px 20px;
+            border-radius: 16px;
+        }
+
+        h2 {
+            font-size: 2rem;
+        }
+
+        .button-group {
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .submit-btn,
+        .back-btn {
+            width: 100%;
+            padding: 14px;
+        }
+    }
+
+    /* No contract message styling */
+    .no-contract {
+        text-align: center;
+        padding: 30px;
+    }
+
+    .no-contract svg {
+        width: 64px;
+        height: 64px;
+        color: var(--error-color);
+        margin-bottom: 20px;
+    }
+
+    .no-contract h3 {
+        color: var(--error-color);
+        margin-top: 20px;
+    }
+
+    .no-contract p {
+        margin: 10px 0 20px;
     }
 </style>
 
@@ -334,13 +405,13 @@
     <div class="container">
         <h2>Đánh Giá Phòng Đang Thuê</h2>
         <!-- Nếu hợp đồng tồn tại -->
-        <form th:if="${contract != null}" th:action="@{/khach-thue/danh-gia-phong}" method="post" th:object="${review}">
+        <form th:if="${contract != null}" th:action="@{/khach-thue/danh-gia-phong}" method="post" th:object="${review}"
+            id="reviewForm">
             <input type="hidden" th:name="contractId" th:value="${contract.contractId}" />
 
             <div class="form-group">
                 <label>Phòng đang thuê:</label>
-                <input type="text" th:value="${contract.room.namerooms}"
-                    readonly />
+                <input type="text" th:value="${contract.room.namerooms}" readonly />
             </div>
 
             <div class="form-group">
@@ -358,14 +429,18 @@
 
             <div class="form-group">
                 <label>Nhận xét (tùy chọn):</label>
-                <textarea th:field="*{comment}" placeholder="Chia sẻ trải nghiệm của bạn..."></textarea>
-                <div class="error" th:if="${#fields.hasErrors('comment')}" th:errors="*{comment}"></div>
+                <textarea th:field="*{comment}" placeholder="Chia sẻ trải nghiệm của bạn..."
+                    id="commentTextarea"></textarea>
+                <div class="invalid-feedback" id="commentError">
+                    Bình luận chứa từ ngữ không phù hợp hoặc quá dài (tối đa 1000 ký tự)!
+                </div>
+                <small class="char-counter" id="charCounter">0/1000 ký tự</small>
             </div>
 
             <div class="button-group">
                 <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract.contractId})}" class="back-btn">Quay
                     lại</a>
-                <button type="submit" class="submit-btn">Gửi đánh giá</button>
+                <button type="submit" class="submit-btn" id="submitBtn">Gửi đánh giá</button>
             </div>
         </form>
 
@@ -375,6 +450,207 @@
         </div>
     </div>
     <div th:replace="~{/layouts/footer}"></div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 🚫 Danh sách từ bậy bạ (có thể mở rộng) - bao gồm cả có dấu và không dấu
+            const badWords = [
+                // Tiếng Việt có dấu
+                "chửi", "ngu", "đần", "khờ", "điên", "ngớ", "đụ", "địt", "đéo",
+                "cặc", "lồn", "buồi", "đĩ", "điếm", "khốn", "súc", "vật", "chó", "heo",
+                "đồ", "thằng", "con", "mẹ", "bố", "cha", "má", "ba", "đéo", "vãi",
+
+                // Tiếng Việt không dấu  
+                "chu", "ngu", "dan", "kho", "dien", "ngo", "du", "dit", "deo",
+                "cac", "lon", "buoi", "di", "diem", "khon", "suc", "vat", "cho", "heo",
+                "do", "thang", "con", "me", "bo", "cha", "ma", "ba", "vao",
+
+                // Tiếng Anh
+                "fuck", "shit", "damn", "bitch", "ass", "hell", "wtf",
+
+                // Viết tắt
+                "dm", "cl", "vcl", "loz", "wtf", "omg"
+            ];
+
+            // 🚧 Hàm loại bỏ dấu tiếng Việt hoàn toàn
+            function removeDiacritics(str) {
+                return str.toLowerCase()
+                    // Loại bỏ các ký tự đặc biệt và khoảng trắng thừa
+                    .replace(/\s+/g, ' ')
+                    .replace(/[^\w\sàáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/g, '')
+                    // A
+                    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+                    // E  
+                    .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+                    // I
+                    .replace(/[ìíịỉĩ]/g, 'i')
+                    // O
+                    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+                    // U
+                    .replace(/[ùúụủũưừứựửữ]/g, 'u')
+                    // Y
+                    .replace(/[ỳýỵỷỹ]/g, 'y')
+                    // Đ
+                    .replace(/[đ]/g, 'd')
+                    // Loại bỏ khoảng trắng đầu cuối
+                    .trim();
+            }
+
+            // 🚧 Hàm kiểm tra hợp lệ
+            function validateComment(text) {
+                if (!text || text.trim().length === 0) {
+                    return { valid: true, message: "" };
+                }
+
+                if (text.length > 1000) {
+                    return { valid: false, message: "Bình luận quá dài (tối đa 1000 ký tự)!" };
+                }
+
+                // Normalize text - loại bỏ dấu và chuyển thường
+                const normalizedText = removeDiacritics(text);
+
+                // Kiểm tra từng từ bậy bạ
+                for (let word of badWords) {
+                    const normalizedBadWord = removeDiacritics(word);
+
+                    // Kiểm tra cả substring và whole word
+                    if (normalizedText.includes(normalizedBadWord)) {
+                        return { valid: false, message: "Bình luận chứa từ ngữ không phù hợp!" };
+                    }
+
+                    // Kiểm tra thêm với regex để bắt các trường hợp có khoảng cách
+                    const wordRegex = new RegExp(normalizedBadWord.split('').join('\\s*'), 'gi');
+                    if (wordRegex.test(normalizedText)) {
+                        return { valid: false, message: "Bình luận chứa từ ngữ không phù hợp!" };
+                    }
+                }
+
+                return { valid: true, message: "" };
+            }
+
+            // Lấy các elements cần thiết
+            const form = document.getElementById("reviewForm");
+            const textarea = document.getElementById("commentTextarea");
+            const invalidFeedback = document.getElementById("commentError");
+            const submitBtn = document.getElementById("submitBtn");
+            const charCounter = document.getElementById("charCounter");
+
+            if (form && textarea && invalidFeedback && submitBtn && charCounter) {
+                // 📊 Cập nhật counter ký tự
+                function updateCharCounter() {
+                    const length = textarea.value.length;
+                    charCounter.textContent = `${length}/1000 ký tự`;
+
+                    if (length > 1000) {
+                        charCounter.style.color = "#dc3545";
+                    } else if (length > 800) {
+                        charCounter.style.color = "#ffc107";
+                    } else {
+                        charCounter.style.color = "#666";
+                    }
+                }
+
+                // 🔎 Kiểm tra realtime khi đang nhập
+                textarea.addEventListener("input", function () {
+                    updateCharCounter();
+                    const validation = validateComment(textarea.value);
+
+                    if (!validation.valid) {
+                        textarea.classList.add("is-invalid");
+                        invalidFeedback.textContent = validation.message;
+                        invalidFeedback.classList.add("show");
+                        submitBtn.disabled = true;
+                    } else {
+                        textarea.classList.remove("is-invalid");
+                        invalidFeedback.classList.remove("show");
+                        submitBtn.disabled = false;
+                    }
+                });
+
+                // 📩 Xử lý khi submit form
+                form.addEventListener("submit", function (e) {
+                    const validation = validateComment(textarea.value);
+
+                    if (!validation.valid) {
+                        e.preventDefault(); // Ngăn submit
+                        textarea.classList.add("is-invalid");
+                        invalidFeedback.textContent = validation.message;
+                        invalidFeedback.classList.add("show");
+                        submitBtn.disabled = true;
+
+                        // Focus vào textarea để người dùng biết cần sửa
+                        textarea.focus();
+
+                        // Scroll đến vị trí lỗi
+                        textarea.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        return false;
+                    } else {
+                        // Nếu validation thành công, xử lý chuyển đổi xuống dòng
+                        textarea.classList.remove("is-invalid");
+                        invalidFeedback.classList.remove("show");
+
+                        // Tạo hidden input để gửi dữ liệu đã format
+                        let hiddenInput = form.querySelector('input[name="commentFormatted"]');
+                        if (!hiddenInput) {
+                            hiddenInput = document.createElement("input");
+                            hiddenInput.type = "hidden";
+                            hiddenInput.name = "commentFormatted";
+                            form.appendChild(hiddenInput);
+                        }
+
+                        // Thay \n thành <br> để lưu vào database
+                        hiddenInput.value = textarea.value.replace(/\r?\n/g, "<br>");
+
+                        return true; // Cho phép submit
+                    }
+                });
+
+                // Khởi tạo counter
+                updateCharCounter();
+
+                // Xử lý khi load lại trang (nếu có dữ liệu từ server)
+                if (textarea.value) {
+                    // Chuyển <br> thành xuống dòng để hiển thị đúng trong textarea
+                    textarea.value = textarea.value.replace(/<br\s*\/?>/gi, "\n");
+                    updateCharCounter();
+                }
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            // Xử lý tất cả form có textarea comment
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener("submit", function () {
+                    const textarea = form.querySelector('textarea[name="comment"]');
+                    if (textarea) {
+                        // Xóa name của textarea để không gửi trực tiếp
+                        textarea.removeAttribute("name");
+
+                        // Tạo hoặc tìm hidden input
+                        let hiddenInput = form.querySelector('input[name="comment"]');
+                        if (!hiddenInput) {
+                            hiddenInput = document.createElement("input");
+                            hiddenInput.type = "hidden";
+                            hiddenInput.name = "comment";
+                            form.appendChild(hiddenInput);
+                        }
+
+                        // Thay \n thành <br> để lưu DB
+                        hiddenInput.value = textarea.value.replace(/\r?\n/g, "<br>");
+                    }
+                });
+            });
+
+            // Khi load lại (form edit) -> thay <br> thành xuống dòng
+            document.querySelectorAll("textarea[name='comment'], textarea[data-type='comment']").forEach(function (textarea) {
+                textarea.value = textarea.value.replace(/<br\s*\/?>/gi, "\n");
+            });
+        });
+
+    </script>
 </body>
 
 </html>

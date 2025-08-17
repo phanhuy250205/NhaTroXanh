@@ -111,7 +111,7 @@
 
         .amenity-item-guest i {
             margin-right: 6px;
-            color: #28a745;
+            color: #1a9be4;
             /* Màu xanh thành công */
         }
 
@@ -404,7 +404,7 @@
                     <div class="info-item-guest">
                         <span class="info-label-guest">
                             <i class="fas fa-users"></i>
-                            Số khách
+                            Số người ở
                         </span>
                         <span class="info-value-guest" th:text="${contract.room.max_tenants} + ' người'">2 người</span>
                     </div>
@@ -429,12 +429,30 @@
                         <ul th:unless="${utilities == null or #sets.isEmpty(utilities)}"
                             class="amenities-horizontal-list">
                             <li class="amenity-item-guest" th:each="utility : ${utilities}">
-                                <i class="fas fa-check-circle"></i>
-                                <span th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}">WiFi
-                                    miễn phí</span>
+                                <span th:switch="${utility.name}">
+                                    <i th:case="'Gác lửng'" class="fa-solid fa-stairs me-2"></i>
+                                    <i th:case="'Phòng tắm'" class="fa-solid fa-bath me-2"></i>
+                                    <i th:case="'Máy giặt'" class="fa-solid fa-soap me-2"></i>
+                                    <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake me-2"></i>
+                                    <i th:case="'Ban công/sân thượng'" class="fa-solid fa-building me-2"></i>
+                                    <i th:case="'Wifi'" class="fa-solid fa-wifi me-2"></i>
+                                    <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower me-2"></i>
+                                    <i th:case="'Tivi'" class="fa-solid fa-tv me-2"></i>
+                                    <i th:case="'Giường nệm'" class="fa-solid fa-bed me-2"></i>
+                                    <i th:case="'Camera an ninh'" class="fa-solid fa-video me-2"></i>
+                                    <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet me-2"></i>
+                                    <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set me-2"></i>
+                                    <i th:case="'Điều hòa'" class="fa-solid fa-fan me-2"></i>
+                                    <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase me-2"></i>
+                                    <i th:case="'Chỗ để xe'" class="fa-solid fa-car me-2"></i>
+                                    <i th:case="*" class="fa-solid fa-circle-check me-2 text-success"></i>
+                                </span>
+                                <span
+                                    th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
                             </li>
                         </ul>
                     </div>
+
                 </div>
             </div>
 
@@ -495,8 +513,10 @@
                     Báo cáo sự cố
                 </button>
 
-                <!-- Nút đánh giá - chỉ hiển thị khi chưa đánh giá -->
-                <a th:if="${!hasReviewed}" th:href="@{/khach-thue/danh-gia(contractId=${contract.contractId})}"
+                <a th:if="${!hasReviewed 
+          and contract.returnStatus != null 
+          and contract.returnStatus.name() == 'APPROVED'}"
+                    th:href="@{/khach-thue/danh-gia(contractId=${contract.contractId})}"
                     class="action-btn-guest btn-rate-guest">
                     <i class="fas fa-star"></i>
                     Đánh giá
@@ -1125,6 +1145,22 @@
                 }, 3000);
             });
         </script>
+        <script th:if="${!hasReviewed 
+      and contract.returnStatus != null 
+      and contract.returnStatus.name() == 'APPROVED'}">
+        document.addEventListener("DOMContentLoaded", function () {
+            Swal.fire({
+                title: 'Vui lòng đánh giá phòng',
+                text: 'Bạn chưa đánh giá phòng này, hãy cho chúng tôi nhận xét!',
+                icon: 'info',
+                confirmButtonText: 'Đánh giá ngay'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById("rateBtn").click();
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

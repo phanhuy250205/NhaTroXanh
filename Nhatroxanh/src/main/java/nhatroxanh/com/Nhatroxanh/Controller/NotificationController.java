@@ -272,7 +272,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
+                    paymentDetails.put("total",successMatcher.group(5) + " VNĐ");
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
@@ -290,7 +290,7 @@ public class NotificationController {
                 if (altSuccessMatcher.find()) {
                     paymentDetails.put("invoiceId", altSuccessMatcher.group(1));
                     paymentDetails.put("month", altSuccessMatcher.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(altSuccessMatcher.group(3))));
+                    paymentDetails.put("total", altSuccessMatcher.group(3) + " VNĐ");
                     paymentDetails.put("paymentMethod", altSuccessMatcher.group(4).trim());
                     paymentDetails.put("status", "SUCCESS");
                     paymentDetails.put("details", Collections.emptyList());

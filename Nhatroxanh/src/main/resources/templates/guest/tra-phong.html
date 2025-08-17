@@ -427,7 +427,8 @@
                     </div>
 
                     <div class="rr-actions">
-                        <a th:href="@{/khach-thue/quan-ly-thue-tra}" class="rr-btn rr-btn-secondary text-decoration-none">
+                        <a th:href="@{/khach-thue/quan-ly-thue-tra}"
+                            class="rr-btn rr-btn-secondary text-decoration-none">
                             <i class="fas fa-arrow-left"></i>
                             <span>Quay lại</span>
                         </a>
@@ -463,10 +464,24 @@
                 });
             }, 5000);
 
-            // Set minimum date for return date (today)
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('returnDate').min = today;
-            document.getElementById('returnDate').valueAsDate = new Date();
+            // Set minimum date for return date (5 days from today)
+            const today = new Date();
+            const minDate = new Date(today);
+            minDate.setDate(today.getDate() + 7);
+            const minDateString = minDate.toISOString().split('T')[0];
+            const returnDateInput = document.getElementById('returnDate');
+            returnDateInput.min = minDateString;
+            returnDateInput.valueAsDate = minDate; // Default to 5 days from today
+
+            // Optional: Add validation feedback
+            returnDateInput.addEventListener('change', () => {
+                const selectedDate = new Date(returnDateInput.value);
+                if (selectedDate < minDate) {
+                    returnDateInput.setCustomValidity('Ngày trả phòng phải cách ngày hiện tại ít nhất 5 ngày.');
+                } else {
+                    returnDateInput.setCustomValidity('');
+                }
+            });
         });
     </script>
 </body>

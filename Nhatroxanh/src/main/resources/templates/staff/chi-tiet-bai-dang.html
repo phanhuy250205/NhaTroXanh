@@ -7,7 +7,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết bài đăng</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <style>
@@ -359,6 +359,192 @@
                 gap: 8px;
             }
         }
+
+        /* ============== ROOM LIST STYLING ============== */
+        .room-list-container {
+            margin-top: 20px;
+        }
+
+        .room-item-host {
+            background: white;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-blue);
+            cursor: pointer;
+        }
+
+        .room-item-host:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+            border-left-color: var(--warning-orange);
+        }
+
+        .room-item-title-host {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .room-item-title-host::before {
+            content: "🏠";
+            margin-right: 8px;
+            font-size: 16px;
+        }
+
+        .room-item-info-host {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+            align-items: center;
+        }
+
+        .room-item-info-host span {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background: rgba(62, 131, 204, 0.08);
+            border-radius: 6px;
+        }
+
+        .room-item-info-host span::before {
+            content: "•";
+            color: var(--primary-blue);
+            margin-right: 6px;
+            font-weight: bold;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .room-item-info-host {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .room-item-info-host span {
+                width: 100%;
+            }
+        }
+
+        /* Animation for room items */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .room-item-host {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .room-item-host:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .room-item-host:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .room-item-host:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .room-item-host:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .room-item-host:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        /* Styling for the staff details card */
+        .staff-details-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 24px;
+        }
+
+        /* Title styling */
+        .staff-details-card-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .staff-details-card-title i {
+            margin-right: 10px;
+            color: #3e83cc;
+        }
+
+        /* Amenity list container */
+        .amenity-list {
+            margin-top: 10px;
+        }
+
+        /* Styling for the amenity item */
+        .amenity-item {
+            background-color: rgba(62, 131, 204, 0.05);
+            border: 1px solid rgba(62, 131, 204, 0.15);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            min-height: 60px;
+        }
+
+        /* Hover effect */
+        .amenity-item:hover {
+            background-color: rgba(62, 131, 204, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Icon styling */
+        .amenity-item i {
+            font-size: 1.3rem;
+            color: #3e83cc;
+            margin-right: 12px;
+        }
+
+        /* Text styling */
+        .amenity-item span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #34495e;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .amenity-item {
+                min-height: 50px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .staff-details-card-title {
+                font-size: 1.4rem;
+            }
+        }
     </style>
 </head>
 
@@ -496,13 +682,32 @@
                                 Phòng này hiện không có tiện ích nào.
                             </p>
                             <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
-                                <ul class="list-unstyled">
-                                    <li class="amenity-item mb-2" th:each="utility : ${utilities}">
-                                        <i class="fas fa-check-circle text-success me-2"></i>
-                                        <span
-                                            th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
-                                    </li>
-                                </ul>
+                                <div class="row row-cols-1 row-cols-md-3 g-3">
+                                    <div class="col" th:each="utility : ${utilities}">
+                                        <div class="amenity-item d-flex align-items-center">
+                                            <i th:switch="${utility.name}" class="me-3 fs-5 text-primary">
+                                                <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                                                <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                                                <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                                                <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                                                <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                                                <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                                                <i th:case="'Ban công/sân thượng'" class="fa-solid fa-archway"></i>
+                                                <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                                                <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                                                <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                                                <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                                                <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase"></i>
+                                                <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                                                <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                                                <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                                                <i th:case="*" class="fa-solid fa-circle-check"></i>
+                                            </i>
+                                            <span
+                                                th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

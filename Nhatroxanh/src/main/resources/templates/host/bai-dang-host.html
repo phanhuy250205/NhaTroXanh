@@ -7,7 +7,7 @@
     <title>Đăng Tin Trọ</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
 
     <style>
@@ -601,9 +601,32 @@
                 <div class="amenities-grid-host" id="amenitiesGrid">
                     <div th:each="utility : ${utilities}" class="form-check-host">
                         <input type="checkbox" name="utilities" class="form-check-input-host"
-                            th:id="'utility_' + ${utility.utilityId}" th:value="${utility.utilityId}">
-                        <label class="form-check-label-host" th:for="'utility_' + ${utility.utilityId}"
-                            th:text="${utility.name}"></label>
+                            th:id="'utility_' + ${utility.utilityId}" th:value="${utility.utilityId}"
+                            th:checked="${selectedUtilities != null and selectedUtilities.contains(utility.utilityId)}" />
+
+                        <label class="form-check-label-host d-flex align-items-center"
+                            th:for="'utility_' + ${utility.utilityId}">
+                            <!-- Icon hiển thị theo tiện ích -->
+                            <span class="me-2 text-primary" th:switch="${utility.name}">
+                                <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                                <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                                <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                                <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                                <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                                <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                                <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                                <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                                <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                                <i th:case="'Ban công/sân thượng'" class="fa-solid fa-home"></i>
+                                <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                                <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase"></i>
+                                <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                                <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                                <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                                <i th:case="*" class="fa-solid fa-check-circle"></i>
+                            </span>
+                            <span th:text="${utility.name}"></span>
+                        </label>
                     </div>
                 </div>
             </div>

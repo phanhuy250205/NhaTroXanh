@@ -597,8 +597,29 @@
                         <input type="checkbox" name="utilities" class="form-check-input-host"
                             th:id="'utility_' + ${utility.utilityId}" th:value="${utility.utilityId}"
                             th:checked="${post.utilities != null && #lists.contains(post.utilities, utility)}">
-                        <label class="form-check-label-host" th:for="'utility_' + ${utility.utilityId}"
-                            th:text="${utility.name}"></label>
+
+                        <label class="form-check-label-host d-flex align-items-center"
+                            th:for="'utility_' + ${utility.utilityId}">
+                            <span class="me-2 text-primary" th:switch="${utility.name}">
+                                <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                                <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                                <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                                <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                                <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                                <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                                <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                                <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                                <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                                <i th:case="'Ban công/sân thượng'" class="fa-solid fa-archway"></i>
+                                <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                                <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase"></i>
+                                <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                                <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                                <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                                <i th:case="*" class="fa-solid fa-check-circle"></i>
+                            </span>
+                            <span th:text="${utility.name}"></span>
+                        </label>
                     </div>
                 </div>
             </div>
