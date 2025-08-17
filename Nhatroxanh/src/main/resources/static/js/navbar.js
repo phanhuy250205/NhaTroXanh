@@ -502,7 +502,7 @@ document.addEventListener('DOMContentLoaded', function () {
             case 'REPORT': return 'fas fa-flag'; // Icon cờ cho báo cáo
             case 'ACCOUNT': return 'fas fa-user-cog'; // Icon tài khoản cho thông báo tài khoản
             case 'HOSTEL_ACTIVITY': return 'fas fa-home'; // Icon nhà cho hoạt động nhà trọ
-            default: return 'fas fa-bell'; // Icon chuông mặc định
+            default: return 'fas fa-percent'; // Icon chuông mặc định
         }
     }
 

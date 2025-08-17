@@ -613,33 +613,26 @@ public class NotificationService {
             LocalDateTime cutoffDateTime = LocalDateTime.now(ZoneId.of("Asia/Ho_Chi_Minh")).minusDays(10);
             Timestamp cutoffDate = Timestamp.valueOf(cutoffDateTime);
             
-            // Count notifications to be deleted for logging
-            long countToDelete = notificationRepository.countNotificationsOlderThan(cutoffDate);
-            
-            if (countToDelete == 0) {
-                log.info("No notifications older than 10 days found to delete");
-                return 0;
-            }
-            
-            // Find notifications older than 10 days
+            // Find and delete notifications older than 10 days
             List<Notification> oldNotifications = notificationRepository.findNotificationsOlderThan(cutoffDate);
             
-            if (!oldNotifications.isEmpty()) {
-                List<Integer> notificationIds = oldNotifications.stream()
-                        .map(Notification::getNotificationId)
-                        .toList();
-                
-                // Delete old notifications
-                notificationRepository.deleteByNotificationIds(notificationIds);
-                
-                log.info("Successfully deleted {} notifications older than 10 days (cutoff date: {})", 
-                        notificationIds.size(), cutoffDateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
-                
-                return notificationIds.size();
-            } else {
+            if (oldNotifications.isEmpty()) {
                 log.info("No notifications older than 10 days found to delete");
                 return 0;
             }
+            
+            List<Integer> notificationIds = oldNotifications.stream()
+                    .map(Notification::getNotificationId)
+                    .toList();
+            
+            // Delete old notifications
+            notificationRepository.deleteByNotificationIds(notificationIds);
+            
+            log.info("Successfully deleted {} notifications older than 10 days (cutoff date: {})", 
+                    notificationIds.size(), 
+                    cutoffDateTime.format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")));
+            
+            return notificationIds.size();
             
         } catch (Exception e) {
             log.error("Error cleaning up old notifications: {}", e.getMessage(), e);
