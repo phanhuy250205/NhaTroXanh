@@ -277,7 +277,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", parseNumber(successMatcher.group(5)));
+                    paymentDetails.put("total",successMatcher.group(5));
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
@@ -295,7 +295,7 @@ public class NotificationController {
                 if (altSuccessMatcher.find()) {
                     paymentDetails.put("invoiceId", altSuccessMatcher.group(1));
                     paymentDetails.put("month", altSuccessMatcher.group(2));
-                    paymentDetails.put("total", parseNumber(altSuccessMatcher.group(3)));
+                    paymentDetails.put("total", altSuccessMatcher.group(3));
                     paymentDetails.put("paymentMethod", altSuccessMatcher.group(4).trim());
                     paymentDetails.put("status", "SUCCESS");
                     paymentDetails.put("details", Collections.emptyList());
@@ -315,7 +315,7 @@ public class NotificationController {
                             Pattern.CASE_INSENSITIVE);
                     Matcher amountMatcher = amountPattern.matcher(message);
                     if (amountMatcher.find()) {
-                        paymentDetails.put("total", parseNumber(amountMatcher.group(1)));
+                        paymentDetails.put("total", amountMatcher.group(1));
                     }
 
                     // Extract month (more flexible pattern)
@@ -339,7 +339,7 @@ public class NotificationController {
                 if (matcher.find()) {
                     paymentDetails.put("invoiceId", matcher.group(1));
                     paymentDetails.put("month", matcher.group(2));
-                    paymentDetails.put("total", parseNumber(matcher.group(3)));
+                    paymentDetails.put("total",matcher.group(3));
                     paymentDetails.put("dueDate", matcher.group(4).trim());
                     paymentDetails.put("status", "PENDING");
                     paymentDetails.put("details", Collections.emptyList());
@@ -355,7 +355,7 @@ public class NotificationController {
                 if (altPendingMatcher.find()) {
                     paymentDetails.put("invoiceId", altPendingMatcher.group(1));
                     paymentDetails.put("month", altPendingMatcher.group(2));
-                    paymentDetails.put("total", parseNumber(altPendingMatcher.group(3)));
+                    paymentDetails.put("total",altPendingMatcher.group(3));
                     paymentDetails.put("dueDate", altPendingMatcher.group(4).trim());
                     paymentDetails.put("status", "PENDING");
                     paymentDetails.put("details", Collections.emptyList());
@@ -370,15 +370,6 @@ public class NotificationController {
             log.error("Error parsing payment notification: {}", message, e);
             return null;
         }
-    }
-
-    private Number parseNumber(String amount) throws ParseException {
-        if (amount == null || amount.trim().isEmpty()) {
-            return 0;
-        }
-        String cleanAmount = amount.replaceAll("[^\\d.,]", "").trim();
-        NumberFormat parser = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
-        return parser.parse(cleanAmount);
     }
 
     private Map<String, Object> parseIncidentNotification(String message) {
@@ -419,12 +410,10 @@ public class NotificationController {
                 String minAmountStr = matcher.group(3);
                 String endDate = matcher.group(4);
 
-                // Parse the numeric values
-                Number discountValue = parseNumber(discountValueStr);
-                Number minAmount = parseNumber(minAmountStr);
+                // Parse the numeric values as longs to avoid decimal issues
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue", discountValue);
-                voucherDetails.put("minAmount", minAmount);
+                voucherDetails.put("discountValue", discountValueStr);
+                voucherDetails.put("minAmount", minAmountStr);
                 voucherDetails.put("endDate", endDate);
                 log.debug("Parsed voucher details: {}", voucherDetails);
                 return voucherDetails;
@@ -440,12 +429,10 @@ public class NotificationController {
                 String minAmountStr = fallbackMatcher.group(3);
                 String endDate = fallbackMatcher.group(4);
 
-                // Parse the numeric values
-                Number discountValue = parseNumber(discountValueStr);
-                Number minAmount = parseNumber(minAmountStr);
+               
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue", discountValue);
-                voucherDetails.put("minAmount", minAmount);
+                voucherDetails.put("discountValue", discountValueStr);
+                voucherDetails.put("minAmount", minAmountStr);
                 voucherDetails.put("endDate", endDate);
                 log.debug("Parsed fallback voucher details: {}", voucherDetails);
                 return voucherDetails;
