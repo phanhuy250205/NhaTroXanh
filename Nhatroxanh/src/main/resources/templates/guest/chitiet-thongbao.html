@@ -987,7 +987,7 @@
                                 <strong>Phòng:</strong> ${notification.room.namerooms || 'Không xác định'}<br>
                                 <strong>Khu trọ:</strong> ${notification.room.hostel?.name || 'Không xác định'}<br>
                                 <strong>Diện tích:</strong> ${notification.room.acreage || 'Không xác định'}m²<br>
-                                <strong>Giá phòng:</strong> ${notification.room.price || '0'} 
+                                <strong>Giá phòng:</strong> ${formatCurrency(notification.room.price) || '0 VNĐ'}
                             </div>
                         </div>
                     ` : '<p>Không có thông tin phòng liên quan.</p>'}
@@ -1024,16 +1024,10 @@
 
             function formatCurrency(value) {
                 if (!value) return '0 VNĐ';
-                // Handle cases where value is already formatted with "VNĐ"
-                const cleanValue = value.replace(/[^0-9.,]/g, '').replace(',', '.');
+                const cleanValue = value.toString().replace(/[^0-9.]/g, '');
                 const num = parseFloat(cleanValue);
-                if (isNaN(num)) return value;
-
-                if (Number.isInteger(num)) {
-                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num) + ' VNĐ';
-                } else {
-                    return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + ' VNĐ';
-                }
+                if (isNaN(num)) return '0 VNĐ';
+                return new Intl.NumberFormat('vi-VN', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(num) + ' VNĐ';
             }
 
             function renderPaymentNotification(paymentDetails, room) {
@@ -1058,7 +1052,7 @@
                                 <strong>Phòng:</strong> ${paymentDetails.roomName || room?.namerooms || 'Không xác định'}<br>
                                 <strong>Khu trọ:</strong> ${paymentDetails.hostelName || room?.hostel?.name || 'Không xác định'}<br>
                                 <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                                <strong>Giá phòng:</strong> ${room?.price || '0'} 
+                                <strong>Giá phòng:</strong> ${formatCurrency(room?.price) || '0 VNĐ'}
                             </div>
                         </div>
                         <div class="data-block-notifications">
@@ -1067,7 +1061,7 @@
                                 Thông tin thanh toán
                             </div>
                             <div class="data-content-notifications">
-                                <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                                <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${formatCurrency(paymentDetails.total) || '0 VNĐ'}<br>
                                 <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'Tiền mặt'}<br>
                                 <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
                             </div>
@@ -1077,7 +1071,7 @@
                 <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
                     <div class="payment-summary-notifications">
                         <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                        <div class="payment-value-notifications" style="color: #10b981;">✓ ${paymentDetails.total || '0 VNĐ'}</div>
+                        <div class="payment-value-notifications" style="color: #10b981;">✓ ${formatCurrency(paymentDetails.total) || '0 VNĐ'}</div>
                     </div>
                     <div class="payment-info-notifications">
                         <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
@@ -1102,7 +1096,7 @@
                             <strong>Phòng:</strong> ${room?.namerooms || 'Không xác định'}<br>
                             <strong>Khu trọ:</strong> ${room?.hostel?.name || 'Không xác định'}<br>
                             <strong>Diện tích:</strong> ${room?.acreage || 'Không xác định'}m²<br>
-                            <strong>Giá phòng:</strong> ${room?.price || '0'} 
+                            <strong>Giá phòng:</strong> ${formatCurrency(room?.price) || '0 VNĐ'}
                         </div>
                     </div>
                     <div class="data-block-notifications">
@@ -1111,7 +1105,7 @@
                             Chi phí cần thanh toán
                         </div>
                         <div class="data-content-notifications">
-                            <strong style="color: #dc2626;">Tổng cộng:</strong> ${paymentDetails.total || '0 VNĐ'}<br>
+                            <strong style="color: #dc2626;">Tổng cộng:</strong> ${formatCurrency(paymentDetails.total) || '0 VNĐ'}<br>
                             <strong style="color: #dc2626;">Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}
                         </div>
                     </div>
@@ -1120,7 +1114,7 @@
             <div class="payment-record-notifications">
                 <div class="payment-summary-notifications">
                     <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                    <div class="payment-value-notifications" style="color: #dc2626;">${paymentDetails.total || '0 VNĐ'}</div>
+                    <div class="payment-value-notifications" style="color: #dc2626;">${formatCurrency(paymentDetails.total) || '0 VNĐ'}</div>
                 </div>
                 <div class="payment-info-notifications">
                     <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
@@ -1129,7 +1123,7 @@
                     <div><strong>Hạn thanh toán:</strong> <span style="color: #dc2626;">${paymentDetails.dueDate || 'Không xác định'}</span></div>
                 </div>
                 <div class="payment-button-container">
-                    <button class="payment-button-notifications" onclick="handlePayment('${paymentDetails.invoiceId}', '${(paymentDetails.total || '0').replace(/[^0-9]/g, '')}', '${roomId}', '${hostelId}', '${addressId}')">
+                    <button class="payment-button-notifications" onclick="handlePayment('${paymentDetails.invoiceId}', '${(formatCurrency(paymentDetails.total) || '0').replace(/[^0-9]/g, '')}', '${roomId}', '${hostelId}', '${addressId}')">
                         <i class="fas fa-credit-card"></i>
                         Thanh toán ngay
                     </button>
@@ -1170,7 +1164,7 @@
                         <strong>Phòng:</strong> ${room.namerooms || 'Không xác định'}<br>
                         <strong>Khu trọ:</strong> ${room.hostel?.name || 'Không xác định'}<br>
                         <strong>Diện tích:</strong> ${room.acreage || 'Không xác định'}m²<br>
-                        <strong>Giá phòng:</strong> ${room.price || '0'} 
+                        <strong>Giá phòng:</strong> ${formatCurrency(room.price) || '0 VNĐ'}
                     </div>
                 </div>`;
                 }
@@ -1193,9 +1187,9 @@
                     </div>
                     <div class="data-content-notifications">
                         <strong>Mã voucher:</strong> ${voucherDetails.voucherCode || 'Không xác định'}<br>
-                        <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue)  || '0 VNĐ'}<br>
-                        <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount)  || '0 VNĐ'}<br>
-                        <strong>Hạn sử dụng:</strong> ${ voucherDetails.endDate || 'Không xác định'}<br>
+                        <strong>Giá trị giảm:</strong> ${formatCurrency(voucherDetails.discountValue) || '0 VNĐ'}<br>
+                        <strong>Đơn tối thiểu:</strong> ${formatCurrency(voucherDetails.minAmount) || '0 VNĐ'}<br>
+                        <strong>Hạn sử dụng:</strong> ${voucherDetails.endDate || 'Không xác định'}<br>
                     </div>
                 </div>
             </div>`;
@@ -1210,10 +1204,11 @@
                         // Primary pattern for success notifications
                         const successMatch = message.match(/Bạn đã thanh toán thành công hóa đơn #(\d+) cho phòng ([^\s]+) tại ([^.]+)\. Tháng: ([^.]+)\. Số tiền: ([^.]+)\. Phương thức: ([^.]+)\./);
                         if (successMatch) {
+                            const totalStr = successMatch[5].replace(/[^0-9.]/g, '');
                             return {
                                 invoiceId: successMatch[1],
                                 month: successMatch[4],
-                                total: successMatch[5],
+                                total: parseFloat(totalStr) || 0,
                                 roomName: successMatch[2],
                                 hostelName: successMatch[3],
                                 paymentMethod: successMatch[6],
@@ -1225,10 +1220,11 @@
                         // Pattern for cash payment success
                         const cashSuccessMatch = message.match(/Bạn đã thanh toán thành công hóa đơn #(\d+).*tháng ([^.\s]+).*Số tiền: ([^.\s]+).*bằng tiền mặt/i);
                         if (cashSuccessMatch) {
+                            const totalStr = cashSuccessMatch[3].replace(/[^0-9.]/g, '');
                             return {
                                 invoiceId: cashSuccessMatch[1],
                                 month: cashSuccessMatch[2],
-                                total: cashSuccessMatch[3],
+                                total: parseFloat(totalStr) || 0,
                                 paymentMethod: 'Tiền mặt',
                                 status: 'SUCCESS',
                                 details: []
@@ -1251,7 +1247,8 @@
 
                             const amountMatch = message.match(/Số tiền: ([^.\s]+)/i);
                             if (amountMatch) {
-                                paymentDetails.total = amountMatch[1];
+                                const totalStr = amountMatch[1].replace(/[^0-9.]/g, '');
+                                paymentDetails.total = parseFloat(totalStr) || 0;
                             }
 
                             if (message.toLowerCase().includes('bằng tiền mặt')) {
@@ -1266,10 +1263,11 @@
                     } else {
                         const match = message.match(/Hóa đơn #(\d+) cho tháng ([\d/]+) \(Tổng: ([^\)]+)\)\.? Hạn thanh toán: ([^\.]+)\.?/i);
                         if (match) {
+                            const totalStr = match[3].replace(/[^0-9.]/g, '');
                             return {
                                 invoiceId: match[1],
                                 month: match[2],
-                                total: match[3],
+                                total: parseFloat(totalStr) || 0,
                                 dueDate: match[4],
                                 status: 'PENDING',
                                 details: []

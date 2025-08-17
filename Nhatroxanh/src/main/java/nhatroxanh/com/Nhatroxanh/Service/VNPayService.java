@@ -72,9 +72,17 @@ public class VNPayService {
         }
 
         // Getters
-        public String getPaymentUrl() { return paymentUrl; }
-        public String getMessage() { return message; }
-        public int getResultCode() { return resultCode; }
+        public String getPaymentUrl() {
+            return paymentUrl;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public int getResultCode() {
+            return resultCode;
+        }
     }
 
     /**
@@ -94,7 +102,15 @@ public class VNPayService {
 
             // Create VNPay parameters
             String vnpTxnRef = vnpTmnCode + System.currentTimeMillis();
-            String vnpOrderInfo = "Thanh toan hoa don #" + invoiceId;
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(payment.getDueDate());
+            int month = cal.get(Calendar.MONTH) + 1; // Calendar.MONTH is zero-based
+            int year = cal.get(Calendar.YEAR);
+            String vnpOrderInfo = "Thanh toán hóa đơn tháng "
+                    + month
+                    + "/"
+                    + year;
+
             long vnpAmount = Math.round(payment.getTotalAmount() * 100); // VNPay requires amount in VND cents
             String vnpCurrCode = "VND";
             String vnpLocale = "vn";
@@ -135,19 +151,19 @@ public class VNPayService {
     /**
      * Handle VNPay return URL
      */
-    public String handlePaymentReturn(Map<String, String> vnpParams, Integer roomId, Integer hostelId, 
-                                    Integer addressId, Model model) {
+    public String handlePaymentReturn(Map<String, String> vnpParams, Integer roomId, Integer hostelId,
+            Integer addressId, Model model) {
         try {
             String vnpTxnRef = vnpParams.get("vnp_TxnRef");
             String vnpResponseCode = vnpParams.get("vnp_ResponseCode");
             String vnpTransactionStatus = vnpParams.get("vnp_TransactionStatus");
             String vnpSecureHash = vnpParams.get("vnp_SecureHash");
-            
+
             // Check for host wallet context
             String context = vnpParams.get("context");
             String userId = vnpParams.get("user_id");
 
-            log.info("VNPay return with txnRef={}, responseCode={}, transactionStatus={}, context={}, user_id={}", 
+            log.info("VNPay return with txnRef={}, responseCode={}, transactionStatus={}, context={}, user_id={}",
                     vnpTxnRef, vnpResponseCode, vnpTransactionStatus, context, userId);
 
             // If this is a host wallet deposit, redirect to host wallet controller
@@ -171,7 +187,7 @@ public class VNPayService {
             fields.remove("vnp_SecureHashType");
             fields.remove("context");
             fields.remove("user_id");
-            
+
             String signValue = buildQueryString(fields);
             String computedHash = hmacSHA512(vnpHashSecret, signValue);
 
@@ -209,7 +225,8 @@ public class VNPayService {
                         String title = "Thanh toán thành công";
                         String roomName = contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A";
                         String hostelName = contract.getRoom() != null && contract.getRoom().getHostel() != null
-                                ? contract.getRoom().getHostel().getName() : "N/A";
+                                ? contract.getRoom().getHostel().getName()
+                                : "N/A";
                         String formattedAmount = CURRENCY_FORMAT.format(payment.getTotalAmount()) + " VNĐ";
 
                         String notificationMessage = String.format(
@@ -218,14 +235,14 @@ public class VNPayService {
 
                         notificationService.handlePaymentSuccess(tenant, payment, title, notificationMessage);
                         log.info("Payment success notification handled for payment: {}", payment.getId());
-                        
+
                         // Add payment amount to landlord's balance
                         try {
                             Users updatedLandlord = walletService.addPaymentToLandlordBalance(payment);
-                            log.info("Successfully added payment amount {} to landlord {} balance for VNPay payment {}", 
+                            log.info("Successfully added payment amount {} to landlord {} balance for VNPay payment {}",
                                     formattedAmount, updatedLandlord.getUserId(), payment.getId());
                         } catch (Exception walletException) {
-                            log.error("Failed to add payment to landlord balance for VNPay payment {}: {}", 
+                            log.error("Failed to add payment to landlord balance for VNPay payment {}: {}",
                                     payment.getId(), walletException.getMessage(), walletException);
                             // Don't fail the entire payment process if wallet update fails
                         }
@@ -255,7 +272,7 @@ public class VNPayService {
     private String buildQueryString(Map<String, String> params) {
         List<String> fieldNames = new ArrayList<>(params.keySet());
         Collections.sort(fieldNames);
-        
+
         StringBuilder sb = new StringBuilder();
         for (String fieldName : fieldNames) {
             String fieldValue = params.get(fieldName);
@@ -264,7 +281,8 @@ public class VNPayService {
                     sb.append("&");
                 }
                 try {
-                    sb.append(fieldName).append("=").append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
+                    sb.append(fieldName).append("=")
+                            .append(URLEncoder.encode(fieldValue, StandardCharsets.UTF_8.toString()));
                 } catch (UnsupportedEncodingException e) {
                     log.error("Error encoding parameter: {}", e.getMessage());
                 }
@@ -282,7 +300,7 @@ public class VNPayService {
             SecretKeySpec secretKey = new SecretKeySpec(key.getBytes(StandardCharsets.UTF_8), "HmacSHA512");
             hmac512.init(secretKey);
             byte[] result = hmac512.doFinal(data.getBytes(StandardCharsets.UTF_8));
-            
+
             StringBuilder sb = new StringBuilder();
             for (byte b : result) {
                 sb.append(String.format("%02x", b));
@@ -306,18 +324,30 @@ public class VNPayService {
      */
     private String getVNPayErrorMessage(String responseCode) {
         switch (responseCode) {
-            case "01": return "Giao dịch chưa hoàn tất";
-            case "02": return "Giao dịch bị lỗi";
-            case "04": return "Giao dịch đảo (Khách hàng đã bị trừ tiền tại Ngân hàng nhưng GD chưa thành công ở VNPAY)";
-            case "05": return "VNPAY đang xử lý giao dịch này (GD hoàn tiền)";
-            case "06": return "VNPAY đã gửi yêu cầu hoàn tiền sang Ngân hàng (GD hoàn tiền)";
-            case "07": return "Giao dịch bị nghi ngờ gian lận";
-            case "09": return "GD Hoàn trả bị từ chối";
-            case "10": return "Đã giao hàng";
-            case "20": return "Đã thu tiền khách hàng";
-            case "21": return "Giao dịch chưa được thanh toán";
-            case "22": return "Giao dịch bị hủy";
-            default: return "Giao dịch thất bại";
+            case "01":
+                return "Giao dịch chưa hoàn tất";
+            case "02":
+                return "Giao dịch bị lỗi";
+            case "04":
+                return "Giao dịch đảo (Khách hàng đã bị trừ tiền tại Ngân hàng nhưng GD chưa thành công ở VNPAY)";
+            case "05":
+                return "VNPAY đang xử lý giao dịch này (GD hoàn tiền)";
+            case "06":
+                return "VNPAY đã gửi yêu cầu hoàn tiền sang Ngân hàng (GD hoàn tiền)";
+            case "07":
+                return "Giao dịch bị nghi ngờ gian lận";
+            case "09":
+                return "GD Hoàn trả bị từ chối";
+            case "10":
+                return "Đã giao hàng";
+            case "20":
+                return "Đã thu tiền khách hàng";
+            case "21":
+                return "Giao dịch chưa được thanh toán";
+            case "22":
+                return "Giao dịch bị hủy";
+            default:
+                return "Giao dịch thất bại";
         }
     }
 
@@ -343,7 +373,8 @@ public class VNPayService {
     /**
      * Build failure redirect URL with payment ID
      */
-    private String buildFailureRedirect(String errorMessage, Integer paymentId, Integer roomId, Integer hostelId, Integer addressId) {
+    private String buildFailureRedirect(String errorMessage, Integer paymentId, Integer roomId, Integer hostelId,
+            Integer addressId) {
         StringBuilder redirectUrl = new StringBuilder("redirect:/guest/failure-thanhtoan?invoiceId=" + paymentId);
         redirectUrl.append("&errorMessage=").append(URLEncoder.encode(errorMessage, StandardCharsets.UTF_8));
         appendRedirectParams(redirectUrl, null, roomId, hostelId, addressId);
@@ -353,7 +384,8 @@ public class VNPayService {
     /**
      * Append redirect parameters
      */
-    private void appendRedirectParams(StringBuilder redirectUrl, String prefix, Integer roomId, Integer hostelId, Integer addressId) {
+    private void appendRedirectParams(StringBuilder redirectUrl, String prefix, Integer roomId, Integer hostelId,
+            Integer addressId) {
         if (roomId != null) {
             redirectUrl.append("&room_id=").append(roomId);
         }

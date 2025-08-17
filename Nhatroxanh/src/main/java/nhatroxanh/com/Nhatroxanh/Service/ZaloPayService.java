@@ -21,6 +21,8 @@ import org.springframework.ui.Model;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
@@ -103,7 +105,12 @@ public class ZaloPayService {
             }
 
             String appTransId = getCurrentDate() + "_" + System.currentTimeMillis();
-            String description = "Thanh toán hóa đơn #" + invoiceId;
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(payment.getDueDate());
+            int month = cal.get(java.util.Calendar.MONTH) + 1;
+            String description = "Thanh toán hóa đơn tháng " + month;
+
+
             long amount = Math.round(payment.getTotalAmount());
 
             // Create order data
