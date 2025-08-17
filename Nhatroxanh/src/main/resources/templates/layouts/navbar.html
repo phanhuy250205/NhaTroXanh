@@ -81,9 +81,9 @@
                         <li th:each="category : ${categoryList}">
                             <a class="dropdown-item" th:href="@{'/danh-muc/' + ${category.categoryId}}">
                                 <span th:switch="${category.name}">
-                                    <i th:case="'Nhà Trọ, Phòng Trọ'" class="fa-solid fa-hotel"></i>
-                                    <i th:case="'Căn Hộ Mini'" class="fa-solid fa-building"></i>
-                                    <i th:case="'Nhà Nguyên Căn'" class="fa-solid fa-house"></i>
+                                    <i th:case="'Nhà Trọ, Phòng Trọ'" class="fa-solid fa-hotel me-2"></i>
+                                    <i th:case="'Căn Hộ Mini'" class="fa-solid fa-building me-2"></i>
+                                    <i th:case="'Nhà Nguyên Căn'" class="fa-solid fa-house me-2"></i>
                                     <i th:case="*" class="fa-solid fa-tag"></i>
                                 </span>
                                 <span th:text="${category.name}">Tên danh mục</span>
@@ -237,12 +237,5 @@
         </div>
     </div>
 </nav>
-<style>
-    .dropdown-menu .dropdown-item i {
-        margin-right: 8px;
-        color: #007bff;
-        width: 18px;
-        text-align: center;
-    }
-</style>
+
 <script th:src="@{/js/notification.js}"></script>

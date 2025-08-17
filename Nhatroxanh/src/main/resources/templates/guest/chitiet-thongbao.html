@@ -1061,7 +1061,7 @@
                                 Thông tin thanh toán
                             </div>
                             <div class="data-content-notifications">
-                                <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${formatCurrency(paymentDetails.total) || '0 VNĐ'}<br>
+                                <strong style="color: #10b981;">Số tiền đã thanh toán:</strong> ${(paymentDetails.total) || '0 VNĐ'} VNĐ<br>
                                 <strong>Phương thức:</strong> ${paymentDetails.paymentMethod || 'Tiền mặt'}<br>
                                 <strong style="color: #10b981;">Trạng thái:</strong> <span style="color: #10b981;">Đã thanh toán</span>
                             </div>
@@ -1071,7 +1071,7 @@
                 <div class="payment-record-notifications" style="border-left: 4px solid #10b981;">
                     <div class="payment-summary-notifications">
                         <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                        <div class="payment-value-notifications" style="color: #10b981;">✓ ${formatCurrency(paymentDetails.total) || '0 VNĐ'}</div>
+                        <div class="payment-value-notifications" style="color: #10b981;">✓ ${(paymentDetails.total) || '0 VNĐ'} VNĐ</div>
                     </div>
                     <div class="payment-info-notifications">
                         <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
@@ -1105,7 +1105,7 @@
                             Chi phí cần thanh toán
                         </div>
                         <div class="data-content-notifications">
-                            <strong style="color: #dc2626;">Tổng cộng:</strong> ${formatCurrency(paymentDetails.total) || '0 VNĐ'}<br>
+                            <strong style="color: #dc2626;">Tổng cộng:</strong> ${paymentDetails.total || '0 VNĐ'} VNĐ<br>
                             <strong style="color: #dc2626;">Hạn thanh toán:</strong> ${paymentDetails.dueDate || 'Không xác định'}
                         </div>
                     </div>
@@ -1114,11 +1114,10 @@
             <div class="payment-record-notifications">
                 <div class="payment-summary-notifications">
                     <div class="payment-label-notifications">Tiền phòng tháng ${paymentDetails.month || 'Không xác định'}</div>
-                    <div class="payment-value-notifications" style="color: #dc2626;">${formatCurrency(paymentDetails.total) || '0 VNĐ'}</div>
+                    <div class="payment-value-notifications" style="color: #dc2626;">${paymentDetails.total || '0 VNĐ'} VNĐ</div>
                 </div>
                 <div class="payment-info-notifications">
                     <div><strong>Mã hóa đơn:</strong> ${paymentDetails.invoiceId || 'Không có'}</div>
-                    <div><strong>Ngày phát hành:</strong> ${paymentDetails.dueDate ? paymentDetails.dueDate.split('-').reverse().join('/') : 'Không xác định'}</div>
                     <div><strong>Trạng thái:</strong> <span style="color: #dc2626;">Chưa thanh toán</span></div>
                     <div><strong>Hạn thanh toán:</strong> <span style="color: #dc2626;">${paymentDetails.dueDate || 'Không xác định'}</span></div>
                 </div>
