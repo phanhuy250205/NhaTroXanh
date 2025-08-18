@@ -68,7 +68,6 @@ public class HostelController {
             @RequestParam("ward") String wardCode,
             @RequestParam("wardName") String wardName,
             @RequestParam("street") String street,
-            @RequestParam("houseNumber") String houseNumber,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
         try {
@@ -77,7 +76,7 @@ public class HostelController {
                 return "redirect:/chu-tro/them-khu-tro";
             }
             System.out.println("Received: provinceName=" + provinceName + ", districtName=" + districtName
-                    + ", wardName=" + wardName + ", street=" + street + ", houseNumber=" + houseNumber);
+                    + ", wardName=" + wardName + ", street=" + street );
             hostelDTO.setOwnerId(userDetails.getUser().getUserId());
             hostelDTO.setProvinceCode(provinceCode);
             hostelDTO.setProvinceName(provinceName);
@@ -86,7 +85,6 @@ public class HostelController {
             hostelDTO.setWardCode(wardCode);
             hostelDTO.setWardName(wardName);
             hostelDTO.setStreet(street);
-            hostelDTO.setHouseNumber(houseNumber);
 
             // Debug trước khi gọi setAddressFromComponents
             System.out.println("Before setAddressFromComponents: " + hostelDTO.toString());
@@ -143,7 +141,6 @@ public class HostelController {
             @RequestParam("ward") String wardCode,
             @RequestParam("wardName") String wardName,
             @RequestParam("street") String street,
-            @RequestParam("houseNumber") String houseNumber,
             RedirectAttributes redirectAttributes) {
         try {
             hostelDTO.setProvinceCode(provinceCode);
@@ -153,7 +150,6 @@ public class HostelController {
             hostelDTO.setWardCode(wardCode);
             hostelDTO.setWardName(wardName);
             hostelDTO.setStreet(street);
-            hostelDTO.setHouseNumber(houseNumber);
 
             hostelDTO.getCombinedAddress();
 

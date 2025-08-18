@@ -5,9 +5,24 @@
     <title>Gia hạn thời gian thuê phòng</title>
 </head>
 <style>
-    /* General Styles */
+    /* Modern Color Palette */
+    :root {
+        --primary: #4361ee;
+        --primary-hover: #3a56d4;
+        --secondary: #6c757d;
+        --secondary-hover: #5a6268;
+        --success: #28a745;
+        --danger: #dc3545;
+        --light: #f8f9fa;
+        --dark: #343a40;
+        --border-radius: 0.375rem;
+        --box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        --transition: all 0.3s ease;
+    }
+
+    /* Base Styles */
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         background-color: #f5f7fa;
         color: #333;
         line-height: 1.6;
@@ -19,42 +34,59 @@
         padding: 0 20px;
     }
 
+    /* Header Styles */
     .page-title-guest {
-        color: #2c3e50;
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        font-weight: 700;
+        font-size: 1.75rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .page-title-guest i {
+        color: var(--primary);
+        font-size: 1.5rem;
+    }
+
+    /* Card Styles */
+    .card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        padding: 1.75rem;
         margin-bottom: 2rem;
-        font-weight: 600;
+        border: none;
+        transition: var(--transition);
+    }
+
+    .card:hover {
+        box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding-bottom: 1rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
         gap: 10px;
     }
 
-    .page-title-guest i {
-        color: #3498db;
-    }
-
-    /* Contract Info Box */
-    .contract-info-box-guest {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border-left: 4px solid #3498db;
-    }
-
-    .contract-info-box-guest h4 {
-        color: #2c3e50;
-        margin-bottom: 1rem;
+    .card-header h4 {
+        color: var(--dark);
+        margin: 0;
         font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+        font-size: 1.25rem;
     }
 
-    .contract-info-box-guest h4 i {
-        color: #3498db;
+    .card-header i {
+        color: var(--primary);
+        font-size: 1.25rem;
     }
 
+    /* Contract Info Styles */
     .contract-details-guest {
         list-style: none;
         padding: 0;
@@ -62,9 +94,10 @@
     }
 
     .contract-details-guest li {
-        padding: 8px 0;
-        border-bottom: 1px solid #eee;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         display: flex;
+        align-items: center;
     }
 
     .contract-details-guest li:last-child {
@@ -72,98 +105,123 @@
     }
 
     .contract-details-guest strong {
-        min-width: 120px;
+        min-width: 140px;
         display: inline-block;
-        color: #7f8c8d;
+        color: var(--secondary);
+        font-weight: 500;
     }
 
     /* Form Styles */
     .extend-form-guest {
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        padding: 1.5rem;
+        margin-top: 2rem;
     }
 
     .form-group-guest {
         margin-bottom: 1.5rem;
     }
 
-    .form-group-guest label {
+    .form-label {
         display: block;
         margin-bottom: 0.5rem;
         font-weight: 500;
-        color: #2c3e50;
+        color: var(--dark);
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
+        font-size: 0.95rem;
     }
 
-    .form-group-guest label i {
-        color: #3498db;
+    .form-label i {
+        color: var(--primary);
         width: 20px;
         text-align: center;
+        font-size: 1rem;
     }
 
-    .form-input-guest {
+    .required:after {
+        content: " *";
+        color: var(--danger);
+    }
+
+    .form-control {
         width: 100%;
-        padding: 10px 15px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-        transition: border-color 0.3s;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        border-radius: var(--border-radius);
+        font-size: 1rem;
+        transition: var(--transition);
+        background-color: #fff;
     }
 
-    .form-input-guest:focus {
-        outline: none;
-        border-color: #3498db;
-        box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    .form-control:focus {
+        color: #495057;
+        background-color: #fff;
+        border-color: #80bdff;
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 
-    textarea.form-input-guest {
-        min-height: 100px;
+    textarea.form-control {
+        min-height: 120px;
         resize: vertical;
     }
 
     /* Button Styles */
     .form-actions-guest {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
+        gap: 1rem;
         margin-top: 2rem;
     }
 
     .btn {
-        padding: 10px 20px;
-        border-radius: 4px;
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--border-radius);
         font-weight: 500;
         cursor: pointer;
-        transition: all 0.3s;
+        transition: var(--transition);
         display: inline-flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
+        gap: 0.5rem;
         text-decoration: none;
         border: none;
-        font-size: 16px;
+        font-size: 1rem;
+        line-height: 1.5;
     }
 
-    .btn-primary-guest {
-        background-color: #3498db;
+    .btn-primary {
+        background-color: var(--primary);
         color: white;
     }
 
-    .btn-primary-guest:hover {
-        background-color: #2980b9;
+    .btn-primary:hover {
+        background-color: var(--primary-hover);
         transform: translateY(-2px);
     }
 
-    .btn-secondary-guest {
-        background-color: #95a5a6;
+    .btn-secondary {
+        background-color: var(--secondary);
         color: white;
     }
 
-    .btn-secondary-guest:hover {
-        background-color: #7f8c8d;
+    .btn-secondary:hover {
+        background-color: var(--secondary-hover);
         transform: translateY(-2px);
+    }
+
+    /* Date Input Styles */
+    .date-input-container {
+        position: relative;
+    }
+
+    .date-input-container i {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--secondary);
+        pointer-events: none;
     }
 
     /* Responsive Adjustments */
@@ -172,44 +230,59 @@
             padding: 0 15px;
         }
 
+        .page-title-guest {
+            font-size: 1.5rem;
+        }
+
+        .card {
+            padding: 1.25rem;
+        }
+
         .contract-details-guest li {
             flex-direction: column;
+            align-items: flex-start;
         }
 
         .contract-details-guest strong {
-            margin-bottom: 4px;
+            margin-bottom: 0.25rem;
+            min-width: auto;
         }
 
         .form-actions-guest {
             flex-direction: column;
-            gap: 10px;
         }
 
         .btn {
             width: 100%;
-            justify-content: center;
         }
     }
 
-    input[type="date"] {
-        position: relative;
+    /* Animation */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
-    input[type="date"]::-webkit-calendar-picker-indicator {
-        background: transparent;
-        bottom: 0;
-        color: transparent;
-        cursor: pointer;
-        height: auto;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-        width: auto;
+    .card {
+        animation: fadeIn 0.5s ease-out;
     }
 
-    .text-danger {
-        color: #e74c3c;
+    /* Validation Styles */
+    .is-invalid {
+        border-color: var(--danger);
+    }
+
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
     }
 </style>
 
@@ -219,23 +292,33 @@
         <h2 class="page-title-guest">
             <i class="fas fa-calendar-plus"></i> Gửi yêu cầu gia hạn hợp đồng
         </h2>
-        <div class="contract-info-box-guest">
-            <h4><i class="fas fa-home"></i> Thông tin hợp đồng</h4>
+
+        <!-- Contract Information Card -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-file-contract"></i>
+                <h4>Thông tin hợp đồng hiện tại</h4>
+            </div>
             <ul class="contract-details-guest">
-                <li><strong>Phòng:</strong>
+                <li>
+                    <strong>Phòng:</strong>
                     <span th:text="${contract?.room?.namerooms}">Phòng</span>
                 </li>
-                <li><strong>Địa chỉ:</strong>
+                <li>
+                    <strong>Địa chỉ:</strong>
                     <span th:if="${contract?.room?.hostel?.address != null}"
                         th:text="${contract.room.hostel.address}">Địa chỉ</span>
                 </li>
-                <li><strong>Ngày bắt đầu:</strong>
+                <li>
+                    <strong>Ngày bắt đầu:</strong>
                     <span th:text="${#dates.format(contract?.startDate, 'dd/MM/yyyy')}">01/01/2024</span>
                 </li>
-                <li><strong>Ngày kết thúc:</strong>
+                <li>
+                    <strong>Ngày kết thúc:</strong>
                     <span th:text="${#dates.format(contract?.endDate, 'dd/MM/yyyy')}">31/12/2024</span>
                 </li>
-                <li><strong>Giá thuê:</strong>
+                <li>
+                    <strong>Giá thuê:</strong>
                     <span th:text="${#numbers.formatDecimal(contract?.price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ/tháng'">
                         1,000,000 VNĐ/tháng
                     </span>
@@ -243,36 +326,104 @@
             </ul>
         </div>
 
-        <!-- Form yêu cầu gia hạn -->
-        <form th:action="@{/khach-thue/gia-han/{id}(id=${contract?.contractId})}" method="post"
-            class="extend-form-guest">
-            <div class="form-group-guest">
-                <label for="requestedExtendDate">
-                    <i class="fas fa-calendar-day"></i> Ngày kết thúc mong muốn
-                    <span class="text-danger">*</span>
-                </label>
-                <input type="date" id="requestedExtendDate" name="requestedExtendDate" class="form-input-guest" required
-                    th:min="${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}" />
+        <!-- Extension Request Form Card -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-edit"></i>
+                <h4>Yêu cầu gia hạn</h4>
             </div>
 
-            <div class="form-group-guest">
-                <label for="message"><i class="fas fa-comment-dots"></i> Lời nhắn gửi chủ nhà</label>
-                <textarea id="message" name="message" rows="4" class="form-input-guest"
-                    placeholder="Chia sẻ lý do bạn muốn gia hạn hợp đồng..."></textarea>
-            </div>
+            <form th:action="@{/khach-thue/gia-han/{id}(id=${contract?.contractId})}" method="post"
+                class="extend-form-guest">
+                <div class="form-group-guest">
+                    <label for="requestedExtendDate" class="form-label required">
+                        <i class="fas fa-calendar-day"></i> Ngày kết thúc mong muốn
+                    </label>
+                    <div class="date-input-container">
+                        <input type="date" id="requestedExtendDate" name="requestedExtendDate" class="form-control"
+                            required th:min="${#dates.format(#dates.createToday(), 'yyyy-MM-dd')}" />
+                    </div>
+                    <div class="invalid-feedback">Vui lòng chọn ngày kết thúc hợp lệ</div>
+                </div>
 
-            <div class="form-actions-guest">
-                <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract?.contractId})}"
-                    class="btn btn-secondary-guest">
-                    <i class="fas fa-arrow-left"></i> Quay lại
-                </a>
-                <button type="submit" class="btn btn-primary-guest">
-                    <i class="fas fa-paper-plane"></i> Gửi yêu cầu
-                </button>
-            </div>
-        </form>
+                <div class="form-group-guest">
+                    <label for="message" class="form-label">
+                        <i class="fas fa-comment-alt"></i> Lời nhắn cho chủ nhà
+                    </label>
+                    <textarea id="message" name="message" rows="4" class="form-control"
+                        placeholder="Xin hãy chia sẻ lý do bạn muốn gia hạn hợp đồng (không bắt buộc)..."></textarea>
+                </div>
+
+                <div class="form-actions-guest">
+                    <a th:href="@{/khach-thue/chitiet-phongthue/{id}(id=${contract?.contractId})}"
+                        class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Gửi yêu cầu
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
     <div th:replace="~{/layouts/footer}"></div>
 </body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const dateInput = document.getElementById("requestedExtendDate");
+        if (dateInput) {
+            // Lấy ngày hôm nay
+            const today = new Date();
+
+            // Cộng thêm 30 ngày
+            const futureDate = new Date();
+            futureDate.setDate(today.getDate() + 30);
+
+            const yyyy = futureDate.getFullYear();
+            const mm = String(futureDate.getMonth() + 1).padStart(2, '0');
+            const dd = String(futureDate.getDate()).padStart(2, '0');
+            const minDateStr = `${yyyy}-${mm}-${dd}`;
+
+            // Set min date = hôm nay + 30 ngày
+            dateInput.setAttribute("min", minDateStr);
+
+            // Nếu người dùng nhập nhỏ hơn minDate → reset lại
+            dateInput.addEventListener("change", function () {
+                if (dateInput.value < minDateStr) {
+                    alert("Vui lòng chọn ngày kết thúc ít nhất sau 30 ngày kể từ hôm nay!");
+                    dateInput.value = minDateStr;
+                }
+            });
+        }
+
+        // Form validation
+        const form = document.querySelector(".extend-form-guest");
+        if (form) {
+            form.addEventListener("submit", function (e) {
+                let isValid = true;
+
+                // Validate date
+                if (!dateInput.value) {
+                    dateInput.classList.add("is-invalid");
+                    isValid = false;
+                } else {
+                    dateInput.classList.remove("is-invalid");
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    // Scroll to first invalid field
+                    const firstInvalid = form.querySelector(".is-invalid");
+                    if (firstInvalid) {
+                        firstInvalid.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center"
+                        });
+                    }
+                }
+            });
+        }
+    });
+</script>
 
 </html>

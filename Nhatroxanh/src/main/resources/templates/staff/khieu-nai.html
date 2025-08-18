@@ -51,7 +51,7 @@
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid rgba(62, 131, 204, 0.1);
-            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.15);
         }
 
         .search-container-staff {
@@ -71,7 +71,6 @@
             color: #1f2937;
             background: white;
             transition: all 0.2s ease;
-            font-family: 'Inter', 'Segoe UI', sans-serif;
         }
 
         .search-input-staff:focus {
@@ -85,7 +84,7 @@
         }
 
         .search-btn-staff {
-            background: #3e83cc;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
             color: white;
             border: none;
             padding: 12px 24px;
@@ -97,23 +96,21 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
-            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.2);
         }
 
         .search-btn-staff:hover {
-            background: #549eed;
-            transform: translateY(-1px);
-            box-shadow: 0 3px 12px rgba(62, 131, 204, 0.2);
+            background: linear-gradient(135deg, #2f6ab4 0%, #4682b4 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
         }
 
         .table-section-staff {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 16px;
             border: 1px solid rgba(62, 131, 204, 0.1);
-            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.15);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.15);
             overflow: hidden;
-            transition: all 0.2s ease;
         }
 
         .table-container-staff {
@@ -139,7 +136,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border: none;
-            white-space: nowrap;
         }
 
         .complaint-table-staff td {
@@ -154,81 +150,129 @@
         }
 
         .complaint-table-staff tbody tr:hover {
-            background: rgba(62, 131, 204, 0.02);
+            background: rgba(62, 131, 204, 0.05);
         }
 
         .complaint-table-staff tbody tr:last-child td {
             border-bottom: none;
         }
 
+        .priority-badge-host {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .priority-badge-host i.fas {
+            font-size: 8px;
+            margin-right: 8px;
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: white;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        .priority-badge-host span {
+            margin-left: 10px;
+            /* Offset for the icon */
+            color: white;
+            font-weight: 500;
+        }
+
+        .priority-high-host {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+        }
+
+        .priority-high-host i.fas {
+            color: #ef4444;
+        }
+
+        .priority-medium-host {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
+        }
+
+        .priority-medium-host i.fas {
+            color: #f59e0b;
+            background: #000;
+        }
+
+        .priority-low-host {
+            background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+            box-shadow: 0 2px 4px rgba(4, 120, 87, 0.2);
+        }
+
+        .priority-low-host i.fas {
+            color: #10b981;
+        }
+
         .status-badge-staff {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            padding: 6px 12px;
+            padding: 9px 25px;
             border-radius: 20px;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.3px;
             white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
-        .status-pending-staff {
-            background: #fbbf24;
+        .status-chua_xu_ly-staff {
+            background-color: #ffca28;
+            color: #333;
+            box-shadow: 0 2px 4px rgba(255, 202, 40, 0.1);
+        }
+
+        .status-chua_xu_ly-staff:hover {
+            background-color: #ffe082;
+        }
+
+        .status-dang_xu_ly-staff {
+            background-color: #4dabf5;
             color: white;
-            box-shadow: 0 2px 8px rgba(251, 191, 36, 0.2);
+            box-shadow: 0 2px 4px rgba(77, 171, 245, 0.1);
         }
 
-        .status-processing-staff {
-            background: #3b82f6;
+        .status-dang_xu_ly-staff:hover {
+            background-color: #90caf9;
+        }
+
+        .status-da_xu_ly-staff {
+            background-color: #66bb6a;
             color: white;
-            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 2px 4px rgba(102, 187, 106, 0.1);
         }
 
-        .status-completed-staff {
-            background: #10b981;
-            color: white;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-        }
-
-        /* Priority Badge Styles */
-        .priority-badge-staff {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            white-space: nowrap;
-        }
-
-        .priority-high-staff {
-            background: #ef4444;
-            color: white;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
-        }
-
-        .priority-medium-staff {
-            background: #f59e0b;
-            color: white;
-            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
-        }
-
-        .priority-low-staff {
-            background: #10b981;
-            color: white;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        .status-da_xu_ly-staff:hover {
+            background-color: #a5d6a7;
         }
 
         .action-btn-staff {
-            background: #3e83cc;
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
             color: white;
-            border: 1px solid #3e83cc;
-            padding: 8px 16px;
+            border: none;
+            padding: 10px 25px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
@@ -237,17 +281,13 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            white-space: nowrap;
             text-decoration: none;
-            margin: 0 auto;
         }
 
         .action-btn-staff:hover {
-            background: #549eed;
-            color: white;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(62, 131, 204, 0.3);
-            text-decoration: none;
+            background: linear-gradient(135deg, #2f6ab4 0%, #4682b4 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(62, 131, 204, 0.3);
         }
 
         .empty-state-staff {
@@ -353,7 +393,7 @@
             }
 
             .status-badge-staff,
-            .priority-badge-staff {
+            .priority-badge-host {
                 font-size: 10px;
                 padding: 4px 8px;
             }
@@ -383,24 +423,6 @@
             background: #549eed;
         }
 
-        .status-chua_xu_ly-staff {
-            background-color: #ffc107;
-            /* vàng */
-            color: #000;
-        }
-
-        .status-dang_xu_ly-staff {
-            background-color: #17a2b8;
-            /* xanh dương nhạt */
-            color: #fff;
-        }
-
-        .status-da_xu_ly-staff {
-            background-color: #28a745;
-            /* xanh lá */
-            color: #fff;
-        }
-
         /* Pagination Styles */
         .pagination-staff {
             margin-top: 2rem;
@@ -408,32 +430,37 @@
 
         .page-link {
             padding: 0.5rem 1rem;
-            border-radius: 12px !important;
+            border-radius: 12px;
             font-weight: 600;
             margin: 0 0.25rem;
-            border: none !important;
+            border: none;
             transition: all 0.3s ease;
             min-width: 40px;
             text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            color: #3e83cc;
         }
 
         .page-link:hover {
             transform: translateY(-2px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #e6f3ff 0%, #f0f8ff 100%);
         }
 
         .page-item.active .page-link {
+            background: linear-gradient(135deg, #3e83cc 0%, #549eed 100%);
+            color: white;
             box-shadow: 0 4px 15px rgba(62, 131, 204, 0.3);
         }
 
         .page-item.disabled .page-link {
             opacity: 0.6;
-            background-color: transparent;
+            background: transparent;
         }
 
         .page-item:first-child .page-link,
         .page-item:last-child .page-link {
-            border-radius: 12px !important;
+            border-radius: 12px;
         }
 
         /* Responsive pagination */
@@ -451,42 +478,6 @@
                 padding: 0.5rem 0.75rem;
                 min-width: 36px;
             }
-        }
-
-        .priority-badge-host {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 500;
-            line-height: 1;
-        }
-
-        .priority-badge-host i.fas {
-            font-size: 8px;
-            margin-right: 4px;
-        }
-
-        .priority-high-host {
-            color: #d32f2f;
-            /* Màu chữ đỏ đậm */
-            background-color: #ffebee;
-            /* Màu nền đỏ nhạt */
-        }
-
-        .priority-medium-host {
-            color: #ff9800;
-            /* Màu chữ cam */
-            background-color: #fff3e0;
-            /* Màu nền cam nhạt */
-        }
-
-        .priority-low-host {
-            color: #388e3c;
-            /* Màu chữ xanh lá */
-            background-color: #e8f5e9;
-            /* Màu nền xanh lá nhạt */
         }
     </style>
 </head>

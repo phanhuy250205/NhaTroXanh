@@ -461,11 +461,11 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th><i class="fas fa-hashtag me-2"></i>ID</th>
+                            <th><i class="fas fa-hashtag me-2"></i>Tên</th>
                             <th><i class="fas fa-ruler-combined me-2"></i>Diện tích (m²)</th>
                             <th><i class="fas fa-money-bill-wave me-2"></i>Giá thuê (VNĐ)</th>
                             <th><i class="fas fa-info-circle me-2"></i>Tình trạng</th>
-                            <th><i class="fas fa-sticky-note me-2"></i>Ghi chú</th>
+                            <th><i class="fas fa-user me-2"></i>Số người ở</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -480,7 +480,7 @@
                                 <span class="badge bg-warning text-dark"
                                     th:if="${room.status.name() == 'unactive'}">Trống</span>
                             </td>
-                            <td th:text="${room.description}">Phòng VIP</td>
+                            <td th:text="${room.max_tenants}">Phòng VIP</td>
                         </tr>
                         <tr th:if="${rooms == null or rooms.isEmpty()}">
                             <td colspan="5" class="text-center text-muted fw-semibold">

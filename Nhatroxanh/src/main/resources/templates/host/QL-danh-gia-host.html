@@ -624,16 +624,16 @@
                       <div class="flex-grow-1">
                         <h6 class="mb-0" th:text="${review.user.fullname}">Nguyễn Văn A</h6>
                         <small class="text-muted"
-                          th:text="'Phòng ' + ${review.room.namerooms} + ' • ' + ${#dates.format(review.createdAt, 'dd/MM/yyyy')}">Phòng
+                          th:text="${review.room.namerooms} + ' • ' + ${#dates.format(review.createdAt, 'dd/MM/yyyy')}">Phòng
                           A1 • 01/01/2024</small>
                         <div class="review-rating mt-1" th:utext="${'⭐'.repeat(review.rating)}">⭐⭐⭐⭐</div>
                       </div>
                     </div>
-                    <div class="review-content mt-2 ps-5" th:text="${review.comment}">Nội dung đánh giá...</div>
+                    <div class="review-content mt-2 ps-5" th:utext="${review.comment}">Nội dung đánh giá...</div>
                     <div class="review-actions ps-5 mt-2">
                       <button type="button" class="btn btn-outline-primary btn-sm btn-view-review"
                         data-bs-toggle="modal" data-bs-target="#reviewDetailModal" th:attr="data-reviewer=${review.user.fullname},
-                             data-room=${'Phòng ' + review.room.namerooms + ', ' + hostel.name},
+                             data-room=${review.room.namerooms + ', ' + hostel.name},
                              data-rating=${review.rating},
                              data-time=${#dates.format(review.createdAt, 'dd/MM/yyyy HH:mm')},
                              data-comment=${review.comment}">
@@ -706,7 +706,7 @@
                         <div class="review-rating mt-1" th:utext="${'⭐'.repeat(review.rating)}">⭐⭐⭐⭐</div>
                       </div>
                     </div>
-                    <div class="review-content mt-2 ps-5" th:text="${review.comment}">Nội dung đánh giá...</div>
+                    <div class="review-content mt-2 ps-5" th:utext="${review.comment}">Nội dung đánh giá...</div>
                     <div class="review-actions ps-5 mt-2">
                       <button type="button" class="btn btn-outline-primary btn-sm btn-view-review"
                         data-bs-toggle="modal" data-bs-target="#reviewDetailModal" th:attr="data-reviewer=${review.user.fullname},
@@ -808,7 +808,7 @@
           roomEl.textContent = room;
           ratingEl.innerHTML = '⭐'.repeat(rating) + ` (${rating}/5)`;
           timeEl.textContent = time;
-          contentEl.textContent = comment;
+          contentEl.innerHTML = comment;
         });
       });
     });

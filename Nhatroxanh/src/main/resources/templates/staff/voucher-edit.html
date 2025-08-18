@@ -580,7 +580,7 @@
                         <div class="float-label-group">
                             <input type="number" class="form-control" id="discountValue" th:field="*{discountValue}"
                                 placeholder=" " min="0">
-                            <label class="float-label" for="discountValue">Giảm giá (%)</label>
+                            <label class="float-label" for="discountValue">Giảm giá</label>
                         </div>
                         <div class="float-label-group">
                             <input type="number" class="form-control" id="minAmount" th:field="*{minAmount}"
@@ -600,14 +600,14 @@
                     <div class="date-range-picker">
                         <div class="date-picker float-label-group">
                             <input type="date" class="form-control" id="startDate" th:field="*{startDate}"
-                                placeholder=" ">
+                                placeholder=" " readonly>
                             <label class="float-label" for="startDate">Ngày bắt đầu</label>
                             <i class="fas fa-calendar-alt date-picker-icon"></i>
                         </div>
+
                         <div class="date-picker float-label-group">
                             <input type="date" class="form-control" id="endDate" th:field="*{endDate}" placeholder=" ">
                             <label class="float-label" for="endDate">Ngày kết thúc</label>
-                            <i class="fas fa-calendar-alt date-picker-icon"></i>
                         </div>
                     </div>
                 </div>

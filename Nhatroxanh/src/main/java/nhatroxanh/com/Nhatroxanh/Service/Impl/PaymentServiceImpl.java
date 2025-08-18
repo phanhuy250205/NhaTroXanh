@@ -124,14 +124,16 @@ public class PaymentServiceImpl implements PaymentService {
         try {
             // Validate contract exists
             Contracts contract = contractsRepository.findById(request.getContractId())
-                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + request.getContractId()));
+                    .orElseThrow(
+                            () -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + request.getContractId()));
 
             // Parse month and year from request
             String[] monthYear = request.getMonth().split("/");
             int month = Integer.parseInt(monthYear[0]);
             int year = Integer.parseInt(monthYear[1]);
 
-            // Validate month range - landlords can only create invoices within ±2 months from current month
+            // Validate month range - landlords can only create invoices within ±2 months
+            // from current month
             validateInvoiceMonth(month, year);
 
             // Check for existing payment for the same contract and month/year
@@ -145,11 +147,11 @@ public class PaymentServiceImpl implements PaymentService {
                 } else if (contract.getUnregisteredTenant() != null) {
                     tenantName = contract.getUnregisteredTenant().getFullName();
                 }
-                
+
                 throw new RuntimeException(String.format(
-                    "Hóa đơn cho tháng %02d/%d đã tồn tại cho phòng %s (Khách thuê: %s). " +
-                    "Không thể tạo hóa đơn trùng lặp cho cùng một tháng.", 
-                    month, year, roomCode, tenantName));
+                        "Hóa đơn cho tháng %02d/%d đã tồn tại cho phòng %s (Khách thuê: %s). " +
+                                "Không thể tạo hóa đơn trùng lặp cho cùng một tháng.",
+                        month, year, roomCode, tenantName));
             }
 
             // Validate payment details
@@ -198,11 +200,12 @@ public class PaymentServiceImpl implements PaymentService {
                 detailPaymentsRepository.save(detailPayment);
             }
 
-            log.info("Successfully created payment with id: {} for contract: {} (Room: {}, Month: {}/{}) with total amount: {}",
-                    payment.getId(), contract.getContractId(), 
+            log.info(
+                    "Successfully created payment with id: {} for contract: {} (Room: {}, Month: {}/{}) with total amount: {}",
+                    payment.getId(), contract.getContractId(),
                     contract.getRoom() != null ? contract.getRoom().getNamerooms() : "N/A",
                     month, year, totalAmount);
-            
+
             return convertToResponseDto(payment);
 
         } catch (NumberFormatException e) {
@@ -392,7 +395,7 @@ public class PaymentServiceImpl implements PaymentService {
                 // Send email if tenant has an email
                 if (tenant.getEmail() != null && !tenant.getEmail().isEmpty()) {
                     try {
-                        String subject = "Hóa Đơn Thanh Toán #" + payment.getPaymentId() + " - " + payment.getMonth();
+                        String subject = "Hóa Đơn Thanh Toán Tháng " + payment.getMonth();
                         String body = buildEmailBody(payment);
                         sendEmail(tenant.getEmail(), subject, body);
                         emailSent = true;
@@ -441,92 +444,93 @@ public class PaymentServiceImpl implements PaymentService {
      * @return HTML email body
      */
     private String buildEmailBody(PaymentResponseDto payment) {
-    StringBuilder body = new StringBuilder();
-    body.append("<!DOCTYPE html>")
-            .append("<html>")
-            .append("<head>")
-            .append("<meta charset='UTF-8'>")
-            .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
-            .append("<style>")
-            .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; background-color: #f5f9fc; }")
-            .append(".ticket { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2); background: white; position: relative; }")
-            .append(".ticket:before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(to bottom, transparent, transparent 10px, #3498db 10px, #3498db 20px); }")
-            .append(".header { background-color: #3498db; color: white; padding: 20px; text-align: center; }")
-            .append("h2 { margin: 0; font-size: 24px; font-weight: 600; }")
-            .append(".content { padding: 25px; }")
-            .append(".info-item { display: flex; margin-bottom: 15px; }")
-            .append(".info-label { flex: 1; font-weight: bold; color: #3498db; }")
-            .append(".info-value { flex: 2; }")
-            .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #f0f7fd; color: #3498db; border: 1px solid #3498db; }")
-            .append(".status-paid { background-color: #e6f7ee; color: #28a745; border-color: #28a745; }")
-            .append(".status-overdue { background-color: #fde8e8; color: #dc3545; border-color: #dc3545; }")
-            .append("table { width: 100%; border-collapse: collapse; margin: 25px 0; border-radius: 8px; overflow: hidden; }")
-            .append("th { background-color: #3498db; color: white; padding: 12px; text-align: left; font-weight: 500; }")
-            .append("td { padding: 12px; border-bottom: 1px solid #e0e0e0; }")
-            .append("tr:last-child td { border-bottom: none; }")
-            .append(".total-row td { padding-top: 15px; font-weight: bold; font-size: 16px; }")
-            .append(".total-amount { color: #3498db; font-size: 18px; }")
-            .append(".payment-button { display: block; text-align: center; padding: 12px 0; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 25px 0; transition: background-color 0.3s; }")
-            .append(".payment-button:hover { background-color: #2980b9; }")
-            .append(".footer { text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1; }")
-            .append(".contact-link { color: #3498db; text-decoration: none; }")
-.append("@media (max-width: 600px) { .content { padding: 15px; } th, td { padding: 8px; } }")
-            .append("</style>")
-            .append("</head>")
-            .append("<body>")
-            .append("<div class='ticket'>")
-            .append("<div class='header'>")
-            .append("<h2>HÓA ĐƠN THANH TOÁN</h2>")
-            .append("</div>")
-            .append("<div class='content'>")
-            .append("<div class='info-item'><span class='info-label'>Mã hóa đơn:</span><span class='info-value'>").append(payment.getPaymentId()).append("</span></div>")
-            .append("<div class='info-item'><span class='info-label'>Tháng:</span><span class='info-value'>").append(payment.getMonth()).append("</span></div>")
-            .append("<div class='info-item'><span class='info-label'>Hạn thanh toán:</span><span class='info-value'>").append(payment.getDueDate()).append("</span></div>")
-            .append("<div class='info-item'><span class='info-label'>Trạng thái:</span><span class='info-value'><span class='status-badge ");
+        StringBuilder body = new StringBuilder();
+        body.append("<!DOCTYPE html>")
+                .append("<html>")
+                .append("<head>")
+                .append("<meta charset='UTF-8'>")
+                .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
+                .append("<style>")
+                .append("body { font-family: Arial, Helvetica, sans-serif; color: #333; max-width: 600px; margin: 20px auto; padding: 0 10px; background-color: #f5f9fc; }")
+                .append(".ticket { border-radius: 10px; overflow: hidden; box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2); background: white; position: relative; }")
+                .append(".ticket:before { content: ''; position: absolute; left: 20px; top: 0; bottom: 0; width: 2px; background: repeating-linear-gradient(to bottom, transparent, transparent 10px, #3498db 10px, #3498db 20px); }")
+                .append(".header { background-color: #3498db; color: white; padding: 20px; text-align: center; }")
+                .append("h2 { margin: 0; font-size: 24px; font-weight: 600; }")
+                .append(".content { padding: 25px; }")
+                .append(".info-item { display: flex; margin-bottom: 15px; }")
+                .append(".info-label { flex: 1; font-weight: bold; color: #3498db; }")
+                .append(".info-value { flex: 2; }")
+                .append(".status-badge { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; background-color: #f0f7fd; color: #3498db; border: 1px solid #3498db; }")
+                .append(".status-paid { background-color: #e6f7ee; color: #28a745; border-color: #28a745; }")
+                .append(".status-overdue { background-color: #fde8e8; color: #dc3545; border-color: #dc3545; }")
+                .append("table { width: 100%; border-collapse: collapse; margin: 25px 0; border-radius: 8px; overflow: hidden; }")
+                .append("th { background-color: #3498db; color: white; padding: 12px; text-align: left; font-weight: 500; }")
+                .append("td { padding: 12px; border-bottom: 1px solid #e0e0e0; }")
+                .append("tr:last-child td { border-bottom: none; }")
+                .append(".total-row td { padding-top: 15px; font-weight: bold; font-size: 16px; }")
+                .append(".total-amount { color: #3498db; font-size: 18px; }")
+                .append(".payment-button { display: block; text-align: center; padding: 12px 0; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 25px 0; transition: background-color 0.3s; }")
+                .append(".payment-button:hover { background-color: #2980b9; }")
+                .append(".footer { text-align: center; color: #7f8c8d; font-size: 12px; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1; }")
+                .append(".contact-link { color: #3498db; text-decoration: none; }")
+                .append("@media (max-width: 600px) { .content { padding: 15px; } th, td { padding: 8px; } }")
+                .append("</style>")
+                .append("</head>")
+                .append("<body>")
+                .append("<div class='ticket'>")
+                .append("<div class='header'>")
+                .append("<h2>Hóa đơn thanh toán tháng ").append(payment.getMonth()).append("</h2>")
+                .append("</div>")
+                .append("<div class='content'>")
+                .append("<div class='info-item'><span class='info-label'>Mã hóa đơn:</span><span class='info-value'>")
+                .append(payment.getPaymentId()).append("</span></div>")
+                .append("<div class='info-item'><span class='info-label'>Tháng:</span><span class='info-value'>")
+                .append(payment.getMonth()).append("</span></div>")
+                .append("<div class='info-item'><span class='info-label'>Hạn thanh toán:</span><span class='info-value'>")
+                .append(payment.getDueDate()).append("</span></div>")
+                .append("<div class='info-item'><span class='info-label'>Trạng thái:</span><span class='info-value'><span class='status-badge ");
 
-    // Handle payment status safely
-    String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase()
-            : "unknown";
-    if (status.contains("đã_thanh_toán")) {
-        body.append("status-paid'>Đã thanh toán");
-    } else if (status.contains("quá_hạn_thanh_toán")) {
-        body.append("status-overdue'>Quá hạn thanh toán");
-    } else {
-        body.append("'>Chưa thanh toán");
+        // Handle payment status safely
+        String status = payment.getPaymentStatus() != null ? payment.getPaymentStatus().toString().toLowerCase()
+                : "unknown";
+        if (status.contains("đã_thanh_toán")) {
+            body.append("status-paid'>Đã thanh toán");
+        } else if (status.contains("quá_hạn_thanh_toán")) {
+            body.append("status-overdue'>Quá hạn thanh toán");
+        } else {
+            body.append("'>Chưa thanh toán");
+        }
+        body.append("</span></span></div>")
+                .append("<table>")
+                .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
+
+        for (PaymentResponseDto.PaymentDetailResponseDto detail : payment.getDetails()) {
+            body.append("<tr>")
+                    .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText())
+                    .append(")</td>")
+                    .append("<td>").append(detail.getQuantity()).append("</td>")
+                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
+                    .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
+                    .append("</tr>");
+        }
+
+        body.append("<tr class='total-row'>")
+                .append("<td colspan='3' style='text-align: right;'>Tổng cộng:</td>")
+                .append("<td class='total-amount'>").append(CURRENCY_FORMAT.format(payment.getTotalAmount()))
+                .append(" VNĐ</td>")
+                .append("</tr>")
+                .append("</table>")
+                .append("<p style='text-align: center; color: #7f8c8d;'>Vui lòng thanh toán trước ngày đến hạn</p>")
+                .append("<div class='footer'>")
+                .append("Nhà Trọ Xanh | <a href='mailto:support@nhatroxanh.com' class='contact-link'>support@nhatroxanh.com</a>")
+                .append("</div>")
+                .append("</div>")
+                .append("</div>")
+                .append("</body>")
+                .append("</html>");
+
+        return body.toString();
     }
-    body.append("</span></span></div>")
-            .append("<table>")
-            .append("<tr><th>Khoản mục</th><th>Số lượng</th><th>Đơn giá</th><th>Thành tiền</th></tr>");
-
-    for (PaymentResponseDto.PaymentDetailResponseDto detail : payment.getDetails()) {
-        body.append("<tr>")
-                .append("<td>").append(detail.getItemName()).append(" (").append(detail.getDisplayText())
-                .append(")</td>")
-                .append("<td>").append(detail.getQuantity()).append("</td>")
-                .append("<td>").append(CURRENCY_FORMAT.format(detail.getUnitPrice())).append(" VNĐ</td>")
-                .append("<td>").append(CURRENCY_FORMAT.format(detail.getAmount())).append(" VNĐ</td>")
-                .append("</tr>");
-    }
-
-    body.append("<tr class='total-row'>")
-            .append("<td colspan='3' style='text-align: right;'>Tổng cộng:</td>")
-            .append("<td class='total-amount'>").append(CURRENCY_FORMAT.format(payment.getTotalAmount()))
-            .append(" VNĐ</td>")
-            .append("</tr>")
-            .append("</table>")
-            .append("<a href='/tenant/payments/").append(payment.getPaymentId())
-            .append("' class='payment-button'>THANH TOÁN NGAY</a>")
-            .append("<p style='text-align: center; color: #7f8c8d;'>Vui lòng thanh toán trước ngày đến hạn</p>")
-            .append("<div class='footer'>")
-.append("Nhà Trọ Xanh | <a href='mailto:support@nhatroxanh.com' class='contact-link'>support@nhatroxanh.com</a>")
-            .append("</div>")
-            .append("</div>")
-            .append("</div>")
-            .append("</body>")
-            .append("</html>");
-
-    return body.toString();
-}
 
     /**
      * Sends an email with the specified subject and HTML body.
@@ -690,25 +694,25 @@ public class PaymentServiceImpl implements PaymentService {
             // Validate that the contract belongs to the owner for security
             Contracts contract = contractsRepository.findById(contractId)
                     .orElseThrow(() -> new RuntimeException("Không tìm thấy hợp đồng với ID: " + contractId));
-            
+
             // Check if the contract belongs to the owner
             if (!contract.getRoom().getHostel().getOwner().getUserId().equals(ownerId)) {
-                log.warn("Owner {} attempted to check payment for contract {} which doesn't belong to them", 
+                log.warn("Owner {} attempted to check payment for contract {} which doesn't belong to them",
                         ownerId, contractId);
                 throw new RuntimeException("Bạn không có quyền truy cập hợp đồng này");
             }
-            
+
             // Check if payment exists for this contract and month/year
             Optional<Payments> existingPayment = paymentsRepository.findByContractIdAndMonth(contractId, month, year);
             boolean exists = existingPayment.isPresent();
-            
-            log.info("Payment existence check for contract {} and month {}/{}: {}", 
+
+            log.info("Payment existence check for contract {} and month {}/{}: {}",
                     contractId, month, year, exists);
-            
+
             return exists;
-            
+
         } catch (Exception e) {
-            log.error("Error checking payment existence for contract {} and month {}/{}: ", 
+            log.error("Error checking payment existence for contract {} and month {}/{}: ",
                     contractId, month, year, e);
             throw new RuntimeException("Lỗi kiểm tra hóa đơn: " + e.getMessage());
         }
@@ -721,36 +725,38 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Validates that the invoice month is within the allowed range (current month ±2 months)
+     * Validates that the invoice month is within the allowed range (current month
+     * ±2 months)
+     * 
      * @param month The month to validate (1-12)
-     * @param year The year to validate
+     * @param year  The year to validate
      * @throws RuntimeException if the month is outside the allowed range
      */
     private void validateInvoiceMonth(int month, int year) {
         LocalDate currentDate = LocalDate.now();
         LocalDate requestedDate = LocalDate.of(year, month, 1);
-        
+
         // Calculate the difference in months
         long monthsDifference = java.time.temporal.ChronoUnit.MONTHS.between(
-            currentDate.withDayOfMonth(1), requestedDate);
-        
+                currentDate.withDayOfMonth(1), requestedDate);
+
         // Allow creation for current month ±2 months
         if (Math.abs(monthsDifference) > 2) {
             String currentMonthYear = String.format("%02d/%d", currentDate.getMonthValue(), currentDate.getYear());
             String requestedMonthYear = String.format("%02d/%d", month, year);
-            
+
             if (monthsDifference > 2) {
                 throw new RuntimeException(String.format(
-                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong tương lai từ tháng hiện tại (%s).",
-                    requestedMonthYear, currentMonthYear));
+                        "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong tương lai từ tháng hiện tại (%s).",
+                        requestedMonthYear, currentMonthYear));
             } else {
                 throw new RuntimeException(String.format(
-                    "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong quá khứ từ tháng hiện tại (%s).",
-                    requestedMonthYear, currentMonthYear));
+                        "Không thể tạo hóa đơn cho tháng %s. Chỉ có thể tạo hóa đơn tối đa 2 tháng trong quá khứ từ tháng hiện tại (%s).",
+                        requestedMonthYear, currentMonthYear));
             }
         }
-        
-        log.info("Invoice month validation passed for {}/{} (current: {}/{})", 
+
+        log.info("Invoice month validation passed for {}/{} (current: {}/{})",
                 month, year, currentDate.getMonthValue(), currentDate.getYear());
     }
 }

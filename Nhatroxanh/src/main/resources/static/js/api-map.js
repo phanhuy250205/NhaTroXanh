@@ -36,7 +36,6 @@ class VietnamAddressAPI {
         const provinceSelect = document.getElementById("provinceHost");
         const districtSelect = document.getElementById("districtHost");
         const wardSelect = document.getElementById("wardHost");
-        const houseNumberInput = document.getElementById("houseNumberHost");
         const streetInput = document.getElementById("streetHost");
 
         // Step 1: Tỉnh/Thành phố
@@ -74,17 +73,9 @@ class VietnamAddressAPI {
             }
         }
 
-        // Step 4: Số nhà và đường
+        // Step 4: Đường/phố
         if (parts.length >= 1) {
-            const addressPart = parts[0].trim();
-            const firstSpaceIndex = addressPart.indexOf(" ");
-            if (firstSpaceIndex > 0) {
-                houseNumberInput.value = addressPart.substring(0, firstSpaceIndex).trim();
-                streetInput.value = addressPart.substring(firstSpaceIndex + 1).trim();
-            } else {
-                houseNumberInput.value = addressPart;
-                streetInput.value = "";
-            }
+            streetInput.value = parts[0].trim();
         }
 
         this.updateFullAddress();
@@ -103,11 +94,9 @@ class VietnamAddressAPI {
     }
 
     async loadDistricts(provinceCode) {
-        console.log("Đang tải quận/huyện với mã tỉnh:", provinceCode);
         try {
             const response = await fetch(`${this.baseURL}/p/${provinceCode}?depth=2`);
             const data = await response.json();
-            console.log("Danh sách quận/huyện:", data.districts);
             this.districts = data.districts || [];
             this.populateDistricts();
         } catch (error) {
@@ -178,7 +167,6 @@ class VietnamAddressAPI {
         const provinceSelect = document.getElementById("provinceHost");
         const districtSelect = document.getElementById("districtHost");
         const wardSelect = document.getElementById("wardHost");
-        const houseNumberInput = document.getElementById("houseNumberHost");
         const streetInput = document.getElementById("streetHost");
 
         provinceSelect.addEventListener("change", async (e) => {
@@ -202,7 +190,6 @@ class VietnamAddressAPI {
         });
 
         wardSelect.addEventListener("change", () => this.updateFullAddress());
-        houseNumberInput.addEventListener("input", () => this.updateFullAddress());
         streetInput.addEventListener("input", () => this.updateFullAddress());
     }
 
@@ -210,26 +197,18 @@ class VietnamAddressAPI {
         const provinceSelect = document.getElementById("provinceHost");
         const districtSelect = document.getElementById("districtHost");
         const wardSelect = document.getElementById("wardHost");
-        const houseNumberInput = document.getElementById("houseNumberHost");
         const streetInput = document.getElementById("streetHost");
         const fullAddressInput = document.getElementById("fullAddressHost");
 
         const clean = (text) => (text || "").replace(/,+/g, "").replace(/\s+/g, " ").trim();
 
-        const houseNumber = clean(houseNumberInput.value);
         const street = clean(streetInput.value);
         const ward = wardSelect.value ? clean(wardSelect.options[wardSelect.selectedIndex].text) : "";
         const district = districtSelect.value ? clean(districtSelect.options[districtSelect.selectedIndex].text) : "";
         const province = provinceSelect.value ? clean(provinceSelect.options[provinceSelect.selectedIndex].text) : "";
 
-        let addressPart = houseNumber;
-        if (street) {
-            addressPart += (houseNumber ? " " : "") + street;
-        }
-
-        const parts = [addressPart, ward, district, province].filter(part => part && part.length > 0);
+        const parts = [street, ward, district, province].filter(part => part && part.length > 0);
         fullAddressInput.value = parts.join(", ").replace(/,+(?=,|$)/g, "").trim();
-        console.log("Updated Full Address:", fullAddressInput.value);
     }
 
     showError(message) {
@@ -251,7 +230,6 @@ class VietnamAddressAPI {
         const provinceSelect = document.getElementById("provinceHost");
         const districtSelect = document.getElementById("districtHost");
         const wardSelect = document.getElementById("wardHost");
-        const houseNumberInput = document.getElementById("houseNumberHost");
         const streetInput = document.getElementById("streetHost");
 
         return {
@@ -268,12 +246,10 @@ class VietnamAddressAPI {
                 name: wardSelect.options[wardSelect.selectedIndex]?.text || "",
             },
             street: streetInput.value.trim(),
-            houseNumber: houseNumberInput.value.trim(),
             fullAddress: document.getElementById("fullAddressHost").value,
         };
     }
 
-    // THÊM HÀM VALIDATION VÀO ĐÂY
     validateForm() {
         console.log('API Map - Validating form...');
         let valid = true;
@@ -287,7 +263,6 @@ class VietnamAddressAPI {
             el.classList.remove('is-invalid');
         });
 
-        // Hàm hiển thị lỗi
         const showError = (fieldId, message) => {
             const field = document.getElementById(fieldId);
             const errorElement = document.getElementById('error-' + fieldId);
@@ -334,13 +309,6 @@ class VietnamAddressAPI {
             valid = false;
         }
 
-        // Kiểm tra số nhà
-        const houseNumber = document.getElementById('houseNumberHost').value.trim();
-        if (!houseNumber) {
-            showError('houseNumberHost', 'Vui lòng nhập số nhà.');
-            valid = false;
-        }
-
         // Kiểm tra đường/phố
         const street = document.getElementById('streetHost').value.trim();
         if (!street) {
@@ -348,34 +316,23 @@ class VietnamAddressAPI {
             valid = false;
         }
 
-        console.log('API Map - Validation result:', valid);
         return valid;
     }
 
     processFormData() {
         let address = this.getSelectedAddress();
 
-        // Hàm làm sạch triệt để
         const clean = (text) => (text || "").replace(/,+/g, "").replace(/\s+/g, " ").trim();
 
-        address.houseNumber = clean(address.houseNumber);
         address.street = clean(address.street);
         address.ward.name = clean(address.ward.name);
         address.district.name = clean(address.district.name);
         address.province.name = clean(address.province.name);
 
-        // Gộp phần đầu địa chỉ: houseNumber + street
-        const addressPart = [address.houseNumber, address.street]
-            .filter(Boolean)
-            .join(" ");
-
-        // Gộp địa chỉ đầy đủ
-        const fullAddress = [addressPart, address.ward.name, address.district.name, address.province.name]
+        const fullAddress = [address.street, address.ward.name, address.district.name, address.province.name]
             .filter(Boolean)
             .join(", ");
 
-        // Gán lại giá trị input
-        document.getElementById("houseNumberHost").value = address.houseNumber;
         document.getElementById("streetHost").value = address.street;
         document.getElementById("fullAddressHost").value = fullAddress;
         document.getElementById("provinceCodeHost").value = address.province.code;
@@ -392,34 +349,20 @@ class VietnamAddressAPI {
 document.addEventListener("DOMContentLoaded", () => {
     window.vietnamAddressAPI = new VietnamAddressAPI();
 
-    // XỬ LÝ SUBMIT FORM VỚI VALIDATION
     const form = document.getElementById("addHostelFormHost");
     if (form) {
         form.addEventListener("submit", function (e) {
-            console.log("API Map - Form submit event triggered");
-
-            // Prevent submit ngay lập tức
             e.preventDefault();
             e.stopPropagation();
 
-            // CHẠY VALIDATION TRƯỚC
             const isValid = window.vietnamAddressAPI.validateForm();
 
             if (isValid) {
-                console.log("API Map - Form is valid, processing data...");
-
-                // Xử lý dữ liệu địa chỉ
                 window.vietnamAddressAPI.processFormData();
-
-                // Submit form
                 setTimeout(() => {
-                    console.log("API Map - Submitting form...");
                     this.submit();
                 }, 100);
             } else {
-                console.log("API Map - Form is invalid, preventing submit");
-
-                // Scroll đến lỗi đầu tiên
                 setTimeout(() => {
                     const firstError = document.querySelector('.is-invalid');
                     if (firstError) {
@@ -432,45 +375,36 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+// Kiểm tra realtime số phòng
 const roomNumberField = document.getElementById("roomCountHost");
 const errorField = document.getElementById("error-roomCountHost");
 
-// Kiểm tra realtime khi nhập
-roomNumberField.addEventListener("input", function() {
-    const value = parseInt(roomNumberField.value, 10);
+if (roomNumberField) {
+    roomNumberField.addEventListener("input", function () {
+        const value = parseInt(roomNumberField.value, 10);
 
-    if (isNaN(value) || value < 1) {
-        errorField.innerText = "Số phòng phải từ 1 trở lên";
-        roomNumberField.classList.add("is-invalid");
-    } 
-    else if (value > 20) {
-        errorField.innerText = "Số phòng tối đa là 20";
-        roomNumberField.classList.add("is-invalid");
-    } 
-    else {
-        errorField.innerText = "";
-        roomNumberField.classList.remove("is-invalid");
-    }
-});
+        if (isNaN(value) || value < 1) {
+            errorField.innerText = "Số phòng phải từ 1 trở lên";
+            roomNumberField.classList.add("is-invalid");
+        } else if (value > 20) {
+            errorField.innerText = "Số phòng tối đa là 20";
+            roomNumberField.classList.add("is-invalid");
+        } else {
+            errorField.innerText = "";
+            roomNumberField.classList.remove("is-invalid");
+        }
+    });
+}
 
-// Kiểm tra lại khi submit
-document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
-    const value = parseInt(roomNumberField.value, 10);
-
-    if (isNaN(value) || value < 1 || value > 20) {
-        e.preventDefault();
-    }
-});
-
-document.getElementById("addHostelFormHost").addEventListener("submit", function(e) {
+// Kiểm tra tên khu trọ bắt buộc bắt đầu bằng "Khu"
+document.getElementById("addHostelFormHost").addEventListener("submit", function (e) {
     const hostelNameInput = document.getElementById("hostelNameHost");
     const errorMsg = document.getElementById("error-hostelNameHost");
 
     const value = hostelNameInput.value.trim();
 
-    // Kiểm tra có bắt đầu bằng "Khu"
     if (!/^Khu/i.test(value)) {
-        e.preventDefault(); // Ngăn submit
+        e.preventDefault();
         errorMsg.textContent = "Tên khu trọ phải bắt đầu bằng từ 'Khu'.";
         hostelNameInput.classList.add("is-invalid");
     } else {

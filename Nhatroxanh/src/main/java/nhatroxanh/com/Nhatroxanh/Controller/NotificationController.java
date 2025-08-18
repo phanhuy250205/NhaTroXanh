@@ -37,10 +37,12 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     /**
-     * Hàm helper để lấy thông tin Users một cách an toàn từ bất kỳ loại đăng nhập nào.
+     * Hàm helper để lấy thông tin Users một cách an toàn từ bất kỳ loại đăng nhập
+     * nào.
      */
     private Users getUserFromAuthentication(Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication.getPrincipal().equals("anonymousUser")) {
             return null;
         }
         Object principal = authentication.getPrincipal();
@@ -64,12 +66,11 @@ public class NotificationController {
             if (user == null) {
                 log.info("Unauthenticated access to /api/notifications, returning empty response");
                 return ResponseEntity.ok(Map.of(
-                    "notifications", Collections.emptyList(),
-                    "unreadCount", 0,
-                    "currentPage", 0,
-                    "totalPages", 0,
-                    "totalItems", 0
-                ));
+                        "notifications", Collections.emptyList(),
+                        "unreadCount", 0,
+                        "currentPage", 0,
+                        "totalPages", 0,
+                        "totalItems", 0));
             }
 
             Integer userId = user.getUserId();
@@ -87,11 +88,13 @@ public class NotificationController {
             // Use database-level pagination
             Pageable pageable = PageRequest.of(page, size);
             Page<Notification> notificationPage;
-            
+
             if (type != null && !type.isEmpty()) {
                 try {
-                    Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type.toUpperCase());
-                    notificationPage = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(userId, notificationType, pageable);
+                    Notification.NotificationType notificationType = Notification.NotificationType
+                            .valueOf(type.toUpperCase());
+                    notificationPage = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(userId,
+                            notificationType, pageable);
                 } catch (IllegalArgumentException e) {
                     log.warn("Invalid notification type: {}", type);
                     notificationPage = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId, pageable);
@@ -99,15 +102,15 @@ public class NotificationController {
             } else {
                 notificationPage = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId, pageable);
             }
-            
+
             List<Map<String, Object>> enrichedNotifications = notificationPage.getContent().stream()
                     .filter(Objects::nonNull)
                     .map(this::enrichNotification)
                     .collect(Collectors.toList());
 
             long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
-            
-            log.info("Found {} total notifications, returning {} items for page {} ({} unread) for user ID: {}", 
+
+            log.info("Found {} total notifications, returning {} items for page {} ({} unread) for user ID: {}",
                     notificationPage.getTotalElements(), enrichedNotifications.size(), page, unreadCount, userId);
 
             return ResponseEntity.ok(Map.of(
@@ -117,11 +120,11 @@ public class NotificationController {
                     "totalPages", notificationPage.getTotalPages(),
                     "totalItems", notificationPage.getTotalElements(),
                     "hasNext", notificationPage.hasNext(),
-                    "hasPrevious", notificationPage.hasPrevious()
-            ));
+                    "hasPrevious", notificationPage.hasPrevious()));
         } catch (Exception e) {
             log.error("Error fetching notifications: ", e);
-            return ResponseEntity.badRequest().body(Map.of("error", "Failed to fetch notifications: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to fetch notifications: " + e.getMessage()));
         }
     }
 
@@ -137,30 +140,32 @@ public class NotificationController {
             if (user == null) {
                 log.info("Unauthenticated access to /api/notifications/by-type, returning empty response");
                 return ResponseEntity.ok(Map.of(
-                    "notifications", Collections.emptyList(),
-                    "unreadCount", 0,
-                    "currentPage", 0,
-                    "totalPages", 0,
-                    "totalItems", 0
-                ));
+                        "notifications", Collections.emptyList(),
+                        "unreadCount", 0,
+                        "currentPage", 0,
+                        "totalPages", 0,
+                        "totalItems", 0));
             }
 
             Integer userId = user.getUserId();
-            log.info("Fetching notifications by type for user ID: {}, type: {}, page: {}, size: {}", userId, type, page, size);
+            log.info("Fetching notifications by type for user ID: {}, type: {}, page: {}, size: {}", userId, type, page,
+                    size);
 
             try {
-                Notification.NotificationType notificationType = Notification.NotificationType.valueOf(type.toUpperCase());
+                Notification.NotificationType notificationType = Notification.NotificationType
+                        .valueOf(type.toUpperCase());
                 Pageable pageable = PageRequest.of(page, size);
-                Page<Notification> notificationPage = notificationRepository.findByUserUserIdAndTypeOrderByCreateAtDesc(userId, notificationType, pageable);
-                
+                Page<Notification> notificationPage = notificationRepository
+                        .findByUserUserIdAndTypeOrderByCreateAtDesc(userId, notificationType, pageable);
+
                 List<Map<String, Object>> enrichedNotifications = notificationPage.getContent().stream()
                         .filter(Objects::nonNull)
                         .map(this::enrichNotification)
                         .collect(Collectors.toList());
 
                 long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
-                
-                log.info("Found {} notifications of type {} for user ID: {}, returning {} items for page {}", 
+
+                log.info("Found {} notifications of type {} for user ID: {}, returning {} items for page {}",
                         notificationPage.getTotalElements(), type, userId, enrichedNotifications.size(), page);
 
                 return ResponseEntity.ok(Map.of(
@@ -171,15 +176,15 @@ public class NotificationController {
                         "totalItems", notificationPage.getTotalElements(),
                         "hasNext", notificationPage.hasNext(),
                         "hasPrevious", notificationPage.hasPrevious(),
-                        "type", type
-                ));
+                        "type", type));
             } catch (IllegalArgumentException e) {
                 log.warn("Invalid notification type: {}", type);
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid notification type: " + type));
             }
         } catch (Exception e) {
             log.error("Error fetching notifications by type: ", e);
-            return ResponseEntity.badRequest().body(Map.of("error", "Failed to fetch notifications by type: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to fetch notifications by type: " + e.getMessage()));
         }
     }
 
@@ -225,7 +230,7 @@ public class NotificationController {
                 model.addAttribute("unreadCount", 0);
                 return "guest/chitiet-thongbao";
             }
-            
+
             Integer userId = user.getUserId();
             log.info("Rendering notifications view for user ID: {}", userId);
 
@@ -240,11 +245,11 @@ public class NotificationController {
 
             List<Notification> notifications = notificationRepository.findByUserUserIdOrderByCreateAtDesc(userId);
             long unreadCount = notificationRepository.countByUserUserIdAndIsReadFalse(userId);
-            
+
             List<Map<String, Object>> enrichedNotifications = notifications.stream()
-                .filter(Objects::nonNull)
-                .map(this::enrichNotification)
-                .collect(Collectors.toList());
+                    .filter(Objects::nonNull)
+                    .map(this::enrichNotification)
+                    .collect(Collectors.toList());
 
             model.addAttribute("notifications", enrichedNotifications);
             model.addAttribute("unreadCount", unreadCount);
@@ -272,7 +277,7 @@ public class NotificationController {
                 if (successMatcher.find()) {
                     paymentDetails.put("invoiceId", successMatcher.group(1));
                     paymentDetails.put("month", successMatcher.group(4));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(successMatcher.group(5))));
+                    paymentDetails.put("total",successMatcher.group(5));
                     paymentDetails.put("roomName", successMatcher.group(2).trim());
                     paymentDetails.put("hostelName", successMatcher.group(3).trim());
                     paymentDetails.put("paymentMethod", successMatcher.group(6).trim());
@@ -290,7 +295,7 @@ public class NotificationController {
                 if (altSuccessMatcher.find()) {
                     paymentDetails.put("invoiceId", altSuccessMatcher.group(1));
                     paymentDetails.put("month", altSuccessMatcher.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(altSuccessMatcher.group(3))));
+                    paymentDetails.put("total", altSuccessMatcher.group(3));
                     paymentDetails.put("paymentMethod", altSuccessMatcher.group(4).trim());
                     paymentDetails.put("status", "SUCCESS");
                     paymentDetails.put("details", Collections.emptyList());
@@ -310,11 +315,12 @@ public class NotificationController {
                             Pattern.CASE_INSENSITIVE);
                     Matcher amountMatcher = amountPattern.matcher(message);
                     if (amountMatcher.find()) {
-                        paymentDetails.put("total", formatVietnameseCurrency(parseNumber(amountMatcher.group(1))));
+                        paymentDetails.put("total", amountMatcher.group(1));
                     }
 
                     // Extract month (more flexible pattern)
-                    Pattern monthPattern = Pattern.compile("tháng:?\\s*([\\d/]+(?:\\s*năm\\s*\\d+)?)", Pattern.CASE_INSENSITIVE);
+                    Pattern monthPattern = Pattern.compile("tháng:?\\s*([\\d/]+(?:\\s*năm\\s*\\d+)?)",
+                            Pattern.CASE_INSENSITIVE);
                     Matcher monthMatcher = monthPattern.matcher(message);
                     if (monthMatcher.find()) {
                         paymentDetails.put("month", monthMatcher.group(1).trim());
@@ -333,7 +339,7 @@ public class NotificationController {
                 if (matcher.find()) {
                     paymentDetails.put("invoiceId", matcher.group(1));
                     paymentDetails.put("month", matcher.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(matcher.group(3))));
+                    paymentDetails.put("total",matcher.group(3));
                     paymentDetails.put("dueDate", matcher.group(4).trim());
                     paymentDetails.put("status", "PENDING");
                     paymentDetails.put("details", Collections.emptyList());
@@ -349,7 +355,7 @@ public class NotificationController {
                 if (altPendingMatcher.find()) {
                     paymentDetails.put("invoiceId", altPendingMatcher.group(1));
                     paymentDetails.put("month", altPendingMatcher.group(2));
-                    paymentDetails.put("total", formatVietnameseCurrency(parseNumber(altPendingMatcher.group(3))));
+                    paymentDetails.put("total",altPendingMatcher.group(3));
                     paymentDetails.put("dueDate", altPendingMatcher.group(4).trim());
                     paymentDetails.put("status", "PENDING");
                     paymentDetails.put("details", Collections.emptyList());
@@ -364,30 +370,6 @@ public class NotificationController {
             log.error("Error parsing payment notification: {}", message, e);
             return null;
         }
-    }
-
-    private String formatVietnameseCurrency(Number amount) {
-        if (amount == null) {
-            return "0 VNĐ";
-        }
-
-        try {
-            double value = amount.doubleValue();
-            NumberFormat formatter = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
-            return formatter.format(Math.round(value)) + " VNĐ";
-        } catch (Exception e) {
-            log.warn("Could not format currency amount: {}", amount, e);
-            return amount + " VNĐ";
-        }
-    }
-
-    private Number parseNumber(String amount) throws ParseException {
-        if (amount == null || amount.trim().isEmpty()) {
-            return 0;
-        }
-        String cleanAmount = amount.replaceAll("[^\\d.,]", "").trim();
-        NumberFormat parser = NumberFormat.getNumberInstance(Locale.forLanguageTag("vi-VN"));
-        return parser.parse(cleanAmount);
     }
 
     private Map<String, Object> parseIncidentNotification(String message) {
@@ -428,14 +410,12 @@ public class NotificationController {
                 String minAmountStr = matcher.group(3);
                 String endDate = matcher.group(4);
 
-                // Parse the numeric values
-                Number discountValue = parseNumber(discountValueStr);
-                Number minAmount = parseNumber(minAmountStr);
+                // Parse the numeric values as longs to avoid decimal issues
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue",  discountValue); // Hardcode correct value
-                voucherDetails.put("minAmount", minAmount); // Hardcode correct value
+                voucherDetails.put("discountValue", discountValueStr);
+                voucherDetails.put("minAmount", minAmountStr);
                 voucherDetails.put("endDate", endDate);
-                log.debug("Corrected voucher details: {}", voucherDetails);
+                log.debug("Parsed voucher details: {}", voucherDetails);
                 return voucherDetails;
             }
 
@@ -449,16 +429,14 @@ public class NotificationController {
                 String minAmountStr = fallbackMatcher.group(3);
                 String endDate = fallbackMatcher.group(4);
 
-
-
-                // Apply corrected values
+               
                 voucherDetails.put("voucherCode", voucherCode);
-                voucherDetails.put("discountValue", discountValueStr); // Hardcode correct value
-                voucherDetails.put("minAmount", minAmountStr); // Hardcode correct value
+                voucherDetails.put("discountValue", discountValueStr);
+                voucherDetails.put("minAmount", minAmountStr);
                 voucherDetails.put("endDate", endDate);
-                log.debug("Corrected fallback voucher details: {}", voucherDetails);
+                log.debug("Parsed fallback voucher details: {}", voucherDetails);
                 return voucherDetails;
-            } 
+            }
 
             log.warn("Could not parse PROMOTION notification format: {}", message);
             return null;
@@ -489,68 +467,69 @@ public class NotificationController {
                     "cleanedUp", cleanedUp));
         } catch (Exception e) {
             log.error("Error during manual cleanup: ", e);
-            return ResponseEntity.badRequest().body(Map.of("error", "Failed to cleanup notifications: " + e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Failed to cleanup notifications: " + e.getMessage()));
         }
     }
-    
+
     // =================================================================
     // CÁC HÀM HELPER ĐỂ XỬ LÝ VÀ ĐỊNH DẠNG DỮ LIỆU
     // =================================================================
 
-  private Map<String, Object> enrichNotification(Notification notification) {
-    Map<String, Object> map = new HashMap<>();
-    map.put("notificationId", notification.getNotificationId());
-    map.put("title", notification.getTitle());
-    map.put("message", notification.getMessage());
-    map.put("type", notification.getType().toString());
-    map.put("isRead", notification.getIsRead());
-    
-    // Format createAt as a string
-    if (notification.getCreateAt() != null) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String formattedDateTime = notification.getCreateAt().toLocalDateTime().format(formatter);
-        map.put("createAt", formattedDateTime);
-    } else {
-        map.put("createAt", "N/A");
-    }
-    
-    map.put("notification", notification); // For viewNotifications
+    private Map<String, Object> enrichNotification(Notification notification) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("notificationId", notification.getNotificationId());
+        map.put("title", notification.getTitle());
+        map.put("message", notification.getMessage());
+        map.put("type", notification.getType().toString());
+        map.put("isRead", notification.getIsRead());
 
-    if (notification.getRoom() != null) {
-        Rooms room = notification.getRoom();
-        Map<String, Object> roomMap = new HashMap<>();
-        roomMap.put("roomId", room.getRoomId());
-        roomMap.put("namerooms", room.getNamerooms());
-        roomMap.put("acreage", room.getAcreage());
-        roomMap.put("price", formatVietnameseCurrency(room.getPrice()));
-        if (room.getHostel() != null) {
-            roomMap.put("hostel", Map.of("name", room.getHostel().getName()));
-            // Add hostelId for payment URL generation
-            map.put("hostelId", room.getHostel().getHostelId());
+        // Format createAt as a string
+        if (notification.getCreateAt() != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String formattedDateTime = notification.getCreateAt().toLocalDateTime().format(formatter);
+            map.put("createAt", formattedDateTime);
+        } else {
+            map.put("createAt", "N/A");
         }
-        map.put("room", roomMap);
-        // Add roomId for payment URL generation
-        map.put("roomId", room.getRoomId());
-    }
 
-    switch (notification.getType()) {
-        case PAYMENT:
-            Map<String, Object> paymentDetails = parsePaymentNotification(notification.getMessage());
-            if (paymentDetails != null) {
-                // Add the invoiceId to the top level for easy access in JavaScript
-                map.put("invoiceId", paymentDetails.get("invoiceId"));
-                map.put("paymentDetails", paymentDetails);
+        map.put("notification", notification); // For viewNotifications
+
+        if (notification.getRoom() != null) {
+            Rooms room = notification.getRoom();
+            Map<String, Object> roomMap = new HashMap<>();
+            roomMap.put("roomId", room.getRoomId());
+            roomMap.put("namerooms", room.getNamerooms());
+            roomMap.put("acreage", room.getAcreage());
+            roomMap.put("price", room.getPrice());
+            if (room.getHostel() != null) {
+                roomMap.put("hostel", Map.of("name", room.getHostel().getName()));
+                // Add hostelId for payment URL generation
+                map.put("hostelId", room.getHostel().getHostelId());
             }
-            break;
-        case REPORT:
-            map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));
-            break;
-        case PROMOTION:
-            map.put("voucherDetails", parseVoucherNotification(notification.getMessage()));
-            break;
-        default:
-            break;
+            map.put("room", roomMap);
+            // Add roomId for payment URL generation
+            map.put("roomId", room.getRoomId());
+        }
+
+        switch (notification.getType()) {
+            case PAYMENT:
+                Map<String, Object> paymentDetails = parsePaymentNotification(notification.getMessage());
+                if (paymentDetails != null) {
+                    // Add the invoiceId to the top level for easy access in JavaScript
+                    map.put("invoiceId", paymentDetails.get("invoiceId"));
+                    map.put("paymentDetails", paymentDetails);
+                }
+                break;
+            case REPORT:
+                map.put("incidentDetails", parseIncidentNotification(notification.getMessage()));
+                break;
+            case PROMOTION:
+                map.put("voucherDetails", parseVoucherNotification(notification.getMessage()));
+                break;
+            default:
+                break;
+        }
+        return map;
     }
-    return map;
-}
 }

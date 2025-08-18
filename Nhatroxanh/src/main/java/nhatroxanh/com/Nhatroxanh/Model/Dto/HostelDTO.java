@@ -28,7 +28,6 @@ public class HostelDTO {
     private String wardCode;
     private String wardName;
     private String street;
-    private String houseNumber;
     private String address;
     private Date createdAt;
 
@@ -43,19 +42,13 @@ public class HostelDTO {
                        .trim();
         };
 
-        String cleanHouseNumber = clean.apply(houseNumber);
         String cleanStreet = clean.apply(street);
         String cleanWardName = clean.apply(wardName);
         String cleanDistrictName = clean.apply(districtName);
         String cleanProvinceName = clean.apply(provinceName);
 
-        // Kết hợp số nhà và tên đường
-        String addressPart = cleanHouseNumber;
-        if (!cleanStreet.isEmpty()) {
-            addressPart += (cleanHouseNumber.isEmpty() ? "" : " ") + cleanStreet;
-        }
-
-        if (!addressPart.isEmpty()) parts.add(addressPart);
+        // Chỉ sử dụng street thay vì kết hợp houseNumber và street
+        if (!cleanStreet.isEmpty()) parts.add(cleanStreet);
         if (!cleanWardName.isEmpty()) parts.add(cleanWardName);
         if (!cleanDistrictName.isEmpty()) parts.add(cleanDistrictName);
         if (!cleanProvinceName.isEmpty()) parts.add(cleanProvinceName);
@@ -69,10 +62,7 @@ public class HostelDTO {
             address = address.replaceAll(",+", ",").replaceAll("(^,)|(,$)", "").trim();
             String[] parts = address.split(",\\s*");
             if (parts.length >= 1) {
-                String addressPart = parts[0].trim();
-                int firstSpaceIndex = addressPart.indexOf(" ");
-                this.houseNumber = firstSpaceIndex > 0 ? addressPart.substring(0, firstSpaceIndex) : "";
-                this.street = firstSpaceIndex > 0 ? addressPart.substring(firstSpaceIndex + 1) : addressPart;
+                this.street = parts[0].trim(); // Gán trực tiếp phần đầu là street
                 if (parts.length >= 2) this.wardName = parts[1].trim();
                 if (parts.length >= 3) this.districtName = parts[2].trim();
                 if (parts.length >= 4) this.provinceName = parts[3].trim();

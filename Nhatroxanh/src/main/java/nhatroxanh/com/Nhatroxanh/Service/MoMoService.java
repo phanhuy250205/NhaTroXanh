@@ -98,7 +98,10 @@ public class MoMoService {
 
             String requestId = momoPartnerCode + System.currentTimeMillis();
             String orderId = requestId;
-            String orderInfo = "Thanh toán hóa đơn #" + invoiceId;
+            java.util.Calendar cal = java.util.Calendar.getInstance();
+            cal.setTime(payment.getDueDate());
+            int monthValue = cal.get(java.util.Calendar.MONTH) + 1; 
+            String orderInfo = "Thanh toán hóa đơn tháng " + monthValue;
             long amount = Math.round(payment.getTotalAmount());
             String extraData = "invoiceId=" + invoiceId;
 

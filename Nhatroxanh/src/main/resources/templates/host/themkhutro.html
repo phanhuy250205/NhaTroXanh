@@ -129,16 +129,7 @@
                                             <div class="invalid-feedback" id="error-streetHost"></div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group-host">
-                                        <label for="houseNumberHost" class="form-label-host">Số nhà</label>
-                                        <input type="text" id="houseNumberHost" class="form-control-host"
-                                            name="houseNumber" th:value="${hostel != null ? hostel.houseNumber : ''}"
-                                            placeholder="123">
-                                            <div class="invalid-feedback" id="error-houseNumberHost"></div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
+                                <div class="col-md">
                                     <div class="form-group-host">
                                         <label for="fullAddressHost" class="form-label-host">Địa chỉ đầy đủ</label>
                                         <input type="text" id="fullAddressHost" class="form-control-host" name="address"
@@ -161,8 +152,6 @@
                                 th:value="${hostel != null ? hostel.wardName : ''}">
                             <input type="hidden" id="streetHiddenHost" name="street"
                                 th:value="${hostel != null ? hostel.street : ''}">
-                            <input type="hidden" id="houseNumberHiddenHost" name="houseNumber"
-                                th:value="${hostel != null ? hostel.houseNumber : ''}">
                         </div>
                     </div>
 
