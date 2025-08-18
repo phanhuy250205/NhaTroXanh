@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.VoucherService;
@@ -36,6 +37,9 @@ public class VoucherHostController {
 
     @Autowired
     private HostelService hostelService;
+
+    @Autowired
+    private VoucherRepository voucherRepository;
 
     @GetMapping
     public String showVoucherManagement(
@@ -123,7 +127,6 @@ public class VoucherHostController {
                     .build();
 
             voucherService.createVoucherHost(voucher, currentUser.getUserId());
-            voucherService.sendVoucherNotification(voucher, userDetails);
 
             redirectAttributes.addFlashAttribute("successMessage", "Tạo voucher thành công!");
         } catch (IllegalArgumentException | SecurityException e) {
@@ -218,9 +221,6 @@ public class VoucherHostController {
                     Date.valueOf(end), description, status);
 
             Vouchers voucher = voucherService.getVoucherByIdAndHost(voucherId, userDetails.getUser().getUserId());
-            if (status) {
-                voucherService.sendVoucherNotification(voucher, userDetails);
-            }
 
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật voucher thành công!");
         } catch (SecurityException e) {
@@ -240,5 +240,25 @@ public class VoucherHostController {
         boolean exists = voucherId == null ? voucherService.existsByCode(code)
                 : voucherService.existsByCodeAndNotId(code, voucherId);
         return Collections.singletonMap("exists", exists);
+    }
+
+    @PostMapping("/send-thong-bao/{id}")
+    public String sendVoucherNotification(@PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirect) {
+        try {
+            Vouchers voucher = voucherRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
+
+            if (!voucher.getUser().getUserId().equals(userDetails.getUserId())) {
+                throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
+            }
+
+            voucherService.sendVoucherNotification(voucher, userDetails);
+            redirect.addFlashAttribute("successMessage", "Gửi thông báo voucher thành công!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("errorMessage", "Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+        return "redirect:/chu-tro/voucher";
     }
 }

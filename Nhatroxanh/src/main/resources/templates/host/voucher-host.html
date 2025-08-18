@@ -662,12 +662,13 @@
                                     <p class="card-text mb-2">
                                         <strong><i class="fas fa-tag me-1"></i> Giá trị giảm:</strong>
                                         <span class="fw-bold text-danger price-format"
-                                            th:text="${voucher.discountValue}"></span>
+                                            th:text="${voucher.discountValue}"></span> VNĐ
                                     </p>
                                     <p class="card-text mb-2">
                                         <strong><i class="fas fa-wallet me-1"></i> Đơn tối thiểu:</strong>
                                         <span class="fw-bold text-success price-format"
                                             th:text="${voucher.minAmount != null ? voucher.minAmount : 'Không yêu cầu'}"></span>
+                                        <span th:if="${voucher.minAmount != null}"> VNĐ</span>
                                     </p>
                                     <p class="card-text mb-2">
                                         <strong><i class="fas fa-layer-group me-1"></i> Số lượng:</strong> <span
@@ -689,25 +690,41 @@
                                 </div>
                                 <div class="card-footer bg-light d-flex justify-content-end gap-2">
                                     <button type="button"
-                                        class="btn btn-primary btn-sm d-flex align-items-center gap-1 edit-voucher-btn"
+                                        class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1 edit-voucher-btn"
                                         th:attr="data-voucher-id=${voucher.id}, 
-                                                 data-title=${voucher.title}, 
-                                                 data-code=${voucher.code}, 
-                                                 data-hostel-id=${voucher.hostel != null ? voucher.hostel.hostelId : ''}, 
-                                                 data-discount-value=${voucher.discountValue}, 
-                                                 data-quantity=${voucher.quantity}, 
-                                                 data-min-amount=${voucher.minAmount}, 
-                                                 data-start-date=${#dates.format(voucher.startDate, 'yyyy-MM-dd')}, 
-                                                 data-end-date=${#dates.format(voucher.endDate, 'yyyy-MM-dd')}, 
-                                                 data-status=${voucher.status}, 
-                                                 data-description=${voucher.description}">
-                                        <i class="fas fa-edit"></i> Chỉnh sửa
+                 data-title=${voucher.title}, 
+                 data-code=${voucher.code}, 
+                 data-hostel-id=${voucher.hostel != null ? voucher.hostel.hostelId : ''}, 
+                 data-discount-value=${voucher.discountValue}, 
+                 data-quantity=${voucher.quantity}, 
+                 data-min-amount=${voucher.minAmount}, 
+                 data-start-date=${#dates.format(voucher.startDate, 'yyyy-MM-dd')}, 
+                 data-end-date=${#dates.format(voucher.endDate, 'yyyy-MM-dd')}, 
+                 data-status=${voucher.status}, 
+                 data-description=${voucher.description}">
+                                        <i class="fas fa-edit"></i>
+                                        <span>Chỉnh sửa</span>
                                     </button>
+
                                     <form th:id="'deleteVoucherForm-' + ${voucher.id}"
-                                        th:action="@{/chu-tro/voucher/delete/{id}(id=${voucher.id})}" method="post">
-                                        <button type="button" class="btn-delete-voucher"
+                                        th:action="@{/chu-tro/voucher/delete/{id}(id=${voucher.id})}" method="post"
+                                        class="d-inline">
+                                        <button type="button"
+                                            class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1"
                                             th:onclick="'confirmDeleteVoucher(' + ${voucher.id} + ')'">
-                                            <i class="fas fa-trash-alt"></i> Xóa
+                                            <i class="fas fa-trash-alt"></i>
+                                            <span>Xóa</span>
+                                        </button>
+                                    </form>
+
+                                    <form th:action="@{/chu-tro/voucher/send-thong-bao/{id}(id=${voucher.id})}"
+                                        method="post" class="send-notification-host d-inline"
+                                        th:data-id="${voucher.id}">
+                                        <button type="submit"
+                                            class="btn btn-sm btn-outline-warning d-flex align-items-center gap-1"
+                                            title="Gửi thông báo voucher đến người dùng">
+                                            <i class="fas fa-bell"></i>
+                                            <span>Thông báo</span>
                                         </button>
                                     </form>
                                 </div>
@@ -1193,6 +1210,36 @@
                 }
             });
         }
+        const notificationForms = document.querySelectorAll('.send-notification-host');
+        notificationForms.forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Gửi thông báo voucher?',
+                    text: "Thông báo voucher sẽ được gửi đến tất cả người dùng phù hợp!",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Gửi thông báo',
+                    cancelButtonText: 'Hủy'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        Swal.fire({
+                            title: 'Đang gửi thông báo...',
+                            text: 'Vui lòng đợi trong giây lát',
+                            icon: 'info',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        form.submit();
+                    }
+                });
+            });
+        });
     </script>
     <script src="/js/sidebar.js"></script>
 </body>
