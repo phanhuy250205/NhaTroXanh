@@ -471,6 +471,51 @@
             margin-top: 4px;
             margin-left: 10px;
         }
+
+        .price-input-container {
+            position: relative;
+            flex: 1;
+        }
+
+        .price-display {
+            padding-right: 50px;
+        }
+
+        .currency-suffix {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f8fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            pointer-events: none;
+        }
+
+        .price-preview {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--dark-blue);
+            width: 318px;
+        }
+
+        .price-preview .label {
+            font-weight: 600;
+            color: var(--primary-blue);
+        }
+
+        .price-preview .value {
+            font-weight: 500;
+            margin-left: 4px;
+        }
     </style>
 </head>
 
@@ -567,12 +612,20 @@
                     <div class="col-host">
                         <label class="form-label-host">Giá cho thuê <span style="color: red;">*</span></label>
                         <div class="input-group-host">
-                            <input name="price" type="number" class="form-control-host" placeholder="Nhập giá..."
-                                th:value="${price}">
-                            <select class="form-control-host form-select-host" style="width: 120px;">
-                                <option>VNĐ/Tháng</option>
-                                <option>VNĐ/Ngày</option>
-                            </select>
+                            <div class="price-input-container">
+                                <input id="priceInput" type="text" class="form-control-host price-display"
+                                    placeholder="Nhập giá thuê..." autocomplete="off">
+                                <div class="currency-suffix">VNĐ</div>
+                                <input id="priceValue" type="hidden" name="price" th:value="${price}">
+                            </div>
+                            <input type="text" class="form-control-host area-unit-host" style="width: 150px;"
+                                value="VNĐ/tháng" disabled>
+
+                            <input type="hidden" id="priceUnit" name="priceUnit" value="monthly">
+                        </div>
+                        <div class="price-preview" id="pricePreview" style="display: none;">
+                            <span class="label">Giá hiển thị:</span>
+                            <span class="value" id="pricePreviewValue"></span>
                         </div>
                         <div class="error-message-host" id="error-price"></div>
                     </div>
@@ -670,6 +723,7 @@
             setupFormSubmission();
             initializeToasts();
             setupLiveAddressPreview();
+            setupPriceFormatting();
         });
 
         async function loadProvinces() {
@@ -1124,6 +1178,55 @@
                 });
             }
         });
+        function setupPriceFormatting() {
+            const priceInput = document.getElementById('priceInput');
+            const priceValue = document.getElementById('priceValue');
+            const priceUnit = document.getElementById('priceUnit');
+            const pricePreview = document.getElementById('pricePreview');
+            const pricePreviewValue = document.getElementById('pricePreviewValue');
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function unformatNumber(str) {
+                return str.replace(/\./g, '');
+            }
+
+            function updatePrice() {
+                const rawValue = unformatNumber(priceInput.value);
+                const numValue = parseInt(rawValue) || 0;
+
+                if (numValue > 0) {
+                    priceInput.value = formatNumber(numValue.toString());
+                    priceValue.value = numValue;
+
+                    const unit = priceUnit.value === 'daily' ? '/ngày' : '/tháng';
+                    pricePreviewValue.textContent = `${formatNumber(numValue.toString())} VNĐ${unit}`;
+                    pricePreview.style.display = 'block';
+                } else {
+                    priceValue.value = '';
+                    pricePreview.style.display = 'none';
+                }
+            }
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/[^\d.]/g, '');
+                    e.target.value = value;
+                    updatePrice();
+                });
+
+                priceInput.addEventListener('blur', updatePrice);
+                priceUnit.addEventListener('change', updatePrice);
+
+                // Load existing value
+                if (priceValue.value) {
+                    priceInput.value = formatNumber(priceValue.value);
+                    updatePrice();
+                }
+            }
+        }
     </script>
 </body>
 

@@ -46,8 +46,8 @@ public class VoucherScheduler {
             LocalDate endDate = voucher.getEndDate() != null ? voucher.getEndDate().toLocalDate() : null;
             Integer quantity = voucher.getQuantity();
 
-            boolean isExpired = endDate != null && !endDate.isAfter(today); // endDate <= today
-            boolean isOutOfQuantity = quantity == null || quantity == 0;
+            boolean isExpired = endDate != null && endDate.isBefore(today); // endDate < today
+            boolean isOutOfQuantity = quantity == null || quantity < 0; // số lượng < 0
 
             if (isExpired || isOutOfQuantity) {
                 logger.info("⚠️ Voucher [{}] hết hạn hoặc hết số lượng. Đang cập nhật trạng thái...",

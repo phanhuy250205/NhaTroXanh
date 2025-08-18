@@ -252,10 +252,10 @@ document.addEventListener("DOMContentLoaded", () => {
         switch (notification.type) {
             case 'CONTRACT': return 'fas fa-file-signature'; // Icon hợp đồng
             case 'SYSTEM': return 'fas fa-cog'; // Icon bánh răng cho hệ thống
-            case 'REPORT': return 'fas fa-exclamation-triangle'; // Icon cờ cho báo cáo
+            case 'REPORT': return 'fas fa-tools'; // Icon cờ cho báo cáo
             case 'ACCOUNT': return 'fas fa-user-cog'; // Icon tài khoản cho thông báo tài khoản
             case 'HOSTEL_ACTIVITY': return 'fas fa-home'; // Icon nhà cho hoạt động nhà trọ
-            default: return 'fas fa-ticket'; // Icon chuông mặc định
+            default: return 'fas fa-gift'; // Icon chuông mặc định
         }
     }
 

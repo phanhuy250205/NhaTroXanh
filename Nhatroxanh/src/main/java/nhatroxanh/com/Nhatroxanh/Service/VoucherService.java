@@ -15,28 +15,54 @@ import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 
 public interface VoucherService {
     Page<Vouchers> getActiveVouchers(Pageable pageable);
+
     Page<Vouchers> getVouchersByStatus(Boolean status, Pageable pageable);
+
     Page<Vouchers> getVouchersByUserId(Integer userId, Pageable pageable);
+
     List<Vouchers> getActiveVouchersByHostelId(Integer hostelId);
+
     Vouchers createVoucher(VoucherDTO voucherDTO, CustomUserDetails userDetails);
+
     Vouchers updateVoucher(Integer voucherId, VoucherDTO voucherDTO, CustomUserDetails userDetails);
+
     void deleteVoucher(Integer voucherId, CustomUserDetails userDetails);
+
     Optional<Vouchers> getVoucherById(Integer voucherId);
+
     Page<Vouchers> searchVouchersByStatus(Users user, String keyword, Boolean status, Pageable pageable);
+
     boolean isVoucherCodeExists(String code);
+
     String generateUniqueVoucherCode();
+
     void createVoucherHost(Vouchers voucher, Integer ownerId);
+
     List<Vouchers> getVouchersByOwnerId(Integer ownerId);
-    Page<Vouchers> getVouchersByOwnerIdWithFilters(Integer ownerId, String searchQuery, String statusFilter, Pageable pageable);
+
+    Page<Vouchers> getVouchersByOwnerIdWithFilters(Integer ownerId, String searchQuery, String statusFilter,
+            Pageable pageable);
+
     void deleteVoucherByIdHost(Integer voucherId, Integer ownerId);
+
     Vouchers getVoucherByIdAndHost(Integer voucherId, Integer hostId);
-    void updateVoucherHost(Integer voucherId, Integer hostId, String title, String code, Integer hostelId, Float discountValue, Integer quantity, Float minAmount, Date startDate, Date endDate, String description, Boolean status);
+
+    void updateVoucherHost(Integer voucherId, Integer hostId, String title, String code, Integer hostelId,
+            Float discountValue, Integer quantity, Float minAmount, Date startDate, Date endDate, String description,
+            Boolean status);
+
     boolean existsByCode(String code);
+
     boolean existsByCodeAndNotId(String code, Integer id);
+
     void checkAndDeactivateVouchersIfNeeded();
+
     Page<Vouchers> searchVouchers(Users user, String keyword, Pageable pageable);
+
     void sendVoucherNotification(Vouchers voucher, CustomUserDetails userDetails);
+
     Vouchers getVoucherByCode(String code);
-void updateVoucherQuantity(Vouchers voucher);
+
+    void updateVoucherQuantity(Vouchers voucher);
 
 }
