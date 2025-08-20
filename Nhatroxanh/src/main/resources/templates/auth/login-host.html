@@ -288,43 +288,25 @@
             </div>
         </div>
         <script>
-            // ==== 1. Toggle password ở form đăng nhập ====
-            document.querySelectorAll('.password-toggle-host').forEach(toggleBtn => {
-                toggleBtn.addEventListener('click', function () {
-                    const passwordInput = this.previousElementSibling; // input nằm ngay trước nút
-                    const icon = this.querySelector('i');
+            // Chức năng ẩn/hiện mật khẩu cho form reset password
+            document.querySelectorAll(".toggle-password").forEach(function (toggle) {
+                toggle.addEventListener("click", function () {
+                    const targetId = this.getAttribute("data-target");
+                    const targetInput = document.getElementById(targetId);
 
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    } else {
-                        passwordInput.type = 'password';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
+                    if (targetInput) {
+                        if (targetInput.type === "password") {
+                            targetInput.type = "text";
+                            this.classList.remove("fa-eye");
+                            this.classList.add("fa-eye-slash");
+                        } else {
+                            targetInput.type = "password";
+                            this.classList.remove("fa-eye-slash");
+                            this.classList.add("fa-eye");
+                        }
                     }
                 });
             });
-
-
-            // ==== 2. Toggle password ở modal đặt lại mật khẩu ====
-            document.querySelectorAll('.toggle-password').forEach(toggleIcon => {
-                toggleIcon.addEventListener('click', function () {
-                    const targetId = this.getAttribute('data-target');
-                    const passwordInput = document.getElementById(targetId);
-
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        this.classList.remove('fa-eye');
-                        this.classList.add('fa-eye-slash');
-                    } else {
-                        passwordInput.type = 'password';
-                        this.classList.remove('fa-eye-slash');
-                        this.classList.add('fa-eye');
-                    }
-                });
-            });
-
         </script>
         <script th:src="@{/js/login-host.js}"></script>
         <script th:src="@{/js/quenmk-modal.js}"></script>

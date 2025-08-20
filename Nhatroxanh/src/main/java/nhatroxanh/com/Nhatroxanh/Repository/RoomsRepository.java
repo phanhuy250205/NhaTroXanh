@@ -105,4 +105,6 @@ public interface RoomsRepository extends JpaRepository<Rooms, Integer> {
         @Modifying
         @Query(value = "DELETE FROM room_utility WHERE room_id = ?1", nativeQuery = true)
         void deleteRoomUtilitiesByRoomId(Integer roomId);
+
+        long countByHostel(Hostel hostel);
 }

@@ -7,7 +7,7 @@
   <title>Chi Tiết Bài Đăng</title>
   <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
   <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
   <link rel="stylesheet" th:href="@{/bootstrap/css/bootstrap.min.css}" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
@@ -1153,6 +1153,255 @@
     .btn-show:hover {
       background-color: #33752f;
     }
+
+    /* ============== ROOM LIST STYLING ============== */
+    .room-list-container {
+      margin-top: 20px;
+    }
+
+    .room-item-host {
+      background: white;
+      border-radius: 10px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+      border-left: 4px solid var(--primary-blue);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .room-item-host::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gradient-primary);
+      transition: width 0.3s ease;
+    }
+
+    .room-item-host:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+      border-left-color: var(--warning-orange);
+    }
+
+    .room-item-host:hover::before {
+      width: 6px;
+    }
+
+    .room-item-title-host {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--dark-blue);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding-left: 12px;
+    }
+
+    .room-item-title-host::before {
+      content: "🏠";
+      position: absolute;
+      left: -8px;
+      font-size: 16px;
+    }
+
+    .room-item-info-host {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 14px;
+      color: #555;
+      align-items: center;
+    }
+
+    .room-item-info-host span {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      background: rgba(62, 131, 204, 0.08);
+      border-radius: 20px;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .room-item-info-host span::before {
+      content: "";
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--primary-blue);
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+
+    .room-item-info-host span:hover {
+      background: rgba(62, 131, 204, 0.15);
+      transform: translateY(-1px);
+    }
+
+    /* Animation for room items */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .room-item-host {
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .room-item-host:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .room-item-host:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .room-item-host:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .room-item-host:nth-child(4) {
+      animation-delay: 0.4s;
+    }
+
+    .room-item-host:nth-child(5) {
+      animation-delay: 0.5s;
+    }
+
+    /* Empty state styling */
+    .text-muted {
+      color: var(--text-muted) !important;
+      font-style: italic;
+      padding: 20px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 8px;
+      border: 1px dashed rgba(62, 131, 204, 0.3);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .room-item-host {
+        padding: 14px;
+      }
+
+      .room-item-title-host {
+        font-size: 16px;
+      }
+
+      .room-item-info-host {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .room-item-info-host span {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    /* Modal styling for room details */
+    #roomModal .modal-header {
+      background: var(--gradient-primary);
+      color: white;
+    }
+
+    #roomModal .modal-title {
+      font-weight: 600;
+    }
+
+    .room-modal-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .room-modal-details {
+      margin-bottom: 16px;
+    }
+
+    .room-modal-details p {
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .room-modal-details strong {
+      color: var(--primary-blue);
+      font-weight: 600;
+      margin-right: 10px;
+    }
+
+    .room-modal-utilities ul {
+      padding-left: 0;
+      list-style: none;
+    }
+
+    .room-modal-utilities li {
+      padding: 6px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .room-modal-utilities li i {
+      margin-right: 8px;
+      color: var(--success-green);
+    }
+
+    /* Tiện ích cơ bản */
+    .amenity-item {
+      border: 1px solid rgba(62, 131, 204, 0.1);
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    .amenity-item:hover {
+      background-color: rgba(62, 131, 204, 0.1) !important;
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(62, 131, 204, 0.1);
+      border-color: rgba(62, 131, 204, 0.2);
+    }
+
+    /* Responsive cho tiện ích */
+    @media (max-width: 768px) {
+      .amenity-item {
+        padding: 10px 12px !important;
+      }
+
+      .amenity-item i {
+        font-size: 16px !important;
+        margin-right: 8px !important;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .amenity-list .row-cols-md-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .amenity-list .row-cols-md-3 {
+        grid-template-columns: 1fr !important;
+      }
+    }
   </style>
 </head>
 
@@ -1305,12 +1554,34 @@
                 Phòng này hiện không có tiện ích nào.
               </p>
               <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
-                <ul class="list-unstyled">
-                  <li class="amenity-item mb-2" th:each="utility : ${utilities}">
-                    <i class="fas fa-check-circle text-success me-2"></i>
-                    <span th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
-                  </li>
-                </ul>
+                <div class="row row-cols-1 row-cols-md-3 g-3">
+                  <div class="col" th:each="utility : ${utilities}">
+                    <div class="amenity-item d-flex align-items-center p-3 rounded-3"
+                      style="background-color: rgba(62, 131, 204, 0.05); transition: all 0.3s ease;">
+                      <!-- Icon thay đổi theo tên tiện ích -->
+                      <i th:switch="${utility.name}" class="me-3 fs-5 text-primary">
+                        <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                        <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                        <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                        <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                        <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                        <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                        <i th:case="'Ban công/sân thượng'" class="fa-solid fa-archway"></i>
+                        <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                        <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                        <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                        <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                        <i th:case="'Tủ áo quần'" class="fas fa-briefcase"></i>
+                        <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                        <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                        <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                        <i th:case="*" class="fa-solid fa-circle-check"></i>
+                      </i>
+                      <span class="fw-medium"
+                        th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

@@ -174,7 +174,10 @@ public class VoucherServiceImpl implements VoucherService {
     public void createVoucherHost(Vouchers voucher, Integer ownerId) {
         Hostel hostel = voucher.getHostel();
 
-        if (hostel != null && !hostel.getOwner().getUserId().equals(ownerId)) {
+        if (hostel == null) {
+            throw new IllegalArgumentException("Khu trọ là bắt buộc.");
+        }
+        if (!hostel.getOwner().getUserId().equals(ownerId)) {
             throw new IllegalArgumentException("Khu trọ không thuộc quyền quản lý của bạn.");
         }
 
@@ -241,6 +244,8 @@ public class VoucherServiceImpl implements VoucherService {
             Date startDate, Date endDate, String description, Boolean status) {
 
         Vouchers voucher = getVoucherByIdAndHost(voucherId, hostId);
+
+        // Kiểm tra mã voucher mới nếu khác với mã cũ
         String oldCode = voucher.getCode() != null ? voucher.getCode().trim().toLowerCase() : "";
         String newCode = code != null ? code.trim().toLowerCase() : "";
         if (!oldCode.equals(newCode)) {
@@ -249,6 +254,16 @@ public class VoucherServiceImpl implements VoucherService {
             }
             voucher.setCode(code.trim());
         }
+
+        // Kiểm tra khu trọ
+        Hostel hostel = hostelService.getHostelById(hostelId)
+                .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
+        if (!hostel.getOwner().getUserId().equals(hostId)) {
+            throw new IllegalArgumentException("Khu trọ không thuộc quyền quản lý của bạn.");
+        }
+        voucher.setHostel(hostel);
+
+        // Cập nhật các trường khác
         voucher.setTitle(title != null ? title.trim() : voucher.getTitle());
         voucher.setDiscountValue(discountValue != null ? discountValue : voucher.getDiscountValue());
         voucher.setQuantity(quantity != null ? quantity : voucher.getQuantity());
@@ -257,16 +272,7 @@ public class VoucherServiceImpl implements VoucherService {
         voucher.setEndDate(endDate != null ? endDate : voucher.getEndDate());
         voucher.setDescription(description != null ? description.trim() : voucher.getDescription());
         voucher.setStatus(status != null ? status : voucher.getStatus());
-        if (hostelId == -1) {
-            voucher.setHostel(null);
-        } else {
-            Hostel hostel = hostelService.getHostelById(hostelId)
-                    .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
-            if (!hostel.getOwner().getUserId().equals(hostId)) {
-                throw new IllegalArgumentException("Khu trọ không thuộc quyền quản lý của bạn.");
-            }
-            voucher.setHostel(hostel);
-        }
+
         voucherRepository.save(voucher);
     }
 

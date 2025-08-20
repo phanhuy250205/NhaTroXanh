@@ -79,19 +79,37 @@ public class RoomsController {
 
         if (ownerId == null) {
             log.warning("Unauthorized access: No user ID found");
-            model.addAttribute("errorMessage", "Bạn cần đăng nhập để xem danh sách phòng trọ.");
+            model.addAttribute("showSwalError", true);
+            model.addAttribute("swalErrorMessage", "Bạn cần đăng nhập để xem danh sách phòng trọ.");
             model.addAttribute("rooms", List.of());
             model.addAttribute("hostels", List.of());
+            model.addAttribute("availableHostels", List.of());
             model.addAttribute("hostelId", null);
             model.addAttribute("utilities", List.of());
             return "host/phongtro";
         }
 
-        List<Hostel> hostels = hostelService.getHostelsByOwnerId(ownerId);
-        model.addAttribute("hostels", hostels);
+        // Lấy tất cả khu trọ cho select box khi xem danh sách phòng
+        List<Hostel> allHostels = hostelService.getHostelsByOwnerId(ownerId);
+        model.addAttribute("hostels", allHostels);
 
-        if (hostelId == null && !hostels.isEmpty()) {
-            hostelId = hostels.get(0).getHostelId();
+        // Lấy danh sách khu trọ còn khả năng thêm phòng cho select box khi thêm/chỉnh sửa
+        List<Hostel> availableHostels = allHostels.stream()
+                .filter(hostel -> {
+                    long currentRoomCount = roomsRepository.countByHostel(hostel);
+                    return currentRoomCount < hostel.getRoom_number();
+                })
+                .collect(Collectors.toList());
+        model.addAttribute("availableHostels", availableHostels);
+
+        if (hostelId == null && !allHostels.isEmpty()) {
+            hostelId = allHostels.get(0).getHostelId();
+        } else if (hostelId != null) {
+            // Kiểm tra xem hostelId có hợp lệ không
+            Optional<Hostel> selectedHostelOpt = hostelRepository.findById(hostelId);
+            if (selectedHostelOpt.isEmpty()) {
+                hostelId = allHostels.isEmpty() ? null : allHostels.get(0).getHostelId();
+            }
         }
 
         List<Rooms> rooms = new ArrayList<>();
@@ -111,8 +129,9 @@ public class RoomsController {
                     .filter(room -> status == null || status.isEmpty()
                             || room.getStatus().name().equalsIgnoreCase(status))
                     .collect(Collectors.toList());
-        } else {
-            model.addAttribute("errorMessage", "Bạn chưa có khu trọ nào. Vui lòng tạo khu trọ trước.");
+        } else if (allHostels.isEmpty()) {
+            model.addAttribute("showSwalError", true);
+            model.addAttribute("swalErrorMessage", "Bạn chưa có khu trọ nào. Vui lòng tạo khu trọ trước.");
         }
 
         long totalRooms = roomsRepository.countRoomsByOwnerId(ownerId);
@@ -176,7 +195,7 @@ public class RoomsController {
             @RequestParam("namerooms") String namerooms,
             @RequestParam("price") Float price,
             @RequestParam("acreage") Float acreage,
-            @RequestParam(value = "status", required = false) String status, // status không bắt buộc
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam("maxTenants") Integer maxTenants,
             @RequestParam("hostelId") Integer hostelId,
             @RequestParam(value = "description", required = false) String description,
@@ -187,21 +206,34 @@ public class RoomsController {
         Optional<Hostel> hostelOpt = hostelRepository.findById(hostelId);
         if (hostelOpt.isEmpty()) {
             log.warning("Hostel not found: " + hostelId);
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy khu trọ.");
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", "Không tìm thấy khu trọ.");
             return "redirect:/chu-tro/quan-ly-tro";
+        }
+
+        Hostel hostel = hostelOpt.get();
+        
+        // Kiểm tra số phòng hiện tại so với giới hạn
+        long currentRoomCount = roomsRepository.countByHostel(hostel);
+        if (currentRoomCount >= hostel.getRoom_number()) {
+            log.warning("Room limit exceeded for hostel: " + hostelId);
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", 
+                    "Số phòng đã đạt tối đa (" + hostel.getRoom_number() + ") cho khu trọ này.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
 
         if (namerooms == null || namerooms.trim().isEmpty()) {
             log.warning("Room name is empty");
-            redirectAttributes.addFlashAttribute("errorMessage", "Tên phòng không được để trống.");
-            return "redirect:/chu-tro/quan-ly-tro";
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", "Tên phòng không được để trống.");
+            return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
 
         Rooms room = new Rooms();
         room.setNamerooms(namerooms);
         room.setPrice(price);
         room.setAcreage(acreage);
-        // Đặt trạng thái mặc định là unactive
         room.setStatus(RoomStatus.unactive);
         if (status != null && !status.trim().isEmpty()) {
             try {
@@ -235,7 +267,8 @@ public class RoomsController {
                     if (!image.isEmpty()) {
                         if (!image.getContentType().startsWith("image/")) {
                             log.warning("Invalid file type: " + image.getContentType());
-                            redirectAttributes.addFlashAttribute("error", "Chỉ chấp nhận file ảnh!");
+                            redirectAttributes.addFlashAttribute("showSwalError", true);
+                            redirectAttributes.addFlashAttribute("swalErrorMessage", "Chỉ chấp nhận file ảnh!");
                             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
                         }
                         String imagePath = fileUploadService.uploadFile(image, "");
@@ -250,12 +283,14 @@ public class RoomsController {
                 }
             } catch (IOException e) {
                 log.severe("Error uploading images: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("error", "Lỗi khi tải ảnh lên: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("showSwalError", true);
+                redirectAttributes.addFlashAttribute("swalErrorMessage", "Lỗi khi tải ảnh lên: " + e.getMessage());
                 return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
             }
         }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Thêm phòng thành công!");
+        redirectAttributes.addFlashAttribute("showSwalSuccess", true);
+        redirectAttributes.addFlashAttribute("swalSuccessMessage", "Thêm phòng thành công!");
         return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
     }
 
@@ -277,28 +312,31 @@ public class RoomsController {
         Optional<Rooms> roomOpt = roomsService.findById(roomId);
         if (roomOpt.isEmpty()) {
             log.warning("Room not found: " + roomId);
-            redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy phòng trọ.");
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", "Không tìm thấy phòng trọ.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
 
         if (namerooms == null || namerooms.trim().isEmpty()) {
             log.warning("Room name is empty for roomId: " + roomId);
-            redirectAttributes.addFlashAttribute("errorMessage", "Tên phòng không được để trống.");
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", "Tên phòng không được để trống.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
 
         Rooms room = roomOpt.get();
-        // Kiểm tra trạng thái chuyển đổi
         if (room.getStatus() == RoomStatus.active && !"active".equalsIgnoreCase(status)) {
             log.warning("Invalid status transition: from active to " + status + " for roomId: " + roomId);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage",
                     "Không thể thay đổi trạng thái phòng từ 'Đã thuê' sang trạng thái khác.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
         if (room.getStatus() == RoomStatus.unactive && !"repair".equalsIgnoreCase(status)
                 && !"unactive".equalsIgnoreCase(status)) {
             log.warning("Invalid status transition: from unactive to " + status + " for roomId: " + roomId);
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage",
                     "Phòng ở trạng thái 'Trống' chỉ có thể chuyển sang 'Bảo trì'.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
@@ -313,7 +351,8 @@ public class RoomsController {
             room.setStatus(RoomStatus.valueOf(status));
         } catch (IllegalArgumentException e) {
             log.warning("Invalid status: " + status + ", keeping current status");
-            redirectAttributes.addFlashAttribute("errorMessage",
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage",
                     "Trạng thái không hợp lệ, giữ nguyên trạng thái hiện tại.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
         }
@@ -328,13 +367,11 @@ public class RoomsController {
             room.setUtilities(utilities);
         }
 
-        // Handle existing images
         List<Image> currentImages = imageRepository.findByRoom(room);
         List<String> imagesToKeep = existingImages != null && !existingImages.isEmpty()
                 ? Arrays.asList(existingImages.split(","))
                 : new ArrayList<>();
 
-        // Delete images that are not in the keep list
         for (Image currentImage : currentImages) {
             if (!imagesToKeep.contains(currentImage.getUrl())) {
                 fileUploadService.deleteFile(currentImage.getUrl());
@@ -343,14 +380,14 @@ public class RoomsController {
             }
         }
 
-        // Handle new image uploads
         if (images != null && !images.isEmpty()) {
             try {
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
                         if (!image.getContentType().startsWith("image/")) {
                             log.warning("Invalid file type: " + image.getContentType());
-                            redirectAttributes.addFlashAttribute("error", "Chỉ chấp nhận file ảnh!");
+                            redirectAttributes.addFlashAttribute("showSwalError", true);
+                            redirectAttributes.addFlashAttribute("swalErrorMessage", "Chỉ chấp nhận file ảnh!");
                             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
                         }
                         String imagePath = fileUploadService.uploadFile(image, "");
@@ -365,14 +402,16 @@ public class RoomsController {
                 }
             } catch (IOException e) {
                 log.severe("Error uploading images: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("error", "Lỗi khi tải ảnh lên: " + e.getMessage());
+                redirectAttributes.addFlashAttribute("showSwalError", true);
+                redirectAttributes.addFlashAttribute("swalErrorMessage", "Lỗi khi tải ảnh lên: " + e.getMessage());
                 return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
             }
         }
 
         roomsService.save(room);
         log.info("Updated room with ID: " + room.getRoomId());
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật phòng trọ thành công!");
+        redirectAttributes.addFlashAttribute("showSwalSuccess", true);
+        redirectAttributes.addFlashAttribute("swalSuccessMessage", "Cập nhật phòng trọ thành công!");
         return "redirect:/chu-tro/quan-ly-tro?hostelId=" + hostelId;
     }
 
@@ -383,7 +422,8 @@ public class RoomsController {
         Optional<Rooms> roomOpt = roomsRepository.findById(roomId);
         if (roomOpt.isEmpty()) {
             log.warning("Room not found: " + roomId);
-            redirectAttributes.addFlashAttribute("errorMessage", "Phòng trọ không tồn tại.");
+            redirectAttributes.addFlashAttribute("showSwalError", true);
+            redirectAttributes.addFlashAttribute("swalErrorMessage", "Phòng trọ không tồn tại.");
             return "redirect:/chu-tro/quan-ly-tro?hostelId=" + (hostelId != null ? hostelId : "");
         }
 
@@ -394,14 +434,15 @@ public class RoomsController {
         if (!images.isEmpty()) {
             for (Image image : images) {
                 fileUploadService.deleteFile(image.getUrl());
-                imageRepository.delete(image);
+                imageRepository.save(image);
                 log.info("Deleted image: " + image.getUrl());
             }
         }
 
         roomsRepository.delete(room);
         log.info("Deleted room with ID: " + roomId);
-        redirectAttributes.addFlashAttribute("successMessage", "Xóa phòng trọ thành công!");
+        redirectAttributes.addFlashAttribute("showSwalSuccess", true);
+        redirectAttributes.addFlashAttribute("swalSuccessMessage", "Xóa phòng trọ thành công!");
         return "redirect:/chu-tro/quan-ly-tro?hostelId=" + currentHostelId;
     }
 
@@ -464,5 +505,24 @@ public class RoomsController {
         response.put("hostelId", hostelId != null ? hostelId : room.getHostel().getHostelId());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/chu-tro/hostel-details/{hostelId}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> getHostelDetails(@PathVariable Integer hostelId) {
+        Optional<Hostel> hostelOpt = hostelRepository.findById(hostelId);
+        if (hostelOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Hostel hostel = hostelOpt.get();
+        long currentRoomCount = roomsRepository.countByHostel(hostel);
+
+        Map<String, Object> hostelData = new HashMap<>();
+        hostelData.put("hostelId", hostel.getHostelId());
+        hostelData.put("roomNumber", hostel.getRoom_number());
+        hostelData.put("currentRoomCount", currentRoomCount);
+
+        return ResponseEntity.ok(hostelData);
     }
 }

@@ -108,8 +108,26 @@ public class StaffVoucherController {
                     "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu (" + maxDiscount + " VNĐ).");
         }
 
+        // ✅ Kiểm tra ngày kết thúc không vượt quá 2 tháng kể từ ngày bắt đầu
+        if (voucher.getStartDate() != null && voucher.getEndDate() != null) {
+            LocalDate start = voucher.getStartDate().toLocalDate();
+            LocalDate end = voucher.getEndDate().toLocalDate();
+            LocalDate maxEnd = start.plusMonths(2);
+
+            if (end.isAfter(maxEnd)) {
+                bindingResult.rejectValue("endDate", "error.endDate",
+                        "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu (" + maxEnd + ")");
+                        
+
+            }
+            if (end.isBefore(start)) {
+                bindingResult.rejectValue("endDate", "error.endDate",
+                        "Ngày kết thúc không được trước ngày bắt đầu");
+            }
+        }
+
         if (bindingResult.hasErrors()) {
-            redirect.addFlashAttribute("errorMessage", "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu");
+            redirect.addFlashAttribute("errorMessage", "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu");
             redirect.addFlashAttribute("voucher", voucher);
             return "redirect:/nhan-vien/khuyen-mai";
         }
@@ -129,20 +147,20 @@ public class StaffVoucherController {
             Date today = Date.valueOf(LocalDate.now());
             boolean isExpired = voucher.getEndDate() != null && voucher.getEndDate().before(today);
             boolean isOutOfStock = voucher.getQuantity() != null && voucher.getQuantity() == 0;
+
             if (isExpired || isOutOfStock) {
                 voucher.setStatus(false);
-                if (isExpired && user.getEmail() != null && !user.getEmail().isEmpty()) {
-                    String reason = "Voucher đã hết hạn vào ngày " + voucher.getEndDate();
-                    emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(), voucher.getTitle(),
-                            reason);
-                    logger.info("Đã gửi email thông báo hết hạn cho voucher {} đến {}", voucher.getCode(),
-                            user.getEmail());
-                } else if (isOutOfStock && user.getEmail() != null && !user.getEmail().isEmpty()) {
-                    String reason = "Voucher đã hết số lượng";
-                    emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(), voucher.getTitle(),
-                            reason);
-                    logger.info("Đã gửi email thông báo hết số lượng cho voucher {} đến {}", voucher.getCode(),
-                            user.getEmail());
+
+                if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+                    if (isExpired) {
+                        String reason = "Voucher đã hết hạn vào ngày " + voucher.getEndDate();
+                        emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(),
+                                voucher.getTitle(), reason);
+                    } else if (isOutOfStock) {
+                        String reason = "Voucher đã hết số lượng";
+                        emailService.sendVoucherDeactivatedEmail(user.getEmail(), user.getFullname(),
+                                voucher.getTitle(), reason);
+                    }
                 }
             } else {
                 voucher.setStatus(true);
@@ -180,14 +198,33 @@ public class StaffVoucherController {
             BindingResult bindingResult,
             RedirectAttributes redirect,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
+
         double maxDiscount = updatedVoucher.getMinAmount() * 0.1;
         if (updatedVoucher.getDiscountValue() > maxDiscount) {
             bindingResult.rejectValue("discountValue", "error.discountValue",
                     "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu (" + maxDiscount + " VNĐ).");
         }
 
+        // ✅ Check ngày bắt đầu - ngày kết thúc
+        if (updatedVoucher.getStartDate() != null && updatedVoucher.getEndDate() != null) {
+            LocalDate start = updatedVoucher.getStartDate().toLocalDate();
+            LocalDate end = updatedVoucher.getEndDate().toLocalDate();
+
+            // endDate phải >= startDate
+            if (end.isBefore(start)) {
+                bindingResult.rejectValue("endDate", "error.endDate",
+                        "Ngày kết thúc không được nhỏ hơn ngày bắt đầu!");
+            }
+
+            // endDate không quá 2 tháng từ startDate
+            if (end.isAfter(start.plusMonths(2))) {
+                bindingResult.rejectValue("endDate", "error.endDate",
+                        "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu!");
+            }
+        }
+
         if (bindingResult.hasErrors()) {
-            redirect.addFlashAttribute("errorMessage", "Giá trị giảm giá không được vượt quá 10% giá trị tối thiểu");
+            redirect.addFlashAttribute("errorMessage", "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu");
             return "redirect:/nhan-vien/khuyen-mai/cap-nhat/" + id;
         }
 
@@ -208,7 +245,10 @@ public class StaffVoucherController {
             voucher.setTitle(updatedVoucher.getTitle());
             voucher.setDescription(updatedVoucher.getDescription());
             voucher.setDiscountValue(updatedVoucher.getDiscountValue());
-            voucher.setStartDate(updatedVoucher.getStartDate());
+
+            // ❌ Không cho chỉnh startDate nếu bạn muốn cố định
+            // voucher.setStartDate(updatedVoucher.getStartDate());
+
             voucher.setEndDate(updatedVoucher.getEndDate());
             voucher.setMinAmount(updatedVoucher.getMinAmount());
             voucher.setQuantity(updatedVoucher.getQuantity());
@@ -217,6 +257,7 @@ public class StaffVoucherController {
             boolean isExpired = voucher.getEndDate() != null && voucher.getEndDate().before(today);
             boolean isOutOfStock = voucher.getQuantity() != null && voucher.getQuantity() == 0;
             boolean wasActive = voucher.getStatus();
+
             if (isExpired || isOutOfStock) {
                 voucher.setStatus(false);
                 if (wasActive && isExpired && voucher.getUser().getEmail() != null
@@ -224,15 +265,11 @@ public class StaffVoucherController {
                     String reason = "Voucher đã hết hạn vào ngày " + voucher.getEndDate();
                     emailService.sendVoucherDeactivatedEmail(voucher.getUser().getEmail(),
                             voucher.getUser().getFullname(), voucher.getTitle(), reason);
-                    logger.info("Đã gửi email thông báo hết hạn cho voucher {} đến {}", voucher.getCode(),
-                            voucher.getUser().getEmail());
                 } else if (wasActive && isOutOfStock && voucher.getUser().getEmail() != null
                         && !voucher.getUser().getEmail().isEmpty()) {
                     String reason = "Voucher đã hết số lượng";
                     emailService.sendVoucherDeactivatedEmail(voucher.getUser().getEmail(),
                             voucher.getUser().getFullname(), voucher.getTitle(), reason);
-                    logger.info("Đã gửi email thông báo hết số lượng cho voucher {} đến {}", voucher.getCode(),
-                            voucher.getUser().getEmail());
                 }
             } else {
                 voucher.setStatus(true);

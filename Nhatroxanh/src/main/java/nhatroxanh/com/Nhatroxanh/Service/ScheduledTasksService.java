@@ -36,11 +36,9 @@ public class ScheduledTasksService {
      * Scheduled task to automatically cleanup notifications older than 10 days
      * Runs daily at 2:00 AM
      */
-    @Scheduled(cron = "0 */1 * * * *")
+    @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void cleanupOldNotifications() {
-        log.info("🧹 Bắt đầu tác vụ tự động xóa thông báo cũ hơn 10 ngày...");
-
         try {
             // Gọi phương thức cleanupOldNotifications từ NotificationService
             int deletedCount = notificationService.cleanupOldNotifications();

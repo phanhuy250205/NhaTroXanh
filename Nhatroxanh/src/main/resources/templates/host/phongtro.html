@@ -125,12 +125,12 @@
     }
 
     .toast-host.success {
-        border-left-color: var(--success-green);
+        border-left-color: #28a745;
         background-color: #ecfdf5;
     }
 
     .toast-host.error {
-        border-left-color: var(--danger-red);
+        border-left-color: #dc3545;
         background-color: #fef2f2;
     }
 
@@ -142,7 +142,7 @@
     .toast-host .toast-message {
         flex: 1;
         font-size: 14px;
-        color: var(--dark-blue);
+        color: #1e3a8a;
     }
 
     .toast-host .btn-close {
@@ -155,7 +155,7 @@
     }
 
     .toast-host .btn-close:hover {
-        color: var(--dark-blue);
+        color: #1e3a8a;
     }
 
     @media (max-width: 992px) {
@@ -354,9 +354,6 @@
                                             th:text="${#numbers.formatDecimal(room.price, 0, 'COMMA', 0, 'POINT')} + ' ₫'">
                                         </td>
                                         <td class="table-td-host">
-                                            <span
-                                                th:text="'[Debug: ' + ${room.status != null ? room.status.name() : 'null'} + ']'"
-                                                style="display: none;"></span>
                                             <span th:if="${room.status != null and room.status.name() == 'unactive'}"
                                                 class="status-badge-host status-available-host">
                                                 <i class="fas fa-door-open me-1"></i> Trống
@@ -385,7 +382,6 @@
                                                     th:disabled="${room.status != null and room.status.name() == 'active'}">
                                                     <i class="fas fa-edit"></i>
                                                 </button>
-
                                                 <form th:action="@{/chu-tro/xoa-phong/{roomId}(roomId=${room.roomId})}"
                                                     method="post" class="delete-room-form"
                                                     th:attr="data-room-id=${room.roomId}, data-hostel-id=${hostelId}"
@@ -416,10 +412,11 @@
                                     <label for="roomAreaSelectHost" class="form-label-modern">
                                         Khu trọ <span class="required-star">*</span>
                                     </label>
-                                    <select class="form-select-modern" id="roomAreaSelectHost" name="hostelId">
+                                    <select class="form-select-modern" id="roomAreaSelectHost" name="hostelId"
+                                        onchange="checkHostelCapacity(); checkRoomNameDuplicate();">
                                         <option value="">Chọn khu trọ</option>
                                         <option th:each="hostel : ${hostels}" th:value="${hostel.hostelId}"
-                                            th:text="${hostel.name}"></option>
+                                            th:text="${hostel.name}" class="hostel-option"></option>
                                     </select>
                                 </div>
                                 <div class="form-group-modern">
@@ -427,7 +424,7 @@
                                         Tên phòng <span class="required-star">*</span>
                                     </label>
                                     <input type="text" class="form-input-modern" id="roomNameHost" name="namerooms"
-                                        placeholder="Nhập tên phòng (VD: A101)">
+                                        placeholder="Nhập tên phòng (VD: A101)" oninput="checkRoomNameDuplicate()">
                                 </div>
                             </div>
                             <div class="form-row-modern">
@@ -472,14 +469,22 @@
                                             name="amenities" th:value="${utility.name}" class="amenity-checkbox">
                                         <label th:for="'utility-' + ${utility.utilityId}" class="amenity-label">
                                             <i th:switch="${utility.name}">
-                                                <i th:case="'WiFi'" class="fas fa-wifi"></i>
-                                                <i th:case="'Điều hòa'" class="fas fa-snowflake"></i>
-                                                <i th:case="'Tủ lạnh'" class="fas fa-cube"></i>
-                                                <i th:case="'Máy giặt'" class="fas fa-tshirt"></i>
-                                                <i th:case="'Nước nóng'" class="fas fa-fire"></i>
-                                                <i th:case="'Bếp riêng'" class="fas fa-utensils"></i>
-                                                <i th:case="'WC riêng'" class="fas fa-bath"></i>
-                                                <i th:case="*" class="fas fa-circle"></i>
+                                                <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                                                <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                                                <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                                                <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                                                <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                                                <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                                                <i th:case="'Ban công/sân thượng'" class="fa-solid fa-archway"></i>
+                                                <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                                                <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                                                <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                                                <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                                                <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase"></i>
+                                                <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                                                <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                                                <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                                                <i th:case="*" class="fa-solid fa-circle-check"></i>
                                             </i>
                                             <span th:text="${utility.name}"></span>
                                         </label>
@@ -538,7 +543,7 @@
                                     </svg>
                                     Reset
                                 </button>
-                                <button type="submit" class="btn-submit-modern" id="submitRoomBtn">
+                                <button type="submit" class="btn-submit-modern" id="submitRoomBtn" disabled>
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                                         xmlns="http://www.w3.org/2000/svg">
                                         <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2"
@@ -665,15 +670,26 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let existingImages = [];
         let selectedFiles = new Map();
         let previewURLs = new Set();
 
+        // Hiển thị thông báo SweetAlert
         function showNotification(message, type) {
-            alert(message);
+            Swal.fire({
+                icon: type,
+                title: type === "error" ? "Lỗi!" : "Thành công!",
+                text: message,
+                showConfirmButton: true,
+                confirmButtonText: "Đóng",
+                timer: 5000,
+                timerProgressBar: true
+            });
         }
 
+        // Chuyển tab
         function switchToTab(tabId) {
             const tab = new bootstrap.Tab(document.getElementById(tabId));
             tab.show();
@@ -687,10 +703,73 @@
                     document.getElementById("submitBtnText").textContent = "Thêm phòng";
                     document.getElementById("addRoomTabText").textContent = "Thêm phòng mới";
                     document.getElementById("addRoomFormHost").action = "/chu-tro/them-phong";
+                    filterAvailableHostels().then(() => {
+                        checkHostelCapacity();
+                        checkRoomNameDuplicate();
+                    });
+                } else {
+                    populateAllHostels();
+                    const hostelSelect = document.getElementById("roomAreaSelectHost");
+                    const currentHostelId = hostelSelect.dataset.currentHostelId || "";
+                    if (currentHostelId) {
+                        hostelSelect.value = currentHostelId;
+                    } else {
+                        showNotification("Không tìm thấy thông tin khu trọ hiện tại.", "error");
+                    }
+                    const submitBtn = document.getElementById("submitRoomBtn");
+                    submitBtn.disabled = false;
+                    checkRoomNameDuplicate();
                 }
             }
         }
 
+        // Điền tất cả khu trọ vào select box (cho chế độ chỉnh sửa)
+        function populateAllHostels() {
+            const select = document.getElementById("roomAreaSelectHost");
+            select.innerHTML = '<option value="">Chọn khu trọ</option>';
+            const hostels = document.querySelectorAll("#hostelSelect option:not([value=''])");
+            hostels.forEach(opt => {
+                const option = document.createElement("option");
+                option.value = opt.value;
+                option.textContent = opt.textContent;
+                select.appendChild(option);
+            });
+        }
+
+        // Lọc danh sách khu trọ còn chỗ cho chế độ thêm phòng
+        async function filterAvailableHostels() {
+            const select = document.getElementById("roomAreaSelectHost");
+            select.innerHTML = '<option value="">Chọn khu trọ</option>';
+            const hostels = document.querySelectorAll("#hostelSelect option:not([value=''])");
+            const promises = Array.from(hostels).map(opt =>
+                fetch(`/chu-tro/hostel-details/${opt.value}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Không thể lấy thông tin khu trọ ${opt.textContent}`);
+                        }
+                        return response.json().then(data => ({ data, opt }));
+                    })
+                    .catch(error => {
+                        console.error("Error checking hostel capacity:", error);
+                        return null;
+                    })
+            );
+
+            const results = await Promise.all(promises);
+            results.forEach(result => {
+                if (result && result.data.currentRoomCount < result.data.roomNumber) {
+                    const option = document.createElement("option");
+                    option.value = result.opt.value;
+                    option.textContent = result.opt.textContent;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        // Reset form
         function resetForm() {
             const form = document.getElementById("addRoomFormHost");
             form.reset();
@@ -707,8 +786,98 @@
             existingImages = [];
             selectedFiles.clear();
             previewURLs.clear();
+            filterAvailableHostels().then(() => {
+                checkHostelCapacity();
+                checkRoomNameDuplicate();
+            });
         }
 
+        // Kiểm tra số phòng của khu trọ khi chọn
+        function checkHostelCapacity() {
+            const hostelSelect = document.getElementById("roomAreaSelectHost");
+            const submitBtn = document.getElementById("submitRoomBtn");
+            const roomId = document.getElementById("roomIdHost").value;
+            if (roomId) {
+                // Chế độ chỉnh sửa: không kiểm tra giới hạn phòng
+                submitBtn.disabled = false;
+                checkRoomNameDuplicate();
+                return;
+            }
+            const hostelId = hostelSelect.value;
+            if (hostelId) {
+                fetch(`/chu-tro/hostel-details/${hostelId}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error("Không thể lấy thông tin khu trọ");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.currentRoomCount >= data.roomNumber) {
+                            submitBtn.disabled = true;
+                            showNotification(`Khu trọ đã đạt tối đa ${data.roomNumber} phòng.`, "error");
+                        } else {
+                            submitBtn.disabled = false;
+                            checkRoomNameDuplicate();
+                        }
+                    })
+                    .catch(error => {
+                        showNotification("Lỗi khi kiểm tra khu trọ: " + error.message, "error");
+                        submitBtn.disabled = true;
+                    });
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Kiểm tra trùng tên phòng
+        function checkRoomNameDuplicate() {
+            const hostelId = document.getElementById("roomAreaSelectHost").value;
+            const roomName = document.getElementById("roomNameHost").value.trim();
+            const roomId = document.getElementById("roomIdHost").value;
+            const submitBtn = document.getElementById("submitRoomBtn");
+            const roomNameInput = document.getElementById("roomNameHost");
+
+            // Xóa thông báo lỗi cũ
+            const existingError = roomNameInput.parentNode.querySelector(".input-error-message");
+            if (existingError) existingError.remove();
+
+            if (hostelId && roomName) {
+                fetch(`/chu-tro/check-room-name?hostelId=${hostelId}&roomName=${encodeURIComponent(roomName)}&roomId=${roomId || ''}`, {
+                    method: "GET",
+                    headers: { "Accept": "application/json" }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.exists) {
+                            submitBtn.disabled = true;
+                            const errorDiv = document.createElement("div");
+                            errorDiv.className = "input-error-message";
+                            errorDiv.style.color = "#dc3545";
+                            errorDiv.style.fontSize = "13px";
+                            errorDiv.style.marginTop = "4px";
+                            errorDiv.textContent = "Tên phòng đã tồn tại trong khu trọ này.";
+                            roomNameInput.parentNode.appendChild(errorDiv);
+                        } else if (!roomId) {
+                            // Chỉ kiểm tra giới hạn phòng khi thêm mới
+                            checkHostelCapacity();
+                        } else {
+                            submitBtn.disabled = false;
+                        }
+                    })
+                    .catch(error => {
+                        showNotification("Lỗi khi kiểm tra tên phòng: " + error.message, "error");
+                        submitBtn.disabled = true;
+                    });
+            } else {
+                submitBtn.disabled = true;
+            }
+        }
+
+        // Tạo preview ảnh
         function createImagePreview(src, isExisting = false, file = null) {
             const previewContainer = document.getElementById("imagePreviewContainer");
             if (previewURLs.has(src)) return;
@@ -742,12 +911,14 @@
             previewURLs.add(src);
         }
 
+        // Cập nhật input file
         function updateFileInput() {
             const dataTransfer = new DataTransfer();
             selectedFiles.forEach(file => dataTransfer.items.add(file));
             document.getElementById("imageUpload").files = dataTransfer.files;
         }
 
+        // Thêm ảnh mới
         function addNewImages(files) {
             const newFiles = Array.from(files);
             let addedCount = 0;
@@ -771,7 +942,9 @@
             }
         }
 
+        // Xử lý submit form
         document.getElementById("addRoomFormHost").addEventListener("submit", function (e) {
+            e.preventDefault();
             let isValid = true;
             document.querySelectorAll(".input-error-message").forEach(el => el.remove());
 
@@ -838,7 +1011,6 @@
             }
 
             if (!isValid) {
-                e.preventDefault();
                 const firstError = document.querySelector(".input-error-message");
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -846,31 +1018,47 @@
                 return;
             }
 
-            priceInput.value = price.replace(/[^\d]/g, '');
+            // Kiểm tra trùng tên phòng trước khi submit
+            fetch(`/chu-tro/check-room-name?hostelId=${hostelId}&roomName=${encodeURIComponent(roomName)}&roomId=${document.getElementById("roomIdHost").value || ''}`, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.exists) {
+                        showError("roomNameHost", "Tên phòng đã tồn tại trong khu trọ này.");
+                        return;
+                    }
 
-            e.preventDefault();
-            const formData = new FormData(this);
-            selectedFiles.forEach(file => {
-                if (file.type.startsWith("image/")) formData.append("images", file);
-            });
+                    priceInput.value = price.replace(/[^\d]/g, '');
 
-            const actionUrl = document.getElementById("roomIdHost").value ? "/chu-tro/cap-nhat-phong" : "/chu-tro/them-phong";
-            fetch(actionUrl, {
-                method: "POST",
-                body: formData
-            }).then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    return response.text().then(text => {
-                        showNotification("Có lỗi xảy ra: " + text, "error");
+                    const formData = new FormData(this);
+                    selectedFiles.forEach(file => {
+                        if (file.type.startsWith("image/")) formData.append("images", file);
                     });
-                }
-            }).catch(error => {
-                showNotification("Lỗi khi gửi form: " + error.message, "error");
-            });
+
+                    const actionUrl = document.getElementById("roomIdHost").value ? "/chu-tro/cap-nhat-phong" : "/chu-tro/them-phong";
+                    fetch(actionUrl, {
+                        method: "POST",
+                        body: formData
+                    }).then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            return response.text().then(text => {
+                                showNotification("Có lỗi xảy ra: " + text, "error");
+                            });
+                        }
+                    }).catch(error => {
+                        showNotification("Lỗi khi gửi form: " + error.message, "error");
+                    });
+                })
+                .catch(error => {
+                    showNotification("Lỗi khi kiểm tra tên phòng: " + error.message, "error");
+                });
         });
 
+        // Xử lý nút chỉnh sửa
         document.addEventListener("click", function (e) {
             if (e.target.closest(".btn-edit-host")) {
                 e.preventDefault();
@@ -896,8 +1084,11 @@
                         document.getElementById("roomPriceHost").value = data.price.toLocaleString("vi-VN");
                         document.getElementById("roomAreaHost").value = data.acreage;
                         document.getElementById("roomCapacityHost").value = data.maxTenants;
-                        document.getElementById("roomAreaSelectHost").value = data.hostelId;
                         document.getElementById("roomDescriptionHost").value = data.description || "";
+
+                        // Lưu hostelId để sử dụng sau
+                        const hostelSelect = document.getElementById("roomAreaSelectHost");
+                        hostelSelect.dataset.currentHostelId = data.hostelId;
 
                         const statusSelect = document.getElementById("roomStatusHost");
                         statusSelect.innerHTML = "";
@@ -941,6 +1132,7 @@
             }
         });
 
+        // Xử lý upload ảnh
         document.getElementById("imageUpload").addEventListener("change", function (e) {
             const files = e.target.files;
             if (files && files.length > 0) {
@@ -950,6 +1142,9 @@
         });
 
         const uploadArea = document.getElementById("uploadArea");
+        uploadArea.addEventListener("click", () => {
+            document.getElementById("imageUpload").click();
+        });
 
         uploadArea.addEventListener("dragover", (e) => {
             e.preventDefault();
@@ -964,65 +1159,109 @@
             e.preventDefault();
             uploadArea.classList.remove("dragover");
             const files = e.dataTransfer.files;
-            if (files && files.length > 0) {
+            if (files.length > 0) {
                 addNewImages(files);
             }
         });
 
-        uploadArea.addEventListener("click", function (e) {
-            if (e.target === uploadArea) {
-                document.getElementById("imageUpload").click();
+        // Xử lý tìm kiếm và lọc phòng
+        function filterByHostelAndStatus() {
+            const hostelId = document.getElementById("hostelSelect").value;
+            const status = document.getElementById("statusFilterHost").value;
+            let url = "/chu-tro/quan-ly-tro";
+            if (hostelId || status) {
+                url += "?";
+                if (hostelId) url += `hostelId=${hostelId}`;
+                if (status) url += `${hostelId ? "&" : ""}status=${status}`;
+            }
+            window.location.href = url;
+        }
+
+        // Xử lý tìm kiếm phòng
+        document.getElementById("searchRoomInputHost").addEventListener("input", function () {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll("#roomTableBodyHost tr");
+            rows.forEach(row => {
+                const roomName = row.querySelector(".room-name-host").textContent.toLowerCase();
+                row.style.display = roomName.includes(searchValue) ? "" : "none";
+            });
+        });
+
+        // Khởi tạo biểu đồ
+        const ctx = document.getElementById("roomStatusChart").getContext("2d");
+        const roomStatusChart = new Chart(ctx, {
+            type: "pie",
+            data: {
+                labels: ["Phòng trống", "Phòng đã thuê", "Phòng bảo trì"],
+                datasets: [{
+                    data: [
+                        parseInt(document.getElementById("availableRoomsCount").textContent),
+                        parseInt(document.getElementById("occupiedRoomsCount").textContent),
+                        parseInt(document.getElementById("maintenanceRoomsCount").textContent)
+                    ],
+                    backgroundColor: ["#28a745", "#dc3545", "#ffc107"],
+                    borderColor: ["#28a745", "#dc3545", "#ffc107"],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                let label = context.label || "";
+                                if (label) {
+                                    label += ": ";
+                                }
+                                label += context.raw + " phòng";
+                                return label;
+                            }
+                        }
+                    }
+                }
             }
         });
 
-        function initializeToasts() {
-            const toasts = document.querySelectorAll('.toast-host');
-            toasts.forEach(toast => {
-                setTimeout(() => toast.classList.add('show'), 100);
-                setTimeout(() => {
-                    toast.style.opacity = '0';
-                    toast.style.transform = 'translateX(100%)';
-                    setTimeout(() => toast.remove(), 300);
-                }, 5000);
-
-                const closeBtn = toast.querySelector('.btn-close');
-                if (closeBtn) {
-                    closeBtn.addEventListener('click', () => {
-                        toast.style.opacity = '0';
-                        toast.style.transform = 'translateX(100%)';
-                        setTimeout(() => toast.remove(), 300);
-                    });
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            initializeToasts();
-            const deleteButtons = document.querySelectorAll('.delete-room-btn');
-
-            deleteButtons.forEach(button => {
-                button.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const form = this.closest('form');
-                    Swal.fire({
-                        title: 'Xác nhận xóa?',
-                        text: "Bạn có chắc chắn muốn xóa phòng này không?",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        cancelButtonColor: '#3085d6',
-                        confirmButtonText: 'Xóa',
-                        cancelButtonText: 'Hủy'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
+        // Xử lý xóa phòng
+        document.addEventListener("click", function (e) {
+            if (e.target.closest(".delete-room-btn")) {
+                e.preventDefault();
+                const form = e.target.closest(".delete-room-form");
+                const roomId = form.getAttribute("data-room-id");
+                Swal.fire({
+                    title: "Xác nhận xóa",
+                    text: "Bạn có chắc muốn xóa phòng này?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Xóa",
+                    cancelButtonText: "Hủy"
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        fetch(form.action, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: `hostelId=${form.getAttribute("data-hostel-id")}`
+                        }).then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            } else {
+                                showNotification("Có lỗi xảy ra khi xóa phòng.", "error");
+                            }
+                        }).catch(error => {
+                            showNotification("Lỗi khi xóa phòng: " + error.message, "error");
+                        });
+                    }
                 });
-            });
+            }
+        });
+
+        // Khởi tạo kiểm tra khu trọ
+        document.addEventListener("DOMContentLoaded", function () {
+            checkHostelCapacity();
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </body>
 
 </html>

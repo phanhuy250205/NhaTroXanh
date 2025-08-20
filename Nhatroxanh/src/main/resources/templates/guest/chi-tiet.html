@@ -326,7 +326,6 @@
             max-width: 320px;
         }
 
-        /* Style toast */
         .toast-host {
             padding: 12px 16px;
             border-radius: 8px;
@@ -603,6 +602,66 @@
             font-weight: 500;
             padding: 4px 10px;
         }
+
+        .form-control {
+            /* Layout */
+            width: 100%;
+            min-height: 120px;
+            padding: 12px 16px;
+            resize: vertical;
+            /* Cho phép resize dọc */
+
+            /* Typography */
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            color: #1a202c;
+
+            /* Visual */
+            background-color: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+            /* Interaction */
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Placeholder */
+            &::placeholder {
+                color: #a0aec0;
+                opacity: 1;
+            }
+
+            /* Focus state */
+            &:focus {
+                border-color: #5b67d8;
+                outline: none;
+                box-shadow: 0 0 0 3px rgba(91, 103, 216, 0.2);
+                background-color: #f8fafc;
+            }
+
+            /* Hover state */
+            &:hover:not(:focus) {
+                border-color: #c3cfe2;
+            }
+
+            /* Disabled state */
+            &:disabled {
+                background-color: #f7fafc;
+                color: #a0aec0;
+                cursor: not-allowed;
+            }
+        }
+
+        .amenity-item i {
+            min-width: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        .amenity-item {
+            font-size: 15px;
+        }
     </style>
 </head>
 
@@ -630,18 +689,10 @@
                     th:text="${post != null && post.title != null ? post.title : 'Tiêu đề bài đăng'}"></li>
             </ol>
         </nav>
-        <!-- <div class="toast-container-host" id="toastContainer">
-            <div th:if="${message}" class="toast-host success" role="alert">
-                <i class="toast-icon fas fa-check-circle"></i>
-                <span class="toast-message" th:text="${message}"></span>
-                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
-            </div>
-            <div th:if="${errorData}" class="toast-host error" role="alert">
-                <i class="toast-icon fas fa-exclamation-circle"></i>
-                <span class="toast-message" th:text="${error}"></span>
-                <button type="button" class="btn-close" aria-label="Đóng thông báo">×</button>
-            </div>
-        </div> -->
+        <div id="notificationData"
+            th:attr="data-message=${message != null ? message : ''}, data-error=${error != null ? error : ''}"
+            style="display: none;">
+        </div>
     </div>
     <!-- Property Detail Section -->
     <section class="property-detail-section py-4">
@@ -692,7 +743,7 @@
                             <div class="owner-info d-flex align-items-center">
                                 <img th:src="@{${owner.avatar != null and !owner.avatar.isEmpty() ? owner.avatar : '/images/avatar-default.png'}}"
                                     alt="Chủ trọ" class="owner-avatar rounded-circle me-3"
-                                    style="width: 60px; height: 60px;" onerror="this.src='/images/avatar-default.png';">
+                                    style="width: 60px; height: 60px;">
                                 <div class="owner-details">
                                     <h4 class="owner-name mb-1"
                                         th:text="'Liên hệ: ' +${owner != null ? owner.fullname : 'Chưa có tên'}">Tên chủ
@@ -855,9 +906,41 @@
                                                     Phòng này hiện không có tiện ích nào.
                                                 </p>
                                                 <div th:unless="${utilities == null or #sets.isEmpty(utilities)}">
-                                                    <ul class="list-unstyled">
-                                                        <li class="amenity-item mb-2" th:each="utility : ${utilities}">
-                                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                                    <ul class="list-unstyled row row-cols-1 row-cols-md-3 g-2">
+                                                        <li class="amenity-item col d-flex align-items-center"
+                                                            th:each="utility : ${utilities}">
+                                                            <span th:switch="${utility.name}">
+                                                                <i th:case="'Gác lửng'"
+                                                                    class="fa-solid fa-stairs me-2"></i>
+                                                                <i th:case="'Phòng tắm'"
+                                                                    class="fa-solid fa-bath me-2"></i>
+                                                                <i th:case="'Máy giặt'"
+                                                                    class="fa-solid fa-soap me-2"></i>
+                                                                <i th:case="'Tủ lạnh'"
+                                                                    class="fa-solid fa-snowflake me-2"></i>
+                                                                <i th:case="'Ban công/sân thượng'"
+                                                                    class="fa-solid fa-building me-2"></i>
+                                                                <i th:case="'Wifi'" class="fa-solid fa-wifi me-2"></i>
+                                                                <i th:case="'Bình nóng lạnh'"
+                                                                    class="fa-solid fa-shower me-2"></i>
+                                                                <i th:case="'Tivi'" class="fa-solid fa-tv me-2"></i>
+                                                                <i th:case="'Giường nệm'"
+                                                                    class="fa-solid fa-bed me-2"></i>
+                                                                <i th:case="'Camera an ninh'"
+                                                                    class="fa-solid fa-video me-2"></i>
+                                                                <i th:case="'Vệ sinh trong'"
+                                                                    class="fa-solid fa-toilet me-2"></i>
+                                                                <i th:case="'Kệ bếp'"
+                                                                    class="fa-solid fa-kitchen-set me-2"></i>
+                                                                <i th:case="'Điều hòa'"
+                                                                    class="fa-solid fa-fan me-2"></i>
+                                                                <i th:case="'Tủ áo quần'"
+                                                                    class="fa-solid fa-briefcase me-2"></i>
+                                                                <i th:case="'Chỗ để xe'"
+                                                                    class="fa-solid fa-car me-2"></i>
+                                                                <i th:case="*"
+                                                                    class="fa-solid fa-circle-check me-2"></i>
+                                                            </span>
                                                             <span
                                                                 th:text="${utility.name != null ? utility.name : 'Tiện ích không xác định'}"></span>
                                                         </li>
@@ -913,7 +996,7 @@
                                     <div th:if="${!reviews.isEmpty()}">
                                         <div th:each="review, iter : ${reviews}" th:id="'review-' + ${review.reviewId}"
                                             th:classappend="${iter.index >= 10} ? 'd-none hidden-review' : ''"
-                                            class="border rounded p-3 mb-3 review-item">
+                                            class="border rounded-5 p-3 mb-3 review-item">
                                             <div class="d-flex align-items-start">
                                                 <img th:src="@{${review.user.avatar != null ? review.user.avatar : '/images/avatar-default.png'}}"
                                                     alt="avatar" class="rounded-circle me-3"
@@ -927,7 +1010,7 @@
                                                         <i class="fas fa-star"
                                                             th:each="i : ${#numbers.sequence(1, review.rating.intValue())}"></i>
                                                     </span>
-                                                    <p class="mb-0" th:text="${review.comment}">Nội dung đánh giá</p>
+                                                    <p class="mb-0" th:utext="${review.comment}">Nội dung đánh giá</p>
 
                                                     <div th:if="${currentUser != null and currentUser.userId == review.user.userId}"
                                                         class="mt-2 d-flex justify-content align-items-center gap-2">
@@ -948,7 +1031,6 @@
                                                     <!-- Form chỉnh sửa -->
                                                     <div th:id="'edit-form-' + ${review.reviewId}"
                                                         style="display: none;" class="mt-2">
-
                                                         <form th:action="@{/reviews/action}" method="post"
                                                             th:with="reviewId=${review.reviewId}, postId=${post.postId}, rating=${review.rating != null ? review.rating.intValue() : 0}">
                                                             <input type="hidden" name="actionType" value="edit" />
@@ -973,17 +1055,39 @@
                                                                 </div>
                                                             </div>
 
-                                                            <div class="mb-3">
-                                                                <label class="form-label">Nội dung:</label>
+                                                            <div class="mb-3"
+                                                                style="width: 100%; max-width: 800px; margin: 0 auto;">
+                                                                <label class="form-label"
+                                                                    style="display: block; margin-bottom: 12px; font-weight: 600; color: #2d3748; font-size: 16px;">Nội
+                                                                    dung:</label>
                                                                 <textarea th:id="'edit-comment-' + ${reviewId}"
-                                                                    name="comment" class="form-control" rows="3"
+                                                                    name="comment" class="form-control" rows="8"
                                                                     th:text="${review.comment != null ? review.comment : ''}"
-                                                                    placeholder="Nhập nội dung đánh giá..."></textarea>
+                                                                    placeholder="Nhập nội dung đánh giá..." style="
+            width: 100%;
+            padding: 16px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 10px !important; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 180px !important;
+            resize: vertical;
+            outline: none;
+            display: block;
+        " onfocus="this.style.borderColor='#6366f1'; this.style.boxShadow='0 0 0 4px rgba(99, 102, 241, 0.15)'; this.style.backgroundColor='#f9fafb'"
+                                                                    onblur="this.style.borderColor='#d1d5db'; this.style.boxShadow='0 2px 4px rgba(0, 0, 0, 0.08)'; this.style.backgroundColor='#fff'"
+                                                                    onmouseenter="this.style.borderColor='#9ca3af'"
+                                                                    onmouseleave="this.style.borderColor='#d1d5db'"></textarea>
                                                             </div>
 
                                                             <div class="d-flex gap-2 justify-content-end">
-                                                                <button type="submit" class="btn btn-success btn-sm">Lưu
-                                                                    chỉnh sửa</button>
+                                                                <button type="submit"
+                                                                    class="btn btn-success btn-sm">Lưu</button>
                                                                 <button type="button" class="btn btn-danger btn-sm"
                                                                     th:onclick="'hideEditForm(' + ${reviewId} + ')'">Hủy</button>
                                                             </div>
@@ -1018,7 +1122,8 @@
                                             </div>
                                             <div class="mb-3">
                                                 <label for="comment" class="form-label">Nội dung:</label>
-                                                <textarea id="comment" name="comment" class="form-control" rows="3"
+                                                <textarea id="comment" name="comment" class="form-control" rows="8"
+                                                    style="min-height: 120px !important;"
                                                     placeholder="Nhập đánh giá của bạn..."></textarea>
                                             </div>
                                             <button type="submit" class="btn btn-success btn-sm">Gửi đánh giá</button>
@@ -1369,10 +1474,32 @@
                 // ====== TIỆN ÍCH ======
                 const utilitiesList = document.getElementById('roomDetailUtilities');
                 utilitiesList.innerHTML = '';
+
+                // Map tiện ích -> icon FontAwesome
+                const utilityIcons = {
+                    "Wifi": "fa-wifi",
+                    "Giường nệm": "fa-bed",
+                    "Tủ lạnh": "fa-snowflake", 
+                    "Tivi": "fa-tv",
+                    "Máy giặt": "fa-soap",
+                    "Điều hòa": "fa-fan",
+                    "Ban công/sân thượng": "fa-archway",
+                    "Camera an ninh": "fa-video",
+                    "Vệ sinh trong": "fa-toilet",
+                    "Kệ bếp": "fa-kitchen-set",
+                    "Bình nóng lạnh": "fa-shower",
+                    "Tủ áo quần": "fa-briefcase",
+                    "Gác lửng": "fa-stairs",
+                    "Phòng tắm": "fa-bath",
+                    "Chỗ để xe": "fa-car",
+                };
+
                 if (room.utilities && room.utilities.length > 0) {
                     room.utilities.forEach(utility => {
                         const li = document.createElement('li');
-                        li.innerHTML = `<i class="fas fa-check-circle text-success me-2"></i>${utility}`;
+                        // nếu có icon trong map thì lấy, không thì mặc định check-circle
+                        const icon = utilityIcons[utility] || "fa-check-circle";
+                        li.innerHTML = `<i class="fas ${icon} text-primary me-2"></i>${utility}`;
                         utilitiesList.appendChild(li);
                     });
                 } else {
@@ -1381,6 +1508,7 @@
                     utilitiesList.appendChild(li);
                 }
 
+
                 const modal = new bootstrap.Modal(document.getElementById('roomDetailModal'));
                 modal.show();
             } catch (error) {
@@ -1388,8 +1516,6 @@
                 alert('Không thể tải thông tin phòng. Vui lòng thử lại.');
             }
         }
-
-
 
         let contactCache = new Map();
         function fetchContact(event, action) {
@@ -1490,13 +1616,22 @@
                         const deepLink = `zalo://chat?phone=${phoneNumber}`;
                         const fallbackLink = `https://zalo.me/${phoneNumber}`;
 
-                        window.location.href = deepLink;
+                        window.open(fallbackLink, '_blank');
 
-                        setTimeout(() => {
-                            window.open(fallbackLink, '_blank');
-                        }, 1000);
+                        Swal.fire({
+                            title: 'Mở Zalo bằng ứng dụng?',
+                            text: 'Bạn có muốn mở cuộc trò chuyện trong ứng dụng Zalo không?',
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonText: 'Mở app',
+                            cancelButtonText: 'Ở lại web'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Người dùng đồng ý → mở app
+                                window.location.href = deepLink;
+                            }
+                        });
                         break;
-
                     default:
                         Swal.fire({
                             icon: 'error',
@@ -1804,24 +1939,276 @@
                 });
             }
         });
+        // Danh sách từ khóa bậy bạ (có thể mở rộng)
+        const INAPPROPRIATE_WORDS = [
+            // Từ ngữ thô tục tiếng Việt
+            'đụ', 'địt', 'cặc', 'buồi', 'lồn', 'chó', 'súc vật', 'thằng', 'con mẹ',
+            'đéo', 'vãi', 'cứt', 'shit', 'fuck', 'damn', 'bitch', 'ass', 'hell',
+            'ngu', 'đần', 'óc chó', 'não cá vàng', 'mặt lồn', 'đầu buồi',
+            'đồ chó', 'con chó', 'thằng chó', 'con điên', 'đồ điên',
+            'cút', 'biến', 'tao', 'mày', 'đụ má', 'địt mẹ', 'con đĩ',
+        ];
 
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     const toasts = document.querySelectorAll('.toast-host');
-        //     toasts.forEach(toast => {
-        //         // Tự ẩn sau 5s
-        //         setTimeout(() => {
-        //             toast.style.opacity = '0';
-        //             setTimeout(() => toast.remove(), 30000); // xóa hẳn sau 0.3s
-        //         }, 5000);
+        // Danh sách từ thay thế
+        const REPLACEMENT_CHARS = ['*', '#', '@', '!', '%'];
 
-        //         // Nút close
-        //         toast.querySelector('.btn-close').addEventListener('click', () => {
-        //             toast.style.opacity = '0';
-        //             toast.style.transform = 'translateX(100%)';
-        //             setTimeout(() => toast.remove(), 300);
-        //         });
-        //     });
-        // });
+        class CommentFilter {
+            constructor() {
+                this.inappropriateWords = INAPPROPRIATE_WORDS.map(word =>
+                    this.normalizeText(word.toLowerCase())
+                );
+                this.init();
+            }
+
+            init() {
+                // Form tạo mới
+                const newReviewForm = document.querySelector('form[action="/reviews"]');
+                if (newReviewForm) {
+                    const commentTextarea = newReviewForm.querySelector('textarea[name="comment"]');
+                    const submitButton = newReviewForm.querySelector('button[type="submit"]');
+
+                    if (commentTextarea && submitButton) {
+                        commentTextarea.addEventListener('input', (e) => {
+                            this.handleRealtimeValidation(e.target);
+                        });
+
+                        newReviewForm.addEventListener('submit', (e) => {
+                            this.removeFormError(newReviewForm);
+                            if (!this.validateComment(commentTextarea.value)) {
+                                e.preventDefault();
+                                this.showFormError(newReviewForm, 'Bình luận chứa từ ngữ không phù hợp. Vui lòng chỉnh sửa!');
+                                commentTextarea.focus();
+                            }
+                        });
+                    }
+                }
+
+                // Form chỉnh sửa
+                document.addEventListener('submit', (e) => {
+                    if (e.target.matches('form[action="/reviews/action"]')) {
+                        const actionType = e.target.querySelector('input[name="actionType"]');
+                        const commentTextarea = e.target.querySelector('textarea[name="comment"]');
+                        this.removeFormError(e.target);
+
+                        if (actionType && actionType.value === 'edit' && commentTextarea && !this.validateComment(commentTextarea.value)) {
+                            e.preventDefault();
+                            this.showFormError(e.target, 'Bình luận chứa từ ngữ không phù hợp. Vui lòng chỉnh sửa!');
+                            commentTextarea.focus();
+                        }
+                    }
+                });
+
+                // Khi hiển thị form edit
+                this.initEditFormListeners();
+            }
+
+            initEditFormListeners() {
+                const originalShowEditForm = window.showEditForm;
+                window.showEditForm = (reviewId) => {
+                    if (originalShowEditForm) originalShowEditForm(reviewId);
+
+                    setTimeout(() => {
+                        const editForm = document.getElementById('edit-form-' + reviewId);
+                        if (editForm) {
+                            const commentTextarea = editForm.querySelector('textarea[name="comment"]');
+                            if (commentTextarea) {
+                                commentTextarea.addEventListener('input', (e) => {
+                                    this.handleRealtimeValidation(e.target);
+                                });
+                            }
+                        }
+                    }, 100);
+                };
+            }
+
+            handleRealtimeValidation(textarea) {
+                const text = textarea.value;
+                const containsInappropriate = this.containsInappropriateWords(text);
+
+                this.removeExistingWarning(textarea);
+
+                if (containsInappropriate) {
+                    this.showInlineWarning(textarea, 'Bình luận chứa từ ngữ không phù hợp');
+                    textarea.style.borderColor = '#ef4444';
+                } else {
+                    textarea.style.borderColor = '';
+                }
+            }
+
+            containsInappropriateWords(text) {
+                if (!text) return false;
+                const normalizedText = this.normalizeText(text.toLowerCase());
+                return this.inappropriateWords.some(word => {
+                    const regex = new RegExp(`\\b${this.escapeRegExp(word)}\\b`, 'gi');
+                    return regex.test(normalizedText);
+                });
+            }
+
+            normalizeText(text) {
+                return text
+                    .replace(/[àáạảãâầấậẩẫăằắặẳẵ]/g, 'a')
+                    .replace(/[èéẹẻẽêềếệểễ]/g, 'e')
+                    .replace(/[ìíịỉĩ]/g, 'i')
+                    .replace(/[òóọỏõôồốộổỗơờớợởỡ]/g, 'o')
+                    .replace(/[ùúụủũưừứựửữ]/g, 'u')
+                    .replace(/[ỳýỵỷỹ]/g, 'y')
+                    .replace(/đ/g, 'd')
+                    .replace(/[^\w\s]/g, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+            }
+
+            escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            validateComment(text) {
+                if (!text || text.trim().length === 0) {
+                    return true; // Cho phép comment rỗng
+                }
+                return !this.containsInappropriateWords(text);
+            }
+
+            showInlineWarning(textarea, message) {
+                const warningDiv = document.createElement('div');
+                warningDiv.className = 'comment-warning text-danger mt-1';
+                warningDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                warningDiv.style.fontSize = '0.875rem';
+                textarea.parentNode.insertBefore(warningDiv, textarea.nextSibling);
+            }
+
+            removeExistingWarning(textarea) {
+                const existingWarning = textarea.parentNode.querySelector('.comment-warning');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+            }
+
+            showFormError(form, message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'form-error text-danger mt-2';
+                errorDiv.style.fontSize = '0.875rem';
+                errorDiv.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.insertAdjacentElement('afterend', errorDiv);
+                }
+            }
+
+            removeFormError(form) {
+                const existingError = form.querySelector('.form-error');
+                if (existingError) {
+                    existingError.remove();
+                }
+            }
+        }
+
+        // CSS warning
+        const style = document.createElement('style');
+        style.textContent = `
+.comment-warning {
+    animation: fadeIn 0.3s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.inappropriate-input {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.25) !important;
+}
+`;
+        document.head.appendChild(style);
+
+        // Khởi tạo khi DOM load
+        document.addEventListener('DOMContentLoaded', function () {
+            window.commentFilter = new CommentFilter();
+            console.log('Comment Filter System initialized');
+
+            const commentTextareas = document.querySelectorAll('textarea[name="comment"]');
+            commentTextareas.forEach(textarea => {
+                if (!textarea.placeholder) {
+                    textarea.placeholder = 'Nhập đánh giá của bạn... (Vui lòng sử dụng ngôn từ phù hợp)';
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const toasts = document.querySelectorAll('.toast-host');
+            toasts.forEach(toast => {
+                // Tự ẩn sau 5s
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 30000); // xóa hẳn sau 0.3s
+                }, 5000);
+
+                // Nút close
+                toast.querySelector('.btn-close').addEventListener('click', () => {
+                    toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
+                    setTimeout(() => toast.remove(), 300);
+                });
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Lấy giá trị từ data attributes
+            const notificationData = document.getElementById('notificationData');
+            const successMessage = notificationData.getAttribute('data-message');
+            const errorMessage = notificationData.getAttribute('data-error');
+
+            // Check for success message
+            if (successMessage && successMessage !== 'null' && successMessage.trim() !== '') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công',
+                    text: successMessage,
+                    showConfirmButton: true,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }
+
+            // Check for error message
+            if (errorMessage && errorMessage !== 'null' && errorMessage.trim() !== '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Lỗi',
+                    text: errorMessage,
+                    showConfirmButton: true,
+                    timer: 5000,
+                    timerProgressBar: true
+                });
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll('form').forEach(function (form) {
+                form.addEventListener("submit", function () {
+                    const textarea = form.querySelector('textarea[name="comment"]');
+                    if (textarea) {
+                        // Đổi name textarea để không gửi cùng với hidden input
+                        textarea.removeAttribute("name");
+
+                        // Tạo input hidden để gửi dữ liệu với <br>
+                        let hiddenInput = form.querySelector('input[name="comment"]');
+                        if (!hiddenInput) {
+                            hiddenInput = document.createElement("input");
+                            hiddenInput.type = "hidden";
+                            hiddenInput.name = "comment";
+                            form.appendChild(hiddenInput);
+                        }
+                        hiddenInput.value = textarea.value.replace(/\r?\n/g, "<br>");
+                    }
+                });
+            });
+
+            // Khi load vào textarea -> đổi <br> thành xuống dòng
+            document.querySelectorAll("textarea").forEach(function (textarea) {
+                textarea.value = textarea.value.replace(/<br\s*\/?>/gi, "\n");
+            });
+        });
+
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- Include favorite handler -->

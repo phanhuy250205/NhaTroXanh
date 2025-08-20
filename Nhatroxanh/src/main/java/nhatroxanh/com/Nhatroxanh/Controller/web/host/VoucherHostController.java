@@ -3,6 +3,7 @@ package nhatroxanh.com.Nhatroxanh.Controller.web.host;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Hostel;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Users;
 import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
+import nhatroxanh.com.Nhatroxanh.Repository.VoucherRepository;
 import nhatroxanh.com.Nhatroxanh.Security.CustomUserDetails;
 import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.VoucherService;
@@ -36,6 +37,9 @@ public class VoucherHostController {
 
     @Autowired
     private HostelService hostelService;
+
+    @Autowired
+    private VoucherRepository voucherRepository;
 
     @GetMapping
     public String showVoucherManagement(
@@ -83,34 +87,46 @@ public class VoucherHostController {
             RedirectAttributes redirectAttributes) {
 
         try {
-            Users currentUser = userDetails.getUser();
-            Hostel hostel = null;
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            LocalDate maxEnd = start.plusMonths(2);
 
-            if (hostelId != -1) {
-                hostel = hostelService.getHostelById(hostelId)
-                        .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
-                if (!hostel.getOwner().getUserId().equals(currentUser.getUserId())) {
-                    throw new SecurityException("Bạn không có quyền tạo voucher cho khu trọ này.");
-                }
+            if (end.isBefore(start)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu");
+                return "redirect:/chu-tro/voucher";
+            }
+            if (end.isAfter(maxEnd)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu (" + maxEnd + ")");
+                return "redirect:/chu-tro/voucher";
+            }
+
+            Users currentUser = userDetails.getUser();
+
+            // Yêu cầu chọn khu trọ
+            Hostel hostel = hostelService.getHostelById(hostelId)
+                    .orElseThrow(() -> new IllegalArgumentException("Khu trọ không tồn tại."));
+
+            if (!hostel.getOwner().getUserId().equals(currentUser.getUserId())) {
+                throw new SecurityException("Bạn không có quyền tạo voucher cho khu trọ này.");
             }
 
             Vouchers voucher = Vouchers.builder()
                     .title(title.trim())
                     .code(code.trim())
                     .user(currentUser)
-                    .hostel(hostel) // null nếu áp dụng toàn bộ
+                    .hostel(hostel)
                     .discountValue(discountValue)
                     .quantity(quantity)
                     .minAmount(minAmount)
-                    .startDate(Date.valueOf(startDate))
-                    .endDate(Date.valueOf(endDate))
+                    .startDate(Date.valueOf(start))
+                    .endDate(Date.valueOf(end))
                     .description(description != null ? description.trim() : null)
                     .status(true)
                     .createdAt(Date.valueOf(LocalDate.now()))
                     .build();
 
             voucherService.createVoucherHost(voucher, currentUser.getUserId());
-            voucherService.sendVoucherNotification(voucher, userDetails); // Gửi thông báo sau khi tạo
 
             redirectAttributes.addFlashAttribute("successMessage", "Tạo voucher thành công!");
         } catch (IllegalArgumentException | SecurityException e) {
@@ -149,11 +165,14 @@ public class VoucherHostController {
             RedirectAttributes redirectAttributes) {
         try {
             Vouchers voucher = voucherService.getVoucherByIdAndHost(voucherId, userDetails.getUser().getUserId());
+            if (voucher.getHostel() == null) {
+                throw new IllegalArgumentException("Voucher không hợp lệ: Không có khu trọ được liên kết.");
+            }
             List<Hostel> hostels = hostelService.getHostelsByOwnerId(userDetails.getUser().getUserId());
             model.addAttribute("voucher", voucher);
             model.addAttribute("hostels", hostels);
             model.addAttribute("activeTab", "create");
-            return "host/edit-voucher";
+            return "host/voucher-host";
         } catch (IllegalArgumentException e) {
             logger.error("Lỗi khi lấy voucher: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -182,23 +201,34 @@ public class VoucherHostController {
             @RequestParam("status") Boolean status,
             RedirectAttributes redirectAttributes) {
         try {
-            Vouchers voucher = voucherService.getVoucherByIdAndHost(voucherId, userDetails.getUser().getUserId());
-            
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = LocalDate.parse(endDate);
+            LocalDate maxEnd = start.plusMonths(2);
+
+            if (end.isBefore(start)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Ngày kết thúc không được trước ngày bắt đầu");
+                return "redirect:/chu-tro/voucher/edit/" + voucherId;
+            }
+            if (end.isAfter(maxEnd)) {
+                redirectAttributes.addFlashAttribute("errorMessage",
+                        "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu (" + maxEnd + ")");
+                return "redirect:/chu-tro/voucher/edit/" + voucherId;
+            }
+
             voucherService.updateVoucherHost(
                     voucherId, userDetails.getUser().getUserId(), title, code, hostelId,
-                    discountValue, quantity, minAmount, Date.valueOf(startDate),
-                    Date.valueOf(endDate), description, status);
-            if (status) { // Chỉ gửi thông báo nếu voucher đang hoạt động
-                voucherService.sendVoucherNotification(voucher, userDetails);
-            }
-            // voucherService.checkAndDeactivateVouchersIfNeeded();
+                    discountValue, quantity, minAmount, Date.valueOf(start),
+                    Date.valueOf(end), description, status);
+
+            Vouchers voucher = voucherService.getVoucherByIdAndHost(voucherId, userDetails.getUser().getUserId());
+
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật voucher thành công!");
         } catch (SecurityException e) {
             logger.error("Lỗi bảo mật khi cập nhật voucher: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Bạn không có quyền chỉnh sửa voucher này.");
         } catch (Exception e) {
             logger.error("Lỗi bất ngờ khi cập nhật voucher: {}", e.getMessage(), e);
-
+            redirectAttributes.addFlashAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật voucher.");
         }
         return "redirect:/chu-tro/voucher";
     }
@@ -210,5 +240,25 @@ public class VoucherHostController {
         boolean exists = voucherId == null ? voucherService.existsByCode(code)
                 : voucherService.existsByCodeAndNotId(code, voucherId);
         return Collections.singletonMap("exists", exists);
+    }
+
+    @PostMapping("/send-thong-bao/{id}")
+    public String sendVoucherNotification(@PathVariable Integer id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirect) {
+        try {
+            Vouchers voucher = voucherRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
+
+            if (!voucher.getUser().getUserId().equals(userDetails.getUserId())) {
+                throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
+            }
+
+            voucherService.sendVoucherNotification(voucher, userDetails);
+            redirect.addFlashAttribute("successMessage", "Gửi thông báo voucher thành công!");
+        } catch (Exception e) {
+            redirect.addFlashAttribute("errorMessage", "Lỗi khi gửi thông báo: " + e.getMessage());
+        }
+        return "redirect:/chu-tro/voucher";
     }
 }

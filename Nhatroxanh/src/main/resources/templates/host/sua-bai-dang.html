@@ -466,6 +466,44 @@
                 right: 20px;
             }
         }
+
+        .price-input-container {
+            position: relative;
+            flex: 1;
+        }
+
+        .price-display {
+            padding-right: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        .currency-suffix {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 12px;
+            font-weight: 500;
+            background: #f8fafc;
+            padding: 2px 6px;
+            border-radius: 4px;
+            border: 1px solid #e5e7eb;
+            pointer-events: none;
+        }
+
+        .price-preview {
+            margin-top: 8px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+            border: 1px solid rgba(62, 131, 204, 0.2);
+            border-radius: 6px;
+            font-size: 13px;
+            color: var(--dark-blue);
+            width: 318px;
+        }
     </style>
 </head>
 
@@ -565,12 +603,19 @@
                     <div class="col-host">
                         <label class="form-label-host">Giá cho thuê <span style="color: red;">*</span></label>
                         <div class="input-group-host">
-                            <input name="price" type="number" class="form-control-host" placeholder="Nhập giá..."
-                                required th:value="${post.price}">
-                            <select class="form-control-host form-select-host" style="width: 120px;">
-                                <option>VNĐ/Tháng</option>
-                                <option>VNĐ/Ngày</option>
-                            </select>
+                            <div class="price-input-container">
+                                <input id="priceInput" type="text" class="form-control-host price-display"
+                                    placeholder="Nhập giá thuê..." autocomplete="off">
+                                <div class="currency-suffix">VNĐ</div>
+                                <input id="priceValue" type="hidden" name="price" th:value="${post.price}">
+                            </div>
+                            <input type="text" class="form-control-host area-unit-host" style="width: 150px;"
+                                value="VNĐ/tháng" disabled>
+                            <input type="hidden" id="priceUnit" name="priceUnit" value="monthly">
+                        </div>
+                        <div class="price-preview" id="pricePreview" style="display: none;">
+                            <span class="label">Giá hiển thị:</span>
+                            <span class="value" id="pricePreviewValue"></span>
                         </div>
                     </div>
                     <div class="col-host">
@@ -597,8 +642,29 @@
                         <input type="checkbox" name="utilities" class="form-check-input-host"
                             th:id="'utility_' + ${utility.utilityId}" th:value="${utility.utilityId}"
                             th:checked="${post.utilities != null && #lists.contains(post.utilities, utility)}">
-                        <label class="form-check-label-host" th:for="'utility_' + ${utility.utilityId}"
-                            th:text="${utility.name}"></label>
+
+                        <label class="form-check-label-host d-flex align-items-center"
+                            th:for="'utility_' + ${utility.utilityId}">
+                            <span class="me-2 text-primary" th:switch="${utility.name}">
+                                <i th:case="'Wifi'" class="fa-solid fa-wifi"></i>
+                                <i th:case="'Giường nệm'" class="fa-solid fa-bed"></i>
+                                <i th:case="'Tủ lạnh'" class="fa-solid fa-snowflake"></i>
+                                <i th:case="'Tivi'" class="fa-solid fa-tv"></i>
+                                <i th:case="'Máy giặt'" class="fa-solid fa-soap"></i>
+                                <i th:case="'Điều hòa'" class="fa-solid fa-fan"></i>
+                                <i th:case="'Camera an ninh'" class="fa-solid fa-video"></i>
+                                <i th:case="'Vệ sinh trong'" class="fa-solid fa-toilet"></i>
+                                <i th:case="'Kệ bếp'" class="fa-solid fa-kitchen-set"></i>
+                                <i th:case="'Ban công/sân thượng'" class="fa-solid fa-archway"></i>
+                                <i th:case="'Bình nóng lạnh'" class="fa-solid fa-shower"></i>
+                                <i th:case="'Tủ áo quần'" class="fa-solid fa-briefcase"></i>
+                                <i th:case="'Gác lửng'" class="fa-solid fa-stairs"></i>
+                                <i th:case="'Phòng tắm'" class="fa-solid fa-bath"></i>
+                                <i th:case="'Chỗ để xe'" class="fa-solid fa-car"></i>
+                                <i th:case="*" class="fa-solid fa-check-circle"></i>
+                            </span>
+                            <span th:text="${utility.name}"></span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -661,6 +727,7 @@
             setupFormSubmission();
             initializeToasts();
             initializeDescription();
+            setupPriceFormatting();
         });
 
         // Khởi tạo mô tả với việc xử lý <br> tags
@@ -1039,6 +1106,60 @@
                 categorySelect.querySelector(`option[value="${categorySelect.value}"]`).selected = true;
             }
         });
+        function setupPriceFormatting() {
+            const priceInput = document.getElementById('priceInput');
+            const priceValue = document.getElementById('priceValue');
+            const priceUnit = document.getElementById('priceUnit');
+            const pricePreview = document.getElementById('pricePreview');
+            const pricePreviewValue = document.getElementById('pricePreviewValue');
+
+            function formatNumber(num) {
+                return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function unformatNumber(str) {
+                return str.replace(/\.(?=\d{3})/g, '');
+            }
+
+            function updatePrice() {
+                const rawValue = unformatNumber(priceInput.value);
+                const numValue = parseFloat(rawValue) || 0;
+
+                if (numValue > 0) {
+                    priceInput.value = formatNumber(numValue.toFixed(0));
+                    priceValue.value = numValue.toFixed(0);
+                    const unit = priceUnit.value === 'daily' ? '/ngày' : '/tháng';
+                    pricePreviewValue.textContent = `${formatNumber(numValue.toFixed(0))} VNĐ${unit}`;
+                    pricePreview.style.display = 'block';
+                } else {
+                    priceInput.value = '';
+                    priceValue.value = '';
+                    pricePreview.style.display = 'none';
+                }
+            }
+
+            if (priceInput) {
+                priceInput.addEventListener('input', function (e) {
+                    let value = e.target.value.replace(/[^\d]/g, '');
+                    if (value) {
+                        e.target.value = formatNumber(value);
+                    } else {
+                        e.target.value = '';
+                    }
+                    updatePrice();
+                });
+
+                priceInput.addEventListener('blur', updatePrice);
+                priceUnit.addEventListener('change', updatePrice);
+
+                // Load existing value
+                if (priceValue.value) {
+                    const numValue = parseFloat(priceValue.value) || 0;
+                    priceInput.value = formatNumber(numValue.toFixed(0));
+                    updatePrice();
+                }
+            }
+        }
     </script>
 </body>
 

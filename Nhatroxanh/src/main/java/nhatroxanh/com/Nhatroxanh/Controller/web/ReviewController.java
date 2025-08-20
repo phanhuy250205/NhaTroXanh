@@ -39,7 +39,7 @@ public class ReviewController {
         if (userDetails == null) {
             logger.warn("User not authenticated");
             redirectAttributes.addFlashAttribute("error", "Bạn cần đăng nhập để gửi đánh giá.");
-            return "redirect:/login";
+            return "redirect:/chi-tiet/" + postId;
         }
 
         try {
@@ -137,7 +137,7 @@ public class ReviewController {
                 review.setRating(ratingVal);
                 review.setComment(comment);
                 reviewService.createOrUpdateReview(review);
-                redirectAttributes.addFlashAttribute("message", "Cập nhật đánh giá thành công!");
+                redirectAttributes.addFlashAttribute("message", "Chỉnh sửa đánh giá thành công!");
             }
 
         } catch (Exception e) {

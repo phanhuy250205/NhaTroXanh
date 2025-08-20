@@ -17,8 +17,6 @@
             --dark-color: #1e293b;
         }
 
-
-
         /* Notification System */
         .notification-container {
             position: fixed;
@@ -294,7 +292,6 @@
         /* Action Buttons */
         .action-btn {
             width: 44px;
-            /* hoặc 40px tùy bạn */
             height: 44px;
             display: flex;
             align-items: center;
@@ -306,7 +303,6 @@
             background-color: white;
             transition: all 0.3s ease;
         }
-
 
         .action-btn-edit {
             border-color: var(--info-color);
@@ -453,7 +449,6 @@
             .page-header {
                 text-align: center;
             }
-
 
             .custom-tabs {
                 overflow-x: auto;
@@ -639,7 +634,7 @@
                     <div class="col-md-6 d-flex flex-wrap justify-content-md-end gap-2 mt-2 mt-md-0">
                         <div class="position-relative">
                             <i class="fa fa-filter filter-icon"></i>
-                            <select class=" filter-select" name="statusFilter">
+                            <select class="filter-select" name="statusFilter">
                                 <option value="">Trạng thái</option>
                                 <option value="Hoạt động" th:selected="${statusFilter == 'Hoạt động'}">Hoạt động
                                 </option>
@@ -647,7 +642,6 @@
                                     hoạt động</option>
                             </select>
                         </div>
-
                         <div class="position-relative">
                             <i class="fa fa-calendar-alt filter-icon"></i>
                             <select class="filter-select" name="sortBy">
@@ -683,7 +677,6 @@
         </ul>
 
         <div class="tab-content" id="voucherTabsContent">
-
             <div class="tab-pane fade show active" id="manage" role="tabpanel" aria-labelledby="manage-tab">
                 <div class="row" id="voucherList">
                     <div th:each="voucher : ${vouchers.content}" class="col-lg-4 col-md-6 mb-4">
@@ -693,29 +686,23 @@
                                     <i class="fas fa-gift me-2 text-warning"></i>
                                     <span th:text="${voucher.title}">Tiêu đề</span>
                                 </h5>
-
                                 <div class="voucher-info"><i class="fas fa-user"></i> Người tạo:
                                     <span class="voucher-info-value" th:text="${voucher.user.fullname}"></span>
                                 </div>
-
                                 <div class="voucher-info"><i class="fas fa-tag"></i> Mã:
                                     <span class="voucher-info-value" th:text="${voucher.code}"></span>
                                 </div>
-
                                 <div class="voucher-info"><i class="fas fa-clock"></i> Thời gian:
                                     <span class="voucher-info-value"
                                         th:text="${#dates.format(voucher.startDate, 'dd/MM/yyyy')} + ' - ' + ${#dates.format(voucher.endDate, 'dd/MM/yyyy')}"></span>
                                 </div>
-
                                 <div class="voucher-info"><i class="fas fa-percent"></i> Giảm:
                                     <span class="voucher-info-value" th:text="${voucher.formattedDiscount}"></span>
                                 </div>
-
                                 <div class="voucher-info"><i class="fas fa-wallet"></i> Đơn tối thiểu:
                                     <span class="voucher-info-value"
                                         th:text="${#numbers.formatDecimal(voucher.minAmount, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
                                 </div>
-
                                 <div class="voucher-info"><i class="fas fa-check-circle"></i> Trạng thái:
                                     <span
                                         th:classappend="${voucher.status} ? 'status-badge status-active' : 'status-badge status-inactive'">
@@ -723,11 +710,9 @@
                                         <span th:text="${voucher.status} ? 'Đang hoạt động' : 'Ngừng hoạt động'"></span>
                                     </span>
                                 </div>
-
                                 <div class="voucher-info mb-3"><i class="fas fa-chart-bar"></i> Số lượng:
                                     <span class="voucher-info-value" th:text="${voucher.quantity}"></span>
                                 </div>
-
                                 <div class="mt-auto d-flex justify-content-end gap-2">
                                     <button type="button" class="action-btn action-btn-edit"
                                         th:onclick="'window.location.href=\'/nhan-vien/khuyen-mai/cap-nhat/' + ${voucher.id} + '\';'">
@@ -787,34 +772,32 @@
                 <div class="modal-body px-4 pb-4">
                     <form th:action="@{/nhan-vien/khuyen-mai/tao}" th:object="${voucher}" method="post"
                         id="createInternalVoucherForm">
-
                         <div class="mb-3">
                             <label class="form-label">Tên chương trình</label>
                             <input type="text" class="form-control" th:field="*{title}" name="title"
                                 placeholder="VD: Tặng 5% cho người thuê mới">
                             <div class="text-danger" id="error-title"></div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Mã voucher</label>
                             <input type="text" class="form-control text-uppercase" th:field="*{code}" name="code"
                                 placeholder="VD: NHANVIEN5">
-                            <div class="text-danger" th:errors="*{code}"></div>
+                            <div class="text-danger" id="error-code"></div>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label">Giá trị giảm</label>
-                            <input type="number" class="form-control" th:field="*{discountValue}" name="discountValue"
-                                placeholder="VD: 5 hoặc 50000">
+                            <label class="form-label">Giá trị giảm (VNĐ)</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="discountValue" placeholder="VD: 50.000">
+                                <input type="hidden" th:field="*{discountValue}" id="discountValueHidden">
+                                <span class="input-group-text">VNĐ</span>
+                            </div>
                             <div class="text-danger" id="error-discountValue"></div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label">Mô tả</label>
                             <textarea class="form-control" th:field="*{description}" name="description"></textarea>
                             <div class="text-danger" id="error-description"></div>
                         </div>
-
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Ngày bắt đầu</label>
@@ -827,12 +810,14 @@
                                 <div class="text-danger" id="error-endDate"></div>
                             </div>
                         </div>
-
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Đơn tối thiểu (VNĐ)</label>
-                                <input type="number" class="form-control" th:field="*{minAmount}" name="minAmount"
-                                    placeholder="VD: 1000000">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="minAmount" placeholder="VD: 1.000.000">
+                                    <input type="hidden" th:field="*{minAmount}" id="minAmountHidden">
+                                    <span class="input-group-text">VNĐ</span>
+                                </div>
                                 <div class="text-danger" id="error-minAmount"></div>
                             </div>
                             <div class="col-md-6">
@@ -842,7 +827,6 @@
                                 <div class="text-danger" id="error-quantity"></div>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <label class="form-label d-block">Trạng thái voucher</label>
                             <input type="hidden" th:field="*{status}" id="statusInputInternal" />
@@ -853,7 +837,6 @@
                                 <span th:text="${voucher.status} ? 'Đang áp dụng' : 'Ngừng áp dụng'">Đang áp dụng</span>
                             </button>
                         </div>
-
                         <div class="d-flex justify-content-end gap-2">
                             <button type="submit" class="btn btn-success fw-bold px-4">Tạo voucher</button>
                             <button type="reset" class="btn btn-secondary px-4" data-bs-dismiss="modal">Hủy</button>
@@ -867,169 +850,333 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const statuses = [
-            {
-                text: 'Đang áp dụng',
-                class: 'status-toggle-active',
-                icon: 'fas fa-check-circle',
-                value: true
-            },
-            {
-                text: 'Ngừng áp dụng',
-                class: 'status-toggle-inactive',
-                icon: 'fas fa-ban',
-                value: false
-            }
-        ];
-
-        class StatusManager {
-            constructor(buttonId, hiddenInputName, defaultValue = true) {
-                this.statusBtn = document.getElementById(buttonId);
-                this.hiddenInput = document.querySelector(`input[name="${hiddenInputName}"]`);
-                this.currentStatus = statuses.findIndex(s => s.value === defaultValue);
-                this.statusBtn.addEventListener('click', this.toggleStatus.bind(this));
-                this.updateStatusDisplay();
-            }
-
-            toggleStatus(e) {
-                e.preventDefault();
-                this.currentStatus = (this.currentStatus + 1) % statuses.length;
-                this.updateStatusDisplay();
-            }
-
-            updateStatusDisplay() {
-                const status = statuses[this.currentStatus];
-                this.statusBtn.className = `btn status-toggle-btn ${status.class}`;
-                this.statusBtn.innerHTML = `<i class="${status.icon} me-2"></i> ${status.text}`;
-                this.hiddenInput.value = status.value;
-            }
-        }
-
         document.addEventListener("DOMContentLoaded", function () {
-            new StatusManager("statusBtnInternal", "status", true);
-        });
+            // Status toggle
+            const statuses = [
+                { text: 'Đang áp dụng', class: 'status-toggle-active', icon: 'fas fa-check-circle', value: true },
+                { text: 'Ngừng áp dụng', class: 'status-toggle-inactive', icon: 'fas fa-ban', value: false }
+            ];
 
-        document.addEventListener('DOMContentLoaded', function () {
+            class StatusManager {
+                constructor(buttonId, hiddenInputName, defaultValue = true) {
+                    this.statusBtn = document.getElementById(buttonId);
+                    this.hiddenInput = document.querySelector(`input[name="${hiddenInputName}"]`);
+                    if (!this.statusBtn || !this.hiddenInput) {
+                        console.error(`StatusManager: Button (${buttonId}) or input (${hiddenInputName}) not found`);
+                        return;
+                    }
+                    this.currentStatus = statuses.findIndex(s => s.value === defaultValue);
+                    this.statusBtn.addEventListener('click', this.toggleStatus.bind(this));
+                    this.updateStatusDisplay();
+                }
+
+                toggleStatus(e) {
+                    e.preventDefault();
+                    this.currentStatus = (this.currentStatus + 1) % statuses.length;
+                    this.updateStatusDisplay();
+                }
+
+                updateStatusDisplay() {
+                    const status = statuses[this.currentStatus];
+                    this.statusBtn.className = `btn status-toggle-btn ${status.class}`;
+                    this.statusBtn.innerHTML = `<i class="${status.icon} me-2"></i> ${status.text}`;
+                    this.hiddenInput.value = status.value;
+                }
+            }
+
+            // Initialize StatusManager
+            new StatusManager("statusBtnInternal", "status", true);
+
+            // Price formatting functions (global scope)
+            function formatNumber(num) {
+                if (!num || isNaN(num)) return '';
+                return parseInt(num).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function unformatNumber(str) {
+                return str.replace(/\./g, '');
+            }
+
+            // Price formatting logic
+            function setupPriceFormatting() {
+                const discountValueInput = document.getElementById('discountValue');
+                const discountValueHidden = document.getElementById('discountValueHidden');
+                const minAmountInput = document.getElementById('minAmount');
+                const minAmountHidden = document.getElementById('minAmountHidden');
+
+                function updatePrice(input, hiddenInput) {
+                    let rawValue = unformatNumber(input.value);
+                    rawValue = rawValue.replace(/^0+/, '');
+                    let numValue = parseInt(rawValue) || 0;
+
+                    if (numValue < 0) numValue = 0;
+
+                    if (numValue > 0) {
+                        input.value = formatNumber(numValue);
+                        hiddenInput.value = numValue;
+                    } else {
+                        input.value = '';
+                        hiddenInput.value = '';
+                    }
+                }
+
+                if (discountValueInput && discountValueHidden) {
+                    discountValueInput.addEventListener('input', function () {
+                        let value = this.value.replace(/[^\d]/g, '');
+                        this.value = value;
+                        updatePrice(this, discountValueHidden);
+                    });
+
+                    discountValueInput.addEventListener('blur', function () {
+                        updatePrice(this, discountValueHidden);
+                    });
+
+                    if (discountValueHidden.value) {
+                        discountValueInput.value = formatNumber(discountValueHidden.value);
+                        updatePrice(discountValueInput, discountValueHidden);
+                    }
+                } else {
+                    console.error('discountValue or discountValueHidden not found');
+                }
+
+                if (minAmountInput && minAmountHidden) {
+                    minAmountInput.addEventListener('input', function () {
+                        let value = this.value.replace(/[^\d]/g, '');
+                        this.value = value;
+                        updatePrice(this, minAmountHidden);
+                    });
+
+                    minAmountInput.addEventListener('blur', function () {
+                        updatePrice(this, minAmountHidden);
+                    });
+
+                    if (minAmountHidden.value) {
+                        minAmountInput.value = formatNumber(minAmountHidden.value);
+                        updatePrice(minAmountInput, minAmountHidden);
+                    }
+                } else {
+                    console.error('minAmount or minAmountHidden not found');
+                }
+            }
+
+            // Initialize price formatting
+            setupPriceFormatting();
+
+            // Handle toasts
             document.querySelectorAll('.toast-close').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const toast = btn.closest('.custom-toast');
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 300);
+                    if (toast) {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }
                 });
             });
+
             setTimeout(() => {
                 document.querySelectorAll('.custom-toast').forEach(toast => {
-                    toast.style.opacity = '0';
-                    setTimeout(() => toast.remove(), 300);
+                    if (toast) {
+                        toast.style.opacity = '0';
+                        setTimeout(() => toast.remove(), 300);
+                    }
                 });
             }, 3000);
-        });
 
-        document.addEventListener('DOMContentLoaded', function () {
+            // Handle filter selects
             const filterSelects = document.querySelectorAll('.filter-select');
             filterSelects.forEach(select => {
                 select.addEventListener('change', function () {
-                    this.closest('form').submit();
+                    const form = this.closest('form');
+                    if (form) form.submit();
                 });
             });
 
+            // Handle search form
             const searchForm = document.querySelector('.search-filter-section form');
             const searchInput = document.querySelector('.search-input-group input');
             const searchButton = document.querySelector('.search-input-group button');
 
-            searchButton.addEventListener('click', function (e) {
-                e.preventDefault();
-                searchForm.submit();
-            });
-
-            searchInput.addEventListener('keypress', function (e) {
-                if (e.key === 'Enter') {
+            if (searchButton && searchForm) {
+                searchButton.addEventListener('click', function (e) {
                     e.preventDefault();
                     searchForm.submit();
-                }
-            });
-        });
-        document.addEventListener("DOMContentLoaded", function () {
+                });
+            }
+
+            if (searchInput && searchForm) {
+                searchInput.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        searchForm.submit();
+                    }
+                });
+            }
+
+            // Form validation and submission
             const form = document.getElementById("createInternalVoucherForm");
+            if (!form) {
+                console.error('Form createInternalVoucherForm not found');
+                return;
+            }
 
             form.addEventListener("submit", function (e) {
-                e.preventDefault(); // Ngăn form submit nếu có lỗi
+                e.preventDefault();
                 clearErrors();
 
                 let isValid = true;
 
                 const title = form.querySelector('[name="title"]');
                 const code = form.querySelector('[name="code"]');
-                const discount = form.querySelector('[name="discountValue"]');
+                const discountValueHidden = document.getElementById('discountValueHidden');
                 const description = form.querySelector('[name="description"]');
                 const startDate = form.querySelector('[name="startDate"]');
                 const endDate = form.querySelector('[name="endDate"]');
                 const quantity = form.querySelector('[name="quantity"]');
-                const minAmount = form.querySelector('[name="minAmount"]');
+                const minAmountHidden = document.getElementById('minAmountHidden');
 
-                // Kiểm tra rỗng hoặc sai logic
-                if (!title.value.trim()) {
+                // Validate fields
+                if (!title || !title.value.trim()) {
                     showError("title", "Tên chương trình không được để trống");
                     isValid = false;
                 }
 
-                if (!code.value.trim()) {
+                if (!code || !code.value.trim()) {
                     showError("code", "Mã voucher không được để trống");
                     isValid = false;
                 }
 
-                if (!discount.value || parseFloat(discount.value) <= 0) {
+                if (!discountValueHidden || !discountValueHidden.value || parseFloat(discountValueHidden.value) <= 0) {
                     showError("discountValue", "Giá trị giảm phải lớn hơn 0");
                     isValid = false;
                 }
 
-                if (!description.value.trim()) {
+                if (!description || !description.value.trim()) {
                     showError("description", "Mô tả không được để trống");
                     isValid = false;
                 }
 
-                if (!startDate.value) {
+                if (!startDate || !startDate.value) {
                     showError("startDate", "Ngày bắt đầu không được để trống");
                     isValid = false;
                 }
 
-                if (!endDate.value) {
+                if (!endDate || !endDate.value) {
                     showError("endDate", "Ngày kết thúc không được để trống");
                     isValid = false;
                 }
 
-                if (startDate.value && endDate.value && new Date(startDate.value) > new Date(endDate.value)) {
+                if (startDate && endDate && startDate.value && endDate.value && new Date(startDate.value) > new Date(endDate.value)) {
                     showError("endDate", "Ngày kết thúc phải sau ngày bắt đầu");
                     isValid = false;
                 }
 
-                if (!minAmount.value || parseFloat(minAmount.value) <= 0) {
-                    showError("minAmount", "Đơn tối thiểu phải lớn hơn 0");
+                if (!minAmountHidden || (minAmountHidden.value && parseFloat(minAmountHidden.value) < 0)) {
+                    showError("minAmount", "Đơn tối thiểu không được âm");
                     isValid = false;
                 }
 
-                if (!quantity.value || parseInt(quantity.value) <= 0) {
+                if (!quantity || !quantity.value || parseInt(quantity.value) <= 0) {
                     showError("quantity", "Số lượng phải lớn hơn 0");
                     isValid = false;
                 }
 
-                if (isValid) {
-                    form.submit(); // Submit nếu hợp lệ
+                // Client-side check for discountValue <= 10% of minAmount
+                const discountValue = parseFloat(discountValueHidden.value) || 0;
+                const minAmount = parseFloat(minAmountHidden.value) || 0;
+                if (minAmount > 0 && discountValue > minAmount * 0.1) {
+                    showError("discountValue", `Giá trị giảm không được vượt quá 10% giá trị tối thiểu (${formatNumber(minAmount * 0.1)} VNĐ)`);
+                    isValid = false;
+                }
+
+                // Continue submission if code check is not needed or already done
+                function continueSubmission() {
+                    if (isValid) {
+                        Swal.fire({
+                            title: 'Xác nhận tạo voucher',
+                            html: `<p>Bạn có chắc chắn muốn tạo voucher này?</p>
+                           <div class="text-start mt-3">
+                               <p><strong>Tên chương trình:</strong> ${title.value.trim()}</p>
+                               <p><strong>Mã:</strong> ${code.value.trim()}</p>
+                               <p><strong>Giá trị giảm:</strong> ${formatNumber(discountValue)} VNĐ</p>
+                               <p><strong>Đơn tối thiểu:</strong> ${minAmount ? formatNumber(minAmount) + ' VNĐ' : 'Không yêu cầu'}</p>
+                           </div>`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#22c55e',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: '<i class="fas fa-check me-2"></i>Xác nhận',
+                            cancelButtonText: '<i class="fas fa-times me-2"></i>Hủy',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit();
+                            }
+                        });
+                    } else {
+                        const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
+                        modal.show();
+                    }
+                }
+
+                // Check code availability
+                if (code && code.value.trim()) {
+                    fetch(`/nhan-vien/khuyen-mai/tao-ma-tu-dong?code=${encodeURIComponent(code.value.trim())}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Network response was not ok');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.exists) {
+                                showError("code", "Mã voucher đã tồn tại");
+                                isValid = false;
+                                const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
+                                modal.show();
+                            } else {
+                                continueSubmission();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi kiểm tra mã:', error);
+                            showError("code", "Lỗi khi kiểm tra mã voucher");
+                            isValid = false;
+                            const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
+                            modal.show();
+                        });
                 } else {
-                    const modal = new bootstrap.Modal(document.getElementById("internalVoucherModal"));
-                    modal.show(); // Mở lại modal nếu có lỗi
+                    continueSubmission();
                 }
             });
 
+            // Reset form
+            const resetButton = form.querySelector('button[type="reset"]');
+            if (resetButton) {
+                resetButton.addEventListener('click', function () {
+                    clearErrors();
+                    const discountValueInput = document.getElementById('discountValue');
+                    const discountValueHidden = document.getElementById('discountValueHidden');
+                    const minAmountInput = document.getElementById('minAmount');
+                    const minAmountHidden = document.getElementById('minAmountHidden');
+                    if (discountValueInput) discountValueInput.value = '';
+                    if (discountValueHidden) discountValueHidden.value = '';
+                    if (minAmountInput) minAmountInput.value = '';
+                    if (minAmountHidden) minAmountHidden.value = '';
+                    const today = new Date().toISOString().split('T')[0];
+                    const startDateInput = form.querySelector('[name="startDate"]');
+                    const endDateInput = form.querySelector('[name="endDate"]');
+                    if (startDateInput) startDateInput.value = today;
+                    if (endDateInput) endDateInput.value = '';
+                });
+            }
+
             function showError(fieldName, message) {
                 const errorDiv = document.getElementById("error-" + fieldName);
-                const input = form.querySelector('[name="' + fieldName + '"]');
-
+                const input = fieldName.includes('Hidden') ? document.getElementById(fieldName.replace('Hidden', '')) : form.querySelector('[name="' + fieldName + '"]');
                 if (errorDiv) {
                     errorDiv.innerText = message;
                     errorDiv.style.display = "block";
                 }
-
                 if (input) {
                     input.classList.add("is-invalid");
                 }
@@ -1037,20 +1184,50 @@
 
             function clearErrors() {
                 const errorDivs = document.querySelectorAll(".text-danger");
-                errorDivs.forEach(div => div.innerText = "");
-
+                errorDivs.forEach(div => {
+                    div.innerText = "";
+                    div.style.display = "none";
+                });
                 const inputs = document.querySelectorAll(".form-control");
                 inputs.forEach(input => input.classList.remove("is-invalid"));
             }
-        });
 
-        document.addEventListener('DOMContentLoaded', function () {
+            // Date handling
+            const startDate = form.querySelector('[name="startDate"]');
+            const endDate = form.querySelector('[name="endDate"]');
+            if (startDate && endDate) {
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0');
+                const dd = String(today.getDate()).padStart(2, '0');
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+
+                startDate.min = todayStr;
+                startDate.value = todayStr;
+                endDate.min = todayStr;
+
+                startDate.addEventListener("change", function () {
+                    endDate.min = startDate.value;
+                    if (endDate.value && endDate.value < startDate.value) {
+                        endDate.value = startDate.value;
+                    }
+                    let maxEndDate = new Date(startDate.value);
+                    maxEndDate.setMonth(maxEndDate.getMonth() + 2);
+                    endDate.max = maxEndDate.toISOString().split("T")[0];
+                    if (endDate.value && new Date(endDate.value) > maxEndDate) {
+                        endDate.value = "";
+                        showError("endDate", "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu");
+                    }
+                });
+            } else {
+                console.error('startDate or endDate input not found');
+            }
+
+            // Delete and notification forms
             const deleteForms = document.querySelectorAll('.delete-voucher-form');
-
             deleteForms.forEach(form => {
                 form.addEventListener('submit', function (e) {
-                    e.preventDefault(); // Ngăn submit mặc định
-
+                    e.preventDefault();
                     Swal.fire({
                         title: 'Bạn chắc chắn?',
                         text: "Hành động này sẽ xóa voucher vĩnh viễn!",
@@ -1062,19 +1239,16 @@
                         cancelButtonText: 'Hủy'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            form.submit(); // Gửi form nếu người dùng xác nhận
+                            form.submit();
                         }
                     });
                 });
             });
 
-            // Handle send notification forms
             const notificationForms = document.querySelectorAll('.send-notification-form');
-
             notificationForms.forEach(form => {
                 form.addEventListener('submit', function (e) {
-                    e.preventDefault(); // Ngăn submit mặc định
-
+                    e.preventDefault();
                     Swal.fire({
                         title: 'Gửi thông báo voucher?',
                         text: "Thông báo voucher sẽ được gửi đến tất cả người dùng phù hợp!",
@@ -1086,7 +1260,6 @@
                         cancelButtonText: 'Hủy'
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // Show loading state
                             Swal.fire({
                                 title: 'Đang gửi thông báo...',
                                 text: 'Vui lòng đợi trong giây lát',
@@ -1097,7 +1270,7 @@
                                     Swal.showLoading();
                                 }
                             });
-                            form.submit(); // Gửi form nếu người dùng xác nhận
+                            form.submit();
                         }
                     });
                 });
