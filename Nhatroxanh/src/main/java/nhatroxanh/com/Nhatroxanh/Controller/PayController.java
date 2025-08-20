@@ -917,6 +917,9 @@ public class PayController {
             payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
             paymentsRepository.save(payment);
 
+            // Decrease voucher quantity after successful cash confirmation
+            decreaseVoucherQuantity(paymentId, paymentId.toString());
+
             // Send success notification email to tenant
             Contracts contract = payment.getContract();
             if (contract != null && contract.getTenant() != null) {
