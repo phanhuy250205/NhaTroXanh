@@ -4,311 +4,310 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết khiếu nại và sự cố</title>
+    <title>Chi Tiết Khiếu Nại Và Sự Cố - Nhà Trọ Xanh</title>
+    <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <style>
         :root {
-            --primary-color: #3e83cc;
+            --primary-color: #3a6ea5;
             --primary-light: #e8f2ff;
-            --primary-dark: #2c6ba0;
+            --primary-dark: #2a5080;
+            --secondary-color: #6c757d;
             --success-color: #28a745;
             --info-color: #17a2b8;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
             --light-bg: #f8f9fa;
             --white: #ffffff;
-            --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.08);
-            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.12);
-            --shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.15);
-            --border-radius: 12px;
-            --border-radius-lg: 16px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-800: #343a40;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+            --border-radius: 10px;
+            --border-radius-lg: 14px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --card-padding: 1.75rem;
         }
 
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
             background: linear-gradient(135deg, var(--primary-light) 0%, #f1f8ff 50%, var(--light-bg) 100%);
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
             min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            line-height: 1.5;
-            font-size: 14px;
+            line-height: 1.6;
+            color: var(--gray-800);
+            font-size: 0.95rem;
         }
 
         .main-container {
             margin-left: 100px;
             width: calc(100% - 100px);
             min-height: 100vh;
-            padding: 0;
-        }
-
-        .detail-header-host {
-            background: var(--white);
-            padding: 1.75rem;
-            border-radius: var(--border-radius-lg);
-            box-shadow: var(--shadow-medium);
-            margin-bottom: 2rem;
-            border: 1px solid rgba(62, 131, 204, 0.1);
-        }
-
-        .back-button-host {
-            background: none;
-            border: none;
-            color: var(--primary-color);
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 0.75rem 0;
-            margin-bottom: 1rem;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            text-decoration: none;
-        }
-
-        .back-button-host:hover {
-            color: var(--primary-dark);
-            transform: translateX(-5px);
-        }
-
-        .detail-title-host {
-            color: var(--primary-color);
-            font-size: 2rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -0.5px;
-        }
-
-        .info-section-host {
-            background: var(--white);
-            border-radius: var(--border-radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-medium);
-            margin-bottom: 2rem;
-            border: 1px solid rgba(62, 131, 204, 0.1);
-        }
-
-        .info-header-host {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 1.25rem 1.75rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .info-content-host {
             padding: 2rem;
         }
 
-        .info-field-host {
-            margin-bottom: 1.5rem;
-        }
-
-        .info-label-host {
-            font-weight: 700;
-            color: #495057;
-            margin-bottom: 0.6rem;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .info-value-host {
-            background: #f8f9fa;
-            border: 2px solid #e9ecef;
-            border-radius: var(--border-radius);
-            padding: 0.875rem 1rem;
-            font-size: 0.95rem;
-            color: #212529;
-            transition: var(--transition);
-        }
-
-        .info-value-host:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.25rem rgba(62, 131, 204, 0.15);
-            outline: none;
-        }
-
-        .info-value-large-host {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .status-buttons-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 0.5rem;
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
-            border: none;
-            border-radius: var(--border-radius);
-            padding: 0.875rem 1.75rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow-light);
-        }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #1e7e34 0%, #155724 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-            border: none;
-            border-radius: var(--border-radius);
-            padding: 0.875rem 1.75rem;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            box-shadow: var(--shadow-light);
-        }
-
-        .btn-secondary:hover {
-            background: linear-gradient(135deg, #545b62 0%, #383d41 100%);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .images-section-host {
+        /* Header Styles */
+        .detail-header {
             background: var(--white);
+            padding: var(--card-padding);
             border-radius: var(--border-radius-lg);
-            overflow: hidden;
-            box-shadow: var(--shadow-medium);
+            box-shadow: var(--shadow-md);
             margin-bottom: 2rem;
-            border: 1px solid rgba(62, 131, 204, 0.1);
-        }
-
-        .images-header-host {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 1.25rem 1.75rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .images-content-host {
-            padding: 2rem;
-        }
-
-        .image-placeholder-host {
-            width: 160px;
-            height: 160px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 3px dashed #dee2e6;
-            border-radius: var(--border-radius);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            color: #6c757d;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-right: 1.5rem;
-            margin-bottom: 1.5rem;
-            transition: var(--transition);
-            cursor: pointer;
+            border: 1px solid rgba(58, 110, 165, 0.1);
             position: relative;
             overflow: hidden;
         }
 
-        .image-placeholder-host:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            transform: scale(1.05);
-            box-shadow: var(--shadow-medium);
-        }
-
-        .image-placeholder-host::before {
+        .detail-header::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
+        }
+
+        .back-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+        }
+
+        .back-button:hover {
+            color: var(--primary-dark);
+            transform: translateX(-4px);
+        }
+
+        .detail-title {
+            color: var(--primary-dark);
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .detail-title::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233a6ea5'%3E%3Cpath d='M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 9h-2V5h2v6zm0 4h-2v-2h2v2z'/%3E%3C/svg%3E") no-repeat center;
+        }
+
+        /* Card Styles */
+        .info-card {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            border: 1px solid rgba(58, 110, 165, 0.1);
+            transition: var(--transition);
+        }
+
+        .info-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.25rem var(--card-padding);
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-body {
+            padding: var(--card-padding);
+        }
+
+        /* Form Styles */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-field {
+            margin-bottom: 1.25rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .info-value {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            padding: 0.875rem 1rem;
+            font-size: 0.95rem;
+            color: var(--gray-800);
+            transition: var(--transition);
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+        }
+
+        .info-value.textarea {
+            min-height: 120px;
+            align-items: flex-start;
+            resize: vertical;
+        }
+
+        /* Priority Badge */
+        .priority-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            width: 190px;
+            justify-content: center;
+        }
+
+        .priority-high {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: var(--danger-color);
+        }
+
+        .priority-medium {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: var(--warning-color);
+        }
+
+        .priority-low {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: var(--success-color);
+        }
+
+        /* Status Buttons */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            border: none;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .status-pending {
+            background: linear-gradient(135deg, var(--warning-color) 0%, #e0a800 100%);
+        }
+
+        .status-pending:hover {
+            background: linear-gradient(135deg, #e0a800 0%, #c69500 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .status-processing {
+            background: linear-gradient(135deg, var(--info-color) 0%, #138496 100%);
+        }
+
+        .status-processing:hover {
+            background: linear-gradient(135deg, #138496 0%, #0f6674 100%);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, var(--success-color) 0%, #1e7e34 100%);
+            cursor: default;
+        }
+
+        /* Image Gallery */
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .image-item {
+            position: relative;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            cursor: pointer;
+            aspect-ratio: 4/3;
+        }
+
+        .image-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .image-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .image-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .image-overlay {
+            position: absolute;
             bottom: 0;
-            background: linear-gradient(45deg, transparent 30%, rgba(62, 131, 204, 0.1) 50%, transparent 70%);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
-
-        .image-placeholder-host:hover::before {
-            transform: translateX(100%);
-        }
-
-        .fade-in-host {
-            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+            color: white;
+            padding: 0.75rem;
             opacity: 0;
-            transform: translateY(30px);
+            transition: var(--transition);
         }
 
-        @keyframes fadeInUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .image-item:hover .image-overlay {
+            opacity: 1;
         }
 
-        @media (max-width: 1200px) {
-            .main-container {
-                margin-left: 80px;
-                width: calc(100% - 80px);
-            }
-
-            .content-container {
-                padding: 0 1.5rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body {
-                font-size: 13px;
-            }
-
-            .main-container {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            .detail-title-host {
-                font-size: 1.5rem;
-            }
-
-            .content-container {
-                padding: 0 1rem;
-            }
-
-            .info-content-host {
-                padding: 1.25rem;
-            }
-
-            .images-content-host {
-                padding: 1.25rem;
-            }
-
-            .image-placeholder-host {
-                width: 130px;
-                height: 130px;
-            }
-        }
-
-        .custom-toast-container {
+        /* Toast Notifications */
+        .toast-container {
             position: fixed;
             top: 20px;
             right: 20px;
@@ -328,7 +327,7 @@
             border-radius: 10px;
             min-width: 320px;
             max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-lg);
             font-size: 15px;
             position: relative;
             animation: slideIn 0.3s ease-out;
@@ -367,6 +366,19 @@
             color: #333;
         }
 
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes slideIn {
             from {
                 opacity: 0;
@@ -379,52 +391,202 @@
             }
         }
 
-        .status-badge-staff {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-weight: 600;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 30px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        .fade-in {
+            animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .main-container {
+                margin-left: 80px;
+                width: calc(100% - 80px);
+            }
+        }
+
+        @media (max-width: 992px) {
+            .info-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+
+            .image-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 13px;
+            }
+
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .detail-header {
+                padding: 1.25rem;
+            }
+
+            .card-body {
+                padding: 1.25rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .detail-title {
+                font-size: 1.5rem;
+            }
+
+            .image-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            }
+        }
+
+        @media (max-width: 576px) {
+            .image-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .custom-toast {
+                min-width: 280px;
+                max-width: 300px;
+            }
+        }
+
+        /* Utility Classes */
+        .text-center {
+            text-align: center;
+        }
+
+        .w-100 {
+            width: 100%;
+        }
+
+        .mb-0 {
+            margin-bottom: 0;
+        }
+
+        .mt-3 {
+            margin-top: 1rem;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--gray-300);
+            margin: 1.5rem 0;
+        }
+
+        /* Modal Content */
+        #imageModal .custom-modal-content {
+            background: rgb(59 57 57 / 90%);
+            /* Very translucent white */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            /* Subtle border */
+            border-radius: 15px;
+            /* Rounded corners */
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            /* Stronger shadow for floating effect */
+            backdrop-filter: blur(10px);
+            /* Frosted glass effect */
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            padding: 0;
+            /* Remove default padding */
+            overflow: hidden;
+        }
+
+        /* Modal Header */
+        #imageModal .modal-header {
             color: #fff;
-            text-transform: uppercase;
+            border-bottom: none;
+            padding: 1rem 1.5rem;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
         }
 
-        .status-pending-staff {
-            background-color: #ffc107;
-            /* vàng */
+        /* Modal Body */
+        #imageModal .modal-body {
+            padding: 1.5rem;
+            background: transparent;
+            /* No additional background */
         }
 
-        .status-pending-staff:hover {
-            background-color: #e0a800;
+        /* Modal Image */
+        #imageModal .modal-image {
+            max-width: 100%;
+            max-height: 70vh;
+            /* Slightly smaller to fit the floating design */
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
         }
 
-        .status-processing-staff {
-            background-color: #17a2b8;
-            /* xanh dương nhạt */
+        /* Modal Footer */
+        #imageModal .modal-footer {
+            background: rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            color: #ccc;
+            font-size: 0.9rem;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
         }
 
-        .status-processing-staff:hover {
-            background-color: #138496;
+        /* Animation for Modal Entrance */
+        #imageModal .modal-dialog {
+            animation: fadeInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform: translateY(20px);
+            /* Start slightly below */
         }
 
-        .status-completed-staff {
-            background-color: #28a745;
-            /* xanh lá */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .status-completed-staff:hover {
-            background-color: #218838;
+        /* Zoom effect on image click */
+        #imageModal .modal-image.zoomed {
+            transform: scale(1.2);
+            cursor: zoom-out;
         }
 
-        .status-badge-staff:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        /* Close Button Styling */
+        #imageModal .btn-close {
+            border-radius: 50%;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        #imageModal .btn-close:hover {
+            opacity: 1;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            #imageModal .modal-dialog {
+                margin: 0.5rem;
+            }
+
+            #imageModal .modal-image {
+                max-height: 60vh;
+            }
+
+            #imageModal .custom-modal-content {
+                border-radius: 10px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            #imageModal .modal-dialog {
+                max-width: 80vw;
+            }
         }
     </style>
 </head>
@@ -432,166 +594,184 @@
 <body>
     <div th:replace="~{/layouts/sidebar-host}"></div>
 
-    <div class="container">
-        <div class="content-container">
-            <div class="detail-header-host fade-in-host">
-                <a th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${page})}" class="back-button-host">
-                    <i class="fas fa-arrow-left"></i>Quay lại
-                </a>
-                <h1 class="detail-title-host">Chi tiết khiếu nại và sự cố</h1>
-            </div>
-            <div class="custom-toast-container">
-                <div th:if="${successMessage}" class="custom-toast success">
-                    <i class="toast-icon fas fa-check-circle"></i>
-                    <span class="toast-message" th:text="${successMessage}"></span>
-                    <button class="toast-close" aria-label="Đóng">×</button>
-                </div>
-                <div th:if="${errorMessage}" class="custom-toast error">
-                    <i class="toast-icon fas fa-exclamation-circle"></i>
-                    <span class="toast-message" th:text="${errorMessage}"></span>
-                    <button class="toast-close" aria-label="Đóng">×</button>
-                </div>
-            </div>
-            <div class="info-section-host fade-in-host">
-                <div class="info-header-host">
-                    <i class="fas fa-info-circle"></i>
-                    Thông tin khiếu nại/sự cố
-                </div>
-                <div class="info-content-host">
-                    <form th:action="@{/chu-tro/quan-ly-su-co/{id}/update(id=${incident.reportId})}" method="post"
-                        class="row">
-                        <input type="hidden" name="search" th:value="${search}">
-                        <input type="hidden" name="page" th:value="${page}">
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">ID khiếu nại</div>
-                                <div class="info-value-host" th:text="${incident.reportId}" disabled></div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Loại sự cố</div>
-                                <div class="info-value-host" th:text="${incident.incidentType}" disabled></div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Mức độ ưu tiên</div>
-                                <div class="info-value-host">
-                                    <span th:classappend="
-            ${incident.level.name() == 'CAO'} ? 'priority-high-host' :
-            (${incident.level.name() == 'TRUNG_BINH'} ? 'priority-medium-host' : 'priority-low-host')"
-                                        class="priority-badge-host">
+    <div class="main-container">
+        <div class="detail-header fade-in">
+            <a th:href="@{/chu-tro/quan-ly-su-co(search=${search},page=${page})}" class="back-button">
+                <i class="fas fa-arrow-left"></i>Quay lại danh sách
+            </a>
+            <h1 class="detail-title">Chi tiết khiếu nại và sự cố</h1>
+        </div>
 
-                                        <i class="fas fa-exclamation-triangle"></i>
+        <div class="toast-container">
+            <div th:if="${successMessage}" class="custom-toast success">
+                <i class="toast-icon fas fa-check-circle"></i>
+                <span class="toast-message" th:text="${successMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+            <div th:if="${errorMessage}" class="custom-toast error">
+                <i class="toast-icon fas fa-exclamation-circle"></i>
+                <span class="toast-message" th:text="${errorMessage}"></span>
+                <button class="toast-close" aria-label="Đóng">×</button>
+            </div>
+        </div>
 
-                                        <span th:switch="${incident.level.name()}">
-                                            <span th:case="'CAO'">Cao</span>
-                                            <span th:case="'TRUNG_BINH'">Trung bình</span>
-                                            <span th:case="'THAP'">Thấp</span>
-                                        </span>
+        <div class="info-card fade-in">
+            <div class="card-header">
+                <i class="fas fa-info-circle"></i>
+                Thông tin khiếu nại/sự cố
+            </div>
+            <div class="card-body">
+                <form th:action="@{/chu-tro/quan-ly-su-co/{id}/update(id=${incident.reportId})}" method="post">
+                    <input type="hidden" name="search" th:value="${search}">
+                    <input type="hidden" name="page" th:value="${page}">
+
+                    <div class="info-grid">
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-hashtag"></i>ID khiếu nại
+                            </div>
+                            <div class="info-value" th:text="${incident.reportId}"></div>
+                        </div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-bug"></i>Loại sự cố
+                            </div>
+                            <div class="info-value" th:text="${incident.incidentType}"></div>
+                        </div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-exclamation-circle"></i>Mức độ ưu tiên
+                            </div>
+                            <div class="">
+                                <span
+                                    th:classappend="
+                                    ${incident.level.name() == 'CAO'} ? 'priority-badge priority-high' :
+                                    (${incident.level.name() == 'TRUNG_BINH'} ? 'priority-badge priority-medium' : 'priority-badge priority-low')">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span th:switch="${incident.level.name()}">
+                                        <span th:case="'CAO'">Cao</span>
+                                        <span th:case="'TRUNG_BINH'">Trung bình</span>
+                                        <span th:case="'THAP'">Thấp</span>
                                     </span>
-                                </div>
+                                </span>
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Thời gian gửi</div>
-                                <div class="info-value-host"
-                                    th:text="${#dates.format(incident.reportedAt, 'dd/MM/yyyy HH:mm')}" disabled></div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="far fa-clock"></i>Thời gian gửi
+                            </div>
+                            <div class="info-value" th:text="${#dates.format(incident.reportedAt, 'dd/MM/yyyy HH:mm')}">
                             </div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Họ và tên người gửi</div>
-                                <div class="info-value-host" th:text="${incident.user.fullname}" disabled></div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="far fa-user"></i>Họ và tên người gửi
                             </div>
+                            <div class="info-value" th:text="${incident.user.fullname}"></div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Số điện thoại</div>
-                                <div class="info-value-host" th:text="${incident.user.phone}" disabled></div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-phone"></i>Số điện thoại
                             </div>
+                            <div class="info-value" th:text="${incident.user.phone}"></div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Khu trọ</div>
-                                <div class="info-value-host" th:text="${incident.room.hostel.name}" disabled></div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-building"></i>Khu trọ
                             </div>
+                            <div class="info-value" th:text="${incident.room.hostel.name}"></div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Phòng</div>
-                                <div class="info-value-host" th:text="${incident.room.namerooms}" disabled></div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-door-open"></i>Phòng
                             </div>
+                            <div class="info-value" th:text="${incident.room.namerooms}"></div>
                         </div>
-                        <div class="col-lg-4 col-md-6">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Trạng thái</div>
+
+                        <div class="info-field">
+                            <div class="info-label">
+                                <i class="fas fa-tasks"></i>Trạng thái
+                            </div>
+                            <div class="">
                                 <form th:action="@{/chu-tro/quan-ly-su-co/{id}/update-status(id=${incident.reportId})}"
                                     method="post">
                                     <input type="hidden" name="status" th:value="${incident.status.name() == 'CHUA_XU_LY' ? 'DANG_XU_LY' :
-                      (incident.status.name() == 'DANG_XU_LY' ? 'DA_XU_LY' : 'DA_XU_LY')}" />
+                                        (incident.status.name() == 'DANG_XU_LY' ? 'DA_XU_LY' : 'DA_XU_LY')}" />
 
                                     <button type="submit" th:if="${incident.status.name() == 'CHUA_XU_LY'}"
-                                        class="status-badge-staff status-pending-staff">
+                                        class="status-badge status-pending">
                                         <i class="fas fa-clock"></i> Chờ xử lý
                                     </button>
 
                                     <button type="submit" th:if="${incident.status.name() == 'DANG_XU_LY'}"
-                                        class="status-badge-staff status-processing-staff">
-                                        <i class="fas fa-cog"></i> Đang xử lý
+                                        class="status-badge status-processing">
+                                        <i class="fas fa-cog fa-spin"></i> Đang xử lý
                                     </button>
 
                                     <button type="button" th:if="${incident.status.name() == 'DA_XU_LY'}"
-                                        class="status-badge-staff status-completed-staff" disabled>
+                                        class="status-badge status-completed" disabled>
                                         <i class="fas fa-check-circle"></i> Đã xử lý
                                     </button>
                                 </form>
                             </div>
                         </div>
-                        <div class="col-12">
-                            <div class="info-field-host">
-                                <div class="info-label-host">Nội dung khiếu nại</div>
-                                <textarea name="description" class="form-control info-value-host info-value-large-host"
-                                    th:text="${incident.description}" rows="6" disabled></textarea>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
+                    </div>
 
-            <div class="images-section-host fade-in-host">
-                <div class="images-header-host">
-                    <i class="fas fa-images"></i>
-                    Hình ảnh đính kèm
-                </div>
-                <div class="images-content-host">
-                    <div class="d-flex flex-wrap">
-                        <div th:each="img : ${incident.images}" class="image-placeholder-host">
-                            <span>Ảnh khiếu nại</span>
-                            <img th:src="@{${img.url}}" alt="" style="width: 150px; height: 100px;"
-                                th:attr="onclick=|openModalImage('${img.url}')|" />
-                            <small style="margin-top: 0.5rem; opacity: 0.7;">Nhấn để xem</small>
+                    <div class="divider"></div>
+
+                    <div class="info-field">
+                        <div class="info-label">
+                            <i class="fas fa-align-left"></i>Nội dung khiếu nại
                         </div>
-                        <div th:if="${#lists.isEmpty(incident.images)}" class="text-center w-100">
-                            Không có hình ảnh đính kèm.
+                        <div class="info-value textarea" th:text="${incident.description}"></div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="info-card fade-in">
+            <div class="card-header">
+                <i class="fas fa-images"></i>
+                Hình ảnh đính kèm
+            </div>
+            <div class="card-body">
+                <div th:if="${#lists.isEmpty(incident.images)}" class="text-center w-100 py-4">
+                    <i class="fas fa-image fs-1 text-muted mb-3"></i>
+                    <p class="text-muted mb-0">Không có hình ảnh đính kèm.</p>
+                </div>
+
+                <div th:unless="${#lists.isEmpty(incident.images)}" class="image-gallery">
+                    <div th:each="img : ${incident.images}" class="image-item">
+                        <img th:src="@{${img.url}}" alt="Ảnh khiếu nại"
+                            th:attr="onclick=|openModalImage('${img.url}')|" />
+                        <div class="image-overlay">
+                            <small>Nhấn để xem ảnh</small>
                         </div>
                     </div>
                 </div>
             </div>
-            <!-- Modal xem ảnh -->
-            <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
-                <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="imageModalTitle">Xem ảnh</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img id="modalImage" src="" alt="" class="img-fluid rounded">
-                        </div>
-                    </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-xl" role="document">
+            <div class="modal-content custom-modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="imageModalTitle">Xem ảnh</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modalImage" src="" alt="" class="img-fluid rounded modal-image">
+                </div>
+                <div class="modal-footer">
+                    <p class="text-muted mb-0">Ảnh khiếu nại</p>
                 </div>
             </div>
         </div>
@@ -600,6 +780,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Toast notification handling
             document.querySelectorAll('.toast-close').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const toast = btn.closest('.custom-toast');
@@ -607,19 +788,27 @@
                     setTimeout(() => toast.remove(), 500);
                 });
             });
+
             setTimeout(() => {
                 document.querySelectorAll('.custom-toast').forEach(toast => {
                     toast.style.opacity = '0';
                     setTimeout(() => toast.remove(), 500);
                 });
-            }, 3000);
+            }, 5000);
+
+            // Add animation delay to cards
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.1}s`;
+            });
         });
+
         function openModalImage(url) {
             document.getElementById('modalImage').src = url;
             const modal = new bootstrap.Modal(document.getElementById('imageModal'));
             modal.show();
         }
     </script>
+    <script src="/js/sidebar.js"></script>
 </body>
 
 </html>

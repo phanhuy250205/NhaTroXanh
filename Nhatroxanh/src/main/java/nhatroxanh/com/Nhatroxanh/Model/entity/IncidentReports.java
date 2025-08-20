@@ -32,7 +32,7 @@ public class IncidentReports {
     private Integer reportId;
 
     @ManyToOne
-    @JoinColumn(name = "room_id", nullable = false)
+    @JoinColumn(name = "room_id", nullable = true)
     private Rooms room;
 
     @ManyToOne

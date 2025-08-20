@@ -438,4 +438,7 @@ public class PostServiceImpl implements PostService {
         return postRepository.findFilteredPosts(approvalStatus, type, search, pageable);
     }
 
+    public long countByApprovalStatus(ApprovalStatus approvalStatus) {
+        return postRepository.countByApprovalStatus(approvalStatus);
+    }
 }

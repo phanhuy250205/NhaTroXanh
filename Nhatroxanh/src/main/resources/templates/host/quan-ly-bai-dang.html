@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản lý bài đăng</title>
+  <title>Quản Lý Bài Đăng - Nhà Trọ Xanh</title>
   <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
   <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
@@ -12,8 +12,6 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
   <style>
     :root {
       --primary-blue: #3b82f6;
@@ -46,6 +44,7 @@
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
       color: var(--dark-color);
       line-height: 1.6;
+      padding: 20px;
     }
 
     .main-content {
@@ -115,6 +114,7 @@
       box-shadow: var(--shadow-md);
     }
 
+    /* CARD STYLING - UPDATED FOR EQUAL HEIGHT */
     .listing-card {
       border-radius: var(--border-radius);
       background-color: white;
@@ -123,6 +123,9 @@
       transition: var(--transition);
       border: 1px solid var(--gray-200);
       position: relative;
+      height: 100%; /* Ensure card takes full height of column */
+      display: flex;
+      flex-direction: column;
     }
 
     .listing-card:hover {
@@ -170,6 +173,9 @@
 
     .listing-body {
       padding: 1.25rem;
+      flex: 1; /* Allow body to grow and fill available space */
+      display: flex;
+      flex-direction: column;
     }
 
     .listing-body h5 {
@@ -198,6 +204,11 @@
       min-width: 70px;
     }
 
+    .description-container {
+      flex: 1; /* Allow description to take remaining space */
+      overflow: hidden; /* Hide overflow */
+    }
+
     .listing-footer {
       padding: 1rem 1.25rem;
       border-top: 1px solid var(--gray-200);
@@ -205,6 +216,7 @@
       justify-content: flex-end;
       gap: 0.75rem;
       align-items: center;
+      margin-top: auto; /* Push footer to bottom */
     }
 
     /* Buttons */
