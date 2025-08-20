@@ -30,9 +30,17 @@ import nhatroxanh.com.Nhatroxanh.Service.HostelService;
 import nhatroxanh.com.Nhatroxanh.Service.VoucherService;
 import nhatroxanh.com.Nhatroxanh.Util.VoucherCodeGenerator;
 
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.LockModeType;
+import org.springframework.data.jpa.repository.Lock;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 @Transactional
 public class VoucherServiceImpl implements VoucherService {
+    private static final Logger log = LoggerFactory.getLogger(VoucherServiceImpl.class);
 
     @Autowired
     private VoucherRepository voucherRepository;
@@ -330,7 +338,7 @@ public class VoucherServiceImpl implements VoucherService {
                             "🎁 " + voucher.getTitle() + " - Mã khuyến mãi độc quyền từ Nhà Trọ Xanh",
                             emailContent);
                 } catch (Exception e) {
-
+                    log.error("Failed to send voucher email to {}: {}", recipient.getEmail(), e.getMessage());
                 }
             }
         }
@@ -340,7 +348,6 @@ public class VoucherServiceImpl implements VoucherService {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
         String endDate = dateFormat.format(voucher.getEndDate());
 
-        // Định dạng tiền tệ với dấu phân cách hàng nghìn
         DecimalFormat currencyFormat = new DecimalFormat("###,###,###");
         String formattedDiscount = currencyFormat.format(voucher.getDiscountValue()) + " VNĐ";
         String formattedMinAmount = currencyFormat.format(voucher.getMinAmount()) + " VNĐ";
@@ -351,21 +358,16 @@ public class VoucherServiceImpl implements VoucherService {
                 "    <meta charset=\"UTF-8\">" +
                 "    <style>" +
                 "        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 0; }" +
-                "        .ticket { max-width: 600px; margin: 20px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }"
-                +
+                "        .ticket { max-width: 600px; margin: 20px auto; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }" +
                 "        .header { background-color: #3e83cc; color: white; padding: 20px; text-align: center; }" +
                 "        .header h1 { margin: 0; font-size: 24px; }" +
                 "        .content { padding: 30px; background-color: #f9f9f9; }" +
-                "        .voucher-code { background-color: white; border: 2px dashed #3e83cc; padding: 15px; text-align: center; margin: 20px 0; font-size: 24px; font-weight: bold; color: #3e83cc; border-radius: 5px; }"
-                +
-                "        .details { background-color: white; border-radius: 5px; padding: 20px; margin-bottom: 20px; }"
-                +
+                "        .voucher-code { background-color: white; border: 2px dashed #3e83cc; padding: 15px; text-align: center; margin: 20px 0; font-size: 24px; font-weight: bold; color: #3e83cc; border-radius: 5px; }" +
+                "        .details { background-color: white; border-radius: 5px; padding: 20px; margin-bottom: 20px; }" +
                 "        .detail-row { display: flex; margin-bottom: 10px; }" +
                 "        .detail-label { font-weight: bold; color: #555; width: 150px; }" +
-                "        .footer { background-color: #3e83cc; color: white; padding: 15px; text-align: center; font-size: 12px; }"
-                +
-                "        .discount-value { font-size: 28px; color: #3e83cc; font-weight: bold; text-align: center; margin: 15px 0; }"
-                +
+                "        .footer { background-color: #3e83cc; color: white; padding: 15px; text-align: center; font-size: 12px; }" +
+                "        .discount-value { font-size: 28px; color: #3e83cc; font-weight: bold; text-align: center; margin: 15px 0; }" +
                 "    </style>" +
                 "</head>" +
                 "<body>" +
@@ -377,11 +379,8 @@ public class VoucherServiceImpl implements VoucherService {
                 "        <div class=\"content\">" +
                 "            <p>Xin chào <strong>" + recipient.getFullname() + "</strong>,</p>" +
                 "            <p>Nhà Trọ Xanh gửi tặng bạn mã giảm giá đặc biệt:</p>" +
-                "            " +
                 "            <div class=\"discount-value\">GIẢM " + formattedDiscount + "</div>" +
-                "            " +
                 "            <div class=\"voucher-code\">" + voucher.getCode() + "</div>" +
-                "            " +
                 "            <div class=\"details\">" +
                 "                <div class=\"detail-row\">" +
                 "                    <span class=\"detail-label\">Tiêu đề:</span>" +
@@ -396,13 +395,11 @@ public class VoucherServiceImpl implements VoucherService {
                 "                    <span>" + endDate + "</span>" +
                 "                </div>" +
                 "            </div>" +
-                "            " +
                 "            <p>Hãy sử dụng mã này khi thanh toán để nhận ưu đãi đặc biệt này!</p>" +
                 "            <p>Trân trọng,<br>Đội ngũ Nhà Trọ Xanh</p>" +
                 "        </div>" +
                 "        <div class=\"footer\">" +
-                "            Đây là email tự động, vui lòng không trả lời. Mọi thắc mắc xin liên hệ hỗ trợ khách hàng."
-                +
+                "            Đây là email tự động, vui lòng không trả lời. Mọi thắc mắc xin liên hệ hỗ trợ khách hàng." +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +
@@ -411,14 +408,26 @@ public class VoucherServiceImpl implements VoucherService {
 
     @Override
     public Vouchers getVoucherByCode(String code) {
-        return voucherRepository.findByCode(code); // Giả sử có method findByCode trong VoucherRepository
+        return voucherRepository.findByCode(code);
     }
 
     @Override
+    @Transactional
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     public void updateVoucherQuantity(Vouchers voucher) {
-        if (voucher.getQuantity() <= 0) {
+        if (voucher == null) {
+            throw new IllegalArgumentException("Voucher không tồn tại");
+        }
+        int newQuantity = voucher.getQuantity() - 1;
+        if (newQuantity < 0) {
+            throw new IllegalStateException("Số lượng voucher đã âm, không thể giảm thêm");
+        }
+        voucher.setQuantity(newQuantity);
+        if (newQuantity == 0) {
             voucher.setStatus(false);
+            log.info("Voucher {} quantity reached 0, setting status to inactive", voucher.getCode());
         }
         voucherRepository.save(voucher);
+        log.info("Updated voucher {} quantity to {}", voucher.getCode(), newQuantity);
     }
 }

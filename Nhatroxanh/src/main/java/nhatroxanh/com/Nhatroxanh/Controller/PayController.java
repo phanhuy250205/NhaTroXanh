@@ -51,8 +51,7 @@ public class PayController {
     private final DetailPaymentsRepository detailPaymentsRepository;
     private final ContractsRepository contractsRepository;
     private final RoomsRepository roomsRepository;
-    private final AddressRepository addressRepository;
-    private final VoucherRepository voucherRepository;
+
     @Autowired
     private VoucherService voucherService;
     @Autowired
@@ -144,7 +143,7 @@ public class PayController {
                     .orElse("0 VNĐ"));
             model.addAttribute("roomName", Optional.ofNullable(room).map(Rooms::getNamerooms).orElse("Không xác định"));
             model.addAttribute("hostName", Optional.ofNullable(room)
-                    .map(Rooms::getHostel)  
+                    .map(Rooms::getHostel)
                     .map(hostel -> hostel.getOwner())
                     .map(owner -> owner.getFullname())
                     .orElse("Không xác định"));
@@ -341,11 +340,8 @@ public class PayController {
                             "Hóa đơn này đã được đặt lịch hẹn thanh toán tiền mặt trước đó. Mỗi hóa đơn chỉ được phép đặt lịch hẹn một lần duy nhất.");
                 }
 
-                // Additional check: if payment is currently waiting for cash confirmation
-
                 // Set payment status to waiting for cash payment confirmation
                 payment.setPaymentStatus(Payments.PaymentStatus.CHỜ_XÁC_NHẬN_TIỀN_MẶT);
-                // Save scheduled payment date, time, and note
                 payment.setScheduledPaymentDate(Date.valueOf(paymentDate));
                 payment.setScheduledPaymentTime(paymentTime);
                 payment.setPaymentNote(paymentNote);
@@ -395,7 +391,6 @@ public class PayController {
                 response.put("message",
                         "Đã đặt lịch thanh toán tiền mặt thành công! Chủ trọ sẽ liên hệ để xác nhận. Vui lòng chờ xác nhận từ chủ trọ.");
                 response.put("appointmentScheduled", true);
-                // Không redirect, giữ nguyên trang thanh toán
                 return ResponseEntity.ok(response);
             } else {
                 // For other payment methods, process as paid immediately
@@ -404,7 +399,10 @@ public class PayController {
                 paymentsRepository.save(payment);
 
                 // Decrease voucher quantity after successful payment
-                decreaseVoucherQuantity(paymentIdInt, invoiceId);
+                if (appliedVoucherCode != null) {
+                    voucherService.updateVoucherQuantity(voucherService.getVoucherByCode(appliedVoucherCode));
+                    log.info("Voucher {} quantity updated for payment {}", appliedVoucherCode, invoiceId);
+                }
 
                 // Pass voucher code to success page
                 if (appliedVoucherCode != null) {
@@ -467,7 +465,7 @@ public class PayController {
     }
 
     @GetMapping("/guest/success-thanhtoan")
-    @Transactional(readOnly = true)
+    @Transactional
     public String viewPaymentSuccessPage(
             @RequestParam("invoiceId") String invoiceId,
             @RequestParam(value = "room_id", required = false) Integer roomId,
@@ -510,8 +508,25 @@ public class PayController {
                         });
             }
 
-            // Get payment details
+            // Process voucher quantity decrease if applicable
             List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(paymentIdInt);
+            for (DetailPayments detail : details) {
+                String itemName = detail.getItemName().toLowerCase();
+                if (itemName.startsWith("giảm giá voucher ")) {
+                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
+                    Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
+                    if (usedVoucher != null && payment.getPaymentStatus() == Payments.PaymentStatus.ĐÃ_THANH_TOÁN) {
+                        try {
+                            voucherService.updateVoucherQuantity(usedVoucher);
+                            log.info("Voucher {} quantity updated for payment {} on success page load", usedVoucherCode, paymentIdInt);
+                        } catch (Exception e) {
+                            log.error("Failed to update voucher {} quantity for payment {}: {}", usedVoucherCode, paymentIdInt, e.getMessage());
+                        }
+                    } else if (usedVoucher == null) {
+                        log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, paymentIdInt);
+                    }
+                }
+            }
 
             // Use String address directly
             String fullAddress = room.getHostel() != null && room.getHostel().getAddress() != null
@@ -532,12 +547,11 @@ public class PayController {
                     .map(date -> String.format("Tháng %02d/%d", date.toLocalDate().getMonthValue(),
                             date.toLocalDate().getYear()))
                     .orElse("N/A"));
-            // Set totals explicitly for clarity
-            model.addAttribute("originalTotal", Optional.ofNullable(model.getAttribute("originalTotal"))
-                    .map(obj -> (String) obj)
+            model.addAttribute("originalTotal", Optional.ofNullable(session.getAttribute("originalTotal_" + invoiceId))
+                    .map(obj -> String.format("%,d VNĐ", ((Double) obj).intValue()))
                     .orElse("0 VNĐ"));
-            model.addAttribute("discountAmount", Optional.ofNullable(model.getAttribute("discountAmount"))
-                    .map(obj -> (String) obj)
+            model.addAttribute("discountAmount", Optional.ofNullable(session.getAttribute("discountAmount_" + invoiceId))
+                    .map(obj -> String.format("%,d VNĐ", ((Float) obj).intValue()))
                     .orElse("0 VNĐ"));
             model.addAttribute("finalTotal", Optional.ofNullable(payment.getTotalAmount())
                     .map(amount -> String.format("%,d VNĐ", amount.intValue()))
@@ -706,12 +720,10 @@ public class PayController {
     }
 
     private void processPaymentDetails(List<DetailPayments> details, Rooms room, Model model) {
-        // Initialize accumulators
         Float originalTotal = 0f;
         Float discountAmount = 0f;
         String voucherCode = null;
 
-        // Initialize default values
         model.addAttribute("roomPrice", Optional.ofNullable(room.getPrice())
                 .map(price -> String.format("%,d VNĐ", price.intValue()))
                 .orElse("0 VNĐ"));
@@ -723,7 +735,6 @@ public class PayController {
         model.addAttribute("waterReadings", "N/A");
         model.addAttribute("serviceFee", "0 VNĐ");
 
-        // Loop through all details to calculate breakdown
         for (DetailPayments detail : details) {
             try {
                 String itemNameLower = detail.getItemName().toLowerCase();
@@ -758,7 +769,6 @@ public class PayController {
             }
         }
 
-        // Set calculated totals
         model.addAttribute("originalTotal", String.format("%,d VNĐ", originalTotal.intValue()));
         model.addAttribute("discountAmount", String.format("%,d VNĐ", discountAmount.intValue()));
         model.addAttribute("voucherCode", voucherCode != null ? voucherCode : "N/A");
@@ -771,7 +781,6 @@ public class PayController {
             HttpSession session) {
         Map<String, Object> response = new HashMap<>();
         try {
-            // Check invoiceId
             String invoiceIdStr = request.get("invoiceId");
             if (invoiceIdStr == null || invoiceIdStr.trim().isEmpty()) {
                 response.put("success", false);
@@ -789,14 +798,12 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Check payment
             Payments payment = paymentsRepository.findById(invoiceId)
                     .orElseThrow(() -> {
                         log.error("Payment not found with id: {} at {}", invoiceId, LocalDateTime.now());
                         return new IllegalArgumentException("Hóa đơn không tồn tại với mã: " + invoiceId);
                     });
 
-            // Check if voucher already applied
             List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(invoiceId);
             boolean alreadyApplied = details.stream()
                     .anyMatch(detail -> detail.getItemName().toLowerCase().contains("giảm giá voucher"));
@@ -806,7 +813,6 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Check voucher code
             String voucherCode = request.get("voucherCode");
             if (voucherCode == null || voucherCode.trim().isEmpty()) {
                 response.put("success", false);
@@ -814,7 +820,6 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Validate voucher
             Vouchers voucher = voucherService.getVoucherByCode(voucherCode);
             if (voucher == null) {
                 response.put("success", false);
@@ -847,17 +852,14 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Calculate discount
             Float discount = voucher.getDiscountValue();
             if (payment.getTotalAmount() - discount < 0) {
                 discount = payment.getTotalAmount().floatValue();
             }
 
-            // Apply discount and save
             payment.setTotalAmount(payment.getTotalAmount() - discount);
             paymentsRepository.save(payment);
 
-            // Save discount detail
             DetailPayments discountDetail = DetailPayments.builder()
                     .payment(payment)
                     .itemName("Giảm giá voucher " + voucherCode)
@@ -867,7 +869,6 @@ public class PayController {
                     .build();
             detailPaymentsRepository.save(discountDetail);
 
-            // Store voucher info in session
             session.setAttribute("originalTotal_" + invoiceId, payment.getTotalAmount() + discount);
             session.setAttribute("discountAmount_" + invoiceId, discount);
             session.setAttribute("voucherCode_" + invoiceId, voucherCode);
@@ -875,7 +876,7 @@ public class PayController {
             response.put("success", true);
             response.put("discountValue", discount);
             response.put("finalTotal", payment.getTotalAmount());
-            response.put("message", "Áp dụng voucher thành công! ");
+            response.put("message", "Áp dụng voucher thành công!");
             return ResponseEntity.ok(response);
 
         } catch (IllegalArgumentException e) {
@@ -889,11 +890,6 @@ public class PayController {
             response.put("error", "Lỗi hệ thống: Vui lòng thử lại sau");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
-    }
-
-    @GetMapping("/nap-rut")
-    public String rutTien() {
-        return "redirect:/staff/transactions/duyet-nap-rut";
     }
 
     @PostMapping("/landlord/confirm-cash-payment")
@@ -911,16 +907,27 @@ public class PayController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Update payment status and set payment method to cash
             payment.setPaymentStatus(Payments.PaymentStatus.ĐÃ_THANH_TOÁN);
             payment.setPaymentMethod(Payments.PaymentMethod.TIỀN_MẶT);
             payment.setPaymentDate(new java.sql.Timestamp(System.currentTimeMillis()));
             paymentsRepository.save(payment);
 
             // Decrease voucher quantity after successful cash confirmation
-            decreaseVoucherQuantity(paymentId, paymentId.toString());
+            List<DetailPayments> details = detailPaymentsRepository.findByPaymentId(paymentId);
+            for (DetailPayments detail : details) {
+                String itemName = detail.getItemName().toLowerCase();
+                if (itemName.startsWith("giảm giá voucher ")) {
+                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
+                    Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
+                    if (usedVoucher != null) {
+                        voucherService.updateVoucherQuantity(usedVoucher);
+                        log.info("Voucher {} quantity updated for payment {}", usedVoucherCode, paymentId);
+                    } else {
+                        log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, paymentId);
+                    }
+                }
+            }
 
-            // Send success notification email to tenant
             Contracts contract = payment.getContract();
             if (contract != null && contract.getTenant() != null) {
                 String tenantEmail = contract.getTenant().getEmail();
@@ -938,7 +945,6 @@ public class PayController {
                     log.error("Failed to send cash payment success email: {}", e.getMessage());
                 }
 
-                // Create cash payment success notification for tenant
                 try {
                     notificationService.createCashPaymentSuccessNotification(contract.getTenant(), payment);
                     log.info("Created cash payment success notification for tenant {}",
@@ -956,43 +962,16 @@ public class PayController {
             response.put("message", e.getMessage());
             return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
+            log.error("Failed to confirm payment for paymentId {}: {}", paymentId, e.getMessage(), e);
             response.put("success", false);
             response.put("message", "Failed to confirm payment.");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 
-    /**
-     * Helper method to decrease voucher quantity after successful payment
-     */
-    private void decreaseVoucherQuantity(Integer paymentId, String invoiceId) {
-        try {
-            List<DetailPayments> detailsAfter = detailPaymentsRepository.findByPaymentId(paymentId);
-            for (DetailPayments detail : detailsAfter) {
-                String itemName = detail.getItemName().toLowerCase();
-                if (itemName.startsWith("giảm giá voucher ")) {
-                    String usedVoucherCode = itemName.substring("giảm giá voucher ".length()).trim().toUpperCase();
-                    Vouchers usedVoucher = voucherService.getVoucherByCode(usedVoucherCode);
-                    if (usedVoucher != null) {
-                        int newQuantity = usedVoucher.getQuantity() - 1;
-                        log.info("Decreasing voucher {} quantity from {} to {} for payment {}",
-                                usedVoucherCode, usedVoucher.getQuantity(), newQuantity, invoiceId);
-                        usedVoucher.setQuantity(newQuantity);
-                        if (newQuantity <= 0) {
-                            usedVoucher.setStatus(false);
-                            log.info("Voucher {} quantity reached 0, setting status to inactive", usedVoucherCode);
-                        }
-                        voucherRepository.save(usedVoucher);
-                        log.info("Successfully updated voucher {} quantity to {} for payment {}",
-                                usedVoucherCode, newQuantity, invoiceId);
-                    } else {
-                        log.warn("Voucher with code {} not found for payment {}", usedVoucherCode, invoiceId);
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error decreasing voucher quantity for payment {}: {}", invoiceId, e.getMessage(), e);
-        }
+    @GetMapping("/nap-rut")
+    public String rutTien() {
+        return "redirect:/staff/transactions/duyet-nap-rut";
     }
 
     @GetMapping("/api/invoice/{invoiceId}/appointment-status")

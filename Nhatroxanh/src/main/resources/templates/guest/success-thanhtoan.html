@@ -179,15 +179,15 @@
                     </div>
 
                     <div class="payment-breakdown-total-guest">
-                        <div class="payment-total-row-guest">
+                        <div class="payment-total-row-guest ">
                             <span class="payment-total-text-guest">Tổng cộng ban đầu</span>
                             <span class="payment-total-value-guest" th:text="${originalTotal} ?: '0 VNĐ'"></span>
                         </div>
-                        <div class="payment-total-row-guest" th:if="${discountAmount != '0 VNĐ'}">
+                        <div class="payment-total-row-guest mt-3" th:if="${discountAmount != '0 VNĐ'}">
                             <span class="payment-total-text-guest">Giảm giá voucher</span>
                             <span class="payment-total-value-guest" th:text="'-' + ${discountAmount} ?: '0 VNĐ'"></span>
                         </div>
-                        <div class="payment-total-row-guest">
+                        <div class="payment-total-row-guest mt-3">
                             <span class="payment-total-text-guest">Tổng thanh toán</span>
                             <span class="payment-total-value-guest" th:text="${finalTotal} ?: '0 VNĐ'"></span>
                         </div>
@@ -200,10 +200,6 @@
                 <button class="payment-btn-guest payment-btn-primary-guest" onclick="window.location.href='/'">
                     <i class="fas fa-home"></i>
                     Quay lại Trang chủ
-                </button>
-                <button class="payment-btn-guest payment-btn-secondary-guest" onclick="downloadInvoice()">
-                    <i class="fas fa-download"></i>
-                    Tải Hóa Đơn PDF
                 </button>
             </div>
 
