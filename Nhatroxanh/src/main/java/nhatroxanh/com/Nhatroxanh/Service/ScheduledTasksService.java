@@ -40,6 +40,7 @@ public class ScheduledTasksService {
     @Transactional
     public void cleanupOldNotifications() {
         try {
+            // Gọi phương thức cleanupOldNotifications từ NotificationService
             int deletedCount = notificationService.cleanupOldNotifications();
 
             if (deletedCount > 0) {
