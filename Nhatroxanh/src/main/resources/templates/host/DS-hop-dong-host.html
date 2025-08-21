@@ -12,8 +12,8 @@
     <h5 class="fw-bold mb-4">Danh sách hợp đồng</h5>
 
     <!-- Thống kê hợp đồng -->
-    <div class="row g-3 host-stats">
-      <div class="col-md-6 col-xl-3">
+    <div class="row g-3 host-stats d-flex justify-content-center align-items-center">
+      <div class="col-md-6 col-xl-4">
         <div class="host-card-stat host-stat-blue">
           <div class="host-stat-icon"><i class="fa fa-file-alt"></i></div>
           <div class="host-stat-text">
@@ -22,7 +22,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-md-6 col-xl-4">
         <div class="host-card-stat host-stat-green">
           <div class="host-stat-icon"><i class="fa fa-check-circle"></i></div>
           <div class="host-stat-text">
@@ -31,7 +31,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-md-6 col-xl-4">
         <div class="host-card-stat host-stat-yellow">
           <div class="host-stat-icon"><i class="fa fa-edit"></i></div>
           <div class="host-stat-text">
@@ -40,7 +40,7 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6 col-xl-3">
+      <div class="col-md-6 col-xl-4">
         <div class="host-card-stat host-stat-orange"> <!-- Đổi từ purple sang orange -->
           <div class="host-stat-icon"><i class="fa fa-clock"></i></div> <!-- Đổi icon -->
           <div class="host-stat-text">
@@ -50,7 +50,7 @@
         </div>
       </div>
       <!-- Thêm card mới cho TERMINATED -->
-      <div class="col-md-6 col-xl-3">
+      <div class="col-md-6 col-xl-4">
         <div class="host-card-stat host-stat-red">
           <div class="host-stat-icon"><i class="fa fa-times-circle"></i></div>
           <div class="host-stat-text">
@@ -153,14 +153,14 @@
       },
       EXPIRED: {
         label: 'Sắp hết hạn',
-        badgeClass: 'bg-warning text-dark',
+        badgeClass: 'bg-warning',
         iconClass: 'fa-clock',
         canEdit: true,
         description: 'Hợp đồng sắp hết hạn, cần gia hạn'
       },
       TERMINATED: {
         label: 'Đã chấm dứt',
-        badgeClass: 'bg-danger',
+        badgeClass: 'bg-danger-host',
         iconClass: 'fa-times-circle',
         canEdit: false,
         description: 'Hợp đồng đã kết thúc'

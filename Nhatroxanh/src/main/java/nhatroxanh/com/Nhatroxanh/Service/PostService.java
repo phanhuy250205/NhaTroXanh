@@ -55,10 +55,11 @@ public interface PostService {
         List<Post> getFilteredPosts(String status, String type, String sortBy, String search);
 
         Page<Post> getFilteredPostsByApprovalStatus(
-        ApprovalStatus approvalStatus,
-        String type,
-        String search,
-        Pageable pageable);
+                        ApprovalStatus approvalStatus,
+                        String type,
+                        String search,
+                        Pageable pageable);
 
+        long countByApprovalStatus(ApprovalStatus approvalStatus);
 
 }

@@ -47,17 +47,16 @@ public class StaffPostController {
     @Autowired
     private EmailService emailService;
 
-    @GetMapping
+    @GetMapping("")
     public String showPostManagement(
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String sortBy,
             @RequestParam(required = false) String search,
-
             @RequestParam(defaultValue = "0") int pendingPage,
             @RequestParam(defaultValue = "0") int approvedPage,
             @RequestParam(defaultValue = "6") int size,
-
+            @RequestParam(defaultValue = "pending") String tab, // Thêm tham số tab
             Model model) {
 
         Sort sort = "oldest".equalsIgnoreCase(sortBy)
@@ -79,6 +78,13 @@ public class StaffPostController {
         model.addAttribute("approvedTotalPages", approvedPosts.getTotalPages());
         model.addAttribute("pendingCurrentPage", pendingPage);
         model.addAttribute("approvedCurrentPage", approvedPage);
+        model.addAttribute("activeTab", tab); // Truyền tab active vào model
+
+        long totalPendingPosts = postService.countByApprovalStatus(ApprovalStatus.PENDING);
+        long totalApprovedPosts = postService.countByApprovalStatus(ApprovalStatus.APPROVED);
+
+        model.addAttribute("totalPendingPosts", totalPendingPosts);
+        model.addAttribute("totalApprovedPosts", totalApprovedPosts);
 
         model.addAttribute("categories", categoryService.getAllCategories());
 

@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chi tiết khiếu nại và sự cố</title>
+    <title>Chi Tiết Khiếu Nại Và Sự Cố - Nhà Trọ Xanh</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
@@ -741,7 +742,8 @@
                     </div>
                     <div class="form-group-staff priority-container-staff">
                         <label class="form-label-staff">Mức độ ưu tiên</label>
-                        <button id="priorityBtn" class="priority-badge-staff priority-high-staff" onclick="togglePriority()">
+                        <button id="priorityBtn" class="priority-badge-staff priority-high-staff"
+                            onclick="togglePriority()">
                             <i class="fas fa-exclamation-triangle"></i>
                             Cao
                         </button>
@@ -765,11 +767,13 @@
                 <div class="form-row-staff">
                     <div class="form-group-staff">
                         <label class="form-label-staff">Khu trọ</label>
-                        <input type="text" class="form-control-staff" th:value="${report.room.hostel.name}" disabled>
+                        <input type="text" class="form-control-staff"
+                            th:value="${report.room != null ? report.room.hostel.name : 'Lỗi hệ thống'}" disabled>
                     </div>
                     <div class="form-group-staff">
                         <label class="form-label-staff">Phòng</label>
-                        <input type="text" class="form-control-staff" th:value="${report.room.namerooms}" disabled>
+                        <input type="text" class="form-control-staff"
+                            th:value="${report.room != null ? report.room.namerooms : 'Lỗi hệ thống'}" disabled>
                     </div>
                     <div class="form-group-staff status-container-staff">
                         <label class="form-label-staff">Trạng thái</label>
@@ -906,7 +910,7 @@
         function updatePriorityDisplay() {
             const priorityBtn = document.getElementById('priorityBtn');
             const priority = priorities[currentPriority];
-            
+
             // Remove all priority classes
             priorityBtn.className = 'priority-badge-staff ' + priority.class;
             priorityBtn.innerHTML = `<i class="${priority.icon}"></i> ${priority.text}`;

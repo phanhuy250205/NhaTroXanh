@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý khiếu nại và sự cố</title>
+    <title>Quản Lý Khiếu Nại Và Sự Cố - Nhà Trọ Xanh</title>
     <link rel="stylesheet" th:href="@{/css/sidebar.css}" />
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
@@ -513,7 +513,7 @@
                             <th>Người gửi</th>
                             <th>Loại sự cố</th>
                             <th>Mức độ</th>
-                            <th>Khu trọ</th>
+                            <th>Khu trọ/Hệ thống</th>
                             <th>Thời gian</th>
                             <th>Trạng thái</th>
                             <th>Hành động</th>
@@ -538,7 +538,7 @@
                                     </span>
                                 </span>
                             </td>
-                            <td th:text="${report.room.hostel.name}">KTX A1</td>
+                            <td th:text="${report.room != null ? report.room.hostel.name : 'Lỗi hệ thống'}"></td>
                             <td th:text="${#dates.format(report.reportedAt, 'dd/MM/yyyy HH:mm')}">15/12/2024 14:30</td>
                             <td>
                                 <span
