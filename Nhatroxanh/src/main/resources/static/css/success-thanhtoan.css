@@ -152,6 +152,7 @@ body {
     color: var(--white-guest);
     font-size: 0.9rem;
     flex-shrink: 0;
+ 
 }
 
 .payment-transaction-icon-guest {
@@ -320,6 +321,7 @@ body {
     justify-content: center;
     color: var(--white-guest);
     font-size: 1rem;
+    background-color: rgb(136, 22, 22);
 }
 
 .payment-room-fee-icon-guest {
