@@ -117,7 +117,6 @@ public class StaffVoucherController {
             if (end.isAfter(maxEnd)) {
                 bindingResult.rejectValue("endDate", "error.endDate",
                         "Ngày kết thúc không được vượt quá 2 tháng kể từ ngày bắt đầu (" + maxEnd + ")");
-                        
 
             }
             if (end.isBefore(start)) {
@@ -317,6 +316,9 @@ public class StaffVoucherController {
                 throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
             }
 
+            if (voucher.getStatus() == null || !voucher.getStatus()) {
+                throw new RuntimeException("Voucher chưa được kích hoạt, không thể gửi thông báo!");
+            }
             voucherService.sendVoucherNotification(voucher, userDetails);
             redirect.addFlashAttribute("successMessage", "Gửi thông báo voucher thành công!");
         } catch (Exception e) {

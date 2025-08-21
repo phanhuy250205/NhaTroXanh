@@ -250,8 +250,14 @@ public class VoucherHostController {
             Vouchers voucher = voucherRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Voucher không tồn tại!"));
 
+            // Check quyền sở hữu
             if (!voucher.getUser().getUserId().equals(userDetails.getUserId())) {
                 throw new RuntimeException("Không có quyền gửi thông báo cho voucher này!");
+            }
+
+            // Check trạng thái voucher
+            if (voucher.getStatus() == null || !voucher.getStatus()) {
+                throw new RuntimeException("Voucher chưa được kích hoạt, không thể gửi thông báo!");
             }
 
             voucherService.sendVoucherNotification(voucher, userDetails);
@@ -261,4 +267,5 @@ public class VoucherHostController {
         }
         return "redirect:/chu-tro/voucher";
     }
+
 }
