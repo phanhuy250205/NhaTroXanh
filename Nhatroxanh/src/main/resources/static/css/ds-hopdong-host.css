@@ -67,6 +67,15 @@
     color: #3E83CC;
 }
 
+.host-stat-red::before {
+    background: linear-gradient(135deg, #df0000, #df0000);
+}
+
+.host-stat-red .host-stat-icon {
+    background: #fce0e0;
+    color: #df0000;
+}
+
 .host-stat-green::before {
     background: linear-gradient(135deg, #10b981, #34d399);
 }
@@ -83,6 +92,15 @@
 .host-stat-yellow .host-stat-icon {
     background: rgba(245, 158, 11, 0.1);
     color: #f59e0b;
+}
+
+.host-stat-orange::before {
+    background: linear-gradient(135deg, #fff017, #fff017);
+}
+
+.host-stat-orange .host-stat-icon {
+    background: rgba(205, 193, 62, 0.15);
+    color: #e2d73f;
 }
 
 .host-stat-purple::before {
@@ -241,6 +259,12 @@
     background: linear-gradient(135deg, #ef4444, #f87171) !important;
     color: white !important;
     box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.bg-danger-host {
+    background: linear-gradient(135deg, #df0000, #df0000) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(223, 0, 0, 0.3);
 }
 
 .host-badge.bg-warning {
@@ -507,10 +531,21 @@
     transform: translateY(20px);
 }
 
-.host-card-stat:nth-child(1) { animation-delay: 0.1s; }
-.host-card-stat:nth-child(2) { animation-delay: 0.2s; }
-.host-card-stat:nth-child(3) { animation-delay: 0.3s; }
-.host-card-stat:nth-child(4) { animation-delay: 0.4s; }
+.host-card-stat:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.host-card-stat:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.host-card-stat:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.host-card-stat:nth-child(4) {
+    animation-delay: 0.4s;
+}
 
 .host-contract-table {
     animation: fadeInUp 0.6s ease forwards;

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +10,7 @@
     <link rel="icon" th:href="@{/images/logo/nhatroxanh(title).png}" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             --primary-blue: #3498DB;
@@ -373,7 +374,7 @@
             display: inline-block;
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(255,255,255,.3);
+            border: 2px solid rgba(255, 255, 255, .3);
             border-radius: 50%;
             border-top-color: #fff;
             animation: spin 1s ease-in-out infinite;
@@ -389,7 +390,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         /* Responsive Design */
@@ -433,6 +436,7 @@
         }
     </style>
 </head>
+
 <body>
     <div th:replace="~{/layouts/sidebar-host}"></div>
     <div class="main-container-host">
@@ -489,7 +493,8 @@
 
                         <div class="custom-amount-host">
                             <label class="form-label-host">Hoặc nhập số tiền tùy chỉnh:</label>
-                            <input type="number" class="amount-input-host" id="customAmount" placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
+                            <input type="number" class="amount-input-host" id="customAmount"
+                                placeholder="Nhập số tiền (VNĐ)" min="50000" max="50000000">
                         </div>
                     </div>
                 </div>
@@ -507,7 +512,8 @@
                             <!-- VietQR -->
                             <div class="payment-option-host" onclick="selectPaymentMethod('vietqr')">
                                 <div class="payment-header-host">
-                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr" class="payment-radio-host">
+                                    <input type="radio" name="payment_method_host" id="vietqr-host" value="vietqr"
+                                        class="payment-radio-host">
                                     <div class="payment-icon-host">
                                         <i class="fas fa-qrcode"></i>
                                     </div>
@@ -521,7 +527,8 @@
                             <!-- Bank Transfer -->
                             <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
                                 <div class="payment-header-host">
-                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank" class="payment-radio-host">
+                                    <input type="radio" name="payment_method_host" id="bank-host" value="bank"
+                                        class="payment-radio-host">
                                     <div class="payment-icon-host">
                                         <i class="fas fa-university"></i>
                                     </div>
@@ -561,8 +568,9 @@
                     <div class="card-body-host">
                         <div class="balance-display-host">
                             <div class="balance-label-host">Số dư tài khoản</div>
-                            <div class="balance-amount-host" id="currentBalance-host" 
-                                 th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ</div>
+                            <div class="balance-amount-host" id="currentBalance-host"
+                                th:text="${#numbers.formatInteger(currentBalance, 0, 'COMMA')} + ' VNĐ'">2,450,000 VNĐ
+                            </div>
                             <div class="balance-status-host">
                                 <i class="fas fa-check-circle"></i>
                                 Tài khoản hoạt động bình thường
@@ -582,7 +590,8 @@
                     <div class="card-body-host">
                         <div class="d-flex flex-column gap-3">
                             <div class="d-flex align-items-center gap-3">
-                                <div class="payment-icon-host" style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
+                                <div class="payment-icon-host"
+                                    style="background: linear-gradient(135deg, var(--success-green), #2ecc71); width: 35px; height: 35px;">
                                     <i class="fas fa-phone"></i>
                                 </div>
                                 <div>
@@ -591,7 +600,8 @@
                                 </div>
                             </div>
                             <div class="d-flex align-items-center gap-3">
-                                <div class="payment-icon-host" style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
+                                <div class="payment-icon-host"
+                                    style="background: linear-gradient(135deg, var(--primary-blue), var(--light-blue)); width: 35px; height: 35px;">
                                     <i class="fas fa-envelope"></i>
                                 </div>
                                 <div>
@@ -613,38 +623,38 @@
         let selectedPaymentMethod = '';
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             updateBalanceDisplay();
         });
 
         function selectAmount(amount) {
             selectedAmount = amount;
-            
+
             // Remove active class from all amount options
             document.querySelectorAll('.amount-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             // Add active class to selected amount
             event.currentTarget.classList.add('active-host');
-            
+
             // Clear custom amount input
             document.getElementById('customAmount').value = '';
-            
+
             updateSummary();
         }
 
         function selectPaymentMethod(method) {
             selectedPaymentMethod = method;
-            
+
             // Remove active class from all payment methods
             document.querySelectorAll('.payment-option-host').forEach(el => {
                 el.classList.remove('active-host');
             });
-            
+
             // Add active class to selected method
             event.currentTarget.classList.add('active-host');
-            
+
             // Check the radio button
             document.getElementById(method + '-host').checked = true;
         }
@@ -669,26 +679,26 @@
             const customAmount = document.getElementById('customAmount').value;
             const finalAmount = customAmount ? parseInt(customAmount) : selectedAmount;
             const topupBtn = document.getElementById('topupBtn-host');
-            
+
             // Validation
             if (!finalAmount || finalAmount < 50000) {
                 showAlert('Vui lòng chọn hoặc nhập số tiền nạp (tối thiểu 50,000 VNĐ)!', 'warning');
                 return;
             }
-            
+
             if (finalAmount > 50000000) {
                 showAlert('Số tiền nạp không được vượt quá 50,000,000 VNĐ!', 'warning');
                 return;
             }
-            
+
             if (!selectedPaymentMethod) {
                 showAlert('Vui lòng chọn phương thức thanh toán!', 'warning');
                 return;
             }
-            
+
             let message = `Xác nhận nạp ${formatCurrency(finalAmount)} bằng `;
-            
-            switch(selectedPaymentMethod) {
+
+            switch (selectedPaymentMethod) {
                 case 'bank':
                     message += 'chuyển khoản ngân hàng?';
                     break;
@@ -699,12 +709,12 @@
                     message += 'phương thức đã chọn?';
                     break;
             }
-            
+
             if (confirm(message)) {
                 // Show loading state
                 topupBtn.innerHTML = '<span class="loading-host me-2"></span>Đang xử lý giao dịch...';
                 topupBtn.disabled = true;
-                
+
                 // Process payment based on selected method
                 if (selectedPaymentMethod === 'vietqr') {
                     processVietQRPayment(finalAmount);
@@ -725,21 +735,21 @@
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success && data.qrCodeUrl) {
-                    // Show QR code modal for payment
-                    showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
-                } else {
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.qrCodeUrl) {
+                        // Show QR code modal for payment
+                        showVietQRModal(data.qrCodeUrl, amount, data.transactionId);
+                    } else {
+                        resetButton();
+                        showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                     resetButton();
-                    showAlert(data.message || 'Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                resetButton();
-                showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
-            });
+                    showAlert('Có lỗi xảy ra khi tạo mã QR thanh toán', 'error');
+                });
         }
 
         function showVietQRModal(qrCodeUrl, amount, transactionId) {
