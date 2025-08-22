@@ -887,7 +887,7 @@
                     <div class="card-body-host">
                         <div class="payment-methods-host">
                             <!-- Bank Transfer -->
-                            <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
+                            <!-- <div class="payment-option-host" onclick="selectPaymentMethod('bank')">
                                 <div class="payment-header-host">
                                     <input type="radio" name="payment_method_host" id="bank-host" value="bank"
                                         class="payment-radio-host">
@@ -899,7 +899,7 @@
                                         <p>Chuyển khoản trực tiếp từ tài khoản ngân hàng</p>
                                     </div>
                                 </div>
-                            </div>
+                            </div> -->
 
                             <!-- VietQR -->
                             <div class="payment-option-host" onclick="selectPaymentMethod('vietqr')">
@@ -1696,10 +1696,6 @@
         }
 
         function completeTransaction(transactionId) {
-            // Show confirmation
-            if (!confirm('Bạn đã hoàn thành thanh toán qua ngân hàng? Nhân viên sẽ xác nhận giao dịch của bạn.')) {
-                return;
-            }
 
             // Show loading state
             const completeBtn = document.getElementById('completeTransactionBtn');

@@ -9,8 +9,7 @@ import nhatroxanh.com.Nhatroxanh.Service.TransactionService;
 import nhatroxanh.com.Nhatroxanh.Service.WalletService;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
 import nhatroxanh.com.Nhatroxanh.Service.WalletPaymentService;
-import nhatroxanh.com.Nhatroxanh.Service.VNPayService;
-import nhatroxanh.com.Nhatroxanh.Service.MoMoService;
+import nhatroxanh.com.Nhatroxanh.Repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Optional;
 
 import javax.crypto.Mac;
@@ -47,7 +47,8 @@ public class HostWalletController {
     private final WalletService walletService;
     private final OtpService otpService;
     private final WalletPaymentService walletPaymentService;
-
+    private final UserRepository userRepository; // Added to fetch staff members
+    private final Random random = new Random(); // For random selection
 
     // VNPay Configuration for signature verification
     @Value("${vnpay.hashSecret:DEMO}")
@@ -602,9 +603,34 @@ public class HostWalletController {
                 return ResponseEntity.badRequest().body(response);
             }
 
-            // Sử dụng WalletPaymentService để xử lý VietQR
+            // Fetch all staff members
+            List<Users> staffMembers = userRepository.findByRole(Users.Role.STAFF);
+            if (staffMembers.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Không tìm thấy nhân viên nào để xử lý thanh toán");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Randomly select a staff member's bank account
+            Users selectedStaff = staffMembers.size() > 1 
+                ? staffMembers.get(random.nextInt(staffMembers.size())) 
+                : staffMembers.get(0);
+
+            // Assume Users entity has bank details fields (adjust as per your actual entity structure)
+            String bankName = selectedStaff.getBankId();
+            String accountNumber = selectedStaff.getBankAccount();
+            String accountHolderName = selectedStaff.getAccountHolderName();
+
+            if (bankName == null || accountNumber == null || accountHolderName == null) {
+                response.put("success", false);
+                response.put("message", "Thông tin ngân hàng của nhân viên không đầy đủ");
+                return ResponseEntity.badRequest().body(response);
+            }
+
+            // Sử dụng WalletPaymentService để xử lý VietQR với thông tin ngân hàng của nhân viên
             WalletPaymentService.WalletPaymentResponse vietqrResponse = walletPaymentService.processVietQRWalletDeposit(
-                user, amount, description != null ? description : "Nạp tiền qua VietQR");
+                user, amount, description != null ? description : "Nạp tiền qua VietQR", 
+                bankName, accountNumber, accountHolderName);
             
             if (vietqrResponse.getResultCode() == 0) {
                 response.put("success", true);
@@ -612,9 +638,12 @@ public class HostWalletController {
                 response.put("paymentUrl", vietqrResponse.getPaymentUrl());
                 response.put("qrCodeUrl", vietqrResponse.getQrCodeUrl());
                 response.put("transactionId", vietqrResponse.getTransactionId());
+                response.put("bankName", bankName);
+                response.put("accountNumber", accountNumber);
+                response.put("accountHolderName", accountHolderName);
                 
-                log.info("Created VietQR wallet deposit order for user {} with amount {}", 
-                    user.getUserId(), amount);
+                log.info("Created VietQR wallet deposit order for user {} with amount {} using staff {}'s bank account {}", 
+                    user.getUserId(), amount, selectedStaff.getUserId(), accountNumber);
             } else {
                 response.put("success", false);
                 response.put("message", vietqrResponse.getMessage());

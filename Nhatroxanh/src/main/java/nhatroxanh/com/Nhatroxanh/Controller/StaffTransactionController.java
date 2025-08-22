@@ -167,8 +167,6 @@ public class StaffTransactionController {
             Transaction transaction = transactionService.approveTransaction(transactionId, staff, approvalNote);
             
             // Hoàn thành giao dịch (cập nhật số dư)
-            // Đối với giao dịch rút tiền: số dư đã được trừ khi tạo yêu cầu, chỉ cần đánh dấu hoàn thành
-            // Đối với giao dịch nạp tiền: cần cộng số dư khi hoàn thành
             transactionService.completeTransaction(transactionId);
 
             response.put("success", true);

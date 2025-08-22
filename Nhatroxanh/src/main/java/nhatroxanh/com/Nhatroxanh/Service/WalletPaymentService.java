@@ -27,7 +27,6 @@ public class WalletPaymentService {
 
     private final TransactionService transactionService;
     private final WalletService walletService;
-    private final BankAccountService bankAccountService;
 
     // VietQR Configuration - Using correct img.vietqr.io endpoint
     @Value("${vietqr.apiUrl:https://img.vietqr.io/image}")
@@ -62,12 +61,18 @@ public class WalletPaymentService {
     /**
      * Process VietQR payment for wallet deposit
      */
-    public WalletPaymentResponse processVietQRWalletDeposit(Users user, Double amount, String description) {
+    public WalletPaymentResponse processVietQRWalletDeposit(Users user, Double amount, String description, 
+            String bankName, String accountNumber, String accountHolderName) {
         try {
             // Validate input
             if (user == null || amount == null || amount <= 0) {
                 log.error("Invalid input: user is null or amount is invalid (amount={})", amount);
                 return new WalletPaymentResponse(null, null, -1, "Dữ liệu đầu vào không hợp lệ", null);
+            }
+            if (bankName == null || accountNumber == null || accountHolderName == null) {
+                log.error("Invalid bank details: bankName={}, accountNumber={}, accountHolderName={}", 
+                        bankName, accountNumber, accountHolderName);
+                return new WalletPaymentResponse(null, null, -1, "Thông tin ngân hàng không hợp lệ", null);
             }
 
             // Create transaction for wallet deposit
@@ -82,13 +87,15 @@ public class WalletPaymentService {
             String paymentContent = "NAP TIEN " + transaction.getTransactionId() + " " + 
                 (user.getFullname() != null ? user.getFullname().replaceAll("[^a-zA-Z0-9 ]", "") : "USER");
             
-            // Generate VietQR URL with proper error handling
+            // Generate VietQR URL with provided bank account details
             String qrCodeUrl;
             try {
-                qrCodeUrl = generateVietQRUrl(amount, paymentContent);
-                log.info("Successfully generated VietQR URL for transaction {}", transaction.getTransactionId());
+                qrCodeUrl = generateVietQRUrl(amount, paymentContent, bankName, accountNumber, accountHolderName);
+                log.info("Successfully generated VietQR URL for transaction {} using bank account {}", 
+                        transaction.getTransactionId(), accountNumber);
             } catch (Exception qrError) {
-                log.error("Failed to generate VietQR URL for transaction {}: {}", transaction.getTransactionId(), qrError.getMessage());
+                log.error("Failed to generate VietQR URL for transaction {}: {}", 
+                        transaction.getTransactionId(), qrError.getMessage());
                 transactionService.failTransaction(transaction.getTransactionId(), "Lỗi tạo mã QR: " + qrError.getMessage());
                 return new WalletPaymentResponse(null, null, -1, "Không thể tạo mã QR thanh toán: " + qrError.getMessage(), null);
             }
@@ -96,22 +103,23 @@ public class WalletPaymentService {
             // For VietQR, we don't have a direct payment URL, so we'll use a confirmation page
             String paymentUrl = "/host/wallet/vietqr-confirm?transactionId=" + transaction.getTransactionId();
 
-            log.info("Created VietQR wallet deposit order for transaction {} with amount {}", 
-                transaction.getTransactionId(), amount);
+            log.info("Created VietQR wallet deposit order for transaction {} with amount {} using bank account {}", 
+                transaction.getTransactionId(), amount, accountNumber);
             log.info("VietQR payment content: {}", paymentContent); 
 
             return new WalletPaymentResponse(paymentUrl, qrCodeUrl, 0, "Success", transaction.getTransactionId().toString());
 
         } catch (Exception e) {
-            log.error("Error processing VietQR wallet deposit for user {}: {}", user.getUserId(), e.getMessage(), e);
+            log.error("Error processing VietQR wallet deposit for user {}: {}", 
+                    user != null ? user.getUserId() : "null", e.getMessage(), e);
             return new WalletPaymentResponse(null, null, -1, "Lỗi xử lý yêu cầu nạp tiền: " + e.getMessage(), null);
         }
     }
 
     /**
-     * Generate VietQR URL for payment using staff bank account
+     * Generate VietQR URL for payment using provided bank account
      */
-    private String generateVietQRUrl(Double amount, String content) {
+    private String generateVietQRUrl(Double amount, String content, String bankName, String accountNumber, String accountHolderName) {
         try {
             log.info("Starting VietQR URL generation for amount: {} with content: {}", amount, content);
             
@@ -121,62 +129,30 @@ public class WalletPaymentService {
                 throw new RuntimeException("URL API VietQR không được cấu hình");
             }
 
-            // Get staff bank account information with retry mechanism
-            BankAccountService.BankAccountInfo bankInfo = null;
-            int retryCount = 0;
-            int maxRetries = 3;
-            
-            while (bankInfo == null && retryCount < maxRetries) {
-                try {
-                    bankInfo = bankAccountService.getStaffBankAccount();
-                    if (bankInfo != null) {
-                        log.info("Successfully retrieved bank account info on attempt {}", retryCount + 1);
-                        break;
-                    }
-                } catch (Exception e) {
-                    log.warn("Attempt {} to get bank account failed: {}", retryCount + 1, e.getMessage());
-                }
-                retryCount++;
-                
-                if (retryCount < maxRetries) {
-                    try {
-                        Thread.sleep(100); // Short delay before retry
-                    } catch (InterruptedException ie) {
-                        Thread.currentThread().interrupt();
-                        break;
-                    }
-                }
-            }
-            
-            // Validate bank information with detailed error messages
-            if (bankInfo == null) {
-                log.error("Bank account information is null after {} attempts", maxRetries);
-                throw new RuntimeException("Không thể lấy thông tin tài khoản ngân hàng. Vui lòng liên hệ quản trị viên để cấu hình tài khoản ngân hàng.");
-            }
-            
-            if (bankInfo.getBankId() == null || bankInfo.getBankId().trim().isEmpty()) {
-                log.error("Bank ID is null or empty: {}", bankInfo.getBankId());
-                throw new RuntimeException("Mã ngân hàng không hợp lệ. Vui lòng liên hệ quản trị viên.");
-            }
-            
-            if (bankInfo.getAccountNo() == null || bankInfo.getAccountNo().trim().isEmpty()) {
-                log.error("Account number is null or empty: {}", bankInfo.getAccountNo());
-                throw new RuntimeException("Số tài khoản không hợp lệ. Vui lòng liên hệ quản trị viên.");
-            }
-            
-            if (bankInfo.getAccountHolderName() == null || bankInfo.getAccountHolderName().trim().isEmpty()) {
-                log.error("Account holder name is null or empty: {}", bankInfo.getAccountHolderName());
-                throw new RuntimeException("Tên chủ tài khoản không hợp lệ. Vui lòng liên hệ quản trị viên.");
-            }
-            
-            // Convert bank ID to numeric format
+            // Convert bank name to numeric bank ID
             String numericBankId;
             try {
-                numericBankId = convertToNumericBankId(bankInfo.getBankId().trim());
-                log.info("Converted bank ID {} to numeric format: {}", bankInfo.getBankId(), numericBankId);
+                numericBankId = convertToNumericBankId(bankName);
+                log.info("Converted bank name {} to numeric format: {}", bankName, numericBankId);
             } catch (Exception e) {
-                log.error("Error converting bank ID {}: {}", bankInfo.getBankId(), e.getMessage());
+                log.error("Error converting bank name {}: {}", bankName, e.getMessage());
                 throw new RuntimeException("Lỗi chuyển đổi mã ngân hàng: " + e.getMessage());
+            }
+
+            // Validate bank information
+            if (numericBankId == null || numericBankId.trim().isEmpty()) {
+                log.error("Numeric bank ID is null or empty for bank: {}", bankName);
+                throw new RuntimeException("Mã ngân hàng không hợp lệ");
+            }
+            
+            if (accountNumber == null || accountNumber.trim().isEmpty()) {
+                log.error("Account number is null or empty: {}", accountNumber);
+                throw new RuntimeException("Số tài khoản không hợp lệ");
+            }
+            
+            if (accountHolderName == null || accountHolderName.trim().isEmpty()) {
+                log.error("Account holder name is null or empty: {}", accountHolderName);
+                throw new RuntimeException("Tên chủ tài khoản không hợp lệ");
             }
             
             // Validate and format amount
@@ -195,7 +171,7 @@ public class WalletPaymentService {
                 cleanContent = cleanContent.substring(0, 25);
             }
             
-            // Build VietQR URL - Simplified approach
+            // Build VietQR URL
             // Format: https://img.vietqr.io/image/{bankId}-{accountNo}-compact.png?amount={amount}&addInfo={content}&accountName={name}
             StringBuilder urlBuilder = new StringBuilder();
             urlBuilder.append(vietQRApiUrl);
@@ -208,19 +184,19 @@ public class WalletPaymentService {
             // Add bank ID and account number
             urlBuilder.append(numericBankId)
                      .append("-")
-                     .append(bankInfo.getAccountNo().trim())
+                     .append(accountNumber.trim())
                      .append("-compact.png");
             
             // Add query parameters
             urlBuilder.append("?amount=").append(amountLong);
             urlBuilder.append("&addInfo=").append(URLEncoder.encode(cleanContent, StandardCharsets.UTF_8));
-            urlBuilder.append("&accountName=").append(URLEncoder.encode(bankInfo.getAccountHolderName().trim(), StandardCharsets.UTF_8));
+            urlBuilder.append("&accountName=").append(URLEncoder.encode(accountHolderName.trim(), StandardCharsets.UTF_8));
             
             String finalUrl = urlBuilder.toString();
             
-            log.info("Generated VietQR URL using bank account: {} - Bank ID: {} -> {} - Account: {}", 
-                bankInfo.getBankName(), bankInfo.getBankId(), numericBankId,
-                bankInfo.getAccountNo().substring(0, Math.min(4, bankInfo.getAccountNo().length())) + "****");
+            log.info("Generated VietQR URL using bank account: {} - Bank ID: {} - Account: {}", 
+                bankName, numericBankId,
+                accountNumber.substring(0, Math.min(4, accountNumber.length())) + "****");
             log.info("VietQR URL generated successfully with length: {}", finalUrl.length());
             
             // Validate URL length
@@ -237,24 +213,24 @@ public class WalletPaymentService {
     }
 
     /**
-     * Convert bank ID from short code to numeric format for VietQR
+     * Convert bank name to numeric format for VietQR
      */
-    private String convertToNumericBankId(String bankId) {
-        if (bankId == null || bankId.trim().isEmpty()) {
-            log.warn("Bank ID is null or empty, using default");
+    private String convertToNumericBankId(String bankName) {
+        if (bankName == null || bankName.trim().isEmpty()) {
+            log.warn("Bank name is null or empty, using default");
             return "970436"; // Default to Vietcombank
         }
         
-        String trimmedBankId = bankId.trim().toUpperCase();
+        String trimmedBankName = bankName.trim().toUpperCase();
         
         // If already numeric format, return as is
-        if (trimmedBankId.matches("^\\d{6}$")) {
-            log.info("Bank ID {} is already in numeric format", trimmedBankId);
-            return trimmedBankId;
+        if (trimmedBankName.matches("^\\d{6}$")) {
+            log.info("Bank ID {} is already in numeric format", trimmedBankName);
+            return trimmedBankName;
         }
         
-        // Convert short codes to numeric format
-        switch (trimmedBankId) {
+        // Convert bank names to numeric format
+        switch (trimmedBankName) {
             case "MB": return "970422"; // MB Bank
             case "VCB": case "VIETCOMBANK": return "970436"; // Vietcombank
             case "BIDV": return "970418"; // BIDV
@@ -294,7 +270,7 @@ public class WalletPaymentService {
             case "CAKE": return "970456"; // CAKE by VPBank
             case "VIETCAP": case "VIETCAPITALBANK": return "970454"; // VietCapitalBank
             default:
-                log.warn("Unknown bank ID: {}, using default Vietcombank", bankId);
+                log.warn("Unknown bank name: {}, using default Vietcombank", bankName);
                 return "970436"; // Default to Vietcombank
         }
     }

@@ -15,15 +15,11 @@ import nhatroxanh.com.Nhatroxanh.Model.entity.Vouchers;
 import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.InputStreamSource;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -1086,5 +1082,129 @@ public class EmailServiceImpl implements EmailService {
 
         String footer = "Vui lòng xử lý yêu cầu trong vòng 48 giờ để đảm bảo trải nghiệm tốt nhất cho khách thuê.";
         sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, footer));
+    }
+
+    @Override
+    public void sendTransactionApprovedEmail(String to, String fullname, String transactionReference,
+            String transactionType, Double amount, String processedAt, String approvalNote) {
+        String title = "Giao Dịch Đã Được Duyệt";
+        String greeting = "Kính gửi " + fullname;
+        String content = "<div style=\"background-color: #f5f5f5; padding: 20px; font-family: Arial, sans-serif;\">" +
+                "<div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);\">"
+                +
+                "<div style=\"background: linear-gradient(to right, #4CAF50, #2E7D32); padding: 20px; text-align: center;\">"
+                +
+                "<h1 style=\"color: white; margin: 0; padding: 10px 0;\">Giao Dịch Đã Được Duyệt</h1>" + // Thêm padding
+                "</div>" +
+                "<div style=\"padding: 30px; text-align: center;\">" +
+                "<p style=\"font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 25px;\">" + // Tăng
+                                                                                                       // margin-bottom
+                "Giao dịch của bạn đã được duyệt thành công.<br> Dưới đây là thông tin chi tiết:" +
+                "</p>" +
+                "<div style=\"background-color: #f9f9f9; border-left: 4px solid #4CAF50; padding: 20px; margin: 0 auto 25px auto; max-width: 500px; border-radius: 4px;\">"
+                + // Tăng padding và margin
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                + // Tăng margin và padding
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Mã giao dịch:</span>"
+                + // Thêm min-width
+                "<span style=\"color: #333; text-align: right;\">" + transactionReference + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Loại giao dịch:</span>"
+                +
+                "<span style=\"color: #333; text-align: right;\">" + transactionType + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Số tiền:</span>" +
+                "<span style=\"color: #333; font-weight: bold; text-align: right;\">" + String.format("%,.0f", amount)
+                + " VNĐ</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Thời gian xử lý:</span>"
+                +
+                "<span style=\"color: #333; text-align: right;\">" + processedAt + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between;\">" +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Ghi chú:</span>" +
+                "<span style=\"color: #333; text-align: right;\">" + (approvalNote != null ? approvalNote : "Không có")
+                + "</span>" +
+                "</div>" +
+                "</div>" +
+                "<p style=\"font-size: 16px; line-height: 1.6; color: #333; margin-top: 20px;\">" + // Thêm margin-top
+                "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi." +
+                "</p>" +
+                "</div>" +
+                "<div style=\"background-color: #f5f5f5; padding: 20px; text-align: center; color: #777; font-size: 14px;\">"
+                +
+                "</div>" +
+                "</div>" +
+                "</div>";
+
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, ""));
+    }
+
+    @Override
+    public void sendTransactionRejectedEmail(String to, String fullname, String transactionReference,
+            String transactionType, Double amount, String processedAt, String rejectionReason) {
+        String title = "Giao Dịch Bị Từ Chối";
+        String greeting = "Kính gửi " + fullname;
+        String content = "<div style=\"background-color: #f5f5f5; padding: 20px; font-family: Arial, sans-serif;\">" +
+                "<div style=\"max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);\">"
+                +
+                "<div style=\"background: linear-gradient(to right, #F44336, #D32F2F); padding: 20px; text-align: center;\">"
+                +
+                "<h1 style=\"color: white; margin: 0; padding: 10px 0;\">Giao Dịch Bị Từ Chối</h1>" + // Thêm padding
+                "</div>" +
+                "<div style=\"padding: 30px; text-align: center;\">" +
+                "<p style=\"font-size: 16px; line-height: 1.6; color: #333; margin-bottom: 25px;\">" + // Tăng
+                                                                                                       // margin-bottom
+                "Rất tiếc, giao dịch của bạn đã bị từ chối. Dưới đây là thông tin chi tiết:" +
+                "</p>" +
+                "<div style=\"background-color: #f9f9f9; border-left: 4px solid #F44336; padding: 20px; margin: 0 auto 25px auto; max-width: 500px; border-radius: 4px;\">"
+                + // Tăng padding và margin
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                + // Tăng margin và padding
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Mã giao dịch:</span>"
+                + // Thêm min-width
+                "<span style=\"color: #333; text-align: right;\">" + transactionReference + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Loại giao dịch:</span>"
+                +
+                "<span style=\"color: #333; text-align: right;\">" + transactionType + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Số tiền:</span>" +
+                "<span style=\"color: #333; font-weight: bold; text-align: right;\">" + String.format("%,.0f", amount)
+                + " VNĐ</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;\">"
+                +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Thời gian xử lý:</span>"
+                +
+                "<span style=\"color: #333; text-align: right;\">" + processedAt + "</span>" +
+                "</div>" +
+                "<div style=\"display: flex; justify-content: space-between;\">" +
+                "<span style=\"font-weight: bold; color: #555; min-width: 120px; text-align: left;\">Lý do từ chối:</span>"
+                +
+                "<span style=\"color: #333; text-align: right;\">" + rejectionReason + "</span>" +
+                "</div>" +
+                "</div>" +
+                "<p style=\"font-size: 16px; line-height: 1.6; color: #333; margin-top: 20px;\">" + // Thêm margin-top
+                "Vui lòng liên hệ hỗ trợ nếu cần thêm thông tin." +
+                "</p>" +
+                "</div>" +
+                "<div style=\"background-color: #f5f5f5; padding: 20px; text-align: center; color: #777; font-size: 14px;\">"
+                +
+                "</div>" +
+                "</div>" +
+                "</div>";
+
+        sendHtmlMail(to, title, getEmailTemplate(title, content, greeting, ""));
     }
 }

@@ -8,16 +8,18 @@ import nhatroxanh.com.Nhatroxanh.Repository.TransactionRepository;
 import nhatroxanh.com.Nhatroxanh.Service.TransactionService;
 import nhatroxanh.com.Nhatroxanh.Service.WalletService;
 import nhatroxanh.com.Nhatroxanh.Service.OtpService;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import nhatroxanh.com.Nhatroxanh.Service.EmailService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final WalletService walletService;
     private final OtpService otpService;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     @Override
     @Transactional
@@ -65,12 +68,10 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Số tiền rút phải lớn hơn 0");
         }
 
-        // Kiểm tra số dư
         if (!walletService.hasSufficientBalance(user.getUserId(), amount)) {
             throw new IllegalArgumentException("Số dư tài khoản không đủ để thực hiện giao dịch");
         }
 
-        // Trừ số dư ngay khi chủ trọ xác nhận rút tiền
         try {
             walletService.subtractBalance(user, amount, "Rút tiền - " + (description != null ? description : "Yêu cầu rút tiền"));
             log.info("Deducted {} from user {} balance for withdrawal request", amount, user.getUserId());
@@ -98,6 +99,7 @@ public class TransactionServiceImpl implements TransactionService {
         return savedTransaction;
     }
 
+   
     @Override
     @Transactional
     public Transaction approveTransaction(Integer transactionId, Users approvedBy, String approvalNote) {
@@ -117,6 +119,24 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("Approved transaction {} successfully", transactionId);
+
+        // Send HTML email notification using the responsive template
+        try {
+            String transactionType = transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT ? "Nạp tiền" : "Rút tiền";
+            emailService.sendTransactionApprovedEmail(
+                transaction.getUser().getEmail(),
+                transaction.getUser().getFullname(),
+                transaction.getTransactionReference(),
+                transactionType,
+                transaction.getAmount(),
+                transaction.getProcessedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                approvalNote != null ? approvalNote : "Không có ghi chú"
+            );
+            log.info("Sent approval email for transaction {} to user {}", transactionId, transaction.getUser().getUserId());
+        } catch (Exception e) {
+            log.error("Failed to send approval email for transaction {}: {}", transactionId, e.getMessage());
+            // Not throwing exception to avoid interrupting transaction approval
+        }
         
         return savedTransaction;
     }
@@ -133,7 +153,6 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalStateException("Chỉ có thể từ chối giao dịch đang chờ xử lý");
         }
 
-        // Nếu là giao dịch rút tiền bị từ chối, trả lại số dư cho người dùng
         if (transaction.getTransactionType() == Transaction.TransactionType.WITHDRAWAL) {
             try {
                 walletService.addBalance(transaction.getUser(), transaction.getAmount(), 
@@ -154,6 +173,24 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         log.info("Rejected transaction {} successfully and returned balance if applicable", transactionId);
+
+        // Send HTML email notification using the responsive template
+        try {
+            String transactionType = transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT ? "Nạp tiền" : "Rút tiền";
+            emailService.sendTransactionRejectedEmail(
+                transaction.getUser().getEmail(),
+                transaction.getUser().getFullname(),
+                transaction.getTransactionReference(),
+                transactionType,
+                transaction.getAmount(),
+                transaction.getProcessedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")),
+                rejectionReason
+            );
+            log.info("Sent rejection email for transaction {} to user {}", transactionId, transaction.getUser().getUserId());
+        } catch (Exception e) {
+            log.error("Failed to send rejection email for transaction {}: {}", transactionId, e.getMessage());
+            // Not throwing exception to avoid interrupting transaction rejection
+        }
         
         return savedTransaction;
     }
@@ -171,15 +208,12 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         try {
-            // Cập nhật số dư - chỉ cho giao dịch nạp tiền
-            // Giao dịch rút tiền đã được trừ số dư khi tạo yêu cầu
             if (transaction.getTransactionType() == Transaction.TransactionType.DEPOSIT) {
                 walletService.addBalance(transaction.getUser(), transaction.getAmount(), 
                     "Nạp tiền - " + transaction.getDescription());
                 log.info("Added {} to user {} balance for completed deposit transaction {}", 
                     transaction.getAmount(), transaction.getUser().getUserId(), transactionId);
             } else if (transaction.getTransactionType() == Transaction.TransactionType.WITHDRAWAL) {
-                // Không trừ số dư vì đã trừ khi tạo yêu cầu rút tiền
                 log.info("Withdrawal transaction {} completed - balance was already deducted when request was created", 
                     transactionId);
             }
@@ -336,12 +370,10 @@ public class TransactionServiceImpl implements TransactionService {
             throw new IllegalArgumentException("Số tiền rút phải lớn hơn 0");
         }
 
-        // Kiểm tra số dư
         if (!walletService.hasSufficientBalance(user.getUserId(), amount)) {
             throw new IllegalArgumentException("Số dư tài khoản không đủ để thực hiện giao dịch");
         }
 
-        // Tạo và gửi OTP cho giao dịch rút tiền
         try {
             otpService.createAndSendWithdrawalOtp(user, amount);
             log.info("OTP sent successfully for withdrawal request of user {}", user.getUserId());
@@ -350,7 +382,6 @@ public class TransactionServiceImpl implements TransactionService {
             throw new RuntimeException("Không thể gửi mã OTP. Vui lòng thử lại sau.");
         }
 
-        // Trừ số dư ngay khi chủ trọ xác nhận rút tiền với OTP
         try {
             walletService.subtractBalance(user, amount, "Rút tiền với OTP - " + (description != null ? description : "Yêu cầu rút tiền với xác thực OTP"));
             log.info("Deducted {} from user {} balance for withdrawal request with OTP", amount, user.getUserId());
@@ -359,7 +390,6 @@ public class TransactionServiceImpl implements TransactionService {
             throw new RuntimeException("Không thể trừ số dư: " + e.getMessage());
         }
 
-        // Tạo giao dịch với trạng thái chờ xác thực OTP
         Transaction transaction = Transaction.builder()
                 .user(user)
                 .transactionType(Transaction.TransactionType.WITHDRAWAL)
@@ -379,9 +409,6 @@ public class TransactionServiceImpl implements TransactionService {
         return savedTransaction;
     }
 
-    /**
-     * Tạo mã tham chiếu giao dịch duy nhất
-     */
     private String generateTransactionReference(String prefix) {
         return prefix + "_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
     }
